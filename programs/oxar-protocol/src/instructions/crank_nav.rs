@@ -11,7 +11,7 @@ pub struct CrankNav<'info> {
 
     #[account(
         mut,
-        seeds = [VAULT_SEED, vault.authority.as_ref(), vault.asset_class.as_bytes()],
+        seeds = [VAULT_SEED, vault.region.as_bytes(), vault.denomination.as_bytes(), vault.asset_subtype.as_bytes()],
         bump = vault.bump,
         constraint = vault.is_active @ OxarError::VaultNotActive,
     )]

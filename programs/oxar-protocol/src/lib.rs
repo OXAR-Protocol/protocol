@@ -9,7 +9,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("8kwBnCQJf8WMgA1C1NiADbd3yGbP7TTmzRNZ8B3N1pmr");
+declare_id!("8NsGNHMtfEiJzSczdmN2reo26h75C4axamuLXdk2tfrT");
 
 #[program]
 pub mod oxar_protocol {

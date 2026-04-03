@@ -12,7 +12,7 @@ pub struct Deposit<'info> {
 
     #[account(
         mut,
-        seeds = [VAULT_SEED, vault.authority.as_ref(), vault.asset_class.as_bytes()],
+        seeds = [VAULT_SEED, vault.region.as_bytes(), vault.denomination.as_bytes(), vault.asset_subtype.as_bytes()],
         bump = vault.bump,
         constraint = vault.is_active @ OxarError::VaultNotActive,
     )]
@@ -80,12 +80,14 @@ pub fn handler(ctx: Context<Deposit>, amount: u64) -> Result<()> {
     token::transfer(transfer_ctx, amount)?;
 
     // Mint vault tokens to depositor
-    let authority_key = ctx.accounts.vault.authority;
-    let asset_class = ctx.accounts.vault.asset_class.clone();
+    let region = ctx.accounts.vault.region.clone();
+    let denomination = ctx.accounts.vault.denomination.clone();
+    let asset_subtype = ctx.accounts.vault.asset_subtype.clone();
     let seeds = &[
         VAULT_SEED,
-        authority_key.as_ref(),
-        asset_class.as_bytes(),
+        region.as_bytes(),
+        denomination.as_bytes(),
+        asset_subtype.as_bytes(),
         &[ctx.accounts.vault.bump],
     ];
     let signer_seeds = &[&seeds[..]];

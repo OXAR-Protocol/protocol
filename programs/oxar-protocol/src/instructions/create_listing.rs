@@ -11,11 +11,11 @@ pub struct CreateListing<'info> {
     pub seller: Signer<'info>,
 
     #[account(
-        seeds = [VAULT_SEED, vault.authority.as_ref(), vault.asset_class.as_bytes()],
+        seeds = [VAULT_SEED, vault.region.as_bytes(), vault.denomination.as_bytes(), vault.asset_subtype.as_bytes()],
         bump = vault.bump,
         constraint = vault.is_active @ OxarError::VaultNotActive,
     )]
-    pub vault: Account<'info, Vault>,
+    pub vault: Box<Account<'info, Vault>>,
 
     #[account(
         init,
@@ -24,7 +24,7 @@ pub struct CreateListing<'info> {
         seeds = [LISTING_SEED, vault.key().as_ref(), seller.key().as_ref()],
         bump,
     )]
-    pub listing: Account<'info, Listing>,
+    pub listing: Box<Account<'info, Listing>>,
 
     #[account(
         seeds = [MINT_SEED, vault.key().as_ref()],
@@ -41,19 +41,19 @@ pub struct CreateListing<'info> {
     pub seller_vault_token: Account<'info, TokenAccount>,
 
     /// Escrow token account to hold listed tokens.
+    /// Uses vault PDA as authority (not listing) to avoid init ordering issues.
     #[account(
         init,
         payer = seller,
-        seeds = [ESCROW_SEED, listing.key().as_ref()],
+        seeds = [ESCROW_SEED, vault.key().as_ref(), seller.key().as_ref()],
         bump,
         token::mint = vault_token_mint,
-        token::authority = listing,
+        token::authority = vault,
     )]
     pub escrow_token_account: Account<'info, TokenAccount>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
 }
 
 pub fn handler(ctx: Context<CreateListing>, amount: u64, price_per_token: u64) -> Result<()> {

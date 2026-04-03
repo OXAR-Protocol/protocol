@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-oxar_protocol = "8kwBnCQJf8WMgA1C1NiADbd3yGbP7TTmzRNZ8B3N1pmr"
+oxar_protocol = "8NsGNHMtfEiJzSczdmN2reo26h75C4axamuLXdk2tfrT"
 
 [registry]
 url = "https://api.apr.dev"
