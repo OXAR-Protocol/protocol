@@ -4,7 +4,7 @@ import { PrivyProvider as PrivyProviderBase } from "@privy-io/react-auth";
 import { ReactNode, useEffect, useState } from "react";
 
 export function PrivyProvider({ children }: { children: ReactNode }) {
-  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "";
+  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "cmmzf4k4s00g80cjywxio7b89";
   const [solanaConfig, setSolanaConfig] = useState<any>({});
 
   useEffect(() => {
