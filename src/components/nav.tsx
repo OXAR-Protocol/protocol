@@ -59,9 +59,16 @@ export function Nav() {
           {authenticated ? (
             <>
               {shortAddress && (
-                <span className="hidden sm:inline-block rounded-md bg-gray-800 px-3 py-1.5 text-xs font-mono text-gray-300">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(walletAddress!.toBase58());
+                    alert("Address copied: " + walletAddress!.toBase58());
+                  }}
+                  title="Click to copy full address"
+                  className="hidden sm:inline-block rounded-md bg-gray-800 px-3 py-1.5 text-xs font-mono text-gray-300 hover:bg-gray-700 cursor-pointer"
+                >
                   {shortAddress}
-                </span>
+                </button>
               )}
               <Button
                 variant="outline"
