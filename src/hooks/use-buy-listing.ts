@@ -61,6 +61,21 @@ export function useBuyListing() {
 
         const tx = new Transaction();
 
+        // Create missing ATAs
+        for (const [ata, owner] of [
+          [buyerUsdc, walletAddress],
+          [sellerUsdc, sellerPubkey],
+          [treasuryUsdc, vaultAccount.treasury as PublicKey],
+        ] as [PublicKey, PublicKey][]) {
+          const info = await connection.getAccountInfo(ata);
+          if (!info) {
+            tx.add(createAssociatedTokenAccountInstruction(
+              walletAddress, ata, owner, usdcMint,
+              TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID,
+            ));
+          }
+        }
+
         // Create buyer vault token ATA if needed
         const buyerVaultTokenInfo = await connection.getAccountInfo(buyerVaultToken);
         if (!buyerVaultTokenInfo) {
