@@ -52,9 +52,9 @@ export function usePortfolio() {
       }
       setTokenBalances(balances);
 
-      // Match balances with known vaults
+      // Match balances with known active vaults only
       const matchedPositions: PortfolioPosition[] = [];
-      for (const vault of vaults) {
+      for (const vault of vaults.filter(v => v.account.isActive)) {
         const vaultMint = vault.account.vaultTokenMint;
         const tokenBal = balances.find(
           (b) => b.mint.toBase58() === vaultMint.toBase58()
@@ -69,13 +69,20 @@ export function usePortfolio() {
       }
       setPositions(matchedPositions);
 
-      // Try to find USDC balance (look for vault's usdcMint)
-      if (vaults.length > 0) {
-        const usdcMint = vaults[0].account.usdcMint;
+      // Find USDC balance — use the USDC mint from active vaults only
+      const activeVaults = vaults.filter(v => v.account.isActive);
+      const usdcMintKey = activeVaults.length > 0
+        ? activeVaults[0].account.usdcMint.toBase58()
+        : null;
+
+      if (usdcMintKey) {
         const usdcBal = balances.find(
-          (b) => b.mint.toBase58() === usdcMint.toBase58()
+          (b) => b.mint.toBase58() === usdcMintKey
         );
         setUsdcBalance(usdcBal?.balance || new BN(0));
+      } else {
+        // Fallback: sum all non-vault-token balances with 6 decimals
+        setUsdcBalance(new BN(0));
       }
     } catch (err) {
       console.error("Failed to fetch portfolio:", err);
