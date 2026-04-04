@@ -81,8 +81,14 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     console.error("Faucet error:", err);
+    const debugInfo = {
+      hasKeypair: !!ADMIN_KEYPAIR_B64,
+      keypairLen: ADMIN_KEYPAIR_B64.length,
+      usdcMint: USDC_MINT,
+      rpcUrl: RPC_URL.substring(0, 40),
+    };
     return NextResponse.json(
-      { error: err.message || "Faucet failed" },
+      { error: err.message || "Faucet failed", debug: debugInfo },
       { status: 500 }
     );
   }
