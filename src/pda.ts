@@ -4,14 +4,18 @@ import { PROGRAM_ID } from "./constants";
 export function deriveVaultPda(
   region: string,
   denomination: string,
-  assetSubtype: string
+  assetSubtype: string,
+  series: number = 1
 ): [PublicKey, number] {
+  const seriesBytes = Buffer.alloc(2);
+  seriesBytes.writeUInt16LE(series);
   return PublicKey.findProgramAddressSync(
     [
       Buffer.from("vault"),
       Buffer.from(region),
       Buffer.from(denomination),
       Buffer.from(assetSubtype),
+      seriesBytes,
     ],
     PROGRAM_ID
   );

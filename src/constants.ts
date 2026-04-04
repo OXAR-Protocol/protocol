@@ -4,13 +4,16 @@ export const PROGRAM_ID = new PublicKey(
   "8NsGNHMtfEiJzSczdmN2reo26h75C4axamuLXdk2tfrT"
 );
 
-export const RPC_URL = "http://localhost:8899";
+export const RPC_URL = "https://api.devnet.solana.com";
+
+export const DEFAULT_SERIES = 1;
 
 export interface VaultConfig {
   id: string;
   region: string;
   denomination: string;
   assetSubtype: string;
+  series: number;
   apy: number;
   label: string;
   isWar: boolean;
@@ -19,60 +22,66 @@ export interface VaultConfig {
 
 export const VAULT_CONFIGS: VaultConfig[] = [
   {
-    id: "UA-UAH-SHORTv2",
+    id: "UA-UAH-SHORT",
     region: "UA",
     denomination: "UAH",
-    assetSubtype: "SHORTv2",
+    assetSubtype: "SHORT",
+    series: 1,
     apy: 18,
     label: "Ukraine OVDP UAH (Short-term)",
     isWar: false,
     hasFxRisk: true,
   },
   {
-    id: "UA-UAH-MIDv2",
+    id: "UA-UAH-MID",
     region: "UA",
     denomination: "UAH",
-    assetSubtype: "MIDv2",
+    assetSubtype: "MID",
+    series: 1,
     apy: 17,
     label: "Ukraine OVDP UAH (Mid-term)",
     isWar: false,
     hasFxRisk: true,
   },
   {
-    id: "UA-USD-STDv2",
+    id: "UA-USD-STD",
     region: "UA",
     denomination: "USD",
-    assetSubtype: "STDv2",
+    assetSubtype: "STD",
+    series: 1,
     apy: 4,
     label: "Ukraine OVDP USD",
     isWar: false,
     hasFxRisk: false,
   },
   {
-    id: "UA-EUR-STDv2",
+    id: "UA-EUR-STD",
     region: "UA",
     denomination: "EUR",
-    assetSubtype: "STDv2",
+    assetSubtype: "STD",
+    series: 1,
     apy: 3.5,
     label: "Ukraine OVDP EUR",
     isWar: false,
     hasFxRisk: true,
   },
   {
-    id: "UA-UAH-WARv2",
+    id: "UA-UAH-WAR",
     region: "UA",
     denomination: "UAH",
-    assetSubtype: "WARv2",
+    assetSubtype: "WAR",
+    series: 1,
     apy: 18,
     label: "Ukraine War Bonds UAH",
     isWar: true,
     hasFxRisk: true,
   },
   {
-    id: "UA-USD-WARv2",
+    id: "UA-USD-WAR",
     region: "UA",
     denomination: "USD",
-    assetSubtype: "WARv2",
+    assetSubtype: "WAR",
+    series: 1,
     apy: 4,
     label: "Ukraine War Bonds USD",
     isWar: true,
