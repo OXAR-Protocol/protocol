@@ -55,6 +55,8 @@ export default function PortfolioPage() {
   const [solBalance, setSolBalance] = useState<number>(0);
   const [airdropping, setAirdropping] = useState(false);
   const [airdropMsg, setAirdropMsg] = useState<string | null>(null);
+  const [faucetLoading, setFaucetLoading] = useState(false);
+  const [faucetMsg, setFaucetMsg] = useState<string | null>(null);
 
   const fetchSolBalance = useCallback(async () => {
     if (!walletAddress || !connection) return;
@@ -85,6 +87,31 @@ export default function PortfolioPage() {
       setAirdropMsg(err.message || "Airdrop failed. Are you on localnet/devnet?");
     } finally {
       setAirdropping(false);
+    }
+  };
+
+  const handleFaucet = async () => {
+    if (!walletAddress) return;
+    setFaucetLoading(true);
+    setFaucetMsg(null);
+    try {
+      const res = await fetch("/api/faucet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: walletAddress.toBase58() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFaucetMsg("10,000 test USDC sent! Refresh in a few seconds.");
+        fetchSolBalance();
+        setTimeout(() => refetch(), 3000);
+      } else {
+        setFaucetMsg(data.error || "Faucet failed");
+      }
+    } catch (err: any) {
+      setFaucetMsg(err.message || "Faucet failed");
+    } finally {
+      setFaucetLoading(false);
     }
   };
 
@@ -180,12 +207,24 @@ export default function PortfolioPage() {
                     {airdropMsg}
                   </p>
                 )}
-                <div className="rounded-md bg-gray-800/50 p-3">
-                  <p className="text-xs text-gray-400">
-                    To get test USDC, initialize a vault via the CLI and use the deposit flow.
-                    On devnet, test USDC must be minted by the protocol admin.
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={handleFaucet}
+                    disabled={faucetLoading}
+                    size="sm"
+                    className="bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {faucetLoading ? "Sending..." : "Get 10,000 Test USDC"}
+                  </Button>
+                  <p className="text-xs text-gray-500">
+                    Test USDC for deposits. Rate limited to once per 5 minutes.
                   </p>
                 </div>
+                {faucetMsg && (
+                  <p className={`text-xs ${faucetMsg.includes("sent") ? "text-emerald-400" : "text-red-400"}`}>
+                    {faucetMsg}
+                  </p>
+                )}
               </CardContent>
             </Card>
 
