@@ -106,16 +106,24 @@ export default function PortfolioPage() {
   }, [fetchSolBalance]);
 
   const handleAirdropSol = async () => {
-    if (!walletAddress || !connection) return;
+    if (!walletAddress) return;
     setAirdropping(true);
     setAirdropMsg(null);
     try {
-      const sig = await connection.requestAirdrop(walletAddress, 2 * LAMPORTS_PER_SOL);
-      await connection.confirmTransaction(sig, "confirmed");
-      setAirdropMsg("Airdropped 2 SOL successfully!");
-      fetchSolBalance();
+      const res = await fetch("/api/faucet-sol", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: walletAddress.toBase58() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAirdropMsg("1 SOL sent! Refresh in a few seconds.");
+        setTimeout(() => fetchSolBalance(), 3000);
+      } else {
+        setAirdropMsg(data.error || "Failed to get SOL");
+      }
     } catch (err: any) {
-      setAirdropMsg(err.message || "Airdrop failed. Are you on localnet/devnet?");
+      setAirdropMsg(err.message || "Failed to get SOL");
     } finally {
       setAirdropping(false);
     }
@@ -223,14 +231,14 @@ export default function PortfolioPage() {
                     size="sm"
                     className="bg-[#00D4AA] text-gray-950 font-semibold hover:bg-[#00B892] disabled:opacity-50"
                   >
-                    {airdropping ? "Airdropping..." : "Get 2 Test SOL"}
+                    {airdropping ? "Airdropping..." : "Get 1 Test SOL"}
                   </Button>
                   <p className="text-xs text-gray-500">
-                    Works on localnet and devnet. SOL is required for transaction fees.
+                    SOL is needed for transaction fees.
                   </p>
                 </div>
                 {airdropMsg && (
-                  <p className={`text-xs ${airdropMsg.includes("success") ? "text-emerald-400" : "text-red-400"}`}>
+                  <p className={`text-xs ${airdropMsg.includes("sent") || airdropMsg.includes("success") ? "text-emerald-400" : "text-red-400"}`}>
                     {airdropMsg}
                   </p>
                 )}
