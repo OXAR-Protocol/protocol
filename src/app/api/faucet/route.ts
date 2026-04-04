@@ -7,8 +7,8 @@ import {
   getMint,
 } from "@solana/spl-token";
 
-const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com";
-const USDC_MINT = process.env.USDC_MINT || "";
+const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://devnet.helius-rpc.com/?api-key=0803f982-c361-4a2a-8496-1391a4b38672";
+const USDC_MINT = process.env.USDC_MINT || "HucyHTk4qVJ7JhwsiNNCz9FNGNeDDN38y5KaKjeBYgNR";
 const ADMIN_KEYPAIR_B64 = process.env.ADMIN_KEYPAIR_B64 || "";
 
 // Rate limiting: 1 request per address per 5 minutes
@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid Solana address. Make sure your Solana wallet is connected." }, { status: 400 });
     }
 
-    if (!ADMIN_KEYPAIR_B64 || !USDC_MINT) {
-      return NextResponse.json({ error: "Faucet not configured" }, { status: 500 });
+    if (!ADMIN_KEYPAIR_B64) {
+      return NextResponse.json({ error: "Faucet not configured: missing ADMIN_KEYPAIR_B64" }, { status: 500 });
     }
 
     // Rate limit check
