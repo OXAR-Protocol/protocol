@@ -61,16 +61,6 @@ export async function POST(req: NextRequest) {
       recipient
     );
 
-    // Check existing balance — don't mint if already has enough
-    const existingBalance = Number(ata.amount) / 1_000_000;
-    if (existingBalance >= 10_000) {
-      return NextResponse.json({
-        success: true,
-        message: `You already have ${existingBalance.toFixed(0)} USDC. No additional minting needed.`,
-        usdcAccount: ata.address.toBase58(),
-      });
-    }
-
     const mintAmount = 10_000 * 1_000_000; // 10,000 USDC
     await mintTo(connection, admin, usdcMint, ata.address, admin.publicKey, mintAmount);
 
