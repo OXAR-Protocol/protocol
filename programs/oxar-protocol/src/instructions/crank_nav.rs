@@ -11,7 +11,7 @@ pub struct CrankNav<'info> {
 
     #[account(
         mut,
-        seeds = [VAULT_SEED, vault.region.as_bytes(), vault.denomination.as_bytes(), vault.asset_subtype.as_bytes()],
+        seeds = [VAULT_SEED, vault.region.as_bytes(), vault.denomination.as_bytes(), vault.asset_subtype.as_bytes(), &vault.series.to_le_bytes()],
         bump = vault.bump,
         constraint = vault.is_active @ OxarError::VaultNotActive,
     )]
@@ -27,7 +27,11 @@ pub fn handler(ctx: Context<CrankNav>) -> Result<()> {
         .checked_sub(vault.last_update_ts)
         .ok_or(OxarError::MathOverflow)?;
 
-    require!(elapsed > 0, OxarError::NoTimeElapsed);
+    // No-op if no time has elapsed (e.g. same block)
+    if elapsed <= 0 {
+        msg!("No time elapsed, skipping NAV update");
+        return Ok(());
+    }
 
     // NAV accrual: nav_per_share += nav_per_share * apy_bps * elapsed / (BPS_DENOMINATOR * SECONDS_PER_YEAR)
     let seconds_per_year = DAYS_PER_YEAR
@@ -52,8 +56,8 @@ pub fn handler(ctx: Context<CrankNav>) -> Result<()> {
         .ok_or(OxarError::MathOverflow)?;
     vault.last_update_ts = clock.unix_timestamp;
 
-    // Deactivate if matured
-    if clock.unix_timestamp >= vault.maturity_ts {
+    // Deactivate if matured (skip for perpetual vaults where maturity_ts = 0)
+    if vault.maturity_ts > 0 && clock.unix_timestamp >= vault.maturity_ts {
         vault.is_active = false;
     }
 

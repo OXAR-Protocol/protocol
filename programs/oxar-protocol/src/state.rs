@@ -25,6 +25,7 @@ pub struct Vault {
     pub maturity_ts: i64,
     pub is_active: bool,
     pub fee_bps: u16,
+    pub series: u16,
     pub bump: u8,
 }
 

@@ -46,4 +46,8 @@ pub mod oxar_protocol {
     pub fn buy_listing(ctx: Context<BuyListing>) -> Result<()> {
         instructions::buy_listing::handler(ctx)
     }
+
+    pub fn close_vault(ctx: Context<CloseVault>) -> Result<()> {
+        instructions::close_vault::handler(ctx)
+    }
 }

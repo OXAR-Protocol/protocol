@@ -24,4 +24,6 @@ pub enum OxarError {
     SelfPurchase,
     #[msg("Insufficient tokens for claim")]
     InsufficientTokens,
+    #[msg("Vault still has outstanding shares, cannot close")]
+    VaultNotEmpty,
 }

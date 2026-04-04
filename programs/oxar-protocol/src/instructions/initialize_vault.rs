@@ -14,6 +14,7 @@ pub struct InitializeVaultParams {
     pub apy_bps: u64,
     pub maturity_ts: i64,
     pub fee_bps: u16,
+    pub series: u16,
 }
 
 /// Step 1: Create vault PDA and vault token mint.
@@ -27,7 +28,13 @@ pub struct InitializeVault<'info> {
         init,
         payer = authority,
         space = 8 + Vault::INIT_SPACE,
-        seeds = [VAULT_SEED, params.region.as_bytes(), params.denomination.as_bytes(), params.asset_subtype.as_bytes()],
+        seeds = [
+            VAULT_SEED,
+            params.region.as_bytes(),
+            params.denomination.as_bytes(),
+            params.asset_subtype.as_bytes(),
+            &params.series.to_le_bytes(),
+        ],
         bump,
     )]
     pub vault: Box<Account<'info, Vault>>,
@@ -52,15 +59,19 @@ pub struct InitializeVault<'info> {
 
 pub fn handler(ctx: Context<InitializeVault>, params: InitializeVaultParams) -> Result<()> {
     let clock = Clock::get()?;
-    require!(params.maturity_ts > clock.unix_timestamp, OxarError::AlreadyMatured);
+
+    // maturity_ts = 0 means perpetual (no maturity), otherwise must be in the future
+    if params.maturity_ts > 0 {
+        require!(params.maturity_ts > clock.unix_timestamp, OxarError::AlreadyMatured);
+    }
 
     let vault = &mut ctx.accounts.vault;
     vault.protocol_version = PROTOCOL_VERSION;
     vault.authority = ctx.accounts.authority.key();
     vault.usdc_mint = ctx.accounts.usdc_mint.key();
     vault.vault_token_mint = ctx.accounts.vault_token_mint.key();
-    vault.usdc_pool = Pubkey::default(); // Set in setup_vault_pool
-    vault.treasury = Pubkey::default();  // Set in setup_vault_pool
+    vault.usdc_pool = Pubkey::default();
+    vault.treasury = Pubkey::default();
     vault.asset_class = params.asset_class;
     vault.region = params.region;
     vault.denomination = params.denomination;
@@ -71,11 +82,12 @@ pub fn handler(ctx: Context<InitializeVault>, params: InitializeVaultParams) -> 
     vault.total_shares = 0;
     vault.last_update_ts = clock.unix_timestamp;
     vault.maturity_ts = params.maturity_ts;
-    vault.is_active = false; // Not active until pool is set up
+    vault.is_active = false;
     vault.fee_bps = params.fee_bps;
+    vault.series = params.series;
     vault.bump = ctx.bumps.vault;
 
-    msg!("Vault created: {}", vault.key());
+    msg!("Vault created: {} (series {})", vault.key(), vault.series);
     Ok(())
 }
 

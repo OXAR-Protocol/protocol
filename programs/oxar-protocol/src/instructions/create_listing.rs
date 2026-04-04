@@ -11,7 +11,7 @@ pub struct CreateListing<'info> {
     pub seller: Signer<'info>,
 
     #[account(
-        seeds = [VAULT_SEED, vault.region.as_bytes(), vault.denomination.as_bytes(), vault.asset_subtype.as_bytes()],
+        seeds = [VAULT_SEED, vault.region.as_bytes(), vault.denomination.as_bytes(), vault.asset_subtype.as_bytes(), &vault.series.to_le_bytes()],
         bump = vault.bump,
         constraint = vault.is_active @ OxarError::VaultNotActive,
     )]

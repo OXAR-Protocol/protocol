@@ -10,7 +10,7 @@ pub struct CancelListing<'info> {
     pub seller: Signer<'info>,
 
     #[account(
-        seeds = [VAULT_SEED, vault.region.as_bytes(), vault.denomination.as_bytes(), vault.asset_subtype.as_bytes()],
+        seeds = [VAULT_SEED, vault.region.as_bytes(), vault.denomination.as_bytes(), vault.asset_subtype.as_bytes(), &vault.series.to_le_bytes()],
         bump = vault.bump,
     )]
     pub vault: Box<Account<'info, Vault>>,
@@ -63,6 +63,7 @@ pub fn handler(ctx: Context<CancelListing>) -> Result<()> {
         region.as_bytes(),
         denomination.as_bytes(),
         asset_subtype.as_bytes(),
+        &vault.series.to_le_bytes(),
         &[vault.bump],
     ];
     let signer_seeds = &[&vault_seeds[..]];
