@@ -28,6 +28,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Address is required" }, { status: 400 });
     }
 
+    // Validate Solana address (base58, not Ethereum hex)
+    if (address.startsWith("0x") || address.length < 32 || address.length > 44) {
+      return NextResponse.json({ error: "Invalid Solana address. Make sure your Solana wallet is connected." }, { status: 400 });
+    }
+
     if (!ADMIN_KEYPAIR_B64 || !USDC_MINT) {
       return NextResponse.json({ error: "Faucet not configured" }, { status: 500 });
     }
