@@ -88,7 +88,7 @@ export function useDeposit() {
 
         // Send via connection
         const signature = await connection.sendRawTransaction(signed.serialize(), {
-          skipPreflight: true,
+          skipPreflight: false,
         });
         
 

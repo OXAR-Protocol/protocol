@@ -60,7 +60,7 @@ export function useCreateListing() {
 
         const signed = await program.provider.wallet!.signTransaction(tx);
         const signature = await connection.sendRawTransaction(signed.serialize(), {
-          skipPreflight: true,
+          skipPreflight: false,
         });
         
 

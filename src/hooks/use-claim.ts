@@ -52,7 +52,7 @@ export function useClaim() {
         tx.feePayer = walletAddress;
 
         const signed = await program.provider.wallet!.signTransaction(tx);
-        const signature = await connection.sendRawTransaction(signed.serialize(), { skipPreflight: true });
+        const signature = await connection.sendRawTransaction(signed.serialize(), { skipPreflight: false });
         
 
         return signature;
