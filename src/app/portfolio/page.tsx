@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
+import { usePrivy } from "@privy-io/react-auth";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,6 +47,36 @@ function getMaturityStatus(maturityTs: BN): { text: string; matured: boolean } {
   if (maturity <= now) return { text: "Matured", matured: true };
   const days = Math.floor((maturity - now) / 86400);
   return { text: `${days}d remaining`, matured: false };
+}
+
+function WalletMissing() {
+  const { user, authenticated } = usePrivy();
+  const accounts = user?.linkedAccounts || [];
+  const solanaWallet = accounts.find((a: any) => a.type === "wallet" && a.chainType === "solana") as any;
+  const ethWallet = accounts.find((a: any) => a.type === "wallet" && a.chainType === "ethereum") as any;
+
+  return (
+    <Card className="border-gray-800 bg-gray-900">
+      <CardContent className="py-8 space-y-4">
+        <p className="text-gray-400 text-center">
+          {!authenticated
+            ? "Please log in to view your portfolio."
+            : !solanaWallet
+            ? "Setting up your Solana wallet... Please refresh the page in a few seconds."
+            : "Connecting to your wallet..."}
+        </p>
+        <div className="text-xs text-gray-600 text-center space-y-1">
+          <p>Status: {authenticated ? "Logged in" : "Not logged in"}</p>
+          <p>Accounts: {accounts.length} ({accounts.map((a: any) => `${a.type}:${a.chainType || a.address?.slice(0,8)}`).join(", ")})</p>
+          {solanaWallet && <p>Solana: {solanaWallet.address}</p>}
+          {ethWallet && <p>Ethereum: {ethWallet.address}</p>}
+          {!solanaWallet && authenticated && (
+            <p className="text-yellow-400 mt-2">Solana wallet not found. Try logging out and back in, or refresh the page.</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function PortfolioPage() {
@@ -146,11 +177,7 @@ export default function PortfolioPage() {
         </div>
 
         {!walletAddress ? (
-          <Card className="border-gray-800 bg-gray-900">
-            <CardContent className="py-12 text-center">
-              <p className="text-gray-400">Connect your wallet to view your portfolio.</p>
-            </CardContent>
-          </Card>
+          <WalletMissing />
         ) : loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-[#00D4AA]" />

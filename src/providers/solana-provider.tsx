@@ -11,7 +11,7 @@ import {
 import { Connection, Keypair, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import { usePrivy } from "@privy-io/react-auth";
-import { useWallets as useSolanaWallets } from "@privy-io/react-auth/solana";
+import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
 import type { OxarProtocol } from "@oxar/sdk";
 import idlJson from "@/lib/idl/oxar_protocol.json";
 import { RPC_URL } from "@/lib/constants";
@@ -108,7 +108,9 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   const connection = useMemo(() => new Connection(RPC_URL, "confirmed"), []);
   const { authenticated, user } = usePrivy();
   const { wallets: solanaWallets, ready: solanaReady } = useSolanaWallets();
+  const { createWallet: createSolanaWallet } = useCreateSolanaWallet();
   const [program, setProgram] = useState<Program<OxarProtocol> | null>(null);
+  const [creatingWallet, setCreatingWallet] = useState(false);
   const [provider, setProvider] = useState<AnchorProvider | null>(null);
   const [walletAddress, setWalletAddress] = useState<PublicKey | null>(null);
 
@@ -134,6 +136,20 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
     ) as any;
 
     if (!solanaAccount) {
+      // Auto-create Solana wallet if user doesn't have one yet
+      if (!creatingWallet) {
+        setCreatingWallet(true);
+        console.log("No Solana wallet found, creating one...");
+        createSolanaWallet()
+          .then(() => {
+            console.log("Solana wallet created! Refresh to use.");
+            setCreatingWallet(false);
+          })
+          .catch((err: any) => {
+            console.log("Solana wallet creation error:", err.message);
+            setCreatingWallet(false);
+          });
+      }
       setProgram(readOnlyProgram);
       setProvider(null);
       setWalletAddress(null);
