@@ -8,8 +8,8 @@ import {
 } from "@solana/spl-token";
 
 const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://devnet.helius-rpc.com/?api-key=0803f982-c361-4a2a-8496-1391a4b38672";
-const USDC_MINT = process.env.USDC_MINT || "HucyHTk4qVJ7JhwsiNNCz9FNGNeDDN38y5KaKjeBYgNR";
-const ADMIN_KEYPAIR_B64 = process.env.ADMIN_KEYPAIR_B64 || "";
+const USDC_MINT = (process.env.USDC_MINT || "HucyHTk4qVJ7JhwsiNNCz9FNGNeDDN38y5KaKjeBYgNR").trim();
+const ADMIN_KEYPAIR_B64 = (process.env.ADMIN_KEYPAIR_B64 || "").trim();
 
 // Rate limiting: 1 request per address per 5 minutes
 const rateLimitMap = new Map<string, number>();
