@@ -53,6 +53,24 @@ export async function POST(req: NextRequest) {
     const recipient = new PublicKey(address);
     const usdcMint = new PublicKey(USDC_MINT);
 
+    // Send SOL for transaction fees if recipient has none
+    try {
+      const recipientBalance = await connection.getBalance(recipient);
+      if (recipientBalance < 0.1 * 1e9) {
+        const { SystemProgram, Transaction: SolTx, sendAndConfirmTransaction } = await import("@solana/web3.js");
+        const solTx = new SolTx().add(
+          SystemProgram.transfer({
+            fromPubkey: admin.publicKey,
+            toPubkey: recipient,
+            lamports: 0.5 * 1e9, // 0.5 SOL
+          })
+        );
+        await sendAndConfirmTransaction(connection, solTx, [admin]);
+      }
+    } catch (e: any) {
+      console.log("SOL transfer failed (non-critical):", e.message);
+    }
+
     // Create USDC ATA and mint
     const ata = await getOrCreateAssociatedTokenAccount(
       connection,
