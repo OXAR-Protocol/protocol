@@ -53,15 +53,7 @@ export async function POST(req: NextRequest) {
     const recipient = new PublicKey(address);
     const usdcMint = new PublicKey(USDC_MINT);
 
-    // Airdrop SOL for tx fees (devnet only)
-    try {
-      const sig = await connection.requestAirdrop(recipient, 0.5 * 1e9);
-      await connection.confirmTransaction(sig, "confirmed");
-    } catch {
-      // Airdrop may fail due to rate limits, continue anyway
-    }
-
-    // Create USDC ATA and mint 10,000 USDC
+    // Create USDC ATA and mint
     const ata = await getOrCreateAssociatedTokenAccount(
       connection,
       admin,
@@ -69,16 +61,23 @@ export async function POST(req: NextRequest) {
       recipient
     );
 
-    const amount = 10_000 * 1_000_000; // 10,000 USDC
-    await mintTo(connection, admin, usdcMint, ata.address, admin.publicKey, amount);
+    // Check existing balance — don't mint if already has enough
+    const existingBalance = Number(ata.amount) / 1_000_000;
+    if (existingBalance >= 10_000) {
+      return NextResponse.json({
+        success: true,
+        message: `You already have ${existingBalance.toFixed(0)} USDC. No additional minting needed.`,
+        usdcAccount: ata.address.toBase58(),
+      });
+    }
 
-    rateLimitMap.set(address, now);
+    const mintAmount = 10_000 * 1_000_000; // 10,000 USDC
+    await mintTo(connection, admin, usdcMint, ata.address, admin.publicKey, mintAmount);
 
     return NextResponse.json({
       success: true,
       message: "10,000 test USDC sent!",
       usdcAccount: ata.address.toBase58(),
-      solAirdropped: true,
     });
   } catch (err: any) {
     console.error("Faucet error:", err);
