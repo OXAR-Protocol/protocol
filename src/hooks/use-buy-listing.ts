@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { useOxarProgram } from "./use-oxar-program";
 import {
@@ -14,13 +16,13 @@ import {
 } from "@/lib/pda";
 
 export function useBuyListing() {
-  const { program, walletAddress } = useOxarProgram();
+  const { program, walletAddress, connection } = useOxarProgram();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const buyListing = useCallback(
     async (vaultPda: PublicKey, sellerPubkey: PublicKey) => {
-      if (!program || !walletAddress) {
+      if (!program || !walletAddress || !connection) {
         setError("Wallet not connected");
         return null;
       }
@@ -35,20 +37,11 @@ export function useBuyListing() {
         const [listing] = deriveListingPda(vaultPda, sellerPubkey);
         const [escrowTokenAccount] = deriveEscrowPda(vaultPda, sellerPubkey);
 
-        const buyerUsdc = await getAssociatedTokenAddress(
-          usdcMint,
-          walletAddress
-        );
-        const sellerUsdc = await getAssociatedTokenAddress(
-          usdcMint,
-          sellerPubkey
-        );
-        const buyerVaultToken = await getAssociatedTokenAddress(
-          vaultTokenMint,
-          walletAddress
-        );
+        const buyerUsdc = await getAssociatedTokenAddress(usdcMint, walletAddress);
+        const sellerUsdc = await getAssociatedTokenAddress(usdcMint, sellerPubkey);
+        const buyerVaultToken = await getAssociatedTokenAddress(vaultTokenMint, walletAddress);
 
-        const tx = await program.methods
+        const ix = await program.methods
           .buyListing()
           .accounts({
             buyer: walletAddress,
@@ -62,9 +55,29 @@ export function useBuyListing() {
             escrowTokenAccount,
             tokenProgram: TOKEN_PROGRAM_ID,
           } as any)
-          .rpc();
+          .instruction();
 
-        return tx;
+        const tx = new Transaction();
+
+        // Create buyer vault token ATA if needed
+        const buyerVaultTokenInfo = await connection.getAccountInfo(buyerVaultToken);
+        if (!buyerVaultTokenInfo) {
+          tx.add(createAssociatedTokenAccountInstruction(
+            walletAddress, buyerVaultToken, walletAddress, vaultTokenMint,
+            TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID,
+          ));
+        }
+
+        tx.add(ix);
+        const { blockhash } = await connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+        tx.feePayer = walletAddress;
+
+        const signed = await program.provider.wallet.signTransaction(tx);
+        const signature = await connection.sendRawTransaction(signed.serialize(), { skipPreflight: true });
+        await connection.confirmTransaction(signature, "confirmed");
+
+        return signature;
       } catch (err: any) {
         console.error("Buy listing failed:", err);
         setError(err.message || "Buy listing failed");
@@ -73,7 +86,7 @@ export function useBuyListing() {
         setLoading(false);
       }
     },
-    [program, walletAddress]
+    [program, walletAddress, connection]
   );
 
   return { buyListing, loading, error };

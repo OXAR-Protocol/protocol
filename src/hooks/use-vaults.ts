@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
 import { useOxarProgram } from "./use-oxar-program";
+import { getCached, setCache } from "@/lib/cache";
 
 export interface VaultAccount {
   publicKey: PublicKey;
@@ -43,9 +44,18 @@ export function useVaults() {
       return;
     }
 
+    const cached = getCached<VaultAccount[]>("vaults");
+    if (cached) {
+      setVaults(cached);
+      setLoading(false);
+      return;
+    }
+
     try {
       const allVaults = await program.account.vault.all();
-      setVaults(allVaults as unknown as VaultAccount[]);
+      const result = allVaults as unknown as VaultAccount[];
+      setVaults(result);
+      setCache("vaults", result);
       setError(null);
     } catch (err: any) {
       console.error("Failed to fetch vaults:", err);
@@ -57,8 +67,6 @@ export function useVaults() {
 
   useEffect(() => {
     fetchVaults();
-    const interval = setInterval(fetchVaults, 10000);
-    return () => clearInterval(interval);
   }, [fetchVaults]);
 
   return { vaults, loading, error, refetch: fetchVaults };

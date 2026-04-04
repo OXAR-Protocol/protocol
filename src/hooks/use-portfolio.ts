@@ -86,8 +86,6 @@ export function usePortfolio() {
 
   useEffect(() => {
     fetchPortfolio();
-    const interval = setInterval(fetchPortfolio, 10000);
-    return () => clearInterval(interval);
   }, [fetchPortfolio]);
 
   return { usdcBalance, positions, tokenBalances, loading, refetch: fetchPortfolio };

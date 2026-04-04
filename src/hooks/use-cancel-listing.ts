@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
@@ -14,13 +14,13 @@ import {
 } from "@/lib/pda";
 
 export function useCancelListing() {
-  const { program, walletAddress } = useOxarProgram();
+  const { program, walletAddress, connection } = useOxarProgram();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const cancelListing = useCallback(
     async (vaultPda: PublicKey) => {
-      if (!program || !walletAddress) {
+      if (!program || !walletAddress || !connection) {
         setError("Wallet not connected");
         return null;
       }
@@ -38,7 +38,7 @@ export function useCancelListing() {
           walletAddress
         );
 
-        const tx = await program.methods
+        const ix = await program.methods
           .cancelListing()
           .accounts({
             seller: walletAddress,
@@ -49,9 +49,18 @@ export function useCancelListing() {
             escrowTokenAccount,
             tokenProgram: TOKEN_PROGRAM_ID,
           } as any)
-          .rpc();
+          .instruction();
 
-        return tx;
+        const tx = new Transaction().add(ix);
+        const { blockhash } = await connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+        tx.feePayer = walletAddress;
+
+        const signed = await program.provider.wallet.signTransaction(tx);
+        const signature = await connection.sendRawTransaction(signed.serialize(), { skipPreflight: true });
+        await connection.confirmTransaction(signature, "confirmed");
+
+        return signature;
       } catch (err: any) {
         console.error("Cancel listing failed:", err);
         setError(err.message || "Cancel listing failed");
@@ -60,7 +69,7 @@ export function useCancelListing() {
         setLoading(false);
       }
     },
-    [program, walletAddress]
+    [program, walletAddress, connection]
   );
 
   return { cancelListing, loading, error };

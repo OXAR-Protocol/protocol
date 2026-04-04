@@ -1,23 +1,25 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
 import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { useOxarProgram } from "./use-oxar-program";
 import { deriveMintPda, derivePoolPda } from "@/lib/pda";
 
 export function useDeposit() {
-  const { program, walletAddress } = useOxarProgram();
+  const { program, walletAddress, connection } = useOxarProgram();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const deposit = useCallback(
     async (vaultPda: PublicKey, amount: BN) => {
-      if (!program || !walletAddress) {
+      if (!program || !walletAddress || !connection) {
         setError("Wallet not connected");
         return null;
       }
@@ -40,7 +42,11 @@ export function useDeposit() {
           walletAddress
         );
 
-        const tx = await program.methods
+        // Check if vault token ATA exists, if not create it
+        const vaultTokenAccountInfo = await connection.getAccountInfo(depositorVaultToken);
+
+        // Build deposit instruction
+        const depositIx = await program.methods
           .deposit(amount)
           .accounts({
             depositor: walletAddress,
@@ -51,9 +57,42 @@ export function useDeposit() {
             usdcPool,
             tokenProgram: TOKEN_PROGRAM_ID,
           } as any)
-          .rpc();
+          .instruction();
 
-        return tx;
+        // Build transaction
+        const tx = new Transaction();
+
+        // Add create ATA instruction if needed
+        if (!vaultTokenAccountInfo) {
+          tx.add(
+            createAssociatedTokenAccountInstruction(
+              walletAddress,           // payer
+              depositorVaultToken,     // associatedToken
+              walletAddress,           // owner
+              vaultTokenMint,          // mint
+              TOKEN_PROGRAM_ID,
+              ASSOCIATED_TOKEN_PROGRAM_ID,
+            )
+          );
+        }
+
+        tx.add(depositIx);
+
+        // Set blockhash and feePayer
+        const { blockhash } = await connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+        tx.feePayer = walletAddress;
+
+        // Sign via Privy wallet adapter
+        const signed = await program.provider.wallet.signTransaction(tx);
+
+        // Send via connection
+        const signature = await connection.sendRawTransaction(signed.serialize(), {
+          skipPreflight: true,
+        });
+        await connection.confirmTransaction(signature, "confirmed");
+
+        return signature;
       } catch (err: any) {
         console.error("Deposit failed:", err);
         setError(err.message || "Deposit failed");
@@ -62,7 +101,7 @@ export function useDeposit() {
         setLoading(false);
       }
     },
-    [program, walletAddress]
+    [program, walletAddress, connection]
   );
 
   return { deposit, loading, error };

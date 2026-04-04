@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram } from "@solana/web3.js";
+import { PublicKey, Transaction, SYSVAR_RENT_PUBKEY, SystemProgram } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
 import {
   TOKEN_PROGRAM_ID,
@@ -15,13 +15,13 @@ import {
 } from "@/lib/pda";
 
 export function useCreateListing() {
-  const { program, walletAddress } = useOxarProgram();
+  const { program, walletAddress, connection } = useOxarProgram();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const createListing = useCallback(
     async (vaultPda: PublicKey, amount: BN, pricePerToken: BN) => {
-      if (!program || !walletAddress) {
+      if (!program || !walletAddress || !connection) {
         setError("Wallet not connected");
         return null;
       }
@@ -39,7 +39,7 @@ export function useCreateListing() {
           walletAddress
         );
 
-        const tx = await program.methods
+        const ix = await program.methods
           .createListing(amount, pricePerToken)
           .accounts({
             seller: walletAddress,
@@ -50,11 +50,21 @@ export function useCreateListing() {
             escrowTokenAccount,
             tokenProgram: TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
-            rent: SYSVAR_RENT_PUBKEY,
           } as any)
-          .rpc();
+          .instruction();
 
-        return tx;
+        const tx = new Transaction().add(ix);
+        const { blockhash } = await connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+        tx.feePayer = walletAddress;
+
+        const signed = await program.provider.wallet.signTransaction(tx);
+        const signature = await connection.sendRawTransaction(signed.serialize(), {
+          skipPreflight: true,
+        });
+        await connection.confirmTransaction(signature, "confirmed");
+
+        return signature;
       } catch (err: any) {
         console.error("Create listing failed:", err);
         setError(err.message || "Create listing failed");
@@ -63,7 +73,7 @@ export function useCreateListing() {
         setLoading(false);
       }
     },
-    [program, walletAddress]
+    [program, walletAddress, connection]
   );
 
   return { createListing, loading, error };

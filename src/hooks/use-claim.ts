@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
@@ -10,13 +10,13 @@ import { useOxarProgram } from "./use-oxar-program";
 import { deriveMintPda, derivePoolPda } from "@/lib/pda";
 
 export function useClaim() {
-  const { program, walletAddress } = useOxarProgram();
+  const { program, walletAddress, connection } = useOxarProgram();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const claim = useCallback(
     async (vaultPda: PublicKey) => {
-      if (!program || !walletAddress) {
+      if (!program || !walletAddress || !connection) {
         setError("Wallet not connected");
         return null;
       }
@@ -30,16 +30,10 @@ export function useClaim() {
         const [vaultTokenMint] = deriveMintPda(vaultPda);
         const [usdcPool] = derivePoolPda(vaultPda);
 
-        const claimerVaultToken = await getAssociatedTokenAddress(
-          vaultTokenMint,
-          walletAddress
-        );
-        const claimerUsdc = await getAssociatedTokenAddress(
-          usdcMint,
-          walletAddress
-        );
+        const claimerVaultToken = await getAssociatedTokenAddress(vaultTokenMint, walletAddress);
+        const claimerUsdc = await getAssociatedTokenAddress(usdcMint, walletAddress);
 
-        const tx = await program.methods
+        const ix = await program.methods
           .claim()
           .accounts({
             claimer: walletAddress,
@@ -50,9 +44,18 @@ export function useClaim() {
             usdcPool,
             tokenProgram: TOKEN_PROGRAM_ID,
           } as any)
-          .rpc();
+          .instruction();
 
-        return tx;
+        const tx = new Transaction().add(ix);
+        const { blockhash } = await connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+        tx.feePayer = walletAddress;
+
+        const signed = await program.provider.wallet.signTransaction(tx);
+        const signature = await connection.sendRawTransaction(signed.serialize(), { skipPreflight: true });
+        await connection.confirmTransaction(signature, "confirmed");
+
+        return signature;
       } catch (err: any) {
         console.error("Claim failed:", err);
         setError(err.message || "Claim failed");
@@ -61,7 +64,7 @@ export function useClaim() {
         setLoading(false);
       }
     },
-    [program, walletAddress]
+    [program, walletAddress, connection]
   );
 
   return { claim, loading, error };

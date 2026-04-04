@@ -45,8 +45,6 @@ export function useListings() {
 
   useEffect(() => {
     fetchListings();
-    const interval = setInterval(fetchListings, 10000);
-    return () => clearInterval(interval);
   }, [fetchListings]);
 
   return { listings, loading, error, refetch: fetchListings };

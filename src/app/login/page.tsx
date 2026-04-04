@@ -10,10 +10,18 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (ready && authenticated) {
-      router.replace("/vaults");
+    if (authenticated) {
+      window.location.href = "/vaults";
     }
-  }, [ready, authenticated, router]);
+  }, [authenticated]);
+
+  if (authenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-950">
+        <p className="text-gray-400">Redirecting...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-950 px-4">

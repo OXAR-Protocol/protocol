@@ -46,8 +46,6 @@ export function useVault(region: string, denomination: string, assetSubtype: str
 
   useEffect(() => {
     fetchVault();
-    const interval = setInterval(fetchVault, 10000);
-    return () => clearInterval(interval);
   }, [fetchVault]);
 
   return { vault, vaultPda, loading, error, refetch: fetchVault };
