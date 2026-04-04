@@ -441,6 +441,28 @@ async function cmdBalances() {
   console.log();
 }
 
+async function cmdFaucet(address: string, amount: number) {
+  if (!usdcMint) { console.log("❌ Run 'setup' first"); return; }
+
+  const recipient = new PublicKey(address);
+  const amountLamports = amount * 1_000_000;
+
+  console.log(`\n💧 Sending ${amount} test USDC + 2 SOL to ${address}...\n`);
+
+  // Airdrop SOL for tx fees
+  const sig = await connection.requestAirdrop(recipient, 2 * LAMPORTS_PER_SOL);
+  await connection.confirmTransaction(sig);
+  log(`Airdropped 2 SOL`);
+
+  // Create USDC account and mint
+  const ata = await getOrCreateAssociatedTokenAccount(connection, authority.payer, usdcMint, recipient);
+  await mintTo(connection, authority.payer, usdcMint, ata.address, authority.publicKey, amountLamports);
+  log(`Minted ${amount} USDC to ${ata.address.toBase58()}`);
+  log(`USDC Mint: ${usdcMint.toBase58()}`);
+
+  console.log(`\n✅ Faucet complete! ${address} now has ${amount} USDC + 2 SOL\n`);
+}
+
 function printHelp() {
   console.log(`
 ╔══════════════════════════════════════════════════════════════╗
@@ -457,6 +479,8 @@ Commands:
   deposit <vault> <user> <amount>    Deposit USDC (vault: UA-UAH-SHORT, user: 1 or 2)
   crank <vault>                      Update NAV
   claim <vault> <user>               Claim after maturity
+
+  faucet <address> <amount>            Send test USDC + SOL to any address
 
   list <vault> <user> <amount> <price>  Create listing
   buy <vault> <seller> <buyer>          Buy listing
@@ -537,6 +561,9 @@ async function main() {
           break;
         case "cancel":
           await cmdCancelListing(args[1], parseInt(args[2]));
+          break;
+        case "faucet":
+          await cmdFaucet(args[1], parseFloat(args[2]) || 10000);
           break;
         case "help":
           printHelp();
