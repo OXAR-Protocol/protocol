@@ -58,7 +58,7 @@ export function useCancelListing() {
 
         const signed = await program.provider.wallet!.signTransaction(tx);
         const signature = await connection.sendRawTransaction(signed.serialize(), { skipPreflight: true });
-        await connection.confirmTransaction(signature, "confirmed");
+        
 
         return signature;
       } catch (err: any) {

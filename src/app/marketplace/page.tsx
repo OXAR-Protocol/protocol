@@ -56,8 +56,8 @@ function findVaultConfig(vaultPubkey: string, vaults: any[]): VaultConfig | unde
 export default function MarketplacePage() {
   const { listings, loading: listingsLoading, refetch: refetchListings } = useListings();
   const { vaults } = useVaults();
-  const { buyListing, loading: buying } = useBuyListing();
-  const { cancelListing, loading: cancelling } = useCancelListing();
+  const { buyListing, loading: buying, error: buyError } = useBuyListing();
+  const { cancelListing, loading: cancelling, error: cancelError } = useCancelListing();
   const { createListing, loading: creating, error: createError } = useCreateListing();
   const { walletAddress } = useOxarProgram();
 
@@ -289,8 +289,8 @@ export default function MarketplacePage() {
                   {creating ? "Creating..." : "Create Listing"}
                 </Button>
 
-                {(createError || actionError) && (
-                  <p className="text-xs text-red-400">{createError || actionError}</p>
+                {(createError || actionError || buyError || cancelError) && (
+                  <p className="text-xs text-red-400">{createError || actionError || buyError || cancelError}</p>
                 )}
               </CardContent>
             </Card>

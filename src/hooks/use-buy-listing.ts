@@ -39,6 +39,7 @@ export function useBuyListing() {
 
         const buyerUsdc = await getAssociatedTokenAddress(usdcMint, walletAddress);
         const sellerUsdc = await getAssociatedTokenAddress(usdcMint, sellerPubkey);
+        const treasuryUsdc = await getAssociatedTokenAddress(usdcMint, vaultAccount.treasury as PublicKey);
         const buyerVaultToken = await getAssociatedTokenAddress(vaultTokenMint, walletAddress);
 
         const ix = await program.methods
@@ -51,6 +52,7 @@ export function useBuyListing() {
             vaultTokenMint,
             buyerUsdc,
             sellerUsdc,
+            treasuryUsdc,
             buyerVaultToken,
             escrowTokenAccount,
             tokenProgram: TOKEN_PROGRAM_ID,
@@ -75,7 +77,7 @@ export function useBuyListing() {
 
         const signed = await program.provider.wallet!.signTransaction(tx);
         const signature = await connection.sendRawTransaction(signed.serialize(), { skipPreflight: true });
-        await connection.confirmTransaction(signature, "confirmed");
+        
 
         return signature;
       } catch (err: any) {
