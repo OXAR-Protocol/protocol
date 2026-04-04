@@ -84,7 +84,7 @@ export function useDeposit() {
         tx.feePayer = walletAddress;
 
         // Sign via Privy wallet adapter
-        const signed = await program.provider.wallet.signTransaction(tx);
+        const signed = await program.provider.wallet!.signTransaction(tx);
 
         // Send via connection
         const signature = await connection.sendRawTransaction(signed.serialize(), {

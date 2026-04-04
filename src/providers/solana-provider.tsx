@@ -12,7 +12,7 @@ import { Connection, Keypair, PublicKey, Transaction, VersionedTransaction } fro
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets } from "@privy-io/react-auth/solana";
-import { OxarProtocol } from "@/lib/types/oxar_protocol";
+import type { OxarProtocol } from "@oxar/sdk";
 import idlJson from "@/lib/idl/oxar_protocol.json";
 import { RPC_URL } from "@/lib/constants";
 

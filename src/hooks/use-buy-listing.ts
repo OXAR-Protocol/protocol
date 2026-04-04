@@ -73,7 +73,7 @@ export function useBuyListing() {
         tx.recentBlockhash = blockhash;
         tx.feePayer = walletAddress;
 
-        const signed = await program.provider.wallet.signTransaction(tx);
+        const signed = await program.provider.wallet!.signTransaction(tx);
         const signature = await connection.sendRawTransaction(signed.serialize(), { skipPreflight: true });
         await connection.confirmTransaction(signature, "confirmed");
 
