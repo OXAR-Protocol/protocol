@@ -11,7 +11,6 @@ import {
 import { Connection, Keypair, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import { usePrivy } from "@privy-io/react-auth";
-import { useWallets as useSolanaWallets } from "@privy-io/react-auth/solana";
 import type { OxarProtocol } from "@oxar/sdk";
 import idlJson from "@/lib/idl/oxar_protocol.json";
 import { RPC_URL } from "@/lib/constants";
@@ -107,7 +106,6 @@ class PrivySolanaAdapter {
 export function SolanaProvider({ children }: { children: ReactNode }) {
   const connection = useMemo(() => new Connection(RPC_URL, "confirmed"), []);
   const { authenticated, user } = usePrivy();
-  const { wallets: solanaWallets, ready: solanaReady } = useSolanaWallets();
   const [program, setProgram] = useState<Program<OxarProtocol> | null>(null);
   const [provider, setProvider] = useState<AnchorProvider | null>(null);
   const [walletAddress, setWalletAddress] = useState<PublicKey | null>(null);
@@ -143,18 +141,9 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
     const pubkey = new PublicKey(solanaAccount.address);
     setWalletAddress(pubkey);
 
-    const connectedSolana = solanaWallets.find(
-      (w: any) => w.address === solanaAccount.address
-    );
-
-    let walletAdapter: any;
-    if (connectedSolana) {
-      console.log("Privy Solana wallet ready for signing:", pubkey.toBase58());
-      walletAdapter = new PrivySolanaAdapter(pubkey, connectedSolana, connection);
-    } else {
-      console.log("Solana wallet found, waiting for connector:", pubkey.toBase58());
-      walletAdapter = new ReadOnlyWallet(pubkey);
-    }
+    // Use read-only wallet with correct pubkey
+    // Signing happens via PrivySolanaAdapter when Solana connectors are loaded
+    const walletAdapter = new ReadOnlyWallet(pubkey);
 
     const anchorProvider = new AnchorProvider(connection, walletAdapter as any, {
       commitment: "confirmed",
@@ -163,7 +152,7 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
     const prog = new Program<OxarProtocol>(idlJson as any, anchorProvider);
     setProvider(anchorProvider);
     setProgram(prog);
-  }, [authenticated, user, solanaWallets, solanaReady, connection, readOnlyProgram]);
+  }, [authenticated, user, connection, readOnlyProgram]);
 
   return (
     <SolanaContext.Provider value={{ connection, program, provider, walletAddress }}>
