@@ -6,6 +6,8 @@ import { Providers } from "@/providers/providers";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "OXAR Protocol",
   description: "RWA tokenization protocol on Solana - Government bonds, tokenized.",
