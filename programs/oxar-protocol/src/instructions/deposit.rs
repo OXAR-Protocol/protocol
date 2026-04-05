@@ -65,12 +65,12 @@ pub fn handler(ctx: Context<Deposit>, amount: u64) -> Result<()> {
     }
 
     // Calculate shares: shares = amount * NAV_PRECISION / nav_per_share
-    // TODO: use checked u128->u64 cast (e.g. TryInto) instead of `as u64` to catch overflow
-    let shares = (amount as u128)
+    let shares_u128 = (amount as u128)
         .checked_mul(NAV_PRECISION)
         .ok_or(OxarError::MathOverflow)?
         .checked_div(vault.nav_per_share as u128)
-        .ok_or(OxarError::MathOverflow)? as u64;
+        .ok_or(OxarError::MathOverflow)?;
+    let shares: u64 = shares_u128.try_into().map_err(|_| OxarError::MathOverflow)?;
 
     // Transfer USDC from depositor to pool
     let transfer_ctx = CpiContext::new(

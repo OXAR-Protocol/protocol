@@ -53,6 +53,11 @@ pub struct Claim<'info> {
     pub token_program: Program<'info, Token>,
 }
 
+/// NOTE on NAV vs pool balance (MVP design):
+/// In MVP, NAV accrues via crank_nav but no actual yield is added to the pool.
+/// In production, the vault authority (or broker integration) must fund the pool
+/// with real yield before maturity. Alternatively, claims would go through an
+/// external settlement service. This is by design — see docs/protocol/contract-design.md.
 pub fn handler(ctx: Context<Claim>) -> Result<()> {
     let clock = Clock::get()?;
     let vault = &ctx.accounts.vault;
@@ -68,12 +73,12 @@ pub fn handler(ctx: Context<Claim>) -> Result<()> {
     require!(shares > 0, OxarError::InsufficientTokens);
 
     // Calculate USDC payout: payout = shares * nav_per_share / NAV_PRECISION
-    // TODO: use checked u128->u64 cast (e.g. TryInto) instead of `as u64` to catch overflow
-    let payout = (shares as u128)
+    let payout_u128 = (shares as u128)
         .checked_mul(vault.nav_per_share as u128)
         .ok_or(OxarError::MathOverflow)?
         .checked_div(NAV_PRECISION)
-        .ok_or(OxarError::MathOverflow)? as u64;
+        .ok_or(OxarError::MathOverflow)?;
+    let payout: u64 = payout_u128.try_into().map_err(|_| OxarError::MathOverflow)?;
 
     require!(
         ctx.accounts.usdc_pool.amount >= payout,

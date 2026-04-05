@@ -73,18 +73,19 @@ pub fn handler(ctx: Context<BuyListing>) -> Result<()> {
     let amount = listing.amount;
     let price_per_token = listing.price_per_token;
 
-    // TODO: use checked u128->u64 casts (e.g. TryInto) instead of `as u64` to catch overflow
-    let total_cost = (amount as u128)
+    let total_cost_u128 = (amount as u128)
         .checked_mul(price_per_token as u128)
         .ok_or(OxarError::MathOverflow)?
         .checked_div(NAV_PRECISION)
-        .ok_or(OxarError::MathOverflow)? as u64;
+        .ok_or(OxarError::MathOverflow)?;
+    let total_cost: u64 = total_cost_u128.try_into().map_err(|_| OxarError::MathOverflow)?;
 
-    let fee = (total_cost as u128)
+    let fee_u128 = (total_cost as u128)
         .checked_mul(vault.fee_bps as u128)
         .ok_or(OxarError::MathOverflow)?
         .checked_div(BPS_DENOMINATOR as u128)
-        .ok_or(OxarError::MathOverflow)? as u64;
+        .ok_or(OxarError::MathOverflow)?;
+    let fee: u64 = fee_u128.try_into().map_err(|_| OxarError::MathOverflow)?;
 
     let seller_amount = total_cost.checked_sub(fee).ok_or(OxarError::MathOverflow)?;
 

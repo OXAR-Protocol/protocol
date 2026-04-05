@@ -36,12 +36,11 @@ pub fn handler(ctx: Context<CrankNav>) -> Result<()> {
     }
 
     // NAV accrual: nav_per_share += nav_per_share * apy_bps * elapsed / (BPS_DENOMINATOR * SECONDS_PER_YEAR)
-    // TODO: use checked u128->u64 cast (e.g. TryInto) instead of `as u64` to catch overflow
     let seconds_per_year = DAYS_PER_YEAR
         .checked_mul(SECONDS_PER_DAY)
         .ok_or(OxarError::MathOverflow)?;
 
-    let accrual = (vault.nav_per_share as u128)
+    let accrual_u128 = (vault.nav_per_share as u128)
         .checked_mul(vault.apy_bps as u128)
         .ok_or(OxarError::MathOverflow)?
         .checked_mul(elapsed as u128)
@@ -51,7 +50,8 @@ pub fn handler(ctx: Context<CrankNav>) -> Result<()> {
                 .checked_mul(seconds_per_year as u128)
                 .ok_or(OxarError::MathOverflow)?,
         )
-        .ok_or(OxarError::MathOverflow)? as u64;
+        .ok_or(OxarError::MathOverflow)?;
+    let accrual: u64 = accrual_u128.try_into().map_err(|_| OxarError::MathOverflow)?;
 
     vault.nav_per_share = vault
         .nav_per_share
