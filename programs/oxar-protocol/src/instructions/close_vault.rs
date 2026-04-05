@@ -32,6 +32,11 @@ pub struct CloseVault<'info> {
 }
 
 pub fn handler(ctx: Context<CloseVault>) -> Result<()> {
+    require!(
+        ctx.accounts.usdc_pool.amount == 0,
+        OxarError::PoolNotEmpty
+    );
+
     let vault = &ctx.accounts.vault;
     let region = vault.region.clone();
     let denomination = vault.denomination.clone();

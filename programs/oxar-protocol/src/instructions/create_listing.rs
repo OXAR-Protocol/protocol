@@ -5,6 +5,9 @@ use crate::constants::*;
 use crate::error::OxarError;
 use crate::state::{Listing, Vault};
 
+/// Note: the listing PDA is seeded by (vault, seller), so each seller can have at most
+/// one active listing per vault. This is intentional — it simplifies escrow management
+/// and prevents spam. Sellers must cancel an existing listing before creating a new one.
 #[derive(Accounts)]
 pub struct CreateListing<'info> {
     #[account(mut)]

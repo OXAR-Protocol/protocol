@@ -26,4 +26,8 @@ pub enum OxarError {
     InsufficientTokens,
     #[msg("Vault still has outstanding shares, cannot close")]
     VaultNotEmpty,
+    #[msg("Vault pool is already set up")]
+    VaultAlreadySetup,
+    #[msg("USDC pool still has a non-zero balance, withdraw all funds before closing")]
+    PoolNotEmpty,
 }

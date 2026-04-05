@@ -1,5 +1,7 @@
 use anchor_lang::prelude::*;
 
+// TODO: Add a helper method on Vault to build signer seeds, reducing duplication
+// across deposit, claim, buy_listing, cancel_listing, and close_vault handlers.
 #[account]
 #[derive(InitSpace)]
 pub struct Vault {

@@ -59,9 +59,13 @@ pub fn handler(ctx: Context<Deposit>, amount: u64) -> Result<()> {
     let vault = &ctx.accounts.vault;
 
     require!(amount > 0, OxarError::ZeroDeposit);
-    require!(clock.unix_timestamp < vault.maturity_ts, OxarError::AlreadyMatured);
+    // maturity_ts == 0 means perpetual vault (no maturity), so skip the check
+    if vault.maturity_ts > 0 {
+        require!(clock.unix_timestamp < vault.maturity_ts, OxarError::AlreadyMatured);
+    }
 
     // Calculate shares: shares = amount * NAV_PRECISION / nav_per_share
+    // TODO: use checked u128->u64 cast (e.g. TryInto) instead of `as u64` to catch overflow
     let shares = (amount as u128)
         .checked_mul(NAV_PRECISION)
         .ok_or(OxarError::MathOverflow)?

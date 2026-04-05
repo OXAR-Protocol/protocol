@@ -4,9 +4,11 @@ use crate::constants::*;
 use crate::error::OxarError;
 use crate::state::Vault;
 
+/// Permissionless NAV crank. Any signer can call this to accrue yield on the vault.
+/// This is intentional for devnet: time-based accrual is deterministic and idempotent,
+/// so there is no benefit to restricting who can crank.
 #[derive(Accounts)]
 pub struct CrankNav<'info> {
-    #[account(mut)]
     pub cranker: Signer<'info>,
 
     #[account(
@@ -34,6 +36,7 @@ pub fn handler(ctx: Context<CrankNav>) -> Result<()> {
     }
 
     // NAV accrual: nav_per_share += nav_per_share * apy_bps * elapsed / (BPS_DENOMINATOR * SECONDS_PER_YEAR)
+    // TODO: use checked u128->u64 cast (e.g. TryInto) instead of `as u64` to catch overflow
     let seconds_per_year = DAYS_PER_YEAR
         .checked_mul(SECONDS_PER_DAY)
         .ok_or(OxarError::MathOverflow)?;

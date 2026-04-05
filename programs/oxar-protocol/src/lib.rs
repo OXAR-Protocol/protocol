@@ -20,7 +20,7 @@ pub mod oxar_protocol {
     }
 
     pub fn setup_vault_pool(ctx: Context<SetupVaultPool>) -> Result<()> {
-        instructions::initialize_vault::setup_vault_pool_handler(ctx)
+        instructions::setup_vault_pool::handler(ctx)
     }
 
     pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {

@@ -1,4 +1,5 @@
 pub mod initialize_vault;
+pub mod setup_vault_pool;
 pub mod deposit;
 pub mod crank_nav;
 pub mod claim;
@@ -8,6 +9,7 @@ pub mod buy_listing;
 pub mod close_vault;
 
 pub use initialize_vault::*;
+pub use setup_vault_pool::*;
 pub use deposit::*;
 pub use crank_nav::*;
 pub use claim::*;

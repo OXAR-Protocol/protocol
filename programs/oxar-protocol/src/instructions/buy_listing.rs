@@ -39,11 +39,12 @@ pub struct BuyListing<'info> {
     #[account(mut, token::mint = vault.usdc_mint, token::authority = buyer)]
     pub buyer_usdc: Account<'info, TokenAccount>,
 
-    #[account(mut, token::mint = vault.usdc_mint)]
+    #[account(mut, token::mint = vault.usdc_mint, token::authority = seller)]
     pub seller_usdc: Account<'info, TokenAccount>,
 
     /// Treasury USDC account for protocol fees.
-    #[account(mut, token::mint = vault.usdc_mint)]
+    /// Validated: must be a USDC token account owned by the vault's treasury wallet.
+    #[account(mut, token::mint = vault.usdc_mint, token::authority = vault.treasury)]
     pub treasury_usdc: Account<'info, TokenAccount>,
 
     #[account(mut, token::mint = vault_token_mint, token::authority = buyer)]
@@ -72,6 +73,7 @@ pub fn handler(ctx: Context<BuyListing>) -> Result<()> {
     let amount = listing.amount;
     let price_per_token = listing.price_per_token;
 
+    // TODO: use checked u128->u64 casts (e.g. TryInto) instead of `as u64` to catch overflow
     let total_cost = (amount as u128)
         .checked_mul(price_per_token as u128)
         .ok_or(OxarError::MathOverflow)?

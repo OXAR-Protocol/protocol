@@ -57,6 +57,8 @@ pub fn handler(ctx: Context<Claim>) -> Result<()> {
     let clock = Clock::get()?;
     let vault = &ctx.accounts.vault;
 
+    // Perpetual vaults (maturity_ts == 0) cannot be claimed — only redeemed via secondary market
+    require!(vault.maturity_ts > 0, OxarError::NotMatured);
     require!(
         clock.unix_timestamp >= vault.maturity_ts,
         OxarError::NotMatured
@@ -66,6 +68,7 @@ pub fn handler(ctx: Context<Claim>) -> Result<()> {
     require!(shares > 0, OxarError::InsufficientTokens);
 
     // Calculate USDC payout: payout = shares * nav_per_share / NAV_PRECISION
+    // TODO: use checked u128->u64 cast (e.g. TryInto) instead of `as u64` to catch overflow
     let payout = (shares as u128)
         .checked_mul(vault.nav_per_share as u128)
         .ok_or(OxarError::MathOverflow)?
