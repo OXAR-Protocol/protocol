@@ -1,5 +1,6 @@
 "use client";
 
+import { parseTransactionError } from "@/lib/errors";
 import { useCallback, useState } from "react";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import {
@@ -97,7 +98,7 @@ export function useBuyListing() {
         return signature;
       } catch (err: any) {
         console.error("Buy listing failed:", err);
-        setError(err.message || "Buy listing failed");
+        setError(parseTransactionError(err));
         return null;
       } finally {
         setLoading(false);

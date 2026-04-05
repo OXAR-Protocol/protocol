@@ -1,5 +1,6 @@
 "use client";
 
+import { parseTransactionError } from "@/lib/errors";
 import { useCallback, useState } from "react";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import {
@@ -58,7 +59,7 @@ export function useClaim() {
         return signature;
       } catch (err: any) {
         console.error("Claim failed:", err);
-        setError(err.message || "Claim failed");
+        setError(parseTransactionError(err));
         return null;
       } finally {
         setLoading(false);

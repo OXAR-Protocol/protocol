@@ -1,5 +1,6 @@
 "use client";
 
+import { parseTransactionError } from "@/lib/errors";
 import { useCallback, useState } from "react";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import {
@@ -63,7 +64,7 @@ export function useCancelListing() {
         return signature;
       } catch (err: any) {
         console.error("Cancel listing failed:", err);
-        setError(err.message || "Cancel listing failed");
+        setError(parseTransactionError(err));
         return null;
       } finally {
         setLoading(false);

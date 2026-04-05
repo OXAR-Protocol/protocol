@@ -1,5 +1,6 @@
 "use client";
 
+import { parseTransactionError } from "@/lib/errors";
 import { useCallback, useState } from "react";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
@@ -95,7 +96,7 @@ export function useDeposit() {
         return signature;
       } catch (err: any) {
         console.error("Deposit failed:", err);
-        setError(err.message || "Deposit failed");
+        setError(parseTransactionError(err));
         return null;
       } finally {
         setLoading(false);

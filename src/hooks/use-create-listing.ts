@@ -1,5 +1,6 @@
 "use client";
 
+import { parseTransactionError } from "@/lib/errors";
 import { useCallback, useState } from "react";
 import { PublicKey, Transaction, SystemProgram } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
@@ -67,7 +68,7 @@ export function useCreateListing() {
         return signature;
       } catch (err: any) {
         console.error("Create listing failed:", err);
-        setError(err.message || "Create listing failed");
+        setError(parseTransactionError(err));
         return null;
       } finally {
         setLoading(false);
