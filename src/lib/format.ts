@@ -60,3 +60,14 @@ export function getMaturityDate(maturityTs: BN): string {
 export function shortenAddress(addr: string): string {
   return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
 }
+
+import { VAULT_CONFIGS, VaultConfig } from "@/lib/constants";
+import { deriveVaultPda } from "@/lib/pda";
+
+export function findVaultConfig(vaultPubkey: string): VaultConfig | undefined {
+  for (const config of VAULT_CONFIGS) {
+    const [pda] = deriveVaultPda(config.region, config.denomination, config.assetSubtype);
+    if (pda.toBase58() === vaultPubkey) return config;
+  }
+  return undefined;
+}

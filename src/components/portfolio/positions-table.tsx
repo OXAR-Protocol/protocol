@@ -13,9 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatUsdc, formatTokens, formatApy, getMaturityCountdown } from "@/lib/format";
-import { VAULT_CONFIGS, VaultConfig } from "@/lib/constants";
-import { deriveVaultPda } from "@/lib/pda";
+import { formatUsdc, formatTokens, formatApy, formatNav, getMaturityCountdown, findVaultConfig } from "@/lib/format";
 import { PortfolioPosition } from "@/hooks/use-portfolio";
 
 interface PositionsTableProps {
@@ -23,14 +21,6 @@ interface PositionsTableProps {
   claiming: boolean;
   claimError: string | null;
   onClaim: (vaultPubkey: PublicKey) => void;
-}
-
-function findVaultConfig(vaultPubkey: string): VaultConfig | undefined {
-  for (const config of VAULT_CONFIGS) {
-    const [pda] = deriveVaultPda(config.region, config.denomination, config.assetSubtype);
-    if (pda.toBase58() === vaultPubkey) return config;
-  }
-  return undefined;
 }
 
 export function PositionsTable({ positions, claiming, claimError, onClaim }: PositionsTableProps) {
@@ -92,7 +82,7 @@ export function PositionsTable({ positions, claiming, claimError, onClaim }: Pos
                         {formatTokens(pos.balance)}
                       </TableCell>
                       <TableCell className="text-right text-gray-200">
-                        ${(navPerShare.toNumber() / 1_000_000).toFixed(6)}
+                        ${formatNav(navPerShare)}
                       </TableCell>
                       <TableCell className="text-right font-medium text-white">
                         {formatUsdc(value)}

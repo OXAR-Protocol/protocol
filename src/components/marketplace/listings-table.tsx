@@ -13,17 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatUsdc, formatTokens, shortenAddress } from "@/lib/format";
-import { VAULT_CONFIGS, VaultConfig } from "@/lib/constants";
-import { deriveVaultPda } from "@/lib/pda";
-
-function findVaultConfig(vaultPubkey: string): VaultConfig | undefined {
-  for (const config of VAULT_CONFIGS) {
-    const [pda] = deriveVaultPda(config.region, config.denomination, config.assetSubtype);
-    if (pda.toBase58() === vaultPubkey) return config;
-  }
-  return undefined;
-}
+import { formatUsdc, formatTokens, shortenAddress, findVaultConfig } from "@/lib/format";
 
 interface ListingsTableProps {
   listings: any[];

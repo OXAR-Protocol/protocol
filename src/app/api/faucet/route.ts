@@ -81,6 +81,8 @@ export async function POST(req: NextRequest) {
     const mintAmount = 10_000 * 1_000_000; // 10,000 USDC
     await mintTo(connection, admin, usdcMint, ata.address, admin.publicKey, mintAmount);
 
+    rateLimitMap.set(address, Date.now());
+
     return NextResponse.json({
       success: true,
       message: "10,000 test USDC sent!",

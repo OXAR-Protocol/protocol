@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
 import { Nav } from "@/components/nav";
 import { usePortfolio } from "@/hooks/use-portfolio";
@@ -85,7 +85,7 @@ export default function PortfolioPage() {
     }
   };
 
-  const handleClaim = async (vaultPubkey: any) => {
+  const handleClaim = async (vaultPubkey: PublicKey) => {
     const tx = await claim(vaultPubkey);
     if (tx) refetch();
   };
