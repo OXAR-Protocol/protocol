@@ -1,4 +1,4 @@
-import { ScrollReveal } from "./scroll-reveal";
+import { FadeIn } from "./fade-in";
 
 const steps = [
   {
@@ -44,7 +44,7 @@ export function HowItWorks() {
         02 &middot; How it works
         <span className="flex-1 h-px bg-oxar-gray" />
       </div>
-      <ScrollReveal>
+      <FadeIn>
         <h2
           className="font-display leading-none text-oxar-white mb-[60px] max-w-[600px]"
           style={{ fontSize: "clamp(40px, 5vw, 72px)" }}
@@ -53,8 +53,8 @@ export function HowItWorks() {
           <br />
           One yield-bearing token.
         </h2>
-      </ScrollReveal>
-      <ScrollReveal>
+      </FadeIn>
+      <FadeIn delay={0.15}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
           {steps.map((step, i) => (
             <div
@@ -78,7 +78,7 @@ export function HowItWorks() {
             </div>
           ))}
         </div>
-      </ScrollReveal>
+      </FadeIn>
     </section>
   );
 }

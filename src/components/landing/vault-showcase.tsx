@@ -1,4 +1,4 @@
-import { ScrollReveal } from "./scroll-reveal";
+import { FadeIn } from "./fade-in";
 import { YieldCalculator } from "./yield-calculator";
 
 const vaults = [
@@ -67,7 +67,7 @@ export function VaultShowcase() {
             03 &middot; Vaults
             <span className="flex-1 h-px bg-oxar-gray" />
           </div>
-          <ScrollReveal>
+          <FadeIn>
             <h2
               className="font-display leading-none text-oxar-white"
               style={{ fontSize: "clamp(40px, 5vw, 72px)" }}
@@ -76,22 +76,22 @@ export function VaultShowcase() {
               <br />
               One protocol.
             </h2>
-          </ScrollReveal>
+          </FadeIn>
         </div>
         <div className="font-mono text-[10px] text-oxar-light tracking-[0.1em] uppercase">
           Ukraine MVP &middot; More countries coming
         </div>
       </div>
-      <ScrollReveal>
+      <FadeIn>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0.5">
           {vaults.map((v, i) => (
             <VaultCard key={i} {...v} />
           ))}
         </div>
-      </ScrollReveal>
-      <ScrollReveal>
+      </FadeIn>
+      <FadeIn>
         <YieldCalculator />
-      </ScrollReveal>
+      </FadeIn>
     </section>
   );
 }

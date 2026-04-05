@@ -1,4 +1,4 @@
-import { ScrollReveal } from "./scroll-reveal";
+import { FadeIn } from "./fade-in";
 
 const phases = [
   {
@@ -58,15 +58,15 @@ export function Roadmap() {
         06 &middot; Roadmap
         <span className="flex-1 h-px bg-oxar-gray" />
       </div>
-      <ScrollReveal>
+      <FadeIn>
         <h2
           className="font-display leading-none text-oxar-white mb-[60px]"
           style={{ fontSize: "clamp(40px, 5vw, 72px)" }}
         >
           Where we&apos;re going.
         </h2>
-      </ScrollReveal>
-      <ScrollReveal>
+      </FadeIn>
+      <FadeIn>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0.5">
           {phases.map((p) => (
             <div
@@ -109,7 +109,7 @@ export function Roadmap() {
             </div>
           ))}
         </div>
-      </ScrollReveal>
+      </FadeIn>
     </section>
   );
 }

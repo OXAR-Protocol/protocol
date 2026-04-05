@@ -1,4 +1,4 @@
-import { ScrollReveal } from "./scroll-reveal";
+import { FadeIn } from "./fade-in";
 
 const trustItems = [
   { num: "01", text: "Bonds purchased through licensed Ukrainian broker" },
@@ -33,7 +33,7 @@ export function TrustAndAudience() {
       style={{ borderBottom: "1px solid #2a2a2a" }}
     >
       {/* Trust Left */}
-      <ScrollReveal>
+      <FadeIn>
         <div
           className="p-10 md:p-20"
           style={{ borderRight: "1px solid #2a2a2a" }}
@@ -73,10 +73,10 @@ export function TrustAndAudience() {
             ))}
           </div>
         </div>
-      </ScrollReveal>
+      </FadeIn>
 
       {/* Audience Right */}
-      <ScrollReveal>
+      <FadeIn>
         <div className="p-10 md:p-20">
           <div className="font-mono text-[9px] tracking-[0.2em] text-oxar-light uppercase flex items-center gap-3 mb-4">
             05 &middot; For whom
@@ -101,7 +101,7 @@ export function TrustAndAudience() {
             ))}
           </div>
         </div>
-      </ScrollReveal>
+      </FadeIn>
     </section>
   );
 }

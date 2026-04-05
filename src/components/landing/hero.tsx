@@ -1,6 +1,10 @@
-import Link from "next/link";
+"use client";
+
+import { useWarp } from "./warp-transition";
 
 export function Hero() {
+  const { startWarp } = useWarp();
+
   return (
     <section
       className="min-h-screen grid grid-rows-[1fr_auto] px-6 md:px-10 pt-[120px] pb-[60px] relative overflow-hidden"
@@ -58,12 +62,12 @@ export function Hero() {
             on-chain for the first time. No bank. No broker. Just yield.
           </p>
           <div className="flex gap-4 items-center flex-wrap">
-            <Link
-              href="/login"
-              className="font-mono text-[11px] tracking-[0.1em] uppercase px-8 py-3.5 bg-oxar-white text-oxar-black border-none cursor-pointer transition-all duration-200 hover:bg-oxar-accent no-underline"
+            <button
+              onClick={() => startWarp("/login")}
+              className="font-mono text-[11px] tracking-[0.1em] uppercase px-8 py-3.5 bg-oxar-white text-oxar-black border-none cursor-pointer transition-all duration-200 hover:bg-oxar-accent"
             >
               Start Earning &rarr;
-            </Link>
+            </button>
             <a
               href="#vaults"
               className="font-mono text-[11px] tracking-[0.1em] uppercase text-oxar-lighter cursor-pointer bg-transparent border-none transition-colors duration-200 hover:text-oxar-white no-underline"

@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import { useWarp } from "./warp-transition";
 
 const navLinks = [
   { href: "#problem", label: "Problem" },
@@ -8,6 +10,8 @@ const navLinks = [
 ];
 
 export function LandingNavbar() {
+  const { startWarp } = useWarp();
+
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 md:px-10 py-5"
@@ -32,12 +36,12 @@ export function LandingNavbar() {
           </li>
         ))}
       </ul>
-      <Link
-        href="/login"
-        className="font-mono text-[10px] tracking-[0.12em] uppercase px-5 py-2.5 border border-oxar-accent text-oxar-accent bg-transparent cursor-pointer transition-all duration-200 hover:bg-oxar-accent hover:text-oxar-black no-underline"
+      <button
+        onClick={() => startWarp("/login")}
+        className="font-mono text-[10px] tracking-[0.12em] uppercase px-5 py-2.5 border border-oxar-accent text-oxar-accent bg-transparent cursor-pointer transition-all duration-200 hover:bg-oxar-accent hover:text-oxar-black"
       >
         Launch App
-      </Link>
+      </button>
     </nav>
   );
 }

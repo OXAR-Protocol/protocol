@@ -1,4 +1,4 @@
-import { ScrollReveal } from "./scroll-reveal";
+import { FadeIn } from "./fade-in";
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -17,7 +17,7 @@ export function Problem() {
       style={{ borderBottom: "1px solid #2a2a2a" }}
     >
       {/* Left */}
-      <ScrollReveal>
+      <FadeIn>
         <div
           className="p-10 md:p-20 flex flex-col justify-between gap-10"
           style={{ borderRight: "1px solid #2a2a2a" }}
@@ -61,10 +61,10 @@ export function Problem() {
             </div>
           </div>
         </div>
-      </ScrollReveal>
+      </FadeIn>
 
       {/* Right */}
-      <ScrollReveal>
+      <FadeIn delay={0.15}>
         <div className="p-10 md:p-20 flex flex-col justify-between gap-10">
           <SectionLabel>Market size</SectionLabel>
           <div>
@@ -101,7 +101,7 @@ export function Problem() {
             </div>
           </div>
         </div>
-      </ScrollReveal>
+      </FadeIn>
     </section>
   );
 }
