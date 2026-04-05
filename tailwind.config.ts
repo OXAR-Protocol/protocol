@@ -9,6 +9,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)", "sans-serif"],
+        mono: ["var(--font-space-mono)", "monospace"],
+        display: ["var(--font-bebas-neue)", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -48,6 +53,17 @@ const config: Config = {
           50: "#E0FFF7",
           500: "#00D4AA",
           600: "#00B892",
+        },
+        oxar: {
+          black: "#080808",
+          dark: "#111111",
+          dark2: "#1a1a1a",
+          gray: "#2a2a2a",
+          mid: "#444444",
+          light: "#888888",
+          lighter: "#aaaaaa",
+          white: "#f0f0f0",
+          accent: "#c8ff00",
         },
       },
       borderRadius: {

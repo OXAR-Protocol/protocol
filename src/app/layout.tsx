@@ -1,13 +1,30 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Mono, Bebas_Neue } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  weight: ["300", "400", "500"],
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  variable: "--font-space-mono",
+  weight: ["400", "700"],
+});
+
+const bebasNeue = Bebas_Neue({
+  subsets: ["latin"],
+  variable: "--font-bebas-neue",
+  weight: "400",
+});
 
 export const metadata: Metadata = {
   title: "OXAR Protocol",
-  description: "RWA tokenization protocol on Solana - Government bonds, tokenized.",
+  description:
+    "RWA tokenization protocol on Solana - Government bonds, tokenized.",
 };
 
 export default function RootLayout({
@@ -16,10 +33,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", inter.variable)}>
-      <body className="min-h-screen antialiased">
-        {children}
-      </body>
+    <html
+      lang="en"
+      className={cn(
+        inter.variable,
+        spaceMono.variable,
+        bebasNeue.variable,
+        "font-sans"
+      )}
+    >
+      <body className="min-h-screen antialiased">{children}</body>
     </html>
   );
 }

@@ -1,99 +1,115 @@
-const MILESTONES = [
+import { ScrollReveal } from "./scroll-reveal";
+
+const phases = [
   {
-    status: "done" as const,
-    icon: "\u2705",
-    title: "MVP: Ukraine 6 vaults",
-    description: "Deposit, claim, marketplace. Privy onboarding. Devnet live.",
-    label: "CURRENT",
+    phase: "Now \u00B7 Q2 2025",
+    name: "Ukraine MVP",
+    active: true,
+    items: [
+      "6 active vaults",
+      "USDC deposits live",
+      "Marketplace v1",
+      "Proof of Reserve",
+    ],
   },
   {
-    status: "next" as const,
-    icon: "\u{1F51C}",
-    title: "Poland, Turkey expansion",
-    description: "Multi-country sovereign bonds. New vault types and currencies.",
-    label: "NEXT",
+    phase: "Q3 2025",
+    name: "Scale Up",
+    active: false,
+    items: [
+      "Poland bonds",
+      "Brazil expansion",
+      "Seed round close",
+      "Mobile app beta",
+    ],
   },
   {
-    status: "future" as const,
-    icon: "\u{1F4F1}",
-    title: "Mobile app",
-    description: "Native iOS and Android experience. Push notifications for yield.",
-    label: "",
+    phase: "Q4 2025",
+    name: "Institutional",
+    active: false,
+    items: [
+      "API for funds",
+      "Institutional KYC",
+      "5+ countries",
+      "$10M TVL target",
+    ],
   },
   {
-    status: "future" as const,
-    icon: "\u{1F3E2}",
-    title: "Institutional grade",
-    description: "Custody integration, compliance layer, API access for funds.",
-    label: "",
+    phase: "2026",
+    name: "Global Protocol",
+    active: false,
+    items: [
+      "20+ countries",
+      "Secondary market",
+      "Token launch",
+      "DAO governance",
+    ],
   },
 ];
 
-const BADGES = ["Waitlist open", "Seed round Q3"];
-
 export function Roadmap() {
   return (
-    <section id="roadmap" className="bg-gray-50 px-6 py-24 dark:bg-gray-950/50">
-      <div className="mx-auto max-w-5xl">
-        <p className="mb-3 text-center text-sm font-semibold uppercase tracking-widest text-teal-500">
-          Roadmap
-        </p>
-        <h2 className="mb-14 text-center text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-          Where we are and where we&rsquo;re going
+    <section
+      id="roadmap"
+      className="px-6 md:px-10 py-20"
+      style={{ borderBottom: "1px solid #2a2a2a" }}
+    >
+      <div className="font-mono text-[9px] tracking-[0.2em] text-oxar-light uppercase flex items-center gap-3 mb-4">
+        06 &middot; Roadmap
+        <span className="flex-1 h-px bg-oxar-gray" />
+      </div>
+      <ScrollReveal>
+        <h2
+          className="font-display leading-none text-oxar-white mb-[60px]"
+          style={{ fontSize: "clamp(40px, 5vw, 72px)" }}
+        >
+          Where we&apos;re going.
         </h2>
-
-        {/* Timeline */}
-        <div className="relative">
-          {/* Horizontal line */}
-          <div className="absolute left-0 right-0 top-8 hidden h-0.5 bg-gray-200 dark:bg-gray-800 sm:block" />
-          <div
-            className="absolute left-0 top-8 hidden h-0.5 bg-teal-500 sm:block"
-            style={{ width: "25%" }}
-          />
-
-          <div className="grid gap-8 sm:grid-cols-4">
-            {MILESTONES.map((m) => (
-              <div key={m.title} className="relative text-center">
-                {/* Dot */}
-                <div
-                  className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full text-2xl ${
-                    m.status === "done"
-                      ? "bg-teal-500/20 ring-2 ring-teal-500"
-                      : m.status === "next"
-                        ? "bg-teal-500/10 ring-2 ring-teal-500/40"
-                        : "bg-gray-100 ring-2 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700"
-                  }`}
-                >
-                  {m.icon}
-                </div>
-                {m.label && (
-                  <span className="mb-2 inline-block rounded-full bg-teal-500/10 px-2.5 py-0.5 text-xs font-semibold text-teal-600 dark:text-teal-400">
-                    {m.label}
-                  </span>
-                )}
-                <h3 className="mb-1 font-semibold text-gray-900 dark:text-white">
-                  {m.title}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {m.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Badges */}
-        <div className="mt-12 flex justify-center gap-3">
-          {BADGES.map((b) => (
-            <span
-              key={b}
-              className="rounded-full border border-teal-500/30 bg-teal-500/10 px-4 py-2 text-sm font-medium text-teal-600 dark:text-teal-400"
+      </ScrollReveal>
+      <ScrollReveal>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0.5">
+          {phases.map((p) => (
+            <div
+              key={p.name}
+              className={`p-8 px-6 ${
+                p.active
+                  ? "bg-[rgba(200,255,0,0.03)]"
+                  : "bg-oxar-dark"
+              }`}
+              style={{
+                border: p.active
+                  ? "1px solid rgba(200,255,0,0.4)"
+                  : "1px solid #2a2a2a",
+              }}
             >
-              {b}
-            </span>
+              <div className="font-mono text-[9px] tracking-[0.15em] text-oxar-light uppercase mb-4 flex items-center gap-2">
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    p.active
+                      ? "bg-oxar-accent shadow-[0_0_8px_#c8ff00]"
+                      : "bg-oxar-mid"
+                  }`}
+                />
+                {p.phase}
+              </div>
+              <div className="font-display text-[28px] leading-none text-oxar-white mb-4">
+                {p.name}
+              </div>
+              <ul className="list-none flex flex-col gap-2">
+                {p.items.map((item) => (
+                  <li
+                    key={item}
+                    className="text-xs text-oxar-light font-light flex items-center gap-2"
+                  >
+                    <span className="text-[10px] text-oxar-mid">&mdash;</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

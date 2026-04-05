@@ -1,67 +1,151 @@
-import { YieldCalculator } from "./yield-calculator";
+import { ScrollReveal } from "./scroll-reveal";
 
-const VAULTS = [
-  { name: "OVDP UAH Short", apy: 18, currency: "UAH", type: "3-6 months", isWar: false },
-  { name: "OVDP UAH Mid", apy: 17, currency: "UAH", type: "6-12 months", isWar: false },
-  { name: "OVDP USD", apy: 4, currency: "USD", type: "Stable", isWar: false },
-  { name: "OVDP EUR", apy: 3.5, currency: "EUR", type: "Stable", isWar: false },
-  { name: "War Bonds UAH", apy: 18, currency: "UAH", type: "Impact", isWar: true },
-  { name: "War Bonds USD", apy: 4, currency: "USD", type: "Impact", isWar: true },
+const vaults = [
+  {
+    flag: "UA \u00B7 \u0413\u0420\u0418\u0412\u041D\u042F \u00B7 SHORT",
+    apy: "18%",
+    name: "\u041E\u0412\u0414\u041F \u0413\u0440\u0438\u0432\u043D\u044F Short-Term",
+    curr: "UAH \u00B7 3\u20136 months",
+    impact: false,
+    accentApy: false,
+  },
+  {
+    flag: "UA \u00B7 \u0413\u0420\u0418\u0412\u041D\u042F \u00B7 MID",
+    apy: "16%",
+    name: "\u041E\u0412\u0414\u041F \u0413\u0440\u0438\u0432\u043D\u044F Mid-Term",
+    curr: "UAH \u00B7 6\u201312 months",
+    impact: false,
+    accentApy: false,
+  },
+  {
+    flag: "UA \u00B7 DOLLAR",
+    apy: "4%",
+    name: "\u041E\u0412\u0414\u041F USD-Denominated",
+    curr: "USD \u00B7 Stable",
+    impact: false,
+    accentApy: false,
+  },
+  {
+    flag: "UA \u00B7 EURO",
+    apy: "3.5%",
+    name: "\u041E\u0412\u0414\u041F EUR-Denominated",
+    curr: "EUR \u00B7 Stable",
+    impact: false,
+    accentApy: false,
+  },
+  {
+    flag: "WAR BONDS \u00B7 UAH",
+    apy: "18%",
+    name: "Military Bonds UAH",
+    curr: "UAH \u00B7 Diaspora",
+    impact: true,
+    accentApy: true,
+    apyLabel: "APY + support Ukraine",
+  },
+  {
+    flag: "WAR BONDS \u00B7 USD",
+    apy: "15%",
+    name: "Military Bonds USD",
+    curr: "USD \u00B7 Global",
+    impact: true,
+    accentApy: true,
+    apyLabel: "APY + support Ukraine",
+  },
 ];
 
 export function VaultShowcase() {
   return (
-    <section id="vaults" className="bg-gray-50 px-6 py-24 dark:bg-gray-950/50">
-      <div className="mx-auto max-w-6xl">
-        <p className="mb-3 text-center text-sm font-semibold uppercase tracking-widest text-teal-500">
-          Vaults
-        </p>
-        <h2 className="mb-4 text-center text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-          Choose your yield strategy
-        </h2>
-        <p className="mx-auto mb-14 max-w-xl text-center text-gray-500 dark:text-gray-400">
-          Six vault types backed by Ukrainian government bonds.
-        </p>
-
-        {/* Vault grid */}
-        <div className="mb-20 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {VAULTS.map((v) => (
-            <div
-              key={v.name}
-              className={`group relative rounded-2xl border-2 bg-white p-6 transition hover:shadow-lg dark:bg-gray-900 ${
-                v.isWar
-                  ? "border-amber-400/60 dark:border-amber-500/40"
-                  : "border-gray-200 dark:border-gray-800"
-              }`}
+    <section
+      id="vaults"
+      className="px-6 md:px-10 py-20"
+      style={{ borderBottom: "1px solid #2a2a2a" }}
+    >
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+        <div>
+          <div className="font-mono text-[9px] tracking-[0.2em] text-oxar-light uppercase flex items-center gap-3 mb-4">
+            03 &middot; Vaults
+            <span className="flex-1 h-px bg-oxar-gray" />
+          </div>
+          <ScrollReveal>
+            <h2
+              className="font-display leading-none text-oxar-white"
+              style={{ fontSize: "clamp(40px, 5vw, 72px)" }}
             >
-              {v.isWar && (
-                <span className="absolute -top-3 right-4 rounded-full bg-amber-400 px-3 py-0.5 text-xs font-bold text-gray-900">
-                  IMPACT
-                </span>
-              )}
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900 dark:text-white">{v.name}</h3>
-                <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                  {v.type}
-                </span>
-              </div>
-              <div className={`text-4xl font-extrabold ${v.isWar ? "text-amber-500" : "text-teal-500"}`}>
-                {v.apy}%
-              </div>
-              <div className="mt-1 text-sm text-gray-500">APY</div>
-              <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-800">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Currency</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{v.currency}</span>
-                </div>
-              </div>
-            </div>
+              6 Vaults.
+              <br />
+              One protocol.
+            </h2>
+          </ScrollReveal>
+        </div>
+        <div className="font-mono text-[10px] text-oxar-light tracking-[0.1em] uppercase">
+          Ukraine MVP &middot; More countries coming
+        </div>
+      </div>
+      <ScrollReveal>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0.5">
+          {vaults.map((v, i) => (
+            <VaultCard key={i} {...v} />
           ))}
         </div>
-
-        {/* Calculator */}
-        <YieldCalculator />
-      </div>
+      </ScrollReveal>
     </section>
+  );
+}
+
+function VaultCard({
+  flag,
+  apy,
+  name,
+  curr,
+  impact,
+  accentApy,
+  apyLabel,
+}: {
+  flag: string;
+  apy: string;
+  name: string;
+  curr: string;
+  impact: boolean;
+  accentApy: boolean;
+  apyLabel?: string;
+}) {
+  return (
+    <div
+      className={`bg-oxar-dark p-8 px-7 relative overflow-hidden transition-all duration-[250ms] cursor-pointer hover:-translate-y-0.5 ${
+        impact
+          ? "hover:bg-[rgba(200,255,0,0.03)]"
+          : "hover:bg-oxar-dark2 hover:border-oxar-mid"
+      }`}
+      style={{
+        border: impact
+          ? "1px solid rgba(200,255,0,0.2)"
+          : "1px solid #2a2a2a",
+      }}
+    >
+      {impact && (
+        <div className="absolute top-5 right-5 font-mono text-[8px] tracking-[0.12em] uppercase text-oxar-accent py-1 px-2 border border-[rgba(200,255,0,0.4)]">
+          IMPACT
+        </div>
+      )}
+      <div className="font-mono text-[9px] tracking-[0.15em] text-oxar-light uppercase mb-5 flex items-center gap-2">
+        <span className="w-1 h-1 rounded-full bg-oxar-accent shadow-[0_0_6px_#c8ff00]" />
+        {flag}
+      </div>
+      <div
+        className={`font-display text-[64px] leading-[0.9] mb-1 ${
+          accentApy ? "text-oxar-accent" : "text-oxar-white"
+        }`}
+      >
+        {apy}
+      </div>
+      <div className="font-mono text-[9px] text-oxar-light tracking-[0.15em] uppercase mb-5">
+        {apyLabel || "APY estimated"}
+      </div>
+      <div className="text-sm text-oxar-lighter font-light mb-2">{name}</div>
+      <div className="font-mono text-[10px] text-oxar-light tracking-[0.1em] py-1 px-2.5 border border-oxar-gray inline-block">
+        {curr}
+      </div>
+      <div className="absolute bottom-4 right-4 w-5 h-5 border-r border-b border-oxar-gray" />
+    </div>
   );
 }

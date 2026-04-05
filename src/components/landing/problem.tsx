@@ -1,64 +1,107 @@
-const CARDS = [
-  {
-    value: "$230B+",
-    label: "Stablecoins earning nothing",
-    description: "Sitting idle across DeFi wallets",
-    accent: "border-gray-200 dark:border-gray-800",
-  },
-  {
-    value: "4%",
-    label: "Ondo / US Treasuries",
-    description: "The best you can get today",
-    accent: "border-gray-200 dark:border-gray-800",
-  },
-  {
-    value: "16-28%",
-    label: "Emerging markets",
-    description: "Untapped on-chain",
-    accent: "border-teal-500/50",
-  },
-];
+import { ScrollReveal } from "./scroll-reveal";
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="font-mono text-[9px] tracking-[0.2em] text-oxar-light uppercase flex items-center gap-3 mb-4">
+      {children}
+      <span className="flex-1 h-px bg-oxar-gray" />
+    </div>
+  );
+}
 
 export function Problem() {
   return (
     <section
       id="problem"
-      className="bg-gray-50 px-6 py-24 dark:bg-gray-950/50"
+      className="grid grid-cols-1 lg:grid-cols-2"
+      style={{ borderBottom: "1px solid #2a2a2a" }}
     >
-      <div className="mx-auto max-w-6xl">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-teal-500">
-          The Problem
-        </p>
-        <h2 className="mb-12 text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-          $230B+ in stablecoins sitting idle
-        </h2>
-
-        <div className="grid gap-6 sm:grid-cols-3">
-          {CARDS.map((card) => (
-            <div
-              key={card.value}
-              className={`rounded-2xl border-2 bg-white p-8 text-center transition hover:shadow-lg dark:bg-gray-900 ${card.accent}`}
+      {/* Left */}
+      <ScrollReveal>
+        <div
+          className="p-10 md:p-20 flex flex-col justify-between gap-10"
+          style={{ borderRight: "1px solid #2a2a2a" }}
+        >
+          <div>
+            <SectionLabel>01 &middot; Problem</SectionLabel>
+            <h2
+              className="font-display leading-none text-oxar-white mb-5"
+              style={{ fontSize: "clamp(36px, 5vw, 60px)" }}
             >
-              <div className="mb-2 text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl">
-                {card.value}
-              </div>
-              <div className="mb-1 text-lg font-semibold text-gray-700 dark:text-gray-300">
-                {card.label}
-              </div>
-              <div className="text-sm text-gray-500 dark:text-gray-500">
-                {card.description}
-              </div>
+              The yield gap nobody solved
+            </h2>
+            <p className="text-sm text-oxar-lighter leading-[1.8] font-light max-w-[380px]">
+              $230B+ in stablecoins earn nothing. Ondo proved demand with $2.5B
+              TVL — but only offered 4% on US Treasuries. Emerging markets with
+              16&ndash;28% yields remain inaccessible on-chain.
+            </p>
+          </div>
+          <div>
+            <div className="p-5 px-6 border border-oxar-gray bg-oxar-dark flex flex-col sm:flex-row items-start sm:items-center justify-between mt-2 gap-2">
+              <span className="font-mono text-[10px] text-oxar-light tracking-[0.1em] uppercase">
+                Ondo Finance &middot; US Treasuries
+              </span>
+              <span className="font-mono text-[11px] text-oxar-lighter">
+                ~4% APY &middot; $2.5B TVL
+              </span>
             </div>
-          ))}
+            <div
+              className="p-5 px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between mt-2 gap-2"
+              style={{
+                border: "1px solid rgba(200,255,0,0.3)",
+                background: "rgba(200,255,0,0.04)",
+              }}
+            >
+              <span className="font-mono text-[10px] text-oxar-accent tracking-[0.1em] uppercase">
+                OXAR &middot; Emerging Markets
+              </span>
+              <span className="font-mono text-[11px] text-oxar-accent">
+                16&ndash;28% APY &middot; on-chain
+              </span>
+            </div>
+          </div>
         </div>
+      </ScrollReveal>
 
-        <p className="mt-10 text-center text-gray-500 dark:text-gray-400">
-          Ondo proved demand with $2.5B TVL. But{" "}
-          <span className="font-semibold text-teal-500">
-            emerging markets are missing.
-          </span>
-        </p>
-      </div>
+      {/* Right */}
+      <ScrollReveal>
+        <div className="p-10 md:p-20 flex flex-col justify-between gap-10">
+          <SectionLabel>Market size</SectionLabel>
+          <div>
+            <div
+              className="font-display leading-[0.9] text-oxar-white mb-2"
+              style={{ fontSize: "clamp(60px, 8vw, 100px)" }}
+            >
+              $230B+
+            </div>
+            <div className="text-[13px] text-oxar-light font-light leading-[1.5]">
+              stablecoins earning zero yield
+            </div>
+          </div>
+          <div>
+            <div
+              className="font-display leading-[0.9] text-oxar-accent mb-2"
+              style={{ fontSize: "clamp(40px, 5vw, 72px)" }}
+            >
+              &times;4&ndash;7
+            </div>
+            <div className="text-[13px] text-oxar-light font-light leading-[1.5]">
+              higher APY vs existing on-chain bond products
+            </div>
+          </div>
+          <div>
+            <div
+              className="font-display leading-[0.9] text-oxar-white mb-2"
+              style={{ fontSize: "clamp(40px, 5vw, 72px)" }}
+            >
+              $2.5B
+            </div>
+            <div className="text-[13px] text-oxar-light font-light leading-[1.5]">
+              Ondo TVL proves the demand is real
+            </div>
+          </div>
+        </div>
+      </ScrollReveal>
     </section>
   );
 }

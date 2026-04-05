@@ -1,61 +1,135 @@
 import Link from "next/link";
 
-const STATS = [
-  { value: "$230B+", label: "Idle stablecoins" },
-  { value: "18%", label: "Max APY" },
-  { value: "6", label: "Vault types" },
-];
-
 export function Hero() {
   return (
     <section
-      id="hero"
-      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center"
+      className="min-h-screen grid grid-rows-[1fr_auto] px-6 md:px-10 pt-[120px] pb-[60px] relative overflow-hidden"
+      style={{ borderBottom: "1px solid #2a2a2a" }}
     >
-      {/* Background mesh */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white dark:from-[#0a0e17] dark:to-gray-950" />
-        <div className="absolute left-1/2 top-1/3 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-500/20 blur-[120px]" />
-        <div className="absolute right-1/4 top-1/2 h-[400px] w-[400px] rounded-full bg-purple-500/15 blur-[100px]" />
-        <div className="absolute bottom-1/4 left-1/4 h-[300px] w-[300px] rounded-full bg-teal-400/10 blur-[80px]" />
-      </div>
+      {/* Background grid */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)",
+          backgroundSize: "80px 80px",
+        }}
+      />
+      {/* Background orb */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          top: "-200px",
+          right: "-200px",
+          width: "600px",
+          height: "600px",
+          background:
+            "radial-gradient(circle, rgba(200,255,0,0.04) 0%, transparent 70%)",
+        }}
+      />
 
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-6 inline-block rounded-full border border-teal-500/30 bg-teal-500/10 px-4 py-1.5 text-sm font-medium text-teal-600 dark:text-teal-400">
-          Government bonds, on-chain
+      {/* Main grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-[60px] items-end">
+        {/* Left */}
+        <div>
+          <div className="font-mono text-[10px] tracking-[0.15em] text-oxar-accent uppercase mb-6 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-oxar-accent rounded-full animate-pulse-dot" />
+            Live on Solana &middot; MVP Ukraine
+          </div>
+          <h1
+            className="font-display leading-[0.92] tracking-[0.02em] text-oxar-white mb-8"
+            style={{ fontSize: "clamp(72px, 10vw, 140px)" }}
+          >
+            EARN
+            <br />
+            <span
+              style={{
+                color: "transparent",
+                WebkitTextStroke: "1px rgba(255,255,255,0.3)",
+              }}
+            >
+              16&ndash;28%
+            </span>
+            <br />
+            APY
+          </h1>
+          <p className="text-[15px] leading-[1.7] text-oxar-lighter max-w-[400px] font-light mb-10">
+            Tokenized government bonds from emerging markets — accessible
+            on-chain for the first time. No bank. No broker. Just yield.
+          </p>
+          <div className="flex gap-4 items-center flex-wrap">
+            <Link
+              href="/login"
+              className="font-mono text-[11px] tracking-[0.1em] uppercase px-8 py-3.5 bg-oxar-white text-oxar-black border-none cursor-pointer transition-all duration-200 hover:bg-oxar-accent no-underline"
+            >
+              Start Earning &rarr;
+            </Link>
+            <a
+              href="#vaults"
+              className="font-mono text-[11px] tracking-[0.1em] uppercase text-oxar-lighter cursor-pointer bg-transparent border-none transition-colors duration-200 hover:text-oxar-white no-underline"
+            >
+              View Vaults &darr;
+            </a>
+          </div>
         </div>
 
-        <h1 className="mb-6 text-4xl font-extrabold leading-tight tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
-          Earn 16&ndash;28% APY on real{" "}
-          <span className="bg-gradient-to-r from-teal-500 to-teal-400 bg-clip-text text-transparent">
-            government bonds
-          </span>{" "}
-          &mdash; on-chain
-        </h1>
-
-        <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
-          USDC &rarr; yield token. Government-guaranteed. One click.
-        </p>
-
-        <Link
-          href="/login"
-          className="inline-block rounded-xl bg-teal-500 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-teal-500/25 transition hover:bg-teal-600 hover:shadow-teal-500/40"
-        >
-          Start Earning
-        </Link>
+        {/* Right - Stats */}
+        <div className="flex flex-col gap-0.5">
+          <div className="grid grid-cols-2 gap-0.5">
+            <StatBox value="$230B" accent label="stablecoins at 0%" />
+            <StatBox value={<>4&times;</>} label="vs US Treasuries" />
+          </div>
+          <div className="grid grid-cols-2 gap-0.5 mt-0.5">
+            <StatBox value="6" label="active vaults" />
+            <StatBox value="0%" label="tax on UA bonds" />
+          </div>
+        </div>
       </div>
 
-      {/* Stats row */}
-      <div className="absolute bottom-16 left-0 right-0 mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-8 sm:gap-16">
-        {STATS.map((s) => (
-          <div key={s.label} className="text-center">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
-              {s.value}
-            </div>
-            <div className="mt-1 text-sm text-gray-500">{s.label}</div>
+      {/* Bottom bar */}
+      <div
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-10 mt-[60px] gap-4"
+        style={{ borderTop: "1px solid #2a2a2a" }}
+      >
+        <div className="font-mono text-[9px] tracking-[0.15em] text-oxar-light uppercase flex items-center gap-3">
+          <div className="w-10 h-px bg-oxar-gray relative overflow-hidden">
+            <div
+              className="absolute top-0 bg-oxar-white w-full h-full animate-scan"
+              style={{ left: "-100%" }}
+            />
           </div>
-        ))}
+          Scroll to explore
+        </div>
+        <div className="font-mono text-[9px] text-oxar-light tracking-[0.1em] uppercase">
+          Solana &middot; Anchor &middot; Proof of Reserve
+        </div>
       </div>
     </section>
+  );
+}
+
+function StatBox({
+  value,
+  label,
+  accent,
+}: {
+  value: React.ReactNode;
+  label: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="bg-oxar-dark border border-oxar-gray p-7 px-6 relative transition-colors duration-200 hover:border-oxar-mid">
+      <div
+        className={`font-display text-[52px] leading-none mb-2 ${
+          accent ? "text-oxar-accent" : "text-oxar-white"
+        }`}
+      >
+        {value}
+      </div>
+      <div className="font-mono text-[9px] tracking-[0.12em] text-oxar-light uppercase">
+        {label}
+      </div>
+      <div className="absolute bottom-3 right-3 w-4 h-4 border-r border-b border-oxar-gray" />
+    </div>
   );
 }

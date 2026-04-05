@@ -1,29 +1,27 @@
 import { LandingNavbar } from "@/components/landing/navbar";
 import { Hero } from "@/components/landing/hero";
+import { Ticker } from "@/components/landing/ticker";
 import { Problem } from "@/components/landing/problem";
-import { Solution } from "@/components/landing/solution";
+import { HowItWorks } from "@/components/landing/how-it-works";
 import { VaultShowcase } from "@/components/landing/vault-showcase";
-import { TrustSection } from "@/components/landing/trust-section";
-import { ForWhom } from "@/components/landing/for-whom";
-import { TechSection } from "@/components/landing/tech-section";
+import { TrustAndAudience } from "@/components/landing/trust-and-audience";
 import { Roadmap } from "@/components/landing/roadmap";
-import { SocialProof } from "@/components/landing/social-proof";
-import { CTAFooter } from "@/components/landing/cta-footer";
+import { CTASection } from "@/components/landing/cta-section";
+import { Footer } from "@/components/landing/footer";
 
 export default function LandingPage() {
   return (
     <main>
       <LandingNavbar />
       <Hero />
+      <Ticker />
       <Problem />
-      <Solution />
+      <HowItWorks />
       <VaultShowcase />
-      <TrustSection />
-      <ForWhom />
-      <TechSection />
+      <TrustAndAudience />
       <Roadmap />
-      <SocialProof />
-      <CTAFooter />
+      <CTASection />
+      <Footer />
     </main>
   );
 }
