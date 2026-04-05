@@ -791,6 +791,10 @@
           "writable": true
         },
         {
+          "name": "treasury_usdc",
+          "writable": true
+        },
+        {
           "name": "buyer_vault_token",
           "writable": true
         },
@@ -820,6 +824,39 @@
               }
             ]
           }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_vault",
+      "discriminator": [
+        141,
+        103,
+        17,
+        126,
+        72,
+        75,
+        29,
+        29
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "usdc_pool",
+          "writable": true
         },
         {
           "name": "token_program",
@@ -912,6 +949,11 @@
       "code": 6010,
       "name": "InsufficientTokens",
       "msg": "Insufficient tokens for claim"
+    },
+    {
+      "code": 6011,
+      "name": "VaultNotEmpty",
+      "msg": "Vault still has outstanding shares, cannot close"
     }
   ],
   "types": [
@@ -946,6 +988,10 @@
           },
           {
             "name": "fee_bps",
+            "type": "u16"
+          },
+          {
+            "name": "series",
             "type": "u16"
           }
         ]
@@ -1026,6 +1072,10 @@
           },
           {
             "name": "fee_bps",
+            "type": "u16"
+          },
+          {
+            "name": "series",
             "type": "u16"
           },
           {
