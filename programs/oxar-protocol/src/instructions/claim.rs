@@ -127,10 +127,7 @@ pub fn handler(ctx: Context<Claim>) -> Result<()> {
         .total_shares
         .checked_sub(shares)
         .ok_or(OxarError::MathOverflow)?;
-    vault.total_deposits = vault
-        .total_deposits
-        .checked_sub(payout.min(vault.total_deposits))
-        .ok_or(OxarError::MathOverflow)?;
+    vault.total_deposits = vault.total_deposits.saturating_sub(payout);
 
     msg!(
         "Claimed {} shares for {} USDC by {}",

@@ -30,4 +30,6 @@ pub enum OxarError {
     VaultAlreadySetup,
     #[msg("USDC pool still has a non-zero balance, withdraw all funds before closing")]
     PoolNotEmpty,
+    #[msg("Unauthorized: only the protocol admin can perform this action")]
+    Unauthorized,
 }

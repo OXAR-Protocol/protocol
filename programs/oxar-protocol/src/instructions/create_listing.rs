@@ -69,6 +69,12 @@ pub fn handler(ctx: Context<CreateListing>, amount: u64, price_per_token: u64) -
         OxarError::InsufficientFunds
     );
 
+    // Prevent listings on matured vaults
+    let vault = &ctx.accounts.vault;
+    if vault.maturity_ts > 0 {
+        require!(clock.unix_timestamp < vault.maturity_ts, OxarError::AlreadyMatured);
+    }
+
     // Transfer tokens from seller to escrow
     let transfer_ctx = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),

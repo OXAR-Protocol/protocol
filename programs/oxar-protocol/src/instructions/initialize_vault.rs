@@ -21,7 +21,10 @@ pub struct InitializeVaultParams {
 #[derive(Accounts)]
 #[instruction(params: InitializeVaultParams)]
 pub struct InitializeVault<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = authority.key().to_string() == PROTOCOL_ADMIN @ OxarError::Unauthorized,
+    )]
     pub authority: Signer<'info>,
 
     #[account(
