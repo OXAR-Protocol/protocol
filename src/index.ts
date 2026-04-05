@@ -2,9 +2,15 @@
 export {
   PROGRAM_ID,
   RPC_URL,
+  DEFAULT_SERIES,
   VAULT_CONFIGS,
   getVaultConfigById,
   parseVaultId,
+  INITIAL_NAV,
+  BPS_DENOMINATOR,
+  USDC_DECIMALS,
+  NAV_PRECISION,
+  PROTOCOL_VERSION,
 } from "./constants";
 export type { VaultConfig } from "./constants";
 

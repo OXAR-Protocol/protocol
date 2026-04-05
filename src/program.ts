@@ -1,7 +1,6 @@
 import { Program, AnchorProvider, Wallet } from "@coral-xyz/anchor";
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import { Connection, Keypair } from "@solana/web3.js";
 import { OxarProtocol, IDL } from "./types";
-import { PROGRAM_ID } from "./constants";
 
 /**
  * Create a read-only dummy wallet for use when no wallet is provided.
@@ -11,6 +10,7 @@ function createReadOnlyWallet(): Wallet {
   const keypair = Keypair.generate();
   return {
     publicKey: keypair.publicKey,
+    // SAFETY: Read-only wallet stubs; signatures are never used
     signTransaction: async (tx: any) => tx,
     signAllTransactions: async (txs: any) => txs,
     payer: keypair,
@@ -33,5 +33,6 @@ export function createOxarProgram(
   const provider = new AnchorProvider(connection, w, {
     commitment: "confirmed",
   });
+  // SAFETY: IDL JSON import needs cast; type is validated by OxarProtocol definition
   return new Program<OxarProtocol>(IDL as any, provider);
 }

@@ -185,6 +185,7 @@ export type OxarProtocol = {
           { name: "maturityTs"; type: "i64" },
           { name: "isActive"; type: "bool" },
           { name: "feeBps"; type: "u16" },
+          { name: "series"; type: "u16" },
           { name: "bump"; type: "u8" },
         ];
       };
@@ -207,11 +208,6 @@ export type OxarProtocol = {
   ];
 };
 
-export const IDL: OxarProtocol = {
-  address: "8NsGNHMtfEiJzSczdmN2reo26h75C4axamuLXdk2tfrT",
-  metadata: {
-    name: "oxarProtocol",
-    version: "0.1.0",
-    spec: "0.1.0",
-  },
-} as OxarProtocol;
+import idlJson from "./idl.json";
+
+export const IDL = idlJson as unknown as OxarProtocol;

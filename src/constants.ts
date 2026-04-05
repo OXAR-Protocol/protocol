@@ -9,18 +9,18 @@ export const RPC_URL = "https://api.devnet.solana.com";
 export const DEFAULT_SERIES = 1;
 
 export interface VaultConfig {
-  id: string;
-  region: string;
-  denomination: string;
-  assetSubtype: string;
-  series: number;
-  apy: number;
-  label: string;
-  isWar: boolean;
-  hasFxRisk: boolean;
+  readonly id: string;
+  readonly region: string;
+  readonly denomination: string;
+  readonly assetSubtype: string;
+  readonly series: number;
+  readonly apy: number;
+  readonly label: string;
+  readonly isWar: boolean;
+  readonly hasFxRisk: boolean;
 }
 
-export const VAULT_CONFIGS: VaultConfig[] = [
+export const VAULT_CONFIGS: readonly VaultConfig[] = [
   {
     id: "UA-UAH-SHORT",
     region: "UA",
@@ -98,6 +98,13 @@ export function parseVaultId(id: string): {
   denomination: string;
   assetSubtype: string;
 } {
-  const [region, denomination, assetSubtype] = id.split("-");
-  return { region, denomination, assetSubtype };
+  const parts = id.split("-");
+  if (parts.length !== 3) throw new Error(`Invalid vault ID: ${id}`);
+  return { region: parts[0], denomination: parts[1], assetSubtype: parts[2] };
 }
+
+export const INITIAL_NAV = 1_000_000;
+export const BPS_DENOMINATOR = 10_000;
+export const USDC_DECIMALS = 6;
+export const NAV_PRECISION = 1_000_000;
+export const PROTOCOL_VERSION = 1;

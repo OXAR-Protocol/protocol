@@ -22,6 +22,7 @@ export async function buildDepositTransaction(
   vaultPda: PublicKey,
   amount: BN,
 ): Promise<Transaction> {
+  // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
   const vaultAccount = await (program.account as any).vault.fetch(vaultPda);
   const usdcMint = vaultAccount.usdcMint as PublicKey;
   const [vaultTokenMint] = deriveMintPda(vaultPda);
@@ -32,6 +33,7 @@ export async function buildDepositTransaction(
 
   const depositIx = await program.methods
     .deposit(amount)
+    // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
     .accounts({
       depositor,
       vault: vaultPda,
@@ -91,6 +93,7 @@ export async function buildCreateListingTransaction(
 
   const ix = await program.methods
     .createListing(amount, pricePerToken)
+    // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
     .accounts({
       seller,
       vault: vaultPda,
@@ -125,6 +128,7 @@ export async function buildBuyListingTransaction(
   vaultPda: PublicKey,
   sellerPubkey: PublicKey,
 ): Promise<Transaction> {
+  // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
   const vaultAccount = await (program.account as any).vault.fetch(vaultPda);
   const usdcMint = vaultAccount.usdcMint as PublicKey;
   const [vaultTokenMint] = deriveMintPda(vaultPda);
@@ -134,9 +138,11 @@ export async function buildBuyListingTransaction(
   const buyerUsdc = await getAssociatedTokenAddress(usdcMint, buyer);
   const sellerUsdc = await getAssociatedTokenAddress(usdcMint, sellerPubkey);
   const buyerVaultToken = await getAssociatedTokenAddress(vaultTokenMint, buyer);
+  const treasuryUsdc = await getAssociatedTokenAddress(usdcMint, vaultAccount.treasury as PublicKey);
 
   const ix = await program.methods
     .buyListing()
+    // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
     .accounts({
       buyer,
       seller: sellerPubkey,
@@ -145,6 +151,7 @@ export async function buildBuyListingTransaction(
       vaultTokenMint,
       buyerUsdc,
       sellerUsdc,
+      treasuryUsdc,
       buyerVaultToken,
       escrowTokenAccount,
       tokenProgram: TOKEN_PROGRAM_ID,
@@ -197,6 +204,7 @@ export async function buildCancelListingTransaction(
 
   const ix = await program.methods
     .cancelListing()
+    // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
     .accounts({
       seller,
       vault: vaultPda,
@@ -229,6 +237,7 @@ export async function buildClaimTransaction(
   claimer: PublicKey,
   vaultPda: PublicKey,
 ): Promise<Transaction> {
+  // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
   const vaultAccount = await (program.account as any).vault.fetch(vaultPda);
   const usdcMint = vaultAccount.usdcMint as PublicKey;
   const [vaultTokenMint] = deriveMintPda(vaultPda);
@@ -239,6 +248,7 @@ export async function buildClaimTransaction(
 
   const ix = await program.methods
     .claim()
+    // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
     .accounts({
       claimer,
       vault: vaultPda,
