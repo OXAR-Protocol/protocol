@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VAULT_CONFIGS = exports.DEFAULT_SERIES = exports.RPC_URL = exports.PROGRAM_ID = void 0;
+exports.PROTOCOL_VERSION = exports.NAV_PRECISION = exports.USDC_DECIMALS = exports.BPS_DENOMINATOR = exports.INITIAL_NAV = exports.VAULT_CONFIGS = exports.DEFAULT_SERIES = exports.RPC_URL = exports.PROGRAM_ID = void 0;
 exports.getVaultConfigById = getVaultConfigById;
 exports.parseVaultId = parseVaultId;
 const web3_js_1 = require("@solana/web3.js");
@@ -79,6 +79,13 @@ function getVaultConfigById(id) {
     return exports.VAULT_CONFIGS.find((v) => v.id === id);
 }
 function parseVaultId(id) {
-    const [region, denomination, assetSubtype] = id.split("-");
-    return { region, denomination, assetSubtype };
+    const parts = id.split("-");
+    if (parts.length !== 3)
+        throw new Error(`Invalid vault ID: ${id}`);
+    return { region: parts[0], denomination: parts[1], assetSubtype: parts[2] };
 }
+exports.INITIAL_NAV = 1000000;
+exports.BPS_DENOMINATOR = 10000;
+exports.USDC_DECIMALS = 6;
+exports.NAV_PRECISION = 1000000;
+exports.PROTOCOL_VERSION = 1;

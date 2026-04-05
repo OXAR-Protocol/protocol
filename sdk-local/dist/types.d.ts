@@ -548,6 +548,10 @@ export type OxarProtocol = {
                         type: "u16";
                     },
                     {
+                        name: "series";
+                        type: "u16";
+                    },
+                    {
                         name: "bump";
                         type: "u8";
                     }

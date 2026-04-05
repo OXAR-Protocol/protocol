@@ -12,6 +12,7 @@ function createReadOnlyWallet() {
     const keypair = web3_js_1.Keypair.generate();
     return {
         publicKey: keypair.publicKey,
+        // SAFETY: Read-only wallet stubs; signatures are never used
         signTransaction: async (tx) => tx,
         signAllTransactions: async (txs) => txs,
         payer: keypair,
@@ -30,5 +31,6 @@ function createOxarProgram(connection, wallet) {
     const provider = new anchor_1.AnchorProvider(connection, w, {
         commitment: "confirmed",
     });
+    // SAFETY: IDL JSON import needs cast; type is validated by OxarProtocol definition
     return new anchor_1.Program(types_1.IDL, provider);
 }

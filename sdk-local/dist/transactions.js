@@ -15,6 +15,7 @@ const pda_1 = require("./pda");
  * not already exist, and assembles the transaction with a recent blockhash.
  */
 async function buildDepositTransaction(program, connection, depositor, vaultPda, amount) {
+    // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
     const vaultAccount = await program.account.vault.fetch(vaultPda);
     const usdcMint = vaultAccount.usdcMint;
     const [vaultTokenMint] = (0, pda_1.deriveMintPda)(vaultPda);
@@ -23,6 +24,7 @@ async function buildDepositTransaction(program, connection, depositor, vaultPda,
     const depositorVaultToken = await (0, spl_token_1.getAssociatedTokenAddress)(vaultTokenMint, depositor);
     const depositIx = await program.methods
         .deposit(amount)
+        // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
         .accounts({
         depositor,
         vault: vaultPda,
@@ -58,6 +60,7 @@ async function buildCreateListingTransaction(program, connection, seller, vaultP
     const sellerVaultToken = await (0, spl_token_1.getAssociatedTokenAddress)(vaultTokenMint, seller);
     const ix = await program.methods
         .createListing(amount, pricePerToken)
+        // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
         .accounts({
         seller,
         vault: vaultPda,
@@ -82,6 +85,7 @@ async function buildCreateListingTransaction(program, connection, seller, vaultP
  * buyer's vault-token ATA if needed, and assembles the instruction.
  */
 async function buildBuyListingTransaction(program, connection, buyer, vaultPda, sellerPubkey) {
+    // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
     const vaultAccount = await program.account.vault.fetch(vaultPda);
     const usdcMint = vaultAccount.usdcMint;
     const [vaultTokenMint] = (0, pda_1.deriveMintPda)(vaultPda);
@@ -90,8 +94,10 @@ async function buildBuyListingTransaction(program, connection, buyer, vaultPda, 
     const buyerUsdc = await (0, spl_token_1.getAssociatedTokenAddress)(usdcMint, buyer);
     const sellerUsdc = await (0, spl_token_1.getAssociatedTokenAddress)(usdcMint, sellerPubkey);
     const buyerVaultToken = await (0, spl_token_1.getAssociatedTokenAddress)(vaultTokenMint, buyer);
+    const treasuryUsdc = await (0, spl_token_1.getAssociatedTokenAddress)(usdcMint, vaultAccount.treasury);
     const ix = await program.methods
         .buyListing()
+        // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
         .accounts({
         buyer,
         seller: sellerPubkey,
@@ -100,6 +106,7 @@ async function buildBuyListingTransaction(program, connection, buyer, vaultPda, 
         vaultTokenMint,
         buyerUsdc,
         sellerUsdc,
+        treasuryUsdc,
         buyerVaultToken,
         escrowTokenAccount,
         tokenProgram: spl_token_1.TOKEN_PROGRAM_ID,
@@ -130,6 +137,7 @@ async function buildCancelListingTransaction(program, connection, seller, vaultP
     const sellerVaultToken = await (0, spl_token_1.getAssociatedTokenAddress)(vaultTokenMint, seller);
     const ix = await program.methods
         .cancelListing()
+        // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
         .accounts({
         seller,
         vault: vaultPda,
@@ -153,6 +161,7 @@ async function buildCancelListingTransaction(program, connection, seller, vaultP
  * looks up the claimer's token ATAs, and assembles the instruction.
  */
 async function buildClaimTransaction(program, connection, claimer, vaultPda) {
+    // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
     const vaultAccount = await program.account.vault.fetch(vaultPda);
     const usdcMint = vaultAccount.usdcMint;
     const [vaultTokenMint] = (0, pda_1.deriveMintPda)(vaultPda);
@@ -161,6 +170,7 @@ async function buildClaimTransaction(program, connection, claimer, vaultPda) {
     const claimerUsdc = await (0, spl_token_1.getAssociatedTokenAddress)(usdcMint, claimer);
     const ix = await program.methods
         .claim()
+        // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
         .accounts({
         claimer,
         vault: vaultPda,

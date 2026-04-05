@@ -1,13 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildClaimTransaction = exports.buildCancelListingTransaction = exports.buildBuyListingTransaction = exports.buildCreateListingTransaction = exports.buildDepositTransaction = exports.createOxarProgram = exports.deriveEscrowPda = exports.deriveListingPda = exports.derivePoolPda = exports.deriveMintPda = exports.deriveVaultPda = exports.IDL = exports.parseVaultId = exports.getVaultConfigById = exports.VAULT_CONFIGS = exports.RPC_URL = exports.PROGRAM_ID = void 0;
+exports.buildClaimTransaction = exports.buildCancelListingTransaction = exports.buildBuyListingTransaction = exports.buildCreateListingTransaction = exports.buildDepositTransaction = exports.createOxarProgram = exports.deriveEscrowPda = exports.deriveListingPda = exports.derivePoolPda = exports.deriveMintPda = exports.deriveVaultPda = exports.IDL = exports.PROTOCOL_VERSION = exports.NAV_PRECISION = exports.USDC_DECIMALS = exports.BPS_DENOMINATOR = exports.INITIAL_NAV = exports.parseVaultId = exports.getVaultConfigById = exports.VAULT_CONFIGS = exports.DEFAULT_SERIES = exports.RPC_URL = exports.PROGRAM_ID = void 0;
 // Constants
 var constants_1 = require("./constants");
 Object.defineProperty(exports, "PROGRAM_ID", { enumerable: true, get: function () { return constants_1.PROGRAM_ID; } });
 Object.defineProperty(exports, "RPC_URL", { enumerable: true, get: function () { return constants_1.RPC_URL; } });
+Object.defineProperty(exports, "DEFAULT_SERIES", { enumerable: true, get: function () { return constants_1.DEFAULT_SERIES; } });
 Object.defineProperty(exports, "VAULT_CONFIGS", { enumerable: true, get: function () { return constants_1.VAULT_CONFIGS; } });
 Object.defineProperty(exports, "getVaultConfigById", { enumerable: true, get: function () { return constants_1.getVaultConfigById; } });
 Object.defineProperty(exports, "parseVaultId", { enumerable: true, get: function () { return constants_1.parseVaultId; } });
+Object.defineProperty(exports, "INITIAL_NAV", { enumerable: true, get: function () { return constants_1.INITIAL_NAV; } });
+Object.defineProperty(exports, "BPS_DENOMINATOR", { enumerable: true, get: function () { return constants_1.BPS_DENOMINATOR; } });
+Object.defineProperty(exports, "USDC_DECIMALS", { enumerable: true, get: function () { return constants_1.USDC_DECIMALS; } });
+Object.defineProperty(exports, "NAV_PRECISION", { enumerable: true, get: function () { return constants_1.NAV_PRECISION; } });
+Object.defineProperty(exports, "PROTOCOL_VERSION", { enumerable: true, get: function () { return constants_1.PROTOCOL_VERSION; } });
 // Types & IDL
 var types_1 = require("./types");
 Object.defineProperty(exports, "IDL", { enumerable: true, get: function () { return types_1.IDL; } });
