@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { RPC_URL } from "@/lib/constants";
 
-const RPC_URL = "https://devnet.helius-rpc.com/?api-key=0803f982-c361-4a2a-8496-1391a4b38672";
 const ADMIN_KEYPAIR_B64 = (process.env.ADMIN_KEYPAIR_B64 || "").trim();
+
+// Rate limiting: 1 request per address per 5 minutes
+const rateLimitMap = new Map<string, number>();
+const RATE_LIMIT_MS = 5 * 60 * 1000;
 
 function getAdminKeypair(): Keypair {
   const decoded = JSON.parse(Buffer.from(ADMIN_KEYPAIR_B64, "base64").toString());
@@ -21,6 +25,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Not configured" }, { status: 500 });
     }
 
+    // Rate limit check
+    const now = Date.now();
+    const lastRequest = rateLimitMap.get(address);
+    if (lastRequest && now - lastRequest < RATE_LIMIT_MS) {
+      const waitSec = Math.ceil((RATE_LIMIT_MS - (now - lastRequest)) / 1000);
+      return NextResponse.json(
+        { error: `Rate limited. Try again in ${waitSec}s` },
+        { status: 429 }
+      );
+    }
+
     const connection = new Connection(RPC_URL, "confirmed");
     const admin = getAdminKeypair();
     const recipient = new PublicKey(address);
@@ -34,6 +49,9 @@ export async function POST(req: NextRequest) {
     );
 
     await sendAndConfirmTransaction(connection, tx, [admin]);
+
+    // Update rate limit after successful transfer
+    rateLimitMap.set(address, Date.now());
 
     return NextResponse.json({
       success: true,

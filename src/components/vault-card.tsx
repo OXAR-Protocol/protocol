@@ -1,49 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { BN } from "@coral-xyz/anchor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { VaultConfig } from "@/lib/constants";
+import { formatUsdc, formatNav, formatApy, getMaturityCountdown } from "@/lib/format";
 import { VaultAccount } from "@/hooks/use-vaults";
-
-function formatUsdc(amount: BN): string {
-  const val = amount.toNumber() / 1_000_000;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format(val);
-}
-
-function formatNav(navPerShare: BN): string {
-  const val = navPerShare.toNumber() / 1_000_000;
-  return `$${val.toFixed(6)}`;
-}
-
-function formatApy(apyBps: BN): string {
-  const val = apyBps.toNumber() / 100;
-  return `${val.toFixed(1)}%`;
-}
-
-function getMaturityCountdown(maturityTs: BN): string {
-  const now = Date.now() / 1000;
-  const maturity = maturityTs.toNumber();
-  const diff = maturity - now;
-
-  if (diff <= 0) return "Matured";
-
-  const days = Math.floor(diff / 86400);
-  if (days > 365) {
-    const years = Math.floor(days / 365);
-    const remainDays = days % 365;
-    return `${years}y ${remainDays}d`;
-  }
-  if (days > 0) return `${days}d`;
-
-  const hours = Math.floor(diff / 3600);
-  return `${hours}h`;
-}
 
 interface VaultCardProps {
   config: VaultConfig;
@@ -61,7 +23,7 @@ export function VaultCard({ config, vaultData }: VaultCardProps) {
     ? formatUsdc(vaultData.account.totalDeposits)
     : "$0.00";
   const maturity = vaultData
-    ? getMaturityCountdown(vaultData.account.maturityTs)
+    ? getMaturityCountdown(vaultData.account.maturityTs).text
     : "N/A";
   const isActive = vaultData ? vaultData.account.isActive : false;
 

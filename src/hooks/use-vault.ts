@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
-import { BN } from "@coral-xyz/anchor";
 import { useOxarProgram } from "./use-oxar-program";
 import { deriveVaultPda } from "@/lib/pda";
 import { VaultAccount } from "./use-vaults";
@@ -27,7 +26,6 @@ export function useVault(region: string, denomination: string, assetSubtype: str
 
     if (!program) {
       setVault(null);
-      setError("Wallet not connected");
       setLoading(false);
       return;
     }

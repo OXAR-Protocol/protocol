@@ -139,14 +139,12 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
       // Auto-create Solana wallet if user doesn't have one yet
       if (!creatingWallet) {
         setCreatingWallet(true);
-        console.log("No Solana wallet found, creating one...");
         createSolanaWallet()
           .then(() => {
-            console.log("Solana wallet created! Refresh to use.");
             setCreatingWallet(false);
           })
           .catch((err: any) => {
-            console.log("Solana wallet creation error:", err.message);
+            console.error("Solana wallet creation error:", err.message);
             setCreatingWallet(false);
           });
       }
@@ -166,10 +164,8 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
 
     let walletAdapter: any;
     if (connectedSolana) {
-      console.log("Privy Solana wallet ready for signing:", pubkey.toBase58());
       walletAdapter = new PrivySolanaAdapter(pubkey, connectedSolana, connection);
     } else {
-      console.log("Solana wallet found, waiting for connector:", pubkey.toBase58());
       walletAdapter = new ReadOnlyWallet(pubkey);
     }
 

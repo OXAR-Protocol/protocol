@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import {
-  createMint,
   getOrCreateAssociatedTokenAccount,
   mintTo,
-  getMint,
 } from "@solana/spl-token";
 
-const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://devnet.helius-rpc.com/?api-key=0803f982-c361-4a2a-8496-1391a4b38672";
-const USDC_MINT = (process.env.USDC_MINT || "HucyHTk4qVJ7JhwsiNNCz9FNGNeDDN38y5KaKjeBYgNR").trim();
+import { RPC_URL, CURRENT_USDC_MINT } from "@/lib/constants";
+
+const USDC_MINT = (process.env.USDC_MINT || CURRENT_USDC_MINT).trim();
 const ADMIN_KEYPAIR_B64 = (process.env.ADMIN_KEYPAIR_B64 || "").trim();
 
 // Rate limiting: 1 request per address per 5 minutes
@@ -89,14 +88,14 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     console.error("Faucet error:", err);
-    const debugInfo = {
+    console.error("Faucet debug info:", {
       hasKeypair: !!ADMIN_KEYPAIR_B64,
       keypairLen: ADMIN_KEYPAIR_B64.length,
       usdcMint: USDC_MINT,
       rpcUrl: RPC_URL.substring(0, 40),
-    };
+    });
     return NextResponse.json(
-      { error: err.message || "Faucet failed", debug: debugInfo },
+      { error: err.message || "Faucet failed" },
       { status: 500 }
     );
   }

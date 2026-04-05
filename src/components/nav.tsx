@@ -15,14 +15,8 @@ const NAV_LINKS = [
 
 export function Nav() {
   const pathname = usePathname();
-  const { logout, authenticated, user } = usePrivy();
+  const { logout, authenticated } = usePrivy();
   const { walletAddress } = useOxarProgram();
-
-  // Debug: log Privy user wallets
-  if (typeof window !== "undefined" && authenticated && user) {
-    console.log("Privy linked accounts:", JSON.stringify(user.linkedAccounts.map((a: any) => ({ type: a.type, address: a.address, chainType: a.chainType, walletClientType: a.walletClientType }))));
-    console.log("OXAR walletAddress:", walletAddress?.toBase58());
-  }
 
   const shortAddress = walletAddress
     ? `${walletAddress.toBase58().slice(0, 4)}...${walletAddress.toBase58().slice(-4)}`

@@ -6,6 +6,7 @@ import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { BN } from "@coral-xyz/anchor";
 import { useOxarProgram } from "./use-oxar-program";
 import { useVaults, VaultAccount } from "./use-vaults";
+import { CURRENT_USDC_MINT } from "@/lib/constants";
 
 export interface TokenBalance {
   mint: PublicKey;
@@ -26,6 +27,7 @@ export function usePortfolio() {
   const [positions, setPositions] = useState<PortfolioPosition[]>([]);
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchPortfolio = useCallback(async () => {
     if (!walletAddress) {
@@ -69,14 +71,13 @@ export function usePortfolio() {
       }
       setPositions(matchedPositions);
 
-      // Find USDC balance — use hardcoded current USDC mint
-      const CURRENT_USDC_MINT = "HucyHTk4qVJ7JhwsiNNCz9FNGNeDDN38y5KaKjeBYgNR";
       const usdcBal = balances.find(
         (b) => b.mint.toBase58() === CURRENT_USDC_MINT
       );
       setUsdcBalance(usdcBal?.balance || new BN(0));
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to fetch portfolio:", err);
+      setError(err.message || "Failed to fetch portfolio");
     } finally {
       setLoading(false);
     }
@@ -86,5 +87,5 @@ export function usePortfolio() {
     fetchPortfolio();
   }, [fetchPortfolio]);
 
-  return { usdcBalance, positions, tokenBalances, loading, refetch: fetchPortfolio };
+  return { usdcBalance, positions, tokenBalances, loading, error, refetch: fetchPortfolio };
 }

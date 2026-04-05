@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { PublicKey, Transaction, SYSVAR_RENT_PUBKEY, SystemProgram } from "@solana/web3.js";
+import { PublicKey, Transaction, SystemProgram } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
 import {
   TOKEN_PROGRAM_ID,

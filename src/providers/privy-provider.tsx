@@ -4,9 +4,9 @@ import { PrivyProvider as PrivyProviderBase } from "@privy-io/react-auth";
 import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { ReactNode } from "react";
+import { RPC_URL } from "@/lib/constants";
 
-const HELIUS_RPC = "https://devnet.helius-rpc.com/?api-key=0803f982-c361-4a2a-8496-1391a4b38672";
-const HELIUS_WSS = "wss://devnet.helius-rpc.com/?api-key=0803f982-c361-4a2a-8496-1391a4b38672";
+const HELIUS_WSS = RPC_URL.replace("https://", "wss://");
 
 const solanaConnectors = toSolanaWalletConnectors({
   shouldAutoConnect: true,
@@ -14,15 +14,15 @@ const solanaConnectors = toSolanaWalletConnectors({
 
 const solanaRpcs = {
   "solana:mainnet": {
-    rpc: createSolanaRpc(HELIUS_RPC),
+    rpc: createSolanaRpc(RPC_URL),
     rpcSubscriptions: createSolanaRpcSubscriptions(HELIUS_WSS),
   },
   "solana:devnet": {
-    rpc: createSolanaRpc(HELIUS_RPC),
+    rpc: createSolanaRpc(RPC_URL),
     rpcSubscriptions: createSolanaRpcSubscriptions(HELIUS_WSS),
   },
   "solana:testnet": {
-    rpc: createSolanaRpc(HELIUS_RPC),
+    rpc: createSolanaRpc(RPC_URL),
     rpcSubscriptions: createSolanaRpcSubscriptions(HELIUS_WSS),
   },
 };
