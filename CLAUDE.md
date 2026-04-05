@@ -111,7 +111,7 @@ Do NOT use `program.methods.*.rpc()` -- it does not work with Privy's embedded w
 Privy is configured in `providers/privy-provider.tsx`:
 - `createOnLogin: "all-users"` -- every user gets an embedded Solana wallet
 - `walletChainType: "solana-only"` -- no EVM
-- `theme: "dark"` with accent `#00D4AA`
+- Privy theme configured in `privy-provider.tsx`
 - External wallet connectors enabled (Phantom, etc.)
 - RPC: Helius devnet endpoint
 
@@ -120,8 +120,7 @@ The `use-oxar-program.ts` hook bridges Privy wallet to an Anchor `Program` insta
 ### Styling
 - **Tailwind CSS** for all styling. No CSS modules, no styled-components.
 - **shadcn/ui** for base components (`Button`, `Card`, `Input`, etc.). They live in `components/ui/`.
-- **Dark theme** is the only theme. All components assume dark background.
-- **Accent color**: `#00D4AA` (teal). Use for primary actions, links, highlights.
+- Design system (colors, theme, typography) is TBD — will be defined by design phase.
 - Use `class-variance-authority` (cva) for component variants.
 - Use `clsx` + `tailwind-merge` (via `cn()` utility) for conditional classes.
 
