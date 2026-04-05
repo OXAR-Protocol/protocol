@@ -1,4 +1,5 @@
 import { ScrollReveal } from "./scroll-reveal";
+import { YieldCalculator } from "./yield-calculator";
 
 const vaults = [
   {
@@ -87,6 +88,9 @@ export function VaultShowcase() {
             <VaultCard key={i} {...v} />
           ))}
         </div>
+      </ScrollReveal>
+      <ScrollReveal>
+        <YieldCalculator />
       </ScrollReveal>
     </section>
   );
