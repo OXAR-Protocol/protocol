@@ -267,6 +267,14 @@ html {
   background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.06) 20%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.06) 80%, transparent 100%) !important;
 }
 
+/* Vault chart — bank label/line for light theme */
+[data-theme="light"] .vault-bank-label {
+  fill: rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="light"] .vault-bank-line {
+  stroke: rgba(0, 0, 0, 0.12) !important;
+}
+
 /* How It Works — arc line for light theme */
 [data-theme="light"] .arc-line {
   stroke: rgba(0, 0, 0, 0.08) !important;

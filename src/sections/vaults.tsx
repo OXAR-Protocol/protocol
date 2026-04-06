@@ -84,6 +84,7 @@ function ComparisonChart({
 
       {/* Bank line — grey, dashed */}
       <polyline
+        className="vault-bank-line"
         points={toPoints(bankData)}
         fill="none"
         stroke="rgba(255,255,255,0.15)"
@@ -117,6 +118,7 @@ function ComparisonChart({
       <text
         x={w + 6}
         y={bankEndY + 4}
+        className="vault-bank-label"
         fill="rgba(255,255,255,0.25)"
         fontSize="9"
         fontFamily="monospace"
