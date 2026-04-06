@@ -30,49 +30,69 @@ const AUDIENCES = [
 
 function PlasmaBeamH({ color }: { color: string }) {
   return (
-    <div className="hidden md:flex items-center flex-1 min-w-[16px] relative">
-      {/* Wide ambient glow */}
+    <div className="hidden md:flex items-center flex-1 min-w-[16px] relative h-[140px]">
+      {/* Hourglass shape — wide at edges (cards), narrow center */}
+      <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id={`bg-${color.replace(/,/g, "")}`} x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stopColor={`rgba(${color},0.25)`} />
+            <stop offset="50%" stopColor={`rgba(${color},0.06)`} />
+            <stop offset="100%" stopColor={`rgba(${color},0.25)`} />
+          </linearGradient>
+          <filter id={`blur-${color.replace(/,/g, "")}`}>
+            <feGaussianBlur stdDeviation="2" />
+          </filter>
+        </defs>
+        {/* Main plasma shape */}
+        <path
+          d="M0,10 C25,10 35,40 50,42 C65,40 75,10 100,10 L100,90 C75,90 65,60 50,58 C35,60 25,90 0,90 Z"
+          fill={`url(#bg-${color.replace(/,/g, "")})`}
+          filter={`url(#blur-${color.replace(/,/g, "")})`}
+          style={{ animation: "beamPulse 3s ease-in-out infinite" }}
+        />
+        {/* Brighter inner shape */}
+        <path
+          d="M0,25 C25,25 38,44 50,45 C62,44 75,25 100,25 L100,75 C75,75 62,56 50,55 C38,56 25,75 0,75 Z"
+          fill={`rgba(${color},0.15)`}
+          filter={`url(#blur-${color.replace(/,/g, "")})`}
+          style={{ animation: "beamPulse 2.5s ease-in-out infinite 0.5s" }}
+        />
+      </svg>
+
+      {/* Core line — also curves slightly with gradient thickness */}
       <div
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[60px]"
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[3px] rounded-full"
         style={{
-          background: `rgba(${color},0.07)`,
-          filter: "blur(25px)",
-          animation: "beamPulse 4s ease-in-out infinite",
-        }}
-      />
-      {/* Medium glow */}
-      <div
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[20px]"
-        style={{
-          background: `rgba(${color},0.2)`,
-          filter: "blur(10px)",
-          animation: "beamPulse 2.5s ease-in-out infinite 0.5s",
-        }}
-      />
-      {/* Colored core */}
-      <div
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[4px] rounded-full"
-        style={{
-          background: `linear-gradient(90deg, rgba(${color},0.6), rgba(${color},0.9), rgba(${color},0.6))`,
+          background: `linear-gradient(90deg, rgba(${color},0.8), rgba(${color},0.4) 50%, rgba(${color},0.8))`,
           filter: "blur(1px)",
         }}
       />
-      {/* White-hot center */}
+      {/* White center */}
       <div
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1.5px]"
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1px]"
         style={{
-          background: `linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.7) 50%, transparent 95%)`,
+          background: `linear-gradient(90deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.5))`,
           animation: "beamPulse 2.5s ease-in-out infinite 0.3s",
         }}
       />
+
       {/* Flowing particles */}
       <div
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[12px]"
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[16px]"
         style={{
-          background: `linear-gradient(90deg, transparent, rgba(${color},0.6) 15%, transparent 30%, transparent 55%, rgba(${color},0.5) 70%, transparent 85%)`,
+          background: `linear-gradient(90deg, transparent, rgba(${color},0.5) 15%, transparent 30%, transparent 55%, rgba(${color},0.4) 70%, transparent 85%)`,
           backgroundSize: "200% 100%",
-          filter: "blur(3px)",
+          filter: "blur(4px)",
           animation: "beamFlow 2.5s linear infinite",
+        }}
+      />
+      <div
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[10px]"
+        style={{
+          background: `linear-gradient(90deg, transparent 10%, rgba(255,255,255,0.15) 25%, transparent 40%, rgba(255,255,255,0.1) 60%, transparent 75%)`,
+          backgroundSize: "300% 100%",
+          filter: "blur(3px)",
+          animation: "beamFlow 4s linear infinite 1s",
         }}
       />
     </div>
@@ -81,43 +101,44 @@ function PlasmaBeamH({ color }: { color: string }) {
 
 function PlasmaBeamV({ color }: { color: string }) {
   return (
-    <div className="md:hidden flex justify-center relative h-12">
-      {/* Wide glow */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[60px] h-full"
-        style={{
-          background: `rgba(${color},0.08)`,
-          filter: "blur(20px)",
-          animation: "beamPulse 4s ease-in-out infinite",
-        }}
-      />
-      {/* Medium glow */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[20px] h-full"
-        style={{
-          background: `rgba(${color},0.2)`,
-          filter: "blur(8px)",
-          animation: "beamPulse 2.5s ease-in-out infinite 0.5s",
-        }}
-      />
+    <div className="md:hidden relative h-14 flex justify-center">
+      {/* Hourglass vertical */}
+      <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id={`vbg-${color.replace(/,/g, "")}`} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor={`rgba(${color},0.25)`} />
+            <stop offset="50%" stopColor={`rgba(${color},0.06)`} />
+            <stop offset="100%" stopColor={`rgba(${color},0.25)`} />
+          </linearGradient>
+          <filter id={`vblur-${color.replace(/,/g, "")}`}>
+            <feGaussianBlur stdDeviation="2" />
+          </filter>
+        </defs>
+        <path
+          d="M10,0 C10,25 40,35 42,50 C40,65 10,75 10,100 L90,100 C90,75 60,65 58,50 C60,35 90,25 90,0 Z"
+          fill={`url(#vbg-${color.replace(/,/g, "")})`}
+          filter={`url(#vblur-${color.replace(/,/g, "")})`}
+          style={{ animation: "beamPulse 3s ease-in-out infinite" }}
+        />
+      </svg>
       {/* Core */}
       <div
-        className="w-[4px] h-full rounded-full relative"
+        className="w-[3px] h-full rounded-full relative z-[1]"
         style={{
-          background: `linear-gradient(180deg, rgba(${color},0.6), rgba(${color},0.9), rgba(${color},0.6))`,
+          background: `linear-gradient(180deg, rgba(${color},0.8), rgba(${color},0.4) 50%, rgba(${color},0.8))`,
           filter: "blur(1px)",
         }}
       >
         <div
-          className="absolute left-1/2 -translate-x-1/2 w-[1.5px] h-full"
-          style={{ background: `rgba(255,255,255,0.6)` }}
+          className="absolute left-1/2 -translate-x-1/2 w-[1px] h-full"
+          style={{ background: `rgba(255,255,255,0.4)` }}
         />
       </div>
       {/* Particles */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 w-[12px] h-full"
+        className="absolute left-1/2 -translate-x-1/2 w-[14px] h-full z-[1]"
         style={{
-          background: `linear-gradient(180deg, transparent, rgba(${color},0.6) 20%, transparent 40%, rgba(${color},0.5) 70%, transparent)`,
+          background: `linear-gradient(180deg, transparent, rgba(${color},0.5) 20%, transparent 40%, rgba(${color},0.4) 70%, transparent)`,
           backgroundSize: "100% 200%",
           filter: "blur(3px)",
           animation: "beamFlowV 2.5s linear infinite",
