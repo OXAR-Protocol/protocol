@@ -17,9 +17,9 @@ export function CustomCursor() {
   const rafRef = useRef<number>(0);
 
   const animate = useCallback(() => {
-    // Each trail point follows the one before it with lerp
-    trail.current[0].x += (pos.current.x - trail.current[0].x) * 0.3;
-    trail.current[0].y += (pos.current.y - trail.current[0].y) * 0.3;
+    // First trail point matches cursor exactly
+    trail.current[0].x = pos.current.x;
+    trail.current[0].y = pos.current.y;
 
     for (let i = 1; i < TRAIL_LENGTH; i++) {
       const prev = trail.current[i - 1];
