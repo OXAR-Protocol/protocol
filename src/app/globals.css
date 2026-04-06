@@ -69,6 +69,20 @@ html {
   background-size: 50px 50px;
 }
 
+/* Energy beam animations */
+@keyframes beamFlow {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+@keyframes beamFlowReverse {
+  0% { background-position: -100% 0; }
+  100% { background-position: 100% 0; }
+}
+@keyframes beamFlowV {
+  0% { background-position: 0 100%; }
+  100% { background-position: 0 -100%; }
+}
+
 /* Light theme overrides */
 [data-theme="light"] {
   --color-surface-0: #f5f5f0;
