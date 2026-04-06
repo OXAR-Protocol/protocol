@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* OXAR Landing animations */
+/* ===== OXAR Landing animations ===== */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
@@ -41,6 +41,179 @@
   transform: translateY(0);
 }
 
+/* ===== ETNY Landing — surface colors & custom properties ===== */
+:root {
+  --color-surface-0: #0a0a0a;
+  --color-surface-1: #111118;
+  --color-surface-2: #1a1a24;
+  --color-accent-blue: rgb(114, 162, 240);
+  --color-accent-purple: rgb(139, 92, 246);
+  --color-muted: rgba(255, 255, 255, 0.3);
+  --color-border: rgba(255, 255, 255, 0.1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.3);
+  color: white;
+}
+
+/* Thin scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* ===== Light theme overrides (ETNY landing) ===== */
+[data-theme="light"] {
+  --color-surface-0: #f5f5f0;
+  --color-surface-1: #eaeae5;
+  --color-surface-2: #e0e0db;
+  --color-muted: rgba(0, 0, 0, 0.4);
+  --color-border: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] body {
+  color: #1a1a1a;
+}
+
+[data-theme="light"] ::selection {
+  background: rgba(139, 92, 246, 0.2);
+  color: #1a1a1a;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #f5f5f0;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .bg-grid {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
+
+/* Light theme — remap white-based Tailwind utilities to dark equivalents */
+[data-theme="light"] .text-white {
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .text-white\/30 {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .text-white\/50 {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .text-white\/60 {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="light"] .hover\:text-white:hover {
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .bg-white {
+  background-color: #1a1a1a;
+}
+
+[data-theme="light"] .hover\:bg-white\/90:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+[data-theme="light"] .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .bg-white\/20 {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .hover\:border-white\/20:hover {
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .hover\:border-white\/40:hover {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .stroke-white {
+  stroke: #1a1a1a;
+}
+
+/* Handle [&>strong]:text-white and [&_strong]:text-white inside light theme */
+[data-theme="light"] [class*="\[&>strong\]:text-white"] strong,
+[data-theme="light"] [class*="\[&_strong\]:text-white"] strong,
+[data-theme="light"] [class*="\[&_h2\]:text-white"] h2 {
+  color: #1a1a1a !important;
+}
+
+/* Shadows */
+[data-theme="light"] [class*="shadow-"] {
+  --tw-shadow-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Logo inversion for light theme */
+[data-theme="light"] img[alt="OXAR"] {
+  filter: invert(1);
+}
+
+/* Hero gradient overlay for light theme */
+[data-theme="light"] .hero-overlay {
+  background: linear-gradient(to bottom,
+    #f5f5f0 0%,
+    rgba(245, 245, 240, 0.8) 30%,
+    rgba(245, 245, 240, 0.85) 45%,
+    rgba(245, 245, 240, 0.85) 55%,
+    rgba(245, 245, 240, 0.8) 70%,
+    #f5f5f0 100%
+  ) !important;
+}
+
+/* Hero grid lines for light theme */
+[data-theme="light"] .hero-grid-outer {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px) !important;
+}
+
+/* Hero scroll indicator */
+[data-theme="light"] .hero-scroll-indicator {
+  stroke: rgba(0, 0, 0, 0.3);
+}
+
+/* ===== shadcn/ui CSS variables (app product) ===== */
 @layer base {
   :root {
     --background: 0 0% 100%;

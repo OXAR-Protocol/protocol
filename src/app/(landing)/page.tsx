@@ -1,27 +1,22 @@
-import { LandingNavbar } from "@/components/landing/navbar";
-import { Hero } from "@/components/landing/hero";
-import { Ticker } from "@/components/landing/ticker";
-import { Problem } from "@/components/landing/problem";
-import { HowItWorks } from "@/components/landing/how-it-works";
-import { VaultShowcase } from "@/components/landing/vault-showcase";
-import { TrustAndAudience } from "@/components/landing/trust-and-audience";
-import { Roadmap } from "@/components/landing/roadmap";
-import { CTASection } from "@/components/landing/cta-section";
-import { Footer } from "@/components/landing/footer";
+import { Header } from "@/sections/header";
+import { Hero } from "@/sections/hero";
+import { HowItWorks } from "@/sections/how-it-works";
+import { Features } from "@/sections/features";
+import { Roadmap } from "@/sections/roadmap";
+import { Footer } from "@/sections/footer";
+import { WarpProvider } from "@/components/landing/warp-transition";
 
-export default function LandingPage() {
+export default function Home() {
   return (
-    <main>
-      <LandingNavbar />
-      <Hero />
-      <Ticker />
-      <Problem />
-      <HowItWorks />
-      <VaultShowcase />
-      <TrustAndAudience />
-      <Roadmap />
-      <CTASection />
+    <WarpProvider>
+      <Header />
+      <main>
+        <Hero />
+        <HowItWorks />
+        <Features />
+        <Roadmap />
+      </main>
       <Footer />
-    </main>
+    </WarpProvider>
   );
 }

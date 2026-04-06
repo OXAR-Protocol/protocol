@@ -5,13 +5,14 @@ const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/sections/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)", "sans-serif"],
-        mono: ["var(--font-space-mono)", "monospace"],
+        sans: ["var(--font-geist-sans)", "var(--font-inter)", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "var(--font-space-mono)", "monospace"],
         display: ["var(--font-bebas-neue)", "sans-serif"],
       },
       colors: {
@@ -65,11 +66,30 @@ const config: Config = {
           white: "#f0f0f0",
           accent: "#c8ff00",
         },
+        "surface-0": "var(--color-surface-0, #0a0a0a)",
+        "surface-1": "var(--color-surface-1, #111118)",
+        "surface-2": "var(--color-surface-2, #1a1a24)",
+        "accent-blue": "var(--color-accent-blue, rgb(114, 162, 240))",
+        "accent-purple": "var(--color-accent-purple, rgb(139, 92, 246))",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      animation: {
+        breathing: "breathing 8s ease-in-out infinite",
+        "bounce-slow": "bounce-slow 2s ease-in-out infinite",
+      },
+      keyframes: {
+        breathing: {
+          "0%, 100%": { opacity: "0.15", transform: "scale(1)" },
+          "50%": { opacity: "0.25", transform: "scale(1.05)" },
+        },
+        "bounce-slow": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(8px)" },
+        },
       },
     },
   },

@@ -1,6 +1,6 @@
 "use client";
 
-import { WarpProvider } from "@/components/landing/warp-transition";
+import { ThemeProvider } from "@/context/theme-context";
 import { PageWrapper } from "@/components/landing/page-wrapper";
 
 export default function LandingLayout({
@@ -9,10 +9,10 @@ export default function LandingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-oxar-black text-oxar-white overflow-x-hidden">
-      <WarpProvider>
+    <ThemeProvider>
+      <div className="min-h-screen bg-surface-0 text-white font-sans antialiased overflow-x-hidden">
         <PageWrapper>{children}</PageWrapper>
-      </WarpProvider>
-    </div>
+      </div>
+    </ThemeProvider>
   );
 }
