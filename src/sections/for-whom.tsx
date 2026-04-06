@@ -24,122 +24,138 @@ const AUDIENCES = [
     description:
       "On-chain emerging market bond exposure. API access coming soon.",
     accent: "text-white/60",
-    color: "180,180,220",
+    color: "160,160,200",
   },
 ];
 
-function EnergyBeamH({ color }: { color: string }) {
+function PlasmaBeamH({ color }: { color: string }) {
   return (
-    <div className="hidden md:flex items-center flex-1 min-w-[16px] relative">
-      {/* Outer glow — slow pulse */}
+    <div className="hidden md:block flex-1 min-w-[16px] relative h-[160px] self-center">
+      {/* Ambient wide glow */}
       <div
-        className="absolute inset-0 -top-10 -bottom-10"
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[120px]"
         style={{
-          background: `linear-gradient(90deg, transparent 5%, rgba(${color},0.08) 30%, rgba(${color},0.15) 50%, rgba(${color},0.08) 70%, transparent 95%)`,
-          filter: "blur(20px)",
+          background: `radial-gradient(ellipse 100% 100% at 50% 50%, rgba(${color},0.12), transparent)`,
+          filter: "blur(30px)",
           animation: "beamPulse 4s ease-in-out infinite",
         }}
       />
-      {/* Mid glow — medium pulse */}
+
+      {/* Funnel flare — left (coming from card) */}
       <div
-        className="absolute inset-0 -top-4 -bottom-4"
+        className="absolute left-0 top-1/2 -translate-y-1/2 w-[60%] h-full"
         style={{
-          background: `linear-gradient(90deg, transparent 10%, rgba(${color},0.2) 40%, rgba(${color},0.35) 50%, rgba(${color},0.2) 60%, transparent 90%)`,
-          filter: "blur(8px)",
-          animation: "beamPulse 2.5s ease-in-out infinite 0.5s",
-        }}
-      />
-      {/* Core line */}
-      <div
-        className="w-full h-[2px] relative"
-        style={{ background: `rgba(${color},0.5)` }}
-      >
-        {/* Flowing particles — fast */}
-        <div
-          className="absolute inset-0 h-[2px]"
-          style={{
-            background: `linear-gradient(90deg, transparent, rgba(${color},1) 20%, transparent 40%, transparent 60%, rgba(${color},1) 80%, transparent)`,
-            backgroundSize: "200% 100%",
-            animation: "beamFlow 2s linear infinite",
-          }}
-        />
-        {/* Second particle layer — offset timing */}
-        <div
-          className="absolute inset-0 h-[2px]"
-          style={{
-            background: `linear-gradient(90deg, transparent 10%, rgba(${color},0.8) 30%, transparent 50%, rgba(${color},0.8) 70%, transparent 90%)`,
-            backgroundSize: "300% 100%",
-            animation: "beamFlow 3.5s linear infinite 1s",
-          }}
-        />
-      </div>
-      {/* Flare near right card */}
-      <div
-        className="absolute right-0 top-1/2 -translate-y-1/2 w-[80px] h-[80px]"
-        style={{
-          background: `radial-gradient(ellipse at right center, rgba(${color},0.25), transparent 70%)`,
-          filter: "blur(10px)",
+          background: `linear-gradient(90deg, rgba(${color},0.25), transparent)`,
+          clipPath: "polygon(0 15%, 100% 42%, 100% 58%, 0 85%)",
+          filter: "blur(6px)",
           animation: "beamPulse 3s ease-in-out infinite 0.3s",
         }}
       />
-      {/* Flare near left card */}
+
+      {/* Funnel flare — right (entering card) */}
       <div
-        className="absolute left-0 top-1/2 -translate-y-1/2 w-[80px] h-[80px]"
+        className="absolute right-0 top-1/2 -translate-y-1/2 w-[60%] h-full"
         style={{
-          background: `radial-gradient(ellipse at left center, rgba(${color},0.25), transparent 70%)`,
-          filter: "blur(10px)",
+          background: `linear-gradient(270deg, rgba(${color},0.25), transparent)`,
+          clipPath: "polygon(0 42%, 100% 15%, 100% 85%, 0 58%)",
+          filter: "blur(6px)",
           animation: "beamPulse 3s ease-in-out infinite 0.8s",
+        }}
+      />
+
+      {/* Bright core — wide */}
+      <div
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[6px]"
+        style={{
+          background: `linear-gradient(90deg, rgba(${color},0.3), rgba(${color},0.7), rgba(${color},0.3))`,
+          filter: "blur(2px)",
+        }}
+      />
+
+      {/* Hot white center */}
+      <div
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px]"
+        style={{
+          background: `linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.6) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.6) 70%, transparent 95%)`,
+          animation: "beamPulse 2.5s ease-in-out infinite 0.5s",
+        }}
+      />
+
+      {/* Flowing energy particles */}
+      <div
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[20px]"
+        style={{
+          background: `linear-gradient(90deg, transparent, rgba(${color},0.5) 15%, transparent 30%, transparent 50%, rgba(${color},0.6) 65%, transparent 80%, rgba(${color},0.4) 90%, transparent)`,
+          backgroundSize: "200% 100%",
+          filter: "blur(4px)",
+          animation: "beamFlow 2.5s linear infinite",
+        }}
+      />
+      {/* Second particle layer */}
+      <div
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[14px]"
+        style={{
+          background: `linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.3) 20%, transparent 35%, rgba(255,255,255,0.2) 55%, transparent 70%, rgba(255,255,255,0.35) 85%, transparent 95%)`,
+          backgroundSize: "300% 100%",
+          filter: "blur(3px)",
+          animation: "beamFlow 4s linear infinite 1s",
         }}
       />
     </div>
   );
 }
 
-function EnergyBeamV({ color }: { color: string }) {
+function PlasmaBeamV({ color }: { color: string }) {
   return (
-    <div className="md:hidden flex justify-center relative h-14">
-      {/* Outer glow */}
+    <div className="md:hidden relative h-16 flex justify-center">
+      {/* Ambient glow */}
       <div
-        className="absolute inset-0 -left-10 -right-10"
+        className="absolute left-1/2 -translate-x-1/2 top-0 w-[120px] h-full"
         style={{
-          background: `linear-gradient(180deg, transparent 5%, rgba(${color},0.1) 30%, rgba(${color},0.15) 50%, rgba(${color},0.1) 70%, transparent 95%)`,
+          background: `radial-gradient(ellipse 100% 100% at 50% 50%, rgba(${color},0.15), transparent)`,
           filter: "blur(20px)",
           animation: "beamPulse 4s ease-in-out infinite",
         }}
       />
-      {/* Mid glow */}
+      {/* Funnel top */}
       <div
-        className="absolute inset-0 -left-4 -right-4"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[100px] h-[60%]"
         style={{
-          background: `linear-gradient(180deg, transparent 10%, rgba(${color},0.25) 40%, rgba(${color},0.35) 50%, rgba(${color},0.25) 60%, transparent 90%)`,
-          filter: "blur(8px)",
-          animation: "beamPulse 2.5s ease-in-out infinite 0.5s",
+          background: `linear-gradient(180deg, rgba(${color},0.3), transparent)`,
+          clipPath: "polygon(15% 0, 85% 0, 58% 100%, 42% 100%)",
+          filter: "blur(4px)",
+        }}
+      />
+      {/* Funnel bottom */}
+      <div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[100px] h-[60%]"
+        style={{
+          background: `linear-gradient(0deg, rgba(${color},0.3), transparent)`,
+          clipPath: "polygon(42% 0, 58% 0, 85% 100%, 15% 100%)",
+          filter: "blur(4px)",
         }}
       />
       {/* Core */}
-      <div className="w-[2px] h-full relative" style={{ background: `rgba(${color},0.5)` }}>
+      <div
+        className="w-[6px] h-full relative"
+        style={{
+          background: `linear-gradient(180deg, rgba(${color},0.3), rgba(${color},0.7), rgba(${color},0.3))`,
+          filter: "blur(2px)",
+        }}
+      >
         <div
-          className="absolute inset-0 w-[2px]"
-          style={{
-            background: `linear-gradient(180deg, transparent, rgba(${color},1) 20%, transparent 40%, transparent 60%, rgba(${color},1) 80%, transparent)`,
-            backgroundSize: "100% 200%",
-            animation: "beamFlowV 2s linear infinite",
-          }}
+          className="absolute inset-0 w-[2px] left-1/2 -translate-x-1/2"
+          style={{ background: `rgba(255,255,255,0.7)` }}
         />
       </div>
-      {/* Flares */}
+      {/* Particles */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[80px] h-[40px]"
+        className="absolute left-1/2 -translate-x-1/2 w-[20px] h-full"
         style={{
-          background: `radial-gradient(ellipse at center top, rgba(${color},0.3), transparent 70%)`,
-          filter: "blur(10px)",
-        }}
-      />
-      <div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80px] h-[40px]"
-        style={{
-          background: `radial-gradient(ellipse at center bottom, rgba(${color},0.3), transparent 70%)`,
-          filter: "blur(10px)",
+          background: `linear-gradient(180deg, transparent, rgba(${color},0.6) 20%, transparent 40%, rgba(${color},0.5) 60%, transparent 80%)`,
+          backgroundSize: "100% 200%",
+          filter: "blur(4px)",
+          animation: "beamFlowV 2.5s linear infinite",
         }}
       />
     </div>
@@ -158,7 +174,7 @@ export function ForWhom() {
 
       {/* Desktop */}
       <div className="mt-16 hidden md:flex items-stretch">
-        <EnergyBeamH color={AUDIENCES[0].color} />
+        <PlasmaBeamH color={AUDIENCES[0].color} />
         {AUDIENCES.map((a, i) => (
           <div key={a.title} className="contents">
             <AnimatedSection delay={i * 0.1}>
@@ -167,14 +183,14 @@ export function ForWhom() {
                 <p className="mt-4 font-mono text-sm leading-relaxed text-white/50 flex-1">{a.description}</p>
               </div>
             </AnimatedSection>
-            <EnergyBeamH color={AUDIENCES[Math.min(i + 1, AUDIENCES.length - 1)].color} />
+            <PlasmaBeamH color={AUDIENCES[Math.min(i + 1, AUDIENCES.length - 1)].color} />
           </div>
         ))}
       </div>
 
       {/* Mobile */}
       <div className="mt-16 md:hidden px-6">
-        <EnergyBeamV color={AUDIENCES[0].color} />
+        <PlasmaBeamV color={AUDIENCES[0].color} />
         {AUDIENCES.map((a, i) => (
           <div key={a.title}>
             <AnimatedSection delay={i * 0.1}>
@@ -183,7 +199,7 @@ export function ForWhom() {
                 <p className="mt-4 font-mono text-sm leading-relaxed text-white/50">{a.description}</p>
               </div>
             </AnimatedSection>
-            <EnergyBeamV color={AUDIENCES[Math.min(i + 1, AUDIENCES.length - 1)].color} />
+            <PlasmaBeamV color={AUDIENCES[Math.min(i + 1, AUDIENCES.length - 1)].color} />
           </div>
         ))}
       </div>
