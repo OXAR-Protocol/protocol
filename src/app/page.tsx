@@ -5,7 +5,7 @@ import { HowItWorks } from "@/sections/how-it-works";
 import { Vaults } from "@/sections/vaults";
 import { Features } from "@/sections/features";
 import { ForWhom } from "@/sections/for-whom";
-import { Tech } from "@/sections/tech";
+
 import { Roadmap } from "@/sections/roadmap";
 
 import { Footer } from "@/sections/footer";
@@ -22,7 +22,7 @@ export default function Home() {
         <Vaults />
         <Features />
         <ForWhom />
-        <Tech />
+
         <Roadmap />
       </main>
       <Footer />

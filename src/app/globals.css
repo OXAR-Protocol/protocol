@@ -74,13 +74,13 @@ html {
   0% { background-position: 100% 0; }
   100% { background-position: -100% 0; }
 }
-@keyframes beamFlowReverse {
-  0% { background-position: -100% 0; }
-  100% { background-position: 100% 0; }
-}
 @keyframes beamFlowV {
   0% { background-position: 0 100%; }
   100% { background-position: 0 -100%; }
+}
+@keyframes beamPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
 /* Light theme overrides */
