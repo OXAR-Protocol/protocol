@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useTheme } from "@/context/theme-context";
 
 const TRAIL_LENGTH = 12;
 const HISTORY_SIZE = 80; // store more positions for smooth sampling
 const TRAIL_SPACING = 5; // frames between each particle
 
 export function CustomCursor() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const dotRef = useRef<HTMLDivElement>(null);
   const trailRefs = useRef<(HTMLDivElement | null)[]>([]);
   const pos = useRef({ x: -100, y: -100 });
@@ -100,8 +103,10 @@ export function CustomCursor() {
           width: 10,
           height: 10,
           borderRadius: "50%",
-          backgroundColor: "white",
-          boxShadow: "0 0 10px rgba(114,162,240,0.8), 0 0 25px rgba(114,162,240,0.4)",
+          backgroundColor: isDark ? "white" : "#1a1a1a",
+          boxShadow: isDark
+            ? "0 0 10px rgba(114,162,240,0.8), 0 0 25px rgba(114,162,240,0.4)"
+            : "0 0 10px rgba(60,60,120,0.5), 0 0 25px rgba(60,60,120,0.2)",
           opacity: visible ? 1 : 0,
           transition: "opacity 0.3s, transform 0.15s ease-out",
         }}
@@ -114,8 +119,12 @@ export function CustomCursor() {
           className="fixed top-0 left-0 z-[9998] pointer-events-none"
           style={{
             borderRadius: "50%",
-            backgroundColor: i < 4 ? "rgba(114,162,240,0.8)" : "rgba(114,162,240,0.5)",
-            boxShadow: i < 3 ? "0 0 6px rgba(114,162,240,0.4)" : "none",
+            backgroundColor: isDark
+              ? (i < 4 ? "rgba(114,162,240,0.8)" : "rgba(114,162,240,0.5)")
+              : (i < 4 ? "rgba(30,30,80,0.7)" : "rgba(30,30,80,0.4)"),
+            boxShadow: i < 3
+              ? (isDark ? "0 0 6px rgba(114,162,240,0.4)" : "0 0 6px rgba(60,60,120,0.3)")
+              : "none",
             opacity: 0,
           }}
         />
