@@ -40,20 +40,27 @@ const STEPS = [
 
 // Arc config
 const ARC_RADIUS = 600;
-const ARC_CENTER_X = -ARC_RADIUS + 200;
 const ARC_CENTER_Y_RATIO = 0.5;
 const STEP_ARC_SPAN = 25;
-const CENTER_ANGLE = 0; // active step on right side of arc (visible)
+const CENTER_ANGLE = 0;
+
+// On mobile push arc further left so numbers don't overlap text
+function getArcCenterX(screenWidth: number) {
+  if (screenWidth < 640) return -ARC_RADIUS + 80;
+  if (screenWidth < 768) return -ARC_RADIUS + 120;
+  return -ARC_RADIUS + 200;
+}
 
 function getArcPosition(
   stepIndex: number,
   activeStep: number,
-  screenHeight: number
+  screenHeight: number,
+  centerX: number
 ) {
   const offset = stepIndex - activeStep;
   const angleDeg = CENTER_ANGLE - offset * STEP_ARC_SPAN;
   const angleRad = (angleDeg * Math.PI) / 180;
-  const cx = ARC_CENTER_X;
+  const cx = centerX;
   const cy = screenHeight * ARC_CENTER_Y_RATIO;
 
   return {
@@ -75,11 +82,17 @@ function getStepStyle(offset: number) {
 export function HowItWorks() {
   const [activeStep, setActiveStep] = useState(0);
   const [screenH, setScreenH] = useState(800);
+  const [screenW, setScreenW] = useState(1200);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const arcCenterX = getArcCenterX(screenW);
 
   useEffect(() => {
     setScreenH(window.innerHeight);
-    const onResize = () => setScreenH(window.innerHeight);
+    setScreenW(window.innerWidth);
+    const onResize = () => {
+      setScreenH(window.innerHeight);
+      setScreenW(window.innerWidth);
+    };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -118,7 +131,7 @@ export function HowItWorks() {
             style={{ overflow: "visible" }}
           >
             <circle
-              cx={ARC_CENTER_X}
+              cx={arcCenterX}
               cy={screenH * ARC_CENTER_Y_RATIO}
               r={ARC_RADIUS}
               fill="none"
@@ -130,7 +143,7 @@ export function HowItWorks() {
 
           {/* Step numbers along the arc */}
           {STEPS.map((step, i) => {
-            const pos = getArcPosition(i, activeStep, screenH);
+            const pos = getArcPosition(i, activeStep, screenH, arcCenterX);
             const offset = i - activeStep;
             const style = getStepStyle(offset);
 
