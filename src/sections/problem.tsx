@@ -150,12 +150,8 @@ export function Problem() {
           backgroundImage:
             "linear-gradient(rgba(114,162,240,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(114,162,240,0.15) 1px, transparent 1px)",
           backgroundSize: "60px 60px",
-          maskImage: mouse.active
-            ? `radial-gradient(circle 180px at ${mouse.x}px ${mouse.y}px, black, transparent)`
-            : "none",
-          WebkitMaskImage: mouse.active
-            ? `radial-gradient(circle 180px at ${mouse.x}px ${mouse.y}px, black, transparent)`
-            : "none",
+          maskImage: `radial-gradient(circle 180px at ${mouse.x}px ${mouse.y}px, black, transparent)`,
+          WebkitMaskImage: `radial-gradient(circle 180px at ${mouse.x}px ${mouse.y}px, black, transparent)`,
           opacity: mouse.active ? 1 : 0,
         }}
       />
