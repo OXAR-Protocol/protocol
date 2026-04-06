@@ -71,28 +71,15 @@ export function Roadmap() {
         {/* Desktop */}
         <div className="mt-16 hidden md:block" ref={progress.ref}>
           {/* Progress bar */}
-          <div className="relative h-[3px] bg-white/10 rounded-full mb-12">
+          <div className="relative h-px bg-white/10 mb-12">
             {/* Filled portion */}
             <div
-              className="absolute top-0 left-0 h-full rounded-full transition-all duration-1500 ease-out"
+              className="absolute top-0 left-0 h-full transition-all ease-out"
               style={{
                 width: `${progress.width}%`,
                 background: "linear-gradient(90deg, rgba(114,162,240,0.8), rgba(139,92,246,0.8))",
                 boxShadow: "0 0 12px rgba(114,162,240,0.4), 0 0 30px rgba(114,162,240,0.15)",
                 transitionDuration: "1.5s",
-              }}
-            />
-
-            {/* Glowing head */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full transition-all ease-out"
-              style={{
-                left: `${progress.width}%`,
-                transform: `translate(-50%, -50%)`,
-                background: "rgba(139,92,246,0.9)",
-                boxShadow: "0 0 10px rgba(139,92,246,0.6), 0 0 25px rgba(139,92,246,0.3)",
-                transitionDuration: "1.5s",
-                animation: progress.width > 0 ? "beamPulse 2s ease-in-out infinite" : "none",
               }}
             />
 
@@ -163,9 +150,9 @@ export function Roadmap() {
           {/* Vertical progress */}
           <div className="relative pl-8">
             {/* Track */}
-            <div className="absolute left-[5px] top-0 bottom-0 w-[3px] bg-white/10 rounded-full">
+            <div className="absolute left-[5px] top-0 bottom-0 w-px bg-white/10">
               <div
-                className="w-full rounded-full transition-all ease-out"
+                className="w-full transition-all ease-out"
                 style={{
                   height: `${PROGRESS_PCT}%`,
                   background: "linear-gradient(180deg, rgba(114,162,240,0.8), rgba(139,92,246,0.8))",
