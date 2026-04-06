@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { SectionLabel } from "@/components/section-label";
 import { SectionTitle } from "@/components/section-title";
 import { AnimatedSection } from "@/components/animated-section";
@@ -31,7 +32,34 @@ const MILESTONES = [
   },
 ];
 
+const CURRENT_INDEX = 0;
+const PROGRESS_PCT = ((CURRENT_INDEX + 0.5) / MILESTONES.length) * 100;
+
+function useAnimatedProgress(targetPct: number) {
+  const [width, setWidth] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // small delay for visual effect
+          setTimeout(() => setWidth(targetPct), 200);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [targetPct]);
+
+  return { width, ref };
+}
+
 export function Roadmap() {
+  const progress = useAnimatedProgress(PROGRESS_PCT);
+
   return (
     <section id="roadmap" className="py-20 px-6">
       <div className="max-w-[1200px] mx-auto">
@@ -40,76 +68,159 @@ export function Roadmap() {
           <SectionTitle>What&apos;s ahead</SectionTitle>
         </AnimatedSection>
 
-        {/* Desktop: horizontal */}
-        <div className="mt-16 hidden md:block">
-          <div className="relative h-px bg-white/10 mb-12">
+        {/* Desktop */}
+        <div className="mt-16 hidden md:block" ref={progress.ref}>
+          {/* Progress bar */}
+          <div className="relative h-[3px] bg-white/10 rounded-full mb-12">
+            {/* Filled portion */}
+            <div
+              className="absolute top-0 left-0 h-full rounded-full transition-all duration-1500 ease-out"
+              style={{
+                width: `${progress.width}%`,
+                background: "linear-gradient(90deg, rgba(114,162,240,0.8), rgba(139,92,246,0.8))",
+                boxShadow: "0 0 12px rgba(114,162,240,0.4), 0 0 30px rgba(114,162,240,0.15)",
+                transitionDuration: "1.5s",
+              }}
+            />
+
+            {/* Glowing head */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full transition-all ease-out"
+              style={{
+                left: `${progress.width}%`,
+                transform: `translate(-50%, -50%)`,
+                background: "rgba(139,92,246,0.9)",
+                boxShadow: "0 0 10px rgba(139,92,246,0.6), 0 0 25px rgba(139,92,246,0.3)",
+                transitionDuration: "1.5s",
+                animation: progress.width > 0 ? "beamPulse 2s ease-in-out infinite" : "none",
+              }}
+            />
+
+            {/* Milestone dots */}
             {MILESTONES.map((m, i) => {
-              const left = `${(i / (MILESTONES.length - 1)) * 100}%`;
+              const left = (i / (MILESTONES.length - 1)) * 100;
+              const isPast = i < CURRENT_INDEX;
+              const isCurrent = i === CURRENT_INDEX;
+
               return (
-                <AnimatedSection key={m.phase} delay={i * 0.15}>
-                  <div className="absolute -top-2" style={{ left }}>
-                    <div
-                      className={`w-4 h-4 rounded-full border-2 ${
-                        m.status === "current"
-                          ? "border-accent-blue bg-accent-blue/20 shadow-[0_0_12px_rgba(114,162,240,0.4)]"
-                          : "border-white/20 bg-surface-0"
-                      }`}
-                    />
+                <div
+                  key={m.phase}
+                  className="absolute -top-[5px]"
+                  style={{ left: `${left}%`, transform: "translateX(-50%)" }}
+                >
+                  <div
+                    className={`w-[13px] h-[13px] rounded-full border-2 transition-all duration-700 ${
+                      isCurrent
+                        ? "border-accent-blue bg-accent-blue/30 shadow-[0_0_12px_rgba(114,162,240,0.5)]"
+                        : isPast
+                        ? "border-accent-blue/50 bg-accent-blue/10"
+                        : "border-white/15 bg-surface-0"
+                    }`}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Labels */}
+          <div className="grid grid-cols-4 gap-8">
+            {MILESTONES.map((m, i) => {
+              const isCurrent = i === CURRENT_INDEX;
+              const isPast = i < CURRENT_INDEX;
+
+              return (
+                <AnimatedSection key={m.phase} delay={i * 0.12}>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`font-mono text-xs uppercase tracking-wide ${
+                          isCurrent ? "text-accent-blue" : isPast ? "text-accent-blue/50" : "text-white/30"
+                        }`}
+                      >
+                        {m.phase}
+                      </span>
+                      {isCurrent && (
+                        <span className="px-1.5 py-0.5 rounded-full bg-accent-blue/10 border border-accent-blue/30 font-mono text-[10px] text-accent-blue uppercase tracking-wider">
+                          Now
+                        </span>
+                      )}
+                    </div>
+                    <h3 className={`mt-2 font-sans text-lg ${isCurrent ? "text-white" : "text-white/60"}`}>
+                      {m.name}
+                    </h3>
+                    <p className="mt-2 font-mono text-sm text-white/30 leading-relaxed">
+                      {m.details}
+                    </p>
                   </div>
                 </AnimatedSection>
               );
             })}
           </div>
-
-          <div className="grid grid-cols-4 gap-8">
-            {MILESTONES.map((m, i) => (
-              <AnimatedSection key={m.phase} delay={i * 0.15}>
-                <div>
-                  <span
-                    className={`font-mono text-xs uppercase tracking-wide ${
-                      m.status === "current" ? "text-accent-blue" : "text-white/30"
-                    }`}
-                  >
-                    {m.phase}
-                  </span>
-                  <h3 className="mt-2 font-sans text-lg text-white">{m.name}</h3>
-                  <p className="mt-2 font-mono text-sm text-white/30 leading-relaxed">
-                    {m.details}
-                  </p>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
         </div>
 
-        {/* Mobile: vertical */}
-        <div className="mt-16 md:hidden space-y-8">
-          {MILESTONES.map((m, i) => (
-            <AnimatedSection key={m.phase} delay={i * 0.1}>
-              <div className="flex gap-4 items-start">
-                <div
-                  className={`mt-1 flex-shrink-0 w-3 h-3 rounded-full ${
-                    m.status === "current"
-                      ? "bg-accent-blue shadow-[0_0_12px_rgba(114,162,240,0.4)]"
-                      : "bg-white/20"
-                  }`}
-                />
-                <div>
-                  <span
-                    className={`font-mono text-xs uppercase tracking-wide ${
-                      m.status === "current" ? "text-accent-blue" : "text-white/30"
-                    }`}
-                  >
-                    {m.phase}
-                  </span>
-                  <h3 className="mt-1 font-sans text-lg text-white">{m.name}</h3>
-                  <p className="mt-1 font-mono text-sm text-white/30 leading-relaxed">
-                    {m.details}
-                  </p>
-                </div>
-              </div>
-            </AnimatedSection>
-          ))}
+        {/* Mobile */}
+        <div className="mt-16 md:hidden">
+          {/* Vertical progress */}
+          <div className="relative pl-8">
+            {/* Track */}
+            <div className="absolute left-[5px] top-0 bottom-0 w-[3px] bg-white/10 rounded-full">
+              <div
+                className="w-full rounded-full transition-all ease-out"
+                style={{
+                  height: `${PROGRESS_PCT}%`,
+                  background: "linear-gradient(180deg, rgba(114,162,240,0.8), rgba(139,92,246,0.8))",
+                  boxShadow: "0 0 10px rgba(114,162,240,0.3)",
+                  transitionDuration: "1.5s",
+                }}
+              />
+            </div>
+
+            <div className="space-y-8">
+              {MILESTONES.map((m, i) => {
+                const isCurrent = i === CURRENT_INDEX;
+                const isPast = i < CURRENT_INDEX;
+
+                return (
+                  <AnimatedSection key={m.phase} delay={i * 0.1}>
+                    <div className="relative flex gap-4 items-start">
+                      {/* Dot */}
+                      <div
+                        className={`absolute -left-8 mt-1 w-[13px] h-[13px] rounded-full border-2 ${
+                          isCurrent
+                            ? "border-accent-blue bg-accent-blue/30 shadow-[0_0_12px_rgba(114,162,240,0.5)]"
+                            : isPast
+                            ? "border-accent-blue/50 bg-accent-blue/10"
+                            : "border-white/15 bg-surface-0"
+                        }`}
+                      />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`font-mono text-xs uppercase tracking-wide ${
+                              isCurrent ? "text-accent-blue" : "text-white/30"
+                            }`}
+                          >
+                            {m.phase}
+                          </span>
+                          {isCurrent && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-accent-blue/10 border border-accent-blue/30 font-mono text-[10px] text-accent-blue uppercase tracking-wider">
+                              Now
+                            </span>
+                          )}
+                        </div>
+                        <h3 className={`mt-1 font-sans text-lg ${isCurrent ? "text-white" : "text-white/60"}`}>
+                          {m.name}
+                        </h3>
+                        <p className="mt-1 font-mono text-sm text-white/30 leading-relaxed">
+                          {m.details}
+                        </p>
+                      </div>
+                    </div>
+                  </AnimatedSection>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </section>
