@@ -137,15 +137,14 @@ export function HowItWorks() {
                 <motion.div
                   className="absolute pointer-events-none"
                   animate={{
-                    x: pos.x,
-                    y: pos.y,
+                    left: pos.x,
+                    top: pos.y,
                     opacity: style.opacity,
                   }}
                   transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ transform: "translate(-50%, -50%)" }}
                 >
                   <div
-                    className={`rounded-full transition-all duration-500 ${
+                    className={`-translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-500 ${
                       offset === 0
                         ? "w-3 h-3 bg-white/80"
                         : "w-2 h-2 bg-white/25"
@@ -157,8 +156,8 @@ export function HowItWorks() {
                 <motion.div
                   className="absolute pointer-events-none"
                   animate={{
-                    x: pos.x + 20,
-                    y: pos.y,
+                    left: pos.x + 16,
+                    top: pos.y,
                     scale: style.scale,
                     opacity: style.opacity,
                   }}
