@@ -76,17 +76,17 @@ const ICONS = [VaultIcon, LightningIcon, ShieldIcon, CoinIcon];
 const FEATURES = [
   {
     value: "Govt",
-    label: "Government Guaranteed",
+    label: "Government Backed",
     description: (
       <>
-        Backed by <strong>Ukrainian government bonds (OVDP).</strong>{" "}
+        Backed by <strong>sovereign government bonds.</strong>{" "}
         Not private credit, not algo yields.
       </>
     ),
   },
   {
     value: "18%",
-    label: "4-18% APY",
+    label: "Up to 18% APY",
     description: (
       <>
         Emerging market yields up to <strong>4.5x higher than US Treasuries.</strong>{" "}
@@ -99,8 +99,8 @@ const FEATURES = [
     label: "On-Chain Transparent",
     description: (
       <>
-        <strong>Proof of Reserve on-chain.</strong> Smart contract audited.{" "}
-        Open source on GitHub.
+        <strong>NAV updates on-chain daily.</strong> Smart contracts are{" "}
+        open source on GitHub.
       </>
     ),
   },
@@ -109,8 +109,8 @@ const FEATURES = [
     label: "Trade 24/7",
     description: (
       <>
-        Built-in marketplace. <strong>Sell your position anytime</strong> to
-        other users. No lock-ups.
+        Built-in P2P marketplace. <strong>Sell your position anytime</strong> —{" "}
+        no lock-ups, no waiting.
       </>
     ),
   },

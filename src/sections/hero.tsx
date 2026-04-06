@@ -85,8 +85,8 @@ export function Hero() {
 
         <FadeIn delay={0.4}>
           <p className="mt-6 font-mono text-base text-white/50 leading-relaxed max-w-xl mx-auto [&>strong]:text-white [&>strong]:font-normal">
-            Government-guaranteed bonds from emerging markets — tokenized on Solana.{" "}
-            <strong>No bank. No broker. Just yield.</strong> Starting with Ukraine.
+            Emerging market government bonds — tokenized on Solana.{" "}
+            <strong>No bank. No broker. Just yield.</strong>
           </p>
         </FadeIn>
 

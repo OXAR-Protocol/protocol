@@ -9,13 +9,13 @@ const STEPS = [
     number: "01",
     title: "Deposit USDC",
     description:
-      "Connect wallet or email via Privy. No KYC for small amounts.",
+      "Connect with email or wallet. No complex setup required.",
   },
   {
     number: "02",
     title: "Choose Vault",
     description:
-      "Pick country, currency, bond type. Ukraine MVP with 6 vaults.",
+      "Pick country, currency, and bond type. Multiple vaults available.",
   },
   {
     number: "03",
