@@ -39,10 +39,10 @@ const STEPS = [
 
 // Arc config
 const ARC_RADIUS = 600;
-const ARC_CENTER_X = -ARC_RADIUS + 120; // pushes center off left edge
-const ARC_CENTER_Y_RATIO = 0.5; // vertical center of screen
-const STEP_ARC_SPAN = 28; // degrees between steps
-const CENTER_ANGLE = 0; // active step sits at 0° (3 o'clock = right side of arc)
+const ARC_CENTER_X = -ARC_RADIUS + 220; // more visible from left edge
+const ARC_CENTER_Y_RATIO = 0.5;
+const STEP_ARC_SPAN = 28;
+const CENTER_ANGLE = -90; // active step at bottom of arc (6 o'clock)
 
 function getArcPosition(
   stepIndex: number,
@@ -50,7 +50,7 @@ function getArcPosition(
   screenHeight: number
 ) {
   const offset = stepIndex - activeStep;
-  const angleDeg = CENTER_ANGLE + offset * STEP_ARC_SPAN;
+  const angleDeg = CENTER_ANGLE - offset * STEP_ARC_SPAN;
   const angleRad = (angleDeg * Math.PI) / 180;
   const cx = ARC_CENTER_X;
   const cy = screenHeight * ARC_CENTER_Y_RATIO;
@@ -132,32 +132,47 @@ export function HowItWorks() {
             const style = getStepStyle(offset);
 
             return (
-              <motion.div
-                key={step.number}
-                className="absolute pointer-events-none"
-                animate={{
-                  x: pos.x - 40,
-                  y: pos.y - 40,
-                  scale: style.scale,
-                  opacity: style.opacity,
-                }}
-                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              >
-                {/* Dot on arc */}
-                <div
-                  className={`absolute top-1/2 -left-4 -translate-y-1/2 rounded-full transition-all duration-500 ${
-                    offset === 0
-                      ? "w-2.5 h-2.5 bg-white/80"
-                      : "w-1.5 h-1.5 bg-white/20"
-                  }`}
-                />
-                <span
-                  className="font-mono font-light text-white block"
-                  style={{ fontSize: style.fontSize }}
+              <div key={step.number}>
+                {/* Dot — exactly on the arc */}
+                <motion.div
+                  className="absolute pointer-events-none"
+                  animate={{
+                    x: pos.x,
+                    y: pos.y,
+                    opacity: style.opacity,
+                  }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ transform: "translate(-50%, -50%)" }}
                 >
-                  {step.number}
-                </span>
-              </motion.div>
+                  <div
+                    className={`rounded-full transition-all duration-500 ${
+                      offset === 0
+                        ? "w-3 h-3 bg-white/80"
+                        : "w-2 h-2 bg-white/25"
+                    }`}
+                  />
+                </motion.div>
+
+                {/* Number — offset to the right of the dot */}
+                <motion.div
+                  className="absolute pointer-events-none"
+                  animate={{
+                    x: pos.x + 20,
+                    y: pos.y,
+                    scale: style.scale,
+                    opacity: style.opacity,
+                  }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ transformOrigin: "left center" }}
+                >
+                  <span
+                    className="font-mono font-light text-white block -translate-y-1/2"
+                    style={{ fontSize: style.fontSize }}
+                  >
+                    {step.number}
+                  </span>
+                </motion.div>
+              </div>
             );
           })}
 
