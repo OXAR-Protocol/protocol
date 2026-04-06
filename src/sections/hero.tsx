@@ -18,7 +18,7 @@ export function Hero() {
         playsInline
         className="absolute inset-0 w-full h-full object-cover z-0"
         style={{
-          opacity: 0.4,
+          opacity: 0.2,
           maskImage: "radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent)",
           WebkitMaskImage: "radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent)",
         }}
