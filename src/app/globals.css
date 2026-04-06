@@ -198,3 +198,34 @@ html {
 [data-theme="light"] .hero-scroll-indicator {
   stroke: rgba(0, 0, 0, 0.3);
 }
+
+/* How It Works — arc line for light theme */
+[data-theme="light"] .arc-line {
+  stroke: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* How It Works — step dots */
+[data-theme="light"] .arc-dot {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+[data-theme="light"] .arc-dot-inactive {
+  background-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* How It Works — step numbers */
+[data-theme="light"] .arc-number {
+  color: #1a1a1a !important;
+}
+
+/* Problem section — grid for light theme */
+[data-theme="light"] .problem-grid {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px) !important;
+}
+
+[data-theme="light"] .problem-grid-glow {
+  background-image:
+    linear-gradient(rgba(114, 162, 240, 0.25) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(114, 162, 240, 0.25) 1px, transparent 1px) !important;
+}

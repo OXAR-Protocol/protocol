@@ -120,6 +120,7 @@ export function HowItWorks() {
               cy={screenH * ARC_CENTER_Y_RATIO}
               r={ARC_RADIUS}
               fill="none"
+              className="arc-line"
               stroke="rgba(255,255,255,0.06)"
               strokeWidth="1"
             />
@@ -146,8 +147,8 @@ export function HowItWorks() {
                   <div
                     className={`-translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-500 ${
                       offset === 0
-                        ? "w-3 h-3 bg-white/80"
-                        : "w-2 h-2 bg-white/25"
+                        ? "w-3 h-3 bg-white/80 arc-dot"
+                        : "w-2 h-2 bg-white/25 arc-dot-inactive"
                     }`}
                   />
                 </motion.div>
@@ -165,7 +166,7 @@ export function HowItWorks() {
                   style={{ transformOrigin: "left center" }}
                 >
                   <span
-                    className="font-mono font-light text-white block -translate-y-1/2"
+                    className="font-mono font-light text-white arc-number block -translate-y-1/2"
                     style={{ fontSize: style.fontSize }}
                   >
                     {step.number}

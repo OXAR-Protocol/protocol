@@ -131,9 +131,9 @@ export function Problem() {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Background grid */}
+      {/* Background grid (dim base) */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 problem-grid"
         style={{
           backgroundImage:
             "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
@@ -143,16 +143,19 @@ export function Problem() {
         }}
       />
 
-      {/* Mouse glow on grid */}
+      {/* Grid glow layer — brighter grid lines masked to cursor area */}
       <div
-        className="absolute pointer-events-none transition-opacity duration-500"
+        className="absolute inset-0 pointer-events-none transition-opacity duration-300 problem-grid-glow"
         style={{
-          left: mouse.x - 200,
-          top: mouse.y - 200,
-          width: 400,
-          height: 400,
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(114,162,240,0.08) 0%, transparent 70%)",
+          backgroundImage:
+            "linear-gradient(rgba(114,162,240,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(114,162,240,0.15) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+          maskImage: mouse.active
+            ? `radial-gradient(circle 180px at ${mouse.x}px ${mouse.y}px, black, transparent)`
+            : "none",
+          WebkitMaskImage: mouse.active
+            ? `radial-gradient(circle 180px at ${mouse.x}px ${mouse.y}px, black, transparent)`
+            : "none",
           opacity: mouse.active ? 1 : 0,
         }}
       />
