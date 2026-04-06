@@ -34,17 +34,22 @@ function ComparisonChart({
   const max = Math.max(...allValues);
   const min = Math.min(...allValues);
   const range = max - min + 0.01;
+  const pad = 14; // top padding for labels
   const h = 80;
+  const chartH = h - pad;
   const w = 200;
-  const labelW = 50;
+  const labelW = 55;
   const totalW = w + labelW;
+
+  function yPos(v: number) {
+    return pad + chartH - ((v - min) / range) * chartH;
+  }
 
   function toPoints(data: number[]) {
     return data
       .map((v, i) => {
         const x = (i / (data.length - 1)) * w;
-        const y = h - ((v - min) / range) * h;
-        return `${x},${y}`;
+        return `${x},${yPos(v)}`;
       })
       .join(" ");
   }
@@ -53,16 +58,15 @@ function ComparisonChart({
     return `M0,${h} L${data
       .map((v, i) => {
         const x = (i / (data.length - 1)) * w;
-        const y = h - ((v - min) / range) * h;
-        return `${x},${y}`;
+        return `${x},${yPos(v)}`;
       })
       .join(" L")} L${w},${h} Z`;
   }
 
   const oxarEnd = oxarData[oxarData.length - 1];
   const bankEnd = bankData[bankData.length - 1];
-  const oxarEndY = h - ((oxarEnd - min) / range) * h;
-  const bankEndY = h - ((bankEnd - min) / range) * h;
+  const oxarEndY = yPos(oxarEnd);
+  const bankEndY = yPos(bankEnd);
 
   const gradId = `cgrad-${color.replace(/[^a-z0-9]/gi, "")}`;
 
