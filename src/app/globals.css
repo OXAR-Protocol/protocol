@@ -244,6 +244,12 @@ html {
   ) !important;
 }
 
+/* Hero video for light theme — brighter */
+[data-theme="light"] .hero-video {
+  opacity: 0.5 !important;
+  filter: invert(1) hue-rotate(180deg);
+}
+
 /* Hero grid lines for light theme */
 [data-theme="light"] .hero-grid-outer {
   background-image:

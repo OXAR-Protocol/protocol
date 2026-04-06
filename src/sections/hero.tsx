@@ -16,7 +16,7 @@ export function Hero() {
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0"
+        className="absolute inset-0 w-full h-full object-cover z-0 hero-video"
         style={{
           opacity: 0.2,
           maskImage: "radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent)",
