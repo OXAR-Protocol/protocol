@@ -11,6 +11,7 @@ const AUDIENCES = [
       "Higher yield than US Treasuries without leaving crypto. Up to 18% APY on government bonds.",
     accent: "text-accent-blue",
     borderAccent: "hover:border-accent-blue/30",
+    offset: "md:translate-y-0",
   },
   {
     title: "Yield Seekers",
@@ -18,6 +19,7 @@ const AUDIENCES = [
       "Emerging market rates with sovereign backing. Real yield, not inflationary rewards.",
     accent: "text-accent-purple",
     borderAccent: "hover:border-accent-purple/30",
+    offset: "md:translate-y-12",
   },
   {
     title: "Institutions",
@@ -25,6 +27,7 @@ const AUDIENCES = [
       "On-chain emerging market bond exposure. API access coming soon.",
     accent: "text-white/60",
     borderAccent: "hover:border-white/30",
+    offset: "md:translate-y-24",
   },
 ];
 
@@ -37,11 +40,11 @@ export function ForWhom() {
           <SectionTitle>One product. Three motivations.</SectionTitle>
         </AnimatedSection>
 
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4 md:pb-24">
           {AUDIENCES.map((audience, i) => (
-            <AnimatedSection key={audience.title} delay={i * 0.1}>
+            <AnimatedSection key={audience.title} delay={i * 0.15}>
               <div
-                className={`h-full p-6 rounded-[5px] border border-white/10 bg-surface-0 transition-colors ${audience.borderAccent}`}
+                className={`h-full p-6 rounded-[5px] border border-white/10 bg-surface-0 transition-colors ${audience.borderAccent} ${audience.offset}`}
               >
                 <h3
                   className={`font-mono text-xs uppercase tracking-wide ${audience.accent}`}
