@@ -32,13 +32,16 @@ function PageContent({ children }: { children: React.ReactNode }) {
       )}
 
       {isLoaded && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          {children}
-        </motion.div>
+        <>
+          <CustomCursor />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {children}
+          </motion.div>
+        </>
       )}
     </>
   )
@@ -47,7 +50,6 @@ function PageContent({ children }: { children: React.ReactNode }) {
 export function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
     <LoadingProvider>
-      <CustomCursor />
       <PageContent>{children}</PageContent>
     </LoadingProvider>
   )

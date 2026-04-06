@@ -11,7 +11,7 @@ const AUDIENCES = [
       "Higher yield than US Treasuries without leaving crypto. Up to 18% APY on government bonds.",
     accent: "text-accent-blue",
     borderAccent: "hover:border-accent-blue/30",
-    offset: "md:translate-y-0",
+    offset: "",
   },
   {
     title: "Yield Seekers",
@@ -19,7 +19,7 @@ const AUDIENCES = [
       "Emerging market rates with sovereign backing. Real yield, not inflationary rewards.",
     accent: "text-accent-purple",
     borderAccent: "hover:border-accent-purple/30",
-    offset: "md:translate-y-12",
+    offset: "",
   },
   {
     title: "Institutions",
@@ -27,7 +27,7 @@ const AUDIENCES = [
       "On-chain emerging market bond exposure. API access coming soon.",
     accent: "text-white/60",
     borderAccent: "hover:border-white/30",
-    offset: "md:translate-y-24",
+    offset: "",
   },
 ];
 
@@ -40,7 +40,7 @@ export function ForWhom() {
           <SectionTitle>One product. Three motivations.</SectionTitle>
         </AnimatedSection>
 
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4 md:pb-24">
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4">
           {AUDIENCES.map((audience, i) => (
             <AnimatedSection key={audience.title} delay={i * 0.15}>
               <div
