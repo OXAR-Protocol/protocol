@@ -381,7 +381,7 @@ export function WarpProvider({ children }: { children: ReactNode }) {
           >
             <canvas ref={canvasRef} className="absolute inset-0" />
 
-            {/* "ETNY" text -- appears during Breath phase */}
+            {/* "OXAR" text -- appears during Breath phase */}
             <motion.div
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
               initial={{ opacity: 0, y: 10 }}
@@ -404,7 +404,7 @@ export function WarpProvider({ children }: { children: ReactNode }) {
                   color: 'rgba(255, 255, 255, 0.5)',
                 }}
               >
-                ETNY PROTOCOL
+                OXAR PROTOCOL
               </span>
             </motion.div>
           </motion.div>

@@ -7,27 +7,33 @@ import { SectionLabel } from "@/components/section-label";
 const STEPS = [
   {
     number: "01",
-    title: "Sign Up",
+    title: "Deposit USDC",
     description:
-      "Create an account with email or Google. Your wallet is created automatically — no seed phrases, no extensions.",
+      "Connect wallet or email via Privy. No KYC for small amounts.",
   },
   {
     number: "02",
-    title: "Buy Assets",
+    title: "Choose Vault",
     description:
-      "Purchase tokenized assets with your bank card. Starting with gold — 1 ETNYG = 1 gram, backed by physical reserves.",
+      "Pick country, currency, bond type. Ukraine MVP with 6 vaults.",
   },
   {
     number: "03",
-    title: "Own & Track",
+    title: "Get Yield Token",
     description:
-      "See your balance in real units and dollars. Get notified about audits, reserves status, and price movements.",
+      "Receive oxUAH, oxUSD — yield-bearing SPL tokens on Solana.",
   },
   {
     number: "04",
-    title: "Sell or Send",
+    title: "Earn Daily",
     description:
-      "Sell back to fiat instantly or send assets to anyone in seconds. Full liquidity, anytime.",
+      "Token price increases every day as bond yield accrues on-chain.",
+  },
+  {
+    number: "05",
+    title: "Exit Anytime",
+    description:
+      "Sell on built-in marketplace or wait for bond maturity.",
   },
 ];
 

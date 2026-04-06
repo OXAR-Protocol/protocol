@@ -7,26 +7,26 @@ import { AnimatedSection } from "@/components/animated-section";
 const MILESTONES = [
   {
     phase: "Q2 2026",
-    name: "Launch",
-    details: "Landing page & web app. Buy & sell ETNYG with fiat. Privy onboarding.",
+    name: "Ukraine MVP",
+    details: "6 vaults, USDC deposits, marketplace, Proof of Reserve.",
     status: "current" as const,
   },
   {
     phase: "Q3 2026",
-    name: "Expand",
-    details: "Send gold to other users. DCA & price alerts. Mobile app.",
+    name: "Scale Up",
+    details: "Poland, Turkey bonds. Seed round. Mobile app beta.",
     status: "future" as const,
   },
   {
     phase: "Q4 2026",
-    name: "Real Vaults",
-    details: "Vault partnerships. NFT allocation for 1g+. Proof of reserves & audits.",
+    name: "Institutional",
+    details: "API for funds, KYC module, 5+ countries.",
     status: "future" as const,
   },
   {
     phase: "2027",
-    name: "Ecosystem",
-    details: "Silver & Platinum tokens. Gamification layer. Decentralized storage.",
+    name: "Global Protocol",
+    details: "20+ countries, DAO governance, token launch.",
     status: "future" as const,
   },
 ];

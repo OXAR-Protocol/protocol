@@ -69,7 +69,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <SectionLabel>Real World Assets</SectionLabel>
+          <SectionLabel>Live on Solana · Devnet</SectionLabel>
         </motion.div>
 
         <motion.h1
@@ -78,15 +78,15 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
         >
-          Own real assets.
+          Real-world yields.
           <br />
-          Digitally.
+          On-chain access.
         </motion.h1>
 
         <FadeIn delay={0.4}>
           <p className="mt-6 font-mono text-base text-white/50 leading-relaxed max-w-xl mx-auto [&>strong]:text-white [&>strong]:font-normal">
-            <strong>Buy, sell, and send</strong> real-world assets in seconds.{" "}
-            Gold first, then more. <strong>Backed by physical reserves.</strong> Starting from $5.
+            Government-guaranteed bonds from emerging markets — tokenized on Solana.{" "}
+            <strong>No bank. No broker. Just yield.</strong> Starting with Ukraine.
           </p>
         </FadeIn>
 

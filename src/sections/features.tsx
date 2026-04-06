@@ -75,42 +75,42 @@ const ICONS = [VaultIcon, LightningIcon, ShieldIcon, CoinIcon];
 
 const FEATURES = [
   {
-    value: "Real",
-    label: "Real Assets",
+    value: "Govt",
+    label: "Government Guaranteed",
     description: (
       <>
-        Not paper derivatives. Your tokens are backed by{" "}
-        <strong>real assets in audited vaults.</strong>
+        Backed by <strong>Ukrainian government bonds (OVDP).</strong>{" "}
+        Not private credit, not algo yields.
       </>
     ),
   },
   {
-    value: "Instant",
-    label: "Liquidity",
+    value: "18%",
+    label: "4-18% APY",
     description: (
       <>
-        Buy or sell anytime. <strong>Fiat back to your card</strong> in seconds,
-        not days like traditional banks.
+        Emerging market yields up to <strong>4.5x higher than US Treasuries.</strong>{" "}
+        Real rates, not incentives.
       </>
     ),
   },
   {
     value: "Proof",
-    label: "Of Reserves",
+    label: "On-Chain Transparent",
     description: (
       <>
-        Regular audits, <strong>transparent reserves</strong>. Always know your
-        assets are there.
+        <strong>Proof of Reserve on-chain.</strong> Smart contract audited.{" "}
+        Open source on GitHub.
       </>
     ),
   },
   {
-    value: "$5",
-    label: "Minimum",
+    value: "24/7",
+    label: "Trade 24/7",
     description: (
       <>
-        Start with as little as <strong>$5</strong>. No minimum investment, no
-        barriers to entry.
+        Built-in marketplace. <strong>Sell your position anytime</strong> to
+        other users. No lock-ups.
       </>
     ),
   },
@@ -123,8 +123,8 @@ export function Features() {
 
       <div className="relative max-w-[1200px] mx-auto">
         <AnimatedSection>
-          <SectionLabel>Why ETNY</SectionLabel>
-          <SectionTitle>Asset ownership, reimagined</SectionTitle>
+          <SectionLabel>Why OXAR</SectionLabel>
+          <SectionTitle>Real yields, on-chain</SectionTitle>
         </AnimatedSection>
 
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

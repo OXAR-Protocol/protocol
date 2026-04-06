@@ -10,9 +10,10 @@ type NavItem =
   | { label: string; warpTo: string; warp: true };
 
 const NAV_ITEMS: NavItem[] = [
+  { label: "Problem", href: "#features" },
   { label: "How it works", href: "#how-it-works" },
+  { label: "Vaults", href: "#vaults" },
   { label: "Roadmap", href: "#roadmap" },
-  { label: "Docs", warpTo: "/docs", warp: true },
 ];
 
 export function Header() {
@@ -35,7 +36,7 @@ export function Header() {
     >
       <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
         <a href="#" className="flex items-center">
-          <img src="/images/white.svg" alt="ETNY" className="h-8 w-auto" />
+          <img src="/images/white.svg" alt="OXAR" className="h-8 w-auto" />
         </a>
 
         {/* Desktop nav */}

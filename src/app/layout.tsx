@@ -6,9 +6,9 @@ import { ThemeProvider } from "@/context/theme-context";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ETNY — Own Real Gold, Digitally",
+  title: "OXAR Protocol — Real-World Yields, On-Chain",
   description:
-    "Buy, sell, and send real gold instantly. Backed by physical reserves. Starting from $5.",
+    "Government-guaranteed bonds from emerging markets, tokenized on Solana. 4-18% APY. Deposit USDC, earn yield, trade freely.",
 };
 
 export default function RootLayout({

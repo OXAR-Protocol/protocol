@@ -11,28 +11,28 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
     title: "Product",
     links: [
       { label: "How it works", href: "#how-it-works" },
-      { label: "Features", href: "#features" },
+      { label: "Vaults", href: "#vaults" },
       { label: "Roadmap", href: "#roadmap" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { label: "Documentation", warpTo: "/docs", warp: true },
-      { label: "Press Kit", warpTo: "/kit", warp: true },
+      { label: "Docs", href: "https://github.com/OXAR-Protocol/docs" },
+      { label: "GitHub", href: "https://github.com/OXAR-Protocol" },
+    ],
+  },
+  {
+    title: "Community",
+    links: [
+      { label: "Telegram", href: "#" },
+      { label: "Twitter", href: "#" },
     ],
   },
   {
     title: "Legal",
     links: [
-      { label: "Terms of Use", warpTo: "/terms", warp: true },
-    ],
-  },
-  {
-    title: "Contact",
-    links: [
-      { label: "hello@etny.app", href: "mailto:hello@etny.app" },
-      { label: "contact@etny.app", href: "mailto:contact@etny.app" },
+      { label: "Terms", warpTo: "/terms", warp: true },
     ],
   },
 ];
@@ -82,13 +82,13 @@ export function Footer() {
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <img src="/images/white.svg" alt="ETNY" className="h-6 w-auto" />
+            <img src="/images/white.svg" alt="OXAR" className="h-6 w-auto" />
             <span className="font-mono text-xs text-white/30">
-              Own real assets, digitally.
+              OXAR PROTOCOL
             </span>
           </div>
           <span className="font-mono text-xs text-white/30">
-            © 2026 ETNY. All rights reserved.
+            Built on Solana · 2026
           </span>
         </div>
       </div>

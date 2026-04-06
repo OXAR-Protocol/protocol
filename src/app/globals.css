@@ -171,7 +171,7 @@ html {
 }
 
 /* Logo inversion for light theme */
-[data-theme="light"] img[alt="ETNY"] {
+[data-theme="light"] img[alt="OXAR"] {
   filter: invert(1);
 }
 

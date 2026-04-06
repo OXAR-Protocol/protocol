@@ -154,7 +154,7 @@ export function AssetOrbits() {
           </div>
         ))}
 
-        {/* Center — ETNY logo */}
+        {/* Center — OXAR logo */}
         <div
           className="relative flex-shrink-0 rounded-full flex items-center justify-center"
           style={{
@@ -168,7 +168,7 @@ export function AssetOrbits() {
             zIndex: 10,
           }}
         >
-          <img src="/images/white.svg" alt="ETNY" className="w-16 h-16" />
+          <img src="/images/white.svg" alt="OXAR" className="w-16 h-16" />
           <div
             className="absolute inset-0 rounded-full animate-breathing pointer-events-none"
             style={{

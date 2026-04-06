@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'ETNY — Terms of Use',
+  title: 'OXAR Protocol — Terms of Use',
 }
 
 export default function TermsPage() {
@@ -25,14 +25,14 @@ export default function TermsPage() {
           <section>
             <h2>1. Acceptance of Terms</h2>
             <p>
-              By accessing or using the ETNY platform ("Platform"), website, or any associated services, you agree to be bound by these Terms of Use. If you do not agree, do not use the Platform.
+              By accessing or using the OXAR Protocol platform ("Platform"), website, or any associated services, you agree to be bound by these Terms of Use. If you do not agree, do not use the Platform.
             </p>
           </section>
 
           <section>
             <h2>2. Description of Service</h2>
             <p>
-              ETNY provides a platform for <strong>buying, selling, and sending tokenized gold</strong> (ETNYG tokens). Each ETNYG token represents 1 gram of physical gold. The Platform facilitates transactions between participants and provides access to real-world asset (RWA) gold markets on-chain.
+              OXAR Protocol provides a platform for <strong>depositing USDC and earning yield</strong> from government-guaranteed bonds in emerging markets. The Platform facilitates tokenization of sovereign debt instruments and provides access to real-world asset (RWA) bond yields on-chain via Solana.
             </p>
           </section>
 
@@ -46,14 +46,14 @@ export default function TermsPage() {
           <section>
             <h2>4. No Custody</h2>
             <p>
-              ETNY is a <strong>non-custodial platform</strong>. ETNY does not hold fiat funds on your behalf. ETNYG tokens are held in your own non-custodial wallet. ETNY facilitates transactions but does not custody your assets at any point.
+              OXAR Protocol is a <strong>non-custodial platform</strong>. OXAR Protocol does not hold fiat funds on your behalf. Yield tokens (oxUAH, oxUSD) are held in your own non-custodial wallet. OXAR Protocol facilitates transactions but does not custody your assets at any point.
             </p>
           </section>
 
           <section>
             <h2>5. Risks</h2>
             <p>
-              Tokenized gold and blockchain-based platforms carry inherent risks. You acknowledge that: (a) <strong>volatility of gold prices</strong> may result in loss of value; (b) <strong>counterparty risk</strong> exists with respect to the custodian holding the underlying physical gold; (c) <strong>regulatory risks</strong> may affect the availability of the Platform or the legal status of tokenized assets in your jurisdiction; (d) <strong>blockchain network risks</strong>, including smart contract vulnerabilities, network congestion, and transaction failures, may impact your use of the Platform.
+              Tokenized bonds and blockchain-based platforms carry inherent risks. You acknowledge that: (a) <strong>sovereign credit risk</strong> exists with respect to the issuing government; (b) <strong>currency risk</strong> may affect returns when bonds are denominated in local currencies; (c) <strong>regulatory risks</strong> may affect the availability of the Platform or the legal status of tokenized assets in your jurisdiction; (d) <strong>blockchain network risks</strong>, including smart contract vulnerabilities, network congestion, and transaction failures, may impact your use of the Platform.
             </p>
           </section>
 
@@ -67,7 +67,7 @@ export default function TermsPage() {
           <section>
             <h2>7. Limitation of Liability</h2>
             <p>
-              In no event shall ETNY, its developers, contributors, or partners be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Platform.
+              In no event shall OXAR Protocol, its developers, contributors, or partners be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Platform.
             </p>
           </section>
 
@@ -88,7 +88,7 @@ export default function TermsPage() {
           <section>
             <h2>10. Contact</h2>
             <p>
-              For questions regarding these terms, contact us at <a href="mailto:contact@etny.app" className="text-accent-blue hover:underline">contact@etny.app</a>.
+              For questions regarding these terms, contact us via <a href="https://github.com/OXAR-Protocol" className="text-accent-blue hover:underline">GitHub</a>.
             </p>
           </section>
         </div>

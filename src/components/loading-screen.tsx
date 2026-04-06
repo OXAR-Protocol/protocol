@@ -175,7 +175,7 @@ export function LoadingScreen({
             >
               <Image
                 src={finalLogo}
-                alt="ETNY"
+                alt="OXAR"
                 fill
                 className="object-contain"
                 priority
@@ -200,7 +200,7 @@ export function LoadingScreen({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
-              ETNY PROTOCOL
+              OXAR PROTOCOL
             </motion.p>
           )}
         </motion.div>
