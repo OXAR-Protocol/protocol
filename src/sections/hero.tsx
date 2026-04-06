@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { SectionLabel } from "@/components/section-label";
 import { Button } from "@/components/button";
 import { FadeIn } from "@/components/fade-in";
+import { useWarp } from "@/components/warp-transition";
 
 const LogoParticles = dynamic(
   () => import('@/components/3d/logo-particles').then((mod) => mod.LogoParticles),
@@ -12,6 +13,7 @@ const LogoParticles = dynamic(
 )
 
 export function Hero() {
+  const { startWarp } = useWarp();
   return (
     <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
       {/* Outer grid with radial fade */}
@@ -90,7 +92,7 @@ export function Hero() {
 
         <FadeIn delay={0.6}>
           <div className="mt-10 flex items-center justify-center gap-4 flex-wrap pointer-events-auto">
-          <Button variant="filled" href="#">
+          <Button variant="filled" onClick={() => startWarp("/login")}>
             Launch App
           </Button>
           <Button variant="ghost" href="#how-it-works">

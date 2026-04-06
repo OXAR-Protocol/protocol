@@ -75,7 +75,7 @@ export function Header() {
               </svg>
             )}
           </button>
-          <Button variant="filled" href="#">
+          <Button variant="filled" onClick={() => startWarp("/login")}>
             Launch App
           </Button>
         </nav>
