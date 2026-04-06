@@ -2,8 +2,14 @@
 
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
 import { SectionLabel } from "@/components/section-label";
 import { IsometricBoxes } from "@/components/isometric-boxes";
+
+const LogoParticles = dynamic(
+  () => import('@/components/3d/logo-particles').then((mod) => mod.LogoParticles),
+  { ssr: false }
+);
 
 const STEPS = [
   {
@@ -120,6 +126,10 @@ export function HowItWorks() {
       <div className="relative" style={{ height: `${STEPS.length * 100}vh` }}>
         <div className="sticky top-0 h-screen overflow-hidden">
           <IsometricBoxes className="opacity-30 pointer-events-none" />
+          {/* 3D Logo Particles background */}
+          <div className="absolute inset-0 z-0 opacity-30 pointer-events-none">
+            <LogoParticles />
+          </div>
           {/* Section label */}
           <div className="absolute top-8 left-6 md:left-12 z-20">
             <SectionLabel>How It Works</SectionLabel>
