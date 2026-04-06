@@ -4,58 +4,52 @@ import { SectionLabel } from "@/components/section-label";
 import { SectionTitle } from "@/components/section-title";
 import { AnimatedSection } from "@/components/animated-section";
 import { IsometricBoxes } from "@/components/isometric-boxes";
+import { useCountUp } from "@/hooks/use-count-up";
 
-const ITEMS = [
-  "Government Backed",
-  "Up to 18% APY",
-  "On-Chain Transparent",
-  "Trade 24/7",
-  "No Lock-ups",
-  "Real Yield",
-  "Open Source",
-  "Solana Speed",
+function AnimatedStat() {
+  const counter = useCountUp(4.5, 2000);
+  return (
+    <div ref={counter.ref} className="text-center">
+      <div className="text-[clamp(2.5rem,5vw,4rem)] font-mono font-normal text-white tabular-nums">
+        {counter.value}x
+      </div>
+      <p className="mt-2 font-mono text-sm text-white/50">vs banks</p>
+    </div>
+  );
+}
+
+const STATIC_STATS = [
+  { value: "$0", label: "deposit fee" },
+  { value: "Daily", label: "yield accrual" },
+  { value: "<1min", label: "to start earning" },
 ];
 
 export function Features() {
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-20 px-6 overflow-hidden">
       <IsometricBoxes className="opacity-40 pointer-events-none" />
 
-      <div className="relative max-w-[1200px] mx-auto px-6 mb-12">
+      <div className="relative max-w-[1200px] mx-auto">
         <AnimatedSection>
           <SectionLabel>Why OXAR</SectionLabel>
           <SectionTitle>Real yields, on-chain</SectionTitle>
         </AnimatedSection>
-      </div>
 
-      {/* Marquee — two rows, opposite directions */}
-      <div className="relative space-y-4">
-        {/* Row 1 — left to right */}
-        <div className="overflow-hidden">
-          <div className="flex gap-4 animate-marquee">
-            {[...ITEMS, ...ITEMS].map((item, i) => (
-              <span
-                key={`r1-${i}`}
-                className="flex-shrink-0 px-6 py-3 rounded-[5px] border border-white/10 bg-surface-0 font-mono text-sm text-white/60 whitespace-nowrap hover:border-white/20 hover:text-white transition-colors"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+          <AnimatedSection delay={0}>
+            <AnimatedStat />
+          </AnimatedSection>
 
-        {/* Row 2 — right to left */}
-        <div className="overflow-hidden">
-          <div className="flex gap-4 animate-marquee-reverse">
-            {[...ITEMS.slice(4), ...ITEMS.slice(0, 4), ...ITEMS.slice(4), ...ITEMS.slice(0, 4)].map((item, i) => (
-              <span
-                key={`r2-${i}`}
-                className="flex-shrink-0 px-6 py-3 rounded-[5px] border border-white/10 bg-surface-0 font-mono text-sm text-white/60 whitespace-nowrap hover:border-white/20 hover:text-white transition-colors"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
+          {STATIC_STATS.map((stat, i) => (
+            <AnimatedSection key={stat.value} delay={(i + 1) * 0.1}>
+              <div className="text-center">
+                <div className="text-[clamp(2.5rem,5vw,4rem)] font-mono font-normal text-white">
+                  {stat.value}
+                </div>
+                <p className="mt-2 font-mono text-sm text-white/50">{stat.label}</p>
+              </div>
+            </AnimatedSection>
+          ))}
         </div>
       </div>
     </section>
