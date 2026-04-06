@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { LoadingScreen } from '@/components/loading-screen'
 import { LoadingProvider, useLoading } from '@/context/loading-context'
+import { CustomCursor } from '@/components/custom-cursor'
 
 function PageContent({ children }: { children: React.ReactNode }) {
   const { isLoaded, setIsLoaded } = useLoading()
@@ -46,6 +47,7 @@ function PageContent({ children }: { children: React.ReactNode }) {
 export function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
     <LoadingProvider>
+      <CustomCursor />
       <PageContent>{children}</PageContent>
     </LoadingProvider>
   )

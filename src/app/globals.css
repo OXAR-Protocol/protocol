@@ -42,6 +42,13 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Custom cursor — hide default on desktop only */
+@media (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}
+
 ::selection {
   background: rgba(139, 92, 246, 0.3);
   color: white;
