@@ -37,9 +37,51 @@ const STEPS = [
   },
 ];
 
+// Arc config
+const ARC_RADIUS = 600;
+const ARC_CENTER_X = -ARC_RADIUS + 120; // pushes center off left edge
+const ARC_CENTER_Y_RATIO = 0.5; // vertical center of screen
+const STEP_ARC_SPAN = 28; // degrees between steps
+const CENTER_ANGLE = 0; // active step sits at 0° (3 o'clock = right side of arc)
+
+function getArcPosition(
+  stepIndex: number,
+  activeStep: number,
+  screenHeight: number
+) {
+  const offset = stepIndex - activeStep;
+  const angleDeg = CENTER_ANGLE + offset * STEP_ARC_SPAN;
+  const angleRad = (angleDeg * Math.PI) / 180;
+  const cx = ARC_CENTER_X;
+  const cy = screenHeight * ARC_CENTER_Y_RATIO;
+
+  return {
+    x: cx + ARC_RADIUS * Math.cos(angleRad),
+    y: cy - ARC_RADIUS * Math.sin(angleRad),
+    angleDeg,
+  };
+}
+
+function getStepStyle(offset: number) {
+  const absOffset = Math.abs(offset);
+  if (absOffset === 0)
+    return { scale: 1, opacity: 1, fontSize: "clamp(3rem, 8vw, 5rem)" };
+  if (absOffset === 1)
+    return { scale: 0.6, opacity: 0.25, fontSize: "clamp(2rem, 5vw, 3.5rem)" };
+  return { scale: 0.4, opacity: 0.1, fontSize: "clamp(1.5rem, 4vw, 2.5rem)" };
+}
+
 export function HowItWorks() {
   const [activeStep, setActiveStep] = useState(0);
+  const [screenH, setScreenH] = useState(800);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    setScreenH(window.innerHeight);
+    const onResize = () => setScreenH(window.innerHeight);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
@@ -48,9 +90,7 @@ export function HowItWorks() {
       if (!ref) return;
       const observer = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting) {
-            setActiveStep(i);
-          }
+          if (entry.isIntersecting) setActiveStep(i);
         },
         { threshold: 0.5 }
       );
@@ -63,80 +103,103 @@ export function HowItWorks() {
 
   return (
     <section id="how-it-works">
-      {/* Sticky container */}
       <div className="relative" style={{ height: `${STEPS.length * 100}vh` }}>
-        <div className="sticky top-0 h-screen flex items-center overflow-hidden">
-          <div className="max-w-[1200px] mx-auto w-full px-6 flex items-center gap-12 md:gap-20">
-            {/* Left — big number */}
-            <div className="hidden md:flex flex-col items-start flex-shrink-0 w-[280px]">
-              <SectionLabel>How It Works</SectionLabel>
+        <div className="sticky top-0 h-screen overflow-hidden">
+          {/* Section label */}
+          <div className="absolute top-8 left-6 md:left-12 z-20">
+            <SectionLabel>How It Works</SectionLabel>
+          </div>
 
-              <div className="relative mt-6 h-[180px] w-full overflow-hidden">
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={activeStep}
-                    initial={{ y: 80, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: -80, opacity: 0 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="absolute font-mono text-[160px] font-light leading-none text-white/[0.07]"
-                  >
-                    {STEPS[activeStep].number}
-                  </motion.span>
-                </AnimatePresence>
-              </div>
+          {/* Arc line (decorative) */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{ overflow: "visible" }}
+          >
+            <circle
+              cx={ARC_CENTER_X}
+              cy={screenH * ARC_CENTER_Y_RATIO}
+              r={ARC_RADIUS}
+              fill="none"
+              stroke="rgba(255,255,255,0.06)"
+              strokeWidth="1"
+            />
+          </svg>
 
-              {/* Step indicator dots */}
-              <div className="flex gap-3 mt-4">
-                {STEPS.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-1 rounded-full transition-all duration-500 ${
-                      i === activeStep
-                        ? "w-8 bg-white/60"
-                        : "w-3 bg-white/15"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
+          {/* Step numbers along the arc */}
+          {STEPS.map((step, i) => {
+            const pos = getArcPosition(i, activeStep, screenH);
+            const offset = i - activeStep;
+            const style = getStepStyle(offset);
 
-            {/* Mobile label */}
-            <div className="md:hidden absolute top-8 left-6">
-              <SectionLabel>How It Works</SectionLabel>
-            </div>
-
-            {/* Right — content */}
-            <div className="flex-1 relative min-h-[300px]">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeStep}
-                  initial={{ opacity: 0, x: 40 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -40 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
+            return (
+              <motion.div
+                key={step.number}
+                className="absolute pointer-events-none"
+                animate={{
+                  x: pos.x - 40,
+                  y: pos.y - 40,
+                  scale: style.scale,
+                  opacity: style.opacity,
+                }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {/* Dot on arc */}
+                <div
+                  className={`absolute top-1/2 -left-4 -translate-y-1/2 rounded-full transition-all duration-500 ${
+                    offset === 0
+                      ? "w-2.5 h-2.5 bg-white/80"
+                      : "w-1.5 h-1.5 bg-white/20"
+                  }`}
+                />
+                <span
+                  className="font-mono font-light text-white block"
+                  style={{ fontSize: style.fontSize }}
                 >
-                  {/* Mobile number */}
-                  <span className="md:hidden font-mono text-7xl font-light text-white/10 block mb-4">
-                    {STEPS[activeStep].number}
-                  </span>
+                  {step.number}
+                </span>
+              </motion.div>
+            );
+          })}
 
-                  <div className="h-px w-16 bg-white/20 mb-6" />
+          {/* Content — right side */}
+          <div className="absolute top-1/2 -translate-y-1/2 right-6 md:right-12 lg:right-[10%] w-[min(400px,50vw)]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeStep}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                <div className="h-px w-12 bg-white/20 mb-6" />
 
-                  <h3 className="font-mono text-2xl md:text-3xl uppercase tracking-wide text-white mb-6">
-                    {STEPS[activeStep].title}
-                  </h3>
+                <h3 className="font-mono text-xl md:text-2xl lg:text-3xl uppercase tracking-wide text-white mb-4">
+                  {STEPS[activeStep].title}
+                </h3>
 
-                  <p className="font-mono text-base md:text-lg leading-relaxed text-white/40 max-w-lg">
-                    {STEPS[activeStep].description}
-                  </p>
+                <p className="font-mono text-sm md:text-base leading-relaxed text-white/40">
+                  {STEPS[activeStep].description}
+                </p>
 
-                  <div className="mt-8 font-mono text-xs text-white/20 uppercase tracking-widest">
-                    Step {activeStep + 1} of {STEPS.length}
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                <div className="mt-6 font-mono text-xs text-white/20 uppercase tracking-widest">
+                  Step {activeStep + 1} of {STEPS.length}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Step indicator dots — bottom */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3">
+            {STEPS.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1 rounded-full transition-all duration-500 ${
+                  i === activeStep
+                    ? "w-8 bg-white/60"
+                    : "w-3 bg-white/15"
+                }`}
+              />
+            ))}
           </div>
         </div>
 
