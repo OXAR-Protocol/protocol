@@ -42,7 +42,12 @@ export function Footer() {
 
   return (
     <footer className="relative pt-20 pb-12 px-6 overflow-hidden">
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-amber-500/5 blur-[120px] pointer-events-none" />
+      <div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full blur-[120px] pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse at center, rgba(114,162,240,0.06) 0%, rgba(139,92,246,0.04) 60%, transparent 100%)",
+        }}
+      />
 
       <div className="relative max-w-[1200px] mx-auto">
         <div className="h-px bg-white/10 mb-16" />
