@@ -15,7 +15,7 @@ interface IsometricBoxesProps {
  */
 export function IsometricBoxes({ className = '' }: IsometricBoxesProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(true)
   const isDarkRef = useRef(true)
 
   useEffect(() => {
@@ -267,6 +267,7 @@ export function IsometricBoxes({ className = '' }: IsometricBoxesProps) {
       const t = time * 0.001
 
       if (!mouse.active) {
+        // Lissajous figure-8 pattern — always visible when no cursor
         autoSpot.x = w / 2 + Math.sin(t * 0.18) * w * 0.28
         autoSpot.y = h / 2 + Math.sin(t * 0.24) * h * 0.22
       }

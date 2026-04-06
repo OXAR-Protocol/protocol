@@ -3,21 +3,32 @@
 import { useState, useEffect, ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-function BondIcon() {
-  return (
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
-      <rect x="4" y="4" width="16" height="16" rx="2" />
-      <path d="M8 8h8M8 12h8M8 16h4" />
-    </svg>
-  )
-}
-
 function GoldIcon() {
   return (
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
       <path d="M6 16L4 22H20L18 16" />
       <rect x="5" y="10" width="14" height="6" rx="1" />
       <rect x="7" y="5" width="10" height="5" rx="1" />
+    </svg>
+  )
+}
+
+function SilverIcon() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
+      <circle cx="12" cy="12" r="8" />
+      <circle cx="12" cy="12" r="5" />
+      <path d="M12 9V15M9.5 10.5L14.5 13.5" />
+    </svg>
+  )
+}
+
+function PlatinumIcon() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
+      <path d="M12 3L20 9L16 21H8L4 9L12 3Z" strokeLinejoin="round" />
+      <path d="M4 9H20" opacity="0.6" />
+      <path d="M8 6L10 12L12 20L14 12L16 6" opacity="0.5" />
     </svg>
   )
 }
@@ -62,13 +73,25 @@ function EnergyIcon() {
   )
 }
 
+function MineralsIcon() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
+      <path d="M5 12L8 6H16L19 12L12 20L5 12Z" strokeLinejoin="round" />
+      <path d="M5 12H19" opacity="0.6" />
+      <path d="M8 6L10 12L12 20L14 12L16 6" opacity="0.5" />
+    </svg>
+  )
+}
+
 const ASSETS: { icon: ReactNode; label: string }[] = [
-  { icon: <BondIcon />, label: 'Bonds' },
   { icon: <GoldIcon />, label: 'Gold' },
+  { icon: <SilverIcon />, label: 'Silver' },
+  { icon: <PlatinumIcon />, label: 'Platinum' },
   { icon: <StocksIcon />, label: 'Stocks' },
   { icon: <RealEstateIcon />, label: 'Real Estate' },
   { icon: <CommoditiesIcon />, label: 'Commodities' },
   { icon: <EnergyIcon />, label: 'Energy' },
+  { icon: <MineralsIcon />, label: 'Minerals' },
 ]
 
 export function AssetOrbits() {
@@ -81,27 +104,30 @@ export function AssetOrbits() {
     return () => clearInterval(interval)
   }, [])
 
+  // Circle positions relative to center, spreading outward
+  // Left: positions -4, -3, -2, -1  |  Center: 0  |  Right: 1, 2, 3, 4
   const circleSize = 160
   const centerSize = 200
-  const gap = -16
+  const gap = -16 // slight overlap
 
-  const leftCircles = [2, 1, 0].map((distFromCenter) => ({
-    assetIdx: (activeIndex + 3 + distFromCenter) % ASSETS.length,
-    opacity: 0.08 + (2 - distFromCenter) * 0.08,
+  const leftCircles = [3, 2, 1, 0].map((distFromCenter) => ({
+    assetIdx: (activeIndex + 4 + distFromCenter) % ASSETS.length,
+    opacity: 0.08 + (3 - distFromCenter) * 0.06,
     delay: (distFromCenter + 1) * 0.12,
-    iconOpacity: 0.2 + (2 - distFromCenter) * 0.15,
+    iconOpacity: 0.2 + (3 - distFromCenter) * 0.12,
   }))
 
-  const rightCircles = [0, 1, 2].map((distFromCenter) => ({
+  const rightCircles = [0, 1, 2, 3].map((distFromCenter) => ({
     assetIdx: (activeIndex + 1 + distFromCenter) % ASSETS.length,
-    opacity: 0.25 - distFromCenter * 0.06,
+    opacity: 0.25 - distFromCenter * 0.05,
     delay: (distFromCenter + 1) * 0.12,
-    iconOpacity: 0.55 - distFromCenter * 0.15,
+    iconOpacity: 0.55 - distFromCenter * 0.12,
   }))
 
   return (
     <section className="relative py-8 overflow-hidden">
       <div className="flex items-center justify-center">
+        {/* Left circles — dashed outlines */}
         {leftCircles.map((circle, i) => (
           <div
             key={`left-${i}`}
@@ -128,6 +154,7 @@ export function AssetOrbits() {
           </div>
         ))}
 
+        {/* Center — ETNY logo */}
         <div
           className="relative flex-shrink-0 rounded-full flex items-center justify-center"
           style={{
@@ -141,7 +168,7 @@ export function AssetOrbits() {
             zIndex: 10,
           }}
         >
-          <img src="/images/white.svg" alt="OXAR" className="w-16 h-16" />
+          <img src="/images/white.svg" alt="ETNY" className="w-16 h-16" />
           <div
             className="absolute inset-0 rounded-full animate-breathing pointer-events-none"
             style={{
@@ -151,6 +178,7 @@ export function AssetOrbits() {
           />
         </div>
 
+        {/* Right circles — solid dark fills */}
         {rightCircles.map((circle, i) => (
           <div
             key={`right-${i}`}
@@ -161,7 +189,7 @@ export function AssetOrbits() {
               marginLeft: gap,
               background: `rgba(20,20,25,${0.7 - i * 0.1})`,
               border: `1px solid rgba(255,255,255,${circle.opacity * 0.35})`,
-              zIndex: 3 - i,
+              zIndex: 4 - i,
             }}
           >
             <AnimatePresence mode="wait">
@@ -179,6 +207,7 @@ export function AssetOrbits() {
         ))}
       </div>
 
+      {/* Asset label */}
       <div className="flex justify-center mt-6">
         <AnimatePresence mode="wait">
           <motion.span
@@ -187,7 +216,7 @@ export function AssetOrbits() {
             animate={{ opacity: 0.35, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.3, delay: 0.1 }}
-            className="font-mono text-xs uppercase tracking-widest text-white/[0.35]"
+            className="font-mono text-xs uppercase tracking-widest text-white/35"
           >
             {ASSETS[activeIndex].label}
           </motion.span>

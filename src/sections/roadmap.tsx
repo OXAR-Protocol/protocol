@@ -1,32 +1,32 @@
 "use client";
 
-import { SectionLabel } from "@/components/landing/section-label";
-import { SectionTitle } from "@/components/landing/section-title";
-import { AnimatedSection } from "@/components/landing/animated-section";
+import { SectionLabel } from "@/components/section-label";
+import { SectionTitle } from "@/components/section-title";
+import { AnimatedSection } from "@/components/animated-section";
 
 const MILESTONES = [
   {
     phase: "Q2 2026",
     name: "Launch",
-    details: "Landing page & web app. Buy & sell tokenized bonds. Privy onboarding on Solana.",
+    details: "Landing page & web app. Buy & sell ETNYG with fiat. Privy onboarding.",
     status: "current" as const,
   },
   {
     phase: "Q3 2026",
     name: "Expand",
-    details: "Secondary marketplace. DCA & price alerts. Mobile app.",
+    details: "Send gold to other users. DCA & price alerts. Mobile app.",
     status: "future" as const,
   },
   {
     phase: "Q4 2026",
     name: "Real Vaults",
-    details: "Vault partnerships. NFT allocation for bonds. Proof of reserves & audits.",
+    details: "Vault partnerships. NFT allocation for 1g+. Proof of reserves & audits.",
     status: "future" as const,
   },
   {
     phase: "2027",
     name: "Ecosystem",
-    details: "Multi-asset tokenization. Gamification layer. Cross-chain support.",
+    details: "Silver & Platinum tokens. Gamification layer. Decentralized storage.",
     status: "future" as const,
   },
 ];

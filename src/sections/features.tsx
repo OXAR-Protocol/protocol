@@ -1,9 +1,9 @@
 "use client";
 
-import { SectionLabel } from "@/components/landing/section-label";
-import { SectionTitle } from "@/components/landing/section-title";
-import { AnimatedSection } from "@/components/landing/animated-section";
-import { IsometricBoxes } from "@/components/landing/isometric-boxes";
+import { SectionLabel } from "@/components/section-label";
+import { SectionTitle } from "@/components/section-title";
+import { AnimatedSection } from "@/components/animated-section";
+import { IsometricBoxes } from "@/components/isometric-boxes";
 
 function VaultIcon() {
   return (
@@ -123,7 +123,7 @@ export function Features() {
 
       <div className="relative max-w-[1200px] mx-auto">
         <AnimatedSection>
-          <SectionLabel>Why OXAR</SectionLabel>
+          <SectionLabel>Why ETNY</SectionLabel>
           <SectionTitle>Asset ownership, reimagined</SectionTitle>
         </AnimatedSection>
 

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'OXAR Protocol -- Press Kit',
+  title: 'ETNY Protocol — Press Kit',
 }
 
 export default function KitPage() {
@@ -9,7 +9,7 @@ export default function KitPage() {
     <main className="min-h-screen bg-surface-0 text-white px-6 py-32">
       <div className="max-w-[800px] mx-auto">
         <Link href="/" className="font-mono text-sm text-white/30 hover:text-white transition-colors mb-12 inline-block">
-          &larr; Back
+          ← Back
         </Link>
 
         <span className="font-mono text-xs font-semibold tracking-[0.15em] uppercase text-white/30 block mb-4">
@@ -21,26 +21,27 @@ export default function KitPage() {
 
         <div className="space-y-12 font-mono text-sm leading-relaxed text-white/30 [&_strong]:text-white [&_strong]:font-normal [&_h2]:text-white [&_h2]:font-sans [&_h2]:text-xl [&_h2]:font-normal [&_h2]:mb-4 [&_h2]:mt-0">
           <section>
-            <h2>About OXAR</h2>
+            <h2>About ETNY</h2>
             <p>
-              OXAR is a protocol for <strong>tokenizing real-world assets on Solana</strong>. Government bonds first, then more asset classes. Built for accessibility and transparency.
+              ETNY is a platform for <strong>buying, selling, and sending real gold digitally</strong>. Each ETNYG token represents 1 gram of physical gold, backed by audited reserves.
             </p>
           </section>
 
           <section>
             <h2>Key Facts</h2>
             <ul className="list-none space-y-3 mt-4">
-              <li>&rarr; <strong>Founded:</strong> 2026</li>
-              <li>&rarr; <strong>Category:</strong> Real World Assets (RWA) / DeFi</li>
-              <li>&rarr; <strong>Network:</strong> Solana</li>
-              <li>&rarr; <strong>Backing:</strong> Government bonds &amp; real reserves</li>
+              <li>→ <strong>Founded:</strong> 2026</li>
+              <li>→ <strong>Category:</strong> Real World Assets (RWA) / Fintech</li>
+              <li>→ <strong>Token:</strong> $ETNYG (1 token = 1 gram gold)</li>
+              <li>→ <strong>Network:</strong> Arbitrum (L2)</li>
+              <li>→ <strong>Backing:</strong> Physical gold reserves</li>
             </ul>
           </section>
 
           <section>
             <h2>Logo</h2>
             <p className="mb-6">
-              The OXAR logo is available in multiple color variants. Use the white version on dark backgrounds and the black version on light backgrounds. Do not modify, rotate, or distort the logo.
+              The ETNY logo is available in multiple color variants. Use the white version on dark backgrounds and the black version on light backgrounds. Do not modify, rotate, or distort the logo.
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -53,7 +54,7 @@ export default function KitPage() {
                 { name: 'Breeze', file: 'logo_breeze.svg' },
               ].map((logo) => (
                 <div key={logo.name} className="p-6 rounded-[5px] border border-white/10 flex flex-col items-center gap-4">
-                  <img src={`/images/${logo.file}`} alt={`OXAR ${logo.name}`} className="h-16 w-auto" />
+                  <img src={`/images/${logo.file}`} alt={`ETNY ${logo.name}`} className="h-16 w-auto" />
                   <span className="text-white/50 text-xs">{logo.name}</span>
                 </div>
               ))}
@@ -83,17 +84,17 @@ export default function KitPage() {
           <section>
             <h2>Typography</h2>
             <p>
-              OXAR uses the <strong>Geist</strong> font family by Vercel. <strong>Geist Sans</strong> for headings and display text. <strong>Geist Mono</strong> for body text, labels, and code.
+              ETNY uses the <strong>Geist</strong> font family by Vercel. <strong>Geist Sans</strong> for headings and display text. <strong>Geist Mono</strong> for body text, labels, and code.
             </p>
           </section>
 
           <section>
             <h2>Usage Guidelines</h2>
             <ul className="list-none space-y-3 mt-4">
-              <li>&rarr; Do not modify or distort the logo</li>
-              <li>&rarr; Maintain clear space around the logo equal to the height of the logo mark</li>
-              <li>&rarr; Do not place the logo on busy backgrounds without sufficient contrast</li>
-              <li>&rarr; Do not use the logo to imply endorsement without written permission</li>
+              <li>→ Do not modify or distort the logo</li>
+              <li>→ Maintain clear space around the logo equal to the height of the logo mark</li>
+              <li>→ Do not place the logo on busy backgrounds without sufficient contrast</li>
+              <li>→ Do not use the logo to imply endorsement without written permission</li>
             </ul>
           </section>
         </div>

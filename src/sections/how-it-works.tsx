@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SectionLabel } from "@/components/landing/section-label";
+import { SectionLabel } from "@/components/section-label";
 
 const STEPS = [
   {
@@ -15,13 +15,13 @@ const STEPS = [
     number: "02",
     title: "Buy Assets",
     description:
-      "Purchase tokenized government bonds with your bank card. Each token is backed by real reserves on Solana.",
+      "Purchase tokenized assets with your bank card. Starting with gold — 1 ETNYG = 1 gram, backed by physical reserves.",
   },
   {
     number: "03",
     title: "Own & Track",
     description:
-      "See your balance in real units and dollars. Get notified about audits, reserves status, and yield accrual.",
+      "See your balance in real units and dollars. Get notified about audits, reserves status, and price movements.",
   },
   {
     number: "04",

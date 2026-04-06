@@ -1,6 +1,6 @@
 "use client";
 
-import { useWarp } from "@/components/landing/warp-transition";
+import { useWarp } from "@/components/warp-transition";
 
 type FooterLink =
   | { label: string; href: string; warp?: false }
@@ -31,8 +31,8 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
   {
     title: "Contact",
     links: [
-      { label: "hello@oxar.app", href: "mailto:hello@oxar.app" },
-      { label: "contact@oxar.app", href: "mailto:contact@oxar.app" },
+      { label: "hello@etny.app", href: "mailto:hello@etny.app" },
+      { label: "contact@etny.app", href: "mailto:contact@etny.app" },
     ],
   },
 ];
@@ -42,7 +42,7 @@ export function Footer() {
 
   return (
     <footer className="relative pt-20 pb-12 px-6 overflow-hidden">
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-accent-blue/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-amber-500/5 blur-[120px] pointer-events-none" />
 
       <div className="relative max-w-[1200px] mx-auto">
         <div className="h-px bg-white/10 mb-16" />
@@ -82,13 +82,13 @@ export function Footer() {
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <img src="/images/white.svg" alt="OXAR" className="h-6 w-auto" />
+            <img src="/images/white.svg" alt="ETNY" className="h-6 w-auto" />
             <span className="font-mono text-xs text-white/30">
               Own real assets, digitally.
             </span>
           </div>
           <span className="font-mono text-xs text-white/30">
-            &copy; 2026 OXAR. All rights reserved.
+            © 2026 ETNY. All rights reserved.
           </span>
         </div>
       </div>

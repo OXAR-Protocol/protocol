@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 'use client'
 
@@ -180,6 +179,7 @@ function ParticleSystem({
   const [darkTarget, setDarkTarget] = useState<Float32Array | null>(null)
   const [lightTarget, setLightTarget] = useState<Float32Array | null>(null)
 
+  // Load current theme SVG first, defer the other to avoid blocking
   const isDarkInitial = useRef(isDark)
   useEffect(() => {
     const primary = isDarkInitial.current ? '/images/logo_white.svg' : '/images/logo_black.svg'
@@ -187,8 +187,10 @@ function ParticleSystem({
     const setPrimary = isDarkInitial.current ? setDarkTarget : setLightTarget
     const setSecondary = isDarkInitial.current ? setLightTarget : setDarkTarget
 
+    // Load primary first, then secondary after a delay
     sampleLogoPoints(primary, PARTICLE_COUNT).then((pts) => {
       setPrimary(pts)
+      // Defer secondary to next idle period
       requestAnimationFrame(() => {
         sampleLogoPoints(secondary, PARTICLE_COUNT).then(setSecondary)
       })
@@ -287,6 +289,7 @@ function ParticleSystem({
   useFrame((state) => {
     if (!pointsRef.current || !targetPositions) return
 
+    // Skip computation when hero is off-screen (settled phase only)
     if (!isVisible && settledRef.current) return
 
     const geo = pointsRef.current.geometry
@@ -308,6 +311,7 @@ function ParticleSystem({
     const assembleEnd = FORM_DURATION
 
     if (elapsed < assembleEnd) {
+      // Phase 2: Assembly — simple lerp, no stagger, no cursor during assembly
       const rawProgress = Math.min(1, elapsed / FORM_DURATION)
       const eased = 1 - (1 - rawProgress) * (1 - rawProgress) * (1 - rawProgress)
 
@@ -435,6 +439,7 @@ export function LogoParticles({ className = '' }: { className?: string }) {
   const mouseWorld = useRef({ x: -9999, y: -9999, active: false })
   const [isVisible, setIsVisible] = useState(true)
 
+  // IntersectionObserver to pause when hero is off-screen
   useEffect(() => {
     const el = containerRef.current
     if (!el) return

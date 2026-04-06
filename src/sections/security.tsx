@@ -1,10 +1,10 @@
 "use client";
 
-import { SectionLabel } from "@/components/landing/section-label";
-import { SectionTitle } from "@/components/landing/section-title";
-import { AnimatedSection } from "@/components/landing/animated-section";
-import { NodeVisualization } from "@/components/landing/node-visualization";
-import { IsometricBoxes } from "@/components/landing/isometric-boxes";
+import { SectionLabel } from "@/components/section-label";
+import { SectionTitle } from "@/components/section-title";
+import { AnimatedSection } from "@/components/animated-section";
+import { NodeVisualization } from "@/components/node-visualization";
+import { IsometricBoxes } from "@/components/isometric-boxes";
 
 const BLOCKS = [
   {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/landing/landing-button";
+import { Button } from "@/components/button";
 import { useTheme } from "@/context/theme-context";
-import { useWarp } from "@/components/landing/warp-transition";
+import { useWarp } from "@/components/warp-transition";
 
 type NavItem =
   | { label: string; href: string; warp?: false }
@@ -35,7 +35,7 @@ export function Header() {
     >
       <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
         <a href="#" className="flex items-center">
-          <img src="/images/white.svg" alt="OXAR" className="h-8 w-auto" />
+          <img src="/images/white.svg" alt="ETNY" className="h-8 w-auto" />
         </a>
 
         {/* Desktop nav */}
@@ -61,7 +61,7 @@ export function Header() {
           )}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg border border-white/10 hover:bg-surface-1 transition-colors"
+            className="p-2 rounded-lg border border-border hover:bg-surface-1 transition-colors"
             aria-label="Toggle theme"
           >
             {theme === 'dark' ? (
@@ -75,7 +75,7 @@ export function Header() {
               </svg>
             )}
           </button>
-          <Button variant="filled" href="/login">
+          <Button variant="filled" href="#">
             Launch App
           </Button>
         </nav>
@@ -133,7 +133,7 @@ export function Header() {
             )}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg border border-white/10 hover:bg-surface-1 transition-colors w-fit"
+              className="p-2 rounded-lg border border-border hover:bg-surface-1 transition-colors w-fit"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? (
@@ -147,7 +147,7 @@ export function Header() {
                 </svg>
               )}
             </button>
-            <Button variant="filled" href="/login" onClick={() => setMobileOpen(false)}>
+            <Button variant="filled" href="#" onClick={() => setMobileOpen(false)}>
               Launch App
             </Button>
           </div>

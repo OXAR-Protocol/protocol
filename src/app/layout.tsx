@@ -1,48 +1,31 @@
 import type { Metadata } from "next";
-import { Inter, Space_Mono, Bebas_Neue } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
+import { PageWrapper } from "@/components/page-wrapper";
+import { ThemeProvider } from "@/context/theme-context";
 import "./globals.css";
-import { cn } from "@/lib/utils";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  weight: ["300", "400", "500"],
-});
-
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  variable: "--font-space-mono",
-  weight: ["400", "700"],
-});
-
-const bebasNeue = Bebas_Neue({
-  subsets: ["latin"],
-  variable: "--font-bebas-neue",
-  weight: "400",
-});
 
 export const metadata: Metadata = {
-  title: "OXAR Protocol",
+  title: "ETNY — Own Real Gold, Digitally",
   description:
-    "RWA tokenization protocol on Solana - Government bonds, tokenized.",
+    "Buy, sell, and send real gold instantly. Backed by physical reserves. Starting from $5.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html
       lang="en"
-      className={cn(
-        inter.variable,
-        spaceMono.variable,
-        bebasNeue.variable,
-        "font-sans"
-      )}
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="bg-surface-0 text-white font-sans antialiased overflow-x-hidden">
+        <ThemeProvider>
+          <PageWrapper>{children}</PageWrapper>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

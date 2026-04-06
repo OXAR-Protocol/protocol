@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { LoadingScreen } from '@/components/landing/loading-screen'
+import { LoadingScreen } from '@/components/loading-screen'
 import { LoadingProvider, useLoading } from '@/context/loading-context'
 
 function PageContent({ children }: { children: React.ReactNode }) {

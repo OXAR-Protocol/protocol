@@ -81,7 +81,9 @@ export function StaggerContainer({
       viewport={{ once, margin: '-50px' }}
       variants={{
         visible: {
-          transition: { staggerChildren: staggerDelay },
+          transition: {
+            staggerChildren: staggerDelay,
+          },
         },
       }}
       className={className}

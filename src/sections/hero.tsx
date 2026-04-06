@@ -2,9 +2,9 @@
 
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { SectionLabel } from "@/components/landing/section-label";
-import { Button } from "@/components/landing/landing-button";
-import { FadeIn } from "@/components/landing/fade-in";
+import { SectionLabel } from "@/components/section-label";
+import { Button } from "@/components/button";
+import { FadeIn } from "@/components/fade-in";
 
 const LogoParticles = dynamic(
   () => import('@/components/3d/logo-particles').then((mod) => mod.LogoParticles),
@@ -58,8 +58,8 @@ export function Hero() {
         }}
       />
 
-      {/* Accent glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-accent-blue/15 blur-[120px] animate-breathing pointer-events-none" />
+      {/* Golden glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-amber-500/15 blur-[120px] animate-breathing pointer-events-none" />
 
       <div className="relative z-30 text-center max-w-3xl mx-auto pointer-events-none">
         <motion.div
@@ -84,17 +84,17 @@ export function Hero() {
         <FadeIn delay={0.4}>
           <p className="mt-6 font-mono text-base text-white/50 leading-relaxed max-w-xl mx-auto [&>strong]:text-white [&>strong]:font-normal">
             <strong>Buy, sell, and send</strong> real-world assets in seconds.{" "}
-            Government bonds first, then more. <strong>Backed by real reserves.</strong> Starting from $5.
+            Gold first, then more. <strong>Backed by physical reserves.</strong> Starting from $5.
           </p>
         </FadeIn>
 
         <FadeIn delay={0.6}>
           <div className="mt-10 flex items-center justify-center gap-4 flex-wrap pointer-events-auto">
-          <Button variant="filled" href="/login">
+          <Button variant="filled" href="#">
             Launch App
           </Button>
           <Button variant="ghost" href="#how-it-works">
-            Learn more
+            Learn more ↓
           </Button>
           </div>
         </FadeIn>

@@ -18,7 +18,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark')
 
   useEffect(() => {
-    const saved = localStorage.getItem('oxar-theme') as Theme | null
+    const saved = localStorage.getItem('etny-theme') as Theme | null
     if (saved) {
       setTheme(saved)
       document.documentElement.setAttribute('data-theme', saved)
@@ -28,7 +28,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark'
     setTheme(next)
-    localStorage.setItem('oxar-theme', next)
+    localStorage.setItem('etny-theme', next)
     document.documentElement.setAttribute('data-theme', next)
   }
 
