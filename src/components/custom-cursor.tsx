@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useTheme } from "@/context/theme-context";
 
 const TRAIL_LENGTH = 12;
-const HISTORY_SIZE = 80; // store more positions for smooth sampling
-const TRAIL_SPACING = 5; // frames between each particle
+const HISTORY_SIZE = 120;
+const TRAIL_SPACING = 8; // more frames between particles = more lag
 
 export function CustomCursor() {
   const { theme } = useTheme();
