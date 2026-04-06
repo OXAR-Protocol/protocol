@@ -21,41 +21,77 @@ function generateNavGrowth(apy: number, points = 24): number[] {
   return data;
 }
 
-function Sparkline({ data, color }: { data: number[]; color: string }) {
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const h = 60;
+function ComparisonChart({
+  oxarData,
+  bankData,
+  color,
+}: {
+  oxarData: number[];
+  bankData: number[];
+  color: string;
+}) {
+  const allValues = [...oxarData, ...bankData];
+  const max = Math.max(...allValues);
+  const min = Math.min(...allValues);
+  const range = max - min + 0.01;
+  const h = 80;
   const w = 200;
+  const labelW = 50;
+  const totalW = w + labelW;
 
-  const areaPath = `M0,${h} L${data
-    .map((v, i) => {
-      const x = (i / (data.length - 1)) * w;
-      const y = h - ((v - min) / (max - min + 0.01)) * h;
-      return `${x},${y}`;
-    })
-    .join(" L")} L${w},${h} Z`;
+  function toPoints(data: number[]) {
+    return data
+      .map((v, i) => {
+        const x = (i / (data.length - 1)) * w;
+        const y = h - ((v - min) / range) * h;
+        return `${x},${y}`;
+      })
+      .join(" ");
+  }
 
-  const linePts = data
-    .map((v, i) => {
-      const x = (i / (data.length - 1)) * w;
-      const y = h - ((v - min) / (max - min + 0.01)) * h;
-      return `${x},${y}`;
-    })
-    .join(" ");
+  function toArea(data: number[]) {
+    return `M0,${h} L${data
+      .map((v, i) => {
+        const x = (i / (data.length - 1)) * w;
+        const y = h - ((v - min) / range) * h;
+        return `${x},${y}`;
+      })
+      .join(" L")} L${w},${h} Z`;
+  }
 
-  const gradId = `grad-${color.replace(/[^a-z0-9]/gi, "")}`;
+  const oxarEnd = oxarData[oxarData.length - 1];
+  const bankEnd = bankData[bankData.length - 1];
+  const oxarEndY = h - ((oxarEnd - min) / range) * h;
+  const bankEndY = h - ((bankEnd - min) / range) * h;
+
+  const gradId = `cgrad-${color.replace(/[^a-z0-9]/gi, "")}`;
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-[60px]" preserveAspectRatio="none">
+    <svg viewBox={`0 0 ${totalW} ${h}`} className="w-full h-[80px]">
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.15" />
+          <stop offset="0%" stopColor={color} stopOpacity="0.12" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={areaPath} fill={`url(#${gradId})`} />
+
+      {/* OXAR area fill */}
+      <path d={toArea(oxarData)} fill={`url(#${gradId})`} />
+
+      {/* Bank line — grey, dashed */}
       <polyline
-        points={linePts}
+        points={toPoints(bankData)}
+        fill="none"
+        stroke="rgba(255,255,255,0.15)"
+        strokeWidth="1.5"
+        strokeDasharray="4 3"
+        vectorEffect="non-scaling-stroke"
+        strokeLinecap="round"
+      />
+
+      {/* OXAR line — colored */}
+      <polyline
+        points={toPoints(oxarData)}
         fill="none"
         stroke={color}
         strokeWidth="2"
@@ -63,6 +99,26 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+
+      {/* End labels */}
+      <text
+        x={w + 6}
+        y={oxarEndY + 4}
+        fill={color}
+        fontSize="9"
+        fontFamily="monospace"
+      >
+        ${Math.round(oxarEnd).toLocaleString()}
+      </text>
+      <text
+        x={w + 6}
+        y={bankEndY + 4}
+        fill="rgba(255,255,255,0.25)"
+        fontSize="9"
+        fontFamily="monospace"
+      >
+        ${Math.round(bankEnd).toLocaleString()}
+      </text>
     </svg>
   );
 }
@@ -71,27 +127,27 @@ const VAULTS = [
   {
     name: "Government Bonds UAH",
     apy: 18,
+    bankApy: 3,
     currency: "UAH",
     term: "3-12 months",
-    bankRate: "3%",
     color: "rgba(114,162,240,1)",
     glowRgb: "114,162,240",
   },
   {
     name: "Government Bonds USD",
     apy: 4,
+    bankApy: 0.5,
     currency: "USD",
     term: "Stable",
-    bankRate: "0.5%",
     color: "rgba(139,92,246,1)",
     glowRgb: "139,92,246",
   },
   {
     name: "Government Bonds EUR",
     apy: 3.5,
+    bankApy: 0.3,
     currency: "EUR",
     term: "Stable",
-    bankRate: "0.3%",
     color: "rgba(160,200,160,1)",
     glowRgb: "160,200,160",
   },
@@ -113,11 +169,10 @@ function VaultCard({
   const [mouse, setMouse] = useState({ x: 0, y: 0, active: false });
   const [amount, setAmount] = useState(10000);
 
-  const sparkData = generateNavGrowth(vault.apy);
+  const oxarData = generateNavGrowth(vault.apy);
+  const bankData = generateNavGrowth(vault.bankApy);
   const yearlyYield = Math.round(amount * (vault.apy / 100));
-  const bankMultiplier = vault.bankRate
-    ? Math.round(vault.apy / parseFloat(vault.bankRate))
-    : 0;
+  const bankMultiplier = Math.round(vault.apy / vault.bankApy);
 
   const onMove = useCallback((e: React.MouseEvent) => {
     const rect = cardRef.current?.getBoundingClientRect();
@@ -162,21 +217,25 @@ function VaultCard({
             <span className="font-mono text-xs uppercase tracking-wide text-white/30">
               {vault.currency} &middot; {vault.term}
             </span>
-            <span className="font-mono text-[10px] text-white/20">
-              Bank: {vault.bankRate}
-            </span>
           </div>
 
           <h3 className="font-sans text-base text-white mb-4">
             {vault.name}
           </h3>
 
-          {/* Sparkline — real NAV growth */}
+          {/* Comparison chart — OXAR vs Bank */}
           <div className="mb-4">
-            <Sparkline data={sparkData} color={vault.color} />
+            <ComparisonChart oxarData={oxarData} bankData={bankData} color={vault.color} />
             <div className="flex justify-between mt-1">
-              <span className="font-mono text-[10px] text-white/20">12 months ago</span>
-              <span className="font-mono text-[10px] text-white/20">Today</span>
+              <span className="font-mono text-[10px] text-white/20">$1,000 invested</span>
+              <div className="flex gap-3">
+                <span className="font-mono text-[10px]" style={{ color: vault.color }}>
+                  ● OXAR
+                </span>
+                <span className="font-mono text-[10px] text-white/20">
+                  - - Bank
+                </span>
+              </div>
             </div>
           </div>
 
