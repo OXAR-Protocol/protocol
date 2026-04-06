@@ -24,9 +24,9 @@ export function CustomCursor() {
     for (let i = 1; i < TRAIL_LENGTH; i++) {
       const prev = trail.current[i - 1];
       const curr = trail.current[i];
-      const speed = 0.25 - i * 0.012;
-      curr.x += (prev.x - curr.x) * Math.max(speed, 0.05);
-      curr.y += (prev.y - curr.y) * Math.max(speed, 0.05);
+      const speed = 0.12 - i * 0.006;
+      curr.x += (prev.x - curr.x) * Math.max(speed, 0.03);
+      curr.y += (prev.y - curr.y) * Math.max(speed, 0.03);
     }
 
     // Update dot
@@ -34,12 +34,14 @@ export function CustomCursor() {
       dotRef.current.style.transform = `translate(${pos.current.x}px, ${pos.current.y}px) translate(-50%, -50%) scale(${hovering ? 1.8 : 1})`;
     }
 
-    // Update trail elements
+    // Update trail elements (skip [0] — it's at the dot)
     trailRefs.current.forEach((el, i) => {
       if (!el) return;
-      const p = trail.current[i];
-      const opacity = (1 - i * TRAIL_FADE_STEP) * 0.6;
-      const size = Math.max(6 - i * 0.3, 2);
+      const trailIdx = i + 1;
+      if (trailIdx >= TRAIL_LENGTH) { el.style.opacity = "0"; return; }
+      const p = trail.current[trailIdx];
+      const opacity = (1 - trailIdx * TRAIL_FADE_STEP) * 0.5;
+      const size = Math.max(5 - trailIdx * 0.3, 1.5);
       el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%)`;
       el.style.opacity = String(opacity);
       el.style.width = `${size}px`;
@@ -100,11 +102,11 @@ export function CustomCursor() {
         ref={dotRef}
         className="fixed top-0 left-0 z-[9999] pointer-events-none"
         style={{
-          width: 8,
-          height: 8,
+          width: 10,
+          height: 10,
           borderRadius: "50%",
           backgroundColor: "white",
-          boxShadow: "0 0 8px rgba(114,162,240,0.6), 0 0 20px rgba(114,162,240,0.3)",
+          boxShadow: "0 0 10px rgba(114,162,240,0.8), 0 0 25px rgba(114,162,240,0.4)",
           opacity: visible ? 1 : 0,
           transition: "opacity 0.3s, transform 0.15s ease-out",
         }}
