@@ -127,7 +127,7 @@ export function Problem() {
     <section
       id="problem"
       ref={sectionRef}
-      className="relative py-32 px-6 overflow-hidden"
+      className="relative py-20 px-6 overflow-hidden"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >

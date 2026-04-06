@@ -15,7 +15,7 @@ const TECH_ITEMS = [
 
 export function Tech() {
   return (
-    <section id="tech" className="py-32 px-6">
+    <section id="tech" className="py-20 px-6">
       <div className="max-w-[1200px] mx-auto">
         <AnimatedSection>
           <SectionLabel>Under the Hood</SectionLabel>

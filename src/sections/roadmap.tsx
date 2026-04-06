@@ -33,7 +33,7 @@ const MILESTONES = [
 
 export function Roadmap() {
   return (
-    <section id="roadmap" className="py-32 px-6">
+    <section id="roadmap" className="py-20 px-6">
       <div className="max-w-[1200px] mx-auto">
         <AnimatedSection>
           <SectionLabel>Roadmap</SectionLabel>

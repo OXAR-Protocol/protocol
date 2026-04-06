@@ -118,7 +118,7 @@ const FEATURES = [
 
 export function Features() {
   return (
-    <section className="relative py-32 px-6 overflow-hidden">
+    <section className="relative py-20 px-6 overflow-hidden">
       <IsometricBoxes className="opacity-40 pointer-events-auto" />
 
       <div className="relative max-w-[1200px] mx-auto">

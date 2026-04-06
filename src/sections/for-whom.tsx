@@ -30,7 +30,7 @@ const AUDIENCES = [
 
 export function ForWhom() {
   return (
-    <section id="for-whom" className="py-32 px-6">
+    <section id="for-whom" className="py-20 px-6">
       <div className="max-w-[1200px] mx-auto">
         <AnimatedSection>
           <SectionLabel>For Whom</SectionLabel>

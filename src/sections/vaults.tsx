@@ -13,7 +13,7 @@ const VAULTS = [
 
 export function Vaults() {
   return (
-    <section id="vaults" className="py-32 px-6">
+    <section id="vaults" className="py-20 px-6">
       <div className="max-w-[1200px] mx-auto">
         <AnimatedSection>
           <SectionLabel>Vaults</SectionLabel>
