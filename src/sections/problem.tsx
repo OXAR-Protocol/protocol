@@ -110,8 +110,27 @@ const STATS = [
 ];
 
 export function Problem() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [mouse, setMouse] = useState({ x: 0, y: 0, active: false });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const rect = sectionRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setMouse({ x: e.clientX - rect.left, y: e.clientY - rect.top, active: true });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setMouse((prev) => ({ ...prev, active: false }));
+  }, []);
+
   return (
-    <section id="problem" className="relative py-32 px-6 overflow-hidden">
+    <section
+      id="problem"
+      ref={sectionRef}
+      className="relative py-32 px-6 overflow-hidden"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
       {/* Background grid */}
       <div
         className="absolute inset-0"
@@ -121,6 +140,20 @@ export function Problem() {
           backgroundSize: "60px 60px",
           maskImage: "radial-gradient(ellipse 70% 60% at 50% 50%, black, transparent)",
           WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 50%, black, transparent)",
+        }}
+      />
+
+      {/* Mouse glow on grid */}
+      <div
+        className="absolute pointer-events-none transition-opacity duration-500"
+        style={{
+          left: mouse.x - 200,
+          top: mouse.y - 200,
+          width: 400,
+          height: 400,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(114,162,240,0.08) 0%, transparent 70%)",
+          opacity: mouse.active ? 1 : 0,
         }}
       />
       <div className="relative max-w-[1200px] mx-auto">
