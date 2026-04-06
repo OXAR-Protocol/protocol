@@ -111,8 +111,19 @@ const STATS = [
 
 export function Problem() {
   return (
-    <section id="problem" className="py-32 px-6">
-      <div className="max-w-[1200px] mx-auto">
+    <section id="problem" className="relative py-32 px-6 overflow-hidden">
+      {/* Background grid */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+          maskImage: "radial-gradient(ellipse 70% 60% at 50% 50%, black, transparent)",
+          WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 50%, black, transparent)",
+        }}
+      />
+      <div className="relative max-w-[1200px] mx-auto">
         <AnimatedSection>
           <SectionLabel>The Problem</SectionLabel>
           <SectionTitle>$230B+ in stablecoins earning nothing</SectionTitle>
