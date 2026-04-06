@@ -3,30 +3,23 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
 const TRAIL_LENGTH = 12;
-const TRAIL_FADE_STEP = 1 / TRAIL_LENGTH;
+const HISTORY_SIZE = 80; // store more positions for smooth sampling
+const TRAIL_SPACING = 5; // frames between each particle
 
 export function CustomCursor() {
   const dotRef = useRef<HTMLDivElement>(null);
   const trailRefs = useRef<(HTMLDivElement | null)[]>([]);
   const pos = useRef({ x: -100, y: -100 });
-  const trail = useRef<{ x: number; y: number }[]>(
-    Array.from({ length: TRAIL_LENGTH }, () => ({ x: -100, y: -100 }))
-  );
+  const history = useRef<{ x: number; y: number }[]>([]);
   const [visible, setVisible] = useState(false);
   const [hovering, setHovering] = useState(false);
   const rafRef = useRef<number>(0);
 
   const animate = useCallback(() => {
-    // First trail point matches cursor exactly
-    trail.current[0].x = pos.current.x;
-    trail.current[0].y = pos.current.y;
-
-    for (let i = 1; i < TRAIL_LENGTH; i++) {
-      const prev = trail.current[i - 1];
-      const curr = trail.current[i];
-      const speed = 0.12 - i * 0.006;
-      curr.x += (prev.x - curr.x) * Math.max(speed, 0.03);
-      curr.y += (prev.y - curr.y) * Math.max(speed, 0.03);
+    // Push current position to history
+    history.current.unshift({ x: pos.current.x, y: pos.current.y });
+    if (history.current.length > HISTORY_SIZE) {
+      history.current.length = HISTORY_SIZE;
     }
 
     // Update dot
@@ -34,14 +27,16 @@ export function CustomCursor() {
       dotRef.current.style.transform = `translate(${pos.current.x}px, ${pos.current.y}px) translate(-50%, -50%) scale(${hovering ? 1.8 : 1})`;
     }
 
-    // Update trail elements (skip [0] — it's at the dot)
+    // Each trail particle = a past position from history
     trailRefs.current.forEach((el, i) => {
       if (!el) return;
-      const trailIdx = i + 1;
-      if (trailIdx >= TRAIL_LENGTH) { el.style.opacity = "0"; return; }
-      const p = trail.current[trailIdx];
-      const opacity = (1 - trailIdx * TRAIL_FADE_STEP) * 0.5;
-      const size = Math.max(5 - trailIdx * 0.3, 1.5);
+      const histIdx = (i + 1) * TRAIL_SPACING;
+      const p = history.current[Math.min(histIdx, history.current.length - 1)];
+      if (!p) return;
+
+      const opacity = (1 - (i + 1) / (TRAIL_LENGTH + 1)) * 0.5;
+      const size = Math.max(5 - i * 0.3, 1.5);
+
       el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%)`;
       el.style.opacity = String(opacity);
       el.style.width = `${size}px`;
@@ -122,7 +117,6 @@ export function CustomCursor() {
             backgroundColor: i < 4 ? "rgba(114,162,240,0.8)" : "rgba(114,162,240,0.5)",
             boxShadow: i < 3 ? "0 0 6px rgba(114,162,240,0.4)" : "none",
             opacity: 0,
-            transition: "none",
           }}
         />
       ))}
