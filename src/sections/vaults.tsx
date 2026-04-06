@@ -1,51 +1,61 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { SectionLabel } from "@/components/section-label";
 import { SectionTitle } from "@/components/section-title";
 import { AnimatedSection } from "@/components/animated-section";
-import { YieldCalculator } from "@/components/yield-calculator";
+import { Button } from "@/components/button";
+import { useWarp } from "@/components/warp-transition";
 
-// Fake sparkline data — gentle upward curves
-const SPARKLINES = [
-  [20, 22, 21, 25, 28, 27, 32, 35, 38, 40, 42, 48, 52, 55, 60, 65, 68, 72, 78, 82, 88, 92, 95, 100],
-  [30, 32, 31, 33, 35, 34, 36, 38, 40, 41, 43, 45, 48, 50, 52, 55, 58, 60, 63, 66, 70, 74, 78, 82],
-  [35, 36, 35, 37, 38, 37, 39, 40, 42, 43, 44, 46, 48, 50, 52, 54, 56, 58, 60, 63, 66, 69, 72, 75],
-];
+// Generate realistic NAV growth based on APY over 12 months
+function generateNavGrowth(apy: number, points = 24): number[] {
+  const dailyRate = apy / 100 / 365;
+  const daysPerPoint = 365 / points;
+  const data: number[] = [];
+  let nav = 1000;
+  for (let i = 0; i <= points; i++) {
+    data.push(nav);
+    nav *= 1 + dailyRate * daysPerPoint;
+  }
+  return data;
+}
 
 function Sparkline({ data, color }: { data: number[]; color: string }) {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const h = 60;
   const w = 200;
-  const points = data
-    .map((v, i) => {
-      const x = (i / (data.length - 1)) * w;
-      const y = h - ((v - min) / (max - min)) * h;
-      return `${x},${y}`;
-    })
-    .join(" ");
 
-  // Area fill path
   const areaPath = `M0,${h} L${data
     .map((v, i) => {
       const x = (i / (data.length - 1)) * w;
-      const y = h - ((v - min) / (max - min)) * h;
+      const y = h - ((v - min) / (max - min + 0.01)) * h;
       return `${x},${y}`;
     })
     .join(" L")} L${w},${h} Z`;
 
+  const linePts = data
+    .map((v, i) => {
+      const x = (i / (data.length - 1)) * w;
+      const y = h - ((v - min) / (max - min + 0.01)) * h;
+      return `${x},${y}`;
+    })
+    .join(" ");
+
+  const gradId = `grad-${color.replace(/[^a-z0-9]/gi, "")}`;
+
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-[60px]" preserveAspectRatio="none">
       <defs>
-        <linearGradient id={`grad-${color.replace(/[^a-z0-9]/gi, "")}`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.15" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={areaPath} fill={`url(#grad-${color.replace(/[^a-z0-9]/gi, "")})`} />
+      <path d={areaPath} fill={`url(#${gradId})`} />
       <polyline
-        points={points}
+        points={linePts}
         fill="none"
         stroke={color}
         strokeWidth="2"
@@ -60,42 +70,54 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
 const VAULTS = [
   {
     name: "Government Bonds UAH",
-    apy: "18",
+    apy: 18,
     currency: "UAH",
     term: "3-12 months",
     bankRate: "3%",
-    sparkline: SPARKLINES[0],
     color: "rgba(114,162,240,1)",
+    glowRgb: "114,162,240",
   },
   {
     name: "Government Bonds USD",
-    apy: "4",
+    apy: 4,
     currency: "USD",
     term: "Stable",
     bankRate: "0.5%",
-    sparkline: SPARKLINES[1],
     color: "rgba(139,92,246,1)",
+    glowRgb: "139,92,246",
   },
   {
     name: "Government Bonds EUR",
-    apy: "3.5",
+    apy: 3.5,
     currency: "EUR",
     term: "Stable",
     bankRate: "0.3%",
-    sparkline: SPARKLINES[2],
     color: "rgba(160,200,160,1)",
+    glowRgb: "160,200,160",
   },
 ];
 
 function VaultCard({
   vault,
+  isOpen,
+  onToggle,
   delay,
 }: {
   vault: (typeof VAULTS)[number];
+  isOpen: boolean;
+  onToggle: () => void;
   delay: number;
 }) {
+  const { startWarp } = useWarp();
   const cardRef = useRef<HTMLDivElement>(null);
   const [mouse, setMouse] = useState({ x: 0, y: 0, active: false });
+  const [amount, setAmount] = useState(10000);
+
+  const sparkData = generateNavGrowth(vault.apy);
+  const yearlyYield = Math.round(amount * (vault.apy / 100));
+  const bankMultiplier = vault.bankRate
+    ? Math.round(vault.apy / parseFloat(vault.bankRate))
+    : 0;
 
   const onMove = useCallback((e: React.MouseEvent) => {
     const rect = cardRef.current?.getBoundingClientRect();
@@ -107,16 +129,18 @@ function VaultCard({
     setMouse((prev) => ({ ...prev, active: false }));
   }, []);
 
-  const rgbaMatch = vault.color.match(/rgba?\(([^)]+)\)/);
-  const glowRgb = rgbaMatch ? rgbaMatch[1].replace(/,\s*[\d.]+$/, "") : "255,255,255";
-
   return (
     <AnimatedSection delay={delay}>
       <div
         ref={cardRef}
         onMouseMove={onMove}
         onMouseLeave={onLeave}
-        className="h-full p-6 rounded-[5px] border border-white/10 bg-surface-0 hover:border-white/20 transition-colors relative overflow-hidden"
+        onClick={onToggle}
+        className={`p-6 rounded-[5px] border bg-surface-0 transition-all duration-300 relative overflow-hidden cursor-pointer ${
+          isOpen
+            ? "border-white/20 shadow-[0_0_30px_rgba(114,162,240,0.06)]"
+            : "border-white/10 hover:border-white/20"
+        }`}
       >
         {/* Spotlight */}
         <div
@@ -127,7 +151,7 @@ function VaultCard({
             width: 280,
             height: 280,
             borderRadius: "50%",
-            background: `radial-gradient(circle, rgba(${glowRgb},0.1) 0%, transparent 70%)`,
+            background: `radial-gradient(circle, rgba(${vault.glowRgb},0.1) 0%, transparent 70%)`,
             opacity: mouse.active ? 1 : 0,
           }}
         />
@@ -147,9 +171,13 @@ function VaultCard({
             {vault.name}
           </h3>
 
-          {/* Sparkline */}
+          {/* Sparkline — real NAV growth */}
           <div className="mb-4">
-            <Sparkline data={vault.sparkline} color={vault.color} />
+            <Sparkline data={sparkData} color={vault.color} />
+            <div className="flex justify-between mt-1">
+              <span className="font-mono text-[10px] text-white/20">12 months ago</span>
+              <span className="font-mono text-[10px] text-white/20">Today</span>
+            </div>
           </div>
 
           {/* APY */}
@@ -159,6 +187,66 @@ function VaultCard({
             </span>
             <span className="font-mono text-sm text-white/30">APY</span>
           </div>
+
+          {/* Expandable calculator */}
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="overflow-hidden"
+              >
+                <div className="pt-6 mt-6 border-t border-white/10">
+                  {/* Amount slider */}
+                  <div className="mb-5">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-mono text-sm text-white/50">I want to invest</span>
+                      <span className="font-mono text-sm text-white">
+                        ${amount.toLocaleString()}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={100}
+                      max={100000}
+                      step={100}
+                      value={amount}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => setAmount(Number(e.target.value))}
+                      className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-accent-blue"
+                    />
+                    <div className="flex justify-between mt-1">
+                      <span className="font-mono text-[10px] text-white/20">$100</span>
+                      <span className="font-mono text-[10px] text-white/20">$100,000</span>
+                    </div>
+                  </div>
+
+                  {/* Result */}
+                  <div className="text-center py-3 mb-4 rounded-[5px] bg-white/[0.03]">
+                    <p className="font-mono text-xs text-white/30 mb-1">
+                      Your yearly yield
+                    </p>
+                    <p className="text-[1.8rem] font-mono font-light text-accent-blue leading-none">
+                      +${yearlyYield.toLocaleString()}
+                    </p>
+                    {bankMultiplier > 1 && (
+                      <p className="mt-1.5 font-mono text-xs text-white/40">
+                        {bankMultiplier}x more than a bank deposit
+                      </p>
+                    )}
+                  </div>
+
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Button variant="filled" onClick={() => startWarp("/login")}>
+                      Start Earning
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </AnimatedSection>
@@ -166,6 +254,8 @@ function VaultCard({
 }
 
 export function Vaults() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
   return (
     <section id="vaults" className="py-20 px-6">
       <div className="max-w-[1200px] mx-auto">
@@ -174,18 +264,23 @@ export function Vaults() {
           <SectionTitle>Multiple vaults. One protocol.</SectionTitle>
         </AnimatedSection>
 
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
           {VAULTS.map((vault, i) => (
-            <VaultCard key={vault.name} vault={vault} delay={i * 0.08} />
+            <VaultCard
+              key={vault.name}
+              vault={vault}
+              isOpen={openIndex === i}
+              onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+              delay={i * 0.08}
+            />
           ))}
         </div>
 
-        {/* Yield Calculator */}
-        <div className="mt-16 max-w-md mx-auto">
-          <AnimatedSection delay={0.5}>
-            <YieldCalculator />
-          </AnimatedSection>
-        </div>
+        <AnimatedSection delay={0.3}>
+          <p className="mt-8 text-center font-mono text-xs text-white/20">
+            Click a vault to calculate your yield
+          </p>
+        </AnimatedSection>
       </div>
     </section>
   );
