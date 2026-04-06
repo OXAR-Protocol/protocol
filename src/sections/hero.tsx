@@ -15,7 +15,7 @@ const LogoParticles = dynamic(
 export function Hero() {
   const { startWarp } = useWarp();
   return (
-    <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
+    <section className="relative min-h-[85vh] flex items-center justify-center px-6 overflow-hidden">
       {/* Outer grid with radial fade */}
       <div
         className="absolute inset-0 hero-grid-outer"
@@ -103,20 +103,6 @@ export function Hero() {
 
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce-slow">
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          className="hero-scroll-indicator"
-          stroke="rgba(255,255,255,0.3)"
-          strokeWidth="2"
-        >
-          <path d="M12 5v14M5 12l7 7 7-7" />
-        </svg>
-      </div>
     </section>
   );
 }
