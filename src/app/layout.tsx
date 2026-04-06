@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Space_Mono, Bebas_Neue } from "next/font/google";
-import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -22,18 +21,6 @@ const bebasNeue = Bebas_Neue({
   weight: "400",
 });
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
-
 export const metadata: Metadata = {
   title: "OXAR Protocol",
   description:
@@ -52,8 +39,6 @@ export default function RootLayout({
         inter.variable,
         spaceMono.variable,
         bebasNeue.variable,
-        geistSans.variable,
-        geistMono.variable,
         "font-sans"
       )}
     >
