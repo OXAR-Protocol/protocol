@@ -164,7 +164,7 @@ export function ForWhom() {
         {AUDIENCES.map((a, i) => (
           <div key={a.title} className="contents">
             <AnimatedSection delay={i * 0.1}>
-              <div className="w-[320px] lg:w-[360px] flex-shrink-0 p-6 rounded-[5px] border border-white/10 bg-surface-0 hover:border-white/20 transition-colors flex flex-col relative z-10">
+              <div className="w-[320px] lg:w-[360px] flex-shrink-0 p-6 rounded-[5px] border border-white/10 bg-surface-0 hover:border-white/20 transition-colors flex flex-col relative z-10 min-h-[140px]">
                 <h3 className={`font-mono text-xs uppercase tracking-wide ${a.accent}`}>{a.title}</h3>
                 <p className="mt-4 font-mono text-sm leading-relaxed text-white/50 flex-1">{a.description}</p>
               </div>
