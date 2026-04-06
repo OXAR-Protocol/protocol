@@ -39,10 +39,10 @@ const STEPS = [
 
 // Arc config
 const ARC_RADIUS = 600;
-const ARC_CENTER_X = -ARC_RADIUS + 220; // more visible from left edge
+const ARC_CENTER_X = -ARC_RADIUS + 200;
 const ARC_CENTER_Y_RATIO = 0.5;
-const STEP_ARC_SPAN = 28;
-const CENTER_ANGLE = -90; // active step at bottom of arc (6 o'clock)
+const STEP_ARC_SPAN = 25;
+const CENTER_ANGLE = 0; // active step on right side of arc (visible)
 
 function getArcPosition(
   stepIndex: number,
