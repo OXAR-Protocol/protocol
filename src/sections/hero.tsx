@@ -1,69 +1,51 @@
 "use client";
 
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
 import { SectionLabel } from "@/components/section-label";
 import { Button } from "@/components/button";
 import { FadeIn } from "@/components/fade-in";
 import { useWarp } from "@/components/warp-transition";
 
-const LogoParticles = dynamic(
-  () => import('@/components/3d/logo-particles').then((mod) => mod.LogoParticles),
-  { ssr: false }
-)
-
 export function Hero() {
   const { startWarp } = useWarp();
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center px-6 overflow-hidden">
-      {/* Outer grid with radial fade */}
-      <div
-        className="absolute inset-0 hero-grid-outer"
+      {/* Background video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
         style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
-          backgroundSize: '50px 50px',
-          opacity: 0.8,
-          maskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent)',
+          opacity: 0.4,
+          maskImage: "radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent)",
+          WebkitMaskImage: "radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent)",
         }}
-      />
-
-      {/* Inner grid with accent tint */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(114,162,240,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(114,162,240,0.06) 1px, transparent 1px)',
-          backgroundSize: '50px 50px',
-          opacity: 0.6,
-          maskImage: 'radial-gradient(ellipse 50% 40% at 50% 45%, black, transparent)',
-          WebkitMaskImage: 'radial-gradient(ellipse 50% 40% at 50% 45%, black, transparent)',
-        }}
-      />
-
-      {/* 3D Logo Particles */}
-      <div className="absolute inset-0 z-10">
-        <LogoParticles />
-      </div>
+      >
+        <source src="/hero-bg.mp4" type="video/mp4" />
+      </video>
 
       {/* Gradient overlay for text readability */}
       <div
-        className="absolute inset-0 z-20 pointer-events-none hero-overlay"
+        className="absolute inset-0 z-10 pointer-events-none hero-overlay"
         style={{
           background: `linear-gradient(to bottom,
             #0a0a0a 0%,
-            rgba(10,10,15,0.8) 30%,
-            rgba(10,10,15,0.85) 45%,
-            rgba(10,10,15,0.85) 55%,
-            rgba(10,10,15,0.8) 70%,
+            rgba(10,10,15,0.6) 30%,
+            rgba(10,10,15,0.5) 50%,
+            rgba(10,10,15,0.6) 70%,
             #0a0a0a 100%
           )`
         }}
       />
 
-      {/* Golden glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-amber-500/15 blur-[120px] animate-breathing pointer-events-none" />
+      {/* Subtle blue glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none z-10"
+        style={{ background: "radial-gradient(circle, rgba(114,162,240,0.1), rgba(139,92,246,0.05), transparent)" }}
+      />
 
-      <div className="relative z-30 text-center max-w-3xl mx-auto pointer-events-none">
+      <div className="relative z-20 text-center max-w-3xl mx-auto pointer-events-none">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
