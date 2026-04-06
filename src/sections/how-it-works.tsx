@@ -125,7 +125,6 @@ export function HowItWorks() {
     <section id="how-it-works">
       <div className="relative" style={{ height: `${STEPS.length * 100}vh` }}>
         <div className="sticky top-0 h-screen overflow-hidden">
-          <IsometricBoxes className="opacity-30 pointer-events-none" />
           {/* 3D Logo Particles background */}
           <div className="absolute inset-0 z-0 opacity-30 pointer-events-none">
             <LogoParticles />
