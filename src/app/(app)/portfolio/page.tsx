@@ -3,14 +3,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
-import { Nav } from "@/components/nav";
+
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { useClaim } from "@/hooks/use-claim";
 import { useOxarProgram } from "@/hooks/use-oxar-program";
-import { WalletMissing } from "@/components/portfolio/wallet-missing";
-import { BalanceCards } from "@/components/portfolio/balance-cards";
+import { PortfolioHeader } from "@/components/portfolio/portfolio-header";
+import { PositionCard } from "@/components/portfolio/position-card";
+import { EmptyPortfolio } from "@/components/portfolio/empty-portfolio";
 import { TestTokensCard } from "@/components/portfolio/test-tokens-card";
-import { PositionsTable } from "@/components/portfolio/positions-table";
 
 export default function PortfolioPage() {
   const { walletAddress, connection } = useOxarProgram();
@@ -97,49 +97,43 @@ export default function PortfolioPage() {
   }, new BN(0));
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      <Nav />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Portfolio</h1>
-          <p className="mt-2 text-gray-400">
-            Your balances and vault positions.
-          </p>
+    <div className="py-6 space-y-6">
+      {!walletAddress ? (
+        <p className="text-white/40 font-mono text-sm text-center py-20">
+          Connect wallet to view portfolio
+        </p>
+      ) : loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-accent" />
         </div>
-
-        {!walletAddress ? (
-          <WalletMissing />
-        ) : loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-[#00D4AA]" />
+      ) : positions.length > 0 ? (
+        <>
+          <PortfolioHeader totalValue={totalValue} positions={positions} />
+          <div className="flex flex-col gap-3">
+            {positions.map((pos) => (
+              <PositionCard
+                key={pos.tokenAccount.toBase58()}
+                position={pos}
+                claiming={claiming}
+                onClaim={handleClaim}
+              />
+            ))}
           </div>
-        ) : (
-          <div className="space-y-6">
-            <BalanceCards
-              solBalance={solBalance}
-              usdcBalance={usdcBalance}
-              totalValue={totalValue}
-              positionsCount={positions.length}
-            />
+        </>
+      ) : (
+        <EmptyPortfolio />
+      )}
 
-            <TestTokensCard
-              airdropping={airdropping}
-              airdropMsg={airdropMsg}
-              faucetLoading={faucetLoading}
-              faucetMsg={faucetMsg}
-              onAirdropSol={handleAirdropSol}
-              onFaucet={handleFaucet}
-            />
-
-            <PositionsTable
-              positions={positions}
-              claiming={claiming}
-              claimError={claimError}
-              onClaim={handleClaim}
-            />
-          </div>
-        )}
-      </main>
+      {walletAddress && (
+        <TestTokensCard
+          airdropping={airdropping}
+          airdropMsg={airdropMsg}
+          faucetLoading={faucetLoading}
+          faucetMsg={faucetMsg}
+          onAirdropSol={handleAirdropSol}
+          onFaucet={handleFaucet}
+        />
+      )}
     </div>
   );
 }
