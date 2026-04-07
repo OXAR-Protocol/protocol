@@ -43,7 +43,7 @@ export function NodeVisualization() {
           y1={NODES[from].y}
           x2={NODES[to].x}
           y2={NODES[to].y}
-          stroke="rgba(114, 162, 240, 0.3)"
+          stroke="rgba(139, 92, 246, 0.3)"
           strokeWidth="2"
           animate={{ opacity: [0.1, 0.4, 0.1] }}
           transition={{ duration: 3, repeat: Infinity, delay: i * 1 }}
@@ -60,7 +60,7 @@ export function NodeVisualization() {
                 cy={node.y}
                 r="16"
                 fill="none"
-                stroke="rgba(114, 162, 240, 0.2)"
+                stroke="rgba(139, 92, 246, 0.2)"
                 strokeWidth="1"
                 animate={{ r: [16, 22, 16], opacity: [0.3, 0.1, 0.3] }}
                 transition={{ duration: 3, repeat: Infinity, delay: i * 0.5 }}

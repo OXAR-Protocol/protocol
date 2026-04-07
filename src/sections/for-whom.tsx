@@ -12,8 +12,8 @@ const AUDIENCES = [
     statLabel: "APY",
     description:
       "Higher yield than US Treasuries without leaving crypto.",
-    accent: "text-accent-blue",
-    glowColor: "114,162,240",
+    accent: "text-accent",
+    glowColor: "139,92,246",
     icon: (
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5">
         <circle cx="16" cy="16" r="12" opacity="0.4" />
@@ -27,7 +27,7 @@ const AUDIENCES = [
     statLabel: "Backed",
     description:
       "Emerging market rates with sovereign backing. Real yield.",
-    accent: "text-accent-purple",
+    accent: "text-accent",
     glowColor: "139,92,246",
     icon: (
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5">

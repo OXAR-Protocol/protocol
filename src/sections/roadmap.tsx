@@ -15,7 +15,7 @@ const MILESTONES = [
   {
     phase: "Q3 2026",
     name: "Scale Up",
-    details: "Poland, Turkey bonds. Seed round. Mobile app beta.",
+    details: "Poland and new market bonds. Seed round. Mobile app beta.",
     status: "future" as const,
   },
   {
@@ -77,8 +77,8 @@ export function Roadmap() {
               className="absolute top-0 left-0 h-full transition-all ease-out"
               style={{
                 width: `${progress.width}%`,
-                background: "linear-gradient(90deg, rgba(114,162,240,0.8), rgba(139,92,246,0.8))",
-                boxShadow: "0 0 12px rgba(114,162,240,0.4), 0 0 30px rgba(114,162,240,0.15)",
+                background: "linear-gradient(90deg, rgba(139,92,246,0.8), rgba(139,92,246,0.8))",
+                boxShadow: "0 0 12px rgba(139,92,246,0.4), 0 0 30px rgba(139,92,246,0.15)",
                 transitionDuration: "1.5s",
               }}
             />
@@ -98,9 +98,9 @@ export function Roadmap() {
                   <div
                     className={`w-[13px] h-[13px] rounded-full border-2 transition-all duration-700 ${
                       isCurrent
-                        ? "border-accent-blue bg-accent-blue/30 shadow-[0_0_12px_rgba(114,162,240,0.5)]"
+                        ? "border-accent bg-accent/30 shadow-[0_0_12px_rgba(139,92,246,0.5)]"
                         : isPast
-                        ? "border-accent-blue/50 bg-accent-blue/10"
+                        ? "border-accent/50 bg-accent/10"
                         : "border-white/15 bg-surface-0"
                     }`}
                   />
@@ -121,13 +121,13 @@ export function Roadmap() {
                     <div className="flex items-center gap-2">
                       <span
                         className={`font-mono text-xs uppercase tracking-wide ${
-                          isCurrent ? "text-accent-blue" : isPast ? "text-accent-blue/50" : "text-white/30"
+                          isCurrent ? "text-accent" : isPast ? "text-accent/50" : "text-white/30"
                         }`}
                       >
                         {m.phase}
                       </span>
                       {isCurrent && (
-                        <span className="px-1.5 py-0.5 rounded-full bg-accent-blue/10 border border-accent-blue/30 font-mono text-[10px] text-accent-blue uppercase tracking-wider">
+                        <span className="px-1.5 py-0.5 rounded-full bg-accent/10 border border-accent/30 font-mono text-[10px] text-accent uppercase tracking-wider">
                           Now
                         </span>
                       )}
@@ -155,8 +155,8 @@ export function Roadmap() {
                 className="w-full transition-all ease-out"
                 style={{
                   height: `${PROGRESS_PCT}%`,
-                  background: "linear-gradient(180deg, rgba(114,162,240,0.8), rgba(139,92,246,0.8))",
-                  boxShadow: "0 0 10px rgba(114,162,240,0.3)",
+                  background: "linear-gradient(180deg, rgba(139,92,246,0.8), rgba(139,92,246,0.8))",
+                  boxShadow: "0 0 10px rgba(139,92,246,0.3)",
                   transitionDuration: "1.5s",
                 }}
               />
@@ -174,9 +174,9 @@ export function Roadmap() {
                       <div
                         className={`absolute -left-8 mt-1 w-[13px] h-[13px] rounded-full border-2 ${
                           isCurrent
-                            ? "border-accent-blue bg-accent-blue/30 shadow-[0_0_12px_rgba(114,162,240,0.5)]"
+                            ? "border-accent bg-accent/30 shadow-[0_0_12px_rgba(139,92,246,0.5)]"
                             : isPast
-                            ? "border-accent-blue/50 bg-accent-blue/10"
+                            ? "border-accent/50 bg-accent/10"
                             : "border-white/15 bg-surface-0"
                         }`}
                       />
@@ -184,13 +184,13 @@ export function Roadmap() {
                         <div className="flex items-center gap-2">
                           <span
                             className={`font-mono text-xs uppercase tracking-wide ${
-                              isCurrent ? "text-accent-blue" : "text-white/30"
+                              isCurrent ? "text-accent" : "text-white/30"
                             }`}
                           >
                             {m.phase}
                           </span>
                           {isCurrent && (
-                            <span className="px-1.5 py-0.5 rounded-full bg-accent-blue/10 border border-accent-blue/30 font-mono text-[10px] text-accent-blue uppercase tracking-wider">
+                            <span className="px-1.5 py-0.5 rounded-full bg-accent/10 border border-accent/30 font-mono text-[10px] text-accent uppercase tracking-wider">
                               Now
                             </span>
                           )}

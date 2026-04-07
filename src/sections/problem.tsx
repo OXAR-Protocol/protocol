@@ -30,12 +30,12 @@ function StatCard({
         ref={counter.ref}
         className={`relative h-full p-6 rounded-[5px] border bg-surface-0 hover:border-white/20 transition-colors text-center overflow-hidden ${
           accent
-            ? "border-accent-blue/30 shadow-[0_0_40px_rgba(114,162,240,0.06)]"
+            ? "border-accent/30 shadow-[0_0_40px_rgba(139,92,246,0.06)]"
             : "border-white/10"
         }`}
       >
         {accent && (
-          <div className="absolute inset-0 bg-gradient-to-b from-accent-blue/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent pointer-events-none" />
         )}
         <div
           ref={counter2.ref}
@@ -112,7 +112,7 @@ export function Problem() {
         className="absolute inset-0 pointer-events-none transition-opacity duration-300 problem-grid-glow"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(114,162,240,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(114,162,240,0.15) 1px, transparent 1px)",
+            "linear-gradient(rgba(139,92,246,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.15) 1px, transparent 1px)",
           backgroundSize: "60px 60px",
           maskImage: `radial-gradient(circle 180px at ${mouse.x}px ${mouse.y}px, black, transparent)`,
           WebkitMaskImage: `radial-gradient(circle 180px at ${mouse.x}px ${mouse.y}px, black, transparent)`,

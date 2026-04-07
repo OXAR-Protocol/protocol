@@ -280,7 +280,7 @@ function VaultCard({
                       value={amount}
                       onClick={(e) => e.stopPropagation()}
                       onChange={(e) => setAmount(Number(e.target.value))}
-                      className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-accent-blue"
+                      className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-accent"
                     />
                     <div className="flex justify-between mt-1">
                       <span className="font-mono text-[10px] text-white/20">$100</span>
@@ -293,7 +293,7 @@ function VaultCard({
                     <p className="font-mono text-xs text-white/30 mb-1">
                       Your yearly yield
                     </p>
-                    <p className="text-[1.8rem] font-mono font-light text-accent-blue leading-none">
+                    <p className="text-[1.8rem] font-mono font-light text-accent leading-none">
                       +${yearlyYield.toLocaleString()}
                     </p>
                     {bankMultiplier > 1 && (

@@ -1,15 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --color-surface-0: #0a0a0a;
-  --color-surface-1: #111118;
-  --color-surface-2: #1a1a24;
+  --color-surface-0: #000000;
+  --color-surface-1: #0a0a0a;
+  --color-surface-2: #111111;
 
-  --color-accent-blue: rgb(114, 162, 240);
-  --color-accent-purple: rgb(139, 92, 246);
+  --color-accent: #8B5CF6;
+
+  --color-profit: #22C55E;
+  --color-loss: #EF4444;
+
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: rgba(255, 255, 255, 0.6);
+  --color-text-tertiary: rgba(255, 255, 255, 0.3);
 
   --color-muted: rgba(255, 255, 255, 0.3);
-  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border: rgba(255, 255, 255, 0.08);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -59,7 +65,7 @@ html {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: #000000;
 }
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
@@ -90,13 +96,13 @@ html {
   50% { opacity: 1; }
 }
 
-/* Light theme overrides */
+/* Light theme overrides — kept as dark theme (app is dark-only) */
 [data-theme="light"] {
-  --color-surface-0: #f5f5f0;
-  --color-surface-1: #eaeae5;
-  --color-surface-2: #e0e0db;
-  --color-muted: rgba(0, 0, 0, 0.4);
-  --color-border: rgba(0, 0, 0, 0.1);
+  --color-surface-0: #000000;
+  --color-surface-1: #0a0a0a;
+  --color-surface-2: #111111;
+  --color-muted: rgba(255, 255, 255, 0.3);
+  --color-border: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="light"] body {
@@ -302,6 +308,6 @@ html {
 
 [data-theme="light"] .problem-grid-glow {
   background-image:
-    linear-gradient(rgba(114, 162, 240, 0.25) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(114, 162, 240, 0.25) 1px, transparent 1px) !important;
+    linear-gradient(rgba(139, 92, 246, 0.25) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.25) 1px, transparent 1px) !important;
 }

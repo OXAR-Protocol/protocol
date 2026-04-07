@@ -39,7 +39,7 @@ export function YieldCalculator() {
           step={100}
           value={amount}
           onChange={(e) => setAmount(Number(e.target.value))}
-          className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-accent-blue"
+          className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-accent"
         />
         <div className="flex justify-between mt-1">
           <span className="font-mono text-[10px] text-white/20">$100</span>
@@ -74,7 +74,7 @@ export function YieldCalculator() {
         <p className="font-mono text-sm text-white/30 mb-1">
           Your yearly yield
         </p>
-        <p className="text-[clamp(1.8rem,4vw,2.5rem)] font-mono font-normal text-accent-blue">
+        <p className="text-[clamp(1.8rem,4vw,2.5rem)] font-mono font-normal text-accent">
           ${yearlyYield.toLocaleString()}
         </p>
         {bankMultiplier > 1 && (

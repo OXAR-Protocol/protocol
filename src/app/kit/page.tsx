@@ -65,9 +65,10 @@ export default function KitPage() {
             <h2>Brand Colors</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
               {[
-                { name: 'Background', hex: '#0A0A0A', color: '#0a0a0a' },
-                { name: 'Accent Blue', hex: '#72A2F0', color: 'rgb(114, 162, 240)' },
-                { name: 'Accent Purple', hex: '#8B5CF6', color: 'rgb(139, 92, 246)' },
+                { name: 'Background', hex: '#000000', color: '#000000' },
+                { name: 'Accent', hex: '#8B5CF6', color: '#8B5CF6' },
+                { name: 'Profit', hex: '#22C55E', color: '#22C55E' },
+                { name: 'Loss', hex: '#EF4444', color: '#EF4444' },
                 { name: 'Text', hex: '#FFFFFF', color: '#ffffff' },
               ].map((c) => (
                 <div key={c.name} className="flex items-center gap-3">
