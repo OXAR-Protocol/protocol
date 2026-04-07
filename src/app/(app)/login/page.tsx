@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
-import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
-  const { login, authenticated, ready } = usePrivy();
-  const router = useRouter();
+  const { login, authenticated } = usePrivy();
 
   useEffect(() => {
     if (authenticated) {
@@ -17,38 +14,27 @@ export default function LoginPage() {
 
   if (authenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-950">
-        <p className="text-gray-400">Redirecting...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-white/40 font-mono text-sm">Redirecting...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-950 px-4">
-      <div className="w-full max-w-md space-y-8 text-center">
-        <div className="space-y-4">
-          <h1 className="text-6xl font-bold tracking-tight text-[#00D4AA]">
-            OXAR
-          </h1>
-          <p className="text-lg text-gray-400">
-            Government bonds, tokenized on Solana.
-          </p>
-          <p className="text-sm text-gray-500">
-            Deposit USDC. Earn yield. Trade freely.
-          </p>
-        </div>
-
-        <Button
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center gap-6">
+        <h1 className="text-4xl font-mono font-bold text-white tracking-wider">
+          OXAR
+        </h1>
+        <p className="text-white/40 font-mono text-sm text-center">
+          Government bonds, tokenized on Solana.
+        </p>
+        <button
           onClick={login}
-          size="lg"
-          className="w-full bg-[#00D4AA] text-gray-950 font-semibold hover:bg-[#00B892] h-12 text-base"
+          className="bg-accent text-white px-8 py-3 rounded-xl font-mono text-sm uppercase tracking-wide"
         >
           Get Started
-        </Button>
-
-        <p className="text-xs text-gray-600">
-          Powered by Privy &middot; Solana &middot; Anchor
-        </p>
+        </button>
       </div>
     </div>
   );
