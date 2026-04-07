@@ -42,7 +42,7 @@ export function PortfolioHeader({ totalValue, positions }: PortfolioHeaderProps)
         value={totalValue.toNumber() / 1_000_000}
         prefix="$"
         decimals={2}
-        className="text-4xl font-mono font-bold text-white text-center"
+        className="text-5xl font-mono font-bold text-white text-center"
       />
       <p className="text-white/30 font-mono text-xs uppercase text-center">
         Total Portfolio Value

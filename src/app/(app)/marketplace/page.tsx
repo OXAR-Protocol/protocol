@@ -10,6 +10,7 @@ import { useBuyListing } from "@/hooks/use-buy-listing";
 import { useCancelListing } from "@/hooks/use-cancel-listing";
 import { useCreateListing } from "@/hooks/use-create-listing";
 import { useOxarProgram } from "@/hooks/use-oxar-program";
+import { SectionLabel } from "@/components/section-label";
 import { VAULT_CONFIGS } from "@/lib/constants";
 import { deriveVaultPda } from "@/lib/pda";
 import { findVaultConfig } from "@/lib/format";
@@ -86,8 +87,8 @@ export default function MarketplacePage() {
     <div className="flex flex-col gap-5 px-4 pb-28 pt-4">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-sans text-white">Marketplace</h1>
-        <p className="text-white/40 font-mono text-xs mt-1">
+        <SectionLabel>Marketplace</SectionLabel>
+        <p className="text-white/40 font-mono text-xs mt-2">
           Trade vault tokens with other users
         </p>
       </div>

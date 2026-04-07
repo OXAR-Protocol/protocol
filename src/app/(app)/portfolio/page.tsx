@@ -7,6 +7,7 @@ import { BN } from "@coral-xyz/anchor";
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { useClaim } from "@/hooks/use-claim";
 import { useOxarProgram } from "@/hooks/use-oxar-program";
+import { SectionLabel } from "@/components/section-label";
 import { PortfolioHeader } from "@/components/portfolio/portfolio-header";
 import { PositionCard } from "@/components/portfolio/position-card";
 import { EmptyPortfolio } from "@/components/portfolio/empty-portfolio";
@@ -97,7 +98,8 @@ export default function PortfolioPage() {
   }, new BN(0));
 
   return (
-    <div className="py-6 space-y-6">
+    <div className="py-8 space-y-8">
+      <SectionLabel>Your Portfolio</SectionLabel>
       {!walletAddress ? (
         <p className="text-white/40 font-mono text-sm text-center py-20">
           Connect wallet to view portfolio

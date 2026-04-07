@@ -5,6 +5,7 @@ import { useState, useMemo } from "react";
 import { useVaults } from "@/hooks/use-vaults";
 import { VAULT_CONFIGS, VaultConfig } from "@/lib/constants";
 import { deriveVaultPda } from "@/lib/pda";
+import { SectionLabel } from "@/components/section-label";
 import { OpportunityCost } from "@/components/explore/opportunity-cost";
 import { FilterChips } from "@/components/explore/filter-chips";
 import { VaultCard } from "@/components/explore/vault-card";
@@ -49,10 +50,11 @@ export default function VaultsPage() {
   }
 
   return (
-    <div className="py-6 space-y-6">
+    <div className="py-8 space-y-8">
+      <SectionLabel>Explore</SectionLabel>
       <OpportunityCost />
       <FilterChips active={filter} onChange={setFilter} />
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         {filteredConfigs.map((config, index) => (
           <VaultCard
             key={config.id}
