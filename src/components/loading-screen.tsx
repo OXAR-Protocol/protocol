@@ -4,33 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 
-const darkThemeVariants = [
-  '/images/logo_blue.svg?v=2',
-  '/images/logo_light-green.svg?v=2',
-  '/images/logo_breeze.svg?v=2',
-  '/images/logo_light-blue.svg?v=2',
-  '/images/logo_saladik.svg?v=2',
-  '/images/logo_black-green.svg?v=2',
-]
+import { LOADING_LOGO_VARIANTS, preloadImages } from '@/lib/preload-images'
+
+const darkThemeVariants = LOADING_LOGO_VARIANTS
 
 interface LoadingScreenProps {
   duration?: number
   onComplete?: () => void
-}
-
-function preloadImages(srcs: string[]): Promise<void> {
-  const unique = [...new Set(srcs)]
-  return Promise.all(
-    unique.map(
-      (src) =>
-        new Promise<void>((resolve) => {
-          const img = new window.Image()
-          img.onload = () => resolve()
-          img.onerror = () => resolve()
-          img.src = src
-        })
-    )
-  ).then(() => {})
 }
 
 export function LoadingScreen({

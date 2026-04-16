@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { SectionLabel } from "@/components/section-label";
 import { SectionTitle } from "@/components/section-title";
 import { AnimatedSection } from "@/components/animated-section";
+import { useAnimatedProgress } from "@/hooks/use-animated-progress";
 
 const MILESTONES = [
   {
@@ -34,28 +34,6 @@ const MILESTONES = [
 
 const CURRENT_INDEX = 0;
 const PROGRESS_PCT = ((CURRENT_INDEX + 0.5) / MILESTONES.length) * 100;
-
-function useAnimatedProgress(targetPct: number) {
-  const [width, setWidth] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          // small delay for visual effect
-          setTimeout(() => setWidth(targetPct), 200);
-        }
-      },
-      { threshold: 0.3 }
-    );
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [targetPct]);
-
-  return { width, ref };
-}
 
 export function Roadmap() {
   const progress = useAnimatedProgress(PROGRESS_PCT);
