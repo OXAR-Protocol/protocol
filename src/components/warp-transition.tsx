@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef, createContext, useContext } from 'react'
 import type { ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LOGO_VIEWBOX, LOGO_PATHS, DRAW_ORDER, GLASS_PATHS, measurePathLength } from './logo-path-data'
 
@@ -27,6 +28,7 @@ export function WarpProvider({ children }: { children: ReactNode }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>(0)
   const startTimeRef = useRef<number>(0)
+  const router = useRouter()
 
   const targetUrlRef = useRef<string>('/')
 
@@ -34,9 +36,9 @@ export function WarpProvider({ children }: { children: ReactNode }) {
     targetUrlRef.current = url || '/'
     setIsWarping(true)
     setTimeout(() => {
-      window.location.href = targetUrlRef.current
+      router.push(targetUrlRef.current)
     }, DURATION)
-  }, [])
+  }, [router])
 
   useEffect(() => {
     if (!isWarping || !canvasRef.current) return

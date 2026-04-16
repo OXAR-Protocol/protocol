@@ -81,10 +81,20 @@ export function shortenAddress(addr: string): string {
 import { VAULT_CONFIGS, VaultConfig } from "@/lib/constants";
 import { deriveVaultPda } from "@/lib/pda";
 
-export function findVaultConfig(vaultPubkey: string): VaultConfig | undefined {
-  for (const config of VAULT_CONFIGS) {
-    const [pda] = deriveVaultPda(config.region, config.denomination, config.assetSubtype, config.series);
-    if (pda.toBase58() === vaultPubkey) return config;
+// Memoize PDA→config lookups. VAULT_CONFIGS is static for the runtime, so build once lazily.
+let vaultConfigCache: Map<string, VaultConfig> | null = null;
+
+function getVaultConfigCache(): Map<string, VaultConfig> {
+  if (!vaultConfigCache) {
+    vaultConfigCache = new Map();
+    for (const config of VAULT_CONFIGS) {
+      const [pda] = deriveVaultPda(config.region, config.denomination, config.assetSubtype, config.series);
+      vaultConfigCache.set(pda.toBase58(), config);
+    }
   }
-  return undefined;
+  return vaultConfigCache;
+}
+
+export function findVaultConfig(vaultPubkey: string): VaultConfig | undefined {
+  return getVaultConfigCache().get(vaultPubkey);
 }

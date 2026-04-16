@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -9,30 +8,17 @@ import { Copy, ExternalLink, ChevronRight, Check, CreditCard } from "lucide-reac
 
 import { useOxarProgram } from "@/hooks/use-oxar-program";
 import { usePortfolio } from "@/hooks/use-portfolio";
+import { useSolBalance } from "@/hooks/use-sol-balance";
 import { shortenAddress, formatUsdc } from "@/lib/format";
 import { DetailRow } from "@/components/explore/detail-row";
 
 export default function ProfilePage() {
   const { logout } = usePrivy();
   const router = useRouter();
-  const { walletAddress, connection } = useOxarProgram();
+  const { walletAddress } = useOxarProgram();
   const { usdcBalance, loading } = usePortfolio();
-  const [solBalance, setSolBalance] = useState<number>(0);
+  const { balance: solBalance } = useSolBalance();
   const [copied, setCopied] = useState(false);
-
-  const fetchSolBalance = useCallback(async () => {
-    if (!walletAddress || !connection) return;
-    try {
-      const bal = await connection.getBalance(walletAddress);
-      setSolBalance(bal / LAMPORTS_PER_SOL);
-    } catch {
-      // ignore
-    }
-  }, [walletAddress, connection]);
-
-  useEffect(() => {
-    fetchSolBalance();
-  }, [fetchSolBalance]);
 
   const handleCopy = () => {
     if (!walletAddress) return;

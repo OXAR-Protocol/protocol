@@ -1,91 +1,46 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { useState } from "react";
+import { PublicKey } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
 
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { useClaim } from "@/hooks/use-claim";
 import { useOxarProgram } from "@/hooks/use-oxar-program";
+import { useSolBalance } from "@/hooks/use-sol-balance";
+import { useFaucet } from "@/hooks/use-faucet";
 import { PortfolioHeader } from "@/components/portfolio/portfolio-header";
 import { PositionCard } from "@/components/portfolio/position-card";
 import { EmptyPortfolio } from "@/components/portfolio/empty-portfolio";
 import { TestTokensCard } from "@/components/portfolio/test-tokens-card";
 
 export default function PortfolioPage() {
-  const { walletAddress, connection } = useOxarProgram();
-  const { usdcBalance, positions, loading, refetch } = usePortfolio();
+  const { walletAddress } = useOxarProgram();
+  const { positions, loading, refetch } = usePortfolio();
   const { claim, loading: claiming, error: claimError } = useClaim();
-  const [solBalance, setSolBalance] = useState<number>(0);
-  const [airdropping, setAirdropping] = useState(false);
-  const [airdropMsg, setAirdropMsg] = useState<string | null>(null);
-  const [faucetLoading, setFaucetLoading] = useState(false);
-  const [faucetMsg, setFaucetMsg] = useState<string | null>(null);
+  const { refetch: refetchSolBalance } = useSolBalance();
+  const {
+    airdropSol,
+    solLoading: airdropping,
+    solMsg: airdropMsg,
+    mintUsdc,
+    usdcLoading: faucetLoading,
+    usdcMsg: faucetMsg,
+  } = useFaucet();
 
-  const fetchSolBalance = useCallback(async () => {
-    if (!walletAddress || !connection) return;
-    try {
-      const bal = await connection.getBalance(walletAddress);
-      setSolBalance(bal / LAMPORTS_PER_SOL);
-    } catch {
-      // ignore
-    }
-  }, [walletAddress, connection]);
-
-  useEffect(() => {
-    fetchSolBalance();
-  }, [fetchSolBalance]);
+  const [claimMsg, setClaimMsg] = useState<string | null>(null);
 
   const handleAirdropSol = async () => {
-    if (!walletAddress) return;
-    setAirdropping(true);
-    setAirdropMsg(null);
-    try {
-      const res = await fetch("/api/faucet-sol", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: walletAddress.toBase58() }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setAirdropMsg("1 SOL sent!");
-        await fetchSolBalance();
-      } else {
-        setAirdropMsg(data.error || "Failed to get SOL");
-      }
-    } catch (err: any) {
-      setAirdropMsg(err.message || "Failed to get SOL");
-    } finally {
-      setAirdropping(false);
-    }
+    const ok = await airdropSol();
+    if (ok) await refetchSolBalance();
   };
 
   const handleFaucet = async () => {
-    if (!walletAddress) return;
-    setFaucetLoading(true);
-    setFaucetMsg(null);
-    try {
-      const res = await fetch("/api/faucet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: walletAddress.toBase58() }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setFaucetMsg("10,000 test USDC sent!");
-        fetchSolBalance();
-        refetch();
-      } else {
-        setFaucetMsg(data.error || "Faucet failed");
-      }
-    } catch (err: any) {
-      setFaucetMsg(err.message || "Faucet failed");
-    } finally {
-      setFaucetLoading(false);
+    const ok = await mintUsdc();
+    if (ok) {
+      await Promise.all([refetchSolBalance(), refetch()]);
     }
   };
-
-  const [claimMsg, setClaimMsg] = useState<string | null>(null);
 
   const handleClaim = async (vaultPubkey: PublicKey) => {
     setClaimMsg(null);

@@ -1,5 +1,5 @@
-// Simple in-memory cache to avoid repeated RPC calls on navigation
-const cache = new Map<string, { data: any; timestamp: number }>();
+// Simple in-memory cache to avoid repeated RPC calls on navigation.
+const cache = new Map<string, { data: unknown; timestamp: number }>();
 const TTL = 30_000; // 30 seconds
 
 export function getCached<T>(key: string): T | null {
@@ -12,6 +12,16 @@ export function getCached<T>(key: string): T | null {
   return entry.data as T;
 }
 
-export function setCache(key: string, data: any) {
+export function setCache<T>(key: string, data: T) {
   cache.set(key, { data, timestamp: Date.now() });
+}
+
+export function clearCache(prefix?: string) {
+  if (!prefix) {
+    cache.clear();
+    return;
+  }
+  for (const key of cache.keys()) {
+    if (key.startsWith(prefix)) cache.delete(key);
+  }
 }
