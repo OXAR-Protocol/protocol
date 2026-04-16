@@ -7,7 +7,7 @@ exports.deriveListingPda = deriveListingPda;
 exports.deriveEscrowPda = deriveEscrowPda;
 const web3_js_1 = require("@solana/web3.js");
 const constants_1 = require("./constants");
-function deriveVaultPda(region, denomination, assetSubtype, series = 1) {
+function deriveVaultPda(region, denomination, assetSubtype, series = constants_1.DEFAULT_SERIES) {
     const seriesBytes = Buffer.alloc(2);
     seriesBytes.writeUInt16LE(series);
     return web3_js_1.PublicKey.findProgramAddressSync([

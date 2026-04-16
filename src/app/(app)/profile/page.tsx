@@ -5,11 +5,12 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Copy, ExternalLink, ChevronRight } from "lucide-react";
+import { Copy, ExternalLink, ChevronRight, Check, CreditCard } from "lucide-react";
 
 import { useOxarProgram } from "@/hooks/use-oxar-program";
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { shortenAddress, formatUsdc } from "@/lib/format";
+import { DetailRow } from "@/components/explore/detail-row";
 
 export default function ProfilePage() {
   const { logout } = usePrivy();
@@ -48,71 +49,91 @@ export default function ProfilePage() {
   const fullAddress = walletAddress?.toBase58() ?? "";
 
   return (
-    <div className="py-6 space-y-6">
-      {/* Account Section */}
-      <div>
-        <h2 className="text-white/60 font-mono text-xs uppercase tracking-wide mb-3">
+    <div className="max-w-[720px] mx-auto py-8 space-y-6">
+      <div className="rounded-[5px] border border-white/10 bg-surface-0 p-6">
+        <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30 block mb-3">
           Account
-        </h2>
-
-        {/* Wallet Address */}
-        <div className="flex justify-between items-center py-3 border-b border-white/[0.05]">
-          <span className="text-white/40 font-mono text-xs">Wallet</span>
+        </span>
+        <dl className="font-mono text-xs">
           <button
             onClick={handleCopy}
-            className="flex items-center gap-2 text-white font-mono text-sm hover:text-white/80 transition-colors"
+            className="w-full flex items-center justify-between py-1.5 border-b border-white/[0.04] text-left group"
           >
-            {copied ? "Copied!" : shortenAddress(fullAddress)}
-            <Copy size={14} className="text-white/40" />
+            <dt className="text-white/30 uppercase tracking-wide text-[10px]">
+              Wallet
+            </dt>
+            <dd className="flex items-center gap-2 text-white/80">
+              {copied ? (
+                <>
+                  <span>Copied</span>
+                  <Check size={12} className="text-profit" />
+                </>
+              ) : (
+                <>
+                  <span>{shortenAddress(fullAddress)}</span>
+                  <Copy
+                    size={12}
+                    className="text-white/40 group-hover:text-white transition-colors"
+                  />
+                </>
+              )}
+            </dd>
           </button>
-        </div>
+          <DetailRow
+            label="USDC Balance"
+            value={loading ? "…" : formatUsdc(usdcBalance)}
+          />
+          <DetailRow label="SOL Balance" value={`${solBalance.toFixed(4)} SOL`} />
+        </dl>
 
-        {/* USDC Balance */}
-        <div className="flex justify-between items-center py-3 border-b border-white/[0.05]">
-          <span className="text-white/40 font-mono text-xs">USDC Balance</span>
-          <span className="text-white font-mono text-sm">
-            {loading ? "..." : formatUsdc(usdcBalance)}
-          </span>
-        </div>
-
-        {/* SOL Balance */}
-        <div className="flex justify-between items-center py-3 border-b border-white/[0.05]">
-          <span className="text-white/40 font-mono text-xs">SOL Balance</span>
-          <span className="text-white font-mono text-sm">
-            {solBalance.toFixed(4)} SOL
+        <div className="mt-5 relative">
+          <button
+            disabled
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-[5px] font-mono text-[11px] uppercase tracking-[0.15em] bg-white/[0.04] text-white/30 border border-white/5 cursor-not-allowed"
+          >
+            <CreditCard size={14} />
+            Top Up with Card
+          </button>
+          <span className="block mt-2 text-center font-mono text-[10px] uppercase tracking-wide text-white/25">
+            Available on mainnet
           </span>
         </div>
       </div>
 
-      {/* Links Section */}
-      <div>
-        <h2 className="text-white/60 font-mono text-xs uppercase tracking-wide mb-3">
+      <div className="rounded-[5px] border border-white/10 bg-surface-0 p-6">
+        <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30 block mb-3">
           Links
-        </h2>
-
-        <a
-          href="https://github.com/OXAR-Protocol/docs"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex justify-between items-center py-3 border-b border-white/[0.05] text-white/40 hover:text-white/60 transition-colors"
-        >
-          <span className="font-mono text-xs">Documentation</span>
-          <ExternalLink size={14} />
-        </a>
-
-        <Link
-          href="/terms"
-          className="flex justify-between items-center py-3 border-b border-white/[0.05] text-white/40 hover:text-white/60 transition-colors"
-        >
-          <span className="font-mono text-xs">Terms of Service</span>
-          <ChevronRight size={14} />
-        </Link>
+        </span>
+        <div className="flex flex-col">
+          <a
+            href="https://github.com/OXAR-Protocol/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between py-2.5 border-b border-white/[0.04] font-mono text-xs text-white/50 hover:text-white transition-colors"
+          >
+            <span className="uppercase tracking-wide">Documentation</span>
+            <ExternalLink size={12} />
+          </a>
+          <Link
+            href="/terms"
+            className="flex items-center justify-between py-2.5 border-b border-white/[0.04] font-mono text-xs text-white/50 hover:text-white transition-colors"
+          >
+            <span className="uppercase tracking-wide">Terms of Service</span>
+            <ChevronRight size={12} />
+          </Link>
+          <Link
+            href="/investors"
+            className="flex items-center justify-between py-2.5 font-mono text-xs text-white/50 hover:text-white transition-colors"
+          >
+            <span className="uppercase tracking-wide">For Investors</span>
+            <ChevronRight size={12} />
+          </Link>
+        </div>
       </div>
 
-      {/* Disconnect Button */}
       <button
         onClick={handleDisconnect}
-        className="w-full py-3 rounded-xl border border-loss/30 text-loss font-mono text-sm uppercase tracking-wide mt-8"
+        className="w-full py-4 rounded-[5px] font-mono text-xs uppercase tracking-[0.15em] border border-loss/30 text-loss hover:bg-loss/5 transition-colors"
       >
         Disconnect
       </button>

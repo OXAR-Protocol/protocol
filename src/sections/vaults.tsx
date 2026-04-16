@@ -7,19 +7,8 @@ import { SectionTitle } from "@/components/section-title";
 import { AnimatedSection } from "@/components/animated-section";
 import { Button } from "@/components/button";
 import { useWarp } from "@/components/warp-transition";
-
-// Generate realistic NAV growth based on APY over 12 months
-function generateNavGrowth(apy: number, points = 24): number[] {
-  const dailyRate = apy / 100 / 365;
-  const daysPerPoint = 365 / points;
-  const data: number[] = [];
-  let nav = 1000;
-  for (let i = 0; i <= points; i++) {
-    data.push(nav);
-    nav *= 1 + dailyRate * daysPerPoint;
-  }
-  return data;
-}
+import { generateGrowthCurve } from "@/lib/growth";
+import { BANK_RATES, CURRENCY_COLORS } from "@/lib/bond-constants";
 
 function ComparisonChart({
   oxarData,
@@ -133,29 +122,20 @@ const VAULTS = [
   {
     name: "Government Bonds UAH",
     apy: 18,
-    bankApy: 3,
     currency: "UAH",
     term: "3-12 months",
-    color: "rgba(114,162,240,1)",
-    glowRgb: "114,162,240",
   },
   {
     name: "Government Bonds USD",
     apy: 4,
-    bankApy: 0.5,
     currency: "USD",
     term: "Stable",
-    color: "rgba(139,92,246,1)",
-    glowRgb: "139,92,246",
   },
   {
     name: "Government Bonds EUR",
     apy: 3.5,
-    bankApy: 0.3,
     currency: "EUR",
     term: "Stable",
-    color: "rgba(160,200,160,1)",
-    glowRgb: "160,200,160",
   },
 ];
 
@@ -175,10 +155,12 @@ function VaultCard({
   const [mouse, setMouse] = useState({ x: 0, y: 0, active: false });
   const [amount, setAmount] = useState(10000);
 
-  const oxarData = generateNavGrowth(vault.apy);
-  const bankData = generateNavGrowth(vault.bankApy);
+  const bankApy = BANK_RATES[vault.currency] ?? 1;
+  const { color, rgb: glowRgb } = CURRENCY_COLORS[vault.currency] ?? CURRENCY_COLORS.UAH;
+  const oxarData = generateGrowthCurve(1000, vault.apy);
+  const bankData = generateGrowthCurve(1000, bankApy);
   const yearlyYield = Math.round(amount * (vault.apy / 100));
-  const bankMultiplier = Math.round(vault.apy / vault.bankApy);
+  const bankMultiplier = Math.round(vault.apy / bankApy);
 
   const onMove = useCallback((e: React.MouseEvent) => {
     const rect = cardRef.current?.getBoundingClientRect();
@@ -212,7 +194,7 @@ function VaultCard({
             width: 280,
             height: 280,
             borderRadius: "50%",
-            background: `radial-gradient(circle, rgba(${vault.glowRgb},0.1) 0%, transparent 70%)`,
+            background: `radial-gradient(circle, rgba(${glowRgb},0.1) 0%, transparent 70%)`,
             opacity: mouse.active ? 1 : 0,
           }}
         />
@@ -231,11 +213,11 @@ function VaultCard({
 
           {/* Comparison chart — OXAR vs Bank */}
           <div className="mb-4">
-            <ComparisonChart oxarData={oxarData} bankData={bankData} color={vault.color} />
+            <ComparisonChart oxarData={oxarData} bankData={bankData} color={color} />
             <div className="flex justify-between mt-1">
               <span className="font-mono text-[10px] text-white/20">$1,000 invested</span>
               <div className="flex gap-3">
-                <span className="font-mono text-[10px]" style={{ color: vault.color }}>
+                <span className="font-mono text-[10px]" style={{ color: color }}>
                   ● OXAR
                 </span>
                 <span className="font-mono text-[10px] text-white/20">

@@ -5,6 +5,7 @@ import { PublicKey } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
 import { useOxarProgram } from "./use-oxar-program";
 import { getCached, setCache } from "@/lib/cache";
+import { deriveVaultPda } from "@/lib/pda";
 
 export interface VaultAccount {
   publicKey: PublicKey;
@@ -28,6 +29,7 @@ export interface VaultAccount {
     isActive: boolean;
     feeBps: number;
     bump: number;
+    series: number;
   };
 }
 
@@ -53,7 +55,19 @@ export function useVaults() {
 
     try {
       const allVaults = await program.account.vault.all();
-      const result = allVaults as unknown as VaultAccount[];
+      const result = (allVaults as unknown as VaultAccount[]).filter((v) => {
+        try {
+          const [pda] = deriveVaultPda(
+            v.account.region,
+            v.account.denomination,
+            v.account.assetSubtype,
+            v.account.series,
+          );
+          return pda.toBase58() === v.publicKey.toBase58();
+        } catch {
+          return false;
+        }
+      });
       setVaults(result);
       setCache("vaults", result);
       setError(null);

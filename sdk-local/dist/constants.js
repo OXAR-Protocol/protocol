@@ -6,14 +6,14 @@ exports.parseVaultId = parseVaultId;
 const web3_js_1 = require("@solana/web3.js");
 exports.PROGRAM_ID = new web3_js_1.PublicKey("8NsGNHMtfEiJzSczdmN2reo26h75C4axamuLXdk2tfrT");
 exports.RPC_URL = "https://api.devnet.solana.com";
-exports.DEFAULT_SERIES = 1;
+exports.DEFAULT_SERIES = 2;
 exports.VAULT_CONFIGS = [
     {
         id: "UA-UAH-SHORT",
         region: "UA",
         denomination: "UAH",
         assetSubtype: "SHORT",
-        series: 1,
+        series: 2,
         apy: 18,
         label: "Ukraine OVDP UAH (Short-term)",
         isWar: false,
@@ -24,7 +24,7 @@ exports.VAULT_CONFIGS = [
         region: "UA",
         denomination: "UAH",
         assetSubtype: "MID",
-        series: 1,
+        series: 2,
         apy: 17,
         label: "Ukraine OVDP UAH (Mid-term)",
         isWar: false,
@@ -35,7 +35,7 @@ exports.VAULT_CONFIGS = [
         region: "UA",
         denomination: "USD",
         assetSubtype: "STD",
-        series: 1,
+        series: 2,
         apy: 4,
         label: "Ukraine OVDP USD",
         isWar: false,
@@ -46,7 +46,7 @@ exports.VAULT_CONFIGS = [
         region: "UA",
         denomination: "EUR",
         assetSubtype: "STD",
-        series: 1,
+        series: 2,
         apy: 3.5,
         label: "Ukraine OVDP EUR",
         isWar: false,
@@ -57,7 +57,7 @@ exports.VAULT_CONFIGS = [
         region: "UA",
         denomination: "UAH",
         assetSubtype: "WAR",
-        series: 1,
+        series: 2,
         apy: 18,
         label: "Ukraine War Bonds UAH",
         isWar: true,
@@ -68,7 +68,7 @@ exports.VAULT_CONFIGS = [
         region: "UA",
         denomination: "USD",
         assetSubtype: "WAR",
-        series: 1,
+        series: 2,
         apy: 4,
         label: "Ukraine War Bonds USD",
         isWar: true,

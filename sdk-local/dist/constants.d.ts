@@ -1,7 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 export declare const PROGRAM_ID: PublicKey;
 export declare const RPC_URL = "https://api.devnet.solana.com";
-export declare const DEFAULT_SERIES = 1;
+export declare const DEFAULT_SERIES = 2;
 export interface VaultConfig {
     readonly id: string;
     readonly region: string;

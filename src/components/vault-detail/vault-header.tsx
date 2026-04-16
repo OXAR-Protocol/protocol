@@ -3,23 +3,11 @@
 import { VaultConfig } from "@/lib/constants";
 import { VaultAccount } from "@/hooks/use-vaults";
 import { formatApy, formatUsdc } from "@/lib/format";
+import { getBondName, getBondTermShort } from "@/lib/bond-labels";
 
 interface VaultHeaderProps {
   config: VaultConfig;
   vault: VaultAccount | null;
-}
-
-function getSubtypeLabel(config: VaultConfig): string {
-  if (config.isWar) return "War Bond";
-  if (config.assetSubtype === "SHORT") return "OVDP Short-term";
-  if (config.assetSubtype === "MID") return "OVDP Mid-term";
-  return "OVDP Standard";
-}
-
-function getMaturityRange(config: VaultConfig): string {
-  if (config.assetSubtype === "SHORT") return "3-12mo";
-  if (config.assetSubtype === "MID") return "1-3yr";
-  return "1-5yr";
 }
 
 export function VaultHeader({ config, vault }: VaultHeaderProps) {
@@ -37,8 +25,8 @@ export function VaultHeader({ config, vault }: VaultHeaderProps) {
         Government Bond {config.denomination}
       </p>
       <p className="text-white/40 font-mono text-xs mt-1">
-        {getSubtypeLabel(config)} &middot; {config.denomination} &middot;{" "}
-        {getMaturityRange(config)}
+        {getBondName(config)} &middot; {config.denomination} &middot;{" "}
+        {getBondTermShort(config)}
       </p>
 
       <p className="text-5xl font-mono font-bold text-accent mt-6">

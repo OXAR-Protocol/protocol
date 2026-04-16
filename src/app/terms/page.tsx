@@ -88,7 +88,7 @@ export default function TermsPage() {
           <section>
             <h2>10. Contact</h2>
             <p>
-              For questions regarding these terms, contact us via <a href="https://github.com/OXAR-Protocol" className="text-accent hover:underline">GitHub</a>.
+              For questions regarding these terms, contact us at <a href="mailto:support@oxar.app" className="text-accent hover:underline">support@oxar.app</a>.
             </p>
           </section>
         </div>

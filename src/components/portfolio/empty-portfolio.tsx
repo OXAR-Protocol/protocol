@@ -4,21 +4,20 @@ import Link from "next/link";
 
 export function EmptyPortfolio() {
   return (
-    <div className="flex flex-col items-center py-16 px-4">
-      <p className="text-white/60 font-mono text-lg text-center">
-        No investments yet
+    <div className="rounded-[5px] border border-dashed border-white/10 bg-surface-0 p-10 flex flex-col items-center text-center">
+      <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30 mb-4">
+        [ Empty ]
+      </span>
+      <p className="font-sans text-xl text-white">No investments yet</p>
+      <p className="font-mono text-xs text-white/30 mt-3 max-w-xs leading-relaxed">
+        If you invested $1,000 in UA-UAH-SHORT 30 days ago, you&apos;d have +$14.79 today
       </p>
-      <p className="text-white/30 font-mono text-sm text-center mt-2 max-w-xs">
-        If you invested $1,000 in UA-UAH-SHORT 30 days ago, you&apos;d have +$14.79
-      </p>
-      <div className="flex justify-center mt-6">
-        <Link
-          href="/vaults"
-          className="bg-accent text-white px-6 py-3 rounded-xl font-mono text-sm uppercase tracking-wide transition-opacity hover:opacity-90"
-        >
-          Start Earning
-        </Link>
-      </div>
+      <Link
+        href="/vaults"
+        className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-[5px] font-mono text-xs uppercase tracking-[0.15em] bg-white text-black hover:bg-white/90 transition-colors"
+      >
+        Start Earning
+      </Link>
     </div>
   );
 }

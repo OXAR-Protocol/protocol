@@ -4,21 +4,23 @@ import { useState } from "react";
 import { BN } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
-import { useListings } from "@/hooks/use-listings";
+import { useListings, ListingAccount } from "@/hooks/use-listings";
 import { useBuyListing } from "@/hooks/use-buy-listing";
 import { useCancelListing } from "@/hooks/use-cancel-listing";
 import { useCreateListing } from "@/hooks/use-create-listing";
 import { useOxarProgram } from "@/hooks/use-oxar-program";
-import { SectionLabel } from "@/components/section-label";
 import { VAULT_CONFIGS } from "@/lib/constants";
 import { deriveVaultPda } from "@/lib/pda";
 import { findVaultConfig } from "@/lib/format";
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { BuySheet } from "@/components/marketplace/buy-sheet";
 import { SellSheet } from "@/components/marketplace/sell-sheet";
-import { FilterChips } from "@/components/explore/filter-chips";
-import { ListingAccount } from "@/hooks/use-listings";
+import { BondFilterChip } from "@/components/explore/bond-filter-chip";
+
+const CURRENCY_FILTERS = ["ALL", "UAH", "USD", "EUR"] as const;
+type CurrencyFilter = (typeof CURRENCY_FILTERS)[number];
 
 export default function MarketplacePage() {
   const { listings, loading: listingsLoading, refetch: refetchListings } = useListings();
@@ -30,9 +32,7 @@ export default function MarketplacePage() {
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
   const [selectedListing, setSelectedListing] = useState<ListingAccount | null>(null);
   const [sellSheetOpen, setSellSheetOpen] = useState(false);
-  const [filter, setFilter] = useState("All");
-
-  // --- Transaction handlers (preserved from original) ---
+  const [filter, setFilter] = useState<CurrencyFilter>("ALL");
 
   const handleCreateListing = (vaultId: string, amount: string, price: string) => {
     const config = VAULT_CONFIGS.find((v) => v.id === vaultId);
@@ -42,7 +42,7 @@ export default function MarketplacePage() {
     const priceFloat = parseFloat(price);
     if (isNaN(amountFloat) || isNaN(priceFloat) || amountFloat <= 0 || priceFloat <= 0) return;
 
-    const [vaultPda] = deriveVaultPda(config.region, config.denomination, config.assetSubtype);
+    const [vaultPda] = deriveVaultPda(config.region, config.denomination, config.assetSubtype, config.series);
     const amountBn = new BN(Math.floor(amountFloat * 1_000_000));
     const priceBn = new BN(Math.floor(priceFloat * 1_000_000));
 
@@ -61,145 +61,113 @@ export default function MarketplacePage() {
     if (tx) refetchListings();
   };
 
-  // --- Filtering ---
-
   const filterListings = (items: ListingAccount[]) => {
-    if (filter === "All") return items;
+    if (filter === "ALL") return items;
     return items.filter((l) => {
       const config = findVaultConfig(l.account.vault.toBase58());
-      if (!config) return false;
-      if (filter === "Highest APY" || filter === "Short-term") return true;
-      return config.denomination === filter;
+      return config?.denomination === filter;
     });
   };
 
   const walletAddr = walletAddress?.toBase58();
   const othersListings = filterListings(
-    listings.filter((l) => l.account.seller.toBase58() !== walletAddr)
+    listings.filter((l) => l.account.seller.toBase58() !== walletAddr),
   );
   const ownListings = filterListings(
-    listings.filter((l) => l.account.seller.toBase58() === walletAddr)
+    listings.filter((l) => l.account.seller.toBase58() === walletAddr),
   );
 
   const combinedError = createError || buyError || cancelError;
+  const currentList = activeTab === "buy" ? othersListings : ownListings;
 
   return (
-    <div className="flex flex-col gap-5 px-4 pb-28 pt-4">
-      {/* Header */}
-      <div>
-        <SectionLabel>Marketplace</SectionLabel>
-        <p className="text-white/40 font-mono text-xs mt-2">
+    <div className="max-w-[720px] mx-auto py-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
           Trade vault tokens with other users
         </p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-white/[0.08]">
-        <button
-          onClick={() => setActiveTab("buy")}
-          className={`flex-1 pb-2.5 font-mono text-sm transition-colors ${
-            activeTab === "buy"
-              ? "border-b-2 border-accent text-white"
-              : "text-white/40"
-          }`}
-        >
-          Buy
-        </button>
-        <button
-          onClick={() => setActiveTab("sell")}
-          className={`flex-1 pb-2.5 font-mono text-sm transition-colors ${
-            activeTab === "sell"
-              ? "border-b-2 border-accent text-white"
-              : "text-white/40"
-          }`}
-        >
-          Sell
-        </button>
+      <div className="flex items-center gap-2 border-b border-white/10">
+        {(["buy", "sell"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`font-mono text-[11px] uppercase tracking-[0.15em] px-4 py-3 border-b-2 transition-colors ${
+              activeTab === tab
+                ? "border-white text-white"
+                : "border-transparent text-white/30 hover:text-white/60"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
-      {/* Filter chips */}
-      <FilterChips active={filter} onChange={setFilter} />
-
-      {/* Error */}
-      {combinedError && (
-        <div className="bg-loss/10 border border-loss/30 rounded-xl px-4 py-3">
-          <p className="text-loss font-mono text-xs">{combinedError}</p>
-        </div>
-      )}
-
-      {/* Buy tab */}
-      {activeTab === "buy" && (
-        <div className="flex flex-col gap-3">
-          {listingsLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : othersListings.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 py-12">
-              <p className="text-white/30 font-mono text-sm text-center">
-                No listings yet.
-              </p>
-              <Link
-                href="/vaults"
-                className="text-accent font-mono text-sm hover:underline"
-              >
-                Explore vaults to invest directly &rarr;
-              </Link>
-            </div>
-          ) : (
-            othersListings.map((listing) => (
-              <ListingCard
-                key={listing.publicKey.toBase58()}
-                listing={listing}
-                isOwn={false}
-                onBuy={() => setSelectedListing(listing)}
-                onCancel={() => {}}
-                buying={buying}
-                cancelling={false}
-              />
-            ))
-          )}
-        </div>
-      )}
-
-      {/* Sell tab */}
-      {activeTab === "sell" && (
-        <div className="flex flex-col gap-3">
-          {listingsLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : ownListings.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 py-12">
-              <p className="text-white/30 font-mono text-sm text-center">
-                You have no active listings.
-              </p>
-            </div>
-          ) : (
-            ownListings.map((listing) => (
-              <ListingCard
-                key={listing.publicKey.toBase58()}
-                listing={listing}
-                isOwn={true}
-                onBuy={() => {}}
-                onCancel={() => handleCancel(listing.account.vault)}
-                buying={false}
-                cancelling={cancelling}
-              />
-            ))
-          )}
-
-          {/* Create listing button */}
-          <button
-            onClick={() => setSellSheetOpen(true)}
-            className="w-full bg-accent text-white py-3 rounded-xl font-mono text-sm transition-colors hover:bg-accent/80"
+      <div className="flex flex-wrap items-center gap-2">
+        {CURRENCY_FILTERS.map((f) => (
+          <BondFilterChip
+            key={f}
+            active={filter === f}
+            onClick={() => setFilter(f)}
           >
-            Create Listing
-          </button>
+            {f}
+          </BondFilterChip>
+        ))}
+      </div>
+
+      {combinedError && (
+        <div className="rounded-[5px] border border-loss/30 bg-loss/[0.05] px-4 py-3">
+          <p className="font-mono text-[11px] text-loss">{combinedError}</p>
         </div>
       )}
 
-      {/* Buy sheet */}
+      {listingsLoading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 size={18} className="animate-spin text-white/30" />
+        </div>
+      ) : currentList.length === 0 ? (
+        <div className="rounded-[5px] border border-dashed border-white/10 bg-surface-0 p-10 flex flex-col items-center text-center">
+          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30 mb-3">
+            [ Empty ]
+          </span>
+          <p className="font-sans text-base text-white">
+            {activeTab === "buy" ? "No listings yet" : "You have no active listings"}
+          </p>
+          {activeTab === "buy" && (
+            <Link
+              href="/vaults"
+              className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-[5px] font-mono text-[10px] uppercase tracking-[0.15em] border border-white/10 text-white hover:border-white/20 transition-colors"
+            >
+              Explore vaults →
+            </Link>
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {currentList.map((listing) => (
+            <ListingCard
+              key={listing.publicKey.toBase58()}
+              listing={listing}
+              isOwn={activeTab === "sell"}
+              onBuy={() => setSelectedListing(listing)}
+              onCancel={() => handleCancel(listing.account.vault)}
+              buying={buying}
+              cancelling={cancelling}
+            />
+          ))}
+        </div>
+      )}
+
+      {activeTab === "sell" && (
+        <button
+          onClick={() => setSellSheetOpen(true)}
+          className="w-full py-4 rounded-[5px] font-mono text-xs uppercase tracking-[0.15em] bg-white text-black hover:bg-white/90 transition-colors"
+        >
+          Create Listing
+        </button>
+      )}
+
       <BuySheet
         listing={selectedListing}
         open={!!selectedListing}
@@ -208,7 +176,6 @@ export default function MarketplacePage() {
         buying={buying}
       />
 
-      {/* Sell sheet */}
       <SellSheet
         open={sellSheetOpen}
         onClose={() => setSellSheetOpen(false)}

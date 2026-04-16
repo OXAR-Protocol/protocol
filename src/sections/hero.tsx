@@ -9,7 +9,7 @@ import { useWarp } from "@/components/warp-transition";
 export function Hero() {
   const { startWarp } = useWarp();
   return (
-    <section className="relative min-h-[85vh] flex items-center justify-center px-6 overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
       {/* Background video */}
       <video
         autoPlay
@@ -31,11 +31,11 @@ export function Hero() {
         className="absolute inset-0 z-10 pointer-events-none hero-overlay"
         style={{
           background: `linear-gradient(to bottom,
-            #0a0a0a 0%,
+            #000000 0%,
             rgba(10,10,15,0.6) 30%,
             rgba(10,10,15,0.5) 50%,
             rgba(10,10,15,0.6) 70%,
-            #0a0a0a 100%
+            #000000 100%
           )`
         }}
       />

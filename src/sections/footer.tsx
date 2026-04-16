@@ -23,16 +23,17 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
     ],
   },
   {
-    title: "Community",
+    title: "Contact",
     links: [
-      { label: "Telegram", href: "#" },
-      { label: "Twitter", href: "#" },
+      { label: "support@oxar.app", href: "mailto:support@oxar.app" },
+      { label: "Telegram", href: "https://t.me/eternaki" },
     ],
   },
   {
     title: "Legal",
     links: [
       { label: "Terms", warpTo: "/terms", warp: true },
+      { label: "Investors", warpTo: "/investors", warp: true },
     ],
   },
 ];

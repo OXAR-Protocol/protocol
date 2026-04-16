@@ -16,7 +16,29 @@ export function CustomCursor() {
   const history = useRef<{ x: number; y: number }[]>([]);
   const [visible, setVisible] = useState(false);
   const [hovering, setHovering] = useState(false);
+  const [privyOpen, setPrivyOpen] = useState(false);
   const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const check = () => {
+      const hasPrivy =
+        document.querySelector(
+          'iframe[src*="privy.io"], #privy-dialog, [id^="privy-"], [class*="privy-"]',
+        ) !== null;
+      setPrivyOpen(hasPrivy);
+      document.body.classList.toggle("privy-open", hasPrivy);
+    };
+
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => {
+      observer.disconnect();
+      document.body.classList.remove("privy-open");
+    };
+  }, []);
 
   const animate = useCallback(() => {
     // Push current position to history
@@ -92,6 +114,8 @@ export function CustomCursor() {
       cancelAnimationFrame(rafRef.current);
     };
   }, [animate, visible]);
+
+  if (privyOpen) return null;
 
   return (
     <>

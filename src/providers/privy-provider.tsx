@@ -6,6 +6,10 @@ import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { ReactNode } from "react";
 import { RPC_URL } from "@/lib/constants";
 
+const PRIVY_APP_ID: string = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? (() => {
+  throw new Error("NEXT_PUBLIC_PRIVY_APP_ID is not set");
+})();
+
 const HELIUS_WSS = RPC_URL.replace("https://", "wss://");
 
 const solanaConnectors = toSolanaWalletConnectors({
@@ -30,12 +34,16 @@ const solanaRpcs = {
 export function PrivyProvider({ children }: { children: ReactNode }) {
   return (
     <PrivyProviderBase
-      appId="cmmzf4k4s00g80cjywxio7b89"
+      appId={PRIVY_APP_ID}
       config={{
         appearance: {
-          theme: "dark",
-          accentColor: "#00D4AA",
+          theme: "#000000",
+          accentColor: "#FFFFFF",
           walletChainType: "solana-only",
+          logo: "https://oxar.app/images/white.svg",
+          landingHeader: "Welcome to OXAR",
+          loginMessage: "Real-world yields. On-chain access.",
+          showWalletLoginFirst: false,
         },
         embeddedWallets: {
           solana: {

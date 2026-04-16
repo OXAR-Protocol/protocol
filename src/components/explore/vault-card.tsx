@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 import { VaultConfig } from "@/lib/constants";
 import { VaultAccount } from "@/hooks/use-vaults";
-import { formatApy, formatUsdc, getMaturityCountdown } from "@/lib/format";
+import { bnToDecimal, formatApy, formatUsdc, getMaturityCountdown } from "@/lib/format";
 
 interface VaultCardProps {
   config: VaultConfig;
@@ -93,9 +93,9 @@ export function VaultCard({ config, vaultData, index }: VaultCardProps) {
     ? !vaultData.account.totalDeposits.isZero()
     : false;
 
-  // Progress: ratio of deposits to a soft cap (e.g. 100k)
+  // Progress: ratio of deposits to a soft cap (e.g. 100k). Use safe BN math — totalDeposits can overflow Number on big vaults.
   const depositRatio = vaultData
-    ? Math.min(vaultData.account.totalDeposits.toNumber() / (100_000 * 1_000_000), 1)
+    ? Math.min(bnToDecimal(vaultData.account.totalDeposits, 6) / 100_000, 1)
     : 0;
 
   return (

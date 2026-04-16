@@ -7,7 +7,6 @@ import { BN } from "@coral-xyz/anchor";
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { useClaim } from "@/hooks/use-claim";
 import { useOxarProgram } from "@/hooks/use-oxar-program";
-import { SectionLabel } from "@/components/section-label";
 import { PortfolioHeader } from "@/components/portfolio/portfolio-header";
 import { PositionCard } from "@/components/portfolio/position-card";
 import { EmptyPortfolio } from "@/components/portfolio/empty-portfolio";
@@ -49,8 +48,8 @@ export default function PortfolioPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setAirdropMsg("1 SOL sent! Refresh in a few seconds.");
-        setTimeout(() => fetchSolBalance(), 3000);
+        setAirdropMsg("1 SOL sent!");
+        await fetchSolBalance();
       } else {
         setAirdropMsg(data.error || "Failed to get SOL");
       }
@@ -73,9 +72,9 @@ export default function PortfolioPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setFaucetMsg("10,000 test USDC sent! Refresh in a few seconds.");
+        setFaucetMsg("10,000 test USDC sent!");
         fetchSolBalance();
-        setTimeout(() => refetch(), 3000);
+        refetch();
       } else {
         setFaucetMsg(data.error || "Faucet failed");
       }
@@ -86,9 +85,16 @@ export default function PortfolioPage() {
     }
   };
 
+  const [claimMsg, setClaimMsg] = useState<string | null>(null);
+
   const handleClaim = async (vaultPubkey: PublicKey) => {
+    setClaimMsg(null);
     const tx = await claim(vaultPubkey);
-    if (tx) refetch();
+    if (tx) {
+      setClaimMsg("Claim successful. Balance updated.");
+      await refetch();
+      setTimeout(() => setClaimMsg(null), 3000);
+    }
   };
 
   const totalValue = positions.reduce((acc, pos) => {
@@ -98,8 +104,7 @@ export default function PortfolioPage() {
   }, new BN(0));
 
   return (
-    <div className="py-8 space-y-8">
-      <SectionLabel>Your Portfolio</SectionLabel>
+    <div className="max-w-[720px] mx-auto py-8 space-y-8">
       {!walletAddress ? (
         <p className="text-white/40 font-mono text-sm text-center py-20">
           Connect wallet to view portfolio
@@ -111,6 +116,16 @@ export default function PortfolioPage() {
       ) : positions.length > 0 ? (
         <>
           <PortfolioHeader totalValue={totalValue} positions={positions} />
+          {claimError && (
+            <div className="rounded-[5px] border border-loss/30 bg-loss/[0.05] px-4 py-3">
+              <p className="font-mono text-[11px] text-loss">{claimError}</p>
+            </div>
+          )}
+          {claimMsg && (
+            <div className="rounded-[5px] border border-profit/30 bg-profit/[0.05] px-4 py-3">
+              <p className="font-mono text-[11px] text-profit">{claimMsg}</p>
+            </div>
+          )}
           <div className="flex flex-col gap-3">
             {positions.map((pos) => (
               <PositionCard

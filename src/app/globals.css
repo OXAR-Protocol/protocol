@@ -53,11 +53,38 @@ html {
   * {
     cursor: none !important;
   }
+  body.privy-open,
+  body.privy-open * {
+    cursor: auto !important;
+  }
+  body.privy-open a,
+  body.privy-open button,
+  body.privy-open [role="button"],
+  body.privy-open input,
+  body.privy-open select,
+  body.privy-open textarea {
+    cursor: pointer !important;
+  }
+  body.privy-open input,
+  body.privy-open textarea {
+    cursor: text !important;
+  }
 }
 
 ::selection {
   background: rgba(139, 92, 246, 0.3);
   color: white;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* Thin scrollbar */
@@ -96,13 +123,13 @@ html {
   50% { opacity: 1; }
 }
 
-/* Light theme overrides — kept as dark theme (app is dark-only) */
+/* Light theme overrides */
 [data-theme="light"] {
-  --color-surface-0: #000000;
-  --color-surface-1: #0a0a0a;
-  --color-surface-2: #111111;
-  --color-muted: rgba(255, 255, 255, 0.3);
-  --color-border: rgba(255, 255, 255, 0.08);
+  --color-surface-0: #f5f5f0;
+  --color-surface-1: #ededeb;
+  --color-surface-2: #e5e5e0;
+  --color-muted: rgba(0, 0, 0, 0.3);
+  --color-border: rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="light"] body {

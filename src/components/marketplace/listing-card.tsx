@@ -1,9 +1,18 @@
 "use client";
 
 import { BN } from "@coral-xyz/anchor";
+import { Loader2 } from "lucide-react";
 
 import { ListingAccount } from "@/hooks/use-listings";
-import { findVaultConfig, formatTokens, formatUsdc, shortenAddress } from "@/lib/format";
+import {
+  findVaultConfig,
+  formatTokens,
+  formatUsdc,
+  shortenAddress,
+} from "@/lib/format";
+import { getBondColor } from "@/lib/bond-constants";
+import { getBondName } from "@/lib/bond-labels";
+import { TokenMark } from "@/components/explore/token-mark";
 
 interface ListingCardProps {
   listing: ListingAccount;
@@ -22,8 +31,9 @@ export function ListingCard({
   buying,
   cancelling,
 }: ListingCardProps) {
-  const vaultConfig = findVaultConfig(listing.account.vault.toBase58());
-  const vaultName = vaultConfig?.label || "Unknown Vault";
+  const config = findVaultConfig(listing.account.vault.toBase58());
+  const denomination = config?.denomination ?? "UAH";
+  const { color, rgb } = getBondColor(denomination);
   const sellerAddr = shortenAddress(listing.account.seller.toBase58());
 
   const total = listing.account.amount
@@ -31,56 +41,87 @@ export function ListingCard({
     .div(new BN(1_000_000));
 
   return (
-    <div className="bg-surface-1 rounded-xl border border-white/[0.08] p-4">
-      {/* Top row: vault name + seller */}
-      <div className="flex items-center justify-between">
-        <p className="text-white font-sans text-base">{vaultName}</p>
-        <p className="text-white/40 font-mono text-xs">
-          {sellerAddr}
-          {isOwn && <span className="text-accent ml-1">(You)</span>}
-        </p>
+    <div
+      className="rounded-[5px] border border-white/10 bg-surface-0 p-5 transition-colors hover:border-white/20"
+      style={{ boxShadow: `0 0 40px rgba(${rgb},0.04)` }}
+    >
+      <div className="flex items-start gap-4">
+        <TokenMark symbol={denomination} color={color} rgb={rgb} size="sm" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="font-sans text-base text-white">
+              ox{denomination}
+            </span>
+            {config?.isWar && (
+              <span
+                className="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded"
+                style={{ color, background: `rgba(${rgb},0.1)` }}
+              >
+                WAR
+              </span>
+            )}
+          </div>
+          <span className="font-mono text-[10px] text-white/30 uppercase block truncate">
+            {config ? getBondName(config) : "Government Bond"}
+          </span>
+        </div>
+        <div className="text-right shrink-0">
+          <span className="font-mono text-[10px] text-white/25 uppercase tracking-wide block">
+            Seller
+          </span>
+          <span className="font-mono text-[10px] text-white/50 mt-0.5 block">
+            {isOwn ? "You" : sellerAddr}
+          </span>
+        </div>
       </div>
 
-      {/* Divider */}
-      <div className="border-t border-white/[0.08] my-3" />
-
-      {/* Middle: amount, price, total */}
-      <div className="flex items-center gap-4 text-sm font-mono">
+      <div className="mt-4 pt-4 border-t border-white/[0.06] grid grid-cols-3 gap-3 font-mono text-xs">
         <div>
-          <p className="text-white/40 text-xs">Amount</p>
-          <p className="text-white">{formatTokens(listing.account.amount)} tokens</p>
+          <span className="text-white/30 text-[10px] uppercase tracking-wide block">
+            Amount
+          </span>
+          <span className="text-white/80 mt-0.5 block truncate">
+            {formatTokens(listing.account.amount)}
+          </span>
         </div>
         <div>
-          <p className="text-white/40 text-xs">Price</p>
-          <p className="text-white">{formatUsdc(listing.account.pricePerToken)}/token</p>
+          <span className="text-white/30 text-[10px] uppercase tracking-wide block">
+            Price
+          </span>
+          <span className="text-white/80 mt-0.5 block truncate">
+            {formatUsdc(listing.account.pricePerToken)}
+          </span>
         </div>
-        <div>
-          <p className="text-white/40 text-xs">Total</p>
-          <p className="text-accent font-bold">{formatUsdc(total)}</p>
+        <div className="text-right">
+          <span className="text-white/30 text-[10px] uppercase tracking-wide block">
+            Total
+          </span>
+          <span className="mt-0.5 block truncate" style={{ color }}>
+            {formatUsdc(total)}
+          </span>
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="border-t border-white/[0.08] my-3" />
-
-      {/* Action button */}
-      {isOwn ? (
-        <button
-          onClick={onCancel}
-          disabled={cancelling}
-          className="w-full rounded-xl border border-loss/30 text-loss py-2.5 font-mono text-sm transition-colors hover:bg-loss/10 disabled:opacity-50"
-        >
-          {cancelling ? "Cancelling..." : "Cancel Listing"}
-        </button>
-      ) : (
-        <button
-          onClick={onBuy}
-          disabled={buying}
-          className="w-full rounded-xl bg-accent text-white py-2.5 font-mono text-sm transition-colors hover:bg-accent/80 disabled:opacity-50"
-        >
-          {buying ? "Buying..." : "Buy"}
-        </button>
-      )}
+      <button
+        onClick={isOwn ? onCancel : onBuy}
+        disabled={buying || cancelling}
+        className={`mt-4 w-full py-3 rounded-[5px] font-mono text-[10px] uppercase tracking-[0.15em] transition-colors flex items-center justify-center gap-2 ${
+          isOwn
+            ? "border border-loss/30 text-loss hover:bg-loss/5 disabled:opacity-40"
+            : "bg-white text-black hover:bg-white/90 disabled:bg-white/[0.04] disabled:text-white/30"
+        }`}
+      >
+        {(isOwn ? cancelling : buying) ? (
+          <>
+            <Loader2 size={12} className="animate-spin" />
+            {isOwn ? "Cancelling" : "Buying"}
+          </>
+        ) : isOwn ? (
+          "Cancel Listing"
+        ) : (
+          "Buy"
+        )}
+      </button>
     </div>
   );
 }

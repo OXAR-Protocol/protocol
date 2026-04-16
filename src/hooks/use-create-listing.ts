@@ -55,15 +55,26 @@ export function useCreateListing() {
           .instruction();
 
         const tx = new Transaction().add(ix);
-        const { blockhash } = await connection.getLatestBlockhash();
-        tx.recentBlockhash = blockhash;
+        const latest = await connection.getLatestBlockhash("confirmed");
+        tx.recentBlockhash = latest.blockhash;
         tx.feePayer = walletAddress;
 
         const signed = await program.provider.wallet!.signTransaction(tx);
         const signature = await connection.sendRawTransaction(signed.serialize(), {
           skipPreflight: false,
         });
-        
+
+        const confirmation = await connection.confirmTransaction(
+          {
+            signature,
+            blockhash: latest.blockhash,
+            lastValidBlockHeight: latest.lastValidBlockHeight,
+          },
+          "confirmed",
+        );
+        if (confirmation.value.err) {
+          throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
+        }
 
         return signature;
       } catch (err: any) {
