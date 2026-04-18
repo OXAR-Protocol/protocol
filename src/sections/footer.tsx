@@ -27,6 +27,7 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: "support@oxar.app", href: "mailto:support@oxar.app" },
       { label: "Telegram", href: "https://t.me/eternaki" },
+      { label: "Twitter", href: "https://x.com/the_oxar" },
     ],
   },
   {
