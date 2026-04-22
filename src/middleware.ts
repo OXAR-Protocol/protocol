@@ -25,7 +25,8 @@ function isAppRoute(pathname: string): boolean {
 }
 
 function isMarketingRoute(pathname: string): boolean {
-  if (pathname === "/") return true;
+  // "/" is handled separately per-host — on the marketing domain it's the
+  // landing page; on the app domain we want to route to the gate instead.
   return MARKETING_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
 }
 
@@ -39,6 +40,12 @@ export function middleware(req: NextRequest) {
 
   const isApp = host === APP_DOMAIN;
   const isMarketing = host === MARKETING_DOMAIN || host === `www.${MARKETING_DOMAIN}`;
+
+  // Bare app.oxar.app/ → send users into the app (AccessGate will show if needed).
+  if (isApp && pathname === "/") {
+    const url = new URL(`https://${APP_DOMAIN}/vaults${search}`);
+    return NextResponse.redirect(url, 307);
+  }
 
   if (isMarketing && isAppRoute(pathname)) {
     const url = new URL(`https://${APP_DOMAIN}${pathname}${search}`);
