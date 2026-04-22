@@ -4,10 +4,9 @@ import { motion } from "framer-motion";
 import { SectionLabel } from "@/components/section-label";
 import { Button } from "@/components/button";
 import { FadeIn } from "@/components/fade-in";
-import { useWarp } from "@/components/warp-transition";
+import { scrollToWaitlist } from "@/lib/scroll-to-waitlist";
 
 export function Hero() {
-  const { startWarp } = useWarp();
   return (
     <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
       {/* Background video */}
@@ -74,8 +73,8 @@ export function Hero() {
 
         <FadeIn delay={0.6}>
           <div className="mt-10 flex items-center justify-center gap-4 flex-wrap pointer-events-auto">
-          <Button variant="filled" onClick={() => startWarp("/login")}>
-            Launch App
+          <Button variant="filled" onClick={scrollToWaitlist}>
+            Get Early Access
           </Button>
           <Button variant="ghost" href="#how-it-works">
             Learn more ↓

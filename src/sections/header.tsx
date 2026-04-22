@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { useTheme } from "@/context/theme-context";
 import { useWarp } from "@/components/warp-transition";
+import { scrollToWaitlist } from "@/lib/scroll-to-waitlist";
 
 type NavItem =
   | { label: string; href: string; warp?: false }
@@ -77,8 +78,8 @@ export function Header() {
               </svg>
             )}
           </button>
-          <Button variant="filled" onClick={() => startWarp("/login")}>
-            Launch App
+          <Button variant="filled" onClick={scrollToWaitlist}>
+            Get Early Access
           </Button>
         </nav>
 
@@ -149,8 +150,14 @@ export function Header() {
                 </svg>
               )}
             </button>
-            <Button variant="filled" href="#" onClick={() => setMobileOpen(false)}>
-              Launch App
+            <Button
+              variant="filled"
+              onClick={() => {
+                setMobileOpen(false);
+                scrollToWaitlist();
+              }}
+            >
+              Get Early Access
             </Button>
           </div>
         </nav>

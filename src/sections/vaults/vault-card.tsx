@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { AnimatedSection } from "@/components/animated-section";
 import { Button } from "@/components/button";
-import { useWarp } from "@/components/warp-transition";
+import { scrollToWaitlist } from "@/lib/scroll-to-waitlist";
 import { generateGrowthCurve } from "@/lib/growth";
 import { BANK_RATES, CURRENCY_COLORS } from "@/lib/bond-constants";
 
@@ -26,7 +26,6 @@ interface VaultCardProps {
 }
 
 export function VaultCard({ vault, isOpen, onToggle, delay }: VaultCardProps) {
-  const { startWarp } = useWarp();
   const cardRef = useRef<HTMLDivElement>(null);
   const [mouse, setMouse] = useState({ x: 0, y: 0, active: false });
   const [amount, setAmount] = useState(10000);
@@ -147,8 +146,8 @@ export function VaultCard({ vault, isOpen, onToggle, delay }: VaultCardProps) {
                   </div>
 
                   <div onClick={(e) => e.stopPropagation()}>
-                    <Button variant="filled" onClick={() => startWarp("/login")}>
-                      Start Earning
+                    <Button variant="filled" onClick={scrollToWaitlist}>
+                      Get Early Access
                     </Button>
                   </div>
                 </div>

@@ -7,6 +7,7 @@ import { Features } from "@/sections/features";
 import { ForWhom } from "@/sections/for-whom";
 
 import { Roadmap } from "@/sections/roadmap";
+import { Waitlist } from "@/sections/waitlist";
 
 import { Footer } from "@/sections/footer";
 import { WarpProvider } from "@/components/warp-transition";
@@ -22,8 +23,8 @@ export default function Home() {
         <Vaults />
         <Features />
         <ForWhom />
-
         <Roadmap />
+        <Waitlist />
       </main>
       <Footer />
     </WarpProvider>
