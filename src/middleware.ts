@@ -38,8 +38,15 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Canonicalize www.oxar.app → oxar.app (permanent). Keeps one canonical host
+  // for SEO and avoids any future SSL coverage questions for the www subdomain.
+  if (host === `www.${MARKETING_DOMAIN}`) {
+    const url = new URL(`https://${MARKETING_DOMAIN}${pathname}${search}`);
+    return NextResponse.redirect(url, 308);
+  }
+
   const isApp = host === APP_DOMAIN;
-  const isMarketing = host === MARKETING_DOMAIN || host === `www.${MARKETING_DOMAIN}`;
+  const isMarketing = host === MARKETING_DOMAIN;
 
   // Bare app.oxar.app/ → send users into the app (AccessGate will show if needed).
   if (isApp && pathname === "/") {
