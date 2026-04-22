@@ -48,8 +48,8 @@ export function Waitlist() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mt-2 font-mono text-sm text-white/45 max-w-[520px] leading-relaxed"
         >
-          Fill the certificate. Move the slider to the allocation you&apos;d
-          deploy at launch. Press the seal — your spot is locked.
+          Add your email, stamp the seal — your place in the OXAR alpha is
+          locked. You&apos;ll get priority access when we open.
         </motion.p>
       </div>
 

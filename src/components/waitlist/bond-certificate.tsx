@@ -4,8 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { CertFrame } from "./cert-frame";
 import { CertEmail } from "./cert-email";
-import { AmountDisplay } from "./amount-display";
-import { AmountSlider } from "./amount-slider";
+import { BondCenterpiece } from "./bond-centerpiece";
 import { WaxSeal } from "./wax-seal";
 import { downloadCertificatePng } from "./download-cert";
 import { useWaitlist, formatSerial } from "@/hooks/use-waitlist";
@@ -22,21 +21,18 @@ function today(): string {
 
 export function BondCertificate() {
   const [email, setEmail] = useState("");
-  const [amount, setAmount] = useState(1200);
   const [honeypot, setHoneypot] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const certRef = useRef<HTMLDivElement>(null);
 
-  const { status, serial, savedEmail, savedAmount, existed, error, submit, reset } =
-    useWaitlist();
+  const { status, serial, savedEmail, existed, error, submit, reset } = useWaitlist();
 
-  // When hook restores from localStorage, mirror values into form fields.
+  // When hook restores from localStorage, mirror the email into the field.
   useEffect(() => {
     if (savedEmail && !email) setEmail(savedEmail);
-    if (savedAmount != null && status === "sealed") setAmount(savedAmount);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [savedEmail, savedAmount, status]);
+  }, [savedEmail]);
 
   const emailValid = EMAIL_RE.test(email);
   const sealed = status === "sealed";
@@ -52,7 +48,7 @@ export function BondCertificate() {
   const handleSeal = async () => {
     setEmailTouched(true);
     if (!emailValid) return;
-    await submit(email, amount, honeypot);
+    await submit(email, honeypot);
   };
 
   const handleDownload = async () => {
@@ -68,7 +64,6 @@ export function BondCertificate() {
   const handleReset = () => {
     reset();
     setEmail("");
-    setAmount(1200);
     setHoneypot("");
     setEmailTouched(false);
   };
@@ -110,11 +105,7 @@ export function BondCertificate() {
             invalid={emailInvalidShown}
           />
 
-          <AmountDisplay value={amount} />
-
-          <div className="w-full max-w-[420px]">
-            <AmountSlider value={amount} onChange={setAmount} disabled={disabled} />
-          </div>
+          <BondCenterpiece />
 
           <WaxSeal sealed={sealed} />
 

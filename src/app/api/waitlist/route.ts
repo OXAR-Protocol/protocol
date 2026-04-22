@@ -5,7 +5,6 @@ import { getSupabaseServer } from "@/lib/supabase-server";
 export const runtime = "nodejs";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_AMOUNT = 1;
 const MAX_AMOUNT = 10_000_000;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 const RATE_LIMIT_MAX = 20;
@@ -51,14 +50,20 @@ export async function POST(req: NextRequest) {
   }
 
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-  const amount = typeof body.amount === "number" ? body.amount : Number(body.amount);
   const honeypot = typeof body.website === "string" ? body.website : "";
+
+  // Amount is legacy — waitlist no longer collects it. Accept and validate
+  // only if present; default to 0 so the existing NOT NULL column stays happy.
+  let amount = 0;
+  if (body.amount !== undefined && body.amount !== null) {
+    amount = typeof body.amount === "number" ? body.amount : Number(body.amount);
+    if (!Number.isFinite(amount) || amount < 0 || amount > MAX_AMOUNT) {
+      return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+    }
+  }
 
   if (!EMAIL_RE.test(email)) {
     return NextResponse.json({ error: "Invalid email" }, { status: 400 });
-  }
-  if (!Number.isFinite(amount) || amount < MIN_AMOUNT || amount > MAX_AMOUNT) {
-    return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
   }
 
   // Honeypot — silently accept, but never write. Bots fill all visible fields.
