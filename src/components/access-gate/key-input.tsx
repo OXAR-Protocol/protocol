@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, forwardRef } from "react";
+import { ChangeEvent, ClipboardEvent, forwardRef } from "react";
 
 interface KeyInputProps {
   value: string;
@@ -10,23 +10,33 @@ interface KeyInputProps {
   invalid?: boolean;
 }
 
-// Format: OXAR-XXXX-XXXX-XXXX
-// Normalize raw input: uppercase, strip non-alphanumerics, insert dashes.
-function formatKey(raw: string): string {
-  const cleaned = raw.toUpperCase().replace(/[^A-Z0-9]/g, "");
-  let body = cleaned;
-  if (body.startsWith("OXAR")) body = body.slice(4);
-  body = body.slice(0, 12);
+// Format: OXAR-XXXX-XXXX-XXXX.
+// Accepts any input, normalizes. Returns "" for empty input (so the user
+// can fully erase the field).
+export function formatKey(raw: string): string {
+  let cleaned = raw.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (cleaned.startsWith("OXAR")) cleaned = cleaned.slice(4);
+  cleaned = cleaned.slice(0, 12);
+  if (cleaned.length === 0) return "";
   const groups: string[] = [];
-  for (let i = 0; i < body.length; i += 4) {
-    groups.push(body.slice(i, i + 4));
+  for (let i = 0; i < cleaned.length; i += 4) {
+    groups.push(cleaned.slice(i, i + 4));
   }
-  return `OXAR${groups.length ? "-" + groups.join("-") : ""}`;
+  return `OXAR-${groups.join("-")}`;
 }
 
 export const KeyInput = forwardRef<HTMLInputElement, KeyInputProps>(
   function KeyInput({ value, onChange, onSubmit, disabled, invalid }, ref) {
-    const handle = (e: ChangeEvent<HTMLInputElement>) => onChange(formatKey(e.target.value));
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
+      onChange(formatKey(e.target.value));
+
+    // Always replace on paste so a second paste wipes the first key instead
+    // of concatenating and hitting the 12-char slice.
+    const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
+      e.preventDefault();
+      const pasted = e.clipboardData.getData("text");
+      onChange(formatKey(pasted));
+    };
 
     return (
       <input
@@ -39,7 +49,8 @@ export const KeyInput = forwardRef<HTMLInputElement, KeyInputProps>(
         value={value}
         disabled={disabled}
         placeholder="OXAR-XXXX-XXXX-XXXX"
-        onChange={handle}
+        onChange={handleChange}
+        onPaste={handlePaste}
         onKeyDown={(e) => {
           if (e.key === "Enter") onSubmit();
         }}
