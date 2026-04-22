@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { CertFrame } from "./cert-frame";
 import { CertEmail } from "./cert-email";
 import { AmountDisplay } from "./amount-display";
 import { AmountSlider } from "./amount-slider";
 import { WaxSeal } from "./wax-seal";
+import { downloadCertificatePng } from "./download-cert";
 import { useWaitlist, formatSerial } from "@/hooks/use-waitlist";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,8 +23,20 @@ function today(): string {
 export function BondCertificate() {
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState(1200);
+  const [honeypot, setHoneypot] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
-  const { status, serial, existed, error, submit } = useWaitlist();
+  const [downloading, setDownloading] = useState(false);
+  const certRef = useRef<HTMLDivElement>(null);
+
+  const { status, serial, savedEmail, savedAmount, existed, error, submit, reset } =
+    useWaitlist();
+
+  // When hook restores from localStorage, mirror values into form fields.
+  useEffect(() => {
+    if (savedEmail && !email) setEmail(savedEmail);
+    if (savedAmount != null && status === "sealed") setAmount(savedAmount);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedEmail, savedAmount, status]);
 
   const emailValid = EMAIL_RE.test(email);
   const sealed = status === "sealed";
@@ -39,12 +52,31 @@ export function BondCertificate() {
   const handleSeal = async () => {
     setEmailTouched(true);
     if (!emailValid) return;
-    await submit(email, amount);
+    await submit(email, amount, honeypot);
+  };
+
+  const handleDownload = async () => {
+    if (!certRef.current || serial == null) return;
+    try {
+      setDownloading(true);
+      await downloadCertificatePng(certRef.current, formatSerial(serial));
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleReset = () => {
+    reset();
+    setEmail("");
+    setAmount(1200);
+    setHoneypot("");
+    setEmailTouched(false);
   };
 
   return (
     <div className="w-full max-w-[640px] mx-auto">
       <motion.div
+        ref={certRef}
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -101,9 +133,9 @@ export function BondCertificate() {
               </span>
               <motion.span
                 key={serialText}
-                initial={sealed ? { opacity: 0, scale: 1.2, filter: "blur(6px)" } : false}
+                initial={sealed && existed === false ? { opacity: 0, scale: 1.2, filter: "blur(6px)" } : false}
                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                transition={{ duration: 0.5, delay: sealed ? 0.5 : 0 }}
+                transition={{ duration: 0.5, delay: sealed && !existed ? 0.5 : 0 }}
                 className="font-mono text-[11px] tracking-[0.18em] text-white/80 mt-0.5"
               >
                 {serialText}
@@ -112,6 +144,24 @@ export function BondCertificate() {
           </div>
         </div>
       </motion.div>
+
+      {/* Honeypot — hidden from users, bots fill it. Positioned off-screen so it's not tab-focusable by real users. */}
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        value={honeypot}
+        onChange={(e) => setHoneypot(e.target.value)}
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          width: 1,
+          height: 1,
+          opacity: 0,
+        }}
+      />
 
       <div className="mt-6 flex flex-col items-center gap-3">
         {!sealed && (
@@ -139,17 +189,49 @@ export function BondCertificate() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
-            className="flex flex-col items-center gap-1"
+            className="flex flex-col items-center gap-5"
           >
-            <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-white/70">
-              {existed ? "Already on the list" : "Allocation reserved"}
-            </span>
-            <span className="font-mono text-[10px] text-white/40">
-              Position {serialText} · check your inbox soon
-            </span>
+            <div className="flex flex-col items-center gap-1">
+              <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-white/70">
+                {existed ? "Already on the list" : "Allocation reserved"}
+              </span>
+              <span className="font-mono text-[10px] text-white/40">
+                Position {serialText} · keep this certificate
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              <button
+                onClick={handleDownload}
+                disabled={downloading}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-[4px] font-mono text-[10px] uppercase tracking-[0.2em] bg-white text-surface-0 hover:bg-white/90 disabled:bg-white/[0.2] disabled:cursor-not-allowed transition-all"
+              >
+                <DownloadIcon />
+                {downloading ? "Rendering…" : "Download certificate"}
+              </button>
+              <button
+                onClick={handleReset}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-[4px] font-mono text-[10px] uppercase tracking-[0.2em] bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white/90 transition-all"
+              >
+                Use different email
+              </button>
+            </div>
           </motion.div>
         )}
       </div>
     </div>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+      <path
+        d="M6 1v7m0 0L3 5m3 3l3-3M2 10h8"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="square"
+      />
+    </svg>
   );
 }

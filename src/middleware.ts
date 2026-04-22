@@ -10,6 +10,7 @@ const APP_ROUTES = [
   "/profile",
   "/login",
   "/vault",
+  "/gate",
 ];
 
 const MARKETING_ROUTES = [
