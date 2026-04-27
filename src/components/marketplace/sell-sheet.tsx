@@ -27,8 +27,15 @@ import {
 interface SellSheetProps {
   open: boolean;
   onClose: () => void;
-  onCreateListing: (vaultId: string, amount: string, price: string) => void;
+  /** Returns true on confirmed success (tx landed) so the sheet can auto-close. */
+  onCreateListing: (
+    vaultId: string,
+    amount: string,
+    price: string,
+  ) => Promise<boolean>;
   creating: boolean;
+  /** Latest createListing error from the parent hook. Shown inline when the sheet stays open after a failed attempt. */
+  error?: string | null;
 }
 
 const USDC_RGB = "255,255,255";
@@ -45,6 +52,7 @@ export function SellSheet({
   onClose,
   onCreateListing,
   creating,
+  error,
 }: SellSheetProps) {
   const { positions } = usePortfolio();
   const { listings } = useListings();
@@ -131,9 +139,17 @@ export function SellSheet({
     !overBalance &&
     !creating;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!canSubmit) return;
-    onCreateListing(selectedVaultId, amount, price);
+    const ok = await onCreateListing(selectedVaultId, amount, price);
+    if (ok) {
+      // Reset and close so the user lands back on the marketplace and sees the new listing
+      setSelectedVaultId("");
+      setAmount("");
+      setPrice("");
+      onClose();
+    }
+    // On failure leave the sheet open — `error` prop renders inline so the user can fix and retry
   };
 
   const handleSelectPosition = (vaultId: string, _item: PositionWithConfig) => {
@@ -375,6 +391,12 @@ export function SellSheet({
               submitLabel
             )}
           </button>
+
+          {error && !creating && (
+            <div className="rounded-[5px] border border-loss/30 bg-loss/[0.05] px-4 py-3">
+              <p className="font-mono text-[11px] text-loss">{error}</p>
+            </div>
+          )}
 
           {positions.length === 0 && (
             <p className="text-white/30 font-mono text-[11px] text-center pt-2">

@@ -34,21 +34,40 @@ export default function MarketplacePage() {
   const [sellSheetOpen, setSellSheetOpen] = useState(false);
   const [filter, setFilter] = useState<CurrencyFilter>("ALL");
 
-  const handleCreateListing = (vaultId: string, amount: string, price: string) => {
+  const handleCreateListing = async (
+    vaultId: string,
+    amount: string,
+    price: string,
+  ): Promise<boolean> => {
     const config = VAULT_CONFIGS.find((v) => v.id === vaultId);
-    if (!config || !amount || !price) return;
+    if (!config || !amount || !price) return false;
 
     const amountFloat = parseFloat(amount);
     const priceFloat = parseFloat(price);
-    if (isNaN(amountFloat) || isNaN(priceFloat) || amountFloat <= 0 || priceFloat <= 0) return;
+    if (
+      isNaN(amountFloat) ||
+      isNaN(priceFloat) ||
+      amountFloat <= 0 ||
+      priceFloat <= 0
+    ) {
+      return false;
+    }
 
-    const [vaultPda] = deriveVaultPda(config.region, config.denomination, config.assetSubtype, config.series);
+    const [vaultPda] = deriveVaultPda(
+      config.region,
+      config.denomination,
+      config.assetSubtype,
+      config.series,
+    );
     const amountBn = new BN(Math.floor(amountFloat * 1_000_000));
     const priceBn = new BN(Math.floor(priceFloat * 1_000_000));
 
-    createListing(vaultPda, amountBn, priceBn).then((tx) => {
-      if (tx) refetchListings();
-    });
+    const tx = await createListing(vaultPda, amountBn, priceBn);
+    if (!tx) return false;
+    await refetchListings();
+    // Make sure the user lands on SELL tab so the new listing is visible
+    setActiveTab("sell");
+    return true;
   };
 
   const handleBuy = async (vaultPubkey: PublicKey, sellerPubkey: PublicKey) => {
@@ -181,6 +200,7 @@ export default function MarketplacePage() {
         onClose={() => setSellSheetOpen(false)}
         onCreateListing={handleCreateListing}
         creating={creating}
+        error={createError}
       />
     </div>
   );
