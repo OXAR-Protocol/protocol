@@ -6,6 +6,8 @@ import { BN } from "@coral-xyz/anchor";
 
 import { BottomSheet } from "@/components/bottom-sheet";
 import { usePortfolio, PortfolioPosition } from "@/hooks/use-portfolio";
+import { useListings } from "@/hooks/use-listings";
+import { useOxarProgram } from "@/hooks/use-oxar-program";
 import {
   bnToDecimal,
   findVaultConfig,
@@ -19,6 +21,7 @@ import { TokenMark } from "@/components/explore/token-mark";
 import {
   PositionSelectModal,
   PositionWithConfig,
+  BlockReason,
 } from "./position-select-modal";
 
 interface SellSheetProps {
@@ -31,6 +34,12 @@ interface SellSheetProps {
 const USDC_RGB = "255,255,255";
 const USDC_COLOR = "#ffffff";
 
+function isPositionMatured(position: PortfolioPosition): boolean {
+  const maturity = position.vault.account.maturityTs.toNumber();
+  if (maturity <= 0) return false;
+  return Date.now() / 1000 >= maturity;
+}
+
 export function SellSheet({
   open,
   onClose,
@@ -38,6 +47,8 @@ export function SellSheet({
   creating,
 }: SellSheetProps) {
   const { positions } = usePortfolio();
+  const { listings } = useListings();
+  const { walletAddress } = useOxarProgram();
   const [selectedVaultId, setSelectedVaultId] = useState("");
   const [amount, setAmount] = useState("");
   const [price, setPrice] = useState("");
@@ -52,6 +63,33 @@ export function SellSheet({
     }
   }, [open]);
 
+  // Set of vault PDAs (base58) where this seller already has an active listing
+  const ownListingVaultIds = useMemo(() => {
+    if (!walletAddress) return new Set<string>();
+    const sellerStr = walletAddress.toBase58();
+    return new Set(
+      listings
+        .filter((l) => l.account.seller.toBase58() === sellerStr)
+        .map((l) => l.account.vault.toBase58()),
+    );
+  }, [listings, walletAddress]);
+
+  // Per-position block reasons for the picker
+  const blockedReasons = useMemo(() => {
+    const map: Record<string, BlockReason> = {};
+    for (const pos of positions) {
+      const vaultPda = pos.vault.publicKey.toBase58();
+      if (!pos.vault.account.isActive) {
+        map[vaultPda] = "inactive";
+      } else if (isPositionMatured(pos)) {
+        map[vaultPda] = "matured";
+      } else if (ownListingVaultIds.has(vaultPda)) {
+        map[vaultPda] = "already-listed";
+      }
+    }
+    return map;
+  }, [positions, ownListingVaultIds]);
+
   const selectedPosition = useMemo<PortfolioPosition | undefined>(() => {
     if (!selectedVaultId) return undefined;
     return positions.find((p) => {
@@ -63,6 +101,10 @@ export function SellSheet({
   const selectedConfig = selectedPosition
     ? findVaultConfig(selectedPosition.vault.publicKey.toBase58())
     : null;
+
+  const selectedBlockReason: BlockReason | undefined = selectedPosition
+    ? blockedReasons[selectedPosition.vault.publicKey.toBase58()]
+    : undefined;
 
   const balanceFloat = selectedPosition
     ? bnToDecimal(selectedPosition.balance, 6)
@@ -82,7 +124,12 @@ export function SellSheet({
       : new BN(0);
 
   const canSubmit =
-    !!selectedVaultId && hasAmount && hasPrice && !overBalance && !creating;
+    !!selectedVaultId &&
+    !selectedBlockReason &&
+    hasAmount &&
+    hasPrice &&
+    !overBalance &&
+    !creating;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
@@ -99,10 +146,22 @@ export function SellSheet({
     setAmount(balanceFloat.toString());
   };
 
-  // Visual props for the picker card
   const pickerColor = selectedConfig
     ? getBondColor(selectedConfig.denomination)
     : null;
+
+  // Submit-button helper text covers each blocking state in priority order
+  const submitLabel = (() => {
+    if (creating) return null;
+    if (!selectedVaultId) return "Select position";
+    if (selectedBlockReason === "matured") return "Position is matured";
+    if (selectedBlockReason === "inactive") return "Vault is inactive";
+    if (selectedBlockReason === "already-listed") return "Already listed";
+    if (!hasAmount) return "Enter amount";
+    if (overBalance) return "Exceeds balance";
+    if (!hasPrice) return "Enter price";
+    return `List for ${formatUsdc(total)}`;
+  })();
 
   return (
     <>
@@ -121,7 +180,7 @@ export function SellSheet({
               <label className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
                 Selling
               </label>
-              {selectedPosition && (
+              {selectedPosition && !selectedBlockReason && (
                 <button
                   onClick={handleMax}
                   className="font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-colors"
@@ -189,21 +248,29 @@ export function SellSheet({
                   placeholder="0"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  disabled={!selectedPosition}
+                  disabled={!selectedPosition || !!selectedBlockReason}
                   min="0"
                   step="any"
                   className="bg-transparent text-white font-mono text-3xl font-light w-full outline-none placeholder:text-white/15 text-right min-w-0 disabled:opacity-50 tabular-nums"
                 />
                 <span
                   className={`font-mono text-[10px] mt-0.5 ${
-                    overBalance ? "text-loss" : "text-white/25"
+                    overBalance || selectedBlockReason
+                      ? "text-loss"
+                      : "text-white/25"
                   }`}
                 >
-                  {overBalance
-                    ? "Exceeds balance"
-                    : selectedPosition
-                      ? `${formatTokens(selectedPosition.balance)} available`
-                      : "Pick a position first"}
+                  {selectedBlockReason === "matured"
+                    ? "Matured · claim from Portfolio"
+                    : selectedBlockReason === "inactive"
+                      ? "Vault is inactive"
+                      : selectedBlockReason === "already-listed"
+                        ? "You already have a listing here · cancel it first"
+                        : overBalance
+                          ? "Exceeds balance"
+                          : selectedPosition
+                            ? `${formatTokens(selectedPosition.balance)} available`
+                            : "Pick a position first"}
                 </span>
               </div>
             </div>
@@ -304,16 +371,8 @@ export function SellSheet({
                 <Loader2 size={14} className="animate-spin" />
                 Creating
               </>
-            ) : !selectedVaultId ? (
-              "Select position"
-            ) : !hasAmount ? (
-              "Enter amount"
-            ) : overBalance ? (
-              "Exceeds balance"
-            ) : !hasPrice ? (
-              "Enter price"
             ) : (
-              `List for ${formatUsdc(total)}`
+              submitLabel
             )}
           </button>
 
@@ -329,6 +388,7 @@ export function SellSheet({
         open={pickerOpen}
         positions={positions}
         selectedVaultId={selectedVaultId}
+        blockedReasons={blockedReasons}
         onClose={() => setPickerOpen(false)}
         onSelect={handleSelectPosition}
       />

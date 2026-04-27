@@ -13,6 +13,8 @@ interface PositionSelectModalProps {
   open: boolean;
   positions: PortfolioPosition[];
   selectedVaultId: string;
+  /** Vault PDA (base58) → reason this position cannot be listed right now. */
+  blockedReasons?: Record<string, BlockReason>;
   onClose: () => void;
   onSelect: (vaultId: string, position: PositionWithConfig) => void;
 }
@@ -22,10 +24,19 @@ export interface PositionWithConfig {
   vaultId: string;
 }
 
+export type BlockReason = "matured" | "inactive" | "already-listed";
+
+const BLOCK_LABEL: Record<BlockReason, string> = {
+  matured: "Matured · claim only",
+  inactive: "Inactive vault",
+  "already-listed": "Already listed",
+};
+
 export function PositionSelectModal({
   open,
   positions,
   selectedVaultId,
+  blockedReasons = {},
   onClose,
   onSelect,
 }: PositionSelectModalProps) {
@@ -92,16 +103,25 @@ export function PositionSelectModal({
                 if (!config) return null;
                 const { color, rgb } = getBondColor(config.denomination);
                 const selected = item.vaultId === selectedVaultId;
+                const blockReason =
+                  blockedReasons[item.position.vault.publicKey.toBase58()];
+                const disabled = !!blockReason;
 
                 return (
                   <button
                     key={item.vaultId}
                     onClick={() => {
+                      if (disabled) return;
                       onSelect(item.vaultId, item);
                       onClose();
                     }}
+                    disabled={disabled}
                     className={`flex items-center gap-3 px-3 py-3 rounded-[5px] text-left transition-colors ${
-                      selected ? "bg-white/[0.05]" : "hover:bg-white/[0.03]"
+                      disabled
+                        ? "opacity-40 cursor-not-allowed"
+                        : selected
+                          ? "bg-white/[0.05]"
+                          : "hover:bg-white/[0.03]"
                     }`}
                   >
                     <TokenMark
@@ -125,13 +145,15 @@ export function PositionSelectModal({
                         )}
                       </div>
                       <span className="font-mono text-[10px] text-white/30 uppercase block truncate">
-                        {getBondName(config)}
+                        {blockReason
+                          ? BLOCK_LABEL[blockReason]
+                          : getBondName(config)}
                       </span>
                     </div>
                     <div className="text-right shrink-0">
                       <span
                         className="font-mono text-sm font-light tabular-nums"
-                        style={{ color }}
+                        style={{ color: disabled ? undefined : color }}
                       >
                         {formatTokens(item.position.balance)}
                       </span>
