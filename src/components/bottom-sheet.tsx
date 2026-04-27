@@ -54,8 +54,8 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
               </div>
             )}
 
-            {/* Content */}
-            <div className="px-6 py-4">
+            {/* Content — extra bottom padding on mobile so the CTA clears the fixed TabBar */}
+            <div className="px-6 py-4 pb-[calc(env(safe-area-inset-bottom,0px)+5rem)] md:pb-4">
               {children}
             </div>
           </motion.div>

@@ -18,7 +18,18 @@ import {
   drawPhaseFade,
 } from "@/lib/warp-canvas";
 
-const WarpContext = createContext<{ startWarp: (url?: string) => void }>({
+interface WarpOptions {
+  /** Navigate to this URL when the warp completes. Mutually exclusive with onComplete. */
+  url?: string;
+  /** Run when the warp completes instead of navigating. Use to reveal a sheet/modal after the animation. */
+  onComplete?: () => void;
+  /** Override the default warp duration in ms. Useful for shorter "intro" warps that don't change pages. */
+  duration?: number;
+}
+
+type StartWarp = (options?: WarpOptions | string) => void;
+
+const WarpContext = createContext<{ startWarp: StartWarp }>({
   startWarp: () => {},
 });
 
@@ -28,20 +39,43 @@ export function useWarp() {
 
 export function WarpProvider({ children }: { children: ReactNode }) {
   const [isWarping, setIsWarping] = useState(false);
+  const [activeDuration, setActiveDuration] = useState(WARP_DURATION);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
   const router = useRouter();
 
   const targetUrlRef = useRef<string>("/");
+  const onCompleteRef = useRef<(() => void) | null>(null);
 
-  const startWarp = useCallback(
-    (url?: string) => {
-      targetUrlRef.current = url || "/";
+  const startWarp = useCallback<StartWarp>(
+    (options) => {
+      // Normalize string-form (legacy: startWarp("/path")) to options object
+      const opts: WarpOptions =
+        typeof options === "string" ? { url: options } : (options ?? {});
+
+      targetUrlRef.current = opts.url ?? "";
+      onCompleteRef.current = opts.onComplete ?? null;
+      const duration = opts.duration ?? WARP_DURATION;
+      setActiveDuration(duration);
       setIsWarping(true);
+
       setTimeout(() => {
-        router.push(targetUrlRef.current);
-      }, WARP_DURATION);
+        // Stamp the last-warp timestamp so a follow-up entry warp (e.g., after
+        // landing → app navigation) can decide to skip and avoid back-to-back warps.
+        try {
+          window.sessionStorage.setItem("oxar_last_warp_at", String(Date.now()));
+        } catch {
+          // sessionStorage may be unavailable (private mode, SSR) — that's fine.
+        }
+        if (onCompleteRef.current) {
+          onCompleteRef.current();
+          onCompleteRef.current = null;
+        } else if (targetUrlRef.current) {
+          router.push(targetUrlRef.current);
+        }
+        setIsWarping(false);
+      }, duration);
     },
     [router],
   );
@@ -74,10 +108,11 @@ export function WarpProvider({ children }: { children: ReactNode }) {
     const { paths, glass } = buildWarpPaths();
 
     startTimeRef.current = performance.now();
+    const duration = activeDuration;
 
     const animate = (now: number) => {
       const elapsed = now - startTimeRef.current;
-      const progress = Math.min(elapsed / WARP_DURATION, 1);
+      const progress = Math.min(elapsed / duration, 1);
 
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, w, h);
@@ -107,7 +142,7 @@ export function WarpProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelAnimationFrame(animationRef.current);
     };
-  }, [isWarping]);
+  }, [isWarping, activeDuration]);
 
   return (
     <WarpContext.Provider value={{ startWarp }}>
