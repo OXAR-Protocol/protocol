@@ -30,24 +30,27 @@ export function InvestButton({ amount, vaultPda, onSuccess }: InvestButtonProps)
       ? `Invest $${parsed.toLocaleString()}`
       : "Enter amount";
 
-  const buttonClass = hasAmount && !loading
-    ? "bg-accent text-white"
-    : "bg-white/[0.05] text-white/30";
+  const enabled = hasAmount && !loading && !!vaultPda;
+  const buttonClass = enabled
+    ? "bg-white text-black hover:bg-white/90"
+    : "bg-white/[0.04] text-white/30 cursor-not-allowed border border-white/5";
 
   return (
     <div className="sticky bottom-20 z-10 bg-black pt-4">
       <button
         onClick={handleClick}
-        disabled={!hasAmount || loading || !vaultPda}
-        className={`w-full py-4 rounded-xl font-mono text-base uppercase tracking-wide transition-colors ${buttonClass}`}
+        disabled={!enabled}
+        className={`w-full py-4 rounded-[5px] font-mono text-xs uppercase tracking-[0.15em] transition-colors flex items-center justify-center gap-2 ${buttonClass}`}
       >
         {loading && (
-          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2 align-middle" />
+          <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
         )}
         {buttonLabel}
       </button>
       {error && (
-        <p className="text-loss text-xs font-mono mt-2">{error}</p>
+        <div className="rounded-[5px] border border-loss/30 bg-loss/[0.05] px-4 py-3 mt-3">
+          <p className="font-mono text-[11px] text-loss">{error}</p>
+        </div>
       )}
     </div>
   );

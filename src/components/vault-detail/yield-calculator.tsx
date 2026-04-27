@@ -21,13 +21,17 @@ export function YieldCalculator({
   const monthly = yearly / 12;
 
   return (
-    <div className="bg-surface-1 rounded-xl border border-white/[0.08] p-4">
+    <div className="rounded-[5px] border border-white/10 bg-surface-0 p-5">
+      <label className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30 block mb-3">
+        Yield calculator
+      </label>
+
       <input
         type="number"
         placeholder="Enter amount"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
-        className="bg-surface-1 border border-white/[0.08] rounded-xl px-4 py-3 text-white font-mono text-lg w-full text-center focus:border-accent/50 focus:outline-none"
+        className="bg-transparent text-white font-mono text-3xl font-light w-full outline-none placeholder:text-white/15 text-center tabular-nums"
       />
 
       <div className="flex justify-center gap-2 mt-3">
@@ -35,7 +39,7 @@ export function YieldCalculator({
           <button
             key={preset}
             onClick={() => setAmount(preset.toString())}
-            className="font-mono text-xs px-3 py-1 rounded-full border border-white/[0.08] text-white/40 hover:border-accent/30 hover:text-white transition-all"
+            className="font-mono text-[10px] uppercase tracking-wide px-3 py-1 rounded-full border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-colors"
           >
             ${preset.toLocaleString()}
           </button>
@@ -43,23 +47,27 @@ export function YieldCalculator({
       </div>
 
       {hasAmount && (
-        <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/[0.06]">
           <div className="text-center">
-            <p className="text-white/30 font-mono text-xs mb-1">1 month</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30 mb-1.5">
+              1 month
+            </p>
             <AnimatedNumber
               value={monthly}
               prefix="+$"
               decimals={2}
-              className="text-profit font-mono text-lg font-bold"
+              className="text-profit font-mono text-xl font-medium tabular-nums"
             />
           </div>
           <div className="text-center">
-            <p className="text-white/30 font-mono text-xs mb-1">1 year</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30 mb-1.5">
+              1 year
+            </p>
             <AnimatedNumber
               value={yearly}
               prefix="+$"
               decimals={2}
-              className="text-profit font-mono text-lg font-bold"
+              className="text-profit font-mono text-xl font-medium tabular-nums"
             />
           </div>
         </div>
