@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { BN } from "@coral-xyz/anchor";
-import { ArrowRight, Loader2 } from "lucide-react";
 
 import { ListingAccount } from "@/hooks/use-listings";
 import {
@@ -18,16 +18,9 @@ import { TokenMark } from "@/components/explore/token-mark";
 interface ListingCardProps {
   listing: ListingAccount;
   isOwn: boolean;
-  onCancel: () => void;
-  cancelling: boolean;
 }
 
-export function ListingCard({
-  listing,
-  isOwn,
-  onCancel,
-  cancelling,
-}: ListingCardProps) {
+export function ListingCard({ listing, isOwn }: ListingCardProps) {
   const config = findVaultConfig(listing.account.vault.toBase58());
   const denomination = config?.denomination ?? "UAH";
   const { color, rgb } = getBondColor(denomination);
@@ -38,8 +31,9 @@ export function ListingCard({
     .div(new BN(1_000_000));
 
   return (
-    <div
-      className="rounded-[5px] border border-white/10 bg-surface-0 p-5 transition-colors hover:border-white/20"
+    <Link
+      href={`/marketplace/${listing.publicKey.toBase58()}`}
+      className="rounded-[5px] border border-white/10 bg-surface-0 p-5 transition-colors hover:border-white/20 block"
       style={{ boxShadow: `0 0 40px rgba(${rgb},0.04)` }}
     >
       <div className="flex items-start gap-4">
@@ -99,30 +93,12 @@ export function ListingCard({
         </div>
       </div>
 
-      {isOwn ? (
-        <button
-          onClick={onCancel}
-          disabled={cancelling}
-          className="mt-4 w-full py-3 rounded-[5px] font-mono text-[10px] uppercase tracking-[0.15em] transition-colors flex items-center justify-center gap-2 border border-loss/30 text-loss hover:bg-loss/5 disabled:opacity-40"
-        >
-          {cancelling ? (
-            <>
-              <Loader2 size={12} className="animate-spin" />
-              Cancelling
-            </>
-          ) : (
-            "Cancel Listing"
-          )}
-        </button>
-      ) : (
-        <Link
-          href={`/marketplace/${listing.publicKey.toBase58()}`}
-          className="mt-4 w-full py-3 rounded-[5px] font-mono text-[10px] uppercase tracking-[0.15em] transition-colors flex items-center justify-center gap-2 bg-white text-black hover:bg-white/90"
-        >
-          View details
+      <div className="mt-4 pt-4 border-t border-white/[0.06] flex items-center justify-end">
+        <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/40 inline-flex items-center gap-1.5">
+          {isOwn ? "Manage" : "View details"}
           <ArrowRight size={12} />
-        </Link>
-      )}
-    </div>
+        </span>
+      </div>
+    </Link>
   );
 }

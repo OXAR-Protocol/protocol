@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import { BN } from "@coral-xyz/anchor";
-import { PublicKey } from "@solana/web3.js";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import { useListings, ListingAccount } from "@/hooks/use-listings";
-import { useCancelListing } from "@/hooks/use-cancel-listing";
 import { useCreateListing } from "@/hooks/use-create-listing";
 import { useOxarProgram } from "@/hooks/use-oxar-program";
 import { VAULT_CONFIGS } from "@/lib/constants";
@@ -22,7 +20,6 @@ type CurrencyFilter = (typeof CURRENCY_FILTERS)[number];
 
 export default function MarketplacePage() {
   const { listings, loading: listingsLoading, refetch: refetchListings } = useListings();
-  const { cancelListing, loading: cancelling, error: cancelError } = useCancelListing();
   const { createListing, loading: creating, error: createError } = useCreateListing();
   const { walletAddress } = useOxarProgram();
 
@@ -66,11 +63,6 @@ export default function MarketplacePage() {
     return true;
   };
 
-  const handleCancel = async (vaultPubkey: PublicKey) => {
-    const tx = await cancelListing(vaultPubkey);
-    if (tx) refetchListings();
-  };
-
   const filterListings = (items: ListingAccount[]) => {
     if (filter === "ALL") return items;
     return items.filter((l) => {
@@ -87,7 +79,7 @@ export default function MarketplacePage() {
     listings.filter((l) => l.account.seller.toBase58() === walletAddr),
   );
 
-  const combinedError = createError || cancelError;
+  const combinedError = createError;
   const currentList = activeTab === "buy" ? othersListings : ownListings;
 
   return (
@@ -160,8 +152,6 @@ export default function MarketplacePage() {
               key={listing.publicKey.toBase58()}
               listing={listing}
               isOwn={activeTab === "sell"}
-              onCancel={() => handleCancel(listing.account.vault)}
-              cancelling={cancelling}
             />
           ))}
         </div>

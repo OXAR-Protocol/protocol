@@ -22,7 +22,7 @@ export interface PortfolioPosition {
 
 export function usePortfolio() {
   const { connection, walletAddress } = useOxarProgram();
-  const { vaults } = useVaults();
+  const { vaults, loading: vaultsLoading } = useVaults();
   const [usdcBalance, setUsdcBalance] = useState<BN>(new BN(0));
   const [positions, setPositions] = useState<PortfolioPosition[]>([]);
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
@@ -35,6 +35,14 @@ export function usePortfolio() {
       setPositions([]);
       setTokenBalances([]);
       setLoading(false);
+      return;
+    }
+
+    // Wait for vaults to load before matching balances. Without this guard
+    // we'd race and surface positions=[] on first paint, forcing the user
+    // to refresh once vaults arrive.
+    if (vaultsLoading) {
+      setLoading(true);
       return;
     }
 
@@ -81,7 +89,7 @@ export function usePortfolio() {
     } finally {
       setLoading(false);
     }
-  }, [connection, walletAddress, vaults]);
+  }, [connection, walletAddress, vaults, vaultsLoading]);
 
   useEffect(() => {
     fetchPortfolio();
