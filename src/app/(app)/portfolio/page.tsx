@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { PublicKey } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
 
 import { usePortfolio } from "@/hooks/use-portfolio";
-import { useClaim } from "@/hooks/use-claim";
 import { useOxarProgram } from "@/hooks/use-oxar-program";
 import { useSolBalance } from "@/hooks/use-sol-balance";
 import { useFaucet } from "@/hooks/use-faucet";
@@ -17,7 +14,6 @@ import { TestTokensCard } from "@/components/portfolio/test-tokens-card";
 export default function PortfolioPage() {
   const { walletAddress } = useOxarProgram();
   const { positions, loading, refetch } = usePortfolio();
-  const { claim, loading: claiming, error: claimError } = useClaim();
   const { refetch: refetchSolBalance } = useSolBalance();
   const {
     airdropSol,
@@ -28,8 +24,6 @@ export default function PortfolioPage() {
     usdcMsg: faucetMsg,
   } = useFaucet();
 
-  const [claimMsg, setClaimMsg] = useState<string | null>(null);
-
   const handleAirdropSol = async () => {
     const ok = await airdropSol();
     if (ok) await refetchSolBalance();
@@ -39,16 +33,6 @@ export default function PortfolioPage() {
     const ok = await mintUsdc();
     if (ok) {
       await Promise.all([refetchSolBalance(), refetch()]);
-    }
-  };
-
-  const handleClaim = async (vaultPubkey: PublicKey) => {
-    setClaimMsg(null);
-    const tx = await claim(vaultPubkey);
-    if (tx) {
-      setClaimMsg("Claim successful. Balance updated.");
-      await refetch();
-      setTimeout(() => setClaimMsg(null), 3000);
     }
   };
 
@@ -71,24 +55,9 @@ export default function PortfolioPage() {
       ) : positions.length > 0 ? (
         <>
           <PortfolioHeader totalValue={totalValue} positions={positions} />
-          {claimError && (
-            <div className="rounded-[5px] border border-loss/30 bg-loss/[0.05] px-4 py-3">
-              <p className="font-mono text-[11px] text-loss">{claimError}</p>
-            </div>
-          )}
-          {claimMsg && (
-            <div className="rounded-[5px] border border-profit/30 bg-profit/[0.05] px-4 py-3">
-              <p className="font-mono text-[11px] text-profit">{claimMsg}</p>
-            </div>
-          )}
           <div className="flex flex-col gap-3">
             {positions.map((pos) => (
-              <PositionCard
-                key={pos.tokenAccount.toBase58()}
-                position={pos}
-                claiming={claiming}
-                onClaim={handleClaim}
-              />
+              <PositionCard key={pos.tokenAccount.toBase58()} position={pos} />
             ))}
           </div>
         </>

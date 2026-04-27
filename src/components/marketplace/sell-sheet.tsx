@@ -36,6 +36,8 @@ interface SellSheetProps {
   creating: boolean;
   /** Latest createListing error from the parent hook. Shown inline when the sheet stays open after a failed attempt. */
   error?: string | null;
+  /** Optional vault id to preselect when the sheet opens (e.g. from /portfolio/[id]). */
+  preselectVaultId?: string;
 }
 
 const USDC_RGB = "255,255,255";
@@ -53,14 +55,22 @@ export function SellSheet({
   onCreateListing,
   creating,
   error,
+  preselectVaultId,
 }: SellSheetProps) {
   const { positions } = usePortfolio();
   const { listings } = useListings();
   const { walletAddress } = useOxarProgram();
-  const [selectedVaultId, setSelectedVaultId] = useState("");
+  const [selectedVaultId, setSelectedVaultId] = useState(preselectVaultId ?? "");
   const [amount, setAmount] = useState("");
   const [price, setPrice] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
+
+  // Apply preselect when sheet opens (e.g. portfolio entry point)
+  useEffect(() => {
+    if (open && preselectVaultId) {
+      setSelectedVaultId(preselectVaultId);
+    }
+  }, [open, preselectVaultId]);
 
   // Reset form when sheet closes
   useEffect(() => {

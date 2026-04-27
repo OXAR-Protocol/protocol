@@ -1,8 +1,8 @@
 "use client";
 
-import { PublicKey } from "@solana/web3.js";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { BN } from "@coral-xyz/anchor";
-import { Loader2 } from "lucide-react";
 
 import { PortfolioPosition } from "@/hooks/use-portfolio";
 import {
@@ -18,11 +18,9 @@ import { TokenMark } from "@/components/explore/token-mark";
 
 interface PositionCardProps {
   position: PortfolioPosition;
-  claiming: boolean;
-  onClaim: (vaultPubkey: PublicKey) => void;
 }
 
-export function PositionCard({ position, claiming, onClaim }: PositionCardProps) {
+export function PositionCard({ position }: PositionCardProps) {
   const config = findVaultConfig(position.vault.publicKey.toBase58());
   const value = position.balance
     .mul(position.vault.account.navPerShare)
@@ -33,8 +31,9 @@ export function PositionCard({ position, claiming, onClaim }: PositionCardProps)
   const { color, rgb } = getBondColor(denomination);
 
   return (
-    <div
-      className="rounded-[5px] border border-white/10 bg-surface-0 p-5 transition-colors hover:border-white/20"
+    <Link
+      href={`/portfolio/${position.vault.publicKey.toBase58()}`}
+      className="rounded-[5px] border border-white/10 bg-surface-0 p-5 transition-colors hover:border-white/20 block"
       style={{ boxShadow: `0 0 40px rgba(${rgb},0.04)` }}
     >
       <div className="flex items-start gap-4">
@@ -87,34 +86,22 @@ export function PositionCard({ position, claiming, onClaim }: PositionCardProps)
 
       <div className="mt-4 pt-4 border-t border-white/[0.06] flex items-center justify-between gap-3">
         {maturity.matured ? (
-          <>
-            <span
-              className="font-mono text-[10px] uppercase tracking-wide px-2.5 py-1 rounded"
-              style={{ color, background: `rgba(${rgb},0.1)` }}
-            >
-              Matured
-            </span>
-            <button
-              onClick={() => onClaim(position.vault.publicKey)}
-              disabled={claiming}
-              className="font-mono text-[10px] uppercase tracking-[0.15em] px-4 py-2 rounded-[5px] bg-white text-black hover:bg-white/90 disabled:bg-white/[0.04] disabled:text-white/30 transition-colors flex items-center gap-2"
-            >
-              {claiming ? (
-                <>
-                  <Loader2 size={12} className="animate-spin" />
-                  Claiming
-                </>
-              ) : (
-                "Claim"
-              )}
-            </button>
-          </>
+          <span
+            className="font-mono text-[10px] uppercase tracking-wide px-2.5 py-1 rounded"
+            style={{ color, background: `rgba(${rgb},0.1)` }}
+          >
+            Ready to claim
+          </span>
         ) : (
           <span className="font-mono text-[10px] uppercase tracking-wide text-white/40">
             {maturity.text}
           </span>
         )}
+        <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/40 inline-flex items-center gap-1.5">
+          View details
+          <ArrowRight size={12} />
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }
