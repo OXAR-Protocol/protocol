@@ -7,7 +7,6 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import { useListings, ListingAccount } from "@/hooks/use-listings";
-import { useBuyListing } from "@/hooks/use-buy-listing";
 import { useCancelListing } from "@/hooks/use-cancel-listing";
 import { useCreateListing } from "@/hooks/use-create-listing";
 import { useOxarProgram } from "@/hooks/use-oxar-program";
@@ -15,7 +14,6 @@ import { VAULT_CONFIGS } from "@/lib/constants";
 import { deriveVaultPda } from "@/lib/pda";
 import { findVaultConfig } from "@/lib/format";
 import { ListingCard } from "@/components/marketplace/listing-card";
-import { BuySheet } from "@/components/marketplace/buy-sheet";
 import { SellSheet } from "@/components/marketplace/sell-sheet";
 import { BondFilterChip } from "@/components/explore/bond-filter-chip";
 
@@ -24,13 +22,11 @@ type CurrencyFilter = (typeof CURRENCY_FILTERS)[number];
 
 export default function MarketplacePage() {
   const { listings, loading: listingsLoading, refetch: refetchListings } = useListings();
-  const { buyListing, loading: buying, error: buyError } = useBuyListing();
   const { cancelListing, loading: cancelling, error: cancelError } = useCancelListing();
   const { createListing, loading: creating, error: createError } = useCreateListing();
   const { walletAddress } = useOxarProgram();
 
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
-  const [selectedListing, setSelectedListing] = useState<ListingAccount | null>(null);
   const [sellSheetOpen, setSellSheetOpen] = useState(false);
   const [filter, setFilter] = useState<CurrencyFilter>("ALL");
 
@@ -70,11 +66,6 @@ export default function MarketplacePage() {
     return true;
   };
 
-  const handleBuy = async (vaultPubkey: PublicKey, sellerPubkey: PublicKey) => {
-    const tx = await buyListing(vaultPubkey, sellerPubkey);
-    if (tx) refetchListings();
-  };
-
   const handleCancel = async (vaultPubkey: PublicKey) => {
     const tx = await cancelListing(vaultPubkey);
     if (tx) refetchListings();
@@ -96,7 +87,7 @@ export default function MarketplacePage() {
     listings.filter((l) => l.account.seller.toBase58() === walletAddr),
   );
 
-  const combinedError = createError || buyError || cancelError;
+  const combinedError = createError || cancelError;
   const currentList = activeTab === "buy" ? othersListings : ownListings;
 
   return (
@@ -169,9 +160,7 @@ export default function MarketplacePage() {
               key={listing.publicKey.toBase58()}
               listing={listing}
               isOwn={activeTab === "sell"}
-              onBuy={() => setSelectedListing(listing)}
               onCancel={() => handleCancel(listing.account.vault)}
-              buying={buying}
               cancelling={cancelling}
             />
           ))}
@@ -186,14 +175,6 @@ export default function MarketplacePage() {
           Create Listing
         </button>
       )}
-
-      <BuySheet
-        listing={selectedListing}
-        open={!!selectedListing}
-        onClose={() => setSelectedListing(null)}
-        onBuy={handleBuy}
-        buying={buying}
-      />
 
       <SellSheet
         open={sellSheetOpen}

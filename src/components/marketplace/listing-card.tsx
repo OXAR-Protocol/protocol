@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { BN } from "@coral-xyz/anchor";
-import { Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 import { ListingAccount } from "@/hooks/use-listings";
 import {
@@ -17,18 +18,14 @@ import { TokenMark } from "@/components/explore/token-mark";
 interface ListingCardProps {
   listing: ListingAccount;
   isOwn: boolean;
-  onBuy: () => void;
   onCancel: () => void;
-  buying: boolean;
   cancelling: boolean;
 }
 
 export function ListingCard({
   listing,
   isOwn,
-  onBuy,
   onCancel,
-  buying,
   cancelling,
 }: ListingCardProps) {
   const config = findVaultConfig(listing.account.vault.toBase58());
@@ -102,26 +99,30 @@ export function ListingCard({
         </div>
       </div>
 
-      <button
-        onClick={isOwn ? onCancel : onBuy}
-        disabled={buying || cancelling}
-        className={`mt-4 w-full py-3 rounded-[5px] font-mono text-[10px] uppercase tracking-[0.15em] transition-colors flex items-center justify-center gap-2 ${
-          isOwn
-            ? "border border-loss/30 text-loss hover:bg-loss/5 disabled:opacity-40"
-            : "bg-white text-black hover:bg-white/90 disabled:bg-white/[0.04] disabled:text-white/30"
-        }`}
-      >
-        {(isOwn ? cancelling : buying) ? (
-          <>
-            <Loader2 size={12} className="animate-spin" />
-            {isOwn ? "Cancelling" : "Buying"}
-          </>
-        ) : isOwn ? (
-          "Cancel Listing"
-        ) : (
-          "Buy"
-        )}
-      </button>
+      {isOwn ? (
+        <button
+          onClick={onCancel}
+          disabled={cancelling}
+          className="mt-4 w-full py-3 rounded-[5px] font-mono text-[10px] uppercase tracking-[0.15em] transition-colors flex items-center justify-center gap-2 border border-loss/30 text-loss hover:bg-loss/5 disabled:opacity-40"
+        >
+          {cancelling ? (
+            <>
+              <Loader2 size={12} className="animate-spin" />
+              Cancelling
+            </>
+          ) : (
+            "Cancel Listing"
+          )}
+        </button>
+      ) : (
+        <Link
+          href={`/marketplace/${listing.publicKey.toBase58()}`}
+          className="mt-4 w-full py-3 rounded-[5px] font-mono text-[10px] uppercase tracking-[0.15em] transition-colors flex items-center justify-center gap-2 bg-white text-black hover:bg-white/90"
+        >
+          View details
+          <ArrowRight size={12} />
+        </Link>
+      )}
     </div>
   );
 }

@@ -30,3 +30,11 @@ export function getBondIssuer(config: VaultConfig): string {
   if (config.region === "UA") return "Ministry of Finance of Ukraine";
   return `${getRegionLabel(config.region)} Treasury`;
 }
+
+/** Approximate full term length in days, used to render a maturity-progress ring. */
+export function getBondTermDays(config: VaultConfig): number {
+  if (config.assetSubtype === "SHORT") return 365;
+  if (config.assetSubtype === "MID") return 730;
+  if (config.isWar) return 365;
+  return 365;
+}
