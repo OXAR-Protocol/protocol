@@ -6,7 +6,7 @@ export const PROGRAM_ID = new PublicKey(
 
 export const RPC_URL = "https://api.devnet.solana.com";
 
-export const DEFAULT_SERIES = 1;
+export const DEFAULT_SERIES = 2;
 
 export interface VaultConfig {
   readonly id: string;
@@ -26,7 +26,7 @@ export const VAULT_CONFIGS: readonly VaultConfig[] = [
     region: "UA",
     denomination: "UAH",
     assetSubtype: "SHORT",
-    series: 1,
+    series: 2,
     apy: 18,
     label: "Ukraine OVDP UAH (Short-term)",
     isWar: false,
@@ -37,7 +37,7 @@ export const VAULT_CONFIGS: readonly VaultConfig[] = [
     region: "UA",
     denomination: "UAH",
     assetSubtype: "MID",
-    series: 1,
+    series: 2,
     apy: 17,
     label: "Ukraine OVDP UAH (Mid-term)",
     isWar: false,
@@ -48,7 +48,7 @@ export const VAULT_CONFIGS: readonly VaultConfig[] = [
     region: "UA",
     denomination: "USD",
     assetSubtype: "STD",
-    series: 1,
+    series: 2,
     apy: 4,
     label: "Ukraine OVDP USD",
     isWar: false,
@@ -59,7 +59,7 @@ export const VAULT_CONFIGS: readonly VaultConfig[] = [
     region: "UA",
     denomination: "EUR",
     assetSubtype: "STD",
-    series: 1,
+    series: 2,
     apy: 3.5,
     label: "Ukraine OVDP EUR",
     isWar: false,
@@ -70,7 +70,7 @@ export const VAULT_CONFIGS: readonly VaultConfig[] = [
     region: "UA",
     denomination: "UAH",
     assetSubtype: "WAR",
-    series: 1,
+    series: 2,
     apy: 18,
     label: "Ukraine War Bonds UAH",
     isWar: true,
@@ -81,7 +81,7 @@ export const VAULT_CONFIGS: readonly VaultConfig[] = [
     region: "UA",
     denomination: "USD",
     assetSubtype: "WAR",
-    series: 1,
+    series: 2,
     apy: 4,
     label: "Ukraine War Bonds USD",
     isWar: true,

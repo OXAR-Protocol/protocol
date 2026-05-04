@@ -37,4 +37,5 @@ export {
   buildBuyListingTransaction,
   buildCancelListingTransaction,
   buildClaimTransaction,
+  buildTransferTokensTransaction,
 } from "./transactions";

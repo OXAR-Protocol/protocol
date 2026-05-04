@@ -1,11 +1,11 @@
 import { PublicKey } from "@solana/web3.js";
-import { PROGRAM_ID } from "./constants";
+import { PROGRAM_ID, DEFAULT_SERIES } from "./constants";
 
 export function deriveVaultPda(
   region: string,
   denomination: string,
   assetSubtype: string,
-  series: number = 1
+  series: number = DEFAULT_SERIES
 ): [PublicKey, number] {
   const seriesBytes = Buffer.alloc(2);
   seriesBytes.writeUInt16LE(series);

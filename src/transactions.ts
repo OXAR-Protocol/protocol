@@ -226,6 +226,65 @@ export async function buildCancelListingTransaction(
 }
 
 /**
+ * Build an unsigned transfer-tokens transaction.
+ *
+ * Sends vault tokens from the sender wallet to a recipient wallet. Sender pays
+ * the rent for the recipient's vault-token ATA if it doesn't exist yet.
+ */
+export async function buildTransferTokensTransaction(
+  program: Program<OxarProtocol>,
+  connection: Connection,
+  sender: PublicKey,
+  recipient: PublicKey,
+  vaultPda: PublicKey,
+  amount: BN,
+): Promise<Transaction> {
+  const [vaultTokenMint] = deriveMintPda(vaultPda);
+
+  const senderVaultToken = await getAssociatedTokenAddress(vaultTokenMint, sender);
+  const recipientVaultToken = await getAssociatedTokenAddress(vaultTokenMint, recipient);
+
+  const ix = await program.methods
+    .transferTokens(amount)
+    // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
+    .accounts({
+      sender,
+      recipient,
+      vault: vaultPda,
+      vaultTokenMint,
+      senderVaultToken,
+      recipientVaultToken,
+      tokenProgram: TOKEN_PROGRAM_ID,
+    } as any)
+    .instruction();
+
+  const tx = new Transaction();
+
+  // Create recipient vault-token ATA if missing — sender pays rent
+  const recipientAccountInfo = await connection.getAccountInfo(recipientVaultToken);
+  if (!recipientAccountInfo) {
+    tx.add(
+      createAssociatedTokenAccountInstruction(
+        sender,
+        recipientVaultToken,
+        recipient,
+        vaultTokenMint,
+        TOKEN_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+      )
+    );
+  }
+
+  tx.add(ix);
+
+  const { blockhash } = await connection.getLatestBlockhash();
+  tx.recentBlockhash = blockhash;
+  tx.feePayer = sender;
+
+  return tx;
+}
+
+/**
  * Build an unsigned claim transaction.
  *
  * Fetches vault data to determine the USDC mint, derives mint and pool PDAs,
