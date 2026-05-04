@@ -1,0 +1,190 @@
+'use client'
+
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
+import Image from 'next/image'
+
+import { LOADING_LOGO_VARIANTS, preloadImages } from '@/lib/preload-images'
+
+const darkThemeVariants = LOADING_LOGO_VARIANTS
+
+interface LoadingScreenProps {
+  duration?: number
+  onComplete?: () => void
+}
+
+export function LoadingScreen({
+  duration = 2000,
+  onComplete,
+}: LoadingScreenProps) {
+  const [phase, setPhase] = useState<'preloading' | 'cycling' | 'done'>('preloading')
+  const [isComplete, setIsComplete] = useState(false)
+
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  useEffect(() => {
+    if (phase !== 'preloading') return
+
+    let cancelled = false
+
+    preloadImages(darkThemeVariants).then(() => {
+      if (!cancelled) {
+        setPhase('cycling')
+      }
+    })
+
+    const timeout = setTimeout(() => {
+      if (!cancelled) {
+        setPhase((prev) => (prev === 'preloading' ? 'cycling' : prev))
+      }
+    }, 500)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+    }
+  }, [phase])
+
+  const finishLoading = useCallback(() => {
+    setIsComplete(true)
+    onComplete?.()
+  }, [onComplete])
+
+  useLayoutEffect(() => {
+    if (phase === 'cycling' && imgRef.current) {
+      imgRef.current.src = darkThemeVariants[0]
+    }
+  }, [phase])
+
+  useEffect(() => {
+    if (phase !== 'cycling') return
+
+    let cancelled = false
+    const cycleTime = duration * 0.7
+    const startTime = performance.now()
+    let index = 0
+    let lastSwap = 0
+
+    const tick = (now: number) => {
+      if (cancelled) return
+
+      const elapsed = now - startTime
+      const progress = elapsed / cycleTime
+
+      if (progress >= 1) {
+        setPhase('done')
+        return
+      }
+
+      const interval = 200 - progress * 120
+      if (elapsed - lastSwap >= interval) {
+        lastSwap = elapsed
+        index = (index + 1) % darkThemeVariants.length
+
+        if (imgRef.current) {
+          imgRef.current.src = darkThemeVariants[index]
+        }
+      }
+
+      requestAnimationFrame(tick)
+    }
+
+    const startTimer = setTimeout(() => {
+      requestAnimationFrame(tick)
+    }, 50)
+
+    return () => {
+      cancelled = true
+      clearTimeout(startTimer)
+    }
+  }, [phase, duration])
+
+  useEffect(() => {
+    if (phase !== 'done') return
+
+    const hideTimer = setTimeout(() => {
+      finishLoading()
+    }, duration * 0.2)
+
+    return () => clearTimeout(hideTimer)
+  }, [phase, duration, finishLoading])
+
+  const finalLogo = '/images/logo_white.svg'
+
+  return (
+    <AnimatePresence>
+      {!isComplete && (
+        <motion.div
+          className="fixed inset-0 z-[100] flex items-center justify-center"
+          style={{ backgroundColor: '#000000' }}
+          initial={{ opacity: 1 }}
+          exit={{
+            opacity: 0,
+            transition: { duration: 0.5, ease: 'easeInOut' },
+          }}
+        >
+          {(phase === 'preloading' || phase === 'cycling') && (
+            <div
+              className="relative"
+              style={{ width: 180, height: 194 }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                ref={imgRef}
+                alt=""
+                src={darkThemeVariants[0]}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
+          )}
+
+          {phase === 'done' && (
+            <motion.div
+              className="relative"
+              style={{ width: 180, height: 194 }}
+              initial={{ opacity: 0, scale: 1.3 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                duration: 0.4,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+            >
+              <Image
+                src={finalLogo}
+                alt="OXAR"
+                fill
+                className="object-contain"
+                priority
+              />
+              <motion.div
+                className="absolute inset-0 -z-10"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 0.3, scale: 2 }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+                style={{
+                  background: `radial-gradient(circle, rgba(51,136,255,0.3), transparent 70%)`,
+                }}
+              />
+            </motion.div>
+          )}
+
+          {phase === 'done' && (
+            <motion.p
+              className="absolute bottom-[30%] text-sm font-medium tracking-[0.3em] uppercase"
+              style={{ color: 'rgba(255,255,255,0.4)' }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              OXAR PROTOCOL
+            </motion.p>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
