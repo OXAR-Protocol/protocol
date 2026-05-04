@@ -123,6 +123,7 @@ input[type="number"] {
   50% { opacity: 1; }
 }
 
+
 /* Light theme overrides */
 [data-theme="light"] {
   --color-surface-0: #f5f5f0;

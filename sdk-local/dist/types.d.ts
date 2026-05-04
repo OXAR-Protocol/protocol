@@ -348,6 +348,10 @@ export type OxarProtocol = {
                     writable: true;
                 },
                 {
+                    name: "treasuryUsdc";
+                    writable: true;
+                },
+                {
                     name: "buyerVaultToken";
                     writable: true;
                 },
@@ -364,6 +368,85 @@ export type OxarProtocol = {
                 }
             ];
             args: [];
+        },
+        {
+            name: "closeVault";
+            discriminator: [141, 103, 17, 126, 72, 75, 29, 117];
+            accounts: [
+                {
+                    name: "authority";
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: "vault";
+                    writable: true;
+                    pda: {
+                        seeds: any[];
+                    };
+                },
+                {
+                    name: "vaultTokenMint";
+                    writable: true;
+                    pda: {
+                        seeds: any[];
+                    };
+                },
+                {
+                    name: "usdcPool";
+                    writable: true;
+                    pda: {
+                        seeds: any[];
+                    };
+                },
+                {
+                    name: "tokenProgram";
+                    address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+                }
+            ];
+            args: [];
+        },
+        {
+            name: "transferTokens";
+            discriminator: [54, 180, 238, 175, 74, 85, 126, 188];
+            accounts: [
+                {
+                    name: "sender";
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: "recipient";
+                },
+                {
+                    name: "vault";
+                    pda: {
+                        seeds: any[];
+                    };
+                },
+                {
+                    name: "vaultTokenMint";
+                    pda: {
+                        seeds: any[];
+                    };
+                },
+                {
+                    name: "senderVaultToken";
+                    writable: true;
+                },
+                {
+                    name: "recipientVaultToken";
+                    writable: true;
+                },
+                {
+                    name: "tokenProgram";
+                    address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+                }
+            ];
+            args: [{
+                name: "amount";
+                type: "u64";
+            }];
         }
     ];
     accounts: [
@@ -431,6 +514,36 @@ export type OxarProtocol = {
             code: 6010;
             name: "InsufficientTokens";
             msg: "Insufficient tokens for claim";
+        },
+        {
+            code: 6011;
+            name: "VaultNotEmpty";
+            msg: "Vault still has outstanding shares, cannot close";
+        },
+        {
+            code: 6012;
+            name: "VaultAlreadySetup";
+            msg: "Vault pool is already set up";
+        },
+        {
+            code: 6013;
+            name: "PoolNotEmpty";
+            msg: "USDC pool still has a non-zero balance, withdraw all funds before closing";
+        },
+        {
+            code: 6014;
+            name: "Unauthorized";
+            msg: "Unauthorized: only the protocol admin can perform this action";
+        },
+        {
+            code: 6015;
+            name: "ZeroTransferAmount";
+            msg: "Transfer amount must be greater than zero";
+        },
+        {
+            code: 6016;
+            name: "SelfTransfer";
+            msg: "Sender and recipient cannot be the same wallet";
         }
     ];
     types: [

@@ -30,6 +30,13 @@ export declare function buildBuyListingTransaction(program: Program<OxarProtocol
  */
 export declare function buildCancelListingTransaction(program: Program<OxarProtocol>, connection: Connection, seller: PublicKey, vaultPda: PublicKey): Promise<Transaction>;
 /**
+ * Build an unsigned transfer-tokens transaction.
+ *
+ * Sends vault tokens from the sender wallet to a recipient wallet. Sender pays
+ * the rent for the recipient's vault-token ATA if it doesn't exist yet.
+ */
+export declare function buildTransferTokensTransaction(program: Program<OxarProtocol>, connection: Connection, sender: PublicKey, recipient: PublicKey, vaultPda: PublicKey, amount: BN): Promise<Transaction>;
+/**
  * Build an unsigned claim transaction.
  *
  * Fetches vault data to determine the USDC mint, derives mint and pool PDAs,

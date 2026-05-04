@@ -4,6 +4,7 @@ exports.buildDepositTransaction = buildDepositTransaction;
 exports.buildCreateListingTransaction = buildCreateListingTransaction;
 exports.buildBuyListingTransaction = buildBuyListingTransaction;
 exports.buildCancelListingTransaction = buildCancelListingTransaction;
+exports.buildTransferTokensTransaction = buildTransferTokensTransaction;
 exports.buildClaimTransaction = buildClaimTransaction;
 const web3_js_1 = require("@solana/web3.js");
 const spl_token_1 = require("@solana/spl-token");
@@ -152,6 +153,41 @@ async function buildCancelListingTransaction(program, connection, seller, vaultP
     const { blockhash } = await connection.getLatestBlockhash();
     tx.recentBlockhash = blockhash;
     tx.feePayer = seller;
+    return tx;
+}
+/**
+ * Build an unsigned transfer-tokens transaction.
+ *
+ * Sends vault tokens from the sender wallet to a recipient wallet. Sender pays
+ * the rent for the recipient's vault-token ATA if it doesn't exist yet.
+ */
+async function buildTransferTokensTransaction(program, connection, sender, recipient, vaultPda, amount) {
+    const [vaultTokenMint] = (0, pda_1.deriveMintPda)(vaultPda);
+    const senderVaultToken = await (0, spl_token_1.getAssociatedTokenAddress)(vaultTokenMint, sender);
+    const recipientVaultToken = await (0, spl_token_1.getAssociatedTokenAddress)(vaultTokenMint, recipient);
+    const ix = await program.methods
+        .transferTokens(amount)
+        // SAFETY: Anchor IDL typing is incomplete for dynamic account resolution
+        .accounts({
+        sender,
+        recipient,
+        vault: vaultPda,
+        vaultTokenMint,
+        senderVaultToken,
+        recipientVaultToken,
+        tokenProgram: spl_token_1.TOKEN_PROGRAM_ID,
+    })
+        .instruction();
+    const tx = new web3_js_1.Transaction();
+    // Create recipient vault-token ATA if missing — sender pays rent
+    const recipientAccountInfo = await connection.getAccountInfo(recipientVaultToken);
+    if (!recipientAccountInfo) {
+        tx.add((0, spl_token_1.createAssociatedTokenAccountInstruction)(sender, recipientVaultToken, recipient, vaultTokenMint, spl_token_1.TOKEN_PROGRAM_ID, spl_token_1.ASSOCIATED_TOKEN_PROGRAM_ID));
+    }
+    tx.add(ix);
+    const { blockhash } = await connection.getLatestBlockhash();
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = sender;
     return tx;
 }
 /**

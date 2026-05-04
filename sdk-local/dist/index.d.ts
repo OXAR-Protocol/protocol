@@ -4,4 +4,4 @@ export { IDL } from "./types";
 export type { OxarProtocol } from "./types";
 export { deriveVaultPda, deriveMintPda, derivePoolPda, deriveListingPda, deriveEscrowPda, } from "./pda";
 export { createOxarProgram } from "./program";
-export { buildDepositTransaction, buildCreateListingTransaction, buildBuyListingTransaction, buildCancelListingTransaction, buildClaimTransaction, } from "./transactions";
+export { buildDepositTransaction, buildCreateListingTransaction, buildBuyListingTransaction, buildCancelListingTransaction, buildClaimTransaction, buildTransferTokensTransaction, } from "./transactions";
