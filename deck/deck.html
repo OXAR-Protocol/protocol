@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>OXAR — Investor Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --surface-0: #000000;
+    --surface-1: #0a0a0a;
+    --surface-2: #111111;
+    --surface-3: #1a1a1a;
+    --accent: #8B5CF6;
+    --accent-2: #A78BFA;
+    --accent-glow: rgba(139, 92, 246, 0.18);
+    --profit: #22C55E;
+    --loss: #EF4444;
+    --text: #FFFFFF;
+    --text-2: rgba(255, 255, 255, 0.6);
+    --text-3: rgba(255, 255, 255, 0.32);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.18);
+  }
+
+  @page {
+    size: 1920px 1080px;
+    margin: 0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--surface-0);
+    color: var(--text);
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .slide {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+    background: var(--surface-0);
+  }
+
+  .slide:last-child { page-break-after: auto; }
+
+  /* Common header strip */
+  .header {
+    position: absolute;
+    top: 40px;
+    left: 80px;
+    right: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: var(--text-3);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    z-index: 10;
+  }
+  .header .brand { color: var(--text-2); font-weight: 600; }
+
+  .footer {
+    position: absolute;
+    bottom: 56px;
+    left: 80px;
+    right: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    color: var(--text-3);
+    font-weight: 500;
+    z-index: 10;
+  }
+
+  .section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent-2);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .section-tag::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .underline {
+    display: inline-block;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 8px;
+  }
+
+  /* Backgrounds */
+  .bg-radial {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 1200px 800px at 80% -10%, rgba(139,92,246,0.18), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 0% 100%, rgba(139,92,246,0.10), transparent 55%);
+    z-index: 1;
+  }
+  .bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+    background-position: -1px -1px;
+    z-index: 1;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 90%);
+  }
+
+  .content { position: relative; z-index: 5; }
+
+  /* ============== SLIDE 01 — COVER ============== */
+  .cover {
+    padding: 56px 80px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+  .cover .head { display: flex; justify-content: space-between; color: var(--text-3); font-size: 18px; font-weight: 500; }
+  .cover .center { display: flex; flex-direction: column; justify-content: center; gap: 32px; }
+  .cover .wordmark {
+    font-size: 280px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 0.85;
+  }
+  .cover .wordmark .accent { color: var(--accent); }
+  .cover .tagline {
+    font-size: 36px;
+    color: var(--text-2);
+    font-weight: 400;
+    max-width: 1100px;
+    line-height: 1.3;
+    margin-top: 16px;
+  }
+  .cover .meta {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    color: var(--text-3);
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .cover .meta .left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .cover .meta .left::before {
+    content: '';
+    width: 80px;
+    height: 1px;
+    background: var(--border-strong);
+  }
+
+  /* ============== SLIDE 02 — AGENDA ============== */
+  .agenda { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); height: 100%; }
+  .agenda .left {
+    grid-column: 1 / 2;
+    padding: 80px;
+    background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-0) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-right: 1px solid var(--border);
+  }
+  .agenda .right {
+    grid-column: 2 / 3;
+    padding: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .agenda h1 {
+    font-size: 76px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-top: 80px;
+  }
+  .agenda h1 .muted { color: var(--text-3); }
+  .agenda .agenda-tag { color: var(--text-2); font-size: 22px; font-weight: 500; margin-bottom: 24px; }
+  .agenda-item {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    align-items: baseline;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 28px;
+  }
+  .agenda-item .num { color: var(--accent); font-family: 'Geist Mono', monospace; font-size: 18px; font-weight: 500; }
+  .agenda-item .label { font-weight: 500; }
+
+  /* ============== SLIDE 03 — PROBLEM ============== */
+  .problem {
+    padding: 120px 80px 140px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 56px;
+  }
+  .problem h2 {
+    font-family: 'Geist', sans-serif;
+    font-size: 144px;
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+  }
+  .problem h2 .accent { color: var(--accent); }
+  .problem .quote {
+    font-size: 24px;
+    color: var(--text-2);
+    max-width: 1100px;
+    line-height: 1.5;
+  }
+
+  /* ============== SLIDE 04 — MARKET OPPORTUNITY ============== */
+  .market {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 56px;
+  }
+  .market .top { display: grid; grid-template-columns: 1.4fr 1fr; gap: 64px; align-items: center; }
+  .market .stat {
+    font-size: 80px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .market .stat .muted { color: var(--text-3); }
+  .market .stat .accent { color: var(--accent); }
+  .market .stat-sub { font-size: 22px; color: var(--text-2); margin-top: 24px; max-width: 640px; line-height: 1.4; }
+
+  .pictogram {
+    display: grid;
+    grid-template-columns: repeat(20, 1fr);
+    gap: 6px;
+    align-content: center;
+    max-width: 580px;
+    justify-self: end;
+  }
+  .pictogram .dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--surface-3);
+  }
+  .pictogram .dot.on { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+
+  .market .insights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px; }
+  .insight .label {
+    color: var(--accent);
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--accent);
+    display: inline-block;
+    margin-bottom: 24px;
+  }
+  .insight p { color: var(--text-2); font-size: 20px; line-height: 1.5; }
+
+  /* ============== SLIDE 05 — TAM/SAM/SOM ============== */
+  .tam {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 64px;
+    align-items: center;
+  }
+  .tam .left { grid-column: 1 / 2; }
+  .tam .right { grid-column: 2 / 3; }
+  .tam .left h2 {
+    font-size: 64px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .tam .left p {
+    font-size: 20px;
+    color: var(--text-2);
+    margin-top: 24px;
+    line-height: 1.55;
+    max-width: 560px;
+  }
+  .tam-stack { display: flex; flex-direction: column; gap: 20px; }
+  .tam-row {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 24px;
+  }
+  .tam-row.featured {
+    border-color: var(--accent);
+    background: linear-gradient(90deg, rgba(139,92,246,0.08), var(--surface-1));
+  }
+  .tam-row .tag { color: var(--accent); font-family: 'Geist Mono', monospace; font-weight: 600; font-size: 16px; }
+  .tam-row .desc { color: var(--text); font-size: 18px; font-weight: 500; line-height: 1.4; }
+  .tam-row .amount { font-size: 48px; font-weight: 800; letter-spacing: -0.02em; text-align: right; font-family: 'Geist', sans-serif; }
+  .tam-row.featured .amount { color: var(--accent); }
+
+  /* ============== SLIDE 06 — SOLUTION ============== */
+  .solution {
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+  .solution .left { grid-column: 1 / 2; padding: 80px; display: flex; flex-direction: column; justify-content: space-between; }
+  .solution .right { grid-column: 2 / 3; }
+  .solution .left h2 { font-size: 96px; font-weight: 800; letter-spacing: -0.03em; line-height: 0.95; }
+  .solution .left p { font-size: 24px; color: var(--text-2); margin-top: 32px; line-height: 1.5; max-width: 560px; }
+  .solution .right {
+    background:
+      radial-gradient(circle at 30% 30%, rgba(139,92,246,0.4), transparent 60%),
+      radial-gradient(circle at 70% 70%, rgba(167,139,250,0.3), transparent 65%),
+      var(--accent);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .solution .mockup {
+    width: 720px;
+    height: 460px;
+    background: var(--surface-0);
+    border-radius: 24px;
+    box-shadow: 0 60px 120px rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+    padding: 28px;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 20px;
+    position: relative;
+    transform: translate(80px, 60px);
+  }
+  .mockup-bar { display: flex; gap: 8px; align-items: center; }
+  .mockup-bar .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--surface-3); }
+  .mockup-bar .url { margin-left: 16px; font-size: 14px; color: var(--text-3); font-family: 'Geist Mono', monospace; }
+  .mockup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .mockup-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mockup-card .vault-tag { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .mockup-card .vault-name { font-size: 20px; font-weight: 700; color: var(--text); }
+  .mockup-card .vault-apy { font-size: 36px; font-weight: 800; color: var(--profit); margin-top: 12px; }
+  .mockup-card .vault-meta { font-size: 12px; color: var(--text-3); font-family: 'Geist Mono', monospace; }
+
+  /* ============== SLIDE 07 — PRODUCT ============== */
+  .product {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 56px;
+  }
+  .product h2 { font-size: 80px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .product .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .feature-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+  .feature-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(139,92,246,0.12);
+    border: 1px solid var(--accent);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 28px;
+    font-weight: 700;
+    font-family: 'Geist Mono', monospace;
+  }
+  .feature-card h3 { font-size: 32px; font-weight: 700; margin-bottom: 12px; }
+  .feature-card p { font-size: 20px; color: var(--text-2); line-height: 1.5; }
+
+  /* ============== SLIDE 08 — HOW IT WORKS ============== */
+  .magic {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 64px;
+    align-items: center;
+  }
+  .magic .left { grid-column: 1 / 2; }
+  .magic .right { grid-column: 2 / 3; }
+  .magic .left h2 { font-size: 80px; font-weight: 800; line-height: 0.95; letter-spacing: -0.03em; }
+  .magic .left p { font-size: 20px; color: var(--text-2); margin-top: 28px; line-height: 1.55; max-width: 540px; }
+
+  .magic-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 20px; }
+  .magic-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 32px;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .magic-card.featured {
+    background: var(--accent);
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  .magic-card .label { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .magic-card.featured .label { color: rgba(255,255,255,0.85); }
+  .magic-card h4 { font-size: 26px; font-weight: 700; margin-top: 12px; line-height: 1.2; }
+  .magic-card p { font-size: 16px; color: var(--text-2); line-height: 1.45; }
+  .magic-card.featured p { color: rgba(255,255,255,0.9); }
+
+  /* ============== SLIDE 09 — BUSINESS MODEL ============== */
+  .biz {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 56px;
+  }
+  .biz h2 { font-size: 80px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .biz-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .biz-col {
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-0) 100%);
+  }
+  .biz-col .symbol {
+    width: 96px;
+    height: 96px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .biz-col .symbol.s1 { background: var(--accent); }
+  .biz-col .symbol.s2 { background: var(--accent-2); }
+  .biz-col .symbol.s3 { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+  .biz-col .label { color: var(--accent); font-size: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding-bottom: 12px; border-bottom: 2px solid var(--accent); display: inline-block; }
+  .biz-col h3 { font-size: 28px; font-weight: 700; }
+  .biz-col p { font-size: 18px; color: var(--text-2); line-height: 1.55; }
+  .biz-col .pct { font-size: 64px; font-weight: 800; color: var(--text); margin-top: auto; letter-spacing: -0.02em; }
+
+  /* ============== SLIDE 10 — TRACTION ============== */
+  .traction {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 64px;
+    align-items: center;
+  }
+  .traction .left { grid-column: 1 / 2; display: flex; flex-direction: column; justify-content: center; }
+  .traction .right { grid-column: 2 / 3; display: flex; flex-direction: column; justify-content: center; gap: 56px; }
+  .traction .left h2 { font-size: 80px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .traction .left p { font-size: 20px; color: var(--text-2); margin-top: 28px; max-width: 480px; line-height: 1.5; }
+  .big-stat .num { font-size: 140px; font-weight: 800; letter-spacing: -0.04em; line-height: 0.9; }
+  .big-stat.alt .num { color: var(--accent); }
+  .big-stat .desc { font-size: 18px; color: var(--text-2); margin-top: 16px; max-width: 540px; line-height: 1.4; }
+
+  /* ============== SLIDE 11 — COMPETITION ============== */
+  .compete {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 40px;
+  }
+  .compete h2 { font-size: 72px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .matrix {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: var(--surface-1);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    overflow: hidden;
+  }
+  .matrix .axis-x, .matrix .axis-y { position: absolute; color: var(--text-3); font-size: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .matrix .axis-x.left { top: 24px; left: 32px; }
+  .matrix .axis-x.right { top: 24px; right: 32px; }
+  .matrix .axis-y.bottom-left { bottom: 24px; left: 32px; }
+  .matrix .axis-y.bottom-right { bottom: 24px; right: 32px; }
+  .matrix-cell {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .matrix-cell:nth-child(2), .matrix-cell:nth-child(4) { border-right: none; }
+  .matrix-cell:nth-child(3), .matrix-cell:nth-child(4) { border-bottom: none; }
+  .pill {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px 24px;
+    border-radius: 999px;
+    font-size: 22px;
+    font-weight: 600;
+    display: inline-flex;
+    gap: 12px;
+    align-items: center;
+    margin: 8px;
+  }
+  .pill.us { background: var(--accent); border-color: var(--accent); padding: 16px 32px; font-size: 26px; box-shadow: 0 12px 40px var(--accent-glow); }
+  .pill .ico { width: 24px; height: 24px; border-radius: 6px; background: var(--text-3); display: inline-block; }
+  .pill.us .ico { background: rgba(255,255,255,0.9); }
+  .pill-cluster { display: flex; flex-wrap: wrap; gap: 8px; max-width: 480px; justify-content: center; }
+
+  /* ============== SLIDE 12 — ROADMAP ============== */
+  .road {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 48px;
+  }
+  .road h2 { font-size: 72px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+
+  .timeline { position: relative; padding: 80px 0; display: grid; grid-template-columns: repeat(4, 1fr); align-items: center; }
+  .timeline-track {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: var(--surface-2);
+    border-radius: 4px;
+  }
+  .timeline-progress {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 8px;
+    width: 30%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 4px;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+  .ts {
+    position: relative;
+    text-align: center;
+    padding: 24px;
+  }
+  .ts .dot {
+    width: 24px;
+    height: 24px;
+    background: var(--surface-3);
+    border: 4px solid var(--surface-0);
+    border-radius: 50%;
+    margin: 12px auto;
+    position: relative;
+    z-index: 2;
+  }
+  .ts.active .dot { background: var(--accent); box-shadow: 0 0 0 6px rgba(139,92,246,0.18); }
+  .ts.live .dot { background: var(--text); }
+  .ts .q { color: var(--accent); font-family: 'Geist Mono', monospace; font-size: 16px; font-weight: 600; }
+  .ts .label { font-size: 26px; font-weight: 700; margin-top: 8px; }
+  .ts .desc { font-size: 16px; color: var(--text-2); margin-top: 8px; max-width: 240px; margin-left: auto; margin-right: auto; line-height: 1.4; }
+  .ts.above { padding-bottom: 80px; }
+  .ts.below { padding-top: 80px; }
+
+  /* ============== SLIDE 13 — TEAM ============== */
+  .team {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 48px;
+  }
+  .team h2 { font-size: 72px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .team-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; align-items: stretch; }
+  .person {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .avatar {
+    width: 100%;
+    height: 280px;
+    border-radius: 14px;
+    background:
+      linear-gradient(135deg, rgba(139,92,246,0.4), rgba(167,139,250,0.2)),
+      var(--surface-2);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .avatar .initials {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 88px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: -0.02em;
+  }
+  .person .role { color: var(--accent); font-size: 14px; font-weight: 600; padding-bottom: 6px; border-bottom: 2px solid var(--accent); display: inline-block; align-self: flex-start; text-transform: uppercase; letter-spacing: 0.04em; }
+  .person .name { font-size: 24px; font-weight: 700; }
+  .person .bio { color: var(--text-2); font-size: 16px; line-height: 1.5; }
+
+  /* ============== SLIDE 14 — VISION ============== */
+  .vision {
+    padding: 80px 120px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 48px;
+  }
+  .vision .tag { color: var(--text-2); font-size: 22px; font-weight: 600; padding-bottom: 16px; border-bottom: 1px solid var(--border-strong); display: inline-block; align-self: flex-start; padding-right: 600px; }
+  .vision blockquote {
+    font-size: 110px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    max-width: 1500px;
+  }
+  .vision .accent { color: var(--accent); }
+  .vision .author { color: var(--text-3); font-size: 22px; font-weight: 500; }
+
+  /* ============== SLIDE 15 — CONTACT ============== */
+  .contact {
+    height: 100%;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .contact .left {
+    grid-column: 1 / 2;
+    padding: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 40px;
+  }
+  .contact .right { grid-column: 2 / 3; }
+  .contact .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px;
+    max-width: 560px;
+  }
+  .contact .card h4 { color: var(--accent); font-size: 16px; font-weight: 600; padding-bottom: 12px; border-bottom: 2px solid var(--accent); display: inline-block; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 32px; }
+  .contact-row { display: grid; grid-template-columns: 32px 1fr; align-items: center; gap: 16px; padding: 14px 0; font-size: 22px; color: var(--text); }
+  .contact-row .ico { width: 24px; height: 24px; color: var(--accent); }
+  .contact .right {
+    background:
+      radial-gradient(circle at 50% 50%, rgba(139,92,246,0.25), transparent 65%),
+      var(--surface-1);
+    position: relative;
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    padding: 80px;
+    overflow: hidden;
+  }
+  .contact .word {
+    font-size: 240px;
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    text-align: right;
+  }
+  .contact .word .accent { color: var(--accent); }
+  .contact .ring {
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    top: -200px;
+    right: -200px;
+  }
+  .contact .ring2 { width: 1200px; height: 1200px; top: -400px; right: -400px; opacity: 0.5; }
+
+</style>
+</head>
+<body>
+
+<!-- ============== SLIDE 01 — COVER ============== -->
+<section class="slide cover">
+  <div class="bg-radial"></div>
+  <div class="bg-grid"></div>
+  <div class="head content">
+    <span>April 2026</span>
+    <span>Confidential — do not distribute</span>
+  </div>
+  <div class="center content">
+    <div class="section-tag">Investor Deck</div>
+    <h1 class="wordmark">OXAR<span class="accent">.</span></h1>
+    <p class="tagline">Sovereign bonds from emerging markets, on Solana. Daily yield, instant liquidity, no gatekeepers.</p>
+  </div>
+  <div class="meta content">
+    <div class="left">Series Pre-seed</div>
+    <div>oxar.app</div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 02 — AGENDA ============== -->
+<section class="slide agenda">
+  <div class="left content">
+    <div class="section-tag">01 / 15</div>
+    <h1>How real-world<br/>yield comes <span class="muted">on-chain.</span></h1>
+    <div class="meta" style="color: var(--text-3); font-size: 18px;">OXAR — Investor Deck · April 2026</div>
+  </div>
+  <div class="right content">
+    <div class="agenda-tag">Agenda</div>
+    <div class="agenda-item"><span class="num">01</span><span class="label">The Problem</span></div>
+    <div class="agenda-item"><span class="num">02</span><span class="label">Market Opportunity</span></div>
+    <div class="agenda-item"><span class="num">03</span><span class="label">Solution &amp; Product</span></div>
+    <div class="agenda-item"><span class="num">04</span><span class="label">How it Works</span></div>
+    <div class="agenda-item"><span class="num">05</span><span class="label">Business Model</span></div>
+    <div class="agenda-item"><span class="num">06</span><span class="label">Traction</span></div>
+    <div class="agenda-item"><span class="num">07</span><span class="label">Competition &amp; Roadmap</span></div>
+    <div class="agenda-item"><span class="num">08</span><span class="label">Team &amp; Ask</span></div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 03 — PROBLEM ============== -->
+<section class="slide problem">
+  <div class="bg-grid"></div>
+  <div class="header content">
+    <span class="brand">OXAR · Problem</span>
+    <span>03 / 15</span>
+  </div>
+  <div class="content">
+    <div class="section-tag" style="margin-bottom: 32px;">The Problem</div>
+    <h2>SOVEREIGN<br/>DEBT IS<br/><span class="accent">LOCKED</span> AWAY.</h2>
+  </div>
+  <div class="content">
+    <p class="quote">
+      Emerging-market government bonds yield 4–18%. They sit on the balance sheet of a handful of pension funds and primary dealers — behind a $250k minimum, a wire form, and a country you'd need to fly to. Retail can't touch them. DeFi can't touch them. We can.
+    </p>
+  </div>
+  <div class="footer content"><span>OXAR · Investor Deck</span><span>oxar.app</span></div>
+</section>
+
+<!-- ============== SLIDE 04 — MARKET OPPORTUNITY ============== -->
+<section class="slide market">
+  <div class="header content"><span class="brand">OXAR · Market</span><span>04 / 15</span></div>
+  <div class="top content">
+    <div>
+      <div class="section-tag" style="margin-bottom: 24px;">Market Opportunity</div>
+      <h2 class="stat"><span class="accent">2 of 100</span><br/><span class="muted">EM retail investors<br/>can buy local bonds.</span></h2>
+      <p class="stat-sub">The other 98 hold cash, FX, or pay 3–5% to a mutual fund wrapping the same instrument.</p>
+    </div>
+    <div class="pictogram" id="pictogram"></div>
+  </div>
+  <div class="insights content">
+    <div class="insight"><div class="label">Underbanked</div><p>1.4B adults in emerging markets have no investment account at all.</p></div>
+    <div class="insight"><div class="label">Inflation Hedge</div><p>Local-currency yields routinely beat double-digit inflation by 200–400 bps.</p></div>
+    <div class="insight"><div class="label">RWA Wave</div><p>$12B of U.S. treasuries are on-chain. EM debt is the next frontier.</p></div>
+  </div>
+  <div class="footer content"><span>OXAR · Investor Deck</span><span>oxar.app</span></div>
+</section>
+
+<!-- ============== SLIDE 05 — TAM/SAM/SOM ============== -->
+<section class="slide tam">
+  <div class="bg-radial"></div>
+  <div class="header content"><span class="brand">OXAR · Opportunity</span><span>05 / 15</span></div>
+  <div class="left content">
+    <div class="section-tag" style="margin-bottom: 24px;">Opportunity Sizing</div>
+    <h2>A $1.3 trillion market<br/>is waiting for rails.</h2>
+    <p>EM sovereign debt is bigger than the entire crypto market by 4×. Capturing 0.1% gets us to a $1.3B vault TVL.</p>
+  </div>
+  <div class="right content">
+    <div class="tam-stack">
+      <div class="tam-row">
+        <span class="tag">TAM</span>
+        <span class="desc">Total emerging-market sovereign debt outstanding</span>
+        <span class="amount">$1.3T</span>
+      </div>
+      <div class="tam-row">
+        <span class="tag">SAM</span>
+        <span class="desc">Tokenizable, retail-accessible portion (≤ 24m maturity, USD/EUR settled)</span>
+        <span class="amount">$420B</span>
+      </div>
+      <div class="tam-row featured">
+        <span class="tag">SOM</span>
+        <span class="desc">Realistic 5-year capture across UA, BR, ID, NG, TR</span>
+        <span class="amount">$2.1B</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer content"><span>OXAR · Investor Deck</span><span>oxar.app</span></div>
+</section>
+
+<!-- ============== SLIDE 06 — SOLUTION ============== -->
+<section class="slide solution">
+  <div class="left content">
+    <div>
+      <div class="section-tag" style="margin-bottom: 24px;">Solution</div>
+      <h2>Real bonds.<br/>On-chain wrappers.<br/>Daily yield.</h2>
+      <p>OXAR turns each sovereign bond into a Solana vault. Buy with USDC, hold the token, watch NAV accrue every block. Sell on the secondary marketplace at any time — no bank, no broker, no minimum.</p>
+    </div>
+    <div style="color: var(--text-3); font-size: 18px;">06 / 15 · OXAR · Solution</div>
+  </div>
+  <div class="right">
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="url">oxar.app/vaults</span>
+      </div>
+      <div class="mockup-grid">
+        <div class="mockup-card">
+          <span class="vault-tag">UA · UAH · Short</span>
+          <span class="vault-name">OVDP UAH</span>
+          <span class="vault-apy">18.0%</span>
+          <span class="vault-meta">Matures 30d</span>
+        </div>
+        <div class="mockup-card">
+          <span class="vault-tag">UA · USD · Std</span>
+          <span class="vault-name">USD OVDP</span>
+          <span class="vault-apy">4.0%</span>
+          <span class="vault-meta">Matures 180d</span>
+        </div>
+        <div class="mockup-card">
+          <span class="vault-tag">UA · EUR · Std</span>
+          <span class="vault-name">EUR OVDP</span>
+          <span class="vault-apy">3.5%</span>
+          <span class="vault-meta">Matures 180d</span>
+        </div>
+        <div class="mockup-card">
+          <span class="vault-tag">UA · UAH · Mid</span>
+          <span class="vault-name">UAH Mid</span>
+          <span class="vault-apy">17.0%</span>
+          <span class="vault-meta">Matures 90d</span>
+        </div>
+        <div class="mockup-card">
+          <span class="vault-tag">UA · UAH · WAR</span>
+          <span class="vault-name">UAH Bonds</span>
+          <span class="vault-apy">18.0%</span>
+          <span class="vault-meta">Matures 365d</span>
+        </div>
+        <div class="mockup-card">
+          <span class="vault-tag">UA · USD · WAR</span>
+          <span class="vault-name">USD Bonds</span>
+          <span class="vault-apy">4.0%</span>
+          <span class="vault-meta">Matures 365d</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 07 — PRODUCT ============== -->
+<section class="slide product">
+  <div class="header content"><span class="brand">OXAR · Product</span><span>07 / 15</span></div>
+  <div class="content">
+    <div class="section-tag" style="margin-bottom: 24px;">Product</div>
+    <h2>Four surfaces, one protocol.</h2>
+  </div>
+  <div class="features content">
+    <div class="feature-card">
+      <div class="feature-icon">V</div>
+      <div>
+        <h3>Vaults</h3>
+        <p>Six live vaults wrapping Ukrainian sovereign bonds across UAH, USD, EUR. Daily NAV accrual on-chain. Deposit USDC, receive vault token.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">S</div>
+      <div>
+        <h3>Swap</h3>
+        <p>One-click USDC → vault token, with route selection and live rate. Embedded Privy wallet — no extension required.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">M</div>
+      <div>
+        <h3>Marketplace</h3>
+        <p>Secondary market for vault tokens before maturity. Set your price, escrow PDA holds the asset, anyone can buy.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">P</div>
+      <div>
+        <h3>Portfolio</h3>
+        <p>Live positions, accrued yield, maturity schedule, claim flow. One screen for the entire bond ladder.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer content"><span>OXAR · Investor Deck</span><span>oxar.app</span></div>
+</section>
+
+<!-- ============== SLIDE 08 — HOW IT WORKS ============== -->
+<section class="slide magic">
+  <div class="header content"><span class="brand">OXAR · How it Works</span><span>08 / 15</span></div>
+  <div class="left content">
+    <div class="section-tag" style="margin-bottom: 24px;">How it Works</div>
+    <h2>Underlying<br/>magic.</h2>
+    <p>Every dollar of TVL is backed 1:1 by an off-chain custodian holding the real bond. The protocol just makes the wrapper composable, transferable, and instant-settlement.</p>
+  </div>
+  <div class="right content">
+    <div class="magic-grid">
+      <div class="magic-card featured">
+        <span class="label">Core</span>
+        <div>
+          <h4>PDA Vaults</h4>
+          <p>One Solana program, deterministic vaults per bond series. Audited bytecode, no admin upgrades.</p>
+        </div>
+      </div>
+      <div class="magic-card">
+        <span class="label">Yield</span>
+        <div>
+          <h4>Daily NAV Accrual</h4>
+          <p>NAV ticks every slot. No rebases, no claim transactions until maturity.</p>
+        </div>
+      </div>
+      <div class="magic-card">
+        <span class="label">Settlement</span>
+        <div>
+          <h4>USDC In, USDC Out</h4>
+          <p>Off-chain custody mints the bond, on-chain settlement uses Circle USDC for liquidity.</p>
+        </div>
+      </div>
+      <div class="magic-card">
+        <span class="label">Compliance</span>
+        <div>
+          <h4>TransferHook + KYC</h4>
+          <p>Token-2022 hook enforces 40-day Reg S lockup and allowlist for U.S. persons.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer content"><span>OXAR · Investor Deck</span><span>oxar.app</span></div>
+</section>
+
+<!-- ============== SLIDE 09 — BUSINESS MODEL ============== -->
+<section class="slide biz">
+  <div class="header content"><span class="brand">OXAR · Business Model</span><span>09 / 15</span></div>
+  <div class="content">
+    <div class="section-tag" style="margin-bottom: 24px;">Business Model</div>
+    <h2>Three lines, all on-chain.</h2>
+  </div>
+  <div class="biz-cols content">
+    <div class="biz-col">
+      <div class="symbol s1">%</div>
+      <div class="label">Recurring</div>
+      <h3>Management Fee</h3>
+      <p>Protocol takes a thin slice of NAV per year, streamed continuously to the treasury PDA.</p>
+      <div class="pct">0.50%</div>
+    </div>
+    <div class="biz-col">
+      <div class="symbol s2">↔</div>
+      <div class="label">Per Transaction</div>
+      <h3>Mint &amp; Redeem Spread</h3>
+      <p>Small spread between custodian price and on-chain quote. Aligned with TVL, not user count.</p>
+      <div class="pct">0.20%</div>
+    </div>
+    <div class="biz-col">
+      <div class="symbol s3">⌬</div>
+      <div class="label">Marketplace</div>
+      <h3>Secondary Fee</h3>
+      <p>Take rate on every secondary trade between users. Pure software margin.</p>
+      <div class="pct">0.30%</div>
+    </div>
+  </div>
+  <div class="footer content"><span>OXAR · Investor Deck</span><span>oxar.app</span></div>
+</section>
+
+<!-- ============== SLIDE 10 — TRACTION ============== -->
+<section class="slide traction">
+  <div class="header content"><span class="brand">OXAR · Traction</span><span>10 / 15</span></div>
+  <div class="left content">
+    <div class="section-tag" style="margin-bottom: 24px;">Traction</div>
+    <h2>Live on devnet.<br/>Audit ready.</h2>
+    <p>Six vaults deployed, full deposit + claim + marketplace cycle working end-to-end. Privy embedded wallets remove the seed-phrase wall. Mainnet pencilled for Q3.</p>
+  </div>
+  <div class="right content">
+    <div class="big-stat">
+      <div class="num">6<span style="color: var(--text-3); font-size: 0.4em;">/6</span></div>
+      <div class="desc">Vaults live on devnet, full life-cycle tested.</div>
+    </div>
+    <div class="big-stat alt">
+      <div class="num">1,200+</div>
+      <div class="desc">Early-access waitlist signups since open. Cert NFT for first 1,000.</div>
+    </div>
+  </div>
+  <div class="footer content"><span>OXAR · Investor Deck</span><span>oxar.app</span></div>
+</section>
+
+<!-- ============== SLIDE 11 — COMPETITION ============== -->
+<section class="slide compete">
+  <div class="header content"><span class="brand">OXAR · Competition</span><span>11 / 15</span></div>
+  <div class="content">
+    <div class="section-tag" style="margin-bottom: 24px;">Competitive Landscape</div>
+    <h2>Nobody is doing this.<br/>Yet.</h2>
+  </div>
+  <div class="matrix content">
+    <span class="axis-x left">Treasuries / DM debt →</span>
+    <span class="axis-x right">EM debt →</span>
+    <span class="axis-y bottom-left">Permissioned ↑</span>
+    <span class="axis-y bottom-right">Permissionless ↑</span>
+    <div class="matrix-cell">
+      <div class="pill-cluster">
+        <div class="pill"><span class="ico"></span>Ondo</div>
+        <div class="pill"><span class="ico"></span>OpenEden</div>
+        <div class="pill"><span class="ico"></span>Backed</div>
+      </div>
+    </div>
+    <div class="matrix-cell">
+      <div class="pill-cluster">
+        <div class="pill"><span class="ico"></span>Centrifuge</div>
+        <div class="pill"><span class="ico"></span>Goldfinch</div>
+      </div>
+    </div>
+    <div class="matrix-cell">
+      <div class="pill-cluster">
+        <div class="pill"><span class="ico"></span>Maple</div>
+        <div class="pill"><span class="ico"></span>Mountain</div>
+      </div>
+    </div>
+    <div class="matrix-cell">
+      <div class="pill us"><span class="ico"></span>OXAR</div>
+    </div>
+  </div>
+  <div class="footer content"><span>OXAR · Investor Deck</span><span>oxar.app</span></div>
+</section>
+
+<!-- ============== SLIDE 12 — ROADMAP ============== -->
+<section class="slide road">
+  <div class="header content"><span class="brand">OXAR · Roadmap</span><span>12 / 15</span></div>
+  <div class="content">
+    <div class="section-tag" style="margin-bottom: 24px;">Roadmap</div>
+    <h2>From devnet to multi-country in 12 months.</h2>
+  </div>
+  <div class="timeline content">
+    <div class="timeline-track"></div>
+    <div class="timeline-progress"></div>
+
+    <div class="ts above live">
+      <div class="q">Q1 2026</div>
+      <div class="dot"></div>
+      <div class="label">Devnet MVP</div>
+      <div class="desc">Six Ukrainian vaults, marketplace, Privy wallets.</div>
+    </div>
+    <div class="ts below active">
+      <div class="q">Q2 2026</div>
+      <div class="dot"></div>
+      <div class="label">Audit + Pre-seed</div>
+      <div class="desc">Security audit, compliance build-out, fundraise close.</div>
+    </div>
+    <div class="ts above">
+      <div class="q">Q3 2026</div>
+      <div class="dot"></div>
+      <div class="label">Mainnet Launch</div>
+      <div class="desc">Real custodian integration, real USDC settlement, KYC live.</div>
+    </div>
+    <div class="ts below">
+      <div class="q">Q4 2026</div>
+      <div class="dot"></div>
+      <div class="label">Country #2</div>
+      <div class="desc">Brazil or Indonesia bonds, multi-jurisdiction custody.</div>
+    </div>
+  </div>
+  <div class="footer content"><span>OXAR · Investor Deck</span><span>oxar.app</span></div>
+</section>
+
+<!-- ============== SLIDE 13 — TEAM ============== -->
+<section class="slide team">
+  <div class="header content"><span class="brand">OXAR · Team</span><span>13 / 15</span></div>
+  <div class="content">
+    <div class="section-tag" style="margin-bottom: 24px;">Team</div>
+    <h2>Founders.</h2>
+  </div>
+  <div class="team-grid content">
+    <div class="person">
+      <div class="avatar"><span class="initials">DL</span></div>
+      <div class="role">CEO · Founder</div>
+      <div class="name">Daniil Logachev</div>
+      <p class="bio">Built protocols and wallets in the ETNY ecosystem. Shipped OXAR MVP solo in 8 weeks.</p>
+    </div>
+    <div class="person">
+      <div class="avatar"><span class="initials">+</span></div>
+      <div class="role">CTO · Open</div>
+      <div class="name">Hiring</div>
+      <p class="bio">Solana / Anchor lead. Will own contracts, audit response, and protocol upgrades.</p>
+    </div>
+    <div class="person">
+      <div class="avatar"><span class="initials">+</span></div>
+      <div class="role">Advisors</div>
+      <div class="name">In progress</div>
+      <p class="bio">Sovereign-debt desk veteran + RWA legal counsel. Conversations underway.</p>
+    </div>
+  </div>
+  <div class="footer content"><span>OXAR · Investor Deck</span><span>oxar.app</span></div>
+</section>
+
+<!-- ============== SLIDE 14 — VISION ============== -->
+<section class="slide vision">
+  <div class="bg-radial"></div>
+  <div class="bg-grid"></div>
+  <div class="header content"><span class="brand">OXAR · Vision</span><span>14 / 15</span></div>
+  <div class="content">
+    <div class="tag">Vision</div>
+  </div>
+  <div class="content">
+    <blockquote>
+      We're not building <span class="accent">for crypto natives.</span><br/>
+      We're rebuilding capital markets.
+    </blockquote>
+  </div>
+  <div class="content">
+    <div class="author">— OXAR, 2026</div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 15 — CONTACT ============== -->
+<section class="slide contact">
+  <div class="left">
+    <div class="section-tag">Get in Touch</div>
+    <div class="card">
+      <h4>Contact</h4>
+      <div class="contact-row"><span class="ico">✉</span><span>daniel.l@oxar.app</span></div>
+      <div class="contact-row"><span class="ico">⌖</span><span>oxar.app</span></div>
+      <div class="contact-row"><span class="ico">𝕏</span><span>@oxarprotocol</span></div>
+      <div class="contact-row"><span class="ico">⌬</span><span>devnet · 8NsGNHMtfEiJzSczdmN2reo26h75C4axamuLXdk2tfrT</span></div>
+    </div>
+    <div style="color: var(--text-3); font-size: 16px; margin-top: 16px;">15 / 15 · OXAR · Investor Deck · April 2026</div>
+  </div>
+  <div class="right">
+    <div class="ring ring2"></div>
+    <div class="ring"></div>
+    <div class="word">LET'S<br/><span class="accent">BUILD.</span></div>
+  </div>
+</section>
+
+<script>
+  // Build the pictogram: 100 dots, 2 highlighted (the "2 out of 100" stat)
+  (function() {
+    var p = document.getElementById('pictogram');
+    if (!p) return;
+    var on = [0, 1]; // first two highlighted
+    for (var i = 0; i < 100; i++) {
+      var d = document.createElement('div');
+      d.className = 'dot' + (on.indexOf(i) >= 0 ? ' on' : '');
+      p.appendChild(d);
+    }
+  })();
+</script>
+
+</body>
+</html>

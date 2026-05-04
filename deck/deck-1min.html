@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<title>OXAR — 1-Minute Pitch (UA)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --surface-0: #000000;
+    --surface-1: #0a0a0a;
+    --surface-2: #111111;
+    --surface-3: #1a1a1a;
+    --accent: #8B5CF6;
+    --accent-2: #A78BFA;
+    --accent-glow: rgba(139, 92, 246, 0.18);
+    --profit: #22C55E;
+    --loss: #EF4444;
+    --text: #FFFFFF;
+    --text-2: rgba(255, 255, 255, 0.6);
+    --text-3: rgba(255, 255, 255, 0.32);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.18);
+  }
+
+  @page {
+    size: 1920px 1080px;
+    margin: 0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--surface-0);
+    color: var(--text);
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .slide {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+    background: var(--surface-0);
+  }
+  .slide:last-child { page-break-after: auto; }
+
+  /* Screen mode — fit slides to viewport, allow vertical scroll */
+  @media screen {
+    html, body {
+      background: #050505;
+      scroll-behavior: smooth;
+    }
+    body {
+      scroll-snap-type: y proximity;
+    }
+    .slide {
+      scroll-snap-align: start;
+      margin: 0 auto 24px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.06);
+    }
+  }
+  @media screen and (max-width: 1920px) {
+    html, body { zoom: 0.75; }
+  }
+  @media screen and (max-width: 1500px) {
+    html, body { zoom: 0.6; }
+  }
+  @media screen and (max-width: 1300px) {
+    html, body { zoom: 0.5; }
+  }
+  @media screen and (max-width: 1100px) {
+    html, body { zoom: 0.4; }
+  }
+  @media print {
+    html, body { zoom: 1; }
+    .slide { margin: 0; box-shadow: none; }
+  }
+
+  .header {
+    position: absolute;
+    top: 40px;
+    left: 80px;
+    right: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: var(--text-3);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    z-index: 10;
+    font-family: 'Geist Mono', monospace;
+  }
+  .header .brand { color: var(--text-2); font-weight: 600; }
+
+  .footer {
+    position: absolute;
+    bottom: 56px;
+    left: 80px;
+    right: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    color: var(--text-3);
+    font-weight: 500;
+    z-index: 10;
+    font-family: 'Geist Mono', monospace;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent-2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: 'Geist Mono', monospace;
+  }
+  .section-tag::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .bg-radial {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 1200px 800px at 80% -10%, rgba(139,92,246,0.18), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 0% 100%, rgba(139,92,246,0.10), transparent 55%);
+    z-index: 1;
+  }
+  .bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+    background-position: -1px -1px;
+    z-index: 1;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 90%);
+  }
+
+  .content { position: relative; z-index: 5; }
+
+  /* ============== 01 — COVER ============== */
+  .cover {
+    padding: 56px 80px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100%;
+  }
+  .cover .head { display: flex; justify-content: space-between; color: var(--text-3); font-size: 18px; font-weight: 500; font-family: 'Geist Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; }
+  .cover .center { display: flex; flex-direction: column; justify-content: center; gap: 32px; }
+  .cover .wordmark {
+    font-size: 320px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 0.85;
+  }
+  .cover .wordmark .accent { color: var(--accent); }
+  .cover .tagline {
+    font-size: 44px;
+    color: var(--text-2);
+    font-weight: 400;
+    max-width: 1300px;
+    line-height: 1.25;
+    margin-top: 24px;
+    letter-spacing: -0.01em;
+  }
+  .cover .meta {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    color: var(--text-3);
+    font-size: 18px;
+    font-weight: 500;
+    font-family: 'Geist Mono', monospace;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .cover .meta .left { display: flex; align-items: center; gap: 24px; }
+  .cover .meta .left::before { content: ''; width: 80px; height: 1px; background: var(--border-strong); }
+
+  /* ============== 02 — HOOK ============== */
+  .hook {
+    padding: 120px 80px 140px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 64px;
+  }
+  .hook h2 {
+    font-size: 168px;
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+  }
+  .hook h2 .accent { color: var(--accent); }
+  .hook .quote {
+    font-size: 32px;
+    color: var(--text-2);
+    max-width: 1300px;
+    line-height: 1.4;
+    font-weight: 400;
+  }
+  .hook .quote strong { color: var(--text); font-weight: 600; }
+
+  /* ============== 03 — MARKET ============== */
+  .market {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 56px;
+  }
+  .market .top { display: grid; grid-template-columns: 1.4fr 1fr; gap: 64px; align-items: center; }
+  .market .stat {
+    font-size: 200px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+  }
+  .market .stat .muted { color: var(--text-3); }
+  .market .stat .accent { color: var(--accent); }
+  .market .stat-sub { font-size: 28px; color: var(--text-2); margin-top: 32px; max-width: 720px; line-height: 1.4; }
+
+  .pictogram {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 8px;
+    align-content: center;
+    max-width: 540px;
+    justify-self: end;
+  }
+  .pictogram .dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--surface-3);
+  }
+  .pictogram .dot.on { background: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+
+  .market .insights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px; }
+  .insight .label {
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--accent);
+    display: inline-block;
+    margin-bottom: 24px;
+    font-family: 'Geist Mono', monospace;
+  }
+  .insight p { color: var(--text-2); font-size: 22px; line-height: 1.5; }
+
+  /* ============== 04 — SOLUTION ============== */
+  .solution {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 72px;
+  }
+  .solution h2 {
+    font-size: 96px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    max-width: 1500px;
+  }
+  .solution h2 .accent { color: var(--accent); }
+  .solution .flow {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 56px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .solution .flow .step {
+    padding: 32px 48px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--surface-1);
+  }
+  .solution .flow .arrow { color: var(--accent); font-size: 64px; }
+  .solution .actions {
+    display: flex;
+    gap: 64px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 36px;
+    font-weight: 500;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .solution .actions .action { padding-bottom: 12px; border-bottom: 2px solid var(--accent); color: var(--text); }
+
+  /* ============== 05 — PRODUCT ============== */
+  .product {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 64px;
+  }
+  .product h2 {
+    font-size: 144px;
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+  .product h2 .accent { color: var(--accent); }
+  .product .vaults {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .vault-card {
+    padding: 40px;
+    border: 1px solid var(--border);
+    background: var(--surface-1);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .vault-card .id {
+    font-family: 'Geist Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+  }
+  .vault-card .apy {
+    font-size: 84px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .vault-card .apy .accent { color: var(--accent); }
+  .vault-card .meta {
+    font-size: 18px;
+    color: var(--text-2);
+    font-family: 'Geist Mono', monospace;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .product .footer-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-2);
+    font-size: 24px;
+    font-family: 'Geist Mono', monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+  }
+
+  /* ============== 06 — TRACTION ============== */
+  .traction {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 80px;
+  }
+  .traction h2 {
+    font-size: 96px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .traction .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 56px;
+    align-content: center;
+  }
+  .traction .stat-block {
+    border-left: 2px solid var(--accent);
+    padding-left: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .traction .stat-num {
+    font-size: 156px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    color: var(--text);
+  }
+  .traction .stat-num .accent { color: var(--accent); }
+  .traction .stat-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 18px;
+    color: var(--text-2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+  .traction .program-id {
+    font-family: 'Geist Mono', monospace;
+    font-size: 18px;
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+    word-break: break-all;
+  }
+  .traction .program-id .label { color: var(--accent-2); margin-right: 16px; }
+
+  /* ============== 07 — VISION / TEAM ============== */
+  .vision {
+    padding: 120px 80px 100px;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    gap: 56px;
+  }
+  .vision .team {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+  }
+  .vision .person {
+    border-top: 2px solid var(--accent);
+    padding-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .vision .person .role {
+    font-family: 'Geist Mono', monospace;
+    font-size: 16px;
+    color: var(--accent-2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .vision .person .name {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .vision .person .bio {
+    font-size: 22px;
+    color: var(--text-2);
+    line-height: 1.5;
+    max-width: 600px;
+  }
+  .vision .closer {
+    font-size: 144px;
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+  }
+  .vision .closer .accent { color: var(--accent); }
+  .vision .closer .muted { color: var(--text-3); display: block; font-size: 36px; font-weight: 500; letter-spacing: 0.02em; text-transform: none; margin-top: 32px; max-width: 1100px; line-height: 1.3; }
+  .vision .url {
+    font-family: 'Geist Mono', monospace;
+    font-size: 28px;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .vision .url .accent { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ========================================================== -->
+<!-- SLIDE 01 — COVER                                            -->
+<!-- ========================================================== -->
+<div class="slide">
+  <div class="bg-radial"></div>
+  <div class="bg-grid"></div>
+  <div class="cover content">
+    <div class="head">
+      <span>OXAR · ОЗНАЙОМЧИЙ PITCH</span>
+      <span>2026 · DEVNET LIVE</span>
+    </div>
+    <div class="center">
+      <div class="wordmark">OXA<span class="accent">R</span></div>
+      <div class="tagline">Суверенна дохідність. On-chain. Для всіх.</div>
+    </div>
+    <div class="meta">
+      <span class="left">SOLANA · RWA · UKRAINE</span>
+      <span>oxar.app</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- SLIDE 02 — HOOK                                             -->
+<!-- ========================================================== -->
+<div class="slide">
+  <div class="bg-radial"></div>
+  <div class="header content">
+    <span class="brand">OXAR</span>
+    <span>02 · ПРОБЛЕМА</span>
+  </div>
+  <div class="hook content">
+    <div class="section-tag">ПРОБЛЕМА</div>
+    <h2>Будь-яка <span class="accent">облігація</span>.<br/>Будь-який гаманець.<br/>Будь-яка країна.</h2>
+    <p class="quote">Купити облігацію країни раніше вимагало <strong>місцевого банку</strong>, <strong>місцевого брокера</strong> й <strong>місцевої резиденції</strong>. Ми прибрали всі три.</p>
+  </div>
+  <div class="footer content">
+    <span>OXAR · 1-MIN PITCH</span>
+    <span>02 / 07</span>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- SLIDE 03 — MARKET                                           -->
+<!-- ========================================================== -->
+<div class="slide">
+  <div class="bg-radial"></div>
+  <div class="header content">
+    <span class="brand">OXAR</span>
+    <span>03 · РИНОК</span>
+  </div>
+  <div class="market content">
+    <div class="section-tag">РИНОК</div>
+    <div class="top">
+      <div>
+        <div class="stat"><span class="accent">$13T</span></div>
+        <div class="stat-sub">суверенного боргу. Замкнено за брокерами, банками й правилами резиденції. Дохідність існувала завжди. Доступ — ніколи.</div>
+      </div>
+      <div class="pictogram">
+        <span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+    <div class="insights">
+      <div class="insight">
+        <span class="label">Локальні брокери</span>
+        <p>Доступ дають лише резидентам країни-емітента.</p>
+      </div>
+      <div class="insight">
+        <span class="label">Банки + KYC</span>
+        <p>Потрібен місцевий рахунок та ідентифікація на місці.</p>
+      </div>
+      <div class="insight">
+        <span class="label">Капітальні контролі</span>
+        <p>Транскордонні перекази — повільні, дорогі, обмежені.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer content">
+    <span>OXAR · 1-MIN PITCH</span>
+    <span>03 / 07</span>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- SLIDE 04 — SOLUTION                                         -->
+<!-- ========================================================== -->
+<div class="slide">
+  <div class="bg-radial"></div>
+  <div class="header content">
+    <span class="brand">OXAR</span>
+    <span>04 · РІШЕННЯ</span>
+  </div>
+  <div class="solution content">
+    <div class="section-tag">РІШЕННЯ</div>
+    <h2>OXAR токенізує суверенні облігації <span class="accent">на Solana</span>. Дохід нараховується автоматично, у реальному часі.</h2>
+    <div class="flow">
+      <div class="step">TOKEN</div>
+      <div class="arrow">→</div>
+      <div class="step">BROKER</div>
+      <div class="arrow">→</div>
+      <div class="step">BOND</div>
+    </div>
+    <div class="actions">
+      <span class="action">купуй</span>
+      <span class="action">тримай</span>
+      <span class="action">торгуй</span>
+      <span class="action">надсилай</span>
+    </div>
+  </div>
+  <div class="footer content">
+    <span>OXAR · 1-MIN PITCH</span>
+    <span>04 / 07</span>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- SLIDE 05 — PRODUCT                                          -->
+<!-- ========================================================== -->
+<div class="slide">
+  <div class="bg-radial"></div>
+  <div class="header content">
+    <span class="brand">OXAR</span>
+    <span>05 · ПРОДУКТ</span>
+  </div>
+  <div class="product content">
+    <div>
+      <div class="section-tag" style="margin-bottom: 32px;">ПРОДУКТ</div>
+      <h2>6 vault'ів живі.<br/><span class="accent">До 18% APY.</span></h2>
+    </div>
+    <div class="vaults">
+      <div class="vault-card">
+        <div class="id">UA-UAH-SHORT</div>
+        <div class="apy"><span class="accent">18%</span></div>
+        <div class="meta">Short OVDP · UAH</div>
+      </div>
+      <div class="vault-card">
+        <div class="id">UA-UAH-MID</div>
+        <div class="apy"><span class="accent">17%</span></div>
+        <div class="meta">Mid OVDP · UAH</div>
+      </div>
+      <div class="vault-card">
+        <div class="id">UA-UAH-WAR</div>
+        <div class="apy"><span class="accent">18%</span></div>
+        <div class="meta">War Bond · UAH</div>
+      </div>
+      <div class="vault-card">
+        <div class="id">UA-USD-STD</div>
+        <div class="apy">4%</div>
+        <div class="meta">OVDP · USD</div>
+      </div>
+      <div class="vault-card">
+        <div class="id">UA-USD-WAR</div>
+        <div class="apy">4%</div>
+        <div class="meta">War Bond · USD</div>
+      </div>
+      <div class="vault-card">
+        <div class="id">UA-EUR-STD</div>
+        <div class="apy">3.5%</div>
+        <div class="meta">OVDP · EUR</div>
+      </div>
+    </div>
+    <div class="footer-line">
+      <span>UAH · USD · EUR</span>
+      <span>УСЕ ON-CHAIN · NAV ТИКАЄ КОЖЕН БЛОК</span>
+    </div>
+  </div>
+  <div class="footer content">
+    <span>OXAR · 1-MIN PITCH</span>
+    <span>05 / 07</span>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- SLIDE 06 — TRACTION                                         -->
+<!-- ========================================================== -->
+<div class="slide">
+  <div class="bg-radial"></div>
+  <div class="header content">
+    <span class="brand">OXAR</span>
+    <span>06 · TRACTION</span>
+  </div>
+  <div class="traction content">
+    <div>
+      <div class="section-tag" style="margin-bottom: 32px;">TRACTION</div>
+      <h2>Живий продукт. Зростаючий waitlist. Peer-validation.</h2>
+    </div>
+    <div class="stats">
+      <div class="stat-block">
+        <div class="stat-num"><span class="accent">10</span></div>
+        <div class="stat-label">активних<br/>devnet-тестерів</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num"><span class="accent">30+</span></div>
+        <div class="stat-label">organic mainnet<br/>waitlist sign-ups</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num"><span class="accent">2</span></div>
+        <div class="stat-label">hackathon wins<br/>SUPERTEAM PL · UA</div>
+      </div>
+    </div>
+    <div class="program-id">
+      <span class="label">PROGRAM ID</span>8NsGNHMtfEiJzSczdmN2reo26h75C4axamuLXdk2tfrT · SOLANA DEVNET
+    </div>
+  </div>
+  <div class="footer content">
+    <span>OXAR · 1-MIN PITCH</span>
+    <span>06 / 07</span>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- SLIDE 07 — VISION / TEAM                                    -->
+<!-- ========================================================== -->
+<div class="slide">
+  <div class="bg-radial"></div>
+  <div class="header content">
+    <span class="brand">OXAR</span>
+    <span>07 · КОМАНДА · БАЧЕННЯ</span>
+  </div>
+  <div class="vision content">
+    <div class="section-tag">КОМАНДА</div>
+    <div class="team">
+      <div class="person">
+        <span class="role">CEO / CTO</span>
+        <span class="name">Daniil Logachev</span>
+        <span class="bio">Solana-розробник з 2022. Solo-author всього технічного стеку OXAR. ETNY ecosystem background.</span>
+      </div>
+      <div class="person">
+        <span class="role">COO</span>
+        <span class="name">Anna Tarapatska</span>
+        <span class="bio">Продукт, дизайн, broker partnerships, compliance research.</span>
+      </div>
+    </div>
+    <div class="closer">
+      Один протокол.<br/>Кожна <span class="accent">держава</span>.<br/>Для всіх.
+      <span class="muted">Перший ринок — Україна. Наступний — ваш.</span>
+    </div>
+    <div class="url">
+      <span><span class="accent">→</span> oxar.app</span>
+      <span>OXAR · 2026</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
