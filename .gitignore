@@ -68,3 +68,4 @@ outreach/*.xlsx
 *.pem
 *.key
 secrets/
+.gstack/
