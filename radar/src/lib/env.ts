@@ -2,6 +2,8 @@ export interface ServerEnv {
   alchemyApiKey: string;
   heliusApiKey: string | undefined;
   anthropicApiKey: string;
+  supabaseUrl: string;
+  supabaseServiceRoleKey: string;
   rateLimitRequestsPerWindow: number;
   rateLimitWindowMs: number;
 }
@@ -13,14 +15,20 @@ export function getServerEnv(): ServerEnv {
 
   const alchemyApiKey = process.env.ALCHEMY_API_KEY;
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!alchemyApiKey) throw new Error("ALCHEMY_API_KEY is not set");
   if (!anthropicApiKey) throw new Error("ANTHROPIC_API_KEY is not set");
+  if (!supabaseUrl) throw new Error("NEXT_PUBLIC_SUPABASE_URL is not set");
+  if (!supabaseServiceRoleKey) throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set");
 
   cached = {
     alchemyApiKey,
     heliusApiKey: process.env.HELIUS_API_KEY || undefined,
     anthropicApiKey,
+    supabaseUrl,
+    supabaseServiceRoleKey,
     rateLimitRequestsPerWindow: parseIntOr(process.env.RATE_LIMIT_REQUESTS_PER_WINDOW, 5),
     rateLimitWindowMs: parseIntOr(process.env.RATE_LIMIT_WINDOW_MS, 600_000),
   };
