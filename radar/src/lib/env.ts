@@ -1,5 +1,6 @@
 export interface ServerEnv {
   alchemyApiKey: string;
+  heliusApiKey: string | undefined;
   anthropicApiKey: string;
   rateLimitRequestsPerWindow: number;
   rateLimitWindowMs: number;
@@ -18,6 +19,7 @@ export function getServerEnv(): ServerEnv {
 
   cached = {
     alchemyApiKey,
+    heliusApiKey: process.env.HELIUS_API_KEY || undefined,
     anthropicApiKey,
     rateLimitRequestsPerWindow: parseIntOr(process.env.RATE_LIMIT_REQUESTS_PER_WINDOW, 5),
     rateLimitWindowMs: parseIntOr(process.env.RATE_LIMIT_WINDOW_MS, 600_000),

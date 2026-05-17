@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import type { ExplainOutput, WalletAnalysis } from "@oxar/radar-core";
+import type { Chain, ExplainOutput, WalletAnalysis } from "@oxar/radar-core";
 
 import { AnalyzeResult } from "./analyze-result";
 
@@ -24,16 +24,17 @@ interface ApiError {
 
 export function AnalyzeForm({ initialWallet }: AnalyzeFormProps) {
   const [wallet, setWallet] = useState(initialWallet);
+  const [chains, setChains] = useState<Chain[]>(() => detectChains(initialWallet));
   const [status, setStatus] = useState<Status>("idle");
   const [payload, setPayload] = useState<ApiPayload | undefined>();
   const [error, setError] = useState<string | undefined>();
 
   useEffect(() => {
-    if (initialWallet) void analyze(initialWallet);
+    if (initialWallet) void analyze(initialWallet, detectChains(initialWallet));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function analyze(address: string) {
+  async function analyze(address: string, requestChains: Chain[]) {
     setStatus("loading");
     setError(undefined);
     setPayload(undefined);
@@ -44,7 +45,7 @@ export function AnalyzeForm({ initialWallet }: AnalyzeFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           address,
-          chains: ["ethereum"],
+          chains: requestChains,
           language: "en",
         }),
       });
@@ -71,8 +72,15 @@ export function AnalyzeForm({ initialWallet }: AnalyzeFormProps) {
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!wallet.trim()) return;
-    void analyze(wallet.trim());
+    const trimmed = wallet.trim();
+    if (!trimmed) return;
+    const effectiveChains = chains.length > 0 ? chains : detectChains(trimmed);
+    void analyze(trimmed, effectiveChains);
+  }
+
+  function onWalletChange(value: string) {
+    setWallet(value);
+    setChains(detectChains(value));
   }
 
   return (
@@ -83,9 +91,9 @@ export function AnalyzeForm({ initialWallet }: AnalyzeFormProps) {
           inputMode="text"
           autoComplete="off"
           spellCheck={false}
-          placeholder="0x..."
+          placeholder="0x... or Solana base58 address"
           value={wallet}
-          onChange={(e) => setWallet(e.target.value)}
+          onChange={(e) => onWalletChange(e.target.value)}
           className="flex-1 rounded-lg border border-white/10 bg-[var(--color-surface-1)] px-4 py-3 font-mono text-sm outline-none focus:border-[var(--color-accent)]"
         />
         <button
@@ -108,6 +116,13 @@ export function AnalyzeForm({ initialWallet }: AnalyzeFormProps) {
       )}
     </div>
   );
+}
+
+function detectChains(address: string): Chain[] {
+  const trimmed = address.trim();
+  if (/^0x[a-fA-F0-9]{40}$/.test(trimmed)) return ["ethereum"];
+  if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) return ["solana"];
+  return ["ethereum"];
 }
 
 function errorMessageFor(code: string | undefined, resetAt?: number): string {

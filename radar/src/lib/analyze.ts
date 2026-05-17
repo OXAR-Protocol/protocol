@@ -2,6 +2,7 @@ import {
   analyzeWallet,
   EthereumAdapter,
   explainWallet,
+  SolanaAdapter,
   type Chain,
   type ChainAdapter,
   type ExplainOutput,
@@ -26,7 +27,9 @@ export async function runAnalyze(input: {
   if (input.chains.includes("ethereum")) {
     adapters.ethereum = new EthereumAdapter({ alchemyApiKey: env.alchemyApiKey });
   }
-  // Solana adapter wires up in Phase 1 Day 12-14.
+  if (input.chains.includes("solana") && env.heliusApiKey) {
+    adapters.solana = new SolanaAdapter({ heliusApiKey: env.heliusApiKey });
+  }
 
   const analysis = await analyzeWallet({
     walletAddress: input.walletAddress,
