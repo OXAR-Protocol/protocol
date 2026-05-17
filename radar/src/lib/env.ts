@@ -4,6 +4,7 @@ export interface ServerEnv {
   anthropicApiKey: string;
   supabaseUrl: string;
   supabaseServiceRoleKey: string;
+  cronSecret: string | undefined;
   rateLimitRequestsPerWindow: number;
   rateLimitWindowMs: number;
 }
@@ -29,6 +30,7 @@ export function getServerEnv(): ServerEnv {
     anthropicApiKey,
     supabaseUrl,
     supabaseServiceRoleKey,
+    cronSecret: process.env.CRON_SECRET || undefined,
     rateLimitRequestsPerWindow: parseIntOr(process.env.RATE_LIMIT_REQUESTS_PER_WINDOW, 5),
     rateLimitWindowMs: parseIntOr(process.env.RATE_LIMIT_WINDOW_MS, 600_000),
   };
