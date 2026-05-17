@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
 
+import { withApiKey } from "@/lib/auth";
 import { getProtocolBySlug } from "@/lib/db/protocols";
 import { getLatestSnapshot } from "@/lib/db/snapshots";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-interface RouteParams {
-  params: Promise<{ slug: string }>;
-}
-
-export async function GET(_req: Request, { params }: RouteParams): Promise<NextResponse> {
+export const GET = withApiKey<{ slug: string }>(async (_req, { params }) => {
   const { slug } = await params;
   const protocol = await getProtocolBySlug(slug);
 
@@ -49,8 +46,8 @@ export async function GET(_req: Request, { params }: RouteParams): Promise<NextR
     },
     {
       headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        "Cache-Control": "private, max-age=60",
       },
     },
   );
-}
+});

@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 
+import { withApiKey } from "@/lib/auth";
 import { listActiveProtocols } from "@/lib/db/protocols";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(): Promise<NextResponse> {
+export const GET = withApiKey(async () => {
   const protocols = await listActiveProtocols();
 
   return NextResponse.json(
@@ -28,8 +29,8 @@ export async function GET(): Promise<NextResponse> {
     },
     {
       headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        "Cache-Control": "private, max-age=60",
       },
     },
   );
-}
+});
