@@ -1,0 +1,128 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import type { ExplainOutput, WalletAnalysis } from "@oxar/radar-core";
+
+import { AnalyzeResult } from "./analyze-result";
+
+interface AnalyzeFormProps {
+  initialWallet: string;
+}
+
+type Status = "idle" | "loading" | "success" | "error";
+
+interface ApiPayload {
+  analysis: WalletAnalysis;
+  explanation: ExplainOutput;
+}
+
+interface ApiError {
+  error: string;
+  resetAt?: number;
+}
+
+export function AnalyzeForm({ initialWallet }: AnalyzeFormProps) {
+  const [wallet, setWallet] = useState(initialWallet);
+  const [status, setStatus] = useState<Status>("idle");
+  const [payload, setPayload] = useState<ApiPayload | undefined>();
+  const [error, setError] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (initialWallet) void analyze(initialWallet);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function analyze(address: string) {
+    setStatus("loading");
+    setError(undefined);
+    setPayload(undefined);
+
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address,
+          chains: ["ethereum"],
+          language: "en",
+        }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => ({}))) as ApiError;
+        setError(errorMessageFor(data.error, data.resetAt));
+        setStatus("error");
+        return;
+      }
+
+      const data = (await response.json()) as ApiPayload;
+      setPayload(data);
+      setStatus("success");
+
+      const url = new URL(window.location.href);
+      url.searchParams.set("wallet", address);
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      setError("Network error. Try again in a moment.");
+      setStatus("error");
+    }
+  }
+
+  function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!wallet.trim()) return;
+    void analyze(wallet.trim());
+  }
+
+  return (
+    <div>
+      <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row">
+        <input
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          spellCheck={false}
+          placeholder="0x..."
+          value={wallet}
+          onChange={(e) => setWallet(e.target.value)}
+          className="flex-1 rounded-lg border border-white/10 bg-[var(--color-surface-1)] px-4 py-3 font-mono text-sm outline-none focus:border-[var(--color-accent)]"
+        />
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          className="rounded-lg bg-[var(--color-accent)] px-5 py-3 text-sm font-medium text-black hover:opacity-90 disabled:opacity-50"
+        >
+          {status === "loading" ? "Analyzing..." : "Analyze"}
+        </button>
+      </form>
+
+      {status === "error" && error && (
+        <p className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          {error}
+        </p>
+      )}
+
+      {status === "success" && payload && (
+        <AnalyzeResult analysis={payload.analysis} explanation={payload.explanation} />
+      )}
+    </div>
+  );
+}
+
+function errorMessageFor(code: string | undefined, resetAt?: number): string {
+  switch (code) {
+    case "invalid_address":
+      return "That doesn't look like a valid Ethereum or Solana address.";
+    case "rate_limited": {
+      const seconds = resetAt ? Math.max(0, Math.ceil((resetAt - Date.now()) / 1000)) : 0;
+      return seconds > 0
+        ? `Slow down — public demo limit reached. Try again in ${seconds}s.`
+        : "Public demo limit reached. Try again shortly.";
+    }
+    case "analyze_failed":
+      return "Something went wrong on our side analyzing this wallet. Try again.";
+    default:
+      return "Something went wrong. Try again.";
+  }
+}
