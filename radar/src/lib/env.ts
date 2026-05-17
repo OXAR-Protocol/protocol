@@ -6,6 +6,12 @@ export interface ServerEnv {
   supabaseServiceRoleKey: string;
   cronSecret: string | undefined;
   adminSecret: string | undefined;
+  privyAppSecret: string | undefined;
+  stripeSecretKey: string | undefined;
+  stripeWebhookSecret: string | undefined;
+  stripePriceStarter: string | undefined;
+  stripePricePro: string | undefined;
+  appBaseUrl: string;
   rateLimitRequestsPerWindow: number;
   rateLimitWindowMs: number;
 }
@@ -33,6 +39,12 @@ export function getServerEnv(): ServerEnv {
     supabaseServiceRoleKey,
     cronSecret: process.env.CRON_SECRET || undefined,
     adminSecret: process.env.ADMIN_SECRET || undefined,
+    privyAppSecret: process.env.PRIVY_APP_SECRET || undefined,
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY || undefined,
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || undefined,
+    stripePriceStarter: process.env.STRIPE_PRICE_STARTER || undefined,
+    stripePricePro: process.env.STRIPE_PRICE_PRO || undefined,
+    appBaseUrl: process.env.APP_BASE_URL || "http://localhost:3000",
     rateLimitRequestsPerWindow: parseIntOr(process.env.RATE_LIMIT_REQUESTS_PER_WINDOW, 5),
     rateLimitWindowMs: parseIntOr(process.env.RATE_LIMIT_WINDOW_MS, 600_000),
   };

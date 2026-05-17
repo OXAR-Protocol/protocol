@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
+import { RadarPrivyProvider } from "./privy-provider";
 
 export const metadata: Metadata = {
   title: "OXAR Radar — RWA Intelligence",
@@ -16,7 +17,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
-      <body className="font-sans antialiased min-h-screen">{children}</body>
+      <body className="font-sans antialiased min-h-screen">
+        <RadarPrivyProvider>{children}</RadarPrivyProvider>
+      </body>
     </html>
   );
 }

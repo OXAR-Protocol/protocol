@@ -81,6 +81,35 @@ export async function listApiKeys(): Promise<ApiKeyRecord[]> {
   return rows.map(rowToRecord);
 }
 
+export async function listApiKeysForUser(userId: string): Promise<ApiKeyRecord[]> {
+  const sql = getDb();
+  const rows = await sql<ApiKeyRow[]>`
+    select id, user_id, name, key_prefix, tier,
+           rate_limit_per_min, monthly_quota, created_at, last_used_at
+    from radar.api_keys
+    where user_id = ${userId}
+      and revoked_at is null
+    order by created_at desc
+  `;
+  return rows.map(rowToRecord);
+}
+
+export async function revokeApiKeyForUser(
+  id: string,
+  userId: string,
+): Promise<boolean> {
+  const sql = getDb();
+  const rows = await sql<{ id: string }[]>`
+    update radar.api_keys
+       set revoked_at = now()
+     where id = ${id}
+       and user_id = ${userId}
+       and revoked_at is null
+    returning id
+  `;
+  return rows.length > 0;
+}
+
 function rowToRecord(row: ApiKeyRow): ApiKeyRecord {
   return {
     id: row.id,
