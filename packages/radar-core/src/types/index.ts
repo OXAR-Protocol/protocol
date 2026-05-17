@@ -20,6 +20,8 @@ export interface ProtocolMetadata {
   issuerName: string;
   issuerJurisdiction?: string;
   websiteUrl: string;
+  /** Estimated APY in basis points. Hardcoded in v0.1, indexer-driven in Phase 2. */
+  estimatedApyBps: number;
 }
 
 export interface ProtocolSnapshot {

@@ -16,6 +16,9 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "alchemy-sdk": "^3.5.0"
+  },
   "devDependencies": {
     "typescript": "^5.4.0"
   }

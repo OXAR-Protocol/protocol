@@ -60,7 +60,7 @@ async function collectPositions(options: AnalyzeWalletOptions): Promise<WalletPo
         chain: protocol.chain,
         balance: tokens,
         valueUsd: tokens * nav,
-        yieldApyBps: 0,
+        yieldApyBps: protocol.estimatedApyBps,
       });
     }
   }

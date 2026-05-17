@@ -12,6 +12,7 @@ export const PROTOCOL_REGISTRY: readonly ProtocolMetadata[] = [
     issuerName: "Ondo Finance",
     issuerJurisdiction: "BVI",
     websiteUrl: "https://ondo.finance",
+    estimatedApyBps: 480,
   },
   {
     slug: "ondo-ousg",
@@ -24,6 +25,7 @@ export const PROTOCOL_REGISTRY: readonly ProtocolMetadata[] = [
     issuerName: "Ondo Finance",
     issuerJurisdiction: "BVI",
     websiteUrl: "https://ondo.finance",
+    estimatedApyBps: 450,
   },
   {
     slug: "blackrock-buidl",
@@ -35,7 +37,8 @@ export const PROTOCOL_REGISTRY: readonly ProtocolMetadata[] = [
     description: "BlackRock USD Institutional Digital Liquidity Fund",
     issuerName: "BlackRock",
     issuerJurisdiction: "USA",
-    websiteUrl: "https://securitize.io/learn/press/blackrock-launches-first-tokenized-fund-buidl-on-the-ethereum-network",
+    websiteUrl: "https://securitize.io",
+    estimatedApyBps: 460,
   },
   {
     slug: "maple-finance",
@@ -47,6 +50,7 @@ export const PROTOCOL_REGISTRY: readonly ProtocolMetadata[] = [
     description: "Institutional capital pools for private credit lending",
     issuerName: "Maple Finance",
     websiteUrl: "https://maple.finance",
+    estimatedApyBps: 1050,
   },
   {
     slug: "centrifuge",
@@ -58,6 +62,7 @@ export const PROTOCOL_REGISTRY: readonly ProtocolMetadata[] = [
     description: "Real-world asset financing pools",
     issuerName: "Centrifuge",
     websiteUrl: "https://centrifuge.io",
+    estimatedApyBps: 950,
   },
   {
     slug: "backed-bib01",
@@ -70,6 +75,7 @@ export const PROTOCOL_REGISTRY: readonly ProtocolMetadata[] = [
     issuerName: "Backed Finance",
     issuerJurisdiction: "Switzerland",
     websiteUrl: "https://backed.fi",
+    estimatedApyBps: 470,
   },
 ] as const;
 
