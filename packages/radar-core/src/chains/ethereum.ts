@@ -1,12 +1,8 @@
-import { Alchemy, Network } from "alchemy-sdk";
-
 import { getProtocolByContract } from "../protocols/registry";
 import type { Chain, ProtocolMetadata } from "../types";
 import type { ChainAdapter, TokenBalance } from "./types";
 
-export interface EthereumAdapterConfig {
-  alchemyApiKey: string;
-}
+const ALCHEMY_MAINNET_URL = "https://eth-mainnet.g.alchemy.com/v2";
 
 // v0.1 hardcoded NAVs — replaced by indexer reads in Phase 2.
 // Refreshed weekly until protocol_snapshots table is populated.
@@ -19,15 +15,33 @@ const HARDCODED_NAVS: Readonly<Record<string, number>> = {
   "backed-bib01": 5.41,
 };
 
+interface AlchemyTokenBalance {
+  contractAddress: string;
+  tokenBalance: string | null;
+}
+
+interface AlchemyTokenBalancesResult {
+  address: string;
+  tokenBalances: AlchemyTokenBalance[];
+}
+
+interface JsonRpcResponse<T> {
+  jsonrpc: "2.0";
+  id: number;
+  result?: T;
+  error?: { code: number; message: string };
+}
+
+export interface EthereumAdapterConfig {
+  alchemyApiKey: string;
+}
+
 export class EthereumAdapter implements ChainAdapter {
   readonly chain: Chain = "ethereum";
-  private readonly alchemy: Alchemy;
+  private readonly rpcUrl: string;
 
   constructor(config: EthereumAdapterConfig) {
-    this.alchemy = new Alchemy({
-      apiKey: config.alchemyApiKey,
-      network: Network.ETH_MAINNET,
-    });
+    this.rpcUrl = `${ALCHEMY_MAINNET_URL}/${config.alchemyApiKey}`;
   }
 
   async fetchTokenBalances(
@@ -36,18 +50,24 @@ export class EthereumAdapter implements ChainAdapter {
   ): Promise<TokenBalance[]> {
     if (tokens.length === 0) return [];
 
-    const result = await this.alchemy.core.getTokenBalances(walletAddress, tokens);
+    const result = await this.rpcCall<AlchemyTokenBalancesResult>(
+      "alchemy_getTokenBalances",
+      [walletAddress, tokens],
+    );
+
     const balances: TokenBalance[] = [];
 
     for (const item of result.tokenBalances) {
-      if (!item.tokenBalance || item.tokenBalance === "0x0") continue;
+      if (!item.tokenBalance) continue;
+      const raw = hexToBigInt(item.tokenBalance);
+      if (raw === 0n) continue;
 
       const protocol = getProtocolByContract("ethereum", item.contractAddress);
       if (!protocol) continue;
 
       balances.push({
         contractAddress: item.contractAddress,
-        rawBalance: BigInt(item.tokenBalance),
+        rawBalance: raw,
         decimals: protocol.decimals,
       });
     }
@@ -60,12 +80,37 @@ export class EthereumAdapter implements ChainAdapter {
   }
 
   async fetchTvl(_protocol: ProtocolMetadata): Promise<number> {
-    // Phase 2: indexer populates protocol_snapshots.tvl from totalSupply * NAV
     return 0;
   }
 
   async fetchHolderCount(_protocol: ProtocolMetadata): Promise<number> {
-    // Phase 2: indexer populates from Alchemy token-holders API
     return 0;
   }
+
+  private async rpcCall<T>(method: string, params: unknown[]): Promise<T> {
+    const response = await fetch(this.rpcUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: 1, jsonrpc: "2.0", method, params }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Alchemy RPC ${method} returned HTTP ${response.status}`);
+    }
+
+    const data = (await response.json()) as JsonRpcResponse<T>;
+    if (data.error) {
+      throw new Error(`Alchemy RPC ${method} error: ${data.error.message}`);
+    }
+    if (data.result === undefined) {
+      throw new Error(`Alchemy RPC ${method} returned no result`);
+    }
+
+    return data.result;
+  }
+}
+
+function hexToBigInt(hex: string): bigint {
+  if (hex === "0x" || hex === "0x0") return 0n;
+  return BigInt(hex);
 }
