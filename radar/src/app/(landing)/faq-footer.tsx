@@ -29,8 +29,8 @@ const FAQ: readonly Faq[] = [
     a: "Yes, on Enterprise. We can ship custom data feeds, branded dashboards, or on-prem deployments. Email hello@oxar.app.",
   },
   {
-    q: "Why USDC payments?",
-    a: "Our customers are DAO treasuries and crypto funds — they hold USDC, not bank accounts. Helio Pay handles recurring USDC subscriptions on Solana; first payment in seconds, ~1% fees.",
+    q: "When are paid tiers coming?",
+    a: "Not yet. Radar is free during the public preview while we add more chains and per-protocol fetchers. When paid tiers ship we'll honour existing free keys for at least 30 days so nothing breaks overnight.",
   },
 ];
 

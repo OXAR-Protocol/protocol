@@ -37,12 +37,12 @@ export default function DocsPage() {
       <Section title="Rate limits">
         <Table
           rows={[
-            ["Free", "60 req / min", "10,000 / month"],
-            ["Starter", "600 req / min", "100,000 / month"],
-            ["Pro", "6,000 req / min", "1,000,000 / month"],
-            ["Enterprise", "Custom", "Custom"],
+            ["Per minute", "60 requests"],
+            ["Per month", "10,000 requests"],
+            ["Burst", "Sliding window, 1 minute"],
+            ["Higher limits", <a key="enterprise" href="mailto:hello@oxar.app" className="underline">email us</a>],
           ]}
-          headers={["Tier", "Per-minute", "Per-month"]}
+          headers={["Limit", "Free (preview)"]}
         />
         <p className="mt-4 text-sm text-[var(--color-text-muted)]">
           Every response carries{" "}
@@ -141,7 +141,7 @@ function Code({ children, inline = false }: { children: React.ReactNode; inline?
   );
 }
 
-function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
+function Table({ headers, rows }: { headers: string[]; rows: React.ReactNode[][] }) {
   return (
     <table className="mt-2 w-full border-collapse text-sm">
       <thead>

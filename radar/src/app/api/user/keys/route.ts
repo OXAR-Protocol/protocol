@@ -48,8 +48,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       ? body.name.trim().slice(0, 60)
       : null;
 
-  // Self-serve sign-up only ever gets you free tier. Paid tiers
-  // come from /api/billing/* (Stripe webhook upgrades the row).
+  // Self-serve sign-up only ever gets you free tier. Higher tiers are
+  // issued by hand via /api/admin/keys while paid plans are paused.
   const tier: ApiKeyTier = "free";
 
   const material = mintApiKey();

@@ -15,8 +15,7 @@ export default function DashboardPage() {
       </p>
       <h1 className="mt-3 text-3xl font-semibold tracking-tight">API keys</h1>
       <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-        Sign in to mint a free key. Paid tier upgrades land on Stripe / Helio
-        checkout in the next release.
+        Sign in to mint a key. Free during preview — no card, no plan.
       </p>
 
       <div className="mt-8">
