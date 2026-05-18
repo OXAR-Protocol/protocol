@@ -107,27 +107,27 @@ protocol = r.json()`,
   {
     id: "buidl",
     method: "GET",
-    path: "/protocols/buidl",
+    path: "/protocols/blackrock-buidl",
     label: "BlackRock BUIDL",
     description: "$2.1B fund, one of the most-traded tokenised treasuries.",
     samples: {
-      curl: `curl ${BASE}/protocols/buidl \\
+      curl: `curl ${BASE}/protocols/blackrock-buidl \\
   -H "Authorization: Bearer rdr_live_..."`,
       javascript: `const r = await fetch(
-  "${BASE}/protocols/buidl",
+  "${BASE}/protocols/blackrock-buidl",
   { headers: { Authorization: "Bearer rdr_live_..." } }
 );
 const protocol = await r.json();`,
       python: `import requests
 
 r = requests.get(
-    "${BASE}/protocols/buidl",
+    "${BASE}/protocols/blackrock-buidl",
     headers={"Authorization": "Bearer rdr_live_..."},
 )
 protocol = r.json()`,
     },
     response: `{
-  "slug": "buidl",
+  "slug": "blackrock-buidl",
   "name": "BlackRock BUIDL",
   "chain": "ethereum",
   "issuer": { "name": "BlackRock", "jurisdiction": "USA" },
