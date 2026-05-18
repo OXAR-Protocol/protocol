@@ -20,84 +20,101 @@ const TICKER_ITEMS: readonly string[] = [
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      {/* Subtle purple glow */}
+    <section className="relative min-h-screen overflow-hidden">
+      {/* Radar background — huge, bleeds off the edges */}
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[140px] animate-breathing"
+        className="pointer-events-none absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2"
+        style={{
+          width: "min(140vmin, 1500px)",
+          height: "min(140vmin, 1500px)",
+          maskImage:
+            "radial-gradient(circle at center, black 38%, rgba(0,0,0,0.55) 60%, transparent 78%)",
+          WebkitMaskImage:
+            "radial-gradient(circle at center, black 38%, rgba(0,0,0,0.55) 60%, transparent 78%)",
+        }}
+      >
+        <RadarSweep bare />
+      </div>
+
+      {/* Vignette so the headline reads clean against the radar */}
+      <div
+        className="pointer-events-none absolute inset-0 z-10"
         style={{
           background:
-            "radial-gradient(circle, rgba(139,92,246,0.18), rgba(139,92,246,0.05), transparent)",
+            "radial-gradient(ellipse 60% 50% at 50% 45%, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.55) 35%, transparent 75%)",
         }}
       />
 
-      <div className="bg-grid absolute inset-0 -z-10" />
-
-      <div className="relative mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-12 px-6 pt-32 pb-20 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pt-40 lg:pb-28">
-        <div className="relative flex flex-col">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <SectionLabel>RWA Intelligence · Live</SectionLabel>
-          </motion.div>
-
-          <motion.h1
-            className="mt-6 text-[clamp(2.5rem,6vw,3.75rem)] font-sans font-normal leading-tight"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-          >
-            See every RWA.
-            <br />
-            <span className="text-white/50">Across every chain.</span>
-            <br />
-            Before everyone else.
-          </motion.h1>
-
-          <FadeIn delay={0.4}>
-            <p className="mt-7 max-w-xl font-mono text-base leading-relaxed text-white/50 [&>strong]:font-normal [&>strong]:text-white">
-              Wallet analysis, protocol data, and AI insights across the entire Real
-              World Assets market. <strong>Refreshed every 5 minutes. Queryable in JSON.</strong>
-            </p>
-          </FadeIn>
-
-          <FadeIn delay={0.6}>
-            <div className="mt-10 flex flex-wrap items-center gap-4">
-              <Button variant="filled" href="/analyze">
-                Try the analyzer
-              </Button>
-              <Button variant="ghost" href="/docs">
-                Get API access
-              </Button>
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={0.8}>
-            <div className="mt-14 grid max-w-md grid-cols-3 gap-6 border-t border-white/10 pt-6">
-              <Stat value="$3.1B" label="AUM tracked" />
-              <Stat value="6" label="Protocols" />
-              <Stat value="2" label="Chains" />
-            </div>
-          </FadeIn>
-        </div>
-
-        <div className="relative flex items-center justify-center">
-          <FadeIn direction="none" delay={0.3}>
-            <RadarSweep />
-          </FadeIn>
-        </div>
+      {/* Corner HUD labels at viewport edges */}
+      <div className="pointer-events-none absolute inset-0 z-20 font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
+        <span className="absolute left-6 top-24">SCAN · 360°</span>
+        <span className="absolute right-6 top-24 text-white">● LIVE</span>
+        <span className="absolute bottom-32 left-6">UPDATED 5m</span>
+        <span className="absolute bottom-32 right-6">6 NODES TRACKED</span>
       </div>
 
-      {/* Live ticker tape */}
-      <div className="relative overflow-hidden border-y border-white/10 bg-surface-1 py-2.5">
+      {/* Content */}
+      <div className="relative z-30 mx-auto flex min-h-screen max-w-[1200px] flex-col items-center justify-center px-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <SectionLabel>RWA Intelligence · Live</SectionLabel>
+        </motion.div>
+
+        <motion.h1
+          className="mt-8 max-w-4xl text-[clamp(2.5rem,6.5vw,4.5rem)] font-sans font-normal leading-[1.05]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+        >
+          See every RWA.
+          <br />
+          <span className="text-white/40">Across every chain.</span>
+          <br />
+          Before everyone else.
+        </motion.h1>
+
+        <FadeIn delay={0.4}>
+          <p className="mt-8 max-w-xl font-mono text-base leading-relaxed text-white/55 [&>strong]:font-normal [&>strong]:text-white">
+            Wallet analysis, protocol data, and AI insights across the entire Real
+            World Assets market.{" "}
+            <strong>Refreshed every 5 minutes. Queryable in JSON.</strong>
+          </p>
+        </FadeIn>
+
+        <FadeIn delay={0.6}>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <Button variant="filled" href="/analyze">
+              Try the analyzer
+            </Button>
+            <Button variant="ghost" href="/docs">
+              Get API access
+            </Button>
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={0.8}>
+          <div className="mt-16 flex items-center gap-8 font-mono text-xs uppercase tracking-[0.15em] text-white/40">
+            <Stat value="$3.1B" label="AUM tracked" />
+            <span className="h-6 w-px bg-white/15" />
+            <Stat value="6" label="Protocols" />
+            <span className="h-6 w-px bg-white/15" />
+            <Stat value="2" label="Chains" />
+          </div>
+        </FadeIn>
+      </div>
+
+      {/* Live ticker tape pinned to bottom of viewport */}
+      <div className="absolute bottom-0 left-0 right-0 z-30 overflow-hidden border-y border-white/10 bg-surface-0/80 py-2.5 backdrop-blur-sm">
         <div
           className="flex w-max gap-12 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.15em] text-white/50"
           style={{ animation: "ticker-scroll 40s linear infinite" }}
         >
           {[...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
             <span key={i} className="inline-flex items-center gap-2">
-              <span className="text-accent">●</span>
+              <span className="text-white">●</span>
               {item}
             </span>
           ))}
@@ -109,11 +126,11 @@ export function Hero() {
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (
-    <div>
-      <div className="font-mono text-2xl tabular-nums text-white">{value}</div>
-      <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
-        {label}
-      </div>
+    <div className="flex items-baseline gap-2">
+      <span className="text-base tabular-nums text-white normal-case tracking-normal">
+        {value}
+      </span>
+      <span className="text-white/40">{label}</span>
     </div>
   );
 }
