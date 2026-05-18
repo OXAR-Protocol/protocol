@@ -50,7 +50,7 @@ export function RadarSweep() {
         </defs>
 
         {/* Outer ring + tick marks */}
-        <circle r={R + 12} fill="none" stroke="rgba(0,217,126,0.12)" strokeWidth="1" />
+        <circle r={R + 12} fill="none" stroke="rgba(139,92,246,0.18)" strokeWidth="1" />
         {Array.from({ length: 36 }).map((_, i) => {
           const a = i * 10;
           const major = a % 90 === 0;
@@ -63,7 +63,7 @@ export function RadarSweep() {
               y1={inner.y}
               x2={outer.x}
               y2={outer.y}
-              stroke={major ? "rgba(0,217,126,0.45)" : "rgba(244,245,243,0.18)"}
+              stroke={major ? "rgba(139,92,246,0.5)" : "rgba(255,255,255,0.15)"}
               strokeWidth={major ? 1.2 : 0.6}
             />
           );
@@ -75,39 +75,31 @@ export function RadarSweep() {
             key={r}
             r={R * r}
             fill="none"
-            stroke="rgba(244,245,243,0.06)"
+            stroke="rgba(255,255,255,0.05)"
             strokeWidth="0.8"
           />
         ))}
 
         {/* Crosshair */}
-        <line x1={-R} y1="0" x2={R} y2="0" stroke="rgba(244,245,243,0.05)" strokeWidth="0.5" />
-        <line x1="0" y1={-R} x2="0" y2={R} stroke="rgba(244,245,243,0.05)" strokeWidth="0.5" />
+        <line x1={-R} y1="0" x2={R} y2="0" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+        <line x1="0" y1={-R} x2="0" y2={R} stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
 
         {/* Rotating sweep beam */}
-        <g
-          style={{
-            transformOrigin: "0 0",
-            animation: `radar-spin ${DURATION}s linear infinite`,
-          }}
-        >
-          {/* Soft trailing wedge */}
+        <g style={{ transformOrigin: "0 0", animation: `radar-spin ${DURATION}s linear infinite` }}>
           <path
             d={`M 0,0 L 0,${-R} A ${R} ${R} 0 0 0 ${(-R * Math.sin(Math.PI / 3)).toFixed(2)},${(-R * Math.cos(Math.PI / 3)).toFixed(2)} Z`}
-            fill="rgba(0,217,126,0.16)"
+            fill="rgba(139,92,246,0.14)"
           />
-          {/* Mid wedge */}
           <path
             d={`M 0,0 L 0,${-R} A ${R} ${R} 0 0 0 ${(-R * Math.sin(Math.PI / 6)).toFixed(2)},${(-R * Math.cos(Math.PI / 6)).toFixed(2)} Z`}
-            fill="rgba(0,217,126,0.22)"
+            fill="rgba(139,92,246,0.22)"
           />
-          {/* Bright leading edge */}
           <line
             x1="0"
             y1="0"
             x2="0"
             y2={-R}
-            stroke="rgba(0,217,126,0.95)"
+            stroke="rgba(139,92,246,0.95)"
             strokeWidth="1.4"
             filter="url(#radarGlow)"
           />
@@ -116,7 +108,6 @@ export function RadarSweep() {
         {/* Protocol nodes */}
         {NODES.map((node) => {
           const p = polar(node.angle, node.radius);
-          const color = node.highlight ? "var(--color-cyan)" : "var(--color-accent)";
           return (
             <g key={node.slug}>
               <circle
@@ -124,7 +115,9 @@ export function RadarSweep() {
                 cy={p.y}
                 r={node.size}
                 style={{
-                  fill: node.highlight ? color : "rgba(244,245,243,0.35)",
+                  fill: node.highlight
+                    ? "var(--color-accent)"
+                    : "rgba(255,255,255,0.35)",
                   animation: `radar-ping ${DURATION}s linear infinite`,
                   animationDelay: pingDelay(node.angle),
                 }}
@@ -135,7 +128,7 @@ export function RadarSweep() {
                   cy={p.y}
                   r={node.size + 4}
                   fill="none"
-                  stroke={color}
+                  stroke="var(--color-accent)"
                   strokeWidth="0.8"
                   opacity="0.5"
                 />
@@ -149,10 +142,9 @@ export function RadarSweep() {
         <circle r="6" fill="none" stroke="var(--color-accent)" strokeWidth="0.8" opacity="0.4" />
       </svg>
 
-      {/* Floating labels around the radar */}
-      <div className="pointer-events-none absolute inset-0 font-mono text-[10px] uppercase tracking-widest text-[var(--color-text-muted)]">
+      <div className="pointer-events-none absolute inset-0 font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
         <span className="absolute left-2 top-2">SCAN · 360°</span>
-        <span className="absolute right-2 top-2 text-[var(--color-accent)]">● LIVE</span>
+        <span className="absolute right-2 top-2 text-accent">● LIVE</span>
         <span className="absolute bottom-2 left-2">UPDATED 5m</span>
         <span className="absolute bottom-2 right-2">6 NODES</span>
       </div>

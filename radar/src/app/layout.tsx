@@ -1,16 +1,8 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Fraunces } from "next/font/google";
 import "./globals.css";
 import { RadarPrivyProvider } from "./privy-provider";
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-  axes: ["opsz", "SOFT"],
-});
 
 export const metadata: Metadata = {
   title: "OXAR Radar — RWA Intelligence",
@@ -26,7 +18,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${fraunces.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
       <body className="font-sans antialiased min-h-screen">
         <RadarPrivyProvider>{children}</RadarPrivyProvider>

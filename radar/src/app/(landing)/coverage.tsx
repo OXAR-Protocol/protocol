@@ -1,3 +1,9 @@
+"use client";
+
+import { AnimatedSection } from "@/components/animated-section";
+import { SectionLabel } from "@/components/section-label";
+import { SectionTitle } from "@/components/section-title";
+
 interface Protocol {
   slug: string;
   name: string;
@@ -25,83 +31,85 @@ const CHAINS: readonly { code: string; label: string; live: boolean }[] = [
 
 export function Coverage() {
   return (
-    <section className="px-6 py-20 lg:px-12 lg:py-28">
-      <div className="flex items-baseline gap-4 border-t border-[var(--color-line)] pt-4">
-        <span className="font-mono text-[11px] uppercase tracking-widest text-[var(--color-text-dim)]">
-          04 /
-        </span>
-        <span className="eyebrow">Coverage</span>
-      </div>
-
-      <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
-        <div>
-          <h2 className="font-display text-[clamp(2rem,4vw,3.5rem)] leading-[1.05] tracking-tight">
-            Every major issuer, indexed every five minutes.
-          </h2>
-          <p className="mt-5 max-w-md text-[var(--color-text-muted)]">
-            We pull <code className="font-mono text-[var(--color-accent)]">totalSupply</code>{" "}
-            on-chain and combine it with verified NAV feeds. No second-hand dashboards. No
-            stale daily snapshots.
-          </p>
-
-          <div className="mt-10 space-y-3">
-            <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--color-text-dim)]">
-              Chains
+    <section className="relative py-20 px-6">
+      <div className="mx-auto max-w-[1200px]">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
+          <AnimatedSection>
+            <SectionLabel>Coverage</SectionLabel>
+            <div className="mt-4">
+              <SectionTitle>
+                Every major issuer,
+                <br />
+                <span className="text-white/50">indexed every 5 minutes.</span>
+              </SectionTitle>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {CHAINS.map((c) => (
-                <span
-                  key={c.code}
-                  className={`inline-flex items-center gap-2 rounded border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest ${
-                    c.live
-                      ? "border-[var(--color-accent-edge)] bg-[var(--color-accent-soft)] text-[var(--color-accent)]"
-                      : "border-[var(--color-line)] text-[var(--color-text-dim)]"
+            <p className="mt-6 max-w-md font-mono text-base leading-relaxed text-white/50 [&>strong]:font-normal [&>strong]:text-white">
+              We pull <strong>totalSupply</strong> on-chain and combine it with
+              verified NAV feeds. <strong>No second-hand dashboards.</strong> No stale
+              daily snapshots.
+            </p>
+
+            <div className="mt-10">
+              <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
+                Chains
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {CHAINS.map((c) => (
+                  <span
+                    key={c.code}
+                    className={`inline-flex items-center gap-2 rounded border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.15em] ${
+                      c.live
+                        ? "border-accent/30 bg-accent/5 text-accent"
+                        : "border-white/10 text-white/30"
+                    }`}
+                  >
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        c.live ? "bg-accent" : "bg-white/30"
+                      }`}
+                    />
+                    {c.code}
+                    {!c.live && <span className="opacity-60">· soon</span>}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.2}>
+            <div className="overflow-hidden rounded-[5px] border border-white/10 bg-surface-0">
+              <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-white/10 bg-surface-1 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
+                <span>Protocol</span>
+                <span>Chain</span>
+                <span>TVL</span>
+              </div>
+              {PROTOCOLS.map((p, i) => (
+                <div
+                  key={p.slug}
+                  className={`grid grid-cols-[1fr_auto_auto] items-center gap-4 px-5 py-3 ${
+                    i !== PROTOCOLS.length - 1 ? "border-b border-white/10" : ""
                   }`}
                 >
+                  <div>
+                    <div className="text-sm text-white">{p.name}</div>
+                    <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
+                      {p.issuer}
+                    </div>
+                  </div>
                   <span
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      c.live ? "bg-[var(--color-accent)]" : "bg-[var(--color-text-dim)]"
+                    className={`rounded px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] ${
+                      p.chain === "eth"
+                        ? "bg-white/5 text-white/50"
+                        : "bg-accent/15 text-accent"
                     }`}
-                  />
-                  {c.code}
-                  {!c.live && <span className="opacity-60">· soon</span>}
-                </span>
+                  >
+                    {p.chain}
+                  </span>
+                  <span className="font-mono text-sm text-white">{p.tvl}</span>
+                </div>
               ))}
             </div>
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-lg border border-[var(--color-line-strong)] bg-[var(--color-surface-1)]">
-          <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-[var(--color-line)] px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--color-text-dim)]">
-            <span>Protocol</span>
-            <span>Chain</span>
-            <span>TVL</span>
-          </div>
-          {PROTOCOLS.map((p, i) => (
-            <div
-              key={p.slug}
-              className={`grid grid-cols-[1fr_auto_auto] items-center gap-4 px-5 py-3 ${
-                i !== PROTOCOLS.length - 1 ? "border-b border-[var(--color-line)]" : ""
-              }`}
-            >
-              <div>
-                <div className="text-sm">{p.name}</div>
-                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-[var(--color-text-muted)]">
-                  {p.issuer}
-                </div>
-              </div>
-              <span
-                className={`rounded px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest ${
-                  p.chain === "eth"
-                    ? "bg-[rgba(244,245,243,0.06)] text-[var(--color-text-muted)]"
-                    : "bg-[rgba(65,212,255,0.12)] text-[var(--color-cyan)]"
-                }`}
-              >
-                {p.chain}
-              </span>
-              <span className="font-mono text-sm">{p.tvl}</span>
-            </div>
-          ))}
+          </AnimatedSection>
         </div>
       </div>
     </section>

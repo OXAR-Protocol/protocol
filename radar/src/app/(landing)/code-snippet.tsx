@@ -1,7 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
+
+import { AnimatedSection } from "@/components/animated-section";
+import { Button } from "@/components/button";
+import { SectionLabel } from "@/components/section-label";
+import { SectionTitle } from "@/components/section-title";
 
 type Lang = "curl" | "javascript" | "python";
 
@@ -47,59 +51,60 @@ export function CodeSnippet() {
   const [lang, setLang] = useState<Lang>("curl");
 
   return (
-    <section className="px-6 py-20 lg:px-12 lg:py-28">
-      <div className="flex items-baseline gap-4 border-t border-[var(--color-line)] pt-4">
-        <span className="font-mono text-[11px] uppercase tracking-widest text-[var(--color-text-dim)]">
-          06 /
-        </span>
-        <span className="eyebrow">Developer experience</span>
-      </div>
-
-      <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
-        <div>
-          <h2 className="font-display text-[clamp(2rem,4vw,3.5rem)] leading-[1.05] tracking-tight">
-            JSON in. <span className="text-[var(--color-text-muted)]">JSON out.</span>
-          </h2>
-          <p className="mt-5 max-w-md text-[var(--color-text-muted)]">
-            One bearer token, predictable schemas, OpenAPI spec for code generation. No
-            GraphQL gotchas, no SDK lock-in.
-          </p>
-          <Link
-            href="/docs"
-            className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-[var(--color-accent)] hover:text-white"
-          >
-            Read the full docs →
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <CodeBlock title="Request">
-            <div className="mb-3 flex gap-1">
-              {(Object.keys(SAMPLES) as Lang[]).map((l) => (
-                <button
-                  key={l}
-                  type="button"
-                  onClick={() => setLang(l)}
-                  className={`rounded px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest transition ${
-                    lang === l
-                      ? "bg-[var(--color-accent)] text-black"
-                      : "text-[var(--color-text-muted)] hover:text-white"
-                  }`}
-                >
-                  {LABELS[l]}
-                </button>
-              ))}
+    <section className="relative py-20 px-6">
+      <div className="mx-auto max-w-[1200px]">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
+          <AnimatedSection>
+            <SectionLabel>Developer Experience</SectionLabel>
+            <div className="mt-4">
+              <SectionTitle>
+                JSON in.
+                <br />
+                <span className="text-white/50">JSON out.</span>
+              </SectionTitle>
             </div>
-            <pre className="overflow-x-auto whitespace-pre text-[12px] leading-relaxed text-white">
-              {SAMPLES[lang]}
-            </pre>
-          </CodeBlock>
+            <p className="mt-6 max-w-md font-mono text-base leading-relaxed text-white/50 [&>strong]:font-normal [&>strong]:text-white">
+              One bearer token, predictable schemas, <strong>OpenAPI spec</strong> for
+              code generation. No GraphQL gotchas, no SDK lock-in.
+            </p>
+            <div className="mt-8">
+              <Button variant="ghost" href="/docs">
+                Read the full docs →
+              </Button>
+            </div>
+          </AnimatedSection>
 
-          <CodeBlock title="Response">
-            <pre className="overflow-x-auto whitespace-pre text-[12px] leading-relaxed text-white">
-              <SyntaxHighlight json={RESPONSE} />
-            </pre>
-          </CodeBlock>
+          <AnimatedSection delay={0.2}>
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <CodeBlock title="Request">
+                <div className="mb-3 flex gap-1">
+                  {(Object.keys(SAMPLES) as Lang[]).map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => setLang(l)}
+                      className={`rounded px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] transition ${
+                        lang === l
+                          ? "bg-white text-surface-0"
+                          : "text-white/50 hover:text-white"
+                      }`}
+                    >
+                      {LABELS[l]}
+                    </button>
+                  ))}
+                </div>
+                <pre className="overflow-x-auto whitespace-pre font-mono text-[12px] leading-relaxed text-white">
+                  {SAMPLES[lang]}
+                </pre>
+              </CodeBlock>
+
+              <CodeBlock title="Response">
+                <pre className="overflow-x-auto whitespace-pre font-mono text-[12px] leading-relaxed text-white">
+                  <Highlight json={RESPONSE} />
+                </pre>
+              </CodeBlock>
+            </div>
+          </AnimatedSection>
         </div>
       </div>
     </section>
@@ -108,32 +113,27 @@ export function CodeSnippet() {
 
 function CodeBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-[var(--color-line-strong)] bg-[var(--color-surface-1)]">
-      <div className="flex items-center justify-between border-b border-[var(--color-line)] px-4 py-2.5">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--color-text-muted)]">
+    <div className="rounded-[5px] border border-white/10 bg-surface-0">
+      <div className="flex items-center justify-between border-b border-white/10 bg-surface-1 px-4 py-2.5">
+        <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
           {title}
         </span>
-        <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-accent" />
       </div>
-      <div className="p-4 font-mono">{children}</div>
+      <div className="p-4">{children}</div>
     </div>
   );
 }
 
-function SyntaxHighlight({ json }: { json: string }) {
-  // Cheap colorizer: tag JSON strings, numbers, keys.
+function Highlight({ json }: { json: string }) {
   const parts = json.split(/(\".*?\"\s*:|\".*?\"|\d+\.?\d*|null|true|false)/g);
   return (
     <>
       {parts.map((part, i) => {
-        if (/^\".*\"\s*:$/.test(part))
-          return <span key={i} className="text-[var(--color-cyan)]">{part}</span>;
-        if (/^\".*\"$/.test(part))
-          return <span key={i} className="text-[var(--color-accent)]">{part}</span>;
-        if (/^\d/.test(part))
-          return <span key={i} className="text-[var(--color-warn)]">{part}</span>;
-        if (/^(null|true|false)$/.test(part))
-          return <span key={i} className="text-[var(--color-text-muted)]">{part}</span>;
+        if (/^\".*\"\s*:$/.test(part)) return <span key={i} className="text-accent">{part}</span>;
+        if (/^\".*\"$/.test(part)) return <span key={i} className="text-white/70">{part}</span>;
+        if (/^\d/.test(part)) return <span key={i} className="text-white">{part}</span>;
+        if (/^(null|true|false)$/.test(part)) return <span key={i} className="text-white/50">{part}</span>;
         return <span key={i}>{part}</span>;
       })}
     </>
