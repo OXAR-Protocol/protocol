@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 
+import { CopyButton } from "./copy-button";
 import { TOP_TABS } from "./nav-data";
+import { PrevNext } from "./prev-next";
 import { DocsToc, type TocItem } from "./toc";
 
 interface DocPageProps {
@@ -29,6 +31,7 @@ export function DocPage({ eyebrow, title, description, toc, children }: DocPageP
           </p>
         )}
         <div className="prose-radar mt-10 space-y-7">{children}</div>
+        <PrevNext />
       </article>
       {toc && toc.length > 0 && (
         <aside className="hidden lg:block">
@@ -63,18 +66,16 @@ export function CodeSurface({
   children,
 }: {
   title?: string;
-  children: ReactNode;
+  children: string;
 }) {
   return (
     <div className="overflow-hidden rounded-[5px] border border-white/10 bg-surface-0">
-      {title && (
-        <div className="flex items-center justify-between border-b border-white/10 bg-surface-1 px-4 py-2.5">
-          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
-            {title}
-          </span>
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-        </div>
-      )}
+      <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-surface-1 px-4 py-2.5">
+        <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
+          {title ?? "Code"}
+        </span>
+        <CopyButton text={children} />
+      </div>
       <pre className="overflow-x-auto p-4 font-mono text-[12px] leading-relaxed text-white">
         {children}
       </pre>
