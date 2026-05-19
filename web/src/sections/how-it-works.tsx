@@ -56,7 +56,7 @@ export function HowItWorks() {
         <div className="sticky top-0 h-screen overflow-hidden">
           <IsometricBoxes className="opacity-30 pointer-events-none" />
 
-          <div className="absolute top-8 left-6 md:left-12 z-20">
+          <div className="pointer-events-none absolute inset-x-0 top-8 z-20 mx-auto max-w-[1200px] px-6">
             <SectionLabel>How It Works</SectionLabel>
           </div>
 
@@ -118,7 +118,8 @@ export function HowItWorks() {
             );
           })}
 
-          <div className="absolute top-1/2 -translate-y-1/2 right-6 md:right-12 lg:right-[10%] w-[min(400px,50vw)]">
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 mx-auto flex max-w-[1200px] justify-end px-6">
+            <div className="w-[min(400px,50vw)]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeStep}
@@ -142,6 +143,7 @@ export function HowItWorks() {
                 </div>
               </motion.div>
             </AnimatePresence>
+            </div>
           </div>
 
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3">

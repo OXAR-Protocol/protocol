@@ -26,7 +26,7 @@ const FAQ: readonly Faq[] = [
   },
   {
     q: "Do you support custom integrations or white-label?",
-    a: "Yes, on Enterprise. We can ship custom data feeds, branded dashboards, or on-prem deployments. Email hello@oxar.app.",
+    a: "Yes, on Enterprise. We can ship custom data feeds, branded dashboards, or on-prem deployments. Email support@oxar.app.",
   },
   {
     q: "When are paid tiers coming?",
@@ -105,7 +105,7 @@ export function FaqFooter() {
             <FooterCol
               title="Legal"
               items={[
-                { href: "mailto:hello@oxar.app", label: "Contact" },
+                { href: "mailto:support@oxar.app", label: "Contact" },
                 { href: "https://oxar.app/terms", label: "Terms", external: true },
               ]}
               note="Not investment advice. Educational analytics only."

@@ -45,7 +45,7 @@ export default function AuthenticationPage() {
         <p>
           During the public preview every self-serve key is on the free tier:{" "}
           <strong>60 requests per minute, 10k per month</strong>. Higher limits are
-          available out-of-band — email <a href="mailto:hello@oxar.app">hello@oxar.app</a>.
+          available out-of-band — email <a href="mailto:support@oxar.app">support@oxar.app</a>.
         </p>
       </DocSection>
 

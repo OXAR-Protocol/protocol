@@ -75,7 +75,7 @@ X-Api-Key-Tier: free`}
         <p>
           Higher limits (millions of requests, custom monthly quotas, SLA) are
           issued out-of-band while paid plans are paused. Email{" "}
-          <a href="mailto:hello@oxar.app">hello@oxar.app</a> with what you're
+          <a href="mailto:support@oxar.app">support@oxar.app</a> with what you're
           building and we'll set you up.
         </p>
       </DocSection>

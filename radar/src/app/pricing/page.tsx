@@ -72,10 +72,10 @@ export default function PricingPage() {
           tell us what you need.
         </p>
         <a
-          href="mailto:hello@oxar.app?subject=OXAR%20Radar%20enterprise"
+          href="mailto:support@oxar.app?subject=OXAR%20Radar%20enterprise"
           className="mt-4 inline-flex items-center gap-2 font-mono text-sm uppercase tracking-wide text-white hover:underline"
         >
-          hello@oxar.app →
+          support@oxar.app →
         </a>
       </div>
 
