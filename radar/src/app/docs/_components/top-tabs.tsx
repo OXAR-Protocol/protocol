@@ -10,7 +10,9 @@ function isActiveTab(pathname: string, href: string): boolean {
     return pathname === "/docs" || pathname.startsWith("/docs/authentication")
       || pathname.startsWith("/docs/rate-limits") || pathname.startsWith("/docs/errors");
   }
-  if (href === "/docs/examples") return pathname.startsWith("/docs/examples");
+  if (href === "/docs/examples") {
+    return pathname.startsWith("/docs/examples") || pathname.startsWith("/docs/ai-prompts");
+  }
   return pathname.startsWith("/docs/protocols") || pathname.startsWith("/docs/analyze-wallet");
 }
 

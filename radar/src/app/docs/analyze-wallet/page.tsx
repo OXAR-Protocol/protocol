@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 
+import { LivePreview } from "../_components/live-preview";
 import { Callout, CodeSurface, DocPage, DocSection, PropTable } from "../_components/prose";
+
+const DEMO_WALLETS = [
+  { key: "vitalik", label: "vitalik.eth" },
+  { key: "ondo-treasury", label: "Sample treasury" },
+] as const;
 
 export const metadata: Metadata = {
   title: "Analyze wallet — OXAR Radar API",
@@ -41,6 +47,12 @@ export default function AnalyzeWalletPage() {
     "chains": ["ethereum"]
   }'`}
         </CodeSurface>
+        <LivePreview
+          method="POST"
+          path="/analyze"
+          title="POST /api/v1/analyze/wallet"
+          walletChoices={DEMO_WALLETS}
+        />
       </DocSection>
 
       <DocSection id="response" title="Response">

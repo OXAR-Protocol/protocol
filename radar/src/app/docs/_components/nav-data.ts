@@ -27,7 +27,10 @@ export const NAV_GROUPS: readonly NavGroup[] = [
   },
   {
     title: "Examples",
-    items: [{ href: "/docs/examples", label: "End-to-end quickstart" }],
+    items: [
+      { href: "/docs/examples", label: "End-to-end quickstart" },
+      { href: "/docs/ai-prompts", label: "AI agent prompts" },
+    ],
   },
 ];
 

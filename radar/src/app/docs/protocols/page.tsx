@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { LivePreview } from "../_components/live-preview";
 import { CodeSurface, DocPage, DocSection, PropTable } from "../_components/prose";
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function ProtocolsPage() {
           {`curl https://radar.oxar.app/api/v1/protocols \\
   -H "Authorization: Bearer rdr_live_..."`}
         </CodeSurface>
+        <LivePreview method="GET" path="/protocols" title="GET /api/v1/protocols" />
         <CodeSurface title="200 OK">
           {`{
   "data": [
@@ -56,6 +58,11 @@ export default function ProtocolsPage() {
           {`curl https://radar.oxar.app/api/v1/protocols/ondo-usdy \\
   -H "Authorization: Bearer rdr_live_..."`}
         </CodeSurface>
+        <LivePreview
+          method="GET"
+          path="/protocols/ondo-usdy"
+          title="GET /api/v1/protocols/ondo-usdy"
+        />
         <CodeSurface title="200 OK">
           {`{
   "slug": "ondo-usdy",
