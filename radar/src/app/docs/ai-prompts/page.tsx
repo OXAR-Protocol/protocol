@@ -21,7 +21,7 @@ export default function AiPromptsPage() {
     <DocPage
       eyebrow="For developers"
       title="AI agent prompts"
-      description="Paste any of these into Claude, Cursor, Codex, Aider, or any other coding agent. They include the full Radar context plus a specific task definition so the agent can ship without further setup."
+      description="Recipes that teach a coding agent (Claude, Cursor, Codex, Aider) how to build something against the Radar API. Each prompt is a task definition for the agent — Radar itself doesn't ship the bots, widgets, or ETL jobs listed below; you (or your agent) build them on top of the API."
       toc={TOC}
     >
       <DocSection id="how-to-use" title="How to use">
@@ -47,7 +47,7 @@ export default function AiPromptsPage() {
           <p>{p.blurb}</p>
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
-              Verified with
+              Works with
             </span>
             {p.agents.map((agent) => (
               <span

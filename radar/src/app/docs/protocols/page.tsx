@@ -107,9 +107,9 @@ export default function ProtocolsPage() {
             { name: "nav", type: "number", description: "Net asset value per token in USD" },
             { name: "tvlUsd", type: "number", description: "Total value locked = totalSupply * nav" },
             { name: "apyBps", type: "integer", description: "APY at snapshot time" },
-            { name: "holderCount", type: "integer | null", description: "Filled by the holder-snapshot cron (every hour)" },
-            { name: "top10ConcentrationPct", type: "number | null", description: "Share of supply held by top 10 wallets" },
-            { name: "redemptionQueueUsd", type: "number | null", description: "Pending redemption amount, when known" },
+            { name: "holderCount", type: "integer | null", description: "Currently null; holder-snapshot indexer planned" },
+            { name: "top10ConcentrationPct", type: "number | null", description: "Currently null; tied to holder-snapshot indexer" },
+            { name: "redemptionQueueUsd", type: "number | null", description: "Currently null; per-protocol fetchers on the roadmap" },
           ]}
         />
       </DocSection>

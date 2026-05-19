@@ -50,6 +50,37 @@ const OPENAPI = {
         },
       },
     },
+    "/analyze/wallet": {
+      post: {
+        summary: "Analyze a wallet's RWA exposure",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["address"],
+                properties: {
+                  address: { type: "string", example: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" },
+                  chains: {
+                    type: "array",
+                    items: { type: "string", enum: ["ethereum", "solana"] },
+                    default: ["ethereum"],
+                  },
+                  language: { type: "string", enum: ["en", "ru", "pl"], default: "en" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Analysis + AI explanation" },
+          "400": { description: "Invalid body or address" },
+          "401": { description: "Missing or invalid API key" },
+          "429": { description: "Rate limit exceeded" },
+        },
+      },
+    },
   },
   components: {
     securitySchemes: {

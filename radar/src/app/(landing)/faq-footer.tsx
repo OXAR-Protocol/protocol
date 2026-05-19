@@ -22,7 +22,7 @@ const FAQ: readonly Faq[] = [
   },
   {
     q: "Can I get historical NAV time series?",
-    a: "Yes. /api/v1/protocols/:slug/history returns time-series snapshots since the indexer started. Range parameter accepts 7d / 30d / 90d.",
+    a: "Not yet. The indexer already keeps every 5-minute snapshot in Postgres, but the historical read endpoint is on the roadmap. Today the API returns only the latest snapshot inline with /protocols/:slug.",
   },
   {
     q: "Do you support custom integrations or white-label?",

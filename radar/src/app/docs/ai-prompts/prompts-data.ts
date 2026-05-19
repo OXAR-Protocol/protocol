@@ -54,8 +54,8 @@ Acceptance:
   },
   {
     id: "telegram-bot",
-    title: "Telegram bot that alerts on NAV drift",
-    blurb: "A Node script that polls Radar every 5 min and pings a Telegram chat when a protocol's NAV moves >0.3%.",
+    title: "Build a Telegram bot that alerts on NAV drift",
+    blurb: "Recipe to build your own Node script that polls Radar every 5 min and pings your Telegram chat when a protocol's NAV moves >0.3%. Radar doesn't ship a bot — this prompt teaches your agent how to write one against the API.",
     agents: ["Claude", "Cursor", "Codex"],
     prompt: `${RADAR_CONTEXT}
 
