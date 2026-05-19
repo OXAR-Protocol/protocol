@@ -18,6 +18,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Investors", warpTo: "/investors", warp: true },
 ];
 
+const RADAR_URL = "https://radar.oxar.app";
+
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -62,6 +64,16 @@ export function Header() {
               </a>
             )
           )}
+          <a
+            href={RADAR_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center gap-2 rounded-md border border-white/15 px-3 py-1.5 font-mono text-xs uppercase tracking-[0.15em] text-white/70 transition-colors hover:border-white/30 hover:text-white"
+          >
+            <RadarMark />
+            Radar
+            <span className="text-white/40 transition-colors group-hover:text-white/70">↗</span>
+          </a>
           <button
             onClick={toggleTheme}
             className="p-2 rounded-lg border border-border hover:bg-surface-1 transition-colors"
@@ -134,6 +146,17 @@ export function Header() {
                 </a>
               )
             )}
+            <a
+              href={RADAR_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileOpen(false)}
+              className="inline-flex items-center gap-2 font-mono text-sm uppercase tracking-wide text-white/60 transition-colors hover:text-white"
+            >
+              <RadarMark />
+              Radar
+              <span className="text-white/40">↗</span>
+            </a>
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg border border-border hover:bg-surface-1 transition-colors w-fit"
@@ -163,5 +186,30 @@ export function Header() {
         </nav>
       )}
     </header>
+  );
+}
+
+function RadarMark() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="-12 -12 24 24"
+      className="text-current"
+      aria-hidden
+    >
+      <circle r="10" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+      <circle r="6" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.6" />
+      <g
+        style={{
+          transformOrigin: "0 0",
+          animation: "radar-spin-mark 5s linear infinite",
+        }}
+      >
+        <path d="M 0,0 L 0,-10 A 10 10 0 0 0 -8.66,-5 Z" fill="currentColor" opacity="0.35" />
+        <line x1="0" y1="0" x2="0" y2="-10" stroke="currentColor" strokeWidth="1" />
+      </g>
+      <circle r="1.5" fill="currentColor" />
+    </svg>
   );
 }
