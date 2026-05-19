@@ -1,9 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "crons": [
-    {
-      "path": "/api/cron/snapshot",
-      "schedule": "*/5 * * * *"
-    }
-  ]
+  "installCommand": "cd .. && yarn install --frozen-lockfile",
+  "buildCommand": "yarn build"
 }

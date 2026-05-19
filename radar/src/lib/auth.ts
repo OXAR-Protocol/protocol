@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { findApiKeyByHash, touchApiKey, type ApiKeyRecord } from "./db/api-keys";
 import { logUsage } from "./db/api-usage";
 import { hashApiKey, parseBearer } from "./api-keys";
-import { checkApiKeyRateLimit } from "./rate-limit-redis";
+import { checkApiKeyRateLimit } from "./rate-limit-pg";
 
 export interface AuthorizedContext {
   apiKey: ApiKeyRecord;
