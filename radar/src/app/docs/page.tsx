@@ -1,167 +1,95 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
+import { CodeSurface, DocPage, DocSection } from "./_components/prose";
+
 export const metadata: Metadata = {
-  title: "OXAR Radar — API documentation",
+  title: "Overview — OXAR Radar API",
   description:
-    "Reference for the OXAR Radar API. Real-time risk and wallet intelligence across Ethereum and Solana RWA protocols.",
+    "Intro to the OXAR Radar REST API: what it is, what's in it, how to call it.",
 };
 
-export default function DocsPage() {
+const TOC = [
+  { id: "what-radar-does", label: "What Radar does" },
+  { id: "concepts", label: "Concepts" },
+  { id: "quickstart", label: "Quickstart" },
+  { id: "next", label: "Next steps" },
+];
+
+export default function OverviewPage() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16">
-      <p className="font-mono text-xs uppercase tracking-widest text-[var(--color-text-muted)]">
-        OXAR Radar · API v1
-      </p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight">Documentation</h1>
-      <p className="mt-3 text-[var(--color-text-muted)]">
-        REST API over the same data the public analyzer uses. JSON in, JSON out,
-        bearer-token auth. Pricing page lives at <Link href="/pricing" className="underline">/pricing</Link>.
-      </p>
-
-      <Section title="Base URL">
-        <Code>https://radar.oxar.app/api/v1</Code>
-      </Section>
-
-      <Section title="Authentication">
-        <p>Every <Code inline>/api/v1/*</Code> request needs an API key in the Authorization header:</p>
-        <Code>
-          {`Authorization: Bearer rdr_live_<your_key>`}
-        </Code>
-        <p className="mt-3">
-          Keys are issued during onboarding. The raw key is shown once at creation and never again — store it
-          immediately. Lost keys are rotated, not recovered.
-        </p>
-      </Section>
-
-      <Section title="Rate limits">
-        <Table
-          rows={[
-            ["Per minute", "60 requests"],
-            ["Per month", "10,000 requests"],
-            ["Burst", "Sliding window, 1 minute"],
-            ["Higher limits", <a key="enterprise" href="mailto:hello@oxar.app" className="underline">email us</a>],
-          ]}
-          headers={["Limit", "Free (preview)"]}
-        />
-        <p className="mt-4 text-sm text-[var(--color-text-muted)]">
-          Every response carries{" "}
-          <Code inline>X-RateLimit-Limit</Code>,{" "}
-          <Code inline>X-RateLimit-Remaining</Code>, and{" "}
-          <Code inline>X-RateLimit-Reset</Code> (Unix seconds).
-          429 responses include <Code inline>Retry-After</Code>.
-        </p>
-      </Section>
-
-      <Section title="GET /protocols">
-        <p>List of supported RWA protocols and their static metadata.</p>
-        <Code>{`curl https://radar.oxar.app/api/v1/protocols \\
-  -H "Authorization: Bearer rdr_live_..."`}</Code>
-        <Code>{`{
-  "data": [
-    {
-      "slug": "ondo-usdy",
-      "name": "Ondo USDY",
-      "chain": "ethereum",
-      "category": "us-treasuries",
-      "contractAddress": "0x96F6e...",
-      "issuer": { "name": "Ondo Finance", "jurisdiction": "BVI" },
-      "estimatedApyBps": 480
-    }
-  ]
-}`}</Code>
-      </Section>
-
-      <Section title="GET /protocols/:slug">
-        <p>Single protocol with its latest snapshot inline (NAV, TVL, APY).</p>
-        <Code>{`curl https://radar.oxar.app/api/v1/protocols/ondo-usdy \\
-  -H "Authorization: Bearer rdr_live_..."`}</Code>
-        <Code>{`{
-  "slug": "ondo-usdy",
-  "name": "Ondo USDY",
-  "estimatedApyBps": 480,
-  "snapshot": {
-    "capturedAt": "2026-05-17T01:25:04.264Z",
-    "nav": 1.10,
-    "tvlUsd": 720245696,
-    "apyBps": 480
-  }
-}`}</Code>
-      </Section>
-
-      <Section title="OpenAPI spec">
+    <DocPage
+      eyebrow="Getting started"
+      title="OXAR Radar API"
+      description="Real-time RWA market intelligence for Solana and Ethereum. Wallet positions, protocol snapshots, AI explanations — all queryable in JSON, refreshed every five minutes."
+      toc={TOC}
+    >
+      <DocSection id="what-radar-does" title="What Radar does">
         <p>
-          The full machine-readable spec lives at{" "}
-          <Code inline>/api/openapi</Code>. Drop it into Postman, Insomnia,
-          openapi-generator, or your client SDK builder of choice.
+          Radar indexes every major RWA issuer on Ethereum and Solana —{" "}
+          <strong>BlackRock BUIDL, Ondo USDY/OUSG, Maple, Centrifuge, Backed, and OXAR</strong>{" "}
+          — and exposes their <code>NAV</code>, <code>TVL</code>, holder data, and discrete
+          events through a single REST API.
         </p>
-      </Section>
+        <p>
+          Two kinds of consumers use it: <strong>builders</strong> who need clean data
+          for their own UI, and <strong>analysts</strong> who pipe responses into spreadsheets,
+          Jupyter notebooks, or BI dashboards.
+        </p>
+      </DocSection>
 
-      <Section title="Error codes">
-        <Table
-          headers={["Status", "Body code", "Meaning"]}
-          rows={[
-            ["400", "invalid_json / invalid_address", "Request body is malformed"],
-            ["401", "missing_api_key / invalid_api_key", "Auth header missing or unknown key"],
-            ["404", "not_found", "Unknown protocol slug"],
-            ["429", "rate_limited", "Per-minute tier limit hit; see Retry-After"],
-            ["500", "internal_error", "Unhandled server error; please retry"],
-          ]}
-        />
-      </Section>
+      <DocSection id="concepts" title="Concepts">
+        <p>
+          A <strong>protocol</strong> is a single tokenised issuer on a single chain. Each
+          protocol has a slug like <code>ondo-usdy</code> or <code>blackrock-buidl</code>.
+        </p>
+        <p>
+          A <strong>snapshot</strong> is the protocol's state at one point in time. Radar
+          captures a snapshot every five minutes via Vercel Cron. Snapshots are immutable
+          and append-only.
+        </p>
+        <p>
+          An <strong>analysis</strong> is a wallet-level read computed on demand. It groups
+          a wallet's RWA positions, scores risk, and optionally generates a plain-language
+          explanation via Claude Haiku.
+        </p>
+      </DocSection>
 
-      <p className="mt-12 font-mono text-[11px] uppercase tracking-widest text-[var(--color-text-muted)]">
-        Not investment advice · Educational analytics
-      </p>
-    </main>
-  );
-}
+      <DocSection id="quickstart" title="Quickstart">
+        <p>
+          1. Sign in at <Link href="/dashboard">/dashboard</Link> and mint a key.
+        </p>
+        <p>2. Hit the API with your bearer token:</p>
+        <CodeSurface title="cURL · list protocols">
+          {`curl https://radar.oxar.app/api/v1/protocols \\
+  -H "Authorization: Bearer rdr_live_..."`}
+        </CodeSurface>
+        <p>
+          You'll get a JSON response with every protocol Radar tracks. From there, jump
+          to <Link href="/docs/protocols">Protocols</Link> for the full schema.
+        </p>
+      </DocSection>
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mt-10">
-      <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-      <div className="mt-3 space-y-3 text-[var(--color-text-muted)]">{children}</div>
-    </section>
-  );
-}
-
-function Code({ children, inline = false }: { children: React.ReactNode; inline?: boolean }) {
-  if (inline) {
-    return (
-      <code className="rounded bg-[var(--color-surface-1)] px-1.5 py-0.5 font-mono text-[12px] text-white">
-        {children}
-      </code>
-    );
-  }
-  return (
-    <pre className="mt-2 overflow-x-auto rounded-lg border border-white/10 bg-[var(--color-surface-1)] p-4 font-mono text-[12px] leading-relaxed text-white">
-      {children}
-    </pre>
-  );
-}
-
-function Table({ headers, rows }: { headers: string[]; rows: React.ReactNode[][] }) {
-  return (
-    <table className="mt-2 w-full border-collapse text-sm">
-      <thead>
-        <tr className="border-b border-white/10">
-          {headers.map((h) => (
-            <th key={h} className="py-2 pr-4 text-left font-mono text-[11px] uppercase tracking-widest text-[var(--color-text-muted)]">
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, i) => (
-          <tr key={i} className="border-b border-white/5">
-            {row.map((cell, j) => (
-              <td key={j} className="py-2 pr-4 align-top text-white">{cell}</td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+      <DocSection id="next" title="Next steps">
+        <ul className="list-disc space-y-1 pl-5">
+          <li>
+            <Link href="/docs/authentication">Authentication</Link> — bearer-token format
+            and rotation
+          </li>
+          <li>
+            <Link href="/docs/rate-limits">Rate limits</Link> — the free preview limits
+            and response headers
+          </li>
+          <li>
+            <Link href="/docs/protocols">Protocols API</Link> — endpoints and response
+            schemas
+          </li>
+          <li>
+            <Link href="/docs/analyze-wallet">Analyze wallet</Link> — POST endpoint for
+            on-demand portfolio reads
+          </li>
+        </ul>
+      </DocSection>
+    </DocPage>
   );
 }
