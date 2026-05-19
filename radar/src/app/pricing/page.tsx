@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
+import { SectionLabel } from "@/components/section-label";
+
 export const metadata: Metadata = {
   title: "Pricing — OXAR Radar",
   description:
@@ -17,10 +19,18 @@ const FREE_INCLUDES: readonly string[] = [
 
 export default function PricingPage() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-24">
-      <span className="font-mono text-xs font-semibold tracking-[0.15em] uppercase text-white/30">
-        [ Pricing ]
-      </span>
+    <main className="relative min-h-screen px-6 pb-20 pt-24">
+      <div className="bg-grid pointer-events-none absolute inset-0 -z-10" />
+      <div
+        className="pointer-events-none absolute left-1/2 top-32 -z-10 h-[500px] w-[500px] -translate-x-1/2 rounded-full blur-[120px]"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(139,92,246,0.10), rgba(139,92,246,0.03), transparent)",
+        }}
+      />
+
+      <div className="mx-auto max-w-3xl">
+      <SectionLabel>Pricing</SectionLabel>
 
       <h1 className="mt-6 text-[clamp(2rem,5vw,3.5rem)] font-sans font-normal leading-tight">
         Free during preview.
@@ -82,6 +92,7 @@ export default function PricingPage() {
       <p className="mt-10 font-mono text-xs uppercase tracking-[0.15em] text-white/30">
         Not investment advice · Educational analytics
       </p>
+      </div>
     </main>
   );
 }

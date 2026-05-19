@@ -94,19 +94,30 @@ export function AnalyzeForm({ initialWallet }: AnalyzeFormProps) {
           placeholder="0x... or Solana base58 address"
           value={wallet}
           onChange={(e) => onWalletChange(e.target.value)}
-          className="flex-1 rounded-lg border border-white/10 bg-[var(--color-surface-1)] px-4 py-3 font-mono text-sm outline-none focus:border-[var(--color-accent)]"
+          className="flex-1 rounded-[5px] border border-white/10 bg-surface-1 px-4 py-3 font-mono text-sm text-white placeholder:text-white/30 outline-none transition focus:border-white/40"
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="rounded-lg bg-[var(--color-accent)] px-5 py-3 text-sm font-medium text-black hover:opacity-90 disabled:opacity-50"
+          className="rounded-[5px] bg-white px-6 py-3 font-mono text-sm uppercase tracking-wide text-surface-0 transition hover:bg-white/90 disabled:opacity-50"
         >
-          {status === "loading" ? "Analyzing..." : "Analyze"}
+          {status === "loading" ? "Analyzing…" : "Analyze"}
         </button>
       </form>
 
+      {chains.length > 0 && wallet.trim() && (
+        <div className="mt-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.15em] text-white/30">
+          <span>Detected chain:</span>
+          {chains.map((c) => (
+            <span key={c} className="rounded border border-white/10 px-2 py-0.5 text-white/60">
+              {c}
+            </span>
+          ))}
+        </div>
+      )}
+
       {status === "error" && error && (
-        <p className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <p className="mt-4 rounded-[5px] border border-red-500/30 bg-red-500/5 px-4 py-3 font-mono text-sm text-red-300">
           {error}
         </p>
       )}
