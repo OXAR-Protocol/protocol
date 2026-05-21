@@ -7,7 +7,6 @@ import { Features } from "@/sections/features";
 import { ForWhom } from "@/sections/for-whom";
 
 import { Roadmap } from "@/sections/roadmap";
-import { Products } from "@/sections/products";
 import { Waitlist } from "@/sections/waitlist";
 
 import { Footer } from "@/sections/footer";
@@ -25,7 +24,6 @@ export default function Home() {
         <Features />
         <ForWhom />
         <Roadmap />
-        <Products />
         <Waitlist />
       </main>
       <Footer />

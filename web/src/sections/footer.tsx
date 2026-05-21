@@ -18,7 +18,6 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
   {
     title: "Resources",
     links: [
-      { label: "Radar API ↗", href: "https://radar.oxar.app" },
       { label: "Docs", href: "https://github.com/OXAR-Protocol/docs" },
       { label: "GitHub", href: "https://github.com/OXAR-Protocol" },
     ],
