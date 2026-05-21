@@ -1,0 +1,8 @@
+{
+  "name": "oxar-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "radar"
+  ]
+}
