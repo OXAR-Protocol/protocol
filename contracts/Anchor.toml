@@ -5,12 +5,17 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-oxar_protocol = "8NsGNHMtfEiJzSczdmN2reo26h75C4axamuLXdk2tfrT"
+oxar_protocol = "8RCVjQJhfcRYVpAM8v4jhvvbhjfkdqFwPtffEKNcBQwJ"
+
+[programs.devnet]
+oxar_protocol = "8RCVjQJhfcRYVpAM8v4jhvvbhjfkdqFwPtffEKNcBQwJ"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
+# Default to Localnet for `anchor test` (spawns a local validator).
+# For devnet deploys / upgrades use `--provider.cluster devnet` explicitly.
 cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 

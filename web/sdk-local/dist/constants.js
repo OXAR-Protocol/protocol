@@ -1,91 +1,104 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PROTOCOL_VERSION = exports.NAV_PRECISION = exports.USDC_DECIMALS = exports.BPS_DENOMINATOR = exports.INITIAL_NAV = exports.VAULT_CONFIGS = exports.DEFAULT_SERIES = exports.RPC_URL = exports.PROGRAM_ID = void 0;
-exports.getVaultConfigById = getVaultConfigById;
-exports.parseVaultId = parseVaultId;
+exports.RISK_TEMPLATES = exports.YIELD_SOURCES = exports.USDC_DECIMALS = exports.NAV_PRECISION = exports.INITIAL_NAV = exports.RPC_URL = exports.PROGRAM_ID = void 0;
+exports.getYieldSourceById = getYieldSourceById;
 const web3_js_1 = require("@solana/web3.js");
-exports.PROGRAM_ID = new web3_js_1.PublicKey("8NsGNHMtfEiJzSczdmN2reo26h75C4axamuLXdk2tfrT");
+// ============================================================================
+// Program
+// ============================================================================
+exports.PROGRAM_ID = new web3_js_1.PublicKey("8RCVjQJhfcRYVpAM8v4jhvvbhjfkdqFwPtffEKNcBQwJ");
 exports.RPC_URL = "https://api.devnet.solana.com";
-exports.DEFAULT_SERIES = 2;
-exports.VAULT_CONFIGS = [
+// ============================================================================
+// Math constants (mirror of contracts/.../constants.rs)
+// ============================================================================
+exports.INITIAL_NAV = 1000000;
+exports.NAV_PRECISION = 1000000;
+exports.USDC_DECIMALS = 6;
+exports.YIELD_SOURCES = [
     {
-        id: "UA-UAH-SHORT",
-        region: "UA",
-        denomination: "UAH",
-        assetSubtype: "SHORT",
-        series: 2,
-        apy: 18,
-        label: "Ukraine OVDP UAH (Short-term)",
-        isWar: false,
-        hasFxRisk: true,
+        id: "kamino-usdc",
+        name: "Kamino USDC",
+        description: "USDC lending on Solana",
+        chain: "solana",
+        baseApy: 5.5,
+        riskLevel: "low",
+        viaDelora: false,
+        available: false, // wired up in Phase D
     },
     {
-        id: "UA-UAH-MID",
-        region: "UA",
-        denomination: "UAH",
-        assetSubtype: "MID",
-        series: 2,
-        apy: 17,
-        label: "Ukraine OVDP UAH (Mid-term)",
-        isWar: false,
-        hasFxRisk: true,
+        id: "jlp",
+        name: "Jupiter LP",
+        description: "Jupiter Perps liquidity provider token",
+        chain: "solana",
+        baseApy: 9.5,
+        riskLevel: "medium",
+        viaDelora: false,
+        available: false,
     },
     {
-        id: "UA-USD-STD",
-        region: "UA",
-        denomination: "USD",
-        assetSubtype: "STD",
-        series: 2,
-        apy: 4,
-        label: "Ukraine OVDP USD",
-        isWar: false,
-        hasFxRisk: false,
+        id: "maple-solana",
+        name: "Maple Syrup USDC",
+        description: "Institutional credit on Solana",
+        chain: "solana",
+        baseApy: 7.5,
+        riskLevel: "medium",
+        viaDelora: false,
+        available: false,
     },
     {
-        id: "UA-EUR-STD",
-        region: "UA",
-        denomination: "EUR",
-        assetSubtype: "STD",
-        series: 2,
-        apy: 3.5,
-        label: "Ukraine OVDP EUR",
-        isWar: false,
-        hasFxRisk: true,
+        id: "ondo-usdy",
+        name: "Ondo USDY",
+        description: "Tokenized US Treasuries (cross-chain via Delora)",
+        chain: "ethereum",
+        baseApy: 5.0,
+        riskLevel: "low",
+        viaDelora: true,
+        available: false,
     },
     {
-        id: "UA-UAH-WAR",
-        region: "UA",
-        denomination: "UAH",
-        assetSubtype: "WAR",
-        series: 2,
-        apy: 18,
-        label: "Ukraine War Bonds UAH",
-        isWar: true,
-        hasFxRisk: true,
+        id: "ethena-susde",
+        name: "Ethena sUSDe",
+        description: "DeFi stablecoin yield (cross-chain via Delora)",
+        chain: "ethereum",
+        baseApy: 11.0,
+        riskLevel: "high",
+        viaDelora: true,
+        available: false,
     },
     {
-        id: "UA-USD-WAR",
-        region: "UA",
-        denomination: "USD",
-        assetSubtype: "WAR",
-        series: 2,
-        apy: 4,
-        label: "Ukraine War Bonds USD",
-        isWar: true,
-        hasFxRisk: false,
+        id: "sky-sdai",
+        name: "Sky sDAI",
+        description: "Sky savings rate (cross-chain via Delora)",
+        chain: "ethereum",
+        baseApy: 6.5,
+        riskLevel: "low",
+        viaDelora: true,
+        available: false,
     },
 ];
-function getVaultConfigById(id) {
-    return exports.VAULT_CONFIGS.find((v) => v.id === id);
+exports.RISK_TEMPLATES = {
+    conservative: {
+        label: "Sleepy",
+        emoji: "😴",
+        description: "Slow but steady",
+        targetApy: 5,
+        sources: ["kamino-usdc", "ondo-usdy"],
+    },
+    balanced: {
+        label: "Walking",
+        emoji: "🚶",
+        description: "Balanced pace",
+        targetApy: 7,
+        sources: ["kamino-usdc", "maple-solana", "jlp"],
+    },
+    aggressive: {
+        label: "Running",
+        emoji: "🏃",
+        description: "Fast & loud",
+        targetApy: 10,
+        sources: ["jlp", "ethena-susde"],
+    },
+};
+function getYieldSourceById(id) {
+    return exports.YIELD_SOURCES.find((s) => s.id === id);
 }
-function parseVaultId(id) {
-    const parts = id.split("-");
-    if (parts.length !== 3)
-        throw new Error(`Invalid vault ID: ${id}`);
-    return { region: parts[0], denomination: parts[1], assetSubtype: parts[2] };
-}
-exports.INITIAL_NAV = 1000000;
-exports.BPS_DENOMINATOR = 10000;
-exports.USDC_DECIMALS = 6;
-exports.NAV_PRECISION = 1000000;
-exports.PROTOCOL_VERSION = 1;

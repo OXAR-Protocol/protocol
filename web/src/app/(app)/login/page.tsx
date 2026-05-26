@@ -10,7 +10,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (ready && authenticated) router.replace("/vaults");
+    if (ready && authenticated) router.replace("/home");
   }, [ready, authenticated, router]);
 
   return (
@@ -69,9 +69,9 @@ export default function LoginPage() {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="mt-6 text-[clamp(2.5rem,6vw,3.5rem)] font-sans font-normal leading-tight text-white"
         >
-          Real-world yields.
+          Where does your
           <br />
-          On-chain access.
+          money sleep?
         </motion.h1>
 
         <motion.p
@@ -80,8 +80,8 @@ export default function LoginPage() {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="mt-6 font-mono text-sm text-white/50 leading-relaxed max-w-sm"
         >
-          Emerging market government bonds — tokenized on Solana.{" "}
-          <span className="text-white">No bank. No broker. Just yield.</span>
+          Wake it up. Earn yield. Save together.{" "}
+          <span className="text-white">No bank. No broker. No lock.</span>
         </motion.p>
 
         <motion.div
@@ -95,11 +95,11 @@ export default function LoginPage() {
             disabled={!ready || authenticated}
             className="inline-flex items-center gap-2 px-8 py-3 rounded font-mono text-sm uppercase tracking-wide transition-all duration-200 bg-white text-surface-0 hover:bg-white/90 disabled:bg-white/[0.06] disabled:text-white/30 disabled:cursor-not-allowed"
           >
-            {authenticated ? "Redirecting" : "Get Started"}
+            {authenticated ? "Redirecting" : "Wake up your money"}
           </button>
 
           <span className="font-mono text-[10px] text-white/25 uppercase tracking-wide">
-            Continue with email or wallet
+            Email · Phantom · MetaMask · Backpack
           </span>
         </motion.div>
 

@@ -9,14 +9,21 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("8NsGNHMtfEiJzSczdmN2reo26h75C4axamuLXdk2tfrT");
+declare_id!("8RCVjQJhfcRYVpAM8v4jhvvbhjfkdqFwPtffEKNcBQwJ");
 
 #[program]
 pub mod oxar_protocol {
     use super::*;
 
-    pub fn initialize_vault(ctx: Context<InitializeVault>, params: InitializeVaultParams) -> Result<()> {
-        instructions::initialize_vault::handler(ctx, params)
+    // ========================================================================
+    // Personal vault — single-user yield positions
+    // ========================================================================
+
+    pub fn initialize_personal_vault(
+        ctx: Context<InitializePersonalVault>,
+        params: InitializePersonalVaultParams,
+    ) -> Result<()> {
+        instructions::initialize_personal_vault::handler(ctx, params)
     }
 
     pub fn setup_vault_pool(ctx: Context<SetupVaultPool>) -> Result<()> {
@@ -27,27 +34,75 @@ pub mod oxar_protocol {
         instructions::deposit::handler(ctx, amount)
     }
 
+    pub fn withdraw(ctx: Context<Withdraw>, shares: u64) -> Result<()> {
+        instructions::withdraw::handler(ctx, shares)
+    }
+
     pub fn crank_nav(ctx: Context<CrankNav>) -> Result<()> {
         instructions::crank_nav::handler(ctx)
     }
 
-    pub fn claim(ctx: Context<Claim>) -> Result<()> {
-        instructions::claim::handler(ctx)
+    // ========================================================================
+    // Group vault — shared savings (Phase B)
+    // ========================================================================
+
+    pub fn initialize_group_vault(
+        ctx: Context<InitializeGroupVault>,
+        params: InitializeGroupVaultParams,
+    ) -> Result<()> {
+        instructions::initialize_group_vault::handler(ctx, params)
     }
 
-    pub fn create_listing(ctx: Context<CreateListing>, amount: u64, price_per_token: u64) -> Result<()> {
-        instructions::create_listing::handler(ctx, amount, price_per_token)
+    pub fn join_group_vault(
+        ctx: Context<JoinGroupVault>,
+        params: JoinGroupVaultParams,
+    ) -> Result<()> {
+        instructions::join_group_vault::handler(ctx, params)
     }
 
-    pub fn cancel_listing(ctx: Context<CancelListing>) -> Result<()> {
-        instructions::cancel_listing::handler(ctx)
+    pub fn group_deposit(ctx: Context<GroupDeposit>, amount: u64) -> Result<()> {
+        instructions::group_deposit::handler(ctx, amount)
     }
 
-    pub fn buy_listing(ctx: Context<BuyListing>) -> Result<()> {
-        instructions::buy_listing::handler(ctx)
+    pub fn group_withdraw(ctx: Context<GroupWithdraw>, shares: u64) -> Result<()> {
+        instructions::group_withdraw::handler(ctx, shares)
     }
 
-    pub fn close_vault(ctx: Context<CloseVault>) -> Result<()> {
-        instructions::close_vault::handler(ctx)
+    pub fn leave_group_vault(ctx: Context<LeaveGroupVault>) -> Result<()> {
+        instructions::leave_group_vault::handler(ctx)
+    }
+
+    // ========================================================================
+    // Rules engine (Phase C)
+    // ========================================================================
+
+    pub fn create_rule(ctx: Context<CreateRule>, params: CreateRuleParams) -> Result<()> {
+        instructions::create_rule::handler(ctx, params)
+    }
+
+    pub fn execute_rule(ctx: Context<ExecuteRule>, params: ExecuteRuleParams) -> Result<()> {
+        instructions::execute_rule::handler(ctx, params)
+    }
+
+    pub fn cancel_rule(ctx: Context<CancelRule>) -> Result<()> {
+        instructions::cancel_rule::handler(ctx)
+    }
+
+    // ========================================================================
+    // Yield routing (Phase D)
+    // ========================================================================
+
+    pub fn route_yield_deposit(
+        ctx: Context<RouteYieldDeposit>,
+        amount: u64,
+    ) -> Result<()> {
+        instructions::route_yield_deposit::handler(ctx, amount)
+    }
+
+    pub fn route_yield_withdraw(
+        ctx: Context<RouteYieldWithdraw>,
+        amount: u64,
+    ) -> Result<()> {
+        instructions::route_yield_withdraw::handler(ctx, amount)
     }
 }

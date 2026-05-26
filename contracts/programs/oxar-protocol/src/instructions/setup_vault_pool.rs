@@ -5,7 +5,11 @@ use crate::constants::*;
 use crate::error::OxarError;
 use crate::state::Vault;
 
-/// Step 2: Create USDC pool and activate vault.
+/// Second step of vault initialization: create the hot USDC pool and activate the vault.
+///
+/// The pool is a PDA-derived token account that holds liquid USDC for instant withdrawals
+/// (per the 20/80 hot/cold ratio). The "cold" portion is routed to the vault's yield source
+/// lazily via `route_yield_deposit` (Phase D).
 #[derive(Accounts)]
 pub struct SetupVaultPool<'info> {
     #[account(mut)]
@@ -18,11 +22,10 @@ pub struct SetupVaultPool<'info> {
     )]
     pub vault: Box<Account<'info, Vault>>,
 
-    /// USDC mint.
     #[account(address = vault.usdc_mint)]
     pub usdc_mint: Account<'info, Mint>,
 
-    /// Pool token account for USDC deposits.
+    /// Hot pool: holds liquid USDC for instant withdrawals.
     #[account(
         init,
         payer = authority,
@@ -33,11 +36,6 @@ pub struct SetupVaultPool<'info> {
     )]
     pub usdc_pool: Account<'info, TokenAccount>,
 
-    /// CHECK: Treasury wallet pubkey. Stored on the vault so that downstream instructions
-    /// (e.g. buy_listing) can validate fee destinations against it. The treasury itself
-    /// is not accessed here — only its address is recorded.
-    pub treasury: UncheckedAccount<'info>,
-
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
@@ -45,7 +43,6 @@ pub struct SetupVaultPool<'info> {
 pub fn handler(ctx: Context<SetupVaultPool>) -> Result<()> {
     let vault = &mut ctx.accounts.vault;
     vault.usdc_pool = ctx.accounts.usdc_pool.key();
-    vault.treasury = ctx.accounts.treasury.key();
     vault.is_active = true;
 
     msg!("Vault activated: {}", vault.key());

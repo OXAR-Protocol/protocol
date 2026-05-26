@@ -23,10 +23,10 @@ export function PitchCards() {
         {/* Card 1 — Problem */}
         <article className="relative border border-white/15 rounded-[34px] aspect-[864/910] flex flex-col items-center justify-between px-12 pt-16 pb-10 overflow-hidden">
           <h2 className="font-extralight text-[clamp(28px,2.4vw,46px)] tracking-tight text-center leading-[1.15] text-[#f0f0f2]">
-            <em className="font-medium not-italic italic">$13T</em>{" "}
-            <span className="font-extralight">SOVEREIGN DEBT.</span>
+            <em className="font-medium not-italic italic">YOUR MONEY</em>{" "}
+            <span className="font-extralight">IS SLEEPING.</span>
             <br />
-            <span className="font-extralight">LOCKED BEHIND BORDERS.</span>
+            <span className="font-extralight">BANKS WANT IT THAT WAY.</span>
           </h2>
           <div className="flex-1 flex items-center justify-center w-full">
             <div
@@ -35,21 +35,20 @@ export function PitchCards() {
             />
           </div>
           <p className="text-center text-[clamp(14px,1.1vw,18px)] text-[#5a5a5e] max-w-[340px] leading-snug">
-            Most of it unreachable to most of the planet — gated by local
-            brokers, banks, and residency rules.
+            High yield or instant access — never both. Until now.
           </p>
         </article>
 
         {/* Card 2 — Solution */}
         <article className="relative border border-white/15 rounded-[34px] aspect-[864/910] flex flex-col items-center justify-between px-12 pt-16 pb-10 overflow-hidden">
           <h2 className="font-extralight italic text-[clamp(28px,2.4vw,46px)] tracking-tight text-center leading-[1.15] text-[#f0f0f2]">
-            TOKEN → BROKER → BOND
+            WALLET → YIELD → PILE
           </h2>
           <div className="flex-1 flex flex-col items-center justify-center gap-4 sm:gap-5 lg:gap-6">
-            <span className={actionWordClass}>buy</span>
-            <span className={actionWordClass}>hold</span>
-            <span className={actionWordClass + " font-normal"}>trade</span>
-            <span className={actionWordClass}>send</span>
+            <span className={actionWordClass}>connect</span>
+            <span className={actionWordClass}>earn</span>
+            <span className={actionWordClass + " font-normal"}>gather</span>
+            <span className={actionWordClass}>withdraw</span>
           </div>
           <div className="h-2" />
         </article>

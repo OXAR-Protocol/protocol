@@ -7,11 +7,11 @@ import { AnimatedSection } from "@/components/animated-section";
 
 const AUDIENCES = [
   {
-    title: "DeFi Users",
-    stat: "18%",
-    statLabel: "APY",
+    title: "Solo savers",
+    stat: "Auto",
+    statLabel: "Pilot",
     description:
-      "Higher yield than US Treasuries without leaving crypto.",
+      "You hold USDC. We auto-invest it across curated yields. Withdraw any time.",
     accent: "text-accent",
     glowColor: "139,92,246",
     icon: (
@@ -22,26 +22,27 @@ const AUDIENCES = [
     ),
   },
   {
-    title: "Yield Seekers",
-    stat: "Govt",
-    statLabel: "Backed",
+    title: "Friends with goals",
+    stat: "Together",
+    statLabel: "Piles",
     description:
-      "Emerging market rates with sovereign backing. Real yield.",
+      "Save with people you trust. Real goals — apartment, trip, ring. Each holds their share, exits anytime.",
     accent: "text-accent",
     glowColor: "139,92,246",
     icon: (
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M16 4l10 6v12l-10 6L6 22V10l10-6z" opacity="0.4" />
-        <path d="M16 10v12M10 16h12" strokeLinecap="round" />
+        <circle cx="11" cy="13" r="4" opacity="0.4" />
+        <circle cx="21" cy="13" r="4" opacity="0.4" />
+        <path d="M5 26c0-4 3-6 6-6s6 2 6 6M15 26c0-4 3-6 6-6s6 2 6 6" strokeLinecap="round" />
       </svg>
     ),
   },
   {
-    title: "Institutions",
-    stat: "API",
-    statLabel: "Ready",
+    title: "No bank, no problem",
+    stat: "Apple",
+    statLabel: "Pay",
     description:
-      "On-chain emerging market bond exposure. Programmatic access.",
+      "Don't have crypto yet? Tap to deposit. No KYC banking, no broker, no waiting.",
     accent: "text-white/60",
     glowColor: "160,160,200",
     icon: (
@@ -132,8 +133,8 @@ export function ForWhom() {
     <section id="for-whom" className="py-20 px-6">
       <div className="max-w-[1200px] mx-auto">
         <AnimatedSection>
-          <SectionLabel>For Whom</SectionLabel>
-          <SectionTitle>One product. Three motivations.</SectionTitle>
+          <SectionLabel>Who it's for</SectionLabel>
+          <SectionTitle>One app. Three ways to use it.</SectionTitle>
         </AnimatedSection>
 
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -7,21 +7,21 @@ import { IsometricBoxes } from "@/components/isometric-boxes";
 import { useCountUp } from "@/hooks/use-count-up";
 
 function AnimatedStat() {
-  const counter = useCountUp(4.5, 2000);
+  const counter = useCountUp(12, 2000);
   return (
     <div ref={counter.ref} className="text-center">
       <div className="text-[clamp(2.5rem,5vw,4rem)] font-mono font-normal text-white tabular-nums">
-        {counter.value}x
+        {counter.value}×
       </div>
-      <p className="mt-2 font-mono text-sm text-white/50">vs banks</p>
+      <p className="mt-2 font-mono text-sm text-white/50">your bank's rate</p>
     </div>
   );
 }
 
 const STATIC_STATS = [
-  { value: "$0", label: "deposit fee" },
-  { value: "Daily", label: "yield accrual" },
-  { value: "<1min", label: "to start earning" },
+  { value: "Instant", label: "withdraw anytime" },
+  { value: "Yours", label: "your keys, your money" },
+  { value: "<2min", label: "to start earning" },
 ];
 
 export function Features() {
@@ -32,7 +32,7 @@ export function Features() {
       <div className="relative max-w-[1200px] mx-auto">
         <AnimatedSection>
           <SectionLabel>Why OXAR</SectionLabel>
-          <SectionTitle>Real yields, on-chain</SectionTitle>
+          <SectionTitle>Earn like an investor. Access like savings.</SectionTitle>
         </AnimatedSection>
 
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'OXAR Protocol — For Investors',
+  title: 'OXAR — For Investors',
 }
 
 export default function InvestorsPage() {
@@ -16,94 +16,121 @@ export default function InvestorsPage() {
           [ FOR INVESTORS ]
         </span>
         <h1 className="text-[clamp(2rem,4vw,3rem)] font-sans font-normal mb-8">
-          OXAR Protocol
+          OXAR
         </h1>
 
         <div className="space-y-8 font-mono text-sm leading-relaxed text-white/30 [&_strong]:text-white [&_strong]:font-normal [&_h2]:text-white [&_h2]:font-sans [&_h2]:text-lg [&_h2]:font-normal [&_h2]:mb-3 [&_h2]:mt-0">
-          <p><strong>Real-world yields. On-chain access.</strong></p>
+          <p><strong>Where does your money sleep? Wake it up. Earn yield. Save together.</strong></p>
 
           <section>
-            <h2>1. Overview</h2>
+            <h2>1. One-liner</h2>
             <p>
-              OXAR Protocol <strong>tokenizes emerging market government bonds on Solana</strong>, giving on-chain users access to 4–18% APY sovereign-backed yields through a single USDC deposit. No bank, no broker, no lock-ups.
+              OXAR is a <strong>savings app for the crypto-paid generation</strong>. Connect a wallet or tap Apple Pay, choose how loud you want your money, and save with friends on real goals. Yield from curated RWA and DeFi sources, withdraw anytime, never custodial.
             </p>
           </section>
 
           <section>
-            <h2>2. Problem</h2>
+            <h2>2. The problem</h2>
             <p>
-              Over <strong>$230B in stablecoins sit idle</strong> across DeFi and CEXs, earning zero yield. The best on-chain option today is tokenized US Treasuries at ~4% APY — a market that grew to <strong>$2B+ TVL in under a year</strong>, proving massive demand for real-world yield on-chain.
+              Banks force a choice: <strong>high yield or instant access</strong>, never both. Crypto wallets sit at 0%. Savings apps cap at 4-5% and require a US bank account. Group saving infrastructure for shared goals (a flat, a trip, a wedding) literally does not exist with real yield attached.
             </p>
             <p className="mt-3">
-              But treasuries are a ceiling, not a floor. Emerging market sovereign bonds offer <strong>4–18% APY</strong> — up to 4.5x more — yet have zero on-chain access today. The infrastructure to bridge these yields doesn't exist. That's what OXAR builds.
+              We break the tradeoff. <strong>5-12% APY</strong> across curated sources, <strong>instant withdraw</strong> from liquid positions, <strong>shared piles</strong> with friends — one product.
             </p>
           </section>
 
           <section>
-            <h2>3. Solution</h2>
+            <h2>3. The product</h2>
             <p>
-              OXAR wraps government bonds into <strong>yield-bearing SPL tokens</strong> (oxUAH, oxUSD, oxEUR) on Solana. Each token is backed by a real bond position held through a licensed local broker. Token price increases daily as bond yield accrues on-chain.
+              <strong>Connect your wallet</strong> (Phantom, Backpack, MetaMask) <strong>or just tap to deposit</strong> via Apple Pay / Google Pay (Ramp Network). Pick a risk template: Sleepy (4-6%), Walking (6-9%), Running (9-14%).
             </p>
             <p className="mt-3">
-              The user experience is simple: <strong>deposit USDC → choose a vault → receive yield tokens → earn daily → exit anytime</strong> via the built-in marketplace or at bond maturity. Onboarding takes under 1 minute with email or wallet login.
+              Your USDC routes into <strong>curated yield sources</strong>: Ondo USDY (US Treasuries), Maple Syrup (institutional credit), Ethena sUSDe, Jupiter LP, Kamino USDC. Cross-chain access via Delora — no bridges to manage.
             </p>
             <p className="mt-3">
-              Each vault has an on-chain <strong>Proof of Reserve</strong> — the NAV and backing are verifiable at any time directly from the smart contract.
+              Optionally, start a <strong>friends pile</strong> with people you trust. Real goal, shared progress, each member holds their pro-rata share, anyone can withdraw their part anytime. Yield from personal positions can stream into the group goal automatically.
             </p>
           </section>
 
           <section>
-            <h2>4. Market Size</h2>
+            <h2>4. Why now</h2>
             <p>
-              <strong>TAM:</strong> $230B+ stablecoins seeking yield. Tokenized US Treasuries alone reached <strong>$3B+ TVL</strong> in under 18 months — proving massive demand for on-chain RWA.
+              Crypto-paid workforce is real and growing: Bitwage (150k+ workers), Toku (100+ countries), Deel crypto payroll, Superfluid streaming. <strong>Tokenized RWA is maturing</strong>: Ondo USDY ($500M+), Ethena sUSDe ($5B+), Maple ($1B+). Apple Pay → crypto via licensed providers like Ramp Network just became frictionless.
             </p>
             <p className="mt-3">
-              <strong>SAM:</strong> ~$5B in DeFi-native capital actively seeking higher yield alternatives beyond US Treasuries — yield aggregators, DAO treasuries, and power users looking for diversified sovereign exposure.
-            </p>
-            <p className="mt-3">
-              <strong>SOM (Year 1):</strong> $1–5M TVL across Ukraine bond vaults. Ukraine's domestic government bond market is <strong>~$25B outstanding</strong>, with war bond issuance alone exceeding $5B since 2022.
+              Banks (Apple, Wealthfront, Marcus) cap at 4-5% because of US Treasury rates. Crypto-native users want more without taking obscure risks. <strong>This window opens for the next 12-24 months</strong> before Revolut / Coinbase close it.
             </p>
           </section>
 
           <section>
-            <h2>5. Business Model</h2>
+            <h2>5. Market</h2>
             <p>
-              OXAR earns through a <strong>yield spread</strong>. The protocol retains a portion of the bond yield as a management fee — the difference between the gross bond rate and the net rate passed to token holders. No deposit fees, no withdrawal fees, no hidden costs.
+              <strong>TAM:</strong> Anyone with a crypto wallet + savings instinct (~50M globally and growing).
             </p>
             <p className="mt-3">
-              At scale, additional revenue comes from <strong>marketplace fees</strong> on secondary trading of vault tokens between users, and <strong>institutional API access</strong> for programmatic bond exposure.
+              <strong>SAM:</strong> Crypto-paid earners + DAO contributors + remote workers using stablecoins for salary (~5M globally).
             </p>
             <p className="mt-3">
-              Unit economics improve with scale: custody and brokerage costs are largely fixed, while management fee revenue grows linearly with TVL.
+              <strong>SOM (Year 1):</strong> 500-5,000 active groups, $1-10M TVL across personal yield + group vaults.
             </p>
           </section>
 
           <section>
-            <h2>6. Traction & Roadmap</h2>
+            <h2>6. Business model</h2>
             <p>
-              <strong>Current status (Q2 2026):</strong> Live on Solana Devnet with 6 bond vaults (UAH, USD, EUR), USDC deposit flow, daily NAV accrual, secondary marketplace, and Proof of Reserve — all functional. Smart contracts audited internally, frontend deployed.
+              <strong>10% performance fee</strong> on yield earned (we don't take from principal, only growth). At $10M TVL and 8% average APY → $80k annual revenue. At $100M TVL → $800k. Path to profitability around $26M TVL covering team + ops.
             </p>
             <p className="mt-3">
-              <strong>Q3 2026:</strong> Mainnet launch with Ukraine vaults. Add Poland and other emerging market bonds. Seed round. Mobile app beta.
-            </p>
-            <p className="mt-3">
-              <strong>Q4 2026:</strong> Institutional API for funds and DAOs. KYC module integration. Expand to 5+ countries.
-            </p>
-            <p className="mt-3">
-              <strong>2027:</strong> 20+ countries, DAO governance, protocol token launch. Goal: become the <strong>standard infrastructure layer</strong> for emerging market sovereign yield on-chain.
+              <strong>Secondary streams:</strong> Delora fee share on cross-chain swaps (~10 bps), and in Phase 2+ optional premium features (advanced rules, multi-goal stacking).
             </p>
           </section>
 
           <section>
-            <h2>7. Contact</h2>
+            <h2>7. Status & roadmap</h2>
             <p>
-              Interested in learning more or discussing investment opportunities? Reach out to us directly:
+              <strong>Now (May 2026):</strong> Smart contracts live on Solana Devnet. Personal vault flow (initialize → deposit → withdraw → crank NAV) verified end-to-end. Program ID <code className="text-white/70">8RCVjQJh...nCBQwJ</code>. Group vault contracts under construction.
             </p>
             <p className="mt-3">
-              <a href="mailto:support@oxar.app" className="text-accent hover:underline">support@oxar.app</a> — email
+              <strong>Aug 2026:</strong> Public MVP launch. Personal yield + group piles + Apple Pay deposits. First friend groups onboard.
             </p>
             <p className="mt-3">
-              <a href="https://t.me/eternaki" className="text-accent hover:underline">@eternaki</a> · <a href="https://t.me/tarapatska" className="text-accent hover:underline">@tarapatska</a> — Telegram
+              <strong>Q4 2026:</strong> Additional rule types (buffer top-up, round-ups). Ukrainian bonds via licensed broker partner. Cross-chain yields fully wired.
+            </p>
+            <p className="mt-3">
+              <strong>2027:</strong> iOS / Android native apps. Multi-currency stablecoins. Geographic expansion via local partners.
+            </p>
+          </section>
+
+          <section>
+            <h2>8. Team</h2>
+            <p>
+              <strong>Daniel Lohachov</strong> (63%) — Product, tech, founder of the prior OXAR iteration. Solana ecosystem since 2023.
+            </p>
+            <p className="mt-3">
+              <strong>Anna Tarapatska</strong> (37%) — Operations, legal, partnerships.
+            </p>
+          </section>
+
+          <section>
+            <h2>9. Funding</h2>
+            <p>
+              Not raising a traditional angel round. We're pursuing <strong>grants + accelerators + hackathon prizes</strong> to fund MVP launch (target $30k pre-launch). Crypto VC seed planned for post-PMF (12-18 months out).
+            </p>
+            <p className="mt-3">
+              Targets in motion: Solana Foundation ecosystem grant ($25-50k), Colosseum hackathon, Мінцифри × Binance contest. Strategic partnerships with Delora (cross-chain), Ramp Network (fiat), Privy (auth) already in place.
+            </p>
+          </section>
+
+          <section>
+            <h2>10. Contact</h2>
+            <p>
+              Strategic interest, partnership, or grant intro? Reach out:
+            </p>
+            <p className="mt-3">
+              <a href="mailto:support@oxar.app" className="text-accent hover:underline">support@oxar.app</a>
+            </p>
+            <p className="mt-3">
+              Telegram: <a href="https://t.me/eternaki" className="text-accent hover:underline">@eternaki</a> (Daniel) · <a href="https://t.me/tarapatska" className="text-accent hover:underline">@tarapatska</a> (Anna)
             </p>
           </section>
         </div>

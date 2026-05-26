@@ -1,28 +1,33 @@
 export const STEPS = [
   {
     number: "01",
-    title: "Deposit USDC",
-    description: "Connect with email or wallet. No complex setup required.",
+    title: "Connect or tap",
+    description:
+      "Crypto wallet or Apple Pay. No bank account, no broker. Setup takes a minute.",
   },
   {
     number: "02",
-    title: "Choose Vault",
-    description: "Pick country, currency, and bond type. Multiple vaults available.",
+    title: "Choose your pace",
+    description:
+      "Sleepy (5%), Walking (7%), Running (10%+). Three risk templates — pick once, change anytime.",
   },
   {
     number: "03",
-    title: "Get Yield Token",
-    description: "Receive oxUAH, oxUSD — yield-bearing SPL tokens on Solana.",
+    title: "Money wakes up",
+    description:
+      "Your USDC flows into curated yield sources — Ondo, Maple, Kamino, Ethena. Daily yield, transparent on-chain.",
   },
   {
     number: "04",
-    title: "Earn Daily",
-    description: "Token price increases every day as bond yield accrues on-chain.",
+    title: "Save together",
+    description:
+      "Start a pile with friends for a real goal — Lisbon, Bali, a wedding. Yield accelerates the group.",
   },
   {
     number: "05",
-    title: "Exit Anytime",
-    description: "Sell on built-in marketplace or wait for bond maturity.",
+    title: "Wake some up anytime",
+    description:
+      "Withdraw whenever. No locks, no penalty. Your money sleeps because you let it, not because it has to.",
   },
 ];
 
