@@ -1,6 +1,11 @@
 // Re-export shared constants from SDK
-export { PROGRAM_ID, VAULT_CONFIGS, getVaultConfigById, parseVaultId } from "@oxar/sdk";
-export type { VaultConfig } from "@oxar/sdk";
+export {
+  PROGRAM_ID,
+  YIELD_SOURCES,
+  RISK_TEMPLATES,
+  getYieldSourceById,
+} from "@oxar/sdk";
+export type { YieldSourceConfig, RiskTemplate } from "@oxar/sdk";
 
 // Web-specific: RPC URL from environment. Falls back to public devnet (rate-limited, no secrets).
 export const RPC_URL =

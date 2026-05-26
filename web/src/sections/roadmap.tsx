@@ -7,27 +7,27 @@ import { useAnimatedProgress } from "@/hooks/use-animated-progress";
 
 const MILESTONES = [
   {
-    phase: "Q2 2026",
-    name: "Ukraine MVP",
-    details: "6 vaults, USDC deposits, marketplace, Proof of Reserve.",
+    phase: "Now",
+    name: "Building",
+    details: "Smart contracts live on devnet. Auto-distribute and group vaults under construction.",
     status: "current" as const,
   },
   {
-    phase: "Q3 2026",
-    name: "Scale Up",
-    details: "Poland and new market bonds. Seed round. Mobile app beta.",
+    phase: "Aug 2026",
+    name: "MVP launch",
+    details: "Personal yield + group piles + Apple Pay deposits. First friend groups onboard.",
     status: "future" as const,
   },
   {
     phase: "Q4 2026",
-    name: "Institutional",
-    details: "API for funds, KYC module, 5+ countries.",
+    name: "More yields, more rules",
+    details: "Cross-chain via Delora. Buffer top-up, round-ups, copy-investing. Ukrainian bonds via partner broker.",
     status: "future" as const,
   },
   {
     phase: "2027",
-    name: "Global Protocol",
-    details: "20+ countries, DAO governance, token launch.",
+    name: "Native app + scale",
+    details: "iOS and Android. Multi-currency. Emerging market bonds beyond Ukraine.",
     status: "future" as const,
   },
 ];
@@ -42,8 +42,8 @@ export function Roadmap() {
     <section id="roadmap" className="py-20 px-6">
       <div className="max-w-[1200px] mx-auto">
         <AnimatedSection>
-          <SectionLabel>Roadmap</SectionLabel>
-          <SectionTitle>What&apos;s ahead</SectionTitle>
+          <SectionLabel>What's ahead</SectionLabel>
+          <SectionTitle>From devnet to your phone</SectionTitle>
         </AnimatedSection>
 
         {/* Desktop */}

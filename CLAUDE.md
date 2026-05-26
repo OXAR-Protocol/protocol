@@ -19,7 +19,7 @@ Each repo has its own CLAUDE.md with specific rules. Read them before working in
 
 ## Key Identifiers
 
-- **Program ID**: `8NsGNHMtfEiJzSczdmN2reo26h75C4axamuLXdk2tfrT`
+- **Program ID**: `8RCVjQJhfcRYVpAM8v4jhvvbhjfkdqFwPtffEKNcBQwJ` (fresh deploy 2026-05-23, anchor 0.31.1, solana 2.2.20)
 - **Network**: Solana Devnet
 - **Privy App ID**: `cmmzf4k4s00g80cjywxio7b89`
 - **RPC**: Helius devnet endpoint (see web/src/providers/privy-provider.tsx)

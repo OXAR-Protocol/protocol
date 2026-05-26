@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
 
 const tabs = [
-  { href: "/vaults", label: "Explore" },
-  { href: "/marketplace", label: "Marketplace" },
-  { href: "/portfolio", label: "Portfolio" },
-  { href: "/profile", label: "Profile" },
+  { href: "/home", label: "Home" },
+  { href: "/yield", label: "Yield" },
+  { href: "/pile", label: "Pile" },
+  { href: "/you", label: "You" },
 ] as const;
 
 export function TopNav() {
@@ -18,7 +18,7 @@ export function TopNav() {
   return (
     <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/[0.06]">
       <div className="max-w-[1300px] mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/vaults" className="shrink-0">
+        <Link href="/home" className="shrink-0">
           <img src="/images/white.svg" alt="OXAR" className="h-7 w-auto" />
         </Link>
 
@@ -47,7 +47,7 @@ export function TopNav() {
             disabled={!ready}
             className="font-mono text-[11px] font-semibold tracking-[0.15em] uppercase px-4 py-2 rounded-[5px] bg-white text-black hover:bg-white/90 disabled:bg-white/[0.04] disabled:text-white/30 transition-colors"
           >
-            Sign In
+            Sign in
           </button>
         )}
       </div>

@@ -11,9 +11,9 @@ type NavItem =
   | { label: string; warpTo: string; warp: true };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Problem", href: "#features" },
+  { label: "Problem", href: "#problem" },
   { label: "How it works", href: "#how-it-works" },
-  { label: "Vaults", href: "#vaults" },
+  { label: "Speeds", href: "#vaults" },
   { label: "Roadmap", href: "#roadmap" },
   { label: "Investors", warpTo: "/investors", warp: true },
 ];
@@ -79,7 +79,7 @@ export function Header() {
             )}
           </button>
           <Button variant="filled" onClick={scrollToWaitlist}>
-            Get Early Access
+            Get early access
           </Button>
         </nav>
 
@@ -157,7 +157,7 @@ export function Header() {
                 scrollToWaitlist();
               }}
             >
-              Get Early Access
+              Get early access
             </Button>
           </div>
         </nav>

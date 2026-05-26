@@ -12,9 +12,11 @@ export function PitchHero() {
           className="object-contain"
         />
       </div>
+      <h1 className="font-extralight italic text-center text-white text-[clamp(28px,3.2vw,48px)] leading-tight tracking-tight max-w-2xl mb-6">
+        Where does your money sleep?
+      </h1>
       <p className="font-light text-center text-white/70 text-base leading-relaxed max-w-md">
-        OXAR tokenizes emerging market government bonds. We&apos;re starting in
-        Ukraine — and we&apos;re going global.
+        Wake it up. Earn yield. Save together. No bank. No broker. No lock.
       </p>
     </section>
   );

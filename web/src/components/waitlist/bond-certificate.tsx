@@ -88,10 +88,10 @@ export function BondCertificate() {
         <div className="relative z-10 flex flex-col items-center gap-6 md:gap-8">
           <div className="flex flex-col items-center gap-1">
             <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-white/40">
-              Bond of Early Access
+              Pass to Early Access
             </span>
             <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25">
-              OXAR Protocol · Series 01
+              OXAR · Series 01
             </span>
           </div>
 
@@ -161,7 +161,7 @@ export function BondCertificate() {
             disabled={submitting || !emailValid}
             className="group relative inline-flex items-center justify-center px-10 py-4 rounded-[4px] font-mono text-[11px] uppercase tracking-[0.25em] bg-white text-surface-0 hover:bg-white/90 disabled:bg-white/[0.06] disabled:text-white/30 disabled:cursor-not-allowed transition-all"
           >
-            {submitting ? "Transmitting…" : "Seal Certificate"}
+            {submitting ? "Sealing…" : "Stamp my pass"}
           </button>
         )}
 
@@ -184,10 +184,10 @@ export function BondCertificate() {
           >
             <div className="flex flex-col items-center gap-1">
               <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-white/70">
-                {existed ? "Already on the list" : "Allocation reserved"}
+                {existed ? "Already on the list" : "Your pass is stamped"}
               </span>
               <span className="font-mono text-[10px] text-white/40">
-                Position {serialText} · keep this certificate
+                Position {serialText} · keep this pass
               </span>
             </div>
 
@@ -198,7 +198,7 @@ export function BondCertificate() {
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-[4px] font-mono text-[10px] uppercase tracking-[0.2em] bg-white text-surface-0 hover:bg-white/90 disabled:bg-white/[0.2] disabled:cursor-not-allowed transition-all"
               >
                 <DownloadIcon />
-                {downloading ? "Rendering…" : "Download certificate"}
+                {downloading ? "Rendering…" : "Download pass"}
               </button>
               <button
                 onClick={handleReset}

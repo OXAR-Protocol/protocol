@@ -16,11 +16,11 @@ export function BondCenterpiece() {
       </div>
 
       <div className="mt-2 font-mono text-[11px] uppercase tracking-[0.28em] text-white/45">
-        to the OXAR Protocol · Alpha
+        to the OXAR · Beta
       </div>
 
       <div className="mt-5 font-mono text-[10px] uppercase tracking-[0.2em] text-white/35">
-        First allocation · Founder updates · Direct line to the team
+        First in line · Founder updates · Direct line to the team
       </div>
     </div>
   );

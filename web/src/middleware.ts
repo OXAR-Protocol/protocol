@@ -4,13 +4,14 @@ const APP_DOMAIN = "app.oxar.app";
 const MARKETING_DOMAIN = "oxar.app";
 
 const APP_ROUTES = [
-  "/vaults",
-  "/marketplace",
-  "/portfolio",
-  "/profile",
+  "/home",
+  "/yield",
+  "/pile",
+  "/you",
+  "/markets",
+  "/rules",
+  "/onboarding",
   "/login",
-  "/vault",
-  "/gate",
 ];
 
 const MARKETING_ROUTES = [
@@ -48,9 +49,9 @@ export function middleware(req: NextRequest) {
   const isApp = host === APP_DOMAIN;
   const isMarketing = host === MARKETING_DOMAIN;
 
-  // Bare app.oxar.app/ → send users into the app (AccessGate will show if needed).
+  // Bare app.oxar.app/ → send users to home.
   if (isApp && pathname === "/") {
-    const url = new URL(`https://${APP_DOMAIN}/vaults${search}`);
+    const url = new URL(`https://${APP_DOMAIN}/home${search}`);
     return NextResponse.redirect(url, 307);
   }
 

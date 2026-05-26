@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, ArrowLeftRight, Wallet, User } from "lucide-react";
+import { Home, TrendingUp, Users, User } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 
 const tabs = [
-  { href: "/vaults", label: "Explore", icon: Compass },
-  { href: "/marketplace", label: "Market", icon: ArrowLeftRight },
-  { href: "/portfolio", label: "Portfolio", icon: Wallet },
-  { href: "/profile", label: "Profile", icon: User },
+  { href: "/home", label: "Home", icon: Home },
+  { href: "/yield", label: "Yield", icon: TrendingUp },
+  { href: "/pile", label: "Pile", icon: Users },
+  { href: "/you", label: "You", icon: User },
 ] as const;
 
 export function TabBar() {

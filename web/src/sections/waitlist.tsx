@@ -26,7 +26,7 @@ export function Waitlist() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <SectionLabel>Early Access · Limited Allocation</SectionLabel>
+          <SectionLabel>Early access · Coming in 8 weeks</SectionLabel>
         </motion.div>
 
         <motion.h2
@@ -36,9 +36,9 @@ export function Waitlist() {
           transition={{ duration: 0.6, delay: 0.05 }}
           className="font-sans font-normal text-[clamp(2rem,5vw,3rem)] leading-[1.1] text-white max-w-[760px]"
         >
-          Reserve your place.
+          Be first to wake up your money.
           <br />
-          <span className="text-white/60">Stamp the bond.</span>
+          <span className="text-white/60">Bring friends along.</span>
         </motion.h2>
 
         <motion.p
@@ -48,8 +48,8 @@ export function Waitlist() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mt-2 font-mono text-sm text-white/45 max-w-[520px] leading-relaxed"
         >
-          Add your email, stamp the seal — your place in the OXAR alpha is
-          locked. You&apos;ll get priority access when we open.
+          Drop your email. We'll ping you when OXAR opens — group beta first,
+          public launch right after. Invite friends to skip the queue.
         </motion.p>
       </div>
 

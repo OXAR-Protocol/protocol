@@ -55,20 +55,20 @@ function StatCard({
 
 const STATS = [
   {
-    format: (v: number) => `$${v}B+`,
-    end: 230,
-    label: "stablecoins sitting idle at 0% yield",
+    format: (v: number) => `${v}%`,
+    end: 0,
+    label: "most crypto wallets earn this on their USDC",
   },
   {
     format: (v: number) => `${v}%`,
     end: 4,
-    label: "best on-chain yield today (US Treasuries)",
+    label: "best high-yield savings account, requires bank",
   },
   {
     format: (v: number, v2?: number) => `${v}-${v2}%`,
-    end: 4,
-    endSecondary: 18,
-    label: "emerging market bond yields, untapped on-chain",
+    end: 5,
+    endSecondary: 12,
+    label: "what your money earns with OXAR. withdraw anytime.",
     accent: true,
   },
 ];
@@ -122,7 +122,7 @@ export function Problem() {
       <div className="relative max-w-[1200px] mx-auto">
         <AnimatedSection>
           <SectionLabel>The Problem</SectionLabel>
-          <SectionTitle>$230B+ in stablecoins earning nothing</SectionTitle>
+          <SectionTitle>Your money is sleeping</SectionTitle>
         </AnimatedSection>
 
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -141,9 +141,9 @@ export function Problem() {
 
         <AnimatedSection delay={0.4}>
           <p className="mt-12 font-mono text-base text-white/50 leading-relaxed max-w-2xl mx-auto text-center [&>strong]:text-white [&>strong]:font-normal">
-            On-chain treasuries proved demand at 4% APY. Emerging markets
-            offer <strong>up to 4.5x more</strong> — but have zero on-chain
-            access. Until now.
+            Banks force a choice: high yield <strong>or</strong> instant access.
+            We break the tradeoff. Earn like an investor.
+            <strong> Access like savings.</strong>
           </p>
         </AnimatedSection>
       </div>

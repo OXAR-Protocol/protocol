@@ -50,7 +50,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <SectionLabel>Live on Solana · Devnet</SectionLabel>
+          <SectionLabel>Coming soon · Solana</SectionLabel>
         </motion.div>
 
         <motion.h1
@@ -59,26 +59,26 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
         >
-          Real-world yields.
+          Where does your money
           <br />
-          On-chain access.
+          sleep?
         </motion.h1>
 
         <FadeIn delay={0.4}>
           <p className="mt-6 font-mono text-base text-white/50 leading-relaxed max-w-xl mx-auto [&>strong]:text-white [&>strong]:font-normal">
-            Emerging market government bonds — tokenized on Solana.{" "}
-            <strong>No bank. No broker. Just yield.</strong>
+            Wake it up. Earn yield. Save together.{" "}
+            <strong>No bank. No broker. No lock.</strong>
           </p>
         </FadeIn>
 
         <FadeIn delay={0.6}>
           <div className="mt-10 flex items-center justify-center gap-4 flex-wrap pointer-events-auto">
-          <Button variant="filled" onClick={scrollToWaitlist}>
-            Get Early Access
-          </Button>
-          <Button variant="ghost" href="#how-it-works">
-            Learn more ↓
-          </Button>
+            <Button variant="filled" onClick={scrollToWaitlist}>
+              Get early access
+            </Button>
+            <Button variant="ghost" href="#how-it-works">
+              See how it works ↓
+            </Button>
           </div>
         </FadeIn>
 

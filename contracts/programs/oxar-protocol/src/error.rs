@@ -2,34 +2,53 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum OxarError {
+    // ===== Vault =====
     #[msg("Vault is not active")]
     VaultNotActive,
+    #[msg("Vault is in wrong state for this operation")]
+    InvalidVaultState,
+    #[msg("Vault type mismatch (personal vs group)")]
+    VaultTypeMismatch,
+
+    // ===== Deposits / withdrawals =====
     #[msg("Deposit amount must be greater than zero")]
     ZeroDeposit,
-    #[msg("Insufficient funds for this operation")]
+    #[msg("Withdrawal amount must be greater than zero")]
+    ZeroWithdrawal,
+    #[msg("Withdrawal exceeds your share balance")]
+    InsufficientShares,
+    #[msg("Insufficient funds in pool for withdrawal")]
     InsufficientFunds,
-    #[msg("Bond has not matured yet")]
-    NotMatured,
-    #[msg("Bond has already matured, no new deposits allowed")]
-    AlreadyMatured,
-    #[msg("NAV calculation overflow")]
+    #[msg("Deposit below minimum threshold")]
+    BelowMinimumDeposit,
+
+    // ===== Math =====
+    #[msg("Arithmetic overflow")]
     MathOverflow,
-    #[msg("No time has elapsed since last NAV update")]
-    NoTimeElapsed,
-    #[msg("Listing amount must be greater than zero")]
-    ZeroListingAmount,
-    #[msg("Listing price must be greater than zero")]
-    ZeroListingPrice,
-    #[msg("Seller cannot buy their own listing")]
-    SelfPurchase,
-    #[msg("Insufficient tokens for claim")]
-    InsufficientTokens,
-    #[msg("Vault still has outstanding shares, cannot close")]
-    VaultNotEmpty,
+
+    // ===== Group vault =====
+    #[msg("Group vault is full")]
+    GroupVaultFull,
+    #[msg("Invite code is invalid")]
+    InvalidInviteCode,
+    #[msg("Already a member of this group vault")]
+    AlreadyMember,
+    #[msg("Not a member of this group vault")]
+    NotMember,
+    #[msg("Goal deadline is in the past")]
+    InvalidDeadline,
+
+    // ===== Rules =====
+    #[msg("Rule destinations must sum to 100% (10_000 bps)")]
+    InvalidRuleDestinations,
+    #[msg("Rule is not active")]
+    RuleInactive,
+
+    // ===== System =====
+    #[msg("Unauthorized: signer does not have permission")]
+    Unauthorized,
+    #[msg("This instruction is not yet implemented")]
+    NotImplemented,
     #[msg("Vault pool is already set up")]
     VaultAlreadySetup,
-    #[msg("USDC pool still has a non-zero balance, withdraw all funds before closing")]
-    PoolNotEmpty,
-    #[msg("Unauthorized: only the protocol admin can perform this action")]
-    Unauthorized,
 }
