@@ -33,6 +33,8 @@ pub mod route_yield_withdraw;
 // Adapter registry — whitelist of yield adapter programs (Sprint A)
 // ============================================================================
 pub mod initialize_adapter_registry;
+pub mod whitelist_adapter;
+pub mod pause_adapter;
 
 // Re-exports for lib.rs
 pub use initialize_personal_vault::*;
@@ -55,3 +57,5 @@ pub use route_yield_deposit::*;
 pub use route_yield_withdraw::*;
 
 pub use initialize_adapter_registry::*;
+pub use whitelist_adapter::*;
+pub use pause_adapter::*;

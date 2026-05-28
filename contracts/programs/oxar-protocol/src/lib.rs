@@ -113,4 +113,16 @@ pub mod oxar_protocol {
     pub fn initialize_adapter_registry(ctx: Context<InitializeAdapterRegistry>) -> Result<()> {
         instructions::initialize_adapter_registry::handler(ctx)
     }
+
+    pub fn whitelist_adapter(
+        ctx: Context<WhitelistAdapter>,
+        name: String,
+        interface_version: u8,
+    ) -> Result<()> {
+        instructions::whitelist_adapter::handler(ctx, name, interface_version)
+    }
+
+    pub fn pause_adapter(ctx: Context<PauseAdapter>, paused: bool) -> Result<()> {
+        instructions::pause_adapter::handler(ctx, paused)
+    }
 }
