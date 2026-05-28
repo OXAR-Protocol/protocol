@@ -32,38 +32,11 @@ const DEFAULT_FEE_BPS = 1000; // 10%
 /// expose it anymore; risk is implicit via yield-source choice.
 const LEGACY_RISK_PLACEHOLDER = { balanced: {} };
 
-/// Yield-source on-chain variant mapped from the client-side catalog id.
-function yieldSourceVariant(yieldSourceId: string): Record<string, unknown> {
-  switch (yieldSourceId) {
-    case "kamino-usdc":
-      return { kaminoUsdc: { pool: PublicKey.default } };
-    case "marginfi-usdc":
-      return { marginFiUsdc: { bank: PublicKey.default } };
-    case "jlp":
-      return { jupiterLp: { jlpMint: PublicKey.default } };
-    case "maple-solana":
-      return { mapleSolana: { pool: PublicKey.default } };
-    case "drift-insurance":
-      return { driftInsurance: { vault: PublicKey.default } };
-    case "ondo-usdy":
-    case "mountain-usdm":
-    case "openeden-tbill":
-    case "sky-sdai":
-    case "ethena-susde":
-      return { deloraCrossChain: { sourceId: new BN(crossChainSourceId(yieldSourceId)) } };
-    default:
-      return { idle: {} };
-  }
-}
-
-function crossChainSourceId(id: string): number {
-  // Stable mapping for off-chain Delora source ids. Append-only.
-  if (id === "ondo-usdy") return 1;
-  if (id === "ethena-susde") return 2;
-  if (id === "sky-sdai") return 3;
-  if (id === "mountain-usdm") return 4;
-  if (id === "openeden-tbill") return 5;
-  return 0;
+/// Returns the adapter program pubkey for the given yield source id.
+/// All sources map to Pubkey.default (Idle) until reference adapters are deployed.
+function adapterProgramForYieldSource(_yieldSourceId: string): PublicKey {
+  // TODO(Task 5+): return real adapter program IDs when reference adapters are deployed.
+  return PublicKey.default;
 }
 
 export function useVaultActions(yieldSourceId: string) {
@@ -112,7 +85,7 @@ export function useVaultActions(yieldSourceId: string) {
         .initializePersonalVault({
           vaultId,
           riskTemplate: LEGACY_RISK_PLACEHOLDER as any,
-          yieldSource: yieldSourceVariant(yieldSourceId) as any,
+          adapterProgram: adapterProgramForYieldSource(yieldSourceId),
           feeBps: DEFAULT_FEE_BPS,
         } as any)
         .accounts({

@@ -13,13 +13,13 @@ pub struct Vault {
     pub usdc_mint: Pubkey,
     pub vault_token_mint: Pubkey,     // Share mint
     pub usdc_pool: Pubkey,            // Hot pool (liquid USDC for fast withdrawals)
-    pub yield_source: YieldSource,
+    pub adapter_program: Pubkey,      // Pubkey::default() = Idle (no external routing)
     pub risk_template: RiskTemplate,
     pub nav_per_share: u64,           // Current value per share, NAV_PRECISION
     pub total_deposits: u64,          // Net USDC principal (deposits − withdrawals, saturating). NOT cumulative.
     pub total_shares: u64,            // Total share supply
     pub hot_pool_balance: u64,        // USDC in hot pool (instant withdrawable)
-    pub cold_capital: u64,            // USDC routed to yield_source
+    pub cold_capital: u64,            // USDC routed to adapter_program (0 if Idle)
     pub last_update_ts: i64,
     pub is_active: bool,
     pub fee_bps: u16,                 // Protocol performance fee in basis points
@@ -38,22 +38,6 @@ pub enum RiskTemplate {
     Conservative,  // ~5% APY target
     Balanced,      // ~7% APY target
     Aggressive,    // ~10% APY target
-}
-
-/// Where the cold capital is routed.
-///
-/// Each variant carries minimal data — full integration details live in the
-/// adapter contracts. `source_id` references off-chain Delora source for
-/// cross-chain yields.
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
-pub enum YieldSource {
-    Idle,                                // No yield, USDC just sits (MVP fallback)
-    KaminoUsdc { pool: Pubkey },         // Kamino USDC lending
-    JupiterLp { jlp_mint: Pubkey },      // Jupiter Perps LP token
-    MapleSolana { pool: Pubkey },        // Maple syrupUSDC pool
-    MarginFiUsdc { bank: Pubkey },       // MarginFi USDC bank
-    DriftInsurance { vault: Pubkey },    // Drift Insurance Fund vault
-    DeloraCrossChain { source_id: u64 }, // Off-chain Delora source (Ondo, USDM, USDY, TBILL, sUSDe, sDAI...)
 }
 
 // ============================================================================

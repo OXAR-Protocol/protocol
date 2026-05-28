@@ -121,7 +121,7 @@ describe("oxar-protocol", () => {
         .initializePersonalVault({
           vaultId: ALICE_VAULT_ID,
           riskTemplate: { conservative: {} } as any,
-          yieldSource: { idle: {} } as any,
+          adapterProgram: PublicKey.default,
           feeBps: 1000, // 10%
         } as any)
         .accounts({
@@ -179,7 +179,7 @@ describe("oxar-protocol", () => {
         .initializePersonalVault({
           vaultId: otherVaultId,
           riskTemplate: { balanced: {} } as any,
-          yieldSource: { idle: {} } as any,
+          adapterProgram: PublicKey.default,
           feeBps: 1000,
         } as any)
         .accounts({
@@ -400,7 +400,7 @@ describe("oxar-protocol", () => {
         .initializePersonalVault({
           vaultId: bobVaultId,
           riskTemplate: { aggressive: {} } as any,
-          yieldSource: { idle: {} } as any,
+          adapterProgram: PublicKey.default,
           feeBps: 1500,
         } as any)
         .accounts({

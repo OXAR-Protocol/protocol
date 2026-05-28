@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::constants::*;
 use crate::error::OxarError;
-use crate::state::{Vault, YieldSource};
+use crate::state::Vault;
 
 /// Route `amount` USDC from the vault's hot pool into its cold yield source.
 ///
@@ -41,33 +41,20 @@ pub fn handler(ctx: Context<RouteYieldDeposit>, amount: u64) -> Result<()> {
     let vault = &mut ctx.accounts.vault;
     require!(amount <= vault.hot_pool_balance, OxarError::InsufficientFunds);
 
-    match vault.yield_source {
-        YieldSource::Idle => {
-            vault.hot_pool_balance = vault
-                .hot_pool_balance
-                .checked_sub(amount)
-                .ok_or(OxarError::MathOverflow)?;
-            vault.cold_capital = vault
-                .cold_capital
-                .checked_add(amount)
-                .ok_or(OxarError::MathOverflow)?;
-
-            msg!(
-                "Idle route: {} USDC hot->cold for vault {}",
-                amount,
-                vault.key()
-            );
-            Ok(())
-        }
-        YieldSource::KaminoUsdc { .. }
-        | YieldSource::JupiterLp { .. }
-        | YieldSource::MapleSolana { .. }
-        | YieldSource::MarginFiUsdc { .. }
-        | YieldSource::DriftInsurance { .. }
-        | YieldSource::DeloraCrossChain { .. } => {
-            // External adapter CPIs land here in future phases. Each variant
-            // will require its own remaining_accounts schema and dispatcher.
-            Err(error!(OxarError::NotImplemented))
-        }
+    if vault.adapter_program == Pubkey::default() {
+        // Idle path: bookkeeping only
+        vault.hot_pool_balance = vault
+            .hot_pool_balance
+            .checked_sub(amount)
+            .ok_or(OxarError::MathOverflow)?;
+        vault.cold_capital = vault
+            .cold_capital
+            .checked_add(amount)
+            .ok_or(OxarError::MathOverflow)?;
+        msg!("Idle route: {} USDC bookkeeping hot->cold", amount);
+        Ok(())
+    } else {
+        // Adapter dispatch lands in Sprint A · Task 5
+        Err(error!(OxarError::NotImplemented))
     }
 }

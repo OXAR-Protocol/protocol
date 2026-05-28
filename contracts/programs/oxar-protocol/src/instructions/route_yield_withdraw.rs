@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::constants::*;
 use crate::error::OxarError;
-use crate::state::{Vault, YieldSource};
+use crate::state::Vault;
 
 /// Pull `amount` USDC from the vault's cold yield source back into its hot pool.
 ///
@@ -33,31 +33,20 @@ pub fn handler(ctx: Context<RouteYieldWithdraw>, amount: u64) -> Result<()> {
     let vault = &mut ctx.accounts.vault;
     require!(amount <= vault.cold_capital, OxarError::InsufficientFunds);
 
-    match vault.yield_source {
-        YieldSource::Idle => {
-            vault.cold_capital = vault
-                .cold_capital
-                .checked_sub(amount)
-                .ok_or(OxarError::MathOverflow)?;
-            vault.hot_pool_balance = vault
-                .hot_pool_balance
-                .checked_add(amount)
-                .ok_or(OxarError::MathOverflow)?;
-
-            msg!(
-                "Idle unroute: {} USDC cold->hot for vault {}",
-                amount,
-                vault.key()
-            );
-            Ok(())
-        }
-        YieldSource::KaminoUsdc { .. }
-        | YieldSource::JupiterLp { .. }
-        | YieldSource::MapleSolana { .. }
-        | YieldSource::MarginFiUsdc { .. }
-        | YieldSource::DriftInsurance { .. }
-        | YieldSource::DeloraCrossChain { .. } => {
-            Err(error!(OxarError::NotImplemented))
-        }
+    if vault.adapter_program == Pubkey::default() {
+        // Idle path: bookkeeping only
+        vault.cold_capital = vault
+            .cold_capital
+            .checked_sub(amount)
+            .ok_or(OxarError::MathOverflow)?;
+        vault.hot_pool_balance = vault
+            .hot_pool_balance
+            .checked_add(amount)
+            .ok_or(OxarError::MathOverflow)?;
+        msg!("Idle unroute: {} USDC bookkeeping cold->hot", amount);
+        Ok(())
+    } else {
+        // Adapter dispatch lands in Sprint A · Task 5
+        Err(error!(OxarError::NotImplemented))
     }
 }

@@ -553,6 +553,52 @@
       ]
     },
     {
+      "name": "initialize_adapter_registry",
+      "discriminator": [
+        14,
+        10,
+        135,
+        183,
+        110,
+        127,
+        200,
+        59
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "initialize_group_vault",
       "discriminator": [
         245,
@@ -972,6 +1018,82 @@
       "args": []
     },
     {
+      "name": "pause_adapter",
+      "discriminator": [
+        28,
+        176,
+        64,
+        210,
+        204,
+        183,
+        164,
+        160
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "signer": true
+        },
+        {
+          "name": "registry",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "adapter_entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  97,
+                  112,
+                  116,
+                  101,
+                  114,
+                  95,
+                  101,
+                  110,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "adapter_entry.adapter_program",
+                "account": "AdapterEntry"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "active",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "route_yield_deposit",
       "discriminator": [
         43,
@@ -1141,6 +1263,94 @@
       "args": []
     },
     {
+      "name": "whitelist_adapter",
+      "discriminator": [
+        62,
+        74,
+        124,
+        166,
+        112,
+        117,
+        86,
+        43
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "adapter_entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  97,
+                  112,
+                  116,
+                  101,
+                  114,
+                  95,
+                  101,
+                  110,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "adapter_program"
+              }
+            ]
+          }
+        },
+        {
+          "name": "adapter_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "interface_version",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "withdraw",
       "discriminator": [
         183,
@@ -1250,6 +1460,32 @@
     }
   ],
   "accounts": [
+    {
+      "name": "AdapterEntry",
+      "discriminator": [
+        204,
+        228,
+        11,
+        242,
+        235,
+        250,
+        45,
+        145
+      ]
+    },
+    {
+      "name": "AdapterRegistry",
+      "discriminator": [
+        27,
+        187,
+        195,
+        109,
+        0,
+        66,
+        232,
+        31
+      ]
+    },
     {
       "name": "GroupMember",
       "discriminator": [
@@ -1398,6 +1634,26 @@
       "code": 6018,
       "name": "VaultAlreadySetup",
       "msg": "Vault pool is already set up"
+    },
+    {
+      "code": 6019,
+      "name": "RegistryFull",
+      "msg": "Adapter registry full — MAX_ADAPTERS reached"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidAdapterName",
+      "msg": "Adapter name is empty or too long (max 32 bytes)"
+    },
+    {
+      "code": 6021,
+      "name": "UnsupportedInterfaceVersion",
+      "msg": "Adapter interface version not supported"
+    },
+    {
+      "code": 6022,
+      "name": "InvalidAdapterProgram",
+      "msg": "Adapter program account is not executable"
     }
   ],
   "types": [
@@ -1427,6 +1683,61 @@
           },
           {
             "name": "destinations_used",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AdapterEntry",
+      "docs": [
+        "One entry per whitelisted adapter program. PDA seeded by adapter program id."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "adapter_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "interface_version",
+            "type": "u8"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "is_active",
+            "type": "bool"
+          },
+          {
+            "name": "added_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AdapterRegistry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "adapter_count",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
             "type": "u8"
           }
         ]
@@ -1739,12 +2050,8 @@
             }
           },
           {
-            "name": "yield_source",
-            "type": {
-              "defined": {
-                "name": "YieldSource"
-              }
-            }
+            "name": "adapter_program",
+            "type": "pubkey"
           },
           {
             "name": "fee_bps",
@@ -1944,12 +2251,8 @@
             "type": "pubkey"
           },
           {
-            "name": "yield_source",
-            "type": {
-              "defined": {
-                "name": "YieldSource"
-              }
-            }
+            "name": "adapter_program",
+            "type": "pubkey"
           },
           {
             "name": "risk_template",
@@ -2012,78 +2315,6 @@
           },
           {
             "name": "Group"
-          }
-        ]
-      }
-    },
-    {
-      "name": "YieldSource",
-      "docs": [
-        "Where the cold capital is routed.",
-        "",
-        "Each variant carries minimal data — full integration details live in the",
-        "adapter contracts. `source_id` references off-chain Delora source for",
-        "cross-chain yields."
-      ],
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Idle"
-          },
-          {
-            "name": "KaminoUsdc",
-            "fields": [
-              {
-                "name": "pool",
-                "type": "pubkey"
-              }
-            ]
-          },
-          {
-            "name": "JupiterLp",
-            "fields": [
-              {
-                "name": "jlp_mint",
-                "type": "pubkey"
-              }
-            ]
-          },
-          {
-            "name": "MapleSolana",
-            "fields": [
-              {
-                "name": "pool",
-                "type": "pubkey"
-              }
-            ]
-          },
-          {
-            "name": "MarginFiUsdc",
-            "fields": [
-              {
-                "name": "bank",
-                "type": "pubkey"
-              }
-            ]
-          },
-          {
-            "name": "DriftInsurance",
-            "fields": [
-              {
-                "name": "vault",
-                "type": "pubkey"
-              }
-            ]
-          },
-          {
-            "name": "DeloraCrossChain",
-            "fields": [
-              {
-                "name": "source_id",
-                "type": "u64"
-              }
-            ]
           }
         ]
       }

@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::constants::*;
 use crate::error::OxarError;
-use crate::state::{Vault, YieldSource};
+use crate::state::Vault;
 
 /// Update vault NAV by reading underlying yield source value.
 ///
@@ -43,20 +43,11 @@ pub fn handler(ctx: Context<CrankNav>) -> Result<()> {
         return Ok(());
     }
 
-    match vault.yield_source {
-        YieldSource::Idle => {
-            // No yield by design — NAV stays unchanged.
-        }
-        YieldSource::KaminoUsdc { .. }
-        | YieldSource::JupiterLp { .. }
-        | YieldSource::MapleSolana { .. }
-        | YieldSource::MarginFiUsdc { .. }
-        | YieldSource::DriftInsurance { .. }
-        | YieldSource::DeloraCrossChain { .. } => {
-            // Phase D: read adapter, compute new total_value, derive nav_per_share.
-            // For now, no-op until adapter CPIs are wired.
-            msg!("Yield source adapter not yet implemented — NAV unchanged");
-        }
+    if vault.adapter_program == Pubkey::default() {
+        // No yield by design — NAV stays unchanged.
+    } else {
+        // Adapter NAV update lands in Sprint A · Task 7
+        msg!("Adapter NAV update not yet implemented — NAV unchanged");
     }
 
     vault.last_update_ts = clock.unix_timestamp;
