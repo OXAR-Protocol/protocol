@@ -63,7 +63,6 @@ pub fn handler(ctx: Context<CreateRule>, params: CreateRuleParams) -> Result<()>
         OxarError::InvalidRuleDestinations
     );
 
-    let clock = Clock::get()?;
     let rule = &mut ctx.accounts.rule;
     rule.owner = ctx.accounts.owner.key();
     rule.rule_id = params.rule_id;
@@ -81,6 +80,5 @@ pub fn handler(ctx: Context<CreateRule>, params: CreateRuleParams) -> Result<()>
         ctx.accounts.owner.key(),
         used
     );
-    let _ = clock; // available if future logic needs it
     Ok(())
 }

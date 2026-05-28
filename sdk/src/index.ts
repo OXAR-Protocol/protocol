@@ -8,11 +8,12 @@ export {
   USDC_DECIMALS,
   NAV_PRECISION,
   YIELD_SOURCES,
-  RISK_TEMPLATES,
+  APY_BUCKETS,
   getYieldSourceById,
+  vaultIdForYieldSource,
 } from "./constants";
 
-export type { YieldSourceConfig, RiskTemplate } from "./constants";
+export type { YieldSourceConfig, ApyBucket, ApyBucketConfig } from "./constants";
 
 // ============================================================================
 // IDL + types

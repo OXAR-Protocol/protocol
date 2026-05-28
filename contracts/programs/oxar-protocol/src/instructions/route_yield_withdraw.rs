@@ -54,6 +54,8 @@ pub fn handler(ctx: Context<RouteYieldWithdraw>, amount: u64) -> Result<()> {
         YieldSource::KaminoUsdc { .. }
         | YieldSource::JupiterLp { .. }
         | YieldSource::MapleSolana { .. }
+        | YieldSource::MarginFiUsdc { .. }
+        | YieldSource::DriftInsurance { .. }
         | YieldSource::DeloraCrossChain { .. } => {
             Err(error!(OxarError::NotImplemented))
         }

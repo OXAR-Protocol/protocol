@@ -1357,86 +1357,51 @@ export type OxarProtocol = {
         },
         {
             "code": 6009;
-            "name": "noTimeElapsed";
-            "msg": "No time has elapsed since last NAV update";
-        },
-        {
-            "code": 6010;
             "name": "groupVaultFull";
             "msg": "Group vault is full";
         },
         {
-            "code": 6011;
+            "code": 6010;
             "name": "invalidInviteCode";
             "msg": "Invite code is invalid";
         },
         {
-            "code": 6012;
+            "code": 6011;
             "name": "alreadyMember";
             "msg": "Already a member of this group vault";
         },
         {
-            "code": 6013;
+            "code": 6012;
             "name": "notMember";
             "msg": "Not a member of this group vault";
         },
         {
-            "code": 6014;
+            "code": 6013;
             "name": "invalidDeadline";
             "msg": "Goal deadline is in the past";
         },
         {
-            "code": 6015;
+            "code": 6014;
             "name": "invalidRuleDestinations";
             "msg": "Rule destinations must sum to 100% (10_000 bps)";
         },
         {
-            "code": 6016;
-            "name": "ruleNotTriggered";
-            "msg": "Rule has no active trigger";
-        },
-        {
-            "code": 6017;
+            "code": 6015;
             "name": "ruleInactive";
             "msg": "Rule is not active";
         },
         {
-            "code": 6018;
-            "name": "triggerConditionUnmet";
-            "msg": "Trigger condition not met";
-        },
-        {
-            "code": 6019;
-            "name": "zeroListingAmount";
-            "msg": "Listing amount must be greater than zero";
-        },
-        {
-            "code": 6020;
-            "name": "zeroListingPrice";
-            "msg": "Listing price must be greater than zero";
-        },
-        {
-            "code": 6021;
-            "name": "selfPurchase";
-            "msg": "Seller cannot buy their own listing";
-        },
-        {
-            "code": 6022;
-            "name": "insufficientTokens";
-            "msg": "Insufficient tokens";
-        },
-        {
-            "code": 6023;
+            "code": 6016;
             "name": "unauthorized";
             "msg": "Unauthorized: signer does not have permission";
         },
         {
-            "code": 6024;
+            "code": 6017;
             "name": "notImplemented";
             "msg": "This instruction is not yet implemented";
         },
         {
-            "code": 6025;
+            "code": 6018;
             "name": "vaultAlreadySetup";
             "msg": "Vault pool is already set up";
         }
@@ -2095,6 +2060,24 @@ export type OxarProtocol = {
                         "fields": [
                             {
                                 "name": "pool";
+                                "type": "pubkey";
+                            }
+                        ];
+                    },
+                    {
+                        "name": "marginFiUsdc";
+                        "fields": [
+                            {
+                                "name": "bank";
+                                "type": "pubkey";
+                            }
+                        ];
+                    },
+                    {
+                        "name": "driftInsurance";
+                        "fields": [
+                            {
+                                "name": "vault";
                                 "type": "pubkey";
                             }
                         ];

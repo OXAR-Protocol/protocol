@@ -69,3 +69,4 @@ outreach/*.xlsx
 *.key
 secrets/
 .gstack/
+.vercel

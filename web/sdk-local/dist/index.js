@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.derivePoolPda = exports.deriveMintPda = exports.deriveRulePda = exports.deriveGroupMemberPda = exports.deriveGroupVaultPda = exports.derivePersonalVaultPda = exports.IDL = exports.getYieldSourceById = exports.RISK_TEMPLATES = exports.YIELD_SOURCES = exports.NAV_PRECISION = exports.USDC_DECIMALS = exports.INITIAL_NAV = exports.RPC_URL = exports.PROGRAM_ID = void 0;
+exports.derivePoolPda = exports.deriveMintPda = exports.deriveRulePda = exports.deriveGroupMemberPda = exports.deriveGroupVaultPda = exports.derivePersonalVaultPda = exports.IDL = exports.vaultIdForYieldSource = exports.getYieldSourceById = exports.APY_BUCKETS = exports.YIELD_SOURCES = exports.NAV_PRECISION = exports.USDC_DECIMALS = exports.INITIAL_NAV = exports.RPC_URL = exports.PROGRAM_ID = void 0;
 // ============================================================================
 // Constants
 // ============================================================================
@@ -14,8 +14,9 @@ Object.defineProperty(exports, "INITIAL_NAV", { enumerable: true, get: function 
 Object.defineProperty(exports, "USDC_DECIMALS", { enumerable: true, get: function () { return constants_1.USDC_DECIMALS; } });
 Object.defineProperty(exports, "NAV_PRECISION", { enumerable: true, get: function () { return constants_1.NAV_PRECISION; } });
 Object.defineProperty(exports, "YIELD_SOURCES", { enumerable: true, get: function () { return constants_1.YIELD_SOURCES; } });
-Object.defineProperty(exports, "RISK_TEMPLATES", { enumerable: true, get: function () { return constants_1.RISK_TEMPLATES; } });
+Object.defineProperty(exports, "APY_BUCKETS", { enumerable: true, get: function () { return constants_1.APY_BUCKETS; } });
 Object.defineProperty(exports, "getYieldSourceById", { enumerable: true, get: function () { return constants_1.getYieldSourceById; } });
+Object.defineProperty(exports, "vaultIdForYieldSource", { enumerable: true, get: function () { return constants_1.vaultIdForYieldSource; } });
 // ============================================================================
 // IDL + types
 // ============================================================================

@@ -62,6 +62,8 @@ pub fn handler(ctx: Context<RouteYieldDeposit>, amount: u64) -> Result<()> {
         YieldSource::KaminoUsdc { .. }
         | YieldSource::JupiterLp { .. }
         | YieldSource::MapleSolana { .. }
+        | YieldSource::MarginFiUsdc { .. }
+        | YieldSource::DriftInsurance { .. }
         | YieldSource::DeloraCrossChain { .. } => {
             // External adapter CPIs land here in future phases. Each variant
             // will require its own remaining_accounts schema and dispatcher.

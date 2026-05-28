@@ -19,22 +19,54 @@ import {
   derivePersonalVaultPda,
   deriveMintPda,
   derivePoolPda,
+  vaultIdForYieldSource,
 } from "@oxar/sdk";
 import { CURRENT_USDC_MINT } from "@/lib/constants";
 
 import { useOxarProgram } from "./use-oxar-program";
-import { TEMPLATE_VAULT_ID, type TemplateKey } from "./use-personal-vault";
-
-const TEMPLATE_RISK_VARIANT: Record<TemplateKey, Record<string, {}>> = {
-  sleepy: { conservative: {} },
-  walking: { balanced: {} },
-  running: { aggressive: {} },
-};
 
 const DEFAULT_FEE_BPS = 1000; // 10%
-const DEFAULT_YIELD_SOURCE = { idle: {} };
 
-export function useVaultActions(template: TemplateKey) {
+/// On-chain risk_template is now a legacy field — we always send Balanced as a
+/// placeholder until the next breaking contract release strips it. UX doesn't
+/// expose it anymore; risk is implicit via yield-source choice.
+const LEGACY_RISK_PLACEHOLDER = { balanced: {} };
+
+/// Yield-source on-chain variant mapped from the client-side catalog id.
+function yieldSourceVariant(yieldSourceId: string): Record<string, unknown> {
+  switch (yieldSourceId) {
+    case "kamino-usdc":
+      return { kaminoUsdc: { pool: PublicKey.default } };
+    case "marginfi-usdc":
+      return { marginFiUsdc: { bank: PublicKey.default } };
+    case "jlp":
+      return { jupiterLp: { jlpMint: PublicKey.default } };
+    case "maple-solana":
+      return { mapleSolana: { pool: PublicKey.default } };
+    case "drift-insurance":
+      return { driftInsurance: { vault: PublicKey.default } };
+    case "ondo-usdy":
+    case "mountain-usdm":
+    case "openeden-tbill":
+    case "sky-sdai":
+    case "ethena-susde":
+      return { deloraCrossChain: { sourceId: new BN(crossChainSourceId(yieldSourceId)) } };
+    default:
+      return { idle: {} };
+  }
+}
+
+function crossChainSourceId(id: string): number {
+  // Stable mapping for off-chain Delora source ids. Append-only.
+  if (id === "ondo-usdy") return 1;
+  if (id === "ethena-susde") return 2;
+  if (id === "sky-sdai") return 3;
+  if (id === "mountain-usdm") return 4;
+  if (id === "openeden-tbill") return 5;
+  return 0;
+}
+
+export function useVaultActions(yieldSourceId: string) {
   const { program, provider, connection, walletAddress } = useOxarProgram();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,27 +85,34 @@ export function useVaultActions(template: TemplateKey) {
     [provider, connection, walletAddress],
   );
 
+  const vaultAddresses = useCallback(() => {
+    if (!walletAddress) return null;
+    const vaultIdBig = vaultIdForYieldSource(yieldSourceId);
+    const vaultId = new BN(vaultIdBig.toString());
+    const [vaultPda] = derivePersonalVaultPda(walletAddress, vaultIdBig);
+    const [vaultTokenMint] = deriveMintPda(vaultPda);
+    const [usdcPool] = derivePoolPda(vaultPda);
+    return { vaultId, vaultPda, vaultTokenMint, usdcPool };
+  }, [walletAddress, yieldSourceId]);
+
   const createVault = useCallback(async (): Promise<string | null> => {
     if (!program || !walletAddress) {
       setError("Wallet not connected");
       return null;
     }
+    const addrs = vaultAddresses();
+    if (!addrs) return null;
     setLoading(true);
     setError(null);
     try {
-      const vaultIdBig = BigInt(TEMPLATE_VAULT_ID[template]);
-      const vaultId = new BN(vaultIdBig.toString());
-      const [vaultPda] = derivePersonalVaultPda(walletAddress, vaultIdBig);
-      const [vaultTokenMint] = deriveMintPda(vaultPda);
-      const [usdcPool] = derivePoolPda(vaultPda);
+      const { vaultId, vaultPda, vaultTokenMint, usdcPool } = addrs;
       const usdcMint = new PublicKey(CURRENT_USDC_MINT);
 
-      // 1. initialize_personal_vault
       const initIx = await program.methods
         .initializePersonalVault({
           vaultId,
-          riskTemplate: TEMPLATE_RISK_VARIANT[template] as any,
-          yieldSource: DEFAULT_YIELD_SOURCE as any,
+          riskTemplate: LEGACY_RISK_PLACEHOLDER as any,
+          yieldSource: yieldSourceVariant(yieldSourceId) as any,
           feeBps: DEFAULT_FEE_BPS,
         } as any)
         .accounts({
@@ -87,7 +126,6 @@ export function useVaultActions(template: TemplateKey) {
         } as any)
         .instruction();
 
-      // 2. setup_vault_pool
       const setupIx = await program.methods
         .setupVaultPool()
         .accounts({
@@ -110,7 +148,7 @@ export function useVaultActions(template: TemplateKey) {
     } finally {
       setLoading(false);
     }
-  }, [program, walletAddress, template, send]);
+  }, [program, walletAddress, yieldSourceId, vaultAddresses, send]);
 
   const deposit = useCallback(
     async (amountUsdc: number): Promise<string | null> => {
@@ -118,19 +156,15 @@ export function useVaultActions(template: TemplateKey) {
         setError("Wallet not connected");
         return null;
       }
+      const addrs = vaultAddresses();
+      if (!addrs) return null;
       setLoading(true);
       setError(null);
       try {
-        const vaultIdBig = BigInt(TEMPLATE_VAULT_ID[template]);
-        const [vaultPda] = derivePersonalVaultPda(walletAddress, vaultIdBig);
-        const [vaultTokenMint] = deriveMintPda(vaultPda);
-        const [usdcPool] = derivePoolPda(vaultPda);
+        const { vaultPda, vaultTokenMint, usdcPool } = addrs;
         const usdcMint = new PublicKey(CURRENT_USDC_MINT);
 
-        const depositorUsdc = await getAssociatedTokenAddress(
-          usdcMint,
-          walletAddress,
-        );
+        const depositorUsdc = await getAssociatedTokenAddress(usdcMint, walletAddress);
         const depositorVaultToken = await getAssociatedTokenAddress(
           vaultTokenMint,
           walletAddress,
@@ -139,8 +173,6 @@ export function useVaultActions(template: TemplateKey) {
         const amountLamports = new BN(Math.floor(amountUsdc * 1_000_000));
 
         const tx = new Transaction();
-
-        // Create vault token ATA if not exists
         const ataInfo = await connection.getAccountInfo(depositorVaultToken);
         if (!ataInfo) {
           tx.add(
@@ -179,7 +211,7 @@ export function useVaultActions(template: TemplateKey) {
         setLoading(false);
       }
     },
-    [program, walletAddress, template, connection, send],
+    [program, walletAddress, vaultAddresses, connection, send],
   );
 
   const withdraw = useCallback(
@@ -188,23 +220,19 @@ export function useVaultActions(template: TemplateKey) {
         setError("Wallet not connected");
         return null;
       }
+      const addrs = vaultAddresses();
+      if (!addrs) return null;
       setLoading(true);
       setError(null);
       try {
-        const vaultIdBig = BigInt(TEMPLATE_VAULT_ID[template]);
-        const [vaultPda] = derivePersonalVaultPda(walletAddress, vaultIdBig);
-        const [vaultTokenMint] = deriveMintPda(vaultPda);
-        const [usdcPool] = derivePoolPda(vaultPda);
+        const { vaultPda, vaultTokenMint, usdcPool } = addrs;
         const usdcMint = new PublicKey(CURRENT_USDC_MINT);
 
         const withdrawerVaultToken = await getAssociatedTokenAddress(
           vaultTokenMint,
           walletAddress,
         );
-        const withdrawerUsdc = await getAssociatedTokenAddress(
-          usdcMint,
-          walletAddress,
-        );
+        const withdrawerUsdc = await getAssociatedTokenAddress(usdcMint, walletAddress);
 
         const ix = await program.methods
           .withdraw(shares)
@@ -230,7 +258,7 @@ export function useVaultActions(template: TemplateKey) {
         setLoading(false);
       }
     },
-    [program, walletAddress, template, send],
+    [program, walletAddress, vaultAddresses, send],
   );
 
   return { createVault, deposit, withdraw, loading, error };

@@ -17,13 +17,17 @@ export interface YieldSourceConfig {
     readonly available: boolean;
 }
 export declare const YIELD_SOURCES: readonly YieldSourceConfig[];
-export type RiskTemplate = "conservative" | "balanced" | "aggressive";
-export declare const RISK_TEMPLATES: Record<RiskTemplate, {
+export type ApyBucket = "sleepy" | "walking" | "running";
+export interface ApyBucketConfig {
+    readonly id: ApyBucket;
     readonly label: string;
     readonly emoji: string;
     readonly description: string;
-    readonly targetApy: number;
-    readonly sources: readonly string[];
-}>;
+    /** Returns true if a yield source falls into this bucket by APY. */
+    readonly matches: (apy: number) => boolean;
+}
+export declare const APY_BUCKETS: readonly ApyBucketConfig[];
 export declare function getYieldSourceById(id: string): YieldSourceConfig | undefined;
+/** Stable vault_id derived from yield-source id. Used for vault PDA. */
+export declare function vaultIdForYieldSource(yieldSourceId: string): bigint;
 export {};

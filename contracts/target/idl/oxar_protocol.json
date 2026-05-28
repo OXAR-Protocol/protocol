@@ -2059,6 +2059,24 @@
             ]
           },
           {
+            "name": "MarginFiUsdc",
+            "fields": [
+              {
+                "name": "bank",
+                "type": "pubkey"
+              }
+            ]
+          },
+          {
+            "name": "DriftInsurance",
+            "fields": [
+              {
+                "name": "vault",
+                "type": "pubkey"
+              }
+            ]
+          },
+          {
             "name": "DeloraCrossChain",
             "fields": [
               {

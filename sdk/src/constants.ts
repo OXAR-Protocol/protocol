@@ -37,6 +37,7 @@ export interface YieldSourceConfig {
 }
 
 export const YIELD_SOURCES: readonly YieldSourceConfig[] = [
+  // Foundation — Solana-native
   {
     id: "kamino-usdc",
     name: "Kamino USDC",
@@ -45,7 +46,17 @@ export const YIELD_SOURCES: readonly YieldSourceConfig[] = [
     baseApy: 5.5,
     riskLevel: "low",
     viaDelora: false,
-    available: false, // wired up in Phase D
+    available: false,
+  },
+  {
+    id: "marginfi-usdc",
+    name: "MarginFi USDC",
+    description: "USDC lending alternative to Kamino",
+    chain: "solana",
+    baseApy: 4.5,
+    riskLevel: "low",
+    viaDelora: false,
+    available: false,
   },
   {
     id: "jlp",
@@ -68,9 +79,20 @@ export const YIELD_SOURCES: readonly YieldSourceConfig[] = [
     available: false,
   },
   {
+    id: "drift-insurance",
+    name: "Drift Insurance Fund",
+    description: "Backstop liquidity for Drift Perps",
+    chain: "solana",
+    baseApy: 10.0,
+    riskLevel: "medium",
+    viaDelora: false,
+    available: false,
+  },
+  // RWA Treasuries — облигации США через Delora cross-chain
+  {
     id: "ondo-usdy",
     name: "Ondo USDY",
-    description: "Tokenized US Treasuries (cross-chain via Delora)",
+    description: "Tokenized US Treasuries · short duration",
     chain: "ethereum",
     baseApy: 5.0,
     riskLevel: "low",
@@ -78,66 +100,96 @@ export const YIELD_SOURCES: readonly YieldSourceConfig[] = [
     available: false,
   },
   {
-    id: "ethena-susde",
-    name: "Ethena sUSDe",
-    description: "DeFi stablecoin yield (cross-chain via Delora)",
+    id: "mountain-usdm",
+    name: "Mountain USDM",
+    description: "Retail-regulated US Treasuries (Bermuda)",
     chain: "ethereum",
-    baseApy: 11.0,
-    riskLevel: "high",
+    baseApy: 5.0,
+    riskLevel: "low",
     viaDelora: true,
     available: false,
   },
   {
+    id: "openeden-tbill",
+    name: "OpenEden TBILL",
+    description: "Institutional T-Bills with daily NAV",
+    chain: "ethereum",
+    baseApy: 5.2,
+    riskLevel: "low",
+    viaDelora: true,
+    available: false,
+  },
+  // Stable / advanced DeFi yields
+  {
     id: "sky-sdai",
     name: "Sky sDAI",
-    description: "Sky savings rate (cross-chain via Delora)",
+    description: "Sky (formerly Maker) savings rate",
     chain: "ethereum",
     baseApy: 6.5,
     riskLevel: "low",
     viaDelora: true,
     available: false,
   },
+  {
+    id: "ethena-susde",
+    name: "Ethena sUSDe",
+    description: "Delta-neutral stablecoin yield (advanced)",
+    chain: "ethereum",
+    baseApy: 11.0,
+    riskLevel: "high",
+    viaDelora: true,
+    available: false,
+  },
 ];
 
 // ============================================================================
-// Risk templates — opinionated allocations
+// APY filter buckets — UI chips on /yield marketplace
 // ============================================================================
 
-export type RiskTemplate = "conservative" | "balanced" | "aggressive";
+export type ApyBucket = "sleepy" | "walking" | "running";
 
-export const RISK_TEMPLATES: Record<
-  RiskTemplate,
+export interface ApyBucketConfig {
+  readonly id: ApyBucket;
+  readonly label: string;
+  readonly emoji: string;
+  readonly description: string;
+  /** Returns true if a yield source falls into this bucket by APY. */
+  readonly matches: (apy: number) => boolean;
+}
+
+export const APY_BUCKETS: readonly ApyBucketConfig[] = [
   {
-    readonly label: string;
-    readonly emoji: string;
-    readonly description: string;
-    readonly targetApy: number;
-    readonly sources: readonly string[]; // yield source IDs
-  }
-> = {
-  conservative: {
+    id: "sleepy",
     label: "Sleepy",
     emoji: "😴",
-    description: "Slow but steady",
-    targetApy: 5,
-    sources: ["kamino-usdc", "ondo-usdy"],
+    description: "low APY · low risk",
+    matches: (apy) => apy < 6,
   },
-  balanced: {
+  {
+    id: "walking",
     label: "Walking",
     emoji: "🚶",
-    description: "Balanced pace",
-    targetApy: 7,
-    sources: ["kamino-usdc", "maple-solana", "jlp"],
+    description: "balanced APY",
+    matches: (apy) => apy >= 6 && apy < 9,
   },
-  aggressive: {
+  {
+    id: "running",
     label: "Running",
     emoji: "🏃",
-    description: "Fast & loud",
-    targetApy: 10,
-    sources: ["jlp", "ethena-susde"],
+    description: "high APY · loud risk",
+    matches: (apy) => apy >= 9,
   },
-};
+];
 
 export function getYieldSourceById(id: string): YieldSourceConfig | undefined {
   return YIELD_SOURCES.find((s) => s.id === id);
+}
+
+/** Stable vault_id derived from yield-source id. Used for vault PDA. */
+export function vaultIdForYieldSource(yieldSourceId: string): bigint {
+  let hash = 5381n;
+  for (let i = 0; i < yieldSourceId.length; i++) {
+    hash = ((hash << 5n) + hash + BigInt(yieldSourceId.charCodeAt(i))) & 0xffffffffffffffffn;
+  }
+  return hash;
 }

@@ -50,6 +50,8 @@ pub fn handler(ctx: Context<CrankNav>) -> Result<()> {
         YieldSource::KaminoUsdc { .. }
         | YieldSource::JupiterLp { .. }
         | YieldSource::MapleSolana { .. }
+        | YieldSource::MarginFiUsdc { .. }
+        | YieldSource::DriftInsurance { .. }
         | YieldSource::DeloraCrossChain { .. } => {
             // Phase D: read adapter, compute new total_value, derive nav_per_share.
             // For now, no-op until adapter CPIs are wired.

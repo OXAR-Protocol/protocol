@@ -8,18 +8,9 @@ import { Copy, Check, LogOut, Zap, ArrowUpRight, LineChart } from "lucide-react"
 
 import { SectionLabel } from "@/components/section-label";
 
-type TemplateKey = "sleepy" | "walking" | "running";
-
-const TEMPLATE_LABELS: Record<TemplateKey, { emoji: string; label: string }> = {
-  sleepy: { emoji: "😴", label: "Sleepy" },
-  walking: { emoji: "🚶", label: "Walking" },
-  running: { emoji: "🏃", label: "Running" },
-};
-
 export default function YouPage() {
   const { user, logout, ready, authenticated } = usePrivy();
   const [copied, setCopied] = useState(false);
-  const [template, setTemplate] = useState<TemplateKey>("walking");
 
   const email = user?.email?.address;
   const wallet = user?.wallet?.address;
@@ -95,43 +86,6 @@ export default function YouPage() {
             </div>
           )}
         </div>
-      </motion.section>
-
-      {/* Risk template */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.15 }}
-        className="mt-10"
-      >
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30 mb-4">
-          Default speed
-        </p>
-        <div className="grid grid-cols-3 gap-2">
-          {(Object.keys(TEMPLATE_LABELS) as TemplateKey[]).map((key) => {
-            const meta = TEMPLATE_LABELS[key];
-            const isActive = template === key;
-            return (
-              <button
-                key={key}
-                onClick={() => setTemplate(key)}
-                className={`p-4 rounded-[5px] border transition flex flex-col items-center gap-2 ${
-                  isActive
-                    ? "border-accent/40 bg-accent/[0.04]"
-                    : "border-white/10 hover:border-white/25"
-                }`}
-              >
-                <span className="text-2xl">{meta.emoji}</span>
-                <span className="font-mono text-xs uppercase tracking-wide text-white">
-                  {meta.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-        <p className="mt-3 font-mono text-[11px] text-white/30">
-          Per-vault risk overrides this default
-        </p>
       </motion.section>
 
       {/* Rules link */}

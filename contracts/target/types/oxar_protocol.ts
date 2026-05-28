@@ -2065,6 +2065,24 @@ export type OxarProtocol = {
             ]
           },
           {
+            "name": "marginFiUsdc",
+            "fields": [
+              {
+                "name": "bank",
+                "type": "pubkey"
+              }
+            ]
+          },
+          {
+            "name": "driftInsurance",
+            "fields": [
+              {
+                "name": "vault",
+                "type": "pubkey"
+              }
+            ]
+          },
+          {
             "name": "deloraCrossChain",
             "fields": [
               {

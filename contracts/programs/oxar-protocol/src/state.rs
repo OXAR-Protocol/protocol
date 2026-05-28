@@ -16,7 +16,7 @@ pub struct Vault {
     pub yield_source: YieldSource,
     pub risk_template: RiskTemplate,
     pub nav_per_share: u64,           // Current value per share, NAV_PRECISION
-    pub total_deposits: u64,          // Cumulative USDC deposited
+    pub total_deposits: u64,          // Net USDC principal (deposits − withdrawals, saturating). NOT cumulative.
     pub total_shares: u64,            // Total share supply
     pub hot_pool_balance: u64,        // USDC in hot pool (instant withdrawable)
     pub cold_capital: u64,            // USDC routed to yield_source
@@ -47,11 +47,13 @@ pub enum RiskTemplate {
 /// cross-chain yields.
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
 pub enum YieldSource {
-    Idle,                              // No yield, USDC just sits (MVP fallback)
-    KaminoUsdc { pool: Pubkey },       // Kamino USDC lending
-    JupiterLp { jlp_mint: Pubkey },    // Jupiter Perps LP token
-    MapleSolana { pool: Pubkey },      // Maple syrupUSDC pool
-    DeloraCrossChain { source_id: u64 }, // Off-chain Delora source (Ondo, sUSDe, sDAI...)
+    Idle,                                // No yield, USDC just sits (MVP fallback)
+    KaminoUsdc { pool: Pubkey },         // Kamino USDC lending
+    JupiterLp { jlp_mint: Pubkey },      // Jupiter Perps LP token
+    MapleSolana { pool: Pubkey },        // Maple syrupUSDC pool
+    MarginFiUsdc { bank: Pubkey },       // MarginFi USDC bank
+    DriftInsurance { vault: Pubkey },    // Drift Insurance Fund vault
+    DeloraCrossChain { source_id: u64 }, // Off-chain Delora source (Ondo, USDM, USDY, TBILL, sUSDe, sDAI...)
 }
 
 // ============================================================================

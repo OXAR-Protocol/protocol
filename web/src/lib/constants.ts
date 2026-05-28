@@ -2,10 +2,11 @@
 export {
   PROGRAM_ID,
   YIELD_SOURCES,
-  RISK_TEMPLATES,
+  APY_BUCKETS,
   getYieldSourceById,
+  vaultIdForYieldSource,
 } from "@oxar/sdk";
-export type { YieldSourceConfig, RiskTemplate } from "@oxar/sdk";
+export type { YieldSourceConfig, ApyBucket, ApyBucketConfig } from "@oxar/sdk";
 
 // Web-specific: RPC URL from environment. Falls back to public devnet (rate-limited, no secrets).
 export const RPC_URL =
