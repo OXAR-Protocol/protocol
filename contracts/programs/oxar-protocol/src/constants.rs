@@ -68,3 +68,12 @@ pub const MAX_RULE_DESTINATIONS: u8 = 5;
 
 /// Min deposit to a group vault (prevent dust)
 pub const MIN_GROUP_DEPOSIT: u64 = 1_000_000; // 1 USDC
+
+// ============================================================================
+// Adapter registry (Sprint A — yield adapter standard)
+// ============================================================================
+
+pub const REGISTRY_SEED: &[u8] = b"registry";
+pub const ADAPTER_ENTRY_SEED: &[u8] = b"adapter_entry";
+pub const MAX_ADAPTERS: u32 = 64;
+pub const ADAPTER_INTERFACE_VERSION: u8 = 1;

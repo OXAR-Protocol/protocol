@@ -105,4 +105,12 @@ pub mod oxar_protocol {
     ) -> Result<()> {
         instructions::route_yield_withdraw::handler(ctx, amount)
     }
+
+    // ========================================================================
+    // Adapter registry (Sprint A — yield adapter standard)
+    // ========================================================================
+
+    pub fn initialize_adapter_registry(ctx: Context<InitializeAdapterRegistry>) -> Result<()> {
+        instructions::initialize_adapter_registry::handler(ctx)
+    }
 }

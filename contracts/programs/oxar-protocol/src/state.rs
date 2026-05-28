@@ -169,3 +169,28 @@ pub enum DestinationType {
     StayInWallet,
 }
 
+// ============================================================================
+// Adapter Registry — whitelist of yield adapter programs (Sprint A)
+// ============================================================================
+
+#[account]
+#[derive(InitSpace)]
+pub struct AdapterRegistry {
+    pub admin: Pubkey,         // governance authority (multisig later)
+    pub adapter_count: u32,    // monotonically increasing for telemetry
+    pub bump: u8,
+}
+
+/// One entry per whitelisted adapter program. PDA seeded by adapter program id.
+#[account]
+#[derive(InitSpace)]
+pub struct AdapterEntry {
+    pub adapter_program: Pubkey,
+    pub interface_version: u8,
+    #[max_len(32)]
+    pub name: String,
+    pub is_active: bool,
+    pub added_at: i64,
+    pub bump: u8,
+}
+
