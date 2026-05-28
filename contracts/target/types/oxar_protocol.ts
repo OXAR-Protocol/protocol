@@ -1643,21 +1643,26 @@ export type OxarProtocol = {
     },
     {
       "code": 6019,
+      "name": "protocolVersionMismatch",
+      "msg": "Vault was created under an older protocol version — please re-init"
+    },
+    {
+      "code": 6020,
       "name": "registryFull",
       "msg": "Adapter registry full — MAX_ADAPTERS reached"
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "invalidAdapterName",
       "msg": "Adapter name is empty or too long (max 32 bytes)"
     },
     {
-      "code": 6021,
+      "code": 6022,
       "name": "unsupportedInterfaceVersion",
       "msg": "Adapter interface version not supported"
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "invalidAdapterProgram",
       "msg": "Adapter program account is not executable"
     }
