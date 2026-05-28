@@ -1,5 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { expect } from "chai";
 
 describe("AdapterRegistry account", () => {
@@ -22,7 +23,8 @@ describe("AdapterRegistry account", () => {
   });
 
   it("admin can whitelist adapter", async () => {
-    const dummyAdapter = anchor.web3.Keypair.generate().publicKey;
+    // Use SystemProgram (always executable) as the adapter program under test
+    const dummyAdapter = SystemProgram.programId;
     const [registryPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("registry")],
       program.programId,
@@ -52,7 +54,9 @@ describe("AdapterRegistry account", () => {
 
   it("non-admin cannot whitelist adapter", async () => {
     const stranger = anchor.web3.Keypair.generate();
-    const dummyAdapter = anchor.web3.Keypair.generate().publicKey;
+    // Use TOKEN_PROGRAM_ID (executable, distinct from the adapter in test 2)
+    // so the auth constraint fires before any account-already-in-use error
+    const dummyAdapter = TOKEN_PROGRAM_ID;
     const [registryPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("registry")],
       program.programId,
@@ -82,9 +86,8 @@ describe("AdapterRegistry account", () => {
   });
 
   it("admin can pause adapter", async () => {
-    // Re-use adapter from the first whitelist test by re-deriving the same PDA
-    // We need a fresh dummyAdapter for isolation
-    const adapterToPause = anchor.web3.Keypair.generate().publicKey;
+    // Use the program itself as the adapter — it is executable and a known distinct key
+    const adapterToPause = program.programId;
     const [registryPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("registry")],
       program.programId,
@@ -103,9 +106,9 @@ describe("AdapterRegistry account", () => {
         adapterProgram: adapterToPause,
       } as any)
       .rpc();
-    // Now pause it
+    // Pause it: active = false → paused
     await program.methods
-      .pauseAdapter(true)
+      .pauseAdapter(false)
       .accounts({
         admin: provider.wallet.publicKey,
         registry: registryPda,
@@ -114,9 +117,9 @@ describe("AdapterRegistry account", () => {
       .rpc();
     const entry = await (program.account as any).adapterEntry.fetch(entryPda);
     expect(entry.isActive).to.equal(false);
-    // Unpause
+    // Unpause: active = true → active
     await program.methods
-      .pauseAdapter(false)
+      .pauseAdapter(true)
       .accounts({
         admin: provider.wallet.publicKey,
         registry: registryPda,

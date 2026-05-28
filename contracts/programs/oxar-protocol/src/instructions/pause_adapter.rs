@@ -23,11 +23,12 @@ pub struct PauseAdapter<'info> {
     pub adapter_entry: Account<'info, AdapterEntry>,
 }
 
-pub fn handler(ctx: Context<PauseAdapter>, paused: bool) -> Result<()> {
+pub fn handler(ctx: Context<PauseAdapter>, active: bool) -> Result<()> {
     let entry = &mut ctx.accounts.adapter_entry;
-    entry.is_active = !paused;
+    entry.is_active = active;
     msg!(
-        "Adapter {} is_active={}",
+        "Adapter {} ({}) is_active={}",
+        entry.name,
         entry.adapter_program,
         entry.is_active
     );

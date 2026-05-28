@@ -122,7 +122,7 @@ pub mod oxar_protocol {
         instructions::whitelist_adapter::handler(ctx, name, interface_version)
     }
 
-    pub fn pause_adapter(ctx: Context<PauseAdapter>, paused: bool) -> Result<()> {
-        instructions::pause_adapter::handler(ctx, paused)
+    pub fn pause_adapter(ctx: Context<PauseAdapter>, active: bool) -> Result<()> {
+        instructions::pause_adapter::handler(ctx, active)
     }
 }

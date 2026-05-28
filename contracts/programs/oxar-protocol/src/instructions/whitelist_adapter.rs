@@ -27,7 +27,8 @@ pub struct WhitelistAdapter<'info> {
     )]
     pub adapter_entry: Account<'info, AdapterEntry>,
 
-    /// CHECK: adapter program; we only store its pubkey
+    /// CHECK: adapter program; verified executable to catch fat-finger errors
+    #[account(constraint = adapter_program.executable @ OxarError::InvalidAdapterProgram)]
     pub adapter_program: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
@@ -38,10 +39,14 @@ pub fn handler(
     name: String,
     interface_version: u8,
 ) -> Result<()> {
-    require!(name.len() <= 32, OxarError::InvalidVaultState);
+    require!(!name.is_empty() && name.len() <= 32, OxarError::InvalidAdapterName);
     require!(
         interface_version == ADAPTER_INTERFACE_VERSION,
-        OxarError::InvalidVaultState
+        OxarError::UnsupportedInterfaceVersion
+    );
+    require!(
+        ctx.accounts.registry.adapter_count < MAX_ADAPTERS,
+        OxarError::RegistryFull
     );
 
     let clock = Clock::get()?;
