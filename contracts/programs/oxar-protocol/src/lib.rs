@@ -41,8 +41,9 @@ pub mod oxar_protocol {
 
     pub fn crank_nav<'info>(
         ctx: Context<'_, '_, '_, 'info, CrankNav<'info>>,
+        adapter_data: Vec<u8>,
     ) -> Result<()> {
-        instructions::crank_nav::handler(ctx)
+        instructions::crank_nav::handler(ctx, adapter_data)
     }
 
     // ========================================================================
@@ -98,15 +99,17 @@ pub mod oxar_protocol {
     pub fn route_yield_deposit<'info>(
         ctx: Context<'_, '_, '_, 'info, RouteYieldDeposit<'info>>,
         amount: u64,
+        adapter_data: Vec<u8>,
     ) -> Result<()> {
-        instructions::route_yield_deposit::handler(ctx, amount)
+        instructions::route_yield_deposit::handler(ctx, amount, adapter_data)
     }
 
     pub fn route_yield_withdraw<'info>(
         ctx: Context<'_, '_, '_, 'info, RouteYieldWithdraw<'info>>,
         amount: u64,
+        adapter_data: Vec<u8>,
     ) -> Result<()> {
-        instructions::route_yield_withdraw::handler(ctx, amount)
+        instructions::route_yield_withdraw::handler(ctx, amount, adapter_data)
     }
 
     // ========================================================================

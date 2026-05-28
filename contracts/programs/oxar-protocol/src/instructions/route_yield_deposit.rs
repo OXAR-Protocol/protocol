@@ -86,12 +86,17 @@ pub struct RouteYieldDeposit<'info> {
 pub fn handler<'info>(
     ctx: Context<'_, '_, '_, 'info, RouteYieldDeposit<'info>>,
     amount: u64,
+    adapter_data: Vec<u8>,
 ) -> Result<()> {
     require!(
         ctx.accounts.vault.protocol_version == PROTOCOL_VERSION,
         OxarError::ProtocolVersionMismatch
     );
     require!(amount > 0, OxarError::ZeroDeposit);
+    require!(
+        adapter_data.len() <= 256,
+        OxarError::AdapterDataTooLarge
+    );
     require!(
         amount <= ctx.accounts.vault.hot_pool_balance,
         OxarError::InsufficientFunds
@@ -217,7 +222,7 @@ pub fn handler<'info>(
         let ix = Instruction {
             program_id: adapter_program_clone.key(),
             accounts: metas,
-            data: crate::cpi_adapter::encode_deposit_args(amount, &[]),
+            data: crate::cpi_adapter::encode_deposit_args(amount, &adapter_data),
         };
 
         invoke_signed(&ix, &infos, signer_seeds).map_err(|e| {

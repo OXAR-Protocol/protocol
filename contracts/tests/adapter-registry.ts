@@ -1,5 +1,5 @@
 import * as anchor from "@coral-xyz/anchor";
-import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { expect } from "chai";
 
@@ -82,6 +82,117 @@ describe("AdapterRegistry account", () => {
       throw new Error("Expected unauthorized to fail");
     } catch (err: any) {
       expect(err.toString().toLowerCase()).to.match(/unauthorized|constraint/);
+    }
+  });
+
+  // ============================================================
+  // Edge cases: InvalidAdapterName, UnsupportedInterfaceVersion,
+  // InvalidAdapterProgram (FIX I7)
+  // ============================================================
+
+  it("whitelist_adapter with empty name fails with InvalidAdapterName", async () => {
+    const dummyAdapter = TOKEN_PROGRAM_ID; // executable, distinct from earlier tests
+    const [registryPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("registry")],
+      program.programId,
+    );
+    const [entryPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("adapter_entry"), dummyAdapter.toBuffer()],
+      program.programId,
+    );
+    try {
+      await program.methods
+        .whitelistAdapter("", 1)
+        .accounts({
+          admin: provider.wallet.publicKey,
+          registry: registryPda,
+          adapterEntry: entryPda,
+          adapterProgram: dummyAdapter,
+        } as any)
+        .rpc();
+      throw new Error("Expected InvalidAdapterName to fail");
+    } catch (err: any) {
+      expect(err.toString()).to.match(/InvalidAdapterName/);
+    }
+  });
+
+  it("whitelist_adapter with name > 32 bytes fails with InvalidAdapterName", async () => {
+    const dummyAdapter = TOKEN_PROGRAM_ID;
+    const [registryPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("registry")],
+      program.programId,
+    );
+    const [entryPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("adapter_entry"), dummyAdapter.toBuffer()],
+      program.programId,
+    );
+    const longName = "A".repeat(33); // 33 bytes — exceeds 32-byte limit
+    try {
+      await program.methods
+        .whitelistAdapter(longName, 1)
+        .accounts({
+          admin: provider.wallet.publicKey,
+          registry: registryPda,
+          adapterEntry: entryPda,
+          adapterProgram: dummyAdapter,
+        } as any)
+        .rpc();
+      throw new Error("Expected InvalidAdapterName to fail");
+    } catch (err: any) {
+      expect(err.toString()).to.match(/InvalidAdapterName/);
+    }
+  });
+
+  it("whitelist_adapter with interface_version != 1 fails with UnsupportedInterfaceVersion", async () => {
+    const dummyAdapter = TOKEN_PROGRAM_ID;
+    const [registryPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("registry")],
+      program.programId,
+    );
+    const [entryPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("adapter_entry"), dummyAdapter.toBuffer()],
+      program.programId,
+    );
+    try {
+      await program.methods
+        .whitelistAdapter("ValidName", 99) // unsupported version
+        .accounts({
+          admin: provider.wallet.publicKey,
+          registry: registryPda,
+          adapterEntry: entryPda,
+          adapterProgram: dummyAdapter,
+        } as any)
+        .rpc();
+      throw new Error("Expected UnsupportedInterfaceVersion to fail");
+    } catch (err: any) {
+      expect(err.toString()).to.match(/UnsupportedInterfaceVersion/);
+    }
+  });
+
+  it("whitelist_adapter with non-executable program fails with InvalidAdapterProgram", async () => {
+    // A freshly generated keypair pubkey is NOT an executable program account
+    const nonExecutable = Keypair.generate().publicKey;
+    const [registryPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("registry")],
+      program.programId,
+    );
+    const [entryPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("adapter_entry"), nonExecutable.toBuffer()],
+      program.programId,
+    );
+    try {
+      await program.methods
+        .whitelistAdapter("NonExec", 1)
+        .accounts({
+          admin: provider.wallet.publicKey,
+          registry: registryPda,
+          adapterEntry: entryPda,
+          adapterProgram: nonExecutable,
+        } as any)
+        .rpc();
+      throw new Error("Expected InvalidAdapterProgram to fail");
+    } catch (err: any) {
+      expect(err.toString()).to.match(/InvalidAdapterProgram/);
     }
   });
 

@@ -86,12 +86,17 @@ pub struct RouteYieldWithdraw<'info> {
 pub fn handler<'info>(
     ctx: Context<'_, '_, '_, 'info, RouteYieldWithdraw<'info>>,
     amount: u64,
+    adapter_data: Vec<u8>,
 ) -> Result<()> {
     require!(
         ctx.accounts.vault.protocol_version == PROTOCOL_VERSION,
         OxarError::ProtocolVersionMismatch
     );
     require!(amount > 0, OxarError::ZeroWithdrawal);
+    require!(
+        adapter_data.len() <= 256,
+        OxarError::AdapterDataTooLarge
+    );
     require!(
         amount <= ctx.accounts.vault.cold_capital,
         OxarError::InsufficientFunds
@@ -217,7 +222,7 @@ pub fn handler<'info>(
         let ix = Instruction {
             program_id: adapter_program_clone.key(),
             accounts: metas,
-            data: crate::cpi_adapter::encode_withdraw_args(amount, &[]),
+            data: crate::cpi_adapter::encode_withdraw_args(amount, &adapter_data),
         };
 
         invoke_signed(&ix, &infos, signer_seeds).map_err(|e| {

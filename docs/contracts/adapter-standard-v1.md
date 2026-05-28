@@ -112,6 +112,11 @@ before returning. The dispatcher reads this u64 value via `get_return_data()` af
 CPI to update `vault.nav_per_share`. If return data is absent the dispatcher returns
 `NotImplemented`.
 
+**Scope of returned value:** The adapter returns ONLY the value of its own holdings
+(cold capital deployed to it). The dispatcher composes total vault value as
+`hot_pool_balance + adapter_value` before recomputing `nav_per_share`. Adapters MUST
+NOT include the vault's hot pool in their returned value.
+
 ## Security Requirements
 
 Every adapter MUST:
