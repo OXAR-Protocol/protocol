@@ -104,6 +104,93 @@ export type OxarProtocol = {
               }
             ]
           }
+        },
+        {
+          "name": "registry",
+          "docs": [
+            "Adapter registry — read-only; seeds enforce this is the canonical registry."
+          ],
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "adapterEntry",
+          "docs": [
+            "Per-adapter entry — seeds enforce it is keyed by vault.adapter_program.",
+            "",
+            "CHECK guard in handler: entry.adapter_program == vault.adapter_program."
+          ],
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  97,
+                  112,
+                  116,
+                  101,
+                  114,
+                  95,
+                  101,
+                  110,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.adapter_program",
+                "account": "vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "adapterProgram",
+          "docs": [
+            "The actual adapter program to CPI into.",
+            "",
+            "adapter_entry is PDA-gated on vault.adapter_program."
+          ],
+          "optional": true
+        },
+        {
+          "name": "adapterState",
+          "docs": [
+            "Adapter-owned state PDA for this vault; read-only for current_value query.",
+            "",
+            "before crank_nav can use it."
+          ],
+          "optional": true
+        },
+        {
+          "name": "instructionsSysvar",
+          "docs": [
+            "Instructions sysvar — forwarded to adapter for caller-verification.",
+            ""
+          ],
+          "optional": true,
+          "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
       "args": []
@@ -1143,6 +1230,103 @@ export type OxarProtocol = {
               }
             ]
           }
+        },
+        {
+          "name": "registry",
+          "docs": [
+            "Adapter registry — read-only; seeds enforce this is the canonical registry."
+          ],
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "adapterEntry",
+          "docs": [
+            "Per-adapter entry — seeds enforce it is keyed by vault.adapter_program.",
+            "",
+            "CHECK guard in handler: entry.adapter_program == vault.adapter_program."
+          ],
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  97,
+                  112,
+                  116,
+                  101,
+                  114,
+                  95,
+                  101,
+                  110,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.adapter_program",
+                "account": "vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "adapterProgram",
+          "docs": [
+            "The actual adapter program to CPI into.",
+            "",
+            "adapter_entry is PDA-gated on vault.adapter_program."
+          ],
+          "optional": true
+        },
+        {
+          "name": "vaultUsdcPool",
+          "docs": [
+            "Vault USDC pool — source of funds forwarded to the adapter.",
+            "",
+            "mint = USDC)."
+          ],
+          "optional": true
+        },
+        {
+          "name": "adapterState",
+          "docs": [
+            "Adapter-owned state PDA for this vault; writable so the adapter can update it.",
+            "",
+            "before this instruction."
+          ],
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "instructionsSysvar",
+          "docs": [
+            "Instructions sysvar — forwarded to adapter for caller-verification.",
+            ""
+          ],
+          "optional": true,
+          "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
       "args": [
@@ -1196,6 +1380,103 @@ export type OxarProtocol = {
               }
             ]
           }
+        },
+        {
+          "name": "registry",
+          "docs": [
+            "Adapter registry — read-only; seeds enforce this is the canonical registry."
+          ],
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "adapterEntry",
+          "docs": [
+            "Per-adapter entry — seeds enforce it is keyed by vault.adapter_program.",
+            "",
+            "CHECK guard in handler: entry.adapter_program == vault.adapter_program."
+          ],
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  97,
+                  112,
+                  116,
+                  101,
+                  114,
+                  95,
+                  101,
+                  110,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.adapter_program",
+                "account": "vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "adapterProgram",
+          "docs": [
+            "The actual adapter program to CPI into.",
+            "",
+            "adapter_entry is PDA-gated on vault.adapter_program."
+          ],
+          "optional": true
+        },
+        {
+          "name": "vaultUsdcPool",
+          "docs": [
+            "Vault USDC pool — destination of funds returned from the adapter.",
+            "",
+            "mint = USDC)."
+          ],
+          "optional": true
+        },
+        {
+          "name": "adapterState",
+          "docs": [
+            "Adapter-owned state PDA for this vault; writable so the adapter can update it.",
+            "",
+            "before this instruction."
+          ],
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "instructionsSysvar",
+          "docs": [
+            "Instructions sysvar — forwarded to adapter for caller-verification.",
+            ""
+          ],
+          "optional": true,
+          "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
       "args": [
@@ -1643,21 +1924,26 @@ export type OxarProtocol = {
     },
     {
       "code": 6019,
+      "name": "protocolVersionMismatch",
+      "msg": "Vault was created under an older protocol version — please re-init"
+    },
+    {
+      "code": 6020,
       "name": "registryFull",
       "msg": "Adapter registry full — MAX_ADAPTERS reached"
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "invalidAdapterName",
       "msg": "Adapter name is empty or too long (max 32 bytes)"
     },
     {
-      "code": 6021,
+      "code": 6022,
       "name": "unsupportedInterfaceVersion",
       "msg": "Adapter interface version not supported"
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "invalidAdapterProgram",
       "msg": "Adapter program account is not executable"
     }
