@@ -1,4 +1,5 @@
 pub mod constants;
+pub mod cpi_adapter;
 pub mod error;
 pub mod instructions;
 pub mod state;
@@ -92,8 +93,8 @@ pub mod oxar_protocol {
     // Yield routing (Phase D)
     // ========================================================================
 
-    pub fn route_yield_deposit(
-        ctx: Context<RouteYieldDeposit>,
+    pub fn route_yield_deposit<'info>(
+        ctx: Context<'_, '_, '_, 'info, RouteYieldDeposit<'info>>,
         amount: u64,
     ) -> Result<()> {
         instructions::route_yield_deposit::handler(ctx, amount)

@@ -422,11 +422,99 @@ describe("oxar-protocol", () => {
   });
 
   // ==========================================================================
-  // Adapter path (non-Idle) — pre-Task-5 stub
+  // Yield routing — Idle path bookkeeping
   // ==========================================================================
 
-  describe("Adapter path (non-Idle) — pre-Task-5 stub", () => {
-    it("route_yield_deposit returns NotImplemented for non-Idle vault", async () => {
+  describe("Yield routing — Idle path", () => {
+    it("route_yield_deposit moves balance from hot to cold (Idle vault)", async () => {
+      // Alice's vault has adapter_program = PublicKey.default (Idle).
+      // After the earlier deposit + partial withdraw, hot_pool_balance = 5_000_000.
+      const routeAmount = new BN(1_000_000); // route 1 USDC
+
+      const before = await (program.account as any).vault.fetch(aliceVaultPda);
+      const hotBefore = before.hotPoolBalance.toNumber();
+      const coldBefore = before.coldCapital.toNumber();
+
+      await program.methods
+        .routeYieldDeposit(routeAmount)
+        .accounts({
+          signer: alice.publicKey,
+          vault: aliceVaultPda,
+          // Idle path — adapter accounts are Option::None; pass null so
+          // Anchor fills them with programId (the convention for optional accounts)
+          registry: null,
+          adapterEntry: null,
+          adapterProgram: null,
+          vaultUsdcPool: null,
+          adapterState: null,
+          instructionsSysvar: null,
+        } as any)
+        .signers([alice])
+        .rpc();
+
+      const after = await (program.account as any).vault.fetch(aliceVaultPda);
+      expect(after.hotPoolBalance.toNumber()).to.equal(
+        hotBefore - routeAmount.toNumber()
+      );
+      expect(after.coldCapital.toNumber()).to.equal(
+        coldBefore + routeAmount.toNumber()
+      );
+    });
+
+    it("route_yield_deposit rejects zero amount", async () => {
+      try {
+        await program.methods
+          .routeYieldDeposit(new BN(0))
+          .accounts({
+            signer: alice.publicKey,
+            vault: aliceVaultPda,
+            registry: null,
+            adapterEntry: null,
+            adapterProgram: null,
+            vaultUsdcPool: null,
+            adapterState: null,
+            instructionsSysvar: null,
+          } as any)
+          .signers([alice])
+          .rpc();
+        assert.fail("Expected ZeroDeposit to fail");
+      } catch (err: any) {
+        expect(err.toString()).to.match(/ZeroDeposit/);
+      }
+    });
+
+    it("route_yield_deposit rejects amount exceeding hot_pool_balance", async () => {
+      try {
+        await program.methods
+          .routeYieldDeposit(new BN(999_999_999))
+          .accounts({
+            signer: alice.publicKey,
+            vault: aliceVaultPda,
+            registry: null,
+            adapterEntry: null,
+            adapterProgram: null,
+            vaultUsdcPool: null,
+            adapterState: null,
+            instructionsSysvar: null,
+          } as any)
+          .signers([alice])
+          .rpc();
+        assert.fail("Expected InsufficientFunds to fail");
+      } catch (err: any) {
+        expect(err.toString()).to.match(/InsufficientFunds/);
+      }
+    });
+  });
+
+  // ==========================================================================
+  // Adapter path (non-Idle) — adapter accounts missing → NotImplemented
+  // Updated in Task 5: non-Idle vaults without adapter accounts return NotImplemented
+  // (adapter_entry is Option::None → unpacking fails).
+  // A real whitelisted adapter would proceed to CPI; tested in fork suite.
+  // ==========================================================================
+
+  describe("Adapter path (non-Idle) — missing adapter accounts", () => {
+    it("route_yield_deposit returns NotImplemented when adapter accounts omitted", async () => {
       const fakeAdapter = Keypair.generate().publicKey;
       // Use Date.now() to avoid PDA collision across test runs on the same validator
       const vaultId = new BN(Date.now());
@@ -464,7 +552,7 @@ describe("oxar-protocol", () => {
         } as any)
         .rpc();
 
-      // Fund the vault: wallet needs USDC ATA + vault token ATA, then deposit
+      // Fund the vault
       const walletUsdc = await createAccount(
         connection,
         wallet.payer,
@@ -477,7 +565,7 @@ describe("oxar-protocol", () => {
         usdcMint,
         walletUsdc,
         wallet.payer,
-        10_000_000 // 10 USDC
+        10_000_000
       );
       const walletVaultToken = await createAccount(
         connection,
@@ -498,11 +586,21 @@ describe("oxar-protocol", () => {
         } as any)
         .rpc();
 
-      // Now route_yield_deposit should reach the adapter branch and return NotImplemented
+      // Adapter branch with no adapter accounts → NotImplemented (Option::None unpack).
+      // Pass null for all optional accounts so Anchor doesn't reject client-side.
       try {
         await program.methods
           .routeYieldDeposit(new BN(1_000_000))
-          .accounts({ vault: vaultPda, signer: wallet.publicKey } as any)
+          .accounts({
+            vault: vaultPda,
+            signer: wallet.publicKey,
+            registry: null,
+            adapterEntry: null,
+            adapterProgram: null,
+            vaultUsdcPool: null,
+            adapterState: null,
+            instructionsSysvar: null,
+          } as any)
           .rpc();
         throw new Error("Expected NotImplemented to fail");
       } catch (err: any) {
