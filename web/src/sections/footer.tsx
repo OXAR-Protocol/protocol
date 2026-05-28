@@ -16,13 +16,6 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
     ],
   },
   {
-    title: "Resources",
-    links: [
-      { label: "Docs", href: "https://github.com/OXAR-Protocol/docs" },
-      { label: "GitHub", href: "https://github.com/OXAR-Protocol" },
-    ],
-  },
-  {
     title: "Contact",
     links: [
       { label: "support@oxar.app", href: "mailto:support@oxar.app" },
@@ -55,7 +48,7 @@ export function Footer() {
       <div className="relative max-w-[1200px] mx-auto">
         <div className="h-px bg-white/10 mb-16" />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-12 mb-16">
           {COLUMNS.map((col) => (
             <div key={col.title}>
               <h4 className="font-mono text-xs uppercase tracking-[0.15em] text-white/30 mb-4">
