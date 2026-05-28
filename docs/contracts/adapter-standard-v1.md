@@ -96,7 +96,7 @@ Account layout (positional):
 Args:
 - `adapter_data: Vec<u8>` — MUST NOT exceed 256 bytes; pass empty vec if unused
 
-Returns via event:
+Returns via event (for telemetry and off-chain monitors):
 
     emit!(AdapterValueEvent {
       vault: Pubkey,
@@ -105,6 +105,12 @@ Returns via event:
     });
 
 `as_of_slot` MUST be the minimum of (`Clock::get()?.slot`, any oracle update slot used in computing the value). Dispatcher considers any value older than 60 slots stale.
+
+**Return data (required for on-chain dispatcher consumption):** Adapter MUST call
+`anchor_lang::solana_program::program::set_return_data(&current_value_usdc.to_le_bytes())`
+before returning. The dispatcher reads this u64 value via `get_return_data()` after the
+CPI to update `vault.nav_per_share`. If return data is absent the dispatcher returns
+`NotImplemented`.
 
 ## Security Requirements
 

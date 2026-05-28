@@ -298,6 +298,13 @@ describe("oxar-protocol", () => {
         .accounts({
           cranker: cranker.publicKey,
           vault: aliceVaultPda,
+          // Idle path — adapter accounts are Option::None; pass null so
+          // Anchor fills them with programId (the convention for optional accounts)
+          registry: null,
+          adapterEntry: null,
+          adapterProgram: null,
+          adapterState: null,
+          instructionsSysvar: null,
         } as any)
         .signers([cranker])
         .rpc();

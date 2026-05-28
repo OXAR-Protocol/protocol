@@ -39,7 +39,9 @@ pub mod oxar_protocol {
         instructions::withdraw::handler(ctx, shares)
     }
 
-    pub fn crank_nav(ctx: Context<CrankNav>) -> Result<()> {
+    pub fn crank_nav<'info>(
+        ctx: Context<'_, '_, '_, 'info, CrankNav<'info>>,
+    ) -> Result<()> {
         instructions::crank_nav::handler(ctx)
     }
 
