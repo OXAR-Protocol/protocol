@@ -51,6 +51,8 @@ pub enum OxarError {
     NotImplemented,
     #[msg("Vault pool is already set up")]
     VaultAlreadySetup,
+    #[msg("Vault was created under an older protocol version — please re-init")]
+    ProtocolVersionMismatch,
 
     // ===== Adapter registry =====
     #[msg("Adapter registry full — MAX_ADAPTERS reached")]

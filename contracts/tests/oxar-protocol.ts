@@ -421,4 +421,94 @@ describe("oxar-protocol", () => {
     });
   });
 
+  // ==========================================================================
+  // Adapter path (non-Idle) — pre-Task-5 stub
+  // ==========================================================================
+
+  describe("Adapter path (non-Idle) — pre-Task-5 stub", () => {
+    it("route_yield_deposit returns NotImplemented for non-Idle vault", async () => {
+      const fakeAdapter = Keypair.generate().publicKey;
+      // Use Date.now() to avoid PDA collision across test runs on the same validator
+      const vaultId = new BN(Date.now());
+      const [vaultPda] = derivePersonalVaultPda(wallet.publicKey, vaultId);
+      const [vaultTokenMint] = deriveMintPda(vaultPda);
+      const [usdcPool] = derivePoolPda(vaultPda);
+
+      await program.methods
+        .initializePersonalVault({
+          vaultId,
+          riskTemplate: { balanced: {} } as any,
+          adapterProgram: fakeAdapter,
+          feeBps: 1000,
+        } as any)
+        .accounts({
+          creator: wallet.publicKey,
+          vault: vaultPda,
+          usdcMint,
+          vaultTokenMint,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+          rent: SYSVAR_RENT_PUBKEY,
+        } as any)
+        .rpc();
+
+      await program.methods
+        .setupVaultPool()
+        .accounts({
+          authority: wallet.publicKey,
+          vault: vaultPda,
+          usdcMint,
+          usdcPool,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        } as any)
+        .rpc();
+
+      // Fund the vault: wallet needs USDC ATA + vault token ATA, then deposit
+      const walletUsdc = await createAccount(
+        connection,
+        wallet.payer,
+        usdcMint,
+        wallet.publicKey
+      );
+      await mintTo(
+        connection,
+        wallet.payer,
+        usdcMint,
+        walletUsdc,
+        wallet.payer,
+        10_000_000 // 10 USDC
+      );
+      const walletVaultToken = await createAccount(
+        connection,
+        wallet.payer,
+        vaultTokenMint,
+        wallet.publicKey
+      );
+      await program.methods
+        .deposit(new BN(5_000_000))
+        .accounts({
+          depositor: wallet.publicKey,
+          vault: vaultPda,
+          vaultTokenMint,
+          depositorUsdc: walletUsdc,
+          depositorVaultToken: walletVaultToken,
+          usdcPool,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        } as any)
+        .rpc();
+
+      // Now route_yield_deposit should reach the adapter branch and return NotImplemented
+      try {
+        await program.methods
+          .routeYieldDeposit(new BN(1_000_000))
+          .accounts({ vault: vaultPda, signer: wallet.publicKey } as any)
+          .rpc();
+        throw new Error("Expected NotImplemented to fail");
+      } catch (err: any) {
+        expect(err.toString()).to.match(/NotImplemented/);
+      }
+    });
+  });
+
 });

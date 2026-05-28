@@ -54,7 +54,7 @@ pub const SECONDS_PER_YEAR: u64 = 31_536_000;
 // ============================================================================
 
 /// Bump when changing account layout (breaks deserialization)
-pub const PROTOCOL_VERSION: u8 = 2;
+pub const PROTOCOL_VERSION: u8 = 3; // bumped after Vault layout change (Sprint A Task 4)
 
 // ============================================================================
 // Group vault limits

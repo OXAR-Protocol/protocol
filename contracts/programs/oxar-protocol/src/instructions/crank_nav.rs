@@ -6,12 +6,9 @@ use crate::state::Vault;
 
 /// Update vault NAV by reading underlying yield source value.
 ///
-/// Permissionless: anyone can crank. NAV growth depends on yield source:
-/// - Idle: no growth (NAV stays at last value)
-/// - KaminoUsdc / JupiterLp / MapleSolana / DeloraCrossChain: queries adapter (Phase D)
-///
-/// In Phase A this is a no-op for all sources except Idle. Adapter integration
-/// lands in Phase D when CPI wrappers are wired.
+/// Permissionless: anyone can crank. Behavior depends on the routed adapter:
+/// - Idle (adapter_program == Pubkey::default()): NAV stays at last value
+/// - Delegated adapter: CPI to adapter_current_value (wired in Sprint A · Task 7)
 #[derive(Accounts)]
 pub struct CrankNav<'info> {
     pub cranker: Signer<'info>,
@@ -30,6 +27,11 @@ pub struct CrankNav<'info> {
 }
 
 pub fn handler(ctx: Context<CrankNav>) -> Result<()> {
+    require!(
+        ctx.accounts.vault.protocol_version == PROTOCOL_VERSION,
+        OxarError::ProtocolVersionMismatch
+    );
+
     let clock = Clock::get()?;
     let vault = &mut ctx.accounts.vault;
 

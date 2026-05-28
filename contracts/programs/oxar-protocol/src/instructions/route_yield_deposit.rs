@@ -6,13 +6,12 @@ use crate::state::Vault;
 
 /// Route `amount` USDC from the vault's hot pool into its cold yield source.
 ///
-/// Phase D scope:
-/// - `Idle`: bookkeeping-only (USDC stays in the same pool ATA, but accounting moves
-///   from `hot_pool_balance` to `cold_capital`). This is the MVP default and is
-///   used by every personal vault until an external adapter is wired up.
-/// - `KaminoUsdc` / `JupiterLp` / `MapleSolana` / `DeloraCrossChain`: stubs that
-///   return `NotImplemented`. They will be wired via CPI in subsequent phases
-///   without breaking the existing instruction signature.
+/// Behavior depends on the vault's adapter:
+/// - Idle (adapter_program == Pubkey::default()): bookkeeping-only — USDC stays in
+///   the pool ATA but accounting moves from `hot_pool_balance` to `cold_capital`.
+///   This is the MVP default for every personal vault.
+/// - Delegated adapter: CPI dispatch wired in Sprint A · Task 5. Returns
+///   `NotImplemented` until then.
 ///
 /// Signer must equal `vault.authority` — i.e. the personal vault owner. Group
 /// vaults route via their own `group_*` instructions; this path is personal-only
@@ -36,6 +35,11 @@ pub struct RouteYieldDeposit<'info> {
 }
 
 pub fn handler(ctx: Context<RouteYieldDeposit>, amount: u64) -> Result<()> {
+    require!(
+        ctx.accounts.vault.protocol_version == PROTOCOL_VERSION,
+        OxarError::ProtocolVersionMismatch
+    );
+
     require!(amount > 0, OxarError::ZeroDeposit);
 
     let vault = &mut ctx.accounts.vault;

@@ -65,6 +65,11 @@ pub struct Withdraw<'info> {
 }
 
 pub fn handler(ctx: Context<Withdraw>, shares: u64) -> Result<()> {
+    require!(
+        ctx.accounts.vault.protocol_version == PROTOCOL_VERSION,
+        OxarError::ProtocolVersionMismatch
+    );
+
     let vault = &ctx.accounts.vault;
 
     require!(shares > 0, OxarError::ZeroWithdrawal);

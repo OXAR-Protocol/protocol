@@ -28,6 +28,11 @@ pub struct RouteYieldWithdraw<'info> {
 }
 
 pub fn handler(ctx: Context<RouteYieldWithdraw>, amount: u64) -> Result<()> {
+    require!(
+        ctx.accounts.vault.protocol_version == PROTOCOL_VERSION,
+        OxarError::ProtocolVersionMismatch
+    );
+
     require!(amount > 0, OxarError::ZeroWithdrawal);
 
     let vault = &mut ctx.accounts.vault;

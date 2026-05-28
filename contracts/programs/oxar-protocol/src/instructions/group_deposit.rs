@@ -69,6 +69,11 @@ pub struct GroupDeposit<'info> {
 }
 
 pub fn handler(ctx: Context<GroupDeposit>, amount: u64) -> Result<()> {
+    require!(
+        ctx.accounts.vault.protocol_version == PROTOCOL_VERSION,
+        OxarError::ProtocolVersionMismatch
+    );
+
     require!(amount > 0, OxarError::ZeroDeposit);
 
     let vault = &ctx.accounts.vault;
