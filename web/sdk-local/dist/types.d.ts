@@ -104,6 +104,93 @@ export type OxarProtocol = {
                             }
                         ];
                     };
+                },
+                {
+                    "name": "registry";
+                    "docs": [
+                        "Adapter registry — read-only; seeds enforce this is the canonical registry."
+                    ];
+                    "optional": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    114,
+                                    101,
+                                    103,
+                                    105,
+                                    115,
+                                    116,
+                                    114,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "adapterEntry";
+                    "docs": [
+                        "Per-adapter entry — seeds enforce it is keyed by vault.adapter_program.",
+                        "",
+                        "CHECK guard in handler: entry.adapter_program == vault.adapter_program."
+                    ];
+                    "optional": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    97,
+                                    100,
+                                    97,
+                                    112,
+                                    116,
+                                    101,
+                                    114,
+                                    95,
+                                    101,
+                                    110,
+                                    116,
+                                    114,
+                                    121
+                                ];
+                            },
+                            {
+                                "kind": "account";
+                                "path": "vault.adapter_program";
+                                "account": "vault";
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "adapterProgram";
+                    "docs": [
+                        "The actual adapter program to CPI into.",
+                        "",
+                        "adapter_entry is PDA-gated on vault.adapter_program."
+                    ];
+                    "optional": true;
+                },
+                {
+                    "name": "adapterState";
+                    "docs": [
+                        "Adapter-owned state PDA for this vault; read-only for current_value query.",
+                        "",
+                        "before crank_nav can use it."
+                    ];
+                    "optional": true;
+                },
+                {
+                    "name": "instructionsSysvar";
+                    "docs": [
+                        "Instructions sysvar — forwarded to adapter for caller-verification.",
+                        ""
+                    ];
+                    "optional": true;
+                    "address": "Sysvar1nstructions1111111111111111111111111";
                 }
             ];
             "args": [];
@@ -559,6 +646,52 @@ export type OxarProtocol = {
             ];
         },
         {
+            "name": "initializeAdapterRegistry";
+            "discriminator": [
+                14,
+                10,
+                135,
+                183,
+                110,
+                127,
+                200,
+                59
+            ];
+            "accounts": [
+                {
+                    "name": "admin";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "registry";
+                    "writable": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    114,
+                                    101,
+                                    103,
+                                    105,
+                                    115,
+                                    116,
+                                    114,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "systemProgram";
+                    "address": "11111111111111111111111111111111";
+                }
+            ];
+            "args": [];
+        },
+        {
             "name": "initializeGroupVault";
             "discriminator": [
                 245,
@@ -978,6 +1111,82 @@ export type OxarProtocol = {
             "args": [];
         },
         {
+            "name": "pauseAdapter";
+            "discriminator": [
+                28,
+                176,
+                64,
+                210,
+                204,
+                183,
+                164,
+                160
+            ];
+            "accounts": [
+                {
+                    "name": "admin";
+                    "signer": true;
+                },
+                {
+                    "name": "registry";
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    114,
+                                    101,
+                                    103,
+                                    105,
+                                    115,
+                                    116,
+                                    114,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "adapterEntry";
+                    "writable": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    97,
+                                    100,
+                                    97,
+                                    112,
+                                    116,
+                                    101,
+                                    114,
+                                    95,
+                                    101,
+                                    110,
+                                    116,
+                                    114,
+                                    121
+                                ];
+                            },
+                            {
+                                "kind": "account";
+                                "path": "adapter_entry.adapter_program";
+                                "account": "adapterEntry";
+                            }
+                        ];
+                    };
+                }
+            ];
+            "args": [
+                {
+                    "name": "active";
+                    "type": "bool";
+                }
+            ];
+        },
+        {
             "name": "routeYieldDeposit";
             "discriminator": [
                 43,
@@ -1021,6 +1230,103 @@ export type OxarProtocol = {
                             }
                         ];
                     };
+                },
+                {
+                    "name": "registry";
+                    "docs": [
+                        "Adapter registry — read-only; seeds enforce this is the canonical registry."
+                    ];
+                    "optional": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    114,
+                                    101,
+                                    103,
+                                    105,
+                                    115,
+                                    116,
+                                    114,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "adapterEntry";
+                    "docs": [
+                        "Per-adapter entry — seeds enforce it is keyed by vault.adapter_program.",
+                        "",
+                        "CHECK guard in handler: entry.adapter_program == vault.adapter_program."
+                    ];
+                    "optional": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    97,
+                                    100,
+                                    97,
+                                    112,
+                                    116,
+                                    101,
+                                    114,
+                                    95,
+                                    101,
+                                    110,
+                                    116,
+                                    114,
+                                    121
+                                ];
+                            },
+                            {
+                                "kind": "account";
+                                "path": "vault.adapter_program";
+                                "account": "vault";
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "adapterProgram";
+                    "docs": [
+                        "The actual adapter program to CPI into.",
+                        "",
+                        "adapter_entry is PDA-gated on vault.adapter_program."
+                    ];
+                    "optional": true;
+                },
+                {
+                    "name": "vaultUsdcPool";
+                    "docs": [
+                        "Vault USDC pool — source of funds forwarded to the adapter.",
+                        "",
+                        "mint = USDC)."
+                    ];
+                    "optional": true;
+                },
+                {
+                    "name": "adapterState";
+                    "docs": [
+                        "Adapter-owned state PDA for this vault; writable so the adapter can update it.",
+                        "",
+                        "before this instruction."
+                    ];
+                    "writable": true;
+                    "optional": true;
+                },
+                {
+                    "name": "instructionsSysvar";
+                    "docs": [
+                        "Instructions sysvar — forwarded to adapter for caller-verification.",
+                        ""
+                    ];
+                    "optional": true;
+                    "address": "Sysvar1nstructions1111111111111111111111111";
                 }
             ];
             "args": [
@@ -1074,6 +1380,103 @@ export type OxarProtocol = {
                             }
                         ];
                     };
+                },
+                {
+                    "name": "registry";
+                    "docs": [
+                        "Adapter registry — read-only; seeds enforce this is the canonical registry."
+                    ];
+                    "optional": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    114,
+                                    101,
+                                    103,
+                                    105,
+                                    115,
+                                    116,
+                                    114,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "adapterEntry";
+                    "docs": [
+                        "Per-adapter entry — seeds enforce it is keyed by vault.adapter_program.",
+                        "",
+                        "CHECK guard in handler: entry.adapter_program == vault.adapter_program."
+                    ];
+                    "optional": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    97,
+                                    100,
+                                    97,
+                                    112,
+                                    116,
+                                    101,
+                                    114,
+                                    95,
+                                    101,
+                                    110,
+                                    116,
+                                    114,
+                                    121
+                                ];
+                            },
+                            {
+                                "kind": "account";
+                                "path": "vault.adapter_program";
+                                "account": "vault";
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "adapterProgram";
+                    "docs": [
+                        "The actual adapter program to CPI into.",
+                        "",
+                        "adapter_entry is PDA-gated on vault.adapter_program."
+                    ];
+                    "optional": true;
+                },
+                {
+                    "name": "vaultUsdcPool";
+                    "docs": [
+                        "Vault USDC pool — destination of funds returned from the adapter.",
+                        "",
+                        "mint = USDC)."
+                    ];
+                    "optional": true;
+                },
+                {
+                    "name": "adapterState";
+                    "docs": [
+                        "Adapter-owned state PDA for this vault; writable so the adapter can update it.",
+                        "",
+                        "before this instruction."
+                    ];
+                    "writable": true;
+                    "optional": true;
+                },
+                {
+                    "name": "instructionsSysvar";
+                    "docs": [
+                        "Instructions sysvar — forwarded to adapter for caller-verification.",
+                        ""
+                    ];
+                    "optional": true;
+                    "address": "Sysvar1nstructions1111111111111111111111111";
                 }
             ];
             "args": [
@@ -1145,6 +1548,94 @@ export type OxarProtocol = {
                 }
             ];
             "args": [];
+        },
+        {
+            "name": "whitelistAdapter";
+            "discriminator": [
+                62,
+                74,
+                124,
+                166,
+                112,
+                117,
+                86,
+                43
+            ];
+            "accounts": [
+                {
+                    "name": "admin";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "registry";
+                    "writable": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    114,
+                                    101,
+                                    103,
+                                    105,
+                                    115,
+                                    116,
+                                    114,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "adapterEntry";
+                    "writable": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    97,
+                                    100,
+                                    97,
+                                    112,
+                                    116,
+                                    101,
+                                    114,
+                                    95,
+                                    101,
+                                    110,
+                                    116,
+                                    114,
+                                    121
+                                ];
+                            },
+                            {
+                                "kind": "account";
+                                "path": "adapterProgram";
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "adapterProgram";
+                },
+                {
+                    "name": "systemProgram";
+                    "address": "11111111111111111111111111111111";
+                }
+            ];
+            "args": [
+                {
+                    "name": "name";
+                    "type": "string";
+                },
+                {
+                    "name": "interfaceVersion";
+                    "type": "u8";
+                }
+            ];
         },
         {
             "name": "withdraw";
@@ -1257,6 +1748,32 @@ export type OxarProtocol = {
     ];
     "accounts": [
         {
+            "name": "adapterEntry";
+            "discriminator": [
+                204,
+                228,
+                11,
+                242,
+                235,
+                250,
+                45,
+                145
+            ];
+        },
+        {
+            "name": "adapterRegistry";
+            "discriminator": [
+                27,
+                187,
+                195,
+                109,
+                0,
+                66,
+                232,
+                31
+            ];
+        },
+        {
             "name": "groupMember";
             "discriminator": [
                 100,
@@ -1357,88 +1874,78 @@ export type OxarProtocol = {
         },
         {
             "code": 6009;
-            "name": "noTimeElapsed";
-            "msg": "No time has elapsed since last NAV update";
-        },
-        {
-            "code": 6010;
             "name": "groupVaultFull";
             "msg": "Group vault is full";
         },
         {
-            "code": 6011;
+            "code": 6010;
             "name": "invalidInviteCode";
             "msg": "Invite code is invalid";
         },
         {
-            "code": 6012;
+            "code": 6011;
             "name": "alreadyMember";
             "msg": "Already a member of this group vault";
         },
         {
-            "code": 6013;
+            "code": 6012;
             "name": "notMember";
             "msg": "Not a member of this group vault";
         },
         {
-            "code": 6014;
+            "code": 6013;
             "name": "invalidDeadline";
             "msg": "Goal deadline is in the past";
         },
         {
-            "code": 6015;
+            "code": 6014;
             "name": "invalidRuleDestinations";
             "msg": "Rule destinations must sum to 100% (10_000 bps)";
         },
         {
-            "code": 6016;
-            "name": "ruleNotTriggered";
-            "msg": "Rule has no active trigger";
-        },
-        {
-            "code": 6017;
+            "code": 6015;
             "name": "ruleInactive";
             "msg": "Rule is not active";
         },
         {
-            "code": 6018;
-            "name": "triggerConditionUnmet";
-            "msg": "Trigger condition not met";
-        },
-        {
-            "code": 6019;
-            "name": "zeroListingAmount";
-            "msg": "Listing amount must be greater than zero";
-        },
-        {
-            "code": 6020;
-            "name": "zeroListingPrice";
-            "msg": "Listing price must be greater than zero";
-        },
-        {
-            "code": 6021;
-            "name": "selfPurchase";
-            "msg": "Seller cannot buy their own listing";
-        },
-        {
-            "code": 6022;
-            "name": "insufficientTokens";
-            "msg": "Insufficient tokens";
-        },
-        {
-            "code": 6023;
+            "code": 6016;
             "name": "unauthorized";
             "msg": "Unauthorized: signer does not have permission";
         },
         {
-            "code": 6024;
+            "code": 6017;
             "name": "notImplemented";
             "msg": "This instruction is not yet implemented";
         },
         {
-            "code": 6025;
+            "code": 6018;
             "name": "vaultAlreadySetup";
             "msg": "Vault pool is already set up";
+        },
+        {
+            "code": 6019;
+            "name": "protocolVersionMismatch";
+            "msg": "Vault was created under an older protocol version — please re-init";
+        },
+        {
+            "code": 6020;
+            "name": "registryFull";
+            "msg": "Adapter registry full — MAX_ADAPTERS reached";
+        },
+        {
+            "code": 6021;
+            "name": "invalidAdapterName";
+            "msg": "Adapter name is empty or too long (max 32 bytes)";
+        },
+        {
+            "code": 6022;
+            "name": "unsupportedInterfaceVersion";
+            "msg": "Adapter interface version not supported";
+        },
+        {
+            "code": 6023;
+            "name": "invalidAdapterProgram";
+            "msg": "Adapter program account is not executable";
         }
     ];
     "types": [
@@ -1468,6 +1975,61 @@ export type OxarProtocol = {
                     },
                     {
                         "name": "destinationsUsed";
+                        "type": "u8";
+                    }
+                ];
+            };
+        },
+        {
+            "name": "adapterEntry";
+            "docs": [
+                "One entry per whitelisted adapter program. PDA seeded by adapter program id."
+            ];
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "adapterProgram";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "interfaceVersion";
+                        "type": "u8";
+                    },
+                    {
+                        "name": "name";
+                        "type": "string";
+                    },
+                    {
+                        "name": "isActive";
+                        "type": "bool";
+                    },
+                    {
+                        "name": "addedAt";
+                        "type": "i64";
+                    },
+                    {
+                        "name": "bump";
+                        "type": "u8";
+                    }
+                ];
+            };
+        },
+        {
+            "name": "adapterRegistry";
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "admin";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "adapterCount";
+                        "type": "u32";
+                    },
+                    {
+                        "name": "bump";
                         "type": "u8";
                     }
                 ];
@@ -1780,12 +2342,8 @@ export type OxarProtocol = {
                         };
                     },
                     {
-                        "name": "yieldSource";
-                        "type": {
-                            "defined": {
-                                "name": "yieldSource";
-                            };
-                        };
+                        "name": "adapterProgram";
+                        "type": "pubkey";
                     },
                     {
                         "name": "feeBps";
@@ -1985,12 +2543,8 @@ export type OxarProtocol = {
                         "type": "pubkey";
                     },
                     {
-                        "name": "yieldSource";
-                        "type": {
-                            "defined": {
-                                "name": "yieldSource";
-                            };
-                        };
+                        "name": "adapterProgram";
+                        "type": "pubkey";
                     },
                     {
                         "name": "riskTemplate";
@@ -2053,60 +2607,6 @@ export type OxarProtocol = {
                     },
                     {
                         "name": "group";
-                    }
-                ];
-            };
-        },
-        {
-            "name": "yieldSource";
-            "docs": [
-                "Where the cold capital is routed.",
-                "",
-                "Each variant carries minimal data — full integration details live in the",
-                "adapter contracts. `source_id` references off-chain Delora source for",
-                "cross-chain yields."
-            ];
-            "type": {
-                "kind": "enum";
-                "variants": [
-                    {
-                        "name": "idle";
-                    },
-                    {
-                        "name": "kaminoUsdc";
-                        "fields": [
-                            {
-                                "name": "pool";
-                                "type": "pubkey";
-                            }
-                        ];
-                    },
-                    {
-                        "name": "jupiterLp";
-                        "fields": [
-                            {
-                                "name": "jlpMint";
-                                "type": "pubkey";
-                            }
-                        ];
-                    },
-                    {
-                        "name": "mapleSolana";
-                        "fields": [
-                            {
-                                "name": "pool";
-                                "type": "pubkey";
-                            }
-                        ];
-                    },
-                    {
-                        "name": "deloraCrossChain";
-                        "fields": [
-                            {
-                                "name": "sourceId";
-                                "type": "u64";
-                            }
-                        ];
                     }
                 ];
             };

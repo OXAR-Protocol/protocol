@@ -96,7 +96,7 @@ async function main() {
     .initializePersonalVault({
       vaultId,
       riskTemplate: { conservative: {} } as any,
-      yieldSource: { idle: {} } as any,
+      adapterProgram: PublicKey.default,
       feeBps: 1000,
     } as any)
     .accounts({

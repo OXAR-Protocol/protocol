@@ -19,6 +19,7 @@ import {
 } from "@/hooks/use-rules";
 import { useUserGroupVaults } from "@/hooks/use-group-vault";
 import { usePersonalVault } from "@/hooks/use-personal-vault";
+import { YIELD_SOURCES } from "@oxar/sdk";
 import {
   TRIGGER_TOKENS,
   CUSTOM_TOKEN_SYMBOL,
@@ -72,9 +73,10 @@ export default function RulesPage() {
   const { walletAddress } = useOxarProgram();
   const { rules, loading, refetch } = useUserRules();
   const actions = useRuleActions();
-  const sleepy = usePersonalVault("sleepy");
-  const walking = usePersonalVault("walking");
-  const running = usePersonalVault("running");
+  const yieldVaults = YIELD_SOURCES.map((s) => ({
+    source: s,
+    vault: usePersonalVault(s.id),
+  }));
   const groups = useUserGroupVaults();
 
   const [showForm, setShowForm] = useState(false);
@@ -121,12 +123,15 @@ export default function RulesPage() {
     });
 
   const personalVaultOptions = useMemo(() => {
-    const list: { label: string; pda: string }[] = [];
-    if (sleepy.exists && sleepy.vaultPda) list.push({ label: "😴 Sleepy", pda: sleepy.vaultPda });
-    if (walking.exists && walking.vaultPda) list.push({ label: "🚶 Walking", pda: walking.vaultPda });
-    if (running.exists && running.vaultPda) list.push({ label: "🏃 Running", pda: running.vaultPda });
-    return list;
-  }, [sleepy, walking, running]);
+    return yieldVaults
+      .filter((y) => y.vault.exists && y.vault.vaultPda)
+      .map((y) => ({
+        label: y.source.name,
+        pda: y.vault.vaultPda as string,
+      }));
+    // SAFETY: yieldVaults is rebuilt every render but length is constant.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, yieldVaults.map((y) => y.vault));
 
   const groupOptions = useMemo(
     () =>

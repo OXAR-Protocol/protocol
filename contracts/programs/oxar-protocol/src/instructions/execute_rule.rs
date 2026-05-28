@@ -42,7 +42,7 @@ pub fn handler(ctx: Context<ExecuteRule>, params: ExecuteRuleParams) -> Result<(
     require!(params.incoming_amount > 0, OxarError::ZeroDeposit);
 
     rule.last_triggered_at = clock.unix_timestamp;
-    rule.trigger_count = rule.trigger_count.checked_add(1).unwrap_or(rule.trigger_count);
+    rule.trigger_count = rule.trigger_count.saturating_add(1);
 
     msg!(
         "Rule {} triggered (#{}) for {} lamports",

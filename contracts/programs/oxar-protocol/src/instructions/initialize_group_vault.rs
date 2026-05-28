@@ -5,7 +5,7 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 use crate::constants::*;
 use crate::error::OxarError;
 use crate::state::{
-    GroupVault, RiskTemplate, Vault, VaultType, YieldSource,
+    GroupVault, RiskTemplate, Vault, VaultType,
 };
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
@@ -105,7 +105,7 @@ pub fn handler(
     vault.usdc_mint = ctx.accounts.usdc_mint.key();
     vault.vault_token_mint = ctx.accounts.vault_token_mint.key();
     vault.usdc_pool = ctx.accounts.usdc_pool.key();
-    vault.yield_source = YieldSource::Idle;
+    vault.adapter_program = Pubkey::default(); // Idle — no external routing
     vault.risk_template = params.risk_template;
     vault.nav_per_share = INITIAL_NAV;
     vault.total_deposits = 0;

@@ -54,7 +54,7 @@ pub const SECONDS_PER_YEAR: u64 = 31_536_000;
 // ============================================================================
 
 /// Bump when changing account layout (breaks deserialization)
-pub const PROTOCOL_VERSION: u8 = 2;
+pub const PROTOCOL_VERSION: u8 = 3; // bumped after Vault layout change (Sprint A Task 4)
 
 // ============================================================================
 // Group vault limits
@@ -68,3 +68,12 @@ pub const MAX_RULE_DESTINATIONS: u8 = 5;
 
 /// Min deposit to a group vault (prevent dust)
 pub const MIN_GROUP_DEPOSIT: u64 = 1_000_000; // 1 USDC
+
+// ============================================================================
+// Adapter registry (Sprint A — yield adapter standard)
+// ============================================================================
+
+pub const REGISTRY_SEED: &[u8] = b"registry";
+pub const ADAPTER_ENTRY_SEED: &[u8] = b"adapter_entry";
+pub const MAX_ADAPTERS: u32 = 64;
+pub const ADAPTER_INTERFACE_VERSION: u8 = 1;

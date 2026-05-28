@@ -1,4 +1,5 @@
 pub mod constants;
+pub mod cpi_adapter;
 pub mod error;
 pub mod instructions;
 pub mod state;
@@ -38,7 +39,9 @@ pub mod oxar_protocol {
         instructions::withdraw::handler(ctx, shares)
     }
 
-    pub fn crank_nav(ctx: Context<CrankNav>) -> Result<()> {
+    pub fn crank_nav<'info>(
+        ctx: Context<'_, '_, '_, 'info, CrankNav<'info>>,
+    ) -> Result<()> {
         instructions::crank_nav::handler(ctx)
     }
 
@@ -92,17 +95,37 @@ pub mod oxar_protocol {
     // Yield routing (Phase D)
     // ========================================================================
 
-    pub fn route_yield_deposit(
-        ctx: Context<RouteYieldDeposit>,
+    pub fn route_yield_deposit<'info>(
+        ctx: Context<'_, '_, '_, 'info, RouteYieldDeposit<'info>>,
         amount: u64,
     ) -> Result<()> {
         instructions::route_yield_deposit::handler(ctx, amount)
     }
 
-    pub fn route_yield_withdraw(
-        ctx: Context<RouteYieldWithdraw>,
+    pub fn route_yield_withdraw<'info>(
+        ctx: Context<'_, '_, '_, 'info, RouteYieldWithdraw<'info>>,
         amount: u64,
     ) -> Result<()> {
         instructions::route_yield_withdraw::handler(ctx, amount)
+    }
+
+    // ========================================================================
+    // Adapter registry (Sprint A — yield adapter standard)
+    // ========================================================================
+
+    pub fn initialize_adapter_registry(ctx: Context<InitializeAdapterRegistry>) -> Result<()> {
+        instructions::initialize_adapter_registry::handler(ctx)
+    }
+
+    pub fn whitelist_adapter(
+        ctx: Context<WhitelistAdapter>,
+        name: String,
+        interface_version: u8,
+    ) -> Result<()> {
+        instructions::whitelist_adapter::handler(ctx, name, interface_version)
+    }
+
+    pub fn pause_adapter(ctx: Context<PauseAdapter>, active: bool) -> Result<()> {
+        instructions::pause_adapter::handler(ctx, active)
     }
 }

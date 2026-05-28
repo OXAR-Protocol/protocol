@@ -143,8 +143,16 @@ pub struct GroupVault {
 # Build program (from contracts/)
 anchor build
 
-# Run tests (uses Localnet — Anchor.toml [provider] cluster = "Localnet")
+# Unit tests (Localnet, no clones, fast)
 anchor test
+
+# Mainnet-fork tests for yield-source CPI integrations.
+# Anchor.toml [test.validator] clones accounts from mainnet at startup —
+# tests can call into real Kamino / JLP / MarginFi / Drift state without
+# any real money. Slower (~10s startup) — used in CI not on every save.
+anchor test -- --grep fork
+# Or via npm script:
+yarn test-fork
 
 # Initial deploy to devnet
 anchor deploy --provider.cluster devnet

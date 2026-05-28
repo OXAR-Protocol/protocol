@@ -121,7 +121,7 @@ describe("oxar-protocol", () => {
         .initializePersonalVault({
           vaultId: ALICE_VAULT_ID,
           riskTemplate: { conservative: {} } as any,
-          yieldSource: { idle: {} } as any,
+          adapterProgram: PublicKey.default,
           feeBps: 1000, // 10%
         } as any)
         .accounts({
@@ -179,7 +179,7 @@ describe("oxar-protocol", () => {
         .initializePersonalVault({
           vaultId: otherVaultId,
           riskTemplate: { balanced: {} } as any,
-          yieldSource: { idle: {} } as any,
+          adapterProgram: PublicKey.default,
           feeBps: 1000,
         } as any)
         .accounts({
@@ -298,6 +298,13 @@ describe("oxar-protocol", () => {
         .accounts({
           cranker: cranker.publicKey,
           vault: aliceVaultPda,
+          // Idle path — adapter accounts are Option::None; pass null so
+          // Anchor fills them with programId (the convention for optional accounts)
+          registry: null,
+          adapterEntry: null,
+          adapterProgram: null,
+          adapterState: null,
+          instructionsSysvar: null,
         } as any)
         .signers([cranker])
         .rpc();
@@ -400,7 +407,7 @@ describe("oxar-protocol", () => {
         .initializePersonalVault({
           vaultId: bobVaultId,
           riskTemplate: { aggressive: {} } as any,
-          yieldSource: { idle: {} } as any,
+          adapterProgram: PublicKey.default,
           feeBps: 1500,
         } as any)
         .accounts({
@@ -418,6 +425,194 @@ describe("oxar-protocol", () => {
       const vault = await (program.account as any).vault.fetch(bobVault);
       expect(vault.authority.toString()).to.equal(bob.publicKey.toString());
       expect(vault.feeBps).to.equal(1500);
+    });
+  });
+
+  // ==========================================================================
+  // Yield routing — Idle path bookkeeping
+  // ==========================================================================
+
+  describe("Yield routing — Idle path", () => {
+    it("route_yield_deposit moves balance from hot to cold (Idle vault)", async () => {
+      // Alice's vault has adapter_program = PublicKey.default (Idle).
+      // After the earlier deposit + partial withdraw, hot_pool_balance = 5_000_000.
+      const routeAmount = new BN(1_000_000); // route 1 USDC
+
+      const before = await (program.account as any).vault.fetch(aliceVaultPda);
+      const hotBefore = before.hotPoolBalance.toNumber();
+      const coldBefore = before.coldCapital.toNumber();
+
+      await program.methods
+        .routeYieldDeposit(routeAmount)
+        .accounts({
+          signer: alice.publicKey,
+          vault: aliceVaultPda,
+          // Idle path — adapter accounts are Option::None; pass null so
+          // Anchor fills them with programId (the convention for optional accounts)
+          registry: null,
+          adapterEntry: null,
+          adapterProgram: null,
+          vaultUsdcPool: null,
+          adapterState: null,
+          instructionsSysvar: null,
+        } as any)
+        .signers([alice])
+        .rpc();
+
+      const after = await (program.account as any).vault.fetch(aliceVaultPda);
+      expect(after.hotPoolBalance.toNumber()).to.equal(
+        hotBefore - routeAmount.toNumber()
+      );
+      expect(after.coldCapital.toNumber()).to.equal(
+        coldBefore + routeAmount.toNumber()
+      );
+    });
+
+    it("route_yield_deposit rejects zero amount", async () => {
+      try {
+        await program.methods
+          .routeYieldDeposit(new BN(0))
+          .accounts({
+            signer: alice.publicKey,
+            vault: aliceVaultPda,
+            registry: null,
+            adapterEntry: null,
+            adapterProgram: null,
+            vaultUsdcPool: null,
+            adapterState: null,
+            instructionsSysvar: null,
+          } as any)
+          .signers([alice])
+          .rpc();
+        assert.fail("Expected ZeroDeposit to fail");
+      } catch (err: any) {
+        expect(err.toString()).to.match(/ZeroDeposit/);
+      }
+    });
+
+    it("route_yield_deposit rejects amount exceeding hot_pool_balance", async () => {
+      try {
+        await program.methods
+          .routeYieldDeposit(new BN(999_999_999))
+          .accounts({
+            signer: alice.publicKey,
+            vault: aliceVaultPda,
+            registry: null,
+            adapterEntry: null,
+            adapterProgram: null,
+            vaultUsdcPool: null,
+            adapterState: null,
+            instructionsSysvar: null,
+          } as any)
+          .signers([alice])
+          .rpc();
+        assert.fail("Expected InsufficientFunds to fail");
+      } catch (err: any) {
+        expect(err.toString()).to.match(/InsufficientFunds/);
+      }
+    });
+  });
+
+  // ==========================================================================
+  // Adapter path (non-Idle) — adapter accounts missing → NotImplemented
+  // Updated in Task 5: non-Idle vaults without adapter accounts return NotImplemented
+  // (adapter_entry is Option::None → unpacking fails).
+  // A real whitelisted adapter would proceed to CPI; tested in fork suite.
+  // ==========================================================================
+
+  describe("Adapter path (non-Idle) — missing adapter accounts", () => {
+    it("route_yield_deposit returns NotImplemented when adapter accounts omitted", async () => {
+      const fakeAdapter = Keypair.generate().publicKey;
+      // Use Date.now() to avoid PDA collision across test runs on the same validator
+      const vaultId = new BN(Date.now());
+      const [vaultPda] = derivePersonalVaultPda(wallet.publicKey, vaultId);
+      const [vaultTokenMint] = deriveMintPda(vaultPda);
+      const [usdcPool] = derivePoolPda(vaultPda);
+
+      await program.methods
+        .initializePersonalVault({
+          vaultId,
+          riskTemplate: { balanced: {} } as any,
+          adapterProgram: fakeAdapter,
+          feeBps: 1000,
+        } as any)
+        .accounts({
+          creator: wallet.publicKey,
+          vault: vaultPda,
+          usdcMint,
+          vaultTokenMint,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+          rent: SYSVAR_RENT_PUBKEY,
+        } as any)
+        .rpc();
+
+      await program.methods
+        .setupVaultPool()
+        .accounts({
+          authority: wallet.publicKey,
+          vault: vaultPda,
+          usdcMint,
+          usdcPool,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        } as any)
+        .rpc();
+
+      // Fund the vault
+      const walletUsdc = await createAccount(
+        connection,
+        wallet.payer,
+        usdcMint,
+        wallet.publicKey
+      );
+      await mintTo(
+        connection,
+        wallet.payer,
+        usdcMint,
+        walletUsdc,
+        wallet.payer,
+        10_000_000
+      );
+      const walletVaultToken = await createAccount(
+        connection,
+        wallet.payer,
+        vaultTokenMint,
+        wallet.publicKey
+      );
+      await program.methods
+        .deposit(new BN(5_000_000))
+        .accounts({
+          depositor: wallet.publicKey,
+          vault: vaultPda,
+          vaultTokenMint,
+          depositorUsdc: walletUsdc,
+          depositorVaultToken: walletVaultToken,
+          usdcPool,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        } as any)
+        .rpc();
+
+      // Adapter branch with no adapter accounts → NotImplemented (Option::None unpack).
+      // Pass null for all optional accounts so Anchor doesn't reject client-side.
+      try {
+        await program.methods
+          .routeYieldDeposit(new BN(1_000_000))
+          .accounts({
+            vault: vaultPda,
+            signer: wallet.publicKey,
+            registry: null,
+            adapterEntry: null,
+            adapterProgram: null,
+            vaultUsdcPool: null,
+            adapterState: null,
+            instructionsSysvar: null,
+          } as any)
+          .rpc();
+        throw new Error("Expected NotImplemented to fail");
+      } catch (err: any) {
+        expect(err.toString()).to.match(/NotImplemented/);
+      }
     });
   });
 

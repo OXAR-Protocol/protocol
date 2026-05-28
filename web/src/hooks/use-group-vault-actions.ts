@@ -96,8 +96,12 @@ export function useGroupVaultActions() {
       setLoading(true);
       setError(null);
       try {
-        // Group vault ID: use timestamp seconds (collision-safe enough for single user)
-        const vaultIdBig = BigInt(Math.floor(Date.now() / 1000));
+        // Group vault ID: ms timestamp shifted up + 16-bit random nonce. Two
+        // creates in the same millisecond (let alone same second) get distinct
+        // PDAs, even when triggered programmatically.
+        const ms = BigInt(Date.now());
+        const nonce = BigInt(Math.floor(Math.random() * 0x10000));
+        const vaultIdBig = (ms * BigInt(0x10000)) + nonce;
         const vaultId = new BN(vaultIdBig.toString());
 
         const [groupVaultPda] = deriveGroupVaultPda(walletAddress, vaultIdBig);

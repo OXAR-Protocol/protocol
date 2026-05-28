@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token};
 
 use crate::constants::*;
-use crate::state::{RiskTemplate, Vault, VaultType, YieldSource};
+use crate::state::{RiskTemplate, Vault, VaultType};
 
 /// Parameters for creating a personal yield vault.
 ///
@@ -12,7 +12,7 @@ use crate::state::{RiskTemplate, Vault, VaultType, YieldSource};
 pub struct InitializePersonalVaultParams {
     pub vault_id: u64,
     pub risk_template: RiskTemplate,
-    pub yield_source: YieldSource,
+    pub adapter_program: Pubkey,
     pub fee_bps: u16,
 }
 
@@ -69,7 +69,7 @@ pub fn handler(
     vault.usdc_mint = ctx.accounts.usdc_mint.key();
     vault.vault_token_mint = ctx.accounts.vault_token_mint.key();
     vault.usdc_pool = Pubkey::default(); // Filled by setup_vault_pool
-    vault.yield_source = params.yield_source;
+    vault.adapter_program = params.adapter_program;
     vault.risk_template = params.risk_template;
     vault.nav_per_share = INITIAL_NAV;
     vault.total_deposits = 0;

@@ -3,18 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { BN } from "@coral-xyz/anchor";
 
-import { derivePersonalVaultPda } from "@oxar/sdk";
+import { derivePersonalVaultPda, vaultIdForYieldSource } from "@oxar/sdk";
 
 import { useOxarProgram } from "./use-oxar-program";
-
-export type TemplateKey = "sleepy" | "walking" | "running";
-
-// vault_id is stable per risk template — each user has up to 3 vaults.
-export const TEMPLATE_VAULT_ID: Record<TemplateKey, number> = {
-  sleepy: 1,
-  walking: 2,
-  running: 3,
-};
 
 export interface PersonalVaultState {
   exists: boolean;
@@ -22,6 +13,7 @@ export interface PersonalVaultState {
   totalDeposits: BN;
   totalShares: BN;
   hotPoolBalance: BN;
+  coldCapital: BN;
   navPerShare: BN;
   feeBps: number;
   vaultPda: string | null;
@@ -29,7 +21,10 @@ export interface PersonalVaultState {
   refetch: () => void;
 }
 
-export function usePersonalVault(template: TemplateKey): PersonalVaultState {
+/// Fetches a user's personal vault for a specific yield-source.
+/// One vault per (user, yield-source). vault_id is derived deterministically
+/// from the yield-source id, so the same address is always reused.
+export function usePersonalVault(yieldSourceId: string): PersonalVaultState {
   const { program, walletAddress } = useOxarProgram();
   const [state, setState] = useState<Omit<PersonalVaultState, "refetch">>({
     exists: false,
@@ -37,6 +32,7 @@ export function usePersonalVault(template: TemplateKey): PersonalVaultState {
     totalDeposits: new BN(0),
     totalShares: new BN(0),
     hotPoolBalance: new BN(0),
+    coldCapital: new BN(0),
     navPerShare: new BN(1_000_000),
     feeBps: 0,
     vaultPda: null,
@@ -48,7 +44,7 @@ export function usePersonalVault(template: TemplateKey): PersonalVaultState {
       setState((s) => ({ ...s, loading: false }));
       return;
     }
-    const vaultId = BigInt(TEMPLATE_VAULT_ID[template]);
+    const vaultId = vaultIdForYieldSource(yieldSourceId);
     const [vaultPda] = derivePersonalVaultPda(walletAddress, vaultId);
     try {
       // SAFETY: Anchor IDL typing for dynamic account names
@@ -60,6 +56,7 @@ export function usePersonalVault(template: TemplateKey): PersonalVaultState {
           totalDeposits: new BN(0),
           totalShares: new BN(0),
           hotPoolBalance: new BN(0),
+          coldCapital: new BN(0),
           navPerShare: new BN(1_000_000),
           feeBps: 0,
           vaultPda: vaultPda.toBase58(),
@@ -73,6 +70,7 @@ export function usePersonalVault(template: TemplateKey): PersonalVaultState {
         totalDeposits: account.totalDeposits as BN,
         totalShares: account.totalShares as BN,
         hotPoolBalance: account.hotPoolBalance as BN,
+        coldCapital: account.coldCapital as BN,
         navPerShare: account.navPerShare as BN,
         feeBps: account.feeBps as number,
         vaultPda: vaultPda.toBase58(),
@@ -82,7 +80,7 @@ export function usePersonalVault(template: TemplateKey): PersonalVaultState {
       console.error("Failed to fetch vault:", err);
       setState((s) => ({ ...s, loading: false }));
     }
-  }, [program, walletAddress, template]);
+  }, [program, walletAddress, yieldSourceId]);
 
   useEffect(() => {
     fetchVault();
