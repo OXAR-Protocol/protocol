@@ -63,4 +63,6 @@ pub enum OxarError {
     UnsupportedInterfaceVersion,
     #[msg("Adapter program account is not executable")]
     InvalidAdapterProgram,
+    #[msg("adapter_data exceeds 256 bytes")]
+    AdapterDataTooLarge,
 }

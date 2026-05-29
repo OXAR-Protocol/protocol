@@ -75,7 +75,12 @@ pub struct CrankNav<'info> {
 
 pub fn handler<'info>(
     ctx: Context<'_, '_, '_, 'info, CrankNav<'info>>,
+    adapter_data: Vec<u8>,
 ) -> Result<()> {
+    require!(
+        adapter_data.len() <= 256,
+        OxarError::AdapterDataTooLarge
+    );
     require!(
         ctx.accounts.vault.protocol_version == PROTOCOL_VERSION,
         OxarError::ProtocolVersionMismatch
@@ -148,13 +153,11 @@ pub fn handler<'info>(
         let remaining: Vec<AccountInfo> = ctx.remaining_accounts.to_vec();
 
         // Build CPI account list (positional layout from adapter-standard-v1.md §adapter_current_value):
-        // 0: dispatcher_program (read-only)
-        // 1: instructions_sysvar (read-only)
-        // 2: vault (read-only — current_value is a query, not a mutation)
-        // 3: adapter_state (read-only)
+        // 0: instructions_sysvar (read-only)
+        // 1: vault (read-only — current_value is a query, not a mutation)
+        // 2: adapter_state (read-only)
         // 4+: remaining_accounts (oracle accounts, reserve state, etc.)
         let mut metas = vec![
-            AccountMeta::new_readonly(crate::ID, false),
             AccountMeta::new_readonly(instructions_sysvar_clone.key(), false),
             AccountMeta::new_readonly(vault_account_info.key(), false),
             AccountMeta::new_readonly(adapter_state_clone.key(), false),
@@ -177,7 +180,7 @@ pub fn handler<'info>(
         let ix = Instruction {
             program_id: adapter_program_clone.key(),
             accounts: metas,
-            data: crate::cpi_adapter::encode_current_value_args(&[]),
+            data: crate::cpi_adapter::encode_current_value_args(&adapter_data),
         };
 
         invoke(&ix, &infos).map_err(|e| {
@@ -195,11 +198,15 @@ pub fn handler<'info>(
         let current_value =
             u64::from_le_bytes(return_bytes[..8].try_into().unwrap());
 
-        // nav_per_share = current_value * NAV_PRECISION / total_shares
+        // total_value = hot_pool_balance + adapter current_value (cold capital)
+        // nav_per_share = total_value * NAV_PRECISION / total_shares
         // Skip update if total_shares == 0 (no depositors yet).
         let vault = &mut ctx.accounts.vault;
         if vault.total_shares > 0 {
-            let new_nav = (current_value as u128)
+            let total_value = (vault.hot_pool_balance as u128)
+                .checked_add(current_value as u128)
+                .ok_or(OxarError::MathOverflow)?;
+            let new_nav = total_value
                 .checked_mul(NAV_PRECISION)
                 .ok_or(OxarError::MathOverflow)?
                 .checked_div(vault.total_shares as u128)
@@ -208,8 +215,10 @@ pub fn handler<'info>(
                 .try_into()
                 .map_err(|_| OxarError::MathOverflow)?;
             msg!(
-                "NAV updated via adapter: current_value={} nav_per_share={}",
+                "NAV updated via adapter: hot_pool={} adapter_value={} total={} nav_per_share={}",
+                vault.hot_pool_balance,
                 current_value,
+                total_value,
                 vault.nav_per_share
             );
         } else {

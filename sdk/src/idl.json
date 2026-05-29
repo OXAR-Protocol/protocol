@@ -187,7 +187,12 @@
           "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "adapter_data",
+          "type": "bytes"
+        }
+      ]
     },
     {
       "name": "create_rule",
@@ -1327,6 +1332,10 @@
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "adapter_data",
+          "type": "bytes"
         }
       ]
     },
@@ -1477,6 +1486,10 @@
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "adapter_data",
+          "type": "bytes"
         }
       ]
     },
@@ -1940,6 +1953,11 @@
       "code": 6023,
       "name": "InvalidAdapterProgram",
       "msg": "Adapter program account is not executable"
+    },
+    {
+      "code": 6024,
+      "name": "AdapterDataTooLarge",
+      "msg": "adapter_data exceeds 256 bytes"
     }
   ],
   "types": [

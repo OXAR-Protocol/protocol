@@ -11,16 +11,27 @@ use crate::constants::VAULT_SEED;
 // sha256("global:<name>")[..8]
 // ============================================================================
 
-/// discriminator for `adapter_deposit`
-pub const ADAPTER_DEPOSIT_DISCRIMINATOR: [u8; 8] = [11, 175, 18, 26, 16, 219, 7, 124];
-/// discriminator for `adapter_withdraw`
-pub const ADAPTER_WITHDRAW_DISCRIMINATOR: [u8; 8] = [4, 39, 175, 195, 230, 220, 246, 215];
-/// discriminator for `adapter_current_value`
-pub const ADAPTER_CURRENT_VALUE_DISCRIMINATOR: [u8; 8] = [167, 86, 217, 173, 96, 53, 21, 7];
+/// discriminator for `adapter_initialize` — sha256("global:adapter_initialize")[..8]
+pub const ADAPTER_INITIALIZE_DISCRIMINATOR: [u8; 8] = [125, 160, 35, 249, 117, 179, 167, 76];
+/// discriminator for `adapter_deposit` — sha256("global:adapter_deposit")[..8]
+pub const ADAPTER_DEPOSIT_DISCRIMINATOR: [u8; 8] = [190, 207, 72, 186, 232, 106, 46, 72];
+/// discriminator for `adapter_withdraw` — sha256("global:adapter_withdraw")[..8]
+pub const ADAPTER_WITHDRAW_DISCRIMINATOR: [u8; 8] = [121, 55, 72, 46, 185, 100, 173, 236];
+/// discriminator for `adapter_current_value` — sha256("global:adapter_current_value")[..8]
+pub const ADAPTER_CURRENT_VALUE_DISCRIMINATOR: [u8; 8] = [67, 200, 59, 238, 163, 138, 170, 179];
 
 // ============================================================================
 // Instruction data builders (Borsh layout: discriminator + args)
 // ============================================================================
+
+/// `adapter_initialize`: discriminator + adapter_data (Vec<u8>)
+pub fn encode_initialize_args(adapter_data: &[u8]) -> Vec<u8> {
+    let mut buf = Vec::with_capacity(8 + 4 + adapter_data.len());
+    buf.extend_from_slice(&ADAPTER_INITIALIZE_DISCRIMINATOR);
+    buf.extend_from_slice(&(adapter_data.len() as u32).to_le_bytes());
+    buf.extend_from_slice(adapter_data);
+    buf
+}
 
 /// `adapter_deposit`: discriminator + amount (LE u64) + adapter_data (Vec<u8>)
 pub fn encode_deposit_args(amount: u64, adapter_data: &[u8]) -> Vec<u8> {
@@ -133,4 +144,34 @@ pub fn cpi_adapter_deposit<'info>(
         })?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anchor_lang::solana_program::hash::hash;
+
+    /// Anchor instruction discriminator = sha256("global:<name>")[..8].
+    /// These MUST stay in lock-step with the adapter programs' IDLs — a mismatch
+    /// makes every CPI dispatch fail with an unknown-instruction error.
+    fn discriminator(name: &str) -> [u8; 8] {
+        let h = hash(format!("global:{name}").as_bytes());
+        let mut out = [0u8; 8];
+        out.copy_from_slice(&h.to_bytes()[..8]);
+        out
+    }
+
+    #[test]
+    fn adapter_discriminators_match_anchor_scheme() {
+        assert_eq!(
+            ADAPTER_INITIALIZE_DISCRIMINATOR,
+            discriminator("adapter_initialize")
+        );
+        assert_eq!(ADAPTER_DEPOSIT_DISCRIMINATOR, discriminator("adapter_deposit"));
+        assert_eq!(ADAPTER_WITHDRAW_DISCRIMINATOR, discriminator("adapter_withdraw"));
+        assert_eq!(
+            ADAPTER_CURRENT_VALUE_DISCRIMINATOR,
+            discriminator("adapter_current_value")
+        );
+    }
 }

@@ -294,7 +294,7 @@ describe("oxar-protocol", () => {
       const before = await (program.account as any).vault.fetch(aliceVaultPda);
 
       await program.methods
-        .crankNav()
+        .crankNav(Buffer.from([]))
         .accounts({
           cranker: cranker.publicKey,
           vault: aliceVaultPda,
@@ -443,7 +443,7 @@ describe("oxar-protocol", () => {
       const coldBefore = before.coldCapital.toNumber();
 
       await program.methods
-        .routeYieldDeposit(routeAmount)
+        .routeYieldDeposit(routeAmount, Buffer.from([]))
         .accounts({
           signer: alice.publicKey,
           vault: aliceVaultPda,
@@ -471,7 +471,7 @@ describe("oxar-protocol", () => {
     it("route_yield_deposit rejects zero amount", async () => {
       try {
         await program.methods
-          .routeYieldDeposit(new BN(0))
+          .routeYieldDeposit(new BN(0), Buffer.from([]))
           .accounts({
             signer: alice.publicKey,
             vault: aliceVaultPda,
@@ -493,7 +493,85 @@ describe("oxar-protocol", () => {
     it("route_yield_deposit rejects amount exceeding hot_pool_balance", async () => {
       try {
         await program.methods
-          .routeYieldDeposit(new BN(999_999_999))
+          .routeYieldDeposit(new BN(999_999_999), Buffer.from([]))
+          .accounts({
+            signer: alice.publicKey,
+            vault: aliceVaultPda,
+            registry: null,
+            adapterEntry: null,
+            adapterProgram: null,
+            vaultUsdcPool: null,
+            adapterState: null,
+            instructionsSysvar: null,
+          } as any)
+          .signers([alice])
+          .rpc();
+        assert.fail("Expected InsufficientFunds to fail");
+      } catch (err: any) {
+        expect(err.toString()).to.match(/InsufficientFunds/);
+      }
+    });
+
+    it("route_yield_withdraw moves balance from cold to hot (Idle vault)", async () => {
+      // After route_yield_deposit test above, aliceVaultPda has cold_capital >= 1_000_000.
+      const before = await (program.account as any).vault.fetch(aliceVaultPda);
+      const hotBefore = before.hotPoolBalance.toNumber();
+      const coldBefore = before.coldCapital.toNumber();
+
+      // Ensure there is cold capital to withdraw (should be 1_000_000 from prior deposit route)
+      expect(coldBefore).to.be.greaterThan(0);
+
+      const withdrawAmount = new BN(coldBefore); // withdraw all cold capital back
+
+      await program.methods
+        .routeYieldWithdraw(withdrawAmount, Buffer.from([]))
+        .accounts({
+          signer: alice.publicKey,
+          vault: aliceVaultPda,
+          registry: null,
+          adapterEntry: null,
+          adapterProgram: null,
+          vaultUsdcPool: null,
+          adapterState: null,
+          instructionsSysvar: null,
+        } as any)
+        .signers([alice])
+        .rpc();
+
+      const after = await (program.account as any).vault.fetch(aliceVaultPda);
+      expect(after.coldCapital.toNumber()).to.equal(0);
+      expect(after.hotPoolBalance.toNumber()).to.equal(
+        hotBefore + coldBefore
+      );
+    });
+
+    it("route_yield_withdraw rejects zero amount", async () => {
+      try {
+        await program.methods
+          .routeYieldWithdraw(new BN(0), Buffer.from([]))
+          .accounts({
+            signer: alice.publicKey,
+            vault: aliceVaultPda,
+            registry: null,
+            adapterEntry: null,
+            adapterProgram: null,
+            vaultUsdcPool: null,
+            adapterState: null,
+            instructionsSysvar: null,
+          } as any)
+          .signers([alice])
+          .rpc();
+        assert.fail("Expected ZeroWithdrawal to fail");
+      } catch (err: any) {
+        expect(err.toString()).to.match(/ZeroWithdrawal/);
+      }
+    });
+
+    it("route_yield_withdraw rejects amount exceeding cold_capital", async () => {
+      // After prior test cold_capital = 0
+      try {
+        await program.methods
+          .routeYieldWithdraw(new BN(1_000_000), Buffer.from([]))
           .accounts({
             signer: alice.publicKey,
             vault: aliceVaultPda,
@@ -597,7 +675,7 @@ describe("oxar-protocol", () => {
       // Pass null for all optional accounts so Anchor doesn't reject client-side.
       try {
         await program.methods
-          .routeYieldDeposit(new BN(1_000_000))
+          .routeYieldDeposit(new BN(1_000_000), Buffer.from([]))
           .accounts({
             vault: vaultPda,
             signer: wallet.publicKey,

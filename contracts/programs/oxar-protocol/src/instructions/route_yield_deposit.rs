@@ -63,10 +63,13 @@ pub struct RouteYieldDeposit<'info> {
     /// adapter_entry is PDA-gated on vault.adapter_program.
     pub adapter_program: Option<AccountInfo<'info>>,
 
-    /// Vault USDC pool — source of funds forwarded to the adapter.
+    /// Vault USDC pool — source of funds forwarded to the adapter. Writable: the
+    /// adapter (and klend, via CPI) debits USDC from it, so it must be mut here or
+    /// the onward CPI's writable flag is an illegal privilege escalation.
     ///
     /// CHECK: validated by the adapter (verifies token account authority = vault PDA,
     /// mint = USDC).
+    #[account(mut)]
     pub vault_usdc_pool: Option<AccountInfo<'info>>,
 
     /// Adapter-owned state PDA for this vault; writable so the adapter can update it.
@@ -86,12 +89,17 @@ pub struct RouteYieldDeposit<'info> {
 pub fn handler<'info>(
     ctx: Context<'_, '_, '_, 'info, RouteYieldDeposit<'info>>,
     amount: u64,
+    adapter_data: Vec<u8>,
 ) -> Result<()> {
     require!(
         ctx.accounts.vault.protocol_version == PROTOCOL_VERSION,
         OxarError::ProtocolVersionMismatch
     );
     require!(amount > 0, OxarError::ZeroDeposit);
+    require!(
+        adapter_data.len() <= 256,
+        OxarError::AdapterDataTooLarge
+    );
     require!(
         amount <= ctx.accounts.vault.hot_pool_balance,
         OxarError::InsufficientFunds
@@ -185,14 +193,12 @@ pub fn handler<'info>(
         let signer_seeds = &[&seeds[..]];
 
         // Build CPI account list (positional layout from adapter-standard-v1.md §adapter_deposit):
-        // 0: dispatcher_program (read-only)
-        // 1: instructions_sysvar (read-only)
-        // 2: vault (writable, signer — PDA)
-        // 3: vault_usdc_pool (writable)
-        // 4: adapter_state (writable)
+        // 0: instructions_sysvar (read-only)
+        // 1: vault (writable, signer — PDA)
+        // 2: vault_usdc_pool (writable)
+        // 3: adapter_state (writable)
         // 5+: remaining_accounts (pass-through to underlying protocol)
         let mut metas = vec![
-            AccountMeta::new_readonly(crate::ID, false),
             AccountMeta::new_readonly(instructions_sysvar_clone.key(), false),
             AccountMeta::new(vault_account_info.key(), true),
             AccountMeta::new(vault_usdc_pool_clone.key(), false),
@@ -217,7 +223,7 @@ pub fn handler<'info>(
         let ix = Instruction {
             program_id: adapter_program_clone.key(),
             accounts: metas,
-            data: crate::cpi_adapter::encode_deposit_args(amount, &[]),
+            data: crate::cpi_adapter::encode_deposit_args(amount, &adapter_data),
         };
 
         invoke_signed(&ix, &infos, signer_seeds).map_err(|e| {
