@@ -36,6 +36,45 @@ bind_address = "0.0.0.0"
 url = "https://api.mainnet-beta.solana.com"
 ledger = ".anchor/test-ledger"
 rpc_port = 8899
+# NOTE: klend's refresh_reserve does `clock.slot - reserve.last_update.slot`, which
+# underflows on a fork because the validator clock starts below the cloned reserve's
+# mainnet slot. `warp_slot = <near live slot>` fixes the math, but on macOS the
+# accounts-hash at a warped slot blows past the open-file limit and panics. The
+# robust fix is a bankrun harness with setClock — see the note in kamino-e2e.ts.
+# Left unwarped so the rest of the suite runs; the refresh-dependent kamino steps
+# are skipped (documented there).
 
 [[test.validator.clone]]
 address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+# USDC mint (mainnet).
+
+# ----- Kamino Lend (klend) main-market USDC reserve set, for fork CPI tests -----
+[[test.validator.clone]]
+address = "KLend2g3cP87fffoy8q1mQqGKjrxjC8boSyAYavgmjD"
+# klend program account
+[[test.validator.clone]]
+address = "9uSbGW1y9H5Av6H5TKxQ1wnFApSq2t3oEpfF2YfjDQGA"
+# klend programData (executable bytes)
+[[test.validator.clone]]
+address = "D6q6wuQSrifJKZYpR1M8R4YawnLDtDsMmWM1NbBmgJ59"
+# USDC reserve
+[[test.validator.clone]]
+address = "7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF"
+# lending market
+[[test.validator.clone]]
+address = "Bgq7trRgVMeq33yt235zM2onQ4bRDBsY5EWiTetF4qw6"
+# reserve liquidity supply vault (holds USDC)
+[[test.validator.clone]]
+address = "B8V6WVjPxW1UGwVDfxH2d2r8SyT4cqn7dQRK6XneVa7D"
+# reserve collateral mint (cUSDC)
+[[test.validator.clone]]
+address = "3DzjXRfxRm6iejfyyMynR4tScddaanrePJ1NJU2XnPPL"
+# reserve collateral supply vault
+[[test.validator.clone]]
+address = "3t4JZcueEzTbVP6kLxXrL3VpWx45jDer4eqysweBchNH"
+# Scope price feed (refresh_reserve)
+
+# ----- Injected: throwaway test payer pre-funded with 1,000 USDC (Variant B) -----
+[[test.validator.account]]
+address = "96mBCxzaYW4nwyXac5oLGV6m16aEmXbwWZ4XsTq4AJBT"
+filename = "tests/fork/fixtures/usdc-funded.json"

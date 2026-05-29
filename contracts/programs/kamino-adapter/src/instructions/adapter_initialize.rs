@@ -15,15 +15,10 @@ use crate::state::AdapterState;
 /// is the dispatcher, verified via the instructions sysvar.
 ///
 /// Standard account slots 0–5 (adapter-standard-v1.md §adapter_initialize):
-/// 0 dispatcher_program, 1 instructions_sysvar, 2 vault, 3 adapter_state (init),
-/// 4 rent_payer (signer), 5 system_program.
+/// 3 rent_payer (signer), 5 system_program.
 /// Kamino-specific slots 6–10 appended per this adapter's README.
 #[derive(Accounts)]
 pub struct AdapterInitialize<'info> {
-    /// CHECK: OXAR dispatcher program id; identity verified in handler via sysvar.
-    #[account(address = OXAR_DISPATCHER_PROGRAM_ID @ AdapterError::Unauthorized)]
-    pub dispatcher_program: AccountInfo<'info>,
-
     /// CHECK: instructions sysvar — address enforced; used for caller verification.
     #[account(address = sysvar::instructions::ID)]
     pub instructions_sysvar: AccountInfo<'info>,

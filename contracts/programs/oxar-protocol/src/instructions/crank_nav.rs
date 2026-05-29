@@ -153,13 +153,11 @@ pub fn handler<'info>(
         let remaining: Vec<AccountInfo> = ctx.remaining_accounts.to_vec();
 
         // Build CPI account list (positional layout from adapter-standard-v1.md §adapter_current_value):
-        // 0: dispatcher_program (read-only)
-        // 1: instructions_sysvar (read-only)
-        // 2: vault (read-only — current_value is a query, not a mutation)
-        // 3: adapter_state (read-only)
+        // 0: instructions_sysvar (read-only)
+        // 1: vault (read-only — current_value is a query, not a mutation)
+        // 2: adapter_state (read-only)
         // 4+: remaining_accounts (oracle accounts, reserve state, etc.)
         let mut metas = vec![
-            AccountMeta::new_readonly(crate::ID, false),
             AccountMeta::new_readonly(instructions_sysvar_clone.key(), false),
             AccountMeta::new_readonly(vault_account_info.key(), false),
             AccountMeta::new_readonly(adapter_state_clone.key(), false),

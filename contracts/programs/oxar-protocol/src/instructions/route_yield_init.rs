@@ -113,12 +113,10 @@ pub fn handler<'info>(
     let signer_seeds = &[&seeds[..]];
 
     // CPI account layout (adapter-standard-v1.md §adapter_initialize):
-    // 0 dispatcher_program (ro), 1 instructions_sysvar (ro),
-    // 2 vault (signer, via invoke_signed), 3 adapter_state (writable, init),
-    // 4 rent_payer (writable, signer), 5 system_program (ro),
+    // 1 vault (signer, via invoke_signed), 3 adapter_state (writable, init),
+    // 3 rent_payer (writable, signer), 5 system_program (ro),
     // 6+ remaining_accounts (adapter-specific).
     let mut metas = vec![
-        AccountMeta::new_readonly(crate::ID, false),
         AccountMeta::new_readonly(instructions_sysvar_info.key(), false),
         AccountMeta::new_readonly(vault_account_info.key(), true),
         AccountMeta::new(adapter_state_info.key(), false),

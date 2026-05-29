@@ -16,14 +16,9 @@ use crate::state::AdapterState;
 /// Returns ONLY the adapter's holdings (the dispatcher adds the hot pool).
 ///
 /// Account layout (adapter-standard-v1.md §adapter_current_value):
-/// 0 dispatcher_program, 1 instructions_sysvar, 2 vault, 3 adapter_state,
-/// 4 reserve, 5 lending_market, 6 scope_prices, 7 klend_program.
+/// 3 reserve, 5 lending_market, 6 scope_prices, 7 klend_program.
 #[derive(Accounts)]
 pub struct AdapterCurrentValue<'info> {
-    /// CHECK: OXAR dispatcher program id; identity verified via sysvar in handler.
-    #[account(address = OXAR_DISPATCHER_PROGRAM_ID @ AdapterError::Unauthorized)]
-    pub dispatcher_program: AccountInfo<'info>,
-
     /// CHECK: instructions sysvar — address enforced; used for caller verification.
     #[account(address = sysvar::instructions::ID)]
     pub instructions_sysvar: AccountInfo<'info>,

@@ -63,10 +63,13 @@ pub struct RouteYieldDeposit<'info> {
     /// adapter_entry is PDA-gated on vault.adapter_program.
     pub adapter_program: Option<AccountInfo<'info>>,
 
-    /// Vault USDC pool — source of funds forwarded to the adapter.
+    /// Vault USDC pool — source of funds forwarded to the adapter. Writable: the
+    /// adapter (and klend, via CPI) debits USDC from it, so it must be mut here or
+    /// the onward CPI's writable flag is an illegal privilege escalation.
     ///
     /// CHECK: validated by the adapter (verifies token account authority = vault PDA,
     /// mint = USDC).
+    #[account(mut)]
     pub vault_usdc_pool: Option<AccountInfo<'info>>,
 
     /// Adapter-owned state PDA for this vault; writable so the adapter can update it.
@@ -190,14 +193,12 @@ pub fn handler<'info>(
         let signer_seeds = &[&seeds[..]];
 
         // Build CPI account list (positional layout from adapter-standard-v1.md §adapter_deposit):
-        // 0: dispatcher_program (read-only)
-        // 1: instructions_sysvar (read-only)
-        // 2: vault (writable, signer — PDA)
-        // 3: vault_usdc_pool (writable)
-        // 4: adapter_state (writable)
+        // 0: instructions_sysvar (read-only)
+        // 1: vault (writable, signer — PDA)
+        // 2: vault_usdc_pool (writable)
+        // 3: adapter_state (writable)
         // 5+: remaining_accounts (pass-through to underlying protocol)
         let mut metas = vec![
-            AccountMeta::new_readonly(crate::ID, false),
             AccountMeta::new_readonly(instructions_sysvar_clone.key(), false),
             AccountMeta::new(vault_account_info.key(), true),
             AccountMeta::new(vault_usdc_pool_clone.key(), false),

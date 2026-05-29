@@ -15,10 +15,6 @@ use crate::state::AdapterState;
 /// Standard slots 0–4 (adapter-standard-v1.md §adapter_deposit) + Kamino slots 5+.
 #[derive(Accounts)]
 pub struct AdapterDeposit<'info> {
-    /// CHECK: OXAR dispatcher program id; identity verified via sysvar in handler.
-    #[account(address = OXAR_DISPATCHER_PROGRAM_ID @ AdapterError::Unauthorized)]
-    pub dispatcher_program: AccountInfo<'info>,
-
     /// CHECK: instructions sysvar — address enforced; used for caller verification.
     #[account(address = sysvar::instructions::ID)]
     pub instructions_sysvar: AccountInfo<'info>,

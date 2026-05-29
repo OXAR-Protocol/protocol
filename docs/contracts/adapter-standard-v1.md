@@ -13,12 +13,11 @@ Every adapter program MUST expose these four instructions with exact account lay
 Creates the `adapter_state` PDA the first time a vault routes to this adapter. MUST be called before `adapter_deposit`.
 
 Account layout (positional):
-1. `[]` dispatcher_program — OXAR program ID
-2. `[]` instructions_sysvar — `sysvar1nstructions` account for caller verification
-3. `[writable, signer]` vault — Vault PDA (signs CPI)
-4. `[writable]` adapter_state — adapter-owned PDA (init), seeds = `[b"adapter_state", adapter_program_id, vault]`
-5. `[writable, signer]` rent_payer — pays for account rent
-6. `[]` system_program
+1. `[]` instructions_sysvar — `sysvar1nstructions` account for caller verification
+2. `[writable, signer]` vault — Vault PDA (signs CPI)
+3. `[writable]` adapter_state — adapter-owned PDA (init), seeds = `[b"adapter_state", adapter_program_id, vault]`
+4. `[writable, signer]` rent_payer — pays for account rent
+5. `[]` system_program
 
 Args:
 - `adapter_data: Vec<u8>` — adapter-specific init config (MUST NOT exceed 256 bytes; pass empty vec if unused)
@@ -36,12 +35,11 @@ Pulls `amount` USDC from `vault_usdc_pool` (the USDC token account owned by the 
 `adapter_state` MUST already exist (initialized via `adapter_initialize`); will fail with `AdapterStateUninit` (6006) if not.
 
 Account layout (positional):
-1. `[]` dispatcher_program — OXAR program ID; adapter MUST verify this is the caller via instruction sysvar
-2. `[]` instructions_sysvar — `sysvar1nstructions` account for caller verification
-3. `[writable, signer]` vault — Vault PDA (signs CPI)
-4. `[writable]` vault_usdc_pool — source USDC token account
-5. `[writable]` adapter_state — adapter-owned PDA storing adapter-specific accounting
-6. `[]...` remaining_accounts — pass-through to underlying protocol CPI (Kamino reserve, MarginFi bank, etc.)
+1. `[]` instructions_sysvar — `sysvar1nstructions` account for caller verification
+2. `[writable, signer]` vault — Vault PDA (signs CPI)
+3. `[writable]` vault_usdc_pool — source USDC token account
+4. `[writable]` adapter_state — adapter-owned PDA storing adapter-specific accounting
+5. `[]...` remaining_accounts — pass-through to underlying protocol CPI (Kamino reserve, MarginFi bank, etc.)
 
 Args:
 - `amount: u64` — USDC base units (6 decimals)
@@ -61,12 +59,11 @@ Returns via event:
 Redeems `shares` from adapter, sends USDC back to `vault_usdc_pool` (the USDC token account owned by the vault PDA). Adapter MUST treat `vault_usdc_pool` as the destination; `adapter_state` is the source of redemption logic against underlying protocol holdings.
 
 Account layout (positional):
-1. `[]` dispatcher_program — OXAR program ID; adapter MUST verify this is the caller via instruction sysvar
-2. `[]` instructions_sysvar — `sysvar1nstructions` account for caller verification
-3. `[writable, signer]` vault — Vault PDA (signs CPI)
-4. `[writable]` vault_usdc_pool — destination USDC token account
-5. `[writable]` adapter_state — adapter-owned PDA storing adapter-specific accounting
-6. `[]...` remaining_accounts — pass-through to underlying protocol CPI
+1. `[]` instructions_sysvar — `sysvar1nstructions` account for caller verification
+2. `[writable, signer]` vault — Vault PDA (signs CPI)
+3. `[writable]` vault_usdc_pool — destination USDC token account
+4. `[writable]` adapter_state — adapter-owned PDA storing adapter-specific accounting
+5. `[]...` remaining_accounts — pass-through to underlying protocol CPI
 
 Args:
 - `shares: u64`
@@ -87,11 +84,10 @@ Returns USDC value of adapter's current holdings attributed to vault via event.
 **Not purely read-only:** the instruction emits an event into the transaction log, which is the return mechanism. Off-chain callers (NAV monitor, frontend) SHOULD prefer **simulation** (`simulateTransaction`) to obtain the value without paying CU cost. On-chain callers may invoke it as part of a regular transaction and read the event from the program log.
 
 Account layout (positional):
-1. `[]` dispatcher_program — OXAR program ID; adapter MUST verify this is the caller via instruction sysvar
-2. `[]` instructions_sysvar — `sysvar1nstructions` account for caller verification
-3. `[]` vault
-4. `[]` adapter_state
-5. `[]...` remaining_accounts (oracle accounts, reserve state, etc.)
+1. `[]` instructions_sysvar — `sysvar1nstructions` account for caller verification
+2. `[]` vault
+3. `[]` adapter_state
+4. `[]...` remaining_accounts (oracle accounts, reserve state, etc.)
 
 Args:
 - `adapter_data: Vec<u8>` — MUST NOT exceed 256 bytes; pass empty vec if unused
@@ -133,7 +129,7 @@ let parent_ix = load_instruction_at_checked(current_ix_index as usize, &ix_sysva
 require_keys_eq!(parent_ix.program_id, OXAR_DISPATCHER_PROGRAM_ID, OxarError::Unauthorized);
 ```
 
-- `instructions_sysvar: AccountInfo<'info>` MUST appear as a required account in every adapter instruction's layout (positional slot 2, immediately after `dispatcher_program`)
+- `instructions_sysvar: AccountInfo<'info>` MUST appear as the FIRST account in every adapter instruction's layout (positional slot 1). v1 has no separate `dispatcher_program` account — the caller's identity is verified solely via the instructions sysvar pattern above.
 - Use `checked_add`/`checked_mul`/`checked_div` on all arithmetic
 - Never accept `amount == 0` or `shares == 0`
 - Validate `remaining_accounts` matches expected layout for the underlying protocol
