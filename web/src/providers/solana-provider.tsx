@@ -9,18 +9,22 @@ import {
   useRef,
   useState,
 } from "react";
-import { Connection, Keypair, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
-import { AnchorProvider, Program } from "@coral-xyz/anchor";
+import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
-import { IDL as idlJson, type OxarProtocol } from "@oxar/sdk";
 import { RPC_URL } from "@/lib/constants";
 import { clearCache } from "@/lib/cache";
 
+/** Minimal wallet signer — what yield providers need to sign + send. */
+export interface WalletSigner {
+  publicKey: PublicKey;
+  signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T>;
+}
+
 interface SolanaContextValue {
   connection: Connection;
-  program: Program<OxarProtocol> | null;
-  provider: AnchorProvider | null;
+  /** Connected wallet signer, or null when not authenticated. */
+  wallet: WalletSigner | null;
   walletAddress: PublicKey | null;
   walletError: string | null;
   retryCreateWallet: () => void;
@@ -28,8 +32,7 @@ interface SolanaContextValue {
 
 const SolanaContext = createContext<SolanaContextValue>({
   connection: new Connection(RPC_URL),
-  program: null,
-  provider: null,
+  wallet: null,
   walletAddress: null,
   walletError: null,
   retryCreateWallet: () => {},
@@ -39,18 +42,9 @@ export function useSolanaContext() {
   return useContext(SolanaContext);
 }
 
-class ReadOnlyWallet {
-  private _publicKey: PublicKey;
-  constructor(pubkey?: PublicKey) {
-    this._publicKey = pubkey || Keypair.generate().publicKey;
-  }
-  get publicKey(): PublicKey {
-    return this._publicKey;
-  }
+class ReadOnlyWallet implements WalletSigner {
+  constructor(public readonly publicKey: PublicKey) {}
   async signTransaction<T extends Transaction | VersionedTransaction>(_tx: T): Promise<T> {
-    throw new Error("Please connect your wallet to sign transactions.");
-  }
-  async signAllTransactions<T extends Transaction | VersionedTransaction>(_txs: T[]): Promise<T[]> {
     throw new Error("Please connect your wallet to sign transactions.");
   }
 }
@@ -61,7 +55,7 @@ interface PrivyWalletLike {
   address: string;
 }
 
-class PrivySolanaAdapter {
+class PrivySolanaAdapter implements WalletSigner {
   private _publicKey: PublicKey;
   private _wallet: PrivyWalletLike;
   private _connection: Connection;
@@ -94,21 +88,14 @@ class PrivySolanaAdapter {
 
     const result = await this._wallet.signTransaction({
       transaction: txBytes,
-      chain: "solana:devnet",
+      // v1 (SDK-frontend) targets mainnet — Jupiter Lend / Kamino only exist there.
+      chain: "solana:mainnet",
     });
 
     if (tx instanceof Transaction) {
       return Transaction.from(result.signedTransaction) as T;
     }
     return VersionedTransaction.deserialize(result.signedTransaction) as T;
-  }
-
-  async signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> {
-    const signed: T[] = [];
-    for (const tx of txs) {
-      signed.push(await this.signTransaction(tx));
-    }
-    return signed;
   }
 }
 
@@ -168,34 +155,20 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
       });
   }, [authenticated, user, solanaAddress, createSolanaWallet]);
 
-  const readOnlyProgram = useMemo(() => {
-    const readOnlyProvider = new AnchorProvider(
-      connection,
-      new ReadOnlyWallet() as any,
-      { commitment: "confirmed" },
-    );
-    return new Program<OxarProtocol>(idlJson as any, readOnlyProvider);
-  }, [connection]);
-
-  const { program, provider, walletAddress } = useMemo(() => {
+  const { wallet, walletAddress } = useMemo(() => {
     if (!solanaAddress) {
-      return { program: readOnlyProgram, provider: null, walletAddress: null };
+      return { wallet: null, walletAddress: null };
     }
     const pubkey = new PublicKey(solanaAddress);
-    const adapter = connectedWallet
+    const signer: WalletSigner = connectedWallet
       ? new PrivySolanaAdapter(pubkey, connectedWallet, connection)
       : new ReadOnlyWallet(pubkey);
-
-    const anchorProvider = new AnchorProvider(connection, adapter as any, {
-      commitment: "confirmed",
-    });
-    const prog = new Program<OxarProtocol>(idlJson as any, anchorProvider);
-    return { program: prog, provider: anchorProvider, walletAddress: pubkey };
-  }, [solanaAddress, connectedWallet, connection, readOnlyProgram]);
+    return { wallet: signer, walletAddress: pubkey };
+  }, [solanaAddress, connectedWallet, connection]);
 
   return (
     <SolanaContext.Provider
-      value={{ connection, program, provider, walletAddress, walletError, retryCreateWallet }}
+      value={{ connection, wallet, walletAddress, walletError, retryCreateWallet }}
     >
       {children}
     </SolanaContext.Provider>

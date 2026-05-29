@@ -4,12 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
 
-import { CURRENT_USDC_MINT } from "@/lib/constants";
-
-import { useOxarProgram } from "./use-oxar-program";
+import { USDC_MINT } from "@/lib/constants";
+import { useSolanaContext } from "@/providers/solana-provider";
 
 export function useUsdcBalance() {
-  const { connection, walletAddress } = useOxarProgram();
+  const { connection, walletAddress } = useSolanaContext();
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +20,7 @@ export function useUsdcBalance() {
     }
     setLoading(true);
     try {
-      const usdcMint = new PublicKey(CURRENT_USDC_MINT);
+      const usdcMint = new PublicKey(USDC_MINT);
       const ata = await getAssociatedTokenAddress(usdcMint, walletAddress);
       const account = await getAccount(connection, ata);
       // USDC has 6 decimals

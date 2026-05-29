@@ -4,16 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
-import { ArrowUpRight, Plus, Sparkles, Loader2 } from "lucide-react";
+import { ArrowUpRight, Sparkles, Loader2 } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
-import { useUserGroupVaults } from "@/hooks/use-group-vault";
+import { fromBaseUnits } from "@/lib/yield";
 
 export default function HomePage() {
-  const { user, ready, authenticated } = usePrivy();
-  const personal = useAggregatePersonalBalance();
-  const groups = useUserGroupVaults();
+  const { user } = usePrivy();
+  const { totalUsdc, dailyYield, positionCount, views, loading } =
+    useAggregatePersonalBalance();
   const [greeting, setGreeting] = useState("Welcome");
 
   useEffect(() => {
@@ -30,12 +30,9 @@ export default function HomePage() {
       ? `${user.wallet.address.slice(0, 4)}…${user.wallet.address.slice(-4)}`
       : "friend";
 
-  // Aggregate balance from personal vaults
-  const totalBalance = personal.totalUsdc;
-  const dailyYield = 0; // TODO: estimate from APY × balance when adapters land
-  const apy = personal.vaultCount > 0 ? 0 : 0; // Currently Idle → 0% real yield
-  const userPiles = [...groups.created, ...groups.joined];
-  const balanceLoading = personal.loading || groups.loading;
+  const activePositions = views.filter(
+    (v) => Number(v.underlyingBalance) > 0,
+  );
 
   return (
     <div className="max-w-[1100px] mx-auto pt-8 pb-32">
@@ -59,33 +56,33 @@ export default function HomePage() {
           Your sleeping money
         </p>
         <div className="mt-3 flex items-baseline gap-4">
-          {balanceLoading ? (
+          {loading ? (
             <span className="text-[clamp(2rem,5vw,3rem)] font-sans font-light text-white/30 leading-none">
               <Loader2 className="animate-spin inline" size={28} />
             </span>
           ) : (
             <span className="text-[clamp(2.5rem,6vw,4rem)] font-sans font-light text-white leading-none tabular-nums">
-              ${totalBalance.toLocaleString(undefined, {
+              ${totalUsdc.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
             </span>
           )}
-          {totalBalance > 0 && dailyYield > 0 && (
+          {totalUsdc > 0 && dailyYield > 0 && (
             <span className="font-mono text-sm text-accent">
-              +${dailyYield.toFixed(2)} today
+              +${dailyYield.toFixed(2)} / day
             </span>
           )}
         </div>
         <p className="mt-3 font-mono text-sm text-white/40">
-          {totalBalance > 0
-            ? `${personal.vaultCount} vault${personal.vaultCount === 1 ? "" : "s"} · earning every block`
-            : "Drop USDC into a vault to start earning"}
+          {totalUsdc > 0
+            ? `${positionCount} source${positionCount === 1 ? "" : "s"} · earning every block`
+            : "Drop USDC into a source to start earning"}
         </p>
       </motion.section>
 
       {/* Empty state — first-time hero */}
-      {totalBalance === 0 && (
+      {totalUsdc === 0 && !loading && (
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -112,10 +109,10 @@ export default function HomePage() {
                 <span className="text-white/50">Let's wake it up.</span>
               </h2>
               <p className="mt-3 font-mono text-sm text-white/40 max-w-md leading-relaxed">
-                Pick a speed (sleepy, walking, or running). Deposit USDC. Earn yield from
-                day one. Withdraw whenever you want.
+                Pick a source. Deposit USDC. Earn yield from day one. Withdraw
+                whenever you want — you always hold your own position.
               </p>
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-6">
                 <Link
                   href="/yield"
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-[5px] bg-white text-black font-mono text-xs uppercase tracking-wide hover:bg-white/90 transition"
@@ -123,76 +120,56 @@ export default function HomePage() {
                   Wake up your money
                   <ArrowUpRight size={14} strokeWidth={1.5} />
                 </Link>
-                <Link
-                  href="/pile"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-[5px] border border-white/15 text-white/70 font-mono text-xs uppercase tracking-wide hover:text-white hover:border-white/30 transition"
-                >
-                  <Plus size={14} strokeWidth={1.5} />
-                  Start a pile
-                </Link>
               </div>
             </div>
           </div>
         </motion.section>
       )}
 
-      {/* Piles row */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.25 }}
-        className="mb-12"
-      >
-        <div className="flex items-baseline justify-between mb-4">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">
-            Your piles
-          </p>
-          <Link
-            href="/pile"
-            className="font-mono text-xs text-white/40 hover:text-white transition-colors"
-          >
-            See all →
-          </Link>
-        </div>
+      {/* Where it's sleeping — live positions */}
+      {activePositions.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+          className="mb-12"
+        >
+          <div className="flex items-baseline justify-between mb-4">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">
+              Where it's sleeping
+            </p>
+            <Link
+              href="/pile"
+              className="font-mono text-xs text-white/40 hover:text-white transition-colors"
+            >
+              Manage →
+            </Link>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {userPiles.slice(0, 4).map((g) => {
-            const goalUsdc = g.goalAmount.toNumber() / 1_000_000;
-            return (
-              <Link
-                key={g.pda.toBase58()}
-                href={`/pile/${g.pda.toBase58()}`}
-                className="p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition-colors min-h-[120px] flex flex-col justify-between"
-              >
-                <div>
-                  <p className="font-sans text-base text-white">{g.name}</p>
-                  <p className="mt-1 font-mono text-xs text-white/40">
-                    ${goalUsdc.toLocaleString()} goal · {g.memberCount}{" "}
-                    {g.memberCount === 1 ? "member" : "members"}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {activePositions.map((v) => {
+              const value = fromBaseUnits(v.underlyingBalance, v.decimals);
+              return (
+                <Link
+                  key={v.id}
+                  href="/pile"
+                  className="p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition-colors min-h-[120px] flex flex-col justify-between"
+                >
+                  <div>
+                    <p className="font-sans text-base text-white">{v.name}</p>
+                    <p className="mt-1 font-mono text-xs text-white/40">
+                      {(v.apy * 100).toFixed(2)}% APY · {v.assetSymbol}
+                    </p>
+                  </div>
+                  <p className="font-sans text-xl text-white tabular-nums">
+                    ${value.toFixed(2)}
                   </p>
-                </div>
-                <p className="font-mono text-[10px] text-white/30 uppercase tracking-widest">
-                  Tap →
-                </p>
-              </Link>
-            );
-          })}
-          <Link
-            href="/pile/create"
-            className="border border-dashed border-white/15 rounded-[8px] p-6 hover:border-white/30 transition-colors flex flex-col items-start gap-3 min-h-[120px] justify-between"
-          >
-            <Plus className="text-white/30" size={18} strokeWidth={1.5} />
-            <div>
-              <p className="font-sans text-base text-white">
-                {userPiles.length > 0 ? "Start another pile" : "Start a pile"}
-              </p>
-              <p className="mt-1 font-mono text-xs text-white/40">
-                Save together on something real
-              </p>
-            </div>
-          </Link>
-        </div>
-      </motion.section>
+                </Link>
+              );
+            })}
+          </div>
+        </motion.section>
+      )}
 
       {/* Activity placeholder */}
       <motion.section
