@@ -11,6 +11,8 @@ use crate::constants::VAULT_SEED;
 // sha256("global:<name>")[..8]
 // ============================================================================
 
+/// discriminator for `adapter_initialize` — sha256("global:adapter_initialize")[..8]
+pub const ADAPTER_INITIALIZE_DISCRIMINATOR: [u8; 8] = [125, 160, 35, 249, 117, 179, 167, 76];
 /// discriminator for `adapter_deposit` — sha256("global:adapter_deposit")[..8]
 pub const ADAPTER_DEPOSIT_DISCRIMINATOR: [u8; 8] = [190, 207, 72, 186, 232, 106, 46, 72];
 /// discriminator for `adapter_withdraw` — sha256("global:adapter_withdraw")[..8]
@@ -21,6 +23,15 @@ pub const ADAPTER_CURRENT_VALUE_DISCRIMINATOR: [u8; 8] = [67, 200, 59, 238, 163,
 // ============================================================================
 // Instruction data builders (Borsh layout: discriminator + args)
 // ============================================================================
+
+/// `adapter_initialize`: discriminator + adapter_data (Vec<u8>)
+pub fn encode_initialize_args(adapter_data: &[u8]) -> Vec<u8> {
+    let mut buf = Vec::with_capacity(8 + 4 + adapter_data.len());
+    buf.extend_from_slice(&ADAPTER_INITIALIZE_DISCRIMINATOR);
+    buf.extend_from_slice(&(adapter_data.len() as u32).to_le_bytes());
+    buf.extend_from_slice(adapter_data);
+    buf
+}
 
 /// `adapter_deposit`: discriminator + amount (LE u64) + adapter_data (Vec<u8>)
 pub fn encode_deposit_args(amount: u64, adapter_data: &[u8]) -> Vec<u8> {
@@ -152,6 +163,10 @@ mod tests {
 
     #[test]
     fn adapter_discriminators_match_anchor_scheme() {
+        assert_eq!(
+            ADAPTER_INITIALIZE_DISCRIMINATOR,
+            discriminator("adapter_initialize")
+        );
         assert_eq!(ADAPTER_DEPOSIT_DISCRIMINATOR, discriminator("adapter_deposit"));
         assert_eq!(ADAPTER_WITHDRAW_DISCRIMINATOR, discriminator("adapter_withdraw"));
         assert_eq!(

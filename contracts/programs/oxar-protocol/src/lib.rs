@@ -96,6 +96,13 @@ pub mod oxar_protocol {
     // Yield routing (Phase D)
     // ========================================================================
 
+    pub fn route_yield_init<'info>(
+        ctx: Context<'_, '_, '_, 'info, RouteYieldInit<'info>>,
+        adapter_data: Vec<u8>,
+    ) -> Result<()> {
+        instructions::route_yield_init::handler(ctx, adapter_data)
+    }
+
     pub fn route_yield_deposit<'info>(
         ctx: Context<'_, '_, '_, 'info, RouteYieldDeposit<'info>>,
         amount: u64,

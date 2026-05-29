@@ -19,9 +19,12 @@ url = "https://api.apr.dev"
 cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
+# NOTE: `anchor test` runs these via a non-globstar shell, so `tests/**/*.ts`
+# expands to `tests/*/*.ts` (nested only) and would silently SKIP the top-level
+# unit suite. List both levels explicitly.
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
-test-fork = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/fork/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/*.ts tests/fork/*.ts"
+test-fork = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/fork/*.ts"
 
 [test]
 startup_wait = 10000

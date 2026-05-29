@@ -27,6 +27,7 @@ pub mod cancel_rule;
 // Yield routing — adapters for Kamino, JLP, Maple, Delora (Phase D)
 // ============================================================================
 pub mod route_yield_deposit;
+pub mod route_yield_init;
 pub mod route_yield_withdraw;
 
 // ============================================================================
@@ -54,6 +55,7 @@ pub use execute_rule::*;
 pub use cancel_rule::*;
 
 pub use route_yield_deposit::*;
+pub use route_yield_init::*;
 pub use route_yield_withdraw::*;
 
 pub use initialize_adapter_registry::*;
