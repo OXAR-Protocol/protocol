@@ -76,9 +76,11 @@ export const jupiterUsdcProvider: YieldProvider = {
       tokens.map((lendingToken) => getLendingTokenDetails({ lendingToken, connection })),
     );
     const usdc = details.find((d) => d.asset.equals(USDC));
-    // supplyRate is a fixed-point per-year rate. Scale (1e9) is Jupiter's
-    // convention; VERIFY against the live UI before trusting the displayed %.
-    const apy = usdc ? usdc.supplyRate.toNumber() / 1e9 : 0;
+    // supplyRate + rewardsRate are in basis points — verified against jup.ag's
+    // API for USDC: 422 + 114 = 536 = 5.36% total APY. /10000 → fraction.
+    const apy = usdc
+      ? (usdc.supplyRate.toNumber() + usdc.rewardsRate.toNumber()) / 10000
+      : 0;
     if (apy > 0) setCache(APY_CACHE_KEY, apy);
     return apy;
   },
