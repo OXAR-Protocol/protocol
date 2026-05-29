@@ -51,8 +51,11 @@ export const jupiterUsdcProvider: YieldProvider = {
   async getPosition(owner: PublicKey, connection: Connection): Promise<YieldPosition> {
     try {
       const pos = await getUserLendingPositionByAsset({ user: owner, asset: USDC, connection });
+      // `underlyingAssets` is the DEPOSITED position (shares → assets). The SDK's
+      // `underlyingBalance` is the user's spot USDC wallet balance — using it
+      // wrongly counted un-deposited wallet USDC as a position.
       return {
-        underlyingBalance: BigInt(pos.underlyingBalance.toString()),
+        underlyingBalance: BigInt(pos.underlyingAssets.toString()),
         shares: BigInt(pos.lendingTokenShares.toString()),
       };
     } catch {
