@@ -2,10 +2,13 @@ use anchor_lang::prelude::*;
 
 pub mod constants;
 pub mod error;
+pub mod events;
 pub mod instructions;
+pub mod klend_cpi;
 pub mod state;
 
 pub use constants::*;
+pub use events::*;
 pub use instructions::*;
 pub use state::*;
 
