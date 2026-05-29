@@ -67,3 +67,18 @@ balance with yield).
 
 Runtime verification against mainnet (small real funds) is the user's step — the
 SDKs only target live mainnet protocols.
+
+## Kamino — deferred (SDK packaging blocker)
+
+`@kamino-finance/klend-sdk@8.0.2` fails to load: its `utils/seeds.js` does
+`require("@kamino-finance/farms-sdk/dist/@codegen/farms/programId")`, but
+`farms-sdk@3.2.26` (the version its `^3.2.24` peer range resolves to) moved that
+module to `@codegen/farms/programs/` — the `programId` path no longer exists. This
+is an upstream packaging mismatch; it would break the Next/Turbopack bundle.
+
+The frontend deposit/withdraw builders we'd use are `KaminoAction.build*Txns`
+(notably `buildDepositReserveLiquidityTxns` — the savings path, matching our Rust
+adapter). Resolution options for a follow-up task: pin a compatible `farms-sdk`
+version, add a Turbopack `resolveAlias` shim for the missing module, or wait for an
+upstream klend-sdk fix. Until then **v1 ships Jupiter Lend only** (one real source),
+and the provider interface makes adding Kamino a one-file drop-in later.
