@@ -14,6 +14,7 @@ import {
 } from "@oxar/sdk";
 import { YieldSourceRow } from "@/components/yield-source-row";
 import { YieldSourceSheet } from "@/components/yield-source-sheet";
+import { useYieldPositions } from "@/hooks/use-yield-positions";
 
 type ChainFilter = "all" | "solana" | "ethereum";
 
@@ -21,6 +22,11 @@ export default function YieldPage() {
   const [apyBucket, setApyBucket] = useState<ApyBucket | null>(null);
   const [chain, setChain] = useState<ChainFilter>("all");
   const [active, setActive] = useState<YieldSourceConfig | null>(null);
+
+  // Live APY from real protocol SDKs (v1: Jupiter Lend). Additive — the legacy
+  // catalog below still renders until the marketplace is fully migrated.
+  const { views: liveViews } = useYieldPositions();
+  const liveJup = liveViews.find((v) => v.id === "jupiter-lend-usdc");
 
   const filtered = useMemo(() => {
     return YIELD_SOURCES.filter((s) => {
@@ -48,9 +54,14 @@ export default function YieldPage() {
           Where your money can sleep
         </h1>
         <p className="mt-3 font-mono text-sm text-white/40 max-w-lg">
-          Pick a source. Open it. Deposit. Withdraw anytime. One vault per
-          source — your shares stay separate.
+          Pick a source. Open it. Deposit. Withdraw anytime. Funds go straight
+          into the protocol — you hold your own position.
         </p>
+        {liveJup && (
+          <p className="mt-2 font-mono text-xs text-amber-400/80">
+            ● {liveJup.name} live · {(liveJup.apy * 100).toFixed(2)}% APY
+          </p>
+        )}
       </motion.div>
 
       {/* Filters */}
