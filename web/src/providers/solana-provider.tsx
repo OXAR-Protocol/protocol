@@ -113,11 +113,16 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   // not on every Privy object re-render.
   const solanaAddress = useMemo<string | null>(() => {
     if (!authenticated || !user) return null;
-    // SAFETY: linkedAccounts is loosely typed by Privy; we only read type/chainType/address.
-    const acc = user.linkedAccounts.find(
+    // SAFETY: linkedAccounts is loosely typed by Privy; we read type/chainType/address/walletClientType.
+    const wallets = user.linkedAccounts.filter(
       (a: any) => a.type === "wallet" && a.chainType === "solana",
-    ) as { address?: string } | undefined;
-    return acc?.address ?? null;
+    ) as Array<{ address?: string; walletClientType?: string }>;
+    // Prefer a connected external wallet (Phantom, etc.) over the auto-created
+    // Privy embedded wallet — that's where the user's funds are. Fall back to embedded.
+    const external = wallets.find(
+      (w) => w.walletClientType && w.walletClientType !== "privy",
+    );
+    return (external ?? wallets[0])?.address ?? null;
   }, [authenticated, user]);
 
   // Clear the RPC cache when the wallet changes so stale per-wallet data doesn't leak.
