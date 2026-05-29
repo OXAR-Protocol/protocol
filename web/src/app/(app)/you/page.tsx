@@ -7,13 +7,17 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Copy, Check, LogOut, ArrowUpRight, LineChart } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
+import { useSolanaContext } from "@/providers/solana-provider";
 
 export default function YouPage() {
   const { user, logout, ready, authenticated } = usePrivy();
+  const { walletAddress } = useSolanaContext();
   const [copied, setCopied] = useState(false);
 
   const email = user?.email?.address;
-  const wallet = user?.wallet?.address;
+  // The address OXAR actually uses for balances/deposits (prefers the connected
+  // external wallet), not necessarily Privy's primary wallet.
+  const wallet = walletAddress?.toBase58() ?? user?.wallet?.address;
   const shortWallet = wallet ? `${wallet.slice(0, 6)}…${wallet.slice(-6)}` : "";
 
   const handleCopy = () => {
