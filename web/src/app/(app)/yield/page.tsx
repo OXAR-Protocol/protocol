@@ -6,41 +6,50 @@ import { X } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { CustomSelect } from "@/components/custom-select";
-import {
-  YIELD_SOURCES,
-  APY_BUCKETS,
-  type YieldSourceConfig,
-  type ApyBucket,
-} from "@oxar/sdk";
+import { YIELD_SOURCES, APY_BUCKETS, type ApyBucket } from "@oxar/sdk";
 import { YieldSourceRow } from "@/components/yield-source-row";
+import { YieldProviderRow } from "@/components/yield-provider-row";
 import { YieldSourceSheet } from "@/components/yield-source-sheet";
-import { useYieldPositions } from "@/hooks/use-yield-positions";
+import {
+  useYieldPositions,
+  type ProviderView,
+} from "@/hooks/use-yield-positions";
 
 type ChainFilter = "all" | "solana" | "ethereum";
+
+function matchesApyBucket(bucket: ApyBucket | null, apyPercent: number): boolean {
+  if (!bucket) return true;
+  const cfg = APY_BUCKETS.find((b) => b.id === bucket);
+  return cfg ? cfg.matches(apyPercent) : true;
+}
 
 export default function YieldPage() {
   const [apyBucket, setApyBucket] = useState<ApyBucket | null>(null);
   const [chain, setChain] = useState<ChainFilter>("all");
-  const [active, setActive] = useState<YieldSourceConfig | null>(null);
+  const [active, setActive] = useState<ProviderView | null>(null);
 
-  // Live APY from real protocol SDKs (v1: Jupiter Lend). Additive — the legacy
-  // catalog below still renders until the marketplace is fully migrated.
-  const { views: liveViews } = useYieldPositions();
-  const liveJup = liveViews.find((v) => v.id === "jupiter-lend-usdc");
+  // Live, openable sources backed by real protocol SDKs (v1: Jupiter Lend).
+  const { views, refresh } = useYieldPositions();
 
-  const filtered = useMemo(() => {
+  const liveSources = useMemo(() => {
+    return views.filter((v) => {
+      if (chain !== "all" && v.chain !== chain) return false;
+      return matchesApyBucket(apyBucket, v.apy * 100);
+    });
+  }, [views, apyBucket, chain]);
+
+  // Roadmap catalog — sources not yet integrated as live providers.
+  const roadmap = useMemo(() => {
     return YIELD_SOURCES.filter((s) => {
       if (chain !== "all" && s.chain !== chain) return false;
-      if (apyBucket) {
-        const bucket = APY_BUCKETS.find((b) => b.id === apyBucket);
-        if (bucket && !bucket.matches(s.baseApy)) return false;
-      }
-      return true;
+      return matchesApyBucket(apyBucket, s.baseApy);
     });
   }, [apyBucket, chain]);
 
-  const native = filtered.filter((s) => !s.viaDelora);
-  const crossChain = filtered.filter((s) => s.viaDelora);
+  const roadmapNative = roadmap.filter((s) => !s.viaDelora);
+  const roadmapCrossChain = roadmap.filter((s) => s.viaDelora);
+  const nothingMatches =
+    liveSources.length === 0 && roadmap.length === 0;
 
   return (
     <div className="max-w-[900px] mx-auto pt-8 pb-32 px-4">
@@ -57,11 +66,6 @@ export default function YieldPage() {
           Pick a source. Open it. Deposit. Withdraw anytime. Funds go straight
           into the protocol — you hold your own position.
         </p>
-        {liveJup && (
-          <p className="mt-2 font-mono text-xs text-amber-400/80">
-            ● {liveJup.name} live · {(liveJup.apy * 100).toFixed(2)}% APY
-          </p>
-        )}
       </motion.div>
 
       {/* Filters */}
@@ -114,58 +118,73 @@ export default function YieldPage() {
         </div>
       </motion.section>
 
-      {/* Native sources */}
-      {native.length > 0 && (
+      {/* Live sources */}
+      {liveSources.length > 0 && (
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mt-10"
         >
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30 mb-3">
-            On Solana
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-emerald-300/50 mb-3">
+            Live now
           </p>
           <div className="space-y-2">
-            {native.map((src) => (
-              <YieldSourceRow
-                key={src.id}
-                source={src}
-                onOpen={() => setActive(src)}
+            {liveSources.map((view) => (
+              <YieldProviderRow
+                key={view.id}
+                view={view}
+                onOpen={() => setActive(view)}
               />
             ))}
           </div>
         </motion.section>
       )}
 
-      {/* Cross-chain */}
-      {crossChain.length > 0 && (
+      {/* Roadmap — native */}
+      {roadmapNative.length > 0 && (
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
+          className="mt-10"
+        >
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30 mb-3">
+            On Solana · soon
+          </p>
+          <div className="space-y-2">
+            {roadmapNative.map((src) => (
+              <YieldSourceRow key={src.id} source={src} />
+            ))}
+          </div>
+        </motion.section>
+      )}
+
+      {/* Roadmap — cross-chain */}
+      {roadmapCrossChain.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-12"
         >
           <div className="flex items-baseline justify-between mb-3">
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">
-              Cross-chain
+              Cross-chain · soon
             </p>
             <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
               via Delora
             </p>
           </div>
           <div className="space-y-2">
-            {crossChain.map((src) => (
-              <YieldSourceRow
-                key={src.id}
-                source={src}
-                onOpen={() => setActive(src)}
-              />
+            {roadmapCrossChain.map((src) => (
+              <YieldSourceRow key={src.id} source={src} />
             ))}
           </div>
         </motion.section>
       )}
 
-      {filtered.length === 0 && (
+      {nothingMatches && (
         <p className="mt-12 font-mono text-sm text-white/30 text-center">
           No sources match these filters.
         </p>
@@ -179,7 +198,11 @@ export default function YieldPage() {
       </div>
 
       {active && (
-        <YieldSourceSheet source={active} onClose={() => setActive(null)} />
+        <YieldSourceSheet
+          view={active}
+          onClose={() => setActive(null)}
+          onDone={refresh}
+        />
       )}
     </div>
   );

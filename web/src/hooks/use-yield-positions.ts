@@ -3,13 +3,16 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
-import { PROVIDERS } from "@/lib/yield";
+import { PROVIDERS, fromBaseUnits } from "@/lib/yield";
 
 export interface ProviderView {
   id: string;
   name: string;
   assetSymbol: string;
   decimals: number;
+  description: string;
+  riskLevel: "low" | "medium" | "high";
+  chain: "solana" | "ethereum";
   /** Supply APY as a fraction (0.06 = 6%). */
   apy: number;
   /** User's principal + accrued yield, in asset base units. 0 if not connected. */
@@ -47,6 +50,9 @@ export function useYieldPositions() {
             name: p.name,
             assetSymbol: p.assetSymbol,
             decimals: p.decimals,
+            description: p.description,
+            riskLevel: p.riskLevel,
+            chain: p.chain,
             apy,
             underlyingBalance: position.underlyingBalance,
             shares: position.shares,
@@ -65,8 +71,12 @@ export function useYieldPositions() {
     void load();
   }, [load]);
 
-  /** Sum of underlying balances across providers (asset base units). */
-  const totalBalance = views.reduce((acc, v) => acc + v.underlyingBalance, BigInt(0));
+  // Normalized USD total — sum per-provider human amounts so mixed decimals /
+  // assets stay correct (raw base-unit sums only hold while every source is USDC).
+  const totalValue = views.reduce(
+    (acc, v) => acc + fromBaseUnits(v.underlyingBalance, v.decimals),
+    0,
+  );
 
-  return { views, totalBalance, loading, error, refresh: load };
+  return { views, totalValue, loading, error, refresh: load };
 }

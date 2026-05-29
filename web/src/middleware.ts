@@ -9,7 +9,6 @@ const APP_ROUTES = [
   "/pile",
   "/you",
   "/markets",
-  "/rules",
   "/onboarding",
   "/login",
 ];

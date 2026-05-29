@@ -39,6 +39,13 @@ export interface YieldProvider {
   /** Underlying asset decimals (USDC = 6). */
   readonly decimals: number;
 
+  /** One-line marketplace description. */
+  readonly description: string;
+  /** Risk tier for display tone. */
+  readonly riskLevel: "low" | "medium" | "high";
+  /** Chain the source lives on (v1: Solana only). */
+  readonly chain: "solana" | "ethereum";
+
   /** Instructions to deposit `amount` of the underlying asset. */
   buildDepositIxs(p: BuildIxParams): Promise<TransactionInstruction[]>;
   /** Instructions to withdraw `amount` of the underlying asset. */

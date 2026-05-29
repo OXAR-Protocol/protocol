@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
-import { Copy, Check, LogOut, Zap, ArrowUpRight, LineChart } from "lucide-react";
+import { Copy, Check, LogOut, ArrowUpRight, LineChart } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 
@@ -96,33 +96,9 @@ export default function YouPage() {
         className="mt-10"
       >
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30 mb-4">
-          Automation
+          Explore
         </p>
         <div className="space-y-3">
-          <Link
-            href="/rules"
-            className="block p-5 rounded-[5px] border border-white/10 hover:border-white/30 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-start gap-3">
-                <Zap className="text-accent mt-0.5" size={18} strokeWidth={1.5} />
-                <div>
-                  <p className="font-sans text-base text-white">
-                    Sleeping patterns
-                  </p>
-                  <p className="mt-1 font-mono text-xs text-white/40">
-                    Auto-distribute when money moves in your wallet
-                  </p>
-                </div>
-              </div>
-              <ArrowUpRight
-                className="text-white/30 group-hover:text-white transition"
-                size={16}
-                strokeWidth={1.5}
-              />
-            </div>
-          </Link>
-
           <Link
             href="/markets"
             className="block p-5 rounded-[5px] border border-white/10 hover:border-white/30 transition group"

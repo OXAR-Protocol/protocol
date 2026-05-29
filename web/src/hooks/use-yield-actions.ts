@@ -14,14 +14,14 @@ import { getProvider } from "@/lib/yield";
  * `amount` is in the asset's base units (USDC = 6 decimals).
  */
 export function useYieldActions(providerId: string) {
-  const { provider, connection, walletAddress } = useSolanaContext();
+  const { wallet, connection, walletAddress } = useSolanaContext();
   const yieldProvider = useMemo(() => getProvider(providerId), [providerId]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const run = useCallback(
     async (build: "deposit" | "withdraw", amount: bigint): Promise<string> => {
-      if (!provider || !walletAddress) throw new Error("Wallet not connected");
+      if (!wallet || !walletAddress) throw new Error("Wallet not connected");
       if (!yieldProvider) throw new Error(`Unknown yield provider: ${providerId}`);
       if (amount <= BigInt(0)) throw new Error("Amount must be greater than zero");
 
@@ -38,7 +38,7 @@ export function useYieldActions(providerId: string) {
         tx.recentBlockhash = blockhash;
         tx.feePayer = walletAddress;
 
-        const signed = await provider.wallet.signTransaction(tx);
+        const signed = await wallet.signTransaction(tx);
         const sig = await connection.sendRawTransaction(signed.serialize());
         await connection.confirmTransaction(sig, "confirmed");
         return sig;
@@ -50,7 +50,7 @@ export function useYieldActions(providerId: string) {
         setLoading(false);
       }
     },
-    [provider, connection, walletAddress, yieldProvider, providerId],
+    [wallet, connection, walletAddress, yieldProvider, providerId],
   );
 
   const deposit = useCallback((amount: bigint) => run("deposit", amount), [run]);
