@@ -21,6 +21,7 @@ use crate::state::AdapterState;
 #[derive(Accounts)]
 pub struct AdapterCurrentValue<'info> {
     /// CHECK: OXAR dispatcher program id; identity verified via sysvar in handler.
+    #[account(address = OXAR_DISPATCHER_PROGRAM_ID @ AdapterError::Unauthorized)]
     pub dispatcher_program: AccountInfo<'info>,
 
     /// CHECK: instructions sysvar — address enforced; used for caller verification.
@@ -75,18 +76,24 @@ pub fn handler<'info>(
     )?;
 
     let shares = ctx.accounts.adapter_state.total_shares;
-    let value = {
+    let (value, reserve_slot) = {
         let data = ctx.accounts.reserve.try_borrow_data()?;
-        klend_cpi::collateral_value_usdc(&data, shares)?
+        (
+            klend_cpi::collateral_value_usdc(&data, shares)?,
+            klend_cpi::reserve_last_update_slot(&data)?,
+        )
     };
 
     set_return_data(&value.to_le_bytes());
 
+    // Per spec, as_of_slot = min(current slot, the reserve's last-refresh slot) so
+    // the dispatcher's staleness gate sees the true age of the underlying data.
     let clock = Clock::get()?;
+    let as_of_slot = clock.slot.min(reserve_slot);
     emit!(AdapterValueEvent {
         vault: ctx.accounts.adapter_state.vault,
         current_value_usdc: value,
-        as_of_slot: clock.slot,
+        as_of_slot,
     });
     msg!("kamino value: {} cTokens = {} USDC", shares, value);
     Ok(())

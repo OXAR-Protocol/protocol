@@ -18,13 +18,16 @@ declare_id!("FhGXjrzLvpLUCTxbvN85isLpYoQG9TRnDWRTAaPdK2H9");
 ///
 /// Implements the OXAR Yield Adapter Standard v1
 /// (`docs/contracts/adapter-standard-v1.md`). The dispatcher (`oxar-protocol`)
-/// CPIs into `adapter_deposit` / `adapter_withdraw` / `adapter_current_value`;
-/// `adapter_initialize` is called directly to create the per-vault state PDA.
+/// CPIs into all four instructions — `adapter_initialize` (via the dispatcher's
+/// `route_yield_init`), then `adapter_deposit` / `adapter_withdraw` /
+/// `adapter_current_value`. Every instruction verifies the caller is the
+/// dispatcher via the instructions sysvar.
 #[program]
 pub mod kamino_adapter {
     use super::*;
 
-    /// Create the per-vault `adapter_state` PDA. MUST be called before
+    /// Create the per-vault `adapter_state` PDA. CPI'd by the dispatcher's
+    /// `route_yield_init` (which signs as the vault PDA). MUST run before
     /// `adapter_deposit`. One state account per vault.
     pub fn adapter_initialize(
         ctx: Context<AdapterInitialize>,

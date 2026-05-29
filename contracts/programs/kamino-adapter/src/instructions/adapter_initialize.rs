@@ -21,6 +21,7 @@ use crate::state::AdapterState;
 #[derive(Accounts)]
 pub struct AdapterInitialize<'info> {
     /// CHECK: OXAR dispatcher program id; identity verified in handler via sysvar.
+    #[account(address = OXAR_DISPATCHER_PROGRAM_ID @ AdapterError::Unauthorized)]
     pub dispatcher_program: AccountInfo<'info>,
 
     /// CHECK: instructions sysvar — address enforced; used for caller verification.

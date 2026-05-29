@@ -38,4 +38,9 @@ pub enum AdapterError {
     /// 6008 — Instruction handler is not yet implemented (scaffold stub).
     #[msg("Not implemented")]
     NotImplemented,
+    /// 6009 — An underlying Kamino (klend) CPI failed; see program logs for the
+    /// real cause. Distinct from MathOverflow so mainnet incident response isn't
+    /// misled.
+    #[msg("Kamino CPI failed")]
+    CpiFailed,
 }

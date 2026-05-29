@@ -19,11 +19,19 @@ pub const KLEND_REDEEM_RESERVE_COLLATERAL: [u8; 8] = [234, 117, 181, 125, 185, 1
 // 8-byte Anchor discriminator). Computed from the klend IDL struct layout
 // (see .kamino-ref/klend-idl.json); cross-checked in the mainnet-fork test.
 // ============================================================================
+const OFF_LAST_UPDATE_SLOT: usize = 16; // last_update.slot : u64 (first field of LastUpdate)
 const OFF_TOTAL_AVAILABLE: usize = 224; // liquidity.total_available_amount : u64
 const OFF_BORROWED_SF: usize = 232; // liquidity.borrowed_amount_sf : u128 (scaled 2^60)
 const OFF_COLLATERAL_SUPPLY: usize = 2592; // collateral.mint_total_supply : u64
 /// klend `Fraction` fixed-point scale: the integer part is `sf >> 60`.
 const SF_SHIFT: u32 = 60;
+
+/// Slot at which the reserve's cached state was last refreshed on-chain.
+/// Used to compute `as_of_slot` for the value report (adapter-standard-v1.md
+/// §adapter_current_value).
+pub fn reserve_last_update_slot(reserve_data: &[u8]) -> Result<u64> {
+    read_u64(reserve_data, OFF_LAST_UPDATE_SLOT)
+}
 
 fn read_u64(data: &[u8], off: usize) -> Result<u64> {
     let bytes: [u8; 8] = data
@@ -54,8 +62,13 @@ pub fn collateral_value_usdc(reserve_data: &[u8], shares: u64) -> Result<u64> {
     let borrowed = borrowed_sf >> SF_SHIFT;
     let collateral_supply = read_u64(reserve_data, OFF_COLLATERAL_SUPPLY)? as u128;
 
-    if collateral_supply == 0 || shares == 0 {
+    if shares == 0 {
         return Ok(0);
+    }
+    // Holding shares against a zero-supply reserve is an impossible/corrupt state —
+    // fail loudly rather than silently reporting the position as worthless.
+    if collateral_supply == 0 {
+        return Err(AdapterError::MathOverflow.into());
     }
     let total_liquidity = available
         .checked_add(borrowed)
@@ -128,7 +141,7 @@ pub fn refresh_reserve<'info>(
     };
     invoke(&ix, &infos).map_err(|e| {
         msg!("klend refresh_reserve failed: {:?}", e);
-        error!(AdapterError::MathOverflow)
+        error!(AdapterError::CpiFailed)
     })
 }
 
@@ -171,7 +184,7 @@ pub fn deposit_reserve_liquidity(a: &KlendAccounts, liquidity_amount: u64) -> Re
     };
     invoke(&ix, &infos).map_err(|e| {
         msg!("klend deposit_reserve_liquidity failed: {:?}", e);
-        error!(AdapterError::MathOverflow)
+        error!(AdapterError::CpiFailed)
     })
 }
 
@@ -213,6 +226,6 @@ pub fn redeem_reserve_collateral(a: &KlendAccounts, collateral_amount: u64) -> R
     };
     invoke(&ix, &infos).map_err(|e| {
         msg!("klend redeem_reserve_collateral failed: {:?}", e);
-        error!(AdapterError::MathOverflow)
+        error!(AdapterError::CpiFailed)
     })
 }
