@@ -4,45 +4,35 @@
 resolution = true
 skip-lint = false
 
-[programs.localnet]
+[programs.devnet]
+kamino_adapter = "FhGXjrzLvpLUCTxbvN85isLpYoQG9TRnDWRTAaPdK2H9"
 oxar_protocol = "8RCVjQJhfcRYVpAM8v4jhvvbhjfkdqFwPtffEKNcBQwJ"
 
-[programs.devnet]
+[programs.localnet]
+kamino_adapter = "FhGXjrzLvpLUCTxbvN85isLpYoQG9TRnDWRTAaPdK2H9"
 oxar_protocol = "8RCVjQJhfcRYVpAM8v4jhvvbhjfkdqFwPtffEKNcBQwJ"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-# Default to Localnet for `anchor test` (spawns a local validator).
-# For devnet deploys / upgrades use `--provider.cluster devnet` explicitly.
-cluster = "Localnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 test-fork = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/fork/**/*.ts"
 
-# ============================================================================
-# Mainnet-fork validator config for yield-source CPI tests.
-#
-# Anchor spawns a local solana-test-validator with `--url` pointing at mainnet
-# and `--clone` for each external account we need to interact with. Accounts
-# are pulled once at startup and frozen for the test run.
-#
-# Tagged as "fork" — used by `anchor test --skip-lint -- --features fork`.
-# Defaults to `[test]` (no clones) for fast unit tests.
-# ============================================================================
-
 [test]
 startup_wait = 10000
 shutdown_wait = 2000
+upgradeable = false
 
 [test.validator]
+bind_address = "0.0.0.0"
 url = "https://api.mainnet-beta.solana.com"
-# Always-clone: USDC mint on mainnet (EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v).
-# Sprint 1 will append Kamino reserve, Jupiter LP mint, MarginFi bank, Drift vault.
+ledger = ".anchor/test-ledger"
+rpc_port = 8899
 
 [[test.validator.clone]]
 address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-# USDC mint (mainnet). Programs that hold USDC accounts derive ATAs against it.
