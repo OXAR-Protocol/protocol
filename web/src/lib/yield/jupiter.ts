@@ -4,8 +4,6 @@ import {
   getDepositIxs,
   getWithdrawIxs,
   getUserLendingPositionByAsset,
-  getLendingTokens,
-  getLendingTokenDetails,
 } from "@jup-ag/lend/earn";
 
 import { USDC_MINT, USDC_DECIMALS } from "@/lib/constants";
@@ -63,24 +61,20 @@ export const jupiterUsdcProvider: YieldProvider = {
     }
   },
 
-  async getApy(connection: Connection): Promise<number> {
-    // APY is global (not per-wallet) and barely moves — cache it (30s TTL) so
-    // navigating between pages that mount useYieldPositions doesn't refetch.
+  async getApy(): Promise<number> {
+    // APY is global (not per-wallet) and barely moves — cache it (30s TTL).
     const cached = getCached<number>(APY_CACHE_KEY);
     if (cached !== null) return cached;
 
-    // Fetch every lending token's details in parallel, then pick USDC — the SDK
-    // exposes the asset only on the details, so we can't filter before fetching.
-    const tokens = await getLendingTokens({ connection });
-    const details = await Promise.all(
-      tokens.map((lendingToken) => getLendingTokenDetails({ lendingToken, connection })),
-    );
-    const usdc = details.find((d) => d.asset.equals(USDC));
-    // supplyRate + rewardsRate are in basis points — verified against jup.ag's
-    // API for USDC: 422 + 114 = 536 = 5.36% total APY. /10000 → fraction.
-    const apy = usdc
-      ? (usdc.supplyRate.toNumber() + usdc.rewardsRate.toNumber()) / 10000
-      : 0;
+    // Read APY from Jupiter's public REST API (one CORS-friendly GET) rather than
+    // enumerating program accounts on-chain — getProgramAccounts is heavy and gets
+    // rate-limited in-browser (the on-chain path silently returned 0). totalRate
+    // = supplyRate + rewardsRate in basis points (USDC 422 + 114 = 536 = 5.36%).
+    const res = await fetch("https://lite-api.jup.ag/lend/v1/earn/tokens");
+    if (!res.ok) return 0;
+    const tokens: Array<{ assetAddress: string; totalRate: string }> = await res.json();
+    const usdc = tokens.find((t) => t.assetAddress === USDC_MINT);
+    const apy = usdc ? Number(usdc.totalRate) / 10000 : 0;
     if (apy > 0) setCache(APY_CACHE_KEY, apy);
     return apy;
   },
