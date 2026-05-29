@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Transaction } from "@solana/web3.js";
 
 import { useSolanaContext } from "@/providers/solana-provider";
-import { getProvider } from "@/lib/yield";
+import { getProvider, toFriendlyError } from "@/lib/yield";
 
 /**
  * Deposit / withdraw against a yield provider (Jupiter Lend, Kamino, …) via its
@@ -43,8 +43,9 @@ export function useYieldActions(providerId: string) {
         await connection.confirmTransaction(sig, "confirmed");
         return sig;
       } catch (e) {
-        const msg = e instanceof Error ? e.message : String(e);
-        setError(msg);
+        // Keep the raw error in the console for debugging; show the user a friendly one.
+        console.error("Yield action failed:", e);
+        setError(toFriendlyError(e));
         throw e;
       } finally {
         setLoading(false);
