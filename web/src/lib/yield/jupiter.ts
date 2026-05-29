@@ -3,12 +3,18 @@ import BN from "bn.js";
 import {
   getDepositIxs,
   getWithdrawIxs,
+  getRedeemIxs,
   getUserLendingPositionByAsset,
 } from "@jup-ag/lend/earn";
 
 import { USDC_MINT, USDC_DECIMALS } from "@/lib/constants";
 import { getCached, setCache } from "@/lib/cache";
-import type { BuildIxParams, YieldPosition, YieldProvider } from "./types";
+import type {
+  BuildIxParams,
+  RedeemIxParams,
+  YieldPosition,
+  YieldProvider,
+} from "./types";
 
 const USDC = new PublicKey(USDC_MINT);
 const APY_CACHE_KEY = "jupiter-lend-usdc:apy";
@@ -41,6 +47,16 @@ export const jupiterUsdcProvider: YieldProvider = {
   async buildWithdrawIxs({ owner, amount, connection }: BuildIxParams) {
     const { ixs } = await getWithdrawIxs({
       amount: new BN(amount.toString()),
+      asset: USDC,
+      signer: owner,
+      connection,
+    });
+    return ixs as TransactionInstruction[];
+  },
+
+  async buildRedeemIxs({ owner, shares, connection }: RedeemIxParams) {
+    const { ixs } = await getRedeemIxs({
+      shares: new BN(shares.toString()),
       asset: USDC,
       signer: owner,
       connection,

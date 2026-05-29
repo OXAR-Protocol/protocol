@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Loader2 } from "lucide-react";
+import { X } from "lucide-react";
 
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { useUsdcBalance } from "@/hooks/use-usdc-balance";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { RISK_LABEL, toBaseUnits, fromBaseUnits } from "@/lib/yield";
+import { YieldAmountField } from "@/components/yield-amount-field";
+import {
+  YieldActionSuccess,
+  type ActionResult,
+} from "@/components/yield-action-success";
 
 interface Props {
   view: ProviderView;
@@ -17,11 +22,12 @@ interface Props {
 }
 
 export function YieldSourceSheet({ view, onClose, onDone }: Props) {
-  const { deposit, withdraw, loading, error } = useYieldActions(view.id);
+  const { deposit, withdraw, redeemAll, loading, error } = useYieldActions(view.id);
   const usdc = useUsdcBalance();
 
   const [depositAmount, setDepositAmount] = useState(50);
   const [withdrawAmount, setWithdrawAmount] = useState(10);
+  const [result, setResult] = useState<ActionResult | null>(null);
 
   const positionValue = fromBaseUnits(view.underlyingBalance, view.decimals);
 
@@ -37,12 +43,26 @@ export function YieldSourceSheet({ view, onClose, onDone }: Props) {
   const handleDeposit = async () => {
     if (depositAmount <= 0) return;
     await deposit(toBaseUnits(depositAmount, view.decimals));
+    setResult({ kind: "deposit", amount: depositAmount, symbol: view.assetSymbol });
     settleAndRefresh();
   };
 
   const handleWithdraw = async () => {
     if (withdrawAmount <= 0 || positionValue <= 0) return;
-    await withdraw(toBaseUnits(withdrawAmount, view.decimals));
+    // Full exit → redeem ALL shares. Asset-denominated withdraw rounds shares up,
+    // so it can never reach 100% (a $1 deposit leaves ~$0.01 stranded). Redeeming
+    // the whole share balance burns exactly what the user owns.
+    const isMax = withdrawAmount >= positionValue;
+    if (isMax) {
+      await redeemAll(view.shares);
+    } else {
+      await withdraw(toBaseUnits(withdrawAmount, view.decimals));
+    }
+    setResult({
+      kind: "withdraw",
+      amount: isMax ? positionValue : withdrawAmount,
+      symbol: view.assetSymbol,
+    });
     settleAndRefresh();
   };
 
@@ -61,7 +81,7 @@ export function YieldSourceSheet({ view, onClose, onDone }: Props) {
           exit={{ y: 60, opacity: 0 }}
           transition={{ type: "spring", damping: 26, stiffness: 220 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-[520px] bg-black border border-white/15 rounded-[12px] p-6 md:p-8 max-h-[90vh] overflow-auto"
+          className="relative w-full max-w-[520px] bg-black border border-white/15 rounded-[12px] p-6 md:p-8 max-h-[90vh] overflow-auto"
         >
           {/* Header */}
           <div className="flex items-start justify-between gap-4 mb-6">
@@ -119,78 +139,44 @@ export function YieldSourceSheet({ view, onClose, onDone }: Props) {
 
           {/* Actions */}
           <div className="space-y-4">
-            {/* Deposit */}
-            <div className="p-4 rounded-[6px] border border-white/10">
-              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-2">
-                Deposit {view.assetSymbol}
-              </p>
-              <div className="flex items-baseline gap-3">
-                <input
-                  type="number"
-                  min={0}
-                  step="any"
-                  value={depositAmount}
-                  onChange={(e) =>
-                    setDepositAmount(Math.max(0, Number(e.target.value)))
-                  }
-                  className="flex-1 bg-transparent border-b border-white/15 focus:border-white/40 outline-none font-mono text-2xl text-white py-1"
-                />
-                <span className="font-mono text-sm text-white/40">
-                  {view.assetSymbol}
-                </span>
-              </div>
-              <p className="mt-2 font-mono text-[11px] text-white/30">
-                wallet: ${usdc.balance.toFixed(2)} {view.assetSymbol}
-              </p>
-              <button
-                onClick={handleDeposit}
-                disabled={loading || depositAmount <= 0}
-                className="mt-3 w-full px-4 py-2.5 rounded-[5px] bg-white text-black font-mono text-xs uppercase tracking-wide hover:bg-white/90 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" size={14} />
-                    Working…
-                  </>
-                ) : (
-                  "Deposit"
-                )}
-              </button>
-            </div>
+            <YieldAmountField
+              label={`Deposit ${view.assetSymbol}`}
+              symbol={view.assetSymbol}
+              value={depositAmount}
+              onChange={setDepositAmount}
+              hint={`wallet: $${usdc.balance.toFixed(2)} ${view.assetSymbol}`}
+              actionLabel="Deposit"
+              onAction={handleDeposit}
+              loading={loading}
+              disabled={loading || depositAmount <= 0}
+              variant="primary"
+            />
 
-            {/* Withdraw */}
-            <div className="p-4 rounded-[6px] border border-white/10">
-              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-2">
-                Withdraw {view.assetSymbol}
-              </p>
-              <div className="flex items-baseline gap-3">
-                <input
-                  type="number"
-                  min={0}
-                  step="any"
-                  value={withdrawAmount}
-                  onChange={(e) =>
-                    setWithdrawAmount(Math.max(0, Number(e.target.value)))
-                  }
-                  className="flex-1 bg-transparent border-b border-white/15 focus:border-white/40 outline-none font-mono text-2xl text-white py-1"
-                />
-                <span className="font-mono text-sm text-white/40">
-                  {view.assetSymbol}
+            <YieldAmountField
+              label={`Withdraw ${view.assetSymbol}`}
+              symbol={view.assetSymbol}
+              value={withdrawAmount}
+              onChange={setWithdrawAmount}
+              hint={
+                <span className="flex items-center gap-2">
+                  available: ${positionValue.toFixed(2)}
+                  {positionValue > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setWithdrawAmount(positionValue)}
+                      className="uppercase tracking-wide text-accent/80 hover:text-accent transition"
+                    >
+                      max
+                    </button>
+                  )}
                 </span>
-              </div>
-              <p className="mt-2 font-mono text-[11px] text-white/30">
-                available: ${positionValue.toFixed(2)}
-              </p>
-              <button
-                onClick={handleWithdraw}
-                disabled={
-                  loading || withdrawAmount <= 0 || withdrawAmount > positionValue
-                }
-                className="mt-3 w-full px-4 py-2.5 rounded-[5px] border border-white/20 hover:border-white/40 text-white font-mono text-xs uppercase tracking-wide disabled:opacity-30 transition"
-              >
-                Withdraw
-              </button>
-            </div>
+              }
+              actionLabel="Withdraw"
+              onAction={handleWithdraw}
+              loading={loading}
+              disabled={loading || withdrawAmount <= 0 || withdrawAmount > positionValue}
+              variant="secondary"
+            />
           </div>
 
           {error && (
@@ -198,6 +184,15 @@ export function YieldSourceSheet({ view, onClose, onDone }: Props) {
               {error}
             </p>
           )}
+
+          <AnimatePresence>
+            {result && (
+              <YieldActionSuccess
+                result={result}
+                onDone={() => setResult(null)}
+              />
+            )}
+          </AnimatePresence>
         </motion.div>
       </motion.div>
     </AnimatePresence>

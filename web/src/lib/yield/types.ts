@@ -19,6 +19,14 @@ export interface BuildIxParams {
   connection: Connection;
 }
 
+export interface RedeemIxParams {
+  /** Wallet that owns the position and signs the transaction. */
+  owner: PublicKey;
+  /** Provider-internal shares to redeem (use the full balance for a clean exit). */
+  shares: bigint;
+  connection: Connection;
+}
+
 /**
  * Uniform interface every yield source implements. The UI and hooks talk only
  * to this — adding a protocol means adding one implementation, no UI changes.
@@ -50,6 +58,12 @@ export interface YieldProvider {
   buildDepositIxs(p: BuildIxParams): Promise<TransactionInstruction[]>;
   /** Instructions to withdraw `amount` of the underlying asset. */
   buildWithdrawIxs(p: BuildIxParams): Promise<TransactionInstruction[]>;
+  /**
+   * Instructions to redeem `shares` directly. Used for full exits: redeeming the
+   * entire share balance burns exactly what the user owns, so no rounding dust is
+   * left stranded (asset-denominated withdraw rounds shares up and can't reach 100%).
+   */
+  buildRedeemIxs(p: RedeemIxParams): Promise<TransactionInstruction[]>;
   /** Current position for `owner` (zeroed if none). */
   getPosition(owner: PublicKey, connection: Connection): Promise<YieldPosition>;
   /** Current supply APY as a fraction (0.06 = 6%). */
