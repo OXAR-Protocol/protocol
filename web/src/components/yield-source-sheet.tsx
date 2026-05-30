@@ -7,7 +7,7 @@ import { X } from "lucide-react";
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { useUsdcBalance } from "@/hooks/use-usdc-balance";
 import type { ProviderView } from "@/hooks/use-yield-positions";
-import { RISK_LABEL, toBaseUnits, fromBaseUnits } from "@/lib/yield";
+import { RISK_LABEL, toBaseUnits, fromBaseUnits, planWithdrawal } from "@/lib/yield";
 import { YieldAmountField } from "@/components/yield-amount-field";
 import {
   YieldActionSuccess,
@@ -48,19 +48,23 @@ export function YieldSourceSheet({ view, onClose, onDone }: Props) {
   };
 
   const handleWithdraw = async () => {
-    if (withdrawAmount <= 0 || positionValue <= 0) return;
-    // Full exit → redeem ALL shares. Asset-denominated withdraw rounds shares up,
-    // so it can never reach 100% (a $1 deposit leaves ~$0.01 stranded). Redeeming
-    // the whole share balance burns exactly what the user owns.
-    const isMax = withdrawAmount >= positionValue;
-    if (isMax) {
-      await redeemAll(view.shares);
+    // planWithdrawal decides full-exit (redeem all shares) vs partial in base units —
+    // a full exit avoids the share→asset rounding wall that stranded dust.
+    const plan = planWithdrawal({
+      requested: withdrawAmount,
+      positionBaseUnits: view.underlyingBalance,
+      shares: view.shares,
+      decimals: view.decimals,
+    });
+    if (!plan) return;
+    if (plan.mode === "redeemAll") {
+      await redeemAll(plan.shares);
     } else {
-      await withdraw(toBaseUnits(withdrawAmount, view.decimals));
+      await withdraw(plan.amount);
     }
     setResult({
       kind: "withdraw",
-      amount: isMax ? positionValue : withdrawAmount,
+      amount: plan.mode === "redeemAll" ? positionValue : withdrawAmount,
       symbol: view.assetSymbol,
     });
     settleAndRefresh();
