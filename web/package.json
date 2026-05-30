@@ -7,7 +7,8 @@
     "prebuild": "mkdir -p node_modules/@oxar/sdk && cp -r sdk-local/dist node_modules/@oxar/sdk/ && cp sdk-local/package.json node_modules/@oxar/sdk/",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync-sdk": "cd ../sdk && yarn build && cd ../web && rm -rf sdk-local/dist && cp -r ../sdk/dist sdk-local/dist && cp ../sdk/src/idl.json sdk-local/dist/idl.json && yarn prebuild"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",

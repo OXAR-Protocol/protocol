@@ -10,7 +10,11 @@ import { DeloraClient } from "./delora.js";
 import type { TrackedVault, CrossChainSourceId } from "./types.js";
 
 /**
- * OXAR Delora monitor — skeleton.
+ * OXAR Delora monitor — SKELETON, not wired, not deployed.
+ *
+ * NOTE: built on the pre-pivot own-contract model (`crank_nav` on a `Vault` PDA),
+ * which v1 does not use. Delora is still planned for cross-chain SWAPS, but in the
+ * deposit flow — not this NAV-cranker. See README before reviving. No-op today.
  *
  * Loop:
  *   every CRANK_INTERVAL_SEC seconds:

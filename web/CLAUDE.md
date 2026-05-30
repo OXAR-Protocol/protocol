@@ -186,13 +186,14 @@ Deploy is **git-based auto-deploy**. One correct path, no exceptions:
 - Env vars live in the `oxar-web` Vercel project dashboard, not in code.
 
 ### After SDK changes
+`web/sdk-local/dist` is a **committed copy** of `sdk/dist` — that's what keeps `web/` a
+self-contained Vercel build (see Deploy). After editing `sdk/`, resync with one command
+from `web/`:
 ```bash
-cd ../sdk && yarn build && cd ../web
-rm -rf sdk-local/dist node_modules/@oxar .next
-cp -r ../sdk/dist sdk-local/dist
-cp ../sdk/src/idl.json sdk-local/dist/idl.json
-yarn install   # re-links @oxar/sdk
+yarn sync-sdk   # rebuilds sdk → refreshes sdk-local/dist + idl.json → re-links into node_modules
 ```
+Commit the updated `sdk-local/` alongside your `sdk/` change so the deploy build (which
+copies `sdk-local/dist` in `prebuild`) ships the new SDK.
 
 ## Common Pitfalls
 - Forgetting `"use client"` on a page that uses hooks → cryptic SSR errors
