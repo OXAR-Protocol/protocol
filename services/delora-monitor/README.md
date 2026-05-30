@@ -1,5 +1,13 @@
 # @oxar/delora-monitor
 
+> **Status: SKELETON — not wired, not deployed, and built on the PRE-PIVOT model.**
+> This worker syncs cross-chain yield NAV back to an OXAR `Vault` via `crank_nav` —
+> an own-contract instruction that v1 (non-custodial UI over protocol SDKs, no own
+> contract) does not have. Kept for reference only. Delora **is** on the roadmap for
+> **cross-chain swaps** (bridging USDC for deposits into other-chain sources), but that
+> will live in the deposit flow — not this NAV-cranker — and needs a redesign when
+> cross-chain ships. Do not depend on this code as-is.
+
 Off-chain worker that keeps cross-chain yield NAVs in sync with on-chain Vault accounts.
 
 ## Why
