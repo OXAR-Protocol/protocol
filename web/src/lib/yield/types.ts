@@ -1,4 +1,9 @@
-import type { Connection, PublicKey, TransactionInstruction } from "@solana/web3.js";
+import type {
+  Connection,
+  PublicKey,
+  TransactionInstruction,
+  VersionedTransaction,
+} from "@solana/web3.js";
 
 /**
  * A user's current position in one yield provider, denominated in the
@@ -31,10 +36,16 @@ export interface RedeemIxParams {
  * Uniform interface every yield source implements. The UI and hooks talk only
  * to this — adding a protocol means adding one implementation, no UI changes.
  *
- * Implementations return raw instructions; the calling hook assembles and sends
- * the transaction (so deposits/withdraws compose with ATA creation, priority
- * fees, etc.).
+ * A provider implements EITHER the instruction-based methods (`build*Ixs` — the
+ * hook assembles a legacy Transaction and signs+sends) OR the transaction-based
+ * methods (`build*Tx` — the provider returns a fully-built VersionedTransaction,
+ * e.g. Kamino, which is built server-side with kit/v0). The hook prefers `*Tx`.
  */
+export interface RedeemTxParams {
+  owner: PublicKey;
+  connection: Connection;
+}
+
 export interface YieldProvider {
   /** Stable id, e.g. "jupiter-lend-usdc". */
   readonly id: string;
@@ -54,16 +65,26 @@ export interface YieldProvider {
   /** Chain the source lives on (v1: Solana only). */
   readonly chain: "solana" | "ethereum";
 
+  // --- Instruction-based path (Jupiter Lend) ---
   /** Instructions to deposit `amount` of the underlying asset. */
-  buildDepositIxs(p: BuildIxParams): Promise<TransactionInstruction[]>;
+  buildDepositIxs?(p: BuildIxParams): Promise<TransactionInstruction[]>;
   /** Instructions to withdraw `amount` of the underlying asset. */
-  buildWithdrawIxs(p: BuildIxParams): Promise<TransactionInstruction[]>;
+  buildWithdrawIxs?(p: BuildIxParams): Promise<TransactionInstruction[]>;
   /**
    * Instructions to redeem `shares` directly. Used for full exits: redeeming the
    * entire share balance burns exactly what the user owns, so no rounding dust is
    * left stranded (asset-denominated withdraw rounds shares up and can't reach 100%).
    */
-  buildRedeemIxs(p: RedeemIxParams): Promise<TransactionInstruction[]>;
+  buildRedeemIxs?(p: RedeemIxParams): Promise<TransactionInstruction[]>;
+
+  // --- Transaction-based path (Kamino: server-built v0 VersionedTransaction) ---
+  /** A fully-built deposit transaction the wallet signs+sends as-is. */
+  buildDepositTx?(p: BuildIxParams): Promise<VersionedTransaction>;
+  /** A fully-built partial-withdraw transaction. */
+  buildWithdrawTx?(p: BuildIxParams): Promise<VersionedTransaction>;
+  /** A fully-built full-exit transaction (no share count needed). */
+  buildRedeemTx?(p: RedeemTxParams): Promise<VersionedTransaction>;
+
   /** Current position for `owner` (zeroed if none). */
   getPosition(owner: PublicKey, connection: Connection): Promise<YieldPosition>;
   /** Current supply APY as a fraction (0.06 = 6%). */

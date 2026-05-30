@@ -203,3 +203,19 @@ copies `sdk-local/dist` in `prebuild`) ships the new SDK.
 - Adding a route to `(app)/` but forgetting to update `APP_ROUTES` in `middleware.ts` → cross-domain redirect breaks
 - Using native `<select>` — breaks the visual system. Use `CustomSelect`.
 - Treating `@solana/kit` and `@solana-program/memo` as removable — they're transitive deps of Privy's Solana connectors.
+
+## Kamino / klend-sdk gotchas (server-side provider)
+
+Kamino (`@kamino-finance/klend-sdk` v8) is built on `@solana/kit` v2 + WASM and is
+**Node-only**. It's isolated to the server route `app/api/kamino/route.ts`
+(+ `lib/yield/kamino-server.ts`); the client `lib/yield/kamino.ts` only fetches an
+unsigned v0 tx and signs it with Privy. Hard-won setup (don't undo):
+- **`serverExternalPackages`** in `next.config.ts` lists klend + orca/kliquidity/scope/
+  farms — bundling them breaks the orca WASM path. Keep them external.
+- **`@solana/kit` version split**: Privy uses kit v6 (top-level `@solana/kit`); klend
+  uses kit v2. `kamino-server.ts` imports kit via the **`klend-kit`** alias
+  (`npm:@solana/kit@2.3.0`) so signer/types match klend. Don't import klend-side kit
+  from the top-level `@solana/kit`.
+- **`resolutions: @kamino-finance/farms-sdk = 3.2.24`** in `package.json` — newer
+  farms-sdk moved `@codegen/farms/programId` and breaks klend 8.0.2's import.
+- Providers expose EITHER `build*Ixs` (Jupiter) OR `build*Tx` (Kamino) — see `types.ts`.
