@@ -151,9 +151,11 @@ input[type="number"] {
 }
 
 [data-theme="light"] .bg-grid {
+  /* Much fainter than dark mode — black lines on a light bg read far stronger
+     than white lines on dark, and were overpowering the card outlines. */
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(0, 0, 0, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.015) 1px, transparent 1px);
 }
 
 /* Light theme — remap white-based Tailwind utilities to dark equivalents */
@@ -445,5 +447,27 @@ input[type="number"] {
 }
 [data-theme="light"] .bg-black\/70 {
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Primary CTAs are `bg-white text-black`; in light mode .bg-white flips to #1a1a1a
+   (dark button), so the black label must flip to light or it's invisible. */
+[data-theme="light"] .text-black {
+  color: #f5f5f0;
+}
+
+/* Risk / APY accent text — the -300 shades are readable on dark but wash out on
+   light. Map to darker, legible variants. */
+[data-theme="light"] .text-emerald-300\/50 {
+  color: rgba(4, 120, 87, 0.75);
+}
+[data-theme="light"] .text-emerald-300\/70,
+[data-theme="light"] .text-emerald-300\/80 {
+  color: #047857;
+}
+[data-theme="light"] .text-amber-300\/80 {
+  color: #b45309;
+}
+[data-theme="light"] .text-rose-300\/80 {
+  color: #be123c;
 }
 
