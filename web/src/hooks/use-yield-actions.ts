@@ -1,17 +1,22 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Transaction, type TransactionInstruction } from "@solana/web3.js";
+import {
+  Transaction,
+  VersionedTransaction,
+  type PublicKey,
+  type TransactionInstruction,
+} from "@solana/web3.js";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { getProvider, toFriendlyError } from "@/lib/yield";
 
 /**
- * Deposit / withdraw against a yield provider (Jupiter Lend, Kamino, …) via its
- * own SDK. Funds go directly into the protocol — no OXAR contract. Mirrors the
- * Privy sign+send pattern (no `.rpc()`).
- *
- * `amount` is in the asset's base units (USDC = 6 decimals).
+ * Deposit / withdraw against a yield provider (Jupiter Lend, Kamino, …). Funds go
+ * directly into the protocol — no OXAR contract. Providers expose EITHER raw
+ * instructions (`build*Ixs`, assembled into a legacy tx here) OR a fully-built
+ * VersionedTransaction (`build*Tx`, e.g. Kamino). Either way the Privy wallet
+ * signs+sends (no `.rpc()`). `amount` is in base units (USDC = 6 decimals).
  */
 export function useYieldActions(providerId: string) {
   const { wallet, connection, walletAddress } = useSolanaContext();
@@ -19,16 +24,13 @@ export function useYieldActions(providerId: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Assemble, sign (Privy pattern — no `.rpc()`), send, confirm.
-  const send = useCallback(
+  const sendIxs = useCallback(
     async (ixs: TransactionInstruction[]): Promise<string> => {
       if (!wallet || !walletAddress) throw new Error("Wallet not connected");
-
       const tx = new Transaction().add(...ixs);
       const { blockhash } = await connection.getLatestBlockhash();
       tx.recentBlockhash = blockhash;
       tx.feePayer = walletAddress;
-
       const signed = await wallet.signTransaction(tx);
       const sig = await connection.sendRawTransaction(signed.serialize());
       await connection.confirmTransaction(sig, "confirmed");
@@ -37,17 +39,25 @@ export function useYieldActions(providerId: string) {
     [wallet, connection, walletAddress],
   );
 
+  const sendTx = useCallback(
+    async (tx: VersionedTransaction): Promise<string> => {
+      if (!wallet) throw new Error("Wallet not connected");
+      const signed = await wallet.signTransaction(tx);
+      const sig = await connection.sendRawTransaction(signed.serialize());
+      await connection.confirmTransaction(sig, "confirmed");
+      return sig;
+    },
+    [wallet, connection],
+  );
+
   const run = useCallback(
-    async (
-      build: (owner: NonNullable<typeof walletAddress>) => Promise<TransactionInstruction[]>,
-    ): Promise<string> => {
+    async (action: (owner: PublicKey) => Promise<string>): Promise<string> => {
       if (!wallet || !walletAddress) throw new Error("Wallet not connected");
       if (!yieldProvider) throw new Error(`Unknown yield provider: ${providerId}`);
-
       setLoading(true);
       setError(null);
       try {
-        return await send(await build(walletAddress));
+        return await action(walletAddress);
       } catch (e) {
         // Keep the raw error in the console for debugging; show the user a friendly one.
         console.error("Yield action failed:", e);
@@ -57,32 +67,47 @@ export function useYieldActions(providerId: string) {
         setLoading(false);
       }
     },
-    [wallet, walletAddress, yieldProvider, providerId, send],
+    [wallet, walletAddress, yieldProvider, providerId],
   );
 
   const deposit = useCallback(
     (amount: bigint) => {
       if (amount <= BigInt(0)) throw new Error("Amount must be greater than zero");
-      return run((owner) => yieldProvider!.buildDepositIxs({ owner, amount, connection }));
+      return run(async (owner) => {
+        const p = yieldProvider!;
+        if (p.buildDepositTx) return sendTx(await p.buildDepositTx({ owner, amount, connection }));
+        if (p.buildDepositIxs) return sendIxs(await p.buildDepositIxs({ owner, amount, connection }));
+        throw new Error("This source does not support deposits");
+      });
     },
-    [run, yieldProvider, connection],
+    [run, yieldProvider, connection, sendTx, sendIxs],
   );
 
   const withdraw = useCallback(
     (amount: bigint) => {
       if (amount <= BigInt(0)) throw new Error("Amount must be greater than zero");
-      return run((owner) => yieldProvider!.buildWithdrawIxs({ owner, amount, connection }));
+      return run(async (owner) => {
+        const p = yieldProvider!;
+        if (p.buildWithdrawTx) return sendTx(await p.buildWithdrawTx({ owner, amount, connection }));
+        if (p.buildWithdrawIxs) return sendIxs(await p.buildWithdrawIxs({ owner, amount, connection }));
+        throw new Error("This source does not support withdrawals");
+      });
     },
-    [run, yieldProvider, connection],
+    [run, yieldProvider, connection, sendTx, sendIxs],
   );
 
-  // Full exit: redeem the entire share balance so no rounding dust is stranded.
+  // Full exit: providers with a tx path do a max-withdraw; ixs providers redeem all shares.
   const redeemAll = useCallback(
     (shares: bigint) => {
-      if (shares <= BigInt(0)) throw new Error("Nothing to withdraw");
-      return run((owner) => yieldProvider!.buildRedeemIxs({ owner, shares, connection }));
+      return run(async (owner) => {
+        const p = yieldProvider!;
+        if (p.buildRedeemTx) return sendTx(await p.buildRedeemTx({ owner, connection }));
+        if (shares <= BigInt(0)) throw new Error("Nothing to withdraw");
+        if (p.buildRedeemIxs) return sendIxs(await p.buildRedeemIxs({ owner, shares, connection }));
+        throw new Error("This source does not support withdrawals");
+      });
     },
-    [run, yieldProvider, connection],
+    [run, yieldProvider, connection, sendTx, sendIxs],
   );
 
   return { deposit, withdraw, redeemAll, loading, error };
