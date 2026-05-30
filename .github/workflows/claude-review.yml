@@ -12,11 +12,13 @@ on:
 
 # Minimal scope: read code, comment on PRs. `contents: read` means that even
 # under prompt injection the action CANNOT push code or merge — only comment.
-# No `id-token: write`: it is only needed for OIDC federation (Bedrock/Vertex/
-# workload identity); we authenticate with a static ANTHROPIC_API_KEY.
+# `id-token: write` is REQUIRED by claude-code-action: it exchanges the workflow's
+# GitHub OIDC token to mint the short-lived GitHub token it uses (verified — the
+# action hard-fails "Could not fetch an OIDC token" without it). It's job-scoped.
 permissions:
   contents: read
   pull-requests: write
+  id-token: write
 
 jobs:
   review:
