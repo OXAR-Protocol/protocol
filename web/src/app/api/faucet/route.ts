@@ -6,9 +6,9 @@ import {
   mintTo,
 } from "@solana/spl-token";
 
-import { RPC_URL, CURRENT_USDC_MINT } from "@/lib/constants";
+import { RPC_URL, USDC_MINT as DEFAULT_USDC_MINT } from "@/lib/constants";
 
-const USDC_MINT = (process.env.USDC_MINT || CURRENT_USDC_MINT).trim();
+const USDC_MINT = (process.env.USDC_MINT || DEFAULT_USDC_MINT).trim();
 const ADMIN_KEYPAIR_B64 = (process.env.ADMIN_KEYPAIR_B64 || "").trim();
 
 // Rate limiting: keyed by wallet address AND client IP, plus daily cap per IP.

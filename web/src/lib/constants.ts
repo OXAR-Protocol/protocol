@@ -1,11 +1,5 @@
-// Re-export shared constants from SDK
-export {
-  PROGRAM_ID,
-  YIELD_SOURCES,
-  APY_BUCKETS,
-  getYieldSourceById,
-  vaultIdForYieldSource,
-} from "@oxar/sdk";
+// Re-export the yield-source catalog from the SDK (the only part v1 consumes).
+export { YIELD_SOURCES, APY_BUCKETS } from "@oxar/sdk";
 export type { YieldSourceConfig, ApyBucket, ApyBucketConfig } from "@oxar/sdk";
 
 // Web-specific: RPC URL from environment.
@@ -17,6 +11,3 @@ export const RPC_URL =
 // Mainnet USDC mint — the asset all v1 yield providers accept.
 export const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 export const USDC_DECIMALS = 6;
-
-// Legacy alias (devnet contract era) — kept until callers migrate to USDC_MINT.
-export const CURRENT_USDC_MINT = USDC_MINT;
