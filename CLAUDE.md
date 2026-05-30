@@ -103,6 +103,12 @@ cd web && yarn build
 
 ## Git Conventions
 
+### All changes land via PR — never push to `main`
+Every change reaches `main` through a Pull Request. Do NOT commit or push
+directly to `main`. Work on a `feat/…`/`fix/…`/`chore/…` branch → open a PR →
+merge. Merging to `main` is what deploys the web app (see `web/CLAUDE.md`
+"Deploy"), so a direct push would ship unreviewed and can desync prod.
+
 ### Branch Naming
 ```
 feat/short-description
