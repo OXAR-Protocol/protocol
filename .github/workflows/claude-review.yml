@@ -1,0 +1,36 @@
+name: Claude Review
+
+# AI code review on every PR (see CLAUDE.md "All changes land via PR").
+# Requires the ANTHROPIC_API_KEY repo secret. Until it is set, this workflow
+# will fail on the API-key step — that is expected; add the secret to enable it.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Review this pull request's diff against the base branch. Focus on:
+            - correctness bugs and logic errors
+            - security issues (input validation, auth, secret handling)
+            - violations of the repo's CLAUDE.md conventions: small files
+              (~200 lines), typed everything (no undocumented `any`), no code
+              duplication (shared logic in sdk/), the Privy manual sign+send
+              pattern (never `.rpc()`), and creating ATAs before token ops.
+            Post concise inline comments only for issues that genuinely matter —
+            skip style nitpicks. If nothing is wrong, say so briefly.
+          claude_args: "--max-turns 25"
