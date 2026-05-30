@@ -1,12 +1,17 @@
 import { PublicKey, VersionedTransaction } from "@solana/web3.js";
 
 import { USDC_MINT, USDC_DECIMALS } from "@/lib/constants";
+import { getProviderApy } from "./yields-api";
 import type {
   BuildIxParams,
   RedeemTxParams,
   YieldPosition,
   YieldProvider,
 } from "./types";
+
+// DefiLlama pool id for Kamino Lend USDC (Main market) — APY comes from here, NOT
+// from loading the heavy klend market (whose cold-start made the card read 0%).
+const DEFILLAMA_POOL = "d2141a59-c199-4be7-8d4b-c8223954836b";
 
 /**
  * Kamino Lend provider. klend's SDK is Node-only and heavy (kit v2 + WASM), so the
@@ -86,11 +91,7 @@ export const kaminoUsdcProvider: YieldProvider = {
   },
 
   async getApy(): Promise<number> {
-    try {
-      const { apy } = await postKamino<{ apy: number }>({ action: "apy" });
-      return Number(apy) || 0;
-    } catch {
-      return 0;
-    }
+    // Fast + accurate via DefiLlama; avoids cold-starting the klend market.
+    return getProviderApy(DEFILLAMA_POOL);
   },
 };
