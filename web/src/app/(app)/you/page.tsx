@@ -4,14 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
-import { Copy, Check, LogOut, ArrowUpRight, LineChart } from "lucide-react";
+import { Copy, Check, LogOut, ArrowUpRight, LineChart, Sun, Moon } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { useSolanaContext } from "@/providers/solana-provider";
+import { useTheme } from "@/context/theme-context";
 
 export default function YouPage() {
   const { user, logout, ready, authenticated } = usePrivy();
   const { walletAddress } = useSolanaContext();
+  const { theme, toggleTheme } = useTheme();
   const [copied, setCopied] = useState(false);
 
   const email = user?.email?.address;
@@ -89,6 +91,39 @@ export default function YouPage() {
               You're signed out
             </div>
           )}
+        </div>
+      </motion.section>
+
+      {/* Appearance */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.12 }}
+        className="mt-10"
+      >
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30 mb-4">
+          Appearance
+        </p>
+        <div className="inline-flex gap-1 p-1 rounded-[6px] border border-white/10">
+          {([
+            ["dark", Moon],
+            ["light", Sun],
+          ] as const).map(([mode, Icon]) => (
+            <button
+              key={mode}
+              onClick={() => {
+                if (theme !== mode) toggleTheme();
+              }}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-[5px] font-mono text-xs uppercase tracking-wide transition ${
+                theme === mode
+                  ? "bg-white/[0.08] text-white"
+                  : "text-white/40 hover:text-white/70"
+              }`}
+            >
+              <Icon size={13} strokeWidth={1.5} />
+              {mode}
+            </button>
+          ))}
         </div>
       </motion.section>
 

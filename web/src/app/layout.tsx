@@ -22,6 +22,13 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
       <body className="bg-surface-0 text-white font-sans antialiased overflow-x-hidden">
+        {/* Apply the saved theme before paint to avoid a dark→light flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('oxar-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}",
+          }}
+        />
         <ThemeProvider>
           <PageWrapper>{children}</PageWrapper>
         </ThemeProvider>

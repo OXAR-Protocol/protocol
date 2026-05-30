@@ -432,3 +432,18 @@ input[type="number"] {
   }
 }
 
+/* Light theme — remap literal black surfaces (modals, nav, dropdowns, overlays).
+   The page body flips via --color-surface-0; these bg-black utilities don't. */
+[data-theme="light"] .bg-black {
+  background-color: #ffffff;
+}
+[data-theme="light"] .bg-black\/80 {
+  background-color: rgba(255, 255, 255, 0.85);
+}
+[data-theme="light"] .bg-black\/90 {
+  background-color: rgba(255, 255, 255, 0.92);
+}
+[data-theme="light"] .bg-black\/70 {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
