@@ -12,7 +12,7 @@ import {
   appendTransactionMessageInstructions,
   setTransactionMessageFeePayerSigner,
   setTransactionMessageLifetimeUsingBlockhash,
-  signTransactionMessageWithSigners,
+  compileTransaction,
   getBase64EncodedWireTransaction,
   type Address,
   type Instruction,
@@ -79,14 +79,17 @@ async function buildUnsignedTx(
   ixs: Instruction[],
 ): Promise<string> {
   const { value: blockhash } = await rpc.getLatestBlockhash().send();
-  const signed = await pipe(
+  // Compile to an UNSIGNED wire tx (empty signature slot for the fee payer). We must
+  // NOT sign here — the noopSigner produces no signatures, and signing would throw
+  // "missing signatures". The client's Privy wallet fills the signature.
+  const compiled = pipe(
     createTransactionMessage({ version: 0 }),
     (m) => appendTransactionMessageInstructions(ixs, m),
     (m) => setTransactionMessageFeePayerSigner(owner, m),
     (m) => setTransactionMessageLifetimeUsingBlockhash(blockhash, m),
-    (m) => signTransactionMessageWithSigners(m),
+    (m) => compileTransaction(m),
   );
-  return getBase64EncodedWireTransaction(signed);
+  return getBase64EncodedWireTransaction(compiled);
 }
 
 function usdcReserveAddress(market: KaminoMarket): Address {
