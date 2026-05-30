@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
 import { useYieldActions } from "@/hooks/use-yield-actions";
-import { useTokenBalance } from "@/hooks/use-token-balance";
 import type { ProviderView } from "@/hooks/use-yield-positions";
-import { RISK_LABEL, toBaseUnits, fromBaseUnits, planWithdrawal } from "@/lib/yield";
+import { RISK_LABEL, fromBaseUnits, planWithdrawal } from "@/lib/yield";
 import { YieldAmountField } from "@/components/yield-amount-field";
+import { DepositPanel } from "@/components/deposit-panel";
 import {
   YieldActionSuccess,
   type ActionResult,
@@ -26,10 +26,8 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
   const [selectedId, setSelectedId] = useState(views[0].id);
   const view = views.find((v) => v.id === selectedId) ?? views[0];
 
-  const { deposit, withdraw, redeemAll, loading, error } = useYieldActions(view.id);
-  const wallet = useTokenBalance(view.assetMint, view.decimals);
+  const { withdraw, redeemAll, loading, error } = useYieldActions(view.id);
 
-  const [depositAmount, setDepositAmount] = useState(50);
   const [withdrawAmount, setWithdrawAmount] = useState(10);
   const [result, setResult] = useState<ActionResult | null>(null);
 
@@ -38,16 +36,8 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
   // Confirmed commitment can still lag a slot — refresh after a beat to avoid stale $0.
   const settleAndRefresh = () => {
     setTimeout(() => {
-      wallet.refetch();
       onDone?.();
     }, 1500);
-  };
-
-  const handleDeposit = async () => {
-    if (depositAmount <= 0) return;
-    await deposit(toBaseUnits(depositAmount, view.decimals));
-    setResult({ kind: "deposit", amount: depositAmount, symbol: view.assetSymbol });
-    settleAndRefresh();
   };
 
   const handleWithdraw = async () => {
@@ -148,17 +138,12 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
           )}
 
           <div className="space-y-4">
-            <YieldAmountField
-              label={`Deposit ${view.assetSymbol}`}
-              symbol={view.assetSymbol}
-              value={depositAmount}
-              onChange={setDepositAmount}
-              hint={`wallet: ${wallet.balance.toFixed(2)} ${view.assetSymbol}`}
-              actionLabel="Deposit"
-              onAction={handleDeposit}
-              loading={loading}
-              disabled={loading || depositAmount <= 0}
-              variant="primary"
+            <DepositPanel
+              view={view}
+              onDeposited={(usd) => {
+                setResult({ kind: "deposit", amount: usd, symbol: view.assetSymbol });
+                settleAndRefresh();
+              }}
             />
 
             <YieldAmountField
