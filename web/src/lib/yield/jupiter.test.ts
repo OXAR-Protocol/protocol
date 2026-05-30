@@ -24,6 +24,7 @@ describe("createJupiterLendProvider", () => {
       decimals: 6,
       description: "USDT lending on Solana · withdraw anytime",
       riskLevel: "low",
+      defiLlamaPoolId: "a2fbc7ec-22c2-43fe-aa42-49f854aa940d",
     });
 
     expect(p.id).toBe("jupiter-lend-usdt");

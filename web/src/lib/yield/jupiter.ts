@@ -9,6 +9,7 @@ import {
 
 import { USDC_MINT, USDC_DECIMALS } from "@/lib/constants";
 import { getCached, setCache } from "@/lib/cache";
+import { getProviderApy } from "./yields-api";
 import type {
   BuildIxParams,
   RedeemIxParams,
@@ -58,6 +59,8 @@ export interface JupiterLendConfig {
   decimals: number;
   description: string;
   riskLevel: "low" | "medium" | "high";
+  /** DefiLlama pool id (primary, accurate APY source + chart history). */
+  defiLlamaPoolId: string;
 }
 
 /**
@@ -126,6 +129,10 @@ export function createJupiterLendProvider(config: JupiterLendConfig): YieldProvi
     },
 
     async getApy(): Promise<number> {
+      // Primary: DefiLlama (accurate + uniform with charts). Fall back to Jupiter's
+      // own REST so a DefiLlama hiccup never blanks a working card.
+      const llama = await getProviderApy(config.defiLlamaPoolId);
+      if (llama > 0) return llama;
       const tokens = await fetchJupiterLendTokens();
       const token = tokens.find((t) => t.assetAddress === config.assetMint);
       return parseJupiterApy(token?.totalRate);
@@ -142,6 +149,7 @@ export const jupiterUsdcProvider = createJupiterLendProvider({
   decimals: USDC_DECIMALS,
   description: "USDC lending on Solana · withdraw anytime",
   riskLevel: "low",
+  defiLlamaPoolId: "d783c8df-e2ed-44b4-8317-161ccc1b5f06",
 });
 
 export const jupiterUsdtProvider = createJupiterLendProvider({
@@ -151,6 +159,7 @@ export const jupiterUsdtProvider = createJupiterLendProvider({
   decimals: 6,
   description: "USDT lending on Solana · withdraw anytime",
   riskLevel: "low",
+  defiLlamaPoolId: "a2fbc7ec-22c2-43fe-aa42-49f854aa940d",
 });
 
 export const jupiterUsdgProvider = createJupiterLendProvider({
@@ -160,4 +169,5 @@ export const jupiterUsdgProvider = createJupiterLendProvider({
   decimals: 6,
   description: "USDG · Global Dollar lending on Solana · withdraw anytime",
   riskLevel: "low",
+  defiLlamaPoolId: "c4d22a9b-a5e3-414e-92d9-76493e1ab239",
 });
