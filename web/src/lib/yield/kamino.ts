@@ -46,6 +46,7 @@ export const kaminoUsdcProvider: YieldProvider = {
   description: "USDC lending on Kamino · withdraw anytime",
   riskLevel: "low",
   chain: "solana",
+  defiLlamaPoolId: DEFILLAMA_POOL,
 
   async buildDepositTx({ owner, amount }: BuildIxParams) {
     const { tx } = await postKamino<{ tx: string }>({

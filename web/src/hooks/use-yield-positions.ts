@@ -17,6 +17,8 @@ export interface ProviderView {
   chain: "solana" | "ethereum";
   /** Optional group id — providers sharing it collapse into one marketplace card. */
   group?: string;
+  /** DefiLlama pool id — for the APY history sparkline. */
+  defiLlamaPoolId?: string;
   /** Supply APY as a fraction (0.06 = 6%). */
   apy: number;
   /** User's principal + accrued yield, in asset base units. 0 if not connected. */
@@ -59,6 +61,7 @@ export function useYieldPositions() {
             riskLevel: p.riskLevel,
             chain: p.chain,
             group: p.group,
+            defiLlamaPoolId: p.defiLlamaPoolId,
             apy,
             underlyingBalance: position.underlyingBalance,
             shares: position.shares,

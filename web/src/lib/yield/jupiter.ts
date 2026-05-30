@@ -83,6 +83,7 @@ export function createJupiterLendProvider(config: JupiterLendConfig): YieldProvi
     chain: "solana",
     // All Jupiter Lend stablecoins collapse into one card with an asset picker.
     group: "jupiter-lend",
+    defiLlamaPoolId: config.defiLlamaPoolId,
 
     async buildDepositIxs({ owner, amount, connection }: BuildIxParams) {
       const { ixs } = await getDepositIxs({
