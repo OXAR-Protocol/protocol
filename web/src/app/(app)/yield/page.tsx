@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { X } from "lucide-react";
+import { X, List, LayoutGrid } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { CustomSelect } from "@/components/custom-select";
@@ -10,8 +10,11 @@ import { YIELD_SOURCES, APY_BUCKETS, type ApyBucket } from "@oxar/sdk";
 import { YieldSourceRow } from "@/components/yield-source-row";
 import { YieldProviderRow } from "@/components/yield-provider-row";
 import { YieldGroupRow } from "@/components/yield-group-row";
+import { SourceCard } from "@/components/source-card";
 import { YieldSourceSheet } from "@/components/yield-source-sheet";
 import { groupProviderViews } from "@/lib/yield";
+
+type Layout = "list" | "grid";
 import {
   useYieldPositions,
   type ProviderView,
@@ -30,6 +33,16 @@ export default function YieldPage() {
   const [chain, setChain] = useState<ChainFilter>("all");
   // The sheet operates on a group (1 provider, or Jupiter's stablecoin set).
   const [active, setActive] = useState<ProviderView[] | null>(null);
+  const [layout, setLayout] = useState<Layout>("list");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("oxar:yield-layout");
+    if (saved === "grid" || saved === "list") setLayout(saved);
+  }, []);
+  const chooseLayout = (next: Layout) => {
+    setLayout(next);
+    localStorage.setItem("oxar:yield-layout", next);
+  };
 
   // Live, openable sources backed by real protocol SDKs (v1: Jupiter Lend, Kamino).
   const { views, refresh } = useYieldPositions();
@@ -132,22 +145,52 @@ export default function YieldPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mt-10"
         >
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-emerald-300/50 mb-3">
-            Live now
-          </p>
-          <div className="space-y-2">
-            {liveGroups.map((g) =>
-              g.views.length > 1 ? (
-                <YieldGroupRow key={g.key} group={g} onOpen={() => setActive(g.views)} />
-              ) : (
-                <YieldProviderRow
-                  key={g.key}
-                  view={g.views[0]}
-                  onOpen={() => setActive(g.views)}
-                />
-              ),
-            )}
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-emerald-300/50">
+              Live now
+            </p>
+            <div className="flex gap-1">
+              {([
+                ["list", List],
+                ["grid", LayoutGrid],
+              ] as const).map(([mode, Icon]) => (
+                <button
+                  key={mode}
+                  onClick={() => chooseLayout(mode)}
+                  aria-label={`${mode} view`}
+                  className={`p-1.5 rounded-[5px] border transition ${
+                    layout === mode
+                      ? "border-white/30 text-white"
+                      : "border-white/10 text-white/40 hover:text-white/70"
+                  }`}
+                >
+                  <Icon size={14} strokeWidth={1.5} />
+                </button>
+              ))}
+            </div>
           </div>
+
+          {layout === "grid" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {liveGroups.map((g) => (
+                <SourceCard key={g.key} group={g} onOpen={() => setActive(g.views)} />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {liveGroups.map((g) =>
+                g.views.length > 1 ? (
+                  <YieldGroupRow key={g.key} group={g} onOpen={() => setActive(g.views)} />
+                ) : (
+                  <YieldProviderRow
+                    key={g.key}
+                    view={g.views[0]}
+                    onOpen={() => setActive(g.views)}
+                  />
+                ),
+              )}
+            </div>
+          )}
         </motion.section>
       )}
 
