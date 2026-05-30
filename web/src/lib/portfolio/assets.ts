@@ -29,6 +29,16 @@ export type PriceMap = Record<string, { usdPrice?: number } | undefined>;
 
 const DUST_USD = 0.01;
 
+/** Keep this much SOL for tx fees (swap + deposit) when paying with native SOL. */
+export const SOL_FEE_RESERVE = BigInt(10_000_000); // 0.01 SOL
+
+/** Base units of an asset that may be spent — reserves SOL for network fees. */
+export function spendableBase(asset: WalletAsset): bigint {
+  if (asset.mint !== SOL_MINT) return asset.amount;
+  const max = asset.amount - SOL_FEE_RESERVE;
+  return max > BigInt(0) ? max : BigInt(0);
+}
+
 /**
  * Build a USD-valued asset list from a Helius DAS result + a Jupiter price map.
  * Includes native SOL (priced by Helius directly), drops dust/zero/unpriced,

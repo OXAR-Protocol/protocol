@@ -51,6 +51,7 @@ export function DepositPanel({ view, onDeposited }: Props) {
         const price = payAsset.usdValue / payAsset.uiAmount;
         const payBase = toBaseUnits((usdAmount / price).toFixed(payAsset.decimals), payAsset.decimals);
         const q = await getSwapQuote({ inputMint: payAsset.mint, outputMint: view.assetMint, amount: payBase });
+        // Show the guaranteed-min out — that's exactly what gets deposited.
         if (!cancelled) setNetUsdc(Number(q.otherAmountThreshold) / 10 ** view.decimals);
       } catch {
         if (!cancelled) setNetUsdc(null);
@@ -70,8 +71,13 @@ export function DepositPanel({ view, onDeposited }: Props) {
 
   const handleDeposit = async () => {
     if (!payAsset || usdAmount <= 0) return;
-    await depositWith(payAsset, usdAmount);
-    onDeposited(usdAmount);
+    try {
+      const depositedBase = await depositWith(payAsset, usdAmount);
+      // Report the amount actually deposited (USDC ≈ USD), not the input USD.
+      onDeposited(Number(depositedBase) / 10 ** view.decimals);
+    } catch {
+      // Error is surfaced via the hook's `error` state.
+    }
   };
 
   return (

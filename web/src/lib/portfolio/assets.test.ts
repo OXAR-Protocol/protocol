@@ -1,6 +1,14 @@
 import { describe, it, expect } from "vitest";
 
-import { buildWalletAssets, SOL_MINT, type DasResult, type PriceMap } from "./assets";
+import {
+  buildWalletAssets,
+  spendableBase,
+  SOL_FEE_RESERVE,
+  SOL_MINT,
+  type DasResult,
+  type PriceMap,
+  type WalletAsset,
+} from "./assets";
 
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
@@ -50,5 +58,29 @@ describe("buildWalletAssets", () => {
     };
     const assets = buildWalletAssets(das, { [USDC]: { usdPrice: 1 }, dust: { usdPrice: 1 } });
     expect(assets.map((a) => a.symbol)).toEqual(["USDC", "SOL"]); // $200, then $80; dust/zero/nft gone
+  });
+});
+
+const asset = (over: Partial<WalletAsset> & { mint: string; amount: bigint }): WalletAsset => ({
+  symbol: "X",
+  decimals: 9,
+  uiAmount: 1,
+  usdValue: 1,
+  ...over,
+});
+
+describe("spendableBase", () => {
+  it("reserves SOL for fees on native SOL", () => {
+    const sol = asset({ mint: SOL_MINT, amount: BigInt(2_000_000_000) }); // 2 SOL
+    expect(spendableBase(sol)).toBe(BigInt(2_000_000_000) - SOL_FEE_RESERVE);
+  });
+
+  it("returns 0 when SOL balance is below the reserve", () => {
+    expect(spendableBase(asset({ mint: SOL_MINT, amount: BigInt(5_000_000) }))).toBe(BigInt(0));
+  });
+
+  it("spends the full balance for non-SOL assets", () => {
+    const usdc = asset({ mint: "EPjFW", amount: BigInt(50_000_000) });
+    expect(spendableBase(usdc)).toBe(BigInt(50_000_000));
   });
 });
