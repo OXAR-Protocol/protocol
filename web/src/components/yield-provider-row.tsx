@@ -24,6 +24,9 @@ export function YieldProviderRow({ view, onOpen }: Props) {
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">
             <p className="font-sans text-base text-white truncate">{view.name}</p>
+            <span className="font-mono text-[10px] uppercase tracking-wide text-white/60 px-1.5 py-0.5 rounded border border-white/15">
+              {view.assetSymbol}
+            </span>
             <span className="font-mono text-[10px] uppercase tracking-wide text-emerald-300/70">
               ● live
             </span>
