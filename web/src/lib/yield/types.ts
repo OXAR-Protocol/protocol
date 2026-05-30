@@ -64,6 +64,11 @@ export interface YieldProvider {
   readonly riskLevel: "low" | "medium" | "high";
   /** Chain the source lives on (v1: Solana only). */
   readonly chain: "solana" | "ethereum";
+  /**
+   * Optional grouping id. Providers sharing a `group` (e.g. all Jupiter Lend
+   * stablecoins) collapse into ONE marketplace card with an asset picker.
+   */
+  readonly group?: string;
 
   // --- Instruction-based path (Jupiter Lend) ---
   /** Instructions to deposit `amount` of the underlying asset. */

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
 import { useYieldActions } from "@/hooks/use-yield-actions";
-import { useUsdcBalance } from "@/hooks/use-usdc-balance";
+import { useTokenBalance } from "@/hooks/use-token-balance";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { RISK_LABEL, toBaseUnits, fromBaseUnits, planWithdrawal } from "@/lib/yield";
 import { YieldAmountField } from "@/components/yield-amount-field";
@@ -15,15 +15,19 @@ import {
 } from "@/components/yield-action-success";
 
 interface Props {
-  view: ProviderView;
+  /** One provider, or a group (e.g. Jupiter USDC/USDT/USDG) with an asset picker. */
+  views: ProviderView[];
   onClose: () => void;
   /** Called after a confirmed deposit/withdraw so the page can refresh positions. */
   onDone?: () => void;
 }
 
-export function YieldSourceSheet({ view, onClose, onDone }: Props) {
+export function YieldSourceSheet({ views, onClose, onDone }: Props) {
+  const [selectedId, setSelectedId] = useState(views[0].id);
+  const view = views.find((v) => v.id === selectedId) ?? views[0];
+
   const { deposit, withdraw, redeemAll, loading, error } = useYieldActions(view.id);
-  const usdc = useUsdcBalance();
+  const wallet = useTokenBalance(view.assetMint, view.decimals);
 
   const [depositAmount, setDepositAmount] = useState(50);
   const [withdrawAmount, setWithdrawAmount] = useState(10);
@@ -31,11 +35,10 @@ export function YieldSourceSheet({ view, onClose, onDone }: Props) {
 
   const positionValue = fromBaseUnits(view.underlyingBalance, view.decimals);
 
-  // The tx confirms at "confirmed" commitment, but the position/balance reads can
-  // still lag a slot — refresh after a short beat so the user doesn't see stale $0.
+  // Confirmed commitment can still lag a slot — refresh after a beat to avoid stale $0.
   const settleAndRefresh = () => {
     setTimeout(() => {
-      usdc.refetch();
+      wallet.refetch();
       onDone?.();
     }, 1500);
   };
@@ -48,8 +51,6 @@ export function YieldSourceSheet({ view, onClose, onDone }: Props) {
   };
 
   const handleWithdraw = async () => {
-    // planWithdrawal decides full-exit (redeem all shares) vs partial in base units —
-    // a full exit avoids the share→asset rounding wall that stranded dust.
     const plan = planWithdrawal({
       requested: withdrawAmount,
       positionBaseUnits: view.underlyingBalance,
@@ -57,11 +58,8 @@ export function YieldSourceSheet({ view, onClose, onDone }: Props) {
       decimals: view.decimals,
     });
     if (!plan) return;
-    if (plan.mode === "redeemAll") {
-      await redeemAll(plan.shares);
-    } else {
-      await withdraw(plan.amount);
-    }
+    if (plan.mode === "redeemAll") await redeemAll(plan.shares);
+    else await withdraw(plan.amount);
     setResult({
       kind: "withdraw",
       amount: plan.mode === "redeemAll" ? positionValue : withdrawAmount,
@@ -87,46 +85,56 @@ export function YieldSourceSheet({ view, onClose, onDone }: Props) {
           onClick={(e) => e.stopPropagation()}
           className="relative w-full max-w-[520px] bg-black border border-white/15 rounded-[12px] p-6 md:p-8 max-h-[90vh] overflow-auto"
         >
-          {/* Header */}
           <div className="flex items-start justify-between gap-4 mb-6">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
                 Yield source
               </p>
               <h2 className="mt-2 font-sans text-2xl text-white">{view.name}</h2>
-              <p className="mt-1 font-mono text-xs text-white/40">
-                {view.description}
-              </p>
+              <p className="mt-1 font-mono text-xs text-white/40">{view.description}</p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-white/40 hover:text-white transition"
-            >
+            <button onClick={onClose} className="text-white/40 hover:text-white transition">
               <X size={18} strokeWidth={1.5} />
             </button>
           </div>
 
-          {/* APY + risk */}
+          {/* Stablecoin picker (grouped sources only) */}
+          {views.length > 1 && (
+            <div className="flex gap-1.5 mb-5">
+              {views.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => setSelectedId(v.id)}
+                  className={`flex-1 px-3 py-2 rounded-[6px] border font-mono text-xs uppercase tracking-wide transition ${
+                    v.id === view.id
+                      ? "border-accent/60 bg-accent/[0.06] text-white"
+                      : "border-white/10 text-white/50 hover:border-white/30"
+                  }`}
+                >
+                  {v.assetSymbol}
+                  <span className="block text-[10px] text-white/40 mt-0.5 tabular-nums">
+                    {(v.apy * 100).toFixed(2)}%
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="p-4 rounded-[6px] border border-white/10">
-              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
-                APY
-              </p>
+              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">APY</p>
               <p className="mt-1 font-sans text-2xl text-white tabular-nums">
                 {(view.apy * 100).toFixed(2)}%
               </p>
             </div>
             <div className="p-4 rounded-[6px] border border-white/10">
-              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
-                Risk
-              </p>
+              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">Risk</p>
               <p className="mt-1 font-sans text-2xl text-white">
                 {RISK_LABEL[view.riskLevel] ?? view.riskLevel}
               </p>
             </div>
           </div>
 
-          {/* Position */}
           {positionValue > 0 && (
             <div className="mb-6 p-4 rounded-[6px] border border-accent/30 bg-accent/[0.04]">
               <p className="font-mono text-[10px] uppercase tracking-wide text-white/50">
@@ -135,20 +143,17 @@ export function YieldSourceSheet({ view, onClose, onDone }: Props) {
               <p className="mt-1 font-sans text-2xl text-white tabular-nums">
                 ${positionValue.toFixed(2)}
               </p>
-              <p className="mt-1 font-mono text-[11px] text-white/40">
-                principal + accrued yield
-              </p>
+              <p className="mt-1 font-mono text-[11px] text-white/40">principal + accrued yield</p>
             </div>
           )}
 
-          {/* Actions */}
           <div className="space-y-4">
             <YieldAmountField
               label={`Deposit ${view.assetSymbol}`}
               symbol={view.assetSymbol}
               value={depositAmount}
               onChange={setDepositAmount}
-              hint={`wallet: $${usdc.balance.toFixed(2)} ${view.assetSymbol}`}
+              hint={`wallet: ${wallet.balance.toFixed(2)} ${view.assetSymbol}`}
               actionLabel="Deposit"
               onAction={handleDeposit}
               loading={loading}
@@ -184,17 +189,12 @@ export function YieldSourceSheet({ view, onClose, onDone }: Props) {
           </div>
 
           {error && (
-            <p className="mt-4 font-mono text-xs text-red-400 text-center">
-              {error}
-            </p>
+            <p className="mt-4 font-mono text-xs text-red-400 text-center">{error}</p>
           )}
 
           <AnimatePresence>
             {result && (
-              <YieldActionSuccess
-                result={result}
-                onDone={() => setResult(null)}
-              />
+              <YieldActionSuccess result={result} onDone={() => setResult(null)} />
             )}
           </AnimatePresence>
         </motion.div>

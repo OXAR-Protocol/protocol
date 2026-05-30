@@ -111,7 +111,7 @@ export default function PilePage() {
 
       {active && (
         <YieldSourceSheet
-          view={active}
+          views={[active]}
           onClose={() => setActive(null)}
           onDone={refresh}
         />
