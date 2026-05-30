@@ -1,0 +1,80 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+
+import { useSolanaContext } from "@/providers/solana-provider";
+import {
+  buildWalletAssets,
+  type WalletAsset,
+  type DasResult,
+  type PriceMap,
+} from "@/lib/portfolio/assets";
+
+const JUP_PRICE_URL = "https://lite-api.jup.ag/price/v3";
+const MAX_PRICED_MINTS = 50; // keep the price query URL well under length limits
+
+async function fetchDasAssets(rpc: string, owner: string): Promise<DasResult> {
+  const res = await fetch(rpc, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: "oxar-portfolio",
+      method: "getAssetsByOwner",
+      params: {
+        ownerAddress: owner,
+        page: 1,
+        limit: 1000,
+        displayOptions: { showFungible: true, showNativeBalance: true },
+      },
+    }),
+  });
+  if (!res.ok) throw new Error(`Balances unavailable (${res.status})`);
+  const json = (await res.json()) as { result?: DasResult };
+  return json?.result ?? {};
+}
+
+async function fetchPrices(mints: string[]): Promise<PriceMap> {
+  if (mints.length === 0) return {};
+  const res = await fetch(`${JUP_PRICE_URL}?ids=${mints.join(",")}`);
+  if (!res.ok) return {};
+  return (await res.json()) as PriceMap;
+}
+
+/** The connected wallet's Solana holdings, valued in USD (fetch-on-mount). */
+export function useWalletAssets() {
+  const { connection, walletAddress } = useSolanaContext();
+  const [assets, setAssets] = useState<WalletAsset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    if (!walletAddress) {
+      setAssets([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const das = await fetchDasAssets(connection.rpcEndpoint, walletAddress.toBase58());
+      const mints = (das.items ?? [])
+        .filter((i) => i.interface?.startsWith("Fungible"))
+        .map((i) => i.id)
+        .slice(0, MAX_PRICED_MINTS);
+      const prices = await fetchPrices(mints);
+      setAssets(buildWalletAssets(das, prices));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      setAssets([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [connection, walletAddress]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  return { assets, loading, error, refresh: load };
+}
