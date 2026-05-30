@@ -8,7 +8,7 @@ Read the root `/OXAR/CLAUDE.md` first for project-wide context.
 - **React** 18
 - **TypeScript** 5 (strict)
 - **Privy** (`@privy-io/react-auth`) for auth and embedded Solana wallets
-- **@solana/web3.js** 1.x + **@coral-xyz/anchor** ^0.31.1 for program interaction
+- **@solana/web3.js** 1.x for tx assembly; **@jup-ag/lend** (Jupiter Lend SDK) builds the deposit/withdraw instructions (`@coral-xyz/anchor` is only a transitive dep — v1 calls no own program)
 - **Tailwind CSS** + shadcn/ui primitives, **framer-motion**, **lucide-react**
 - Geist Sans / Geist Mono typography
 - SDK via `@oxar/sdk` (linked as `file:./sdk-local`)
@@ -19,7 +19,7 @@ Read the root `/OXAR/CLAUDE.md` first for project-wide context.
 
 Two hosts share one Next.js app, routed by `src/middleware.ts`:
 - `oxar.app` — marketing (`/`, `/investors`, `/terms`, `/docs`, `/kit`, `/pitch`)
-- `app.oxar.app` — authenticated app (`/home`, `/yield`, `/pile`, `/markets`, `/rules`, `/you`, `/onboarding`, `/login`)
+- `app.oxar.app` — authenticated app (`/home`, `/yield`, `/pile`, `/markets`, `/you`, `/onboarding`, `/login`)
 
 When adding a new authenticated route, append it to `APP_ROUTES` in `middleware.ts` so cross-domain redirects work.
 
@@ -31,10 +31,9 @@ src/
     (app)/                Authenticated routes (auth-guarded)
       layout.tsx          Providers + tab-bar + warp transitions
       home/               Greeting + balance + top markets
-      yield/              Personal yield vault (per risk template)
-      pile/               Group savings vaults (list, [id], create, join)
-      markets/            Yield source catalog (Kamino, JLP, Maple, Delora)
-      rules/              Sleeping patterns (auto-distribute triggers)
+      yield/              Yield sources — open one to deposit/withdraw (live: Jupiter Lend)
+      pile/               Your pile — live positions across every source (portfolio)
+      markets/            Yield-source catalog (roadmap sources)
       you/                Settings, wallet, sign-out
       onboarding/         First-run onboarding
       login/              Privy login
@@ -42,30 +41,28 @@ src/
     page.tsx              Landing
     layout.tsx            Root layout (fonts, metadata)
     api/
-      faucet/             Devnet USDC faucet
-      faucet-sol/         Devnet SOL airdrop
+      faucet/             USDC faucet (admin-mint, test)
+      faucet-sol/         SOL airdrop (test)
       waitlist/           Supabase write
   components/
     ui/                   shadcn-style primitives (button, card, dialog, input, …)
     pitch/, sections/, waitlist/, context/   Marketing-page sub-components
+    yield-source-sheet.tsx, yield-amount-field.tsx, yield-action-success.tsx   Deposit/withdraw UI
     custom-select.tsx     Branded dropdown (replaces native <select>)
     tab-bar.tsx, top-nav.tsx, auth-guard.tsx
     section-label.tsx, warp-transition.tsx, warp-on-entry.tsx
   hooks/
-    use-oxar-program.ts        Anchor Program from Privy wallet
-    use-personal-vault.ts      Fetch one personal vault by template
-    use-vault-actions.ts       deposit / withdraw / create / crank_nav
-    use-group-vault.ts         Fetch user's group vaults
-    use-group-vault-actions.ts initialize / join / deposit / withdraw / leave
-    use-group-members.ts       Members of a group vault
-    use-aggregate-balance.ts   Sum across personal + group
-    use-rules.ts               Fetch + create + cancel rules
-    use-usdc-balance.ts, use-faucet.ts
+    use-yield-positions.ts     APY + the wallet's position per provider
+    use-yield-actions.ts       deposit / withdraw / redeemAll (Privy sign+send)
+    use-aggregate-balance.ts   Sum across all provider positions
+    use-usdc-balance.ts        Wallet USDC balance
+    use-waitlist.ts            Waitlist submit (marketing)
+    use-count-up.ts, use-animated-progress.ts, use-canvas-perf.ts   UI helpers
   providers/
     providers.tsx, privy-provider.tsx, solana-provider.tsx
   lib/
-    constants.ts          PROGRAM_ID / RPC_URL / USDC mint (re-exports SDK)
-    trigger-tokens.ts     Token catalog for rule triggers
+    constants.ts          RPC_URL / USDC mint + yield-source catalog re-export (from @oxar/sdk)
+    yield/                Provider abstraction: types, registry, jupiter, units, display, errors
     growth.ts, cache.ts, supabase-server.ts, …
 ```
 
@@ -78,45 +75,43 @@ Every file that uses React hooks or browser APIs MUST start with `"use client";`
 Max ~200 lines per component file. Split into sub-components / hooks / lib helpers when approaching.
 
 ### Separate UI from Logic
-Components are thin — JSX + hook calls. Business logic lives in `hooks/`. Transaction building inline in hooks via `program.methods.*`.
+Components are thin — JSX + hook calls. Business logic lives in `hooks/`. Instructions
+are built by the yield provider's SDK (e.g. `YieldProvider.buildDepositIxs`), then
+assembled and sent in `use-yield-actions.ts`.
 
-### One Hook per Contract Instruction (or domain)
-Each contract feature gets its own hook file:
-- `use-vault-actions.ts` — personal vault writes
-- `use-group-vault-actions.ts` — group vault writes
-- `use-rules.ts` — rule create/cancel + fetch
+### Yield provider abstraction
+Every source implements the `YieldProvider` interface (`lib/yield/types.ts`); the
+registry (`lib/yield/registry.ts`) lists the live ones (v1: Jupiter Lend, `jupiter.ts`).
+Adding an asset = add a provider, no UI changes. Action hooks return `{ ..., loading, error }`.
 
-Each action returns `{ fn, loading, error }`.
-
-### Transaction Pattern (Privy + Anchor)
+### Transaction Pattern (Privy)
 ```typescript
-const ix = await program.methods
-  .deposit(amount)
-  .accounts({ ... } as any)  // SAFETY: Anchor IDL typing incomplete
-  .instruction();
+// Build provider instructions, then sign+send with the Privy embedded wallet.
+const ixs = await yieldProvider.buildDepositIxs({ owner, amount, connection });
 
-const tx = new Transaction().add(ix);
+const tx = new Transaction().add(...ixs);
 const { blockhash } = await connection.getLatestBlockhash();
 tx.recentBlockhash = blockhash;
 tx.feePayer = walletAddress;
 
-const signed = await provider.wallet.signTransaction(tx);
+const signed = await wallet.signTransaction(tx);
 const sig = await connection.sendRawTransaction(signed.serialize());
 await connection.confirmTransaction(sig, "confirmed");
 ```
 
-**Always create Associated Token Accounts before token operations** — check via `connection.getAccountInfo(ata)` and `tx.add(createAssociatedTokenAccountInstruction(...))` if missing. Both deposit and withdraw flows handle this.
-
-Do NOT use `program.methods.*.rpc()` — fails with Privy embedded wallet.
+Do NOT use `.rpc()` / auto-send — it fails with the Privy embedded wallet; always do
+manual sign+send. The Jupiter Lend SDK creates the needed ATAs idempotently — do NOT
+add your own ATA-creation instructions in deposit/withdraw or you double-create.
 
 ### Privy Integration
 `providers/privy-provider.tsx`:
 - `createOnLogin: "all-users"` — every login gets an embedded Solana wallet
 - `walletChainType: "solana-only"`
 - External connectors (Phantom, etc.) enabled
-- RPC: Helius devnet
+- RPC: Helius **mainnet**
 
-`use-oxar-program.ts` bridges the Privy wallet to an Anchor `Program`.
+`providers/solana-provider.tsx` exposes the Privy wallet + connection consumed by
+`use-yield-actions.ts` / `use-yield-positions.ts`.
 
 ### Styling
 - Tailwind only. No CSS modules.
@@ -201,7 +196,8 @@ yarn install   # re-links @oxar/sdk
 
 ## Common Pitfalls
 - Forgetting `"use client"` on a page that uses hooks → cryptic SSR errors
-- Using `program.methods.*.rpc()` instead of manual sign+send → fails with Privy
+- Calling `.rpc()` / auto-send instead of manual sign+send → fails with the Privy embedded wallet
+- Adding your own ATA-creation ix in deposit/withdraw → the Jupiter SDK already does it (double-create)
 - Not creating Associated Token Account before token ops → transaction fails
 - Adding a route to `(app)/` but forgetting to update `APP_ROUTES` in `middleware.ts` → cross-domain redirect breaks
 - Using native `<select>` — breaks the visual system. Use `CustomSelect`.

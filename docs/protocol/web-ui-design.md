@@ -1,3 +1,8 @@
+> ⚠️ **SUPERSEDED** — describes the pre-pivot RWA / own-contract design (pages, hooks, and
+> flows here do not match the shipping app). v1 ships as a non-custodial UI over third-party
+> protocol SDKs (Jupiter Lend). Current direction:
+> `docs/plans/2026-05-29-web-sdk-migration-design.md`; live structure in `web/CLAUDE.md`.
+
 # OXAR Web UI — Design
 
 Last updated: April 2026

@@ -2,27 +2,35 @@
 
 ## What is OXAR
 
-OXAR is a Real World Asset (RWA) tokenization protocol on Solana. It wraps Ukrainian government bonds (OVDPs and War Bonds) into on-chain vault tokens with daily NAV accrual and a secondary marketplace. The current MVP targets Ukraine-only bond types (UAH, USD, EUR denominations).
+OXAR is a non-custodial yield app on Solana — "where your money sleeps." v1 is a
+**UI over third-party DeFi protocol SDKs** (live: Jupiter Lend USDC): users deposit/
+withdraw straight into the protocol from their own wallet and hold their own position.
+OXAR ships **no smart contract of its own in v1** — the live product is the `web/` app.
+
+> Origin & future: OXAR began as an RWA/bond-tokenization protocol with its own Anchor
+> program (see `contracts/`, kept for future phases). v1 deliberately pivoted to the
+> SDK-frontend model — see `docs/plans/2026-05-29-web-sdk-migration-design.md`.
 
 ## Repository Structure
 
 ```
 OXAR/
-  contracts/oxar-protocol/   Solana/Anchor smart contracts (Rust)
-  sdk/                       Shared TypeScript SDK (@oxar/sdk)
-  web/                       Next.js 14 web application
-  docs/                      Protocol documentation
-  mobile/                    React Native app (future, empty)
+  web/                       Next.js app — THE live product (yield UI over protocol SDKs)
+  sdk/                       Shared TS SDK (@oxar/sdk) — yield-source catalog (+ legacy contract bindings)
+  contracts/oxar-protocol/   Solana/Anchor program (Rust) — NOT used by v1; kept for future phases
+  radar/ + packages/         radar.oxar.app (separate product) + shared radar-core
+  docs/                      Protocol & design docs (docs/plans/ has the current direction)
 ```
 
-Each repo has its own CLAUDE.md with specific rules. Read them before working in that repo.
+Each sub-project has its own CLAUDE.md. Read it before working there.
 
 ## Key Identifiers
 
-- **Program ID**: `8RCVjQJhfcRYVpAM8v4jhvvbhjfkdqFwPtffEKNcBQwJ` (fresh deploy 2026-05-23, anchor 0.31.1, solana 2.2.20)
-- **Network**: Solana Devnet
+- **Network**: Solana **Mainnet** (v1 — Jupiter Lend / Kamino only exist on mainnet)
+- **Own program**: none deployed or used by v1. `contracts/` holds the legacy Anchor
+  program (Program ID `8RCVjQJhfcRYVpAM8v4jhvvbhjfkdqFwPtffEKNcBQwJ`) for future phases.
 - **Privy App ID**: `cmmzf4k4s00g80cjywxio7b89`
-- **RPC**: Helius devnet endpoint (see web/src/providers/privy-provider.tsx)
+- **RPC**: Helius mainnet via `NEXT_PUBLIC_SOLANA_RPC_URL` (see web/src/lib/constants.ts)
 
 ## Universal Coding Principles
 
@@ -137,37 +145,29 @@ Keep the subject line under 72 characters. Add a body for non-trivial changes.
 
 ## Cross-Repo Dependency Chain
 
-```
-contracts (Rust) --> builds IDL --> sdk copies IDL --> web imports sdk
-```
+v1 `web/` consumes only the **yield-source catalog** from `@oxar/sdk` (`YIELD_SOURCES`,
+`APY_BUCKETS`); it does NOT use the contract IDL or PDA bindings. `web/` links the SDK
+via `file:./sdk-local` (a built copy of `sdk/dist`).
 
-When changing the contract:
-1. Update Rust code in `contracts/`
-2. Build with `anchor build` to regenerate IDL
-3. Copy updated IDL to `sdk/src/idl.json`
-4. Update `sdk/src/types.ts` if account shapes changed
-5. Rebuild SDK with `yarn build` in `sdk/`
-6. Copy updated dist to `web/sdk-local/` (web uses `file:./sdk-local` dependency)
-7. Test in web
+The `contracts → IDL → sdk → web` chain below applies ONLY to the legacy contract path
+(`contracts/`), which v1 does not use — relevant again only if a future phase wires the
+program back in:
+1. Update Rust in `contracts/` → `anchor build` regenerates the IDL
+2. Copy IDL to `sdk/src/idl.json`; update `sdk/src/types.ts` if account shapes changed
+3. `yarn build` in `sdk/`; copy `sdk/dist` into `web/sdk-local/`
 
 ## PDA Seed Convention
 
-All PDAs follow a consistent pattern. Seeds MUST match between Rust and TypeScript:
+Not used by v1 (no own program in the live flow). The authoritative, current seed table
+lives in `contracts/CLAUDE.md` (kept in sync with `contracts/.../constants.rs`). The list
+previously shown here was stale (old bond-vault + marketplace seeds).
 
-| PDA     | Seeds                                                   |
-|---------|---------------------------------------------------------|
-| Vault   | `"vault"` + region + denomination + asset_subtype + series (u16 LE) |
-| Mint    | `"mint"` + vault pubkey                                 |
-| Pool    | `"pool"` + vault pubkey                                 |
-| Listing | `"listing"` + vault pubkey + seller pubkey              |
-| Escrow  | `"escrow"` + vault pubkey + seller pubkey               |
+## Yield Sources (v1)
 
-## Vault Configurations (MVP)
+v1 has no OXAR-issued bond vaults. The app routes funds into third-party protocols:
+- **Live**: Jupiter Lend USDC (mainnet) — `web/src/lib/yield/jupiter.ts`.
+- **Catalog / roadmap**: `YIELD_SOURCES` in `sdk/src/constants.ts` (shown on `/markets`),
+  surfaced through the `YieldProvider` interface (`web/src/lib/yield/`).
 
-Six vault types, all Ukraine, all series=1:
-- `UA-UAH-SHORT` (18% APY) -- Short-term OVDP, UAH
-- `UA-UAH-MID` (17% APY) -- Mid-term OVDP, UAH
-- `UA-USD-STD` (4% APY) -- OVDP, USD
-- `UA-EUR-STD` (3.5% APY) -- OVDP, EUR
-- `UA-UAH-WAR` (18% APY) -- War Bonds, UAH
-- `UA-USD-WAR` (4% APY) -- War Bonds, USD
+(The original six Ukrainian bond vaults — `UA-UAH-SHORT` etc. — were part of the
+pre-pivot RWA design and are not in v1.)

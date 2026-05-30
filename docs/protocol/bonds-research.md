@@ -1,3 +1,8 @@
+> ⚠️ **SUPERSEDED / BACKGROUND** — research for the pre-pivot RWA bond direction. v1 is a
+> non-custodial yield UI over third-party protocol SDKs (Jupiter Lend), not a bond product.
+> Kept for historical reference. Current direction:
+> `docs/plans/2026-05-29-web-sdk-migration-design.md`.
+
 # Ukrainian Government Bonds (ОВГЗ) — Research
 
 Last updated: April 2026
