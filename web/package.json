@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
     "sync-sdk": "cd ../sdk && yarn build && cd ../web && rm -rf sdk-local/dist && cp -r ../sdk/dist sdk-local/dist && cp ../sdk/src/idl.json sdk-local/dist/idl.json && yarn prebuild"
   },
   "dependencies": {
@@ -42,6 +43,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.7"
   }
 }
