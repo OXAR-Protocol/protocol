@@ -54,4 +54,6 @@ jobs:
             For each concrete issue, post an inline comment. End with a brief
             summary verdict (this becomes the sticky comment). Skip style
             nitpicks; if nothing is wrong, say so briefly.
-          claude_args: "--model sonnet --max-turns 30"
+          # Default model (Opus) — verified to complete a review in ~9 turns.
+          # Sonnet was flaky here (over-explored, hit turn limits / stalled).
+          claude_args: "--max-turns 10"
