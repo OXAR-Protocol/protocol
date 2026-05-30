@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Loader2, ArrowUpRight, List, LayoutGrid } from "lucide-react";
 
@@ -29,6 +30,10 @@ export default function PilePage() {
     setLayout(next);
     localStorage.setItem("oxar:pile-layout", next);
   };
+
+  // Pile is the portfolio: only sources where you actually hold a position.
+  // (Browse/deposit lives on /yield.)
+  const held = views.filter((v) => v.underlyingBalance > BigInt(0));
 
   return (
     <div className="max-w-[900px] mx-auto pt-8 pb-32 px-4">
@@ -80,38 +85,58 @@ export default function PilePage() {
       >
         <div className="flex items-center justify-between mb-3">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">
-            Sources
+            Positions
           </p>
-          <div className="flex gap-1">
-            {([
-              ["list", List],
-              ["grid", LayoutGrid],
-            ] as const).map(([mode, Icon]) => (
-              <button
-                key={mode}
-                onClick={() => chooseLayout(mode)}
-                aria-label={`${mode} view`}
-                className={`p-1.5 rounded-[5px] border transition ${
-                  layout === mode
-                    ? "border-white/30 text-white"
-                    : "border-white/10 text-white/40 hover:text-white/70"
-                }`}
-              >
-                <Icon size={14} strokeWidth={1.5} />
-              </button>
-            ))}
-          </div>
+          {held.length > 0 && (
+            <div className="flex gap-1">
+              {([
+                ["list", List],
+                ["grid", LayoutGrid],
+              ] as const).map(([mode, Icon]) => (
+                <button
+                  key={mode}
+                  onClick={() => chooseLayout(mode)}
+                  aria-label={`${mode} view`}
+                  className={`p-1.5 rounded-[5px] border transition ${
+                    layout === mode
+                      ? "border-white/30 text-white"
+                      : "border-white/10 text-white/40 hover:text-white/70"
+                  }`}
+                >
+                  <Icon size={14} strokeWidth={1.5} />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {layout === "grid" ? (
+        {loading ? (
+          <div className="p-8 flex justify-center">
+            <Loader2 className="animate-spin text-white/30" size={24} />
+          </div>
+        ) : held.length === 0 ? (
+          <div className="p-8 rounded-[8px] border border-white/10 text-center">
+            <p className="font-sans text-base text-white">You haven&apos;t deposited yet</p>
+            <p className="mt-1 font-mono text-xs text-white/40">
+              Your positions show up here once you put money to work.
+            </p>
+            <Link
+              href="/yield"
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-[5px] bg-white text-black font-mono text-xs uppercase tracking-wide hover:bg-white/90 transition"
+            >
+              Explore yield
+              <ArrowUpRight size={14} strokeWidth={1.5} />
+            </Link>
+          </div>
+        ) : layout === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {views.map((v) => (
+            {held.map((v) => (
               <PositionCard key={v.id} view={v} onOpen={() => setActive(v)} />
             ))}
           </div>
         ) : (
           <div className="space-y-2">
-            {views.map((v) => {
+            {held.map((v) => {
               const value = fromBaseUnits(v.underlyingBalance, v.decimals);
               return (
                 <button
@@ -127,7 +152,7 @@ export default function PilePage() {
                           RISK_TONE[v.riskLevel] ?? "text-white/40"
                         }`}
                       >
-                        {(v.apy * 100).toFixed(2)}% APY
+                        {(v.apy * 100).toFixed(2)}% APY · {v.assetSymbol}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
@@ -135,7 +160,7 @@ export default function PilePage() {
                         ${value.toFixed(2)}
                       </p>
                       <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
-                        {value > 0 ? "your position" : "tap to deposit"}
+                        your position
                       </p>
                     </div>
                     <ArrowUpRight
