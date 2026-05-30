@@ -69,13 +69,19 @@ export interface ApyHistoryPoint {
   apy: number;
 }
 
-/** Historical APY series for a pool (for charts), via the proxy. */
+const historyCache = new Map<string, { at: number; points: ApyHistoryPoint[] }>();
+
+/** Historical APY series for a pool (for charts), via the proxy. Cached ~5min. */
 export async function getApyHistory(poolId: string): Promise<ApyHistoryPoint[]> {
+  const cached = historyCache.get(poolId);
+  if (cached && Date.now() - cached.at < 300_000) return cached.points;
   try {
     const res = await fetch(`/api/yields?history=${encodeURIComponent(poolId)}`);
     if (!res.ok) return [];
     const { history } = (await res.json()) as { history?: ApyHistoryPoint[] };
-    return history ?? [];
+    const points = history ?? [];
+    historyCache.set(poolId, { at: Date.now(), points });
+    return points;
   } catch {
     return [];
   }

@@ -1,20 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Loader2, ArrowUpRight } from "lucide-react";
+import { Loader2, ArrowUpRight, List, LayoutGrid } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { YieldSourceSheet } from "@/components/yield-source-sheet";
+import { PositionCard } from "@/components/position-card";
 import {
   useYieldPositions,
   type ProviderView,
 } from "@/hooks/use-yield-positions";
 import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
 
+type Layout = "list" | "grid";
+
 export default function PilePage() {
   const { views, totalValue, loading, refresh } = useYieldPositions();
   const [active, setActive] = useState<ProviderView | null>(null);
+  const [layout, setLayout] = useState<Layout>("list");
+
+  // Remember the user's preferred layout across visits.
+  useEffect(() => {
+    const saved = localStorage.getItem("oxar:pile-layout");
+    if (saved === "grid" || saved === "list") setLayout(saved);
+  }, []);
+  const chooseLayout = (next: Layout) => {
+    setLayout(next);
+    localStorage.setItem("oxar:pile-layout", next);
+  };
 
   return (
     <div className="max-w-[900px] mx-auto pt-8 pb-32 px-4">
@@ -64,49 +78,77 @@ export default function PilePage() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="mt-8"
       >
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30 mb-3">
-          Sources
-        </p>
-        <div className="space-y-2">
-          {views.map((v) => {
-            const value = fromBaseUnits(v.underlyingBalance, v.decimals);
-            return (
+        <div className="flex items-center justify-between mb-3">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">
+            Sources
+          </p>
+          <div className="flex gap-1">
+            {([
+              ["list", List],
+              ["grid", LayoutGrid],
+            ] as const).map(([mode, Icon]) => (
               <button
-                key={v.id}
-                onClick={() => setActive(v)}
-                className="group w-full text-left p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition"
+                key={mode}
+                onClick={() => chooseLayout(mode)}
+                aria-label={`${mode} view`}
+                className={`p-1.5 rounded-[5px] border transition ${
+                  layout === mode
+                    ? "border-white/30 text-white"
+                    : "border-white/10 text-white/40 hover:text-white/70"
+                }`}
               >
-                <div className="flex items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-sans text-base text-white truncate">
-                      {v.name}
-                    </p>
-                    <p
-                      className={`mt-1 font-mono text-[10px] uppercase tracking-wide ${
-                        RISK_TONE[v.riskLevel] ?? "text-white/40"
-                      }`}
-                    >
-                      {(v.apy * 100).toFixed(2)}% APY
-                    </p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="font-sans text-xl text-white tabular-nums">
-                      ${value.toFixed(2)}
-                    </p>
-                    <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
-                      {value > 0 ? "your position" : "tap to deposit"}
-                    </p>
-                  </div>
-                  <ArrowUpRight
-                    size={16}
-                    strokeWidth={1.5}
-                    className="text-white/30 group-hover:text-white transition shrink-0"
-                  />
-                </div>
+                <Icon size={14} strokeWidth={1.5} />
               </button>
-            );
-          })}
+            ))}
+          </div>
         </div>
+
+        {layout === "grid" ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {views.map((v) => (
+              <PositionCard key={v.id} view={v} onOpen={() => setActive(v)} />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {views.map((v) => {
+              const value = fromBaseUnits(v.underlyingBalance, v.decimals);
+              return (
+                <button
+                  key={v.id}
+                  onClick={() => setActive(v)}
+                  className="group w-full text-left p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-sans text-base text-white truncate">{v.name}</p>
+                      <p
+                        className={`mt-1 font-mono text-[10px] uppercase tracking-wide ${
+                          RISK_TONE[v.riskLevel] ?? "text-white/40"
+                        }`}
+                      >
+                        {(v.apy * 100).toFixed(2)}% APY
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-sans text-xl text-white tabular-nums">
+                        ${value.toFixed(2)}
+                      </p>
+                      <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
+                        {value > 0 ? "your position" : "tap to deposit"}
+                      </p>
+                    </div>
+                    <ArrowUpRight
+                      size={16}
+                      strokeWidth={1.5}
+                      className="text-white/30 group-hover:text-white transition shrink-0"
+                    />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </motion.section>
 
       {active && (

@@ -69,6 +69,8 @@ export interface YieldProvider {
    * stablecoins) collapse into ONE marketplace card with an asset picker.
    */
   readonly group?: string;
+  /** DefiLlama pool id — for accurate APY + historical chart series. */
+  readonly defiLlamaPoolId?: string;
 
   // --- Instruction-based path (Jupiter Lend) ---
   /** Instructions to deposit `amount` of the underlying asset. */
