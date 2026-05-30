@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Transaction } from "@solana/web3.js";
+import { Transaction, type TransactionInstruction } from "@solana/web3.js";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { getProvider, toFriendlyError } from "@/lib/yield";
@@ -19,29 +19,35 @@ export function useYieldActions(providerId: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Assemble, sign (Privy pattern — no `.rpc()`), send, confirm.
+  const send = useCallback(
+    async (ixs: TransactionInstruction[]): Promise<string> => {
+      if (!wallet || !walletAddress) throw new Error("Wallet not connected");
+
+      const tx = new Transaction().add(...ixs);
+      const { blockhash } = await connection.getLatestBlockhash();
+      tx.recentBlockhash = blockhash;
+      tx.feePayer = walletAddress;
+
+      const signed = await wallet.signTransaction(tx);
+      const sig = await connection.sendRawTransaction(signed.serialize());
+      await connection.confirmTransaction(sig, "confirmed");
+      return sig;
+    },
+    [wallet, connection, walletAddress],
+  );
+
   const run = useCallback(
-    async (build: "deposit" | "withdraw", amount: bigint): Promise<string> => {
+    async (
+      build: (owner: NonNullable<typeof walletAddress>) => Promise<TransactionInstruction[]>,
+    ): Promise<string> => {
       if (!wallet || !walletAddress) throw new Error("Wallet not connected");
       if (!yieldProvider) throw new Error(`Unknown yield provider: ${providerId}`);
-      if (amount <= BigInt(0)) throw new Error("Amount must be greater than zero");
 
       setLoading(true);
       setError(null);
       try {
-        const ixs =
-          build === "deposit"
-            ? await yieldProvider.buildDepositIxs({ owner: walletAddress, amount, connection })
-            : await yieldProvider.buildWithdrawIxs({ owner: walletAddress, amount, connection });
-
-        const tx = new Transaction().add(...ixs);
-        const { blockhash } = await connection.getLatestBlockhash();
-        tx.recentBlockhash = blockhash;
-        tx.feePayer = walletAddress;
-
-        const signed = await wallet.signTransaction(tx);
-        const sig = await connection.sendRawTransaction(signed.serialize());
-        await connection.confirmTransaction(sig, "confirmed");
-        return sig;
+        return await send(await build(walletAddress));
       } catch (e) {
         // Keep the raw error in the console for debugging; show the user a friendly one.
         console.error("Yield action failed:", e);
@@ -51,11 +57,33 @@ export function useYieldActions(providerId: string) {
         setLoading(false);
       }
     },
-    [wallet, connection, walletAddress, yieldProvider, providerId],
+    [wallet, walletAddress, yieldProvider, providerId, send],
   );
 
-  const deposit = useCallback((amount: bigint) => run("deposit", amount), [run]);
-  const withdraw = useCallback((amount: bigint) => run("withdraw", amount), [run]);
+  const deposit = useCallback(
+    (amount: bigint) => {
+      if (amount <= BigInt(0)) throw new Error("Amount must be greater than zero");
+      return run((owner) => yieldProvider!.buildDepositIxs({ owner, amount, connection }));
+    },
+    [run, yieldProvider, connection],
+  );
 
-  return { deposit, withdraw, loading, error };
+  const withdraw = useCallback(
+    (amount: bigint) => {
+      if (amount <= BigInt(0)) throw new Error("Amount must be greater than zero");
+      return run((owner) => yieldProvider!.buildWithdrawIxs({ owner, amount, connection }));
+    },
+    [run, yieldProvider, connection],
+  );
+
+  // Full exit: redeem the entire share balance so no rounding dust is stranded.
+  const redeemAll = useCallback(
+    (shares: bigint) => {
+      if (shares <= BigInt(0)) throw new Error("Nothing to withdraw");
+      return run((owner) => yieldProvider!.buildRedeemIxs({ owner, shares, connection }));
+    },
+    [run, yieldProvider, connection],
+  );
+
+  return { deposit, withdraw, redeemAll, loading, error };
 }

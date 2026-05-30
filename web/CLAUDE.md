@@ -171,12 +171,24 @@ Server-side only. Validate all input. Currently:
 # Development (from web/)
 yarn dev          # localhost:3000
 
-# Production build
+# Production build (verify locally before merging)
 yarn build
-
-# Deploy
-vercel --prod --yes
 ```
+
+## Deploy — DO NOT IMPROVISE
+
+Deploy is **git-based auto-deploy**. One correct path, no exceptions:
+1. PR into `main` → Vercel builds a **preview** automatically.
+2. Merge to `main` → auto-deploys to production (oxar.app / app.oxar.app).
+
+- **Canonical Vercel project = `oxar-web`** (owns the live domains + all env vars).
+  A second project named **`web`** is a DECOY (no live domains, ~no env) — never deploy there.
+- Do **NOT** run `vercel --prod`, `vercel build`, `--prebuilt`, or invent install-command
+  workarounds. If a manual deploy is ever truly required, first confirm
+  `web/.vercel/project.json` → `"projectName":"oxar-web"`.
+- Settings (already configured): Production branch `main`, Root Directory `web`,
+  Build Command `yarn build` (runs `prebuild` to copy `sdk-local`).
+- Env vars live in the `oxar-web` Vercel project dashboard, not in code.
 
 ### After SDK changes
 ```bash
