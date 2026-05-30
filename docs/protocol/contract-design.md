@@ -1,3 +1,8 @@
+> ⚠️ **SUPERSEDED** — describes the pre-pivot RWA / own-contract design. v1 ships as a
+> non-custodial UI over third-party protocol SDKs (Jupiter Lend) with no own contract.
+> Kept for historical reference. Current direction:
+> `docs/plans/2026-05-29-web-sdk-migration-design.md` and the root `CLAUDE.md`.
+
 # OXAR Smart Contract — Final Design
 
 Last updated: April 2026

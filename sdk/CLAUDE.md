@@ -4,9 +4,16 @@ Read the root `/OXAR/CLAUDE.md` first for project-wide context.
 
 ## Purpose
 
-`@oxar/sdk` is the shared TypeScript package that provides types, constants, and PDA derivation used by both the web app and future consumers (mobile, CLI, bots). It is the single source of truth for everything TypeScript needs to interact with the OXAR contract.
+`@oxar/sdk` is the shared TypeScript package that provides types, constants, and PDA derivation.
 
-Transaction building is **not** in scope — consumers (currently `web/`) build transactions inline via `program.methods.*` from `@coral-xyz/anchor` because the Privy embedded-wallet flow needs custom sign+send handling.
+> **v1 usage:** the live `web/` app consumes only the **yield-source catalog**
+> (`YIELD_SOURCES`, `APY_BUCKETS`). The contract bindings here — `PROGRAM_ID`, `idl.json`,
+> the `derive*Pda` functions — are **not used by v1** (kept for the future contract path /
+> other consumers like mobile, CLI, bots).
+
+Transaction building is **not** in scope — consumers build and sign transactions
+themselves (v1 `web/` builds instructions via protocol SDKs like Jupiter Lend, then
+manual sign+send through the Privy embedded wallet).
 
 ## Stack
 
@@ -20,7 +27,7 @@ Transaction building is **not** in scope — consumers (currently `web/`) build 
 ```
 src/
   index.ts          Re-exports everything. This is the public API.
-  constants.ts      PROGRAM_ID, RPC_URL, math constants, YIELD_SOURCES, RISK_TEMPLATES
+  constants.ts      PROGRAM_ID, RPC_URL, math constants, YIELD_SOURCES, APY_BUCKETS
   types.ts          IDL TypeScript type export (OxarProtocol) — regenerated from anchor build
   idl.json          Anchor-generated IDL (copied from contracts build)
   pda.ts            PDA derivation functions
@@ -53,7 +60,7 @@ Current PDA functions:
 `constants.ts` has values that mirror `contracts/.../constants.rs`:
 - `PROGRAM_ID` must match `declare_id!()` in `lib.rs`
 - `INITIAL_NAV`, `NAV_PRECISION`, `USDC_DECIMALS` mirror the contract
-- `YIELD_SOURCES` and `RISK_TEMPLATES` are SDK-only (UI catalog)
+- `YIELD_SOURCES` and `APY_BUCKETS` are SDK-only (UI catalog — the part v1 actually uses)
 
 ### TypeScript Strict Mode
 `tsconfig.json` uses strict mode. Respect it:

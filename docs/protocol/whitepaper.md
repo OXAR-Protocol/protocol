@@ -1,3 +1,8 @@
+> ⚠️ **SUPERSEDED (v0.1, pre-pivot)** — describes the RWA / own-contract protocol. v1
+> ships as a non-custodial UI over third-party protocol SDKs (Jupiter Lend) with no own
+> contract. Kept for historical reference. Current direction:
+> `docs/plans/2026-05-29-web-sdk-migration-design.md`.
+
 # OXAR Protocol — Whitepaper v0.1
 
 **Emerging market yields, onchain.**

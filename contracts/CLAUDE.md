@@ -2,6 +2,11 @@
 
 Read the root `/OXAR/CLAUDE.md` first for project-wide context.
 
+> **Status: NOT used by v1.** The live product (`web/`) runs as a non-custodial UI over
+> third-party protocol SDKs (Jupiter Lend) and calls no own program. This Anchor program
+> is kept for future phases; the build/test/deploy steps below are for that future path,
+> not the shipping product.
+
 ## Stack
 
 - **Anchor** 0.31.1
