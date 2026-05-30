@@ -43,7 +43,8 @@ jobs:
             action is posting review comments.
 
             Review this pull request's diff against the base branch (use
-            `git diff origin/main...HEAD`). Focus on:
+            `git diff origin/main...HEAD`). Review ONLY the diff and the files it
+            changes — do not explore the whole repository. Focus on:
             - correctness bugs and logic errors
             - security issues (input validation, auth, secret handling)
             - violations of the repo's CLAUDE.md conventions: small files
@@ -53,4 +54,4 @@ jobs:
             For each concrete issue, post an inline comment. End with a brief
             summary verdict (this becomes the sticky comment). Skip style
             nitpicks; if nothing is wrong, say so briefly.
-          claude_args: "--model sonnet --max-turns 15"
+          claude_args: "--model sonnet --max-turns 30"
