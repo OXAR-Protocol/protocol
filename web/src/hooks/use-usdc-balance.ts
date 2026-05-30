@@ -1,41 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { PublicKey } from "@solana/web3.js";
-import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
+import { USDC_MINT, USDC_DECIMALS } from "@/lib/constants";
+import { useTokenBalance } from "./use-token-balance";
 
-import { USDC_MINT } from "@/lib/constants";
-import { useSolanaContext } from "@/providers/solana-provider";
-
+/** Wallet USDC balance — thin wrapper over the generic token-balance hook. */
 export function useUsdcBalance() {
-  const { connection, walletAddress } = useSolanaContext();
-  const [balance, setBalance] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
-
-  const fetchBalance = useCallback(async () => {
-    if (!walletAddress) {
-      setBalance(0);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const usdcMint = new PublicKey(USDC_MINT);
-      const ata = await getAssociatedTokenAddress(usdcMint, walletAddress);
-      const account = await getAccount(connection, ata);
-      // USDC has 6 decimals
-      setBalance(Number(account.amount) / 1_000_000);
-    } catch (_err) {
-      // Account doesn't exist → balance is 0
-      setBalance(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [connection, walletAddress]);
-
-  useEffect(() => {
-    fetchBalance();
-  }, [fetchBalance]);
-
-  return { balance, loading, refetch: fetchBalance };
+  return useTokenBalance(USDC_MINT, USDC_DECIMALS);
 }

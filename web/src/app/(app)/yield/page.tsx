@@ -9,7 +9,9 @@ import { CustomSelect } from "@/components/custom-select";
 import { YIELD_SOURCES, APY_BUCKETS, type ApyBucket } from "@oxar/sdk";
 import { YieldSourceRow } from "@/components/yield-source-row";
 import { YieldProviderRow } from "@/components/yield-provider-row";
+import { YieldGroupRow } from "@/components/yield-group-row";
 import { YieldSourceSheet } from "@/components/yield-source-sheet";
+import { groupProviderViews } from "@/lib/yield";
 import {
   useYieldPositions,
   type ProviderView,
@@ -26,9 +28,10 @@ function matchesApyBucket(bucket: ApyBucket | null, apyPercent: number): boolean
 export default function YieldPage() {
   const [apyBucket, setApyBucket] = useState<ApyBucket | null>(null);
   const [chain, setChain] = useState<ChainFilter>("all");
-  const [active, setActive] = useState<ProviderView | null>(null);
+  // The sheet operates on a group (1 provider, or Jupiter's stablecoin set).
+  const [active, setActive] = useState<ProviderView[] | null>(null);
 
-  // Live, openable sources backed by real protocol SDKs (v1: Jupiter Lend).
+  // Live, openable sources backed by real protocol SDKs (v1: Jupiter Lend, Kamino).
   const { views, refresh } = useYieldPositions();
 
   const liveSources = useMemo(() => {
@@ -37,6 +40,9 @@ export default function YieldPage() {
       return matchesApyBucket(apyBucket, v.apy * 100);
     });
   }, [views, apyBucket, chain]);
+
+  // Collapse same-protocol stablecoins (Jupiter) into one card; others stay standalone.
+  const liveGroups = useMemo(() => groupProviderViews(liveSources), [liveSources]);
 
   // Roadmap catalog — sources not yet integrated as live providers.
   const roadmap = useMemo(() => {
@@ -130,13 +136,17 @@ export default function YieldPage() {
             Live now
           </p>
           <div className="space-y-2">
-            {liveSources.map((view) => (
-              <YieldProviderRow
-                key={view.id}
-                view={view}
-                onOpen={() => setActive(view)}
-              />
-            ))}
+            {liveGroups.map((g) =>
+              g.views.length > 1 ? (
+                <YieldGroupRow key={g.key} group={g} onOpen={() => setActive(g.views)} />
+              ) : (
+                <YieldProviderRow
+                  key={g.key}
+                  view={g.views[0]}
+                  onOpen={() => setActive(g.views)}
+                />
+              ),
+            )}
           </div>
         </motion.section>
       )}
@@ -199,7 +209,7 @@ export default function YieldPage() {
 
       {active && (
         <YieldSourceSheet
-          view={active}
+          views={active}
           onClose={() => setActive(null)}
           onDone={refresh}
         />
