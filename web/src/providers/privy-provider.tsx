@@ -37,10 +37,14 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
     <PrivyProviderBase
       appId={PRIVY_APP_ID}
       config={{
+        // Standard: log in with email only. The account = the embedded Solana
+        // wallet. External wallets are linked later as funding rails (linkWallet),
+        // never a login. See docs/plans/2026-06-01-wallet-account-standard.md.
+        loginMethods: ["email"],
         appearance: {
           theme: "#000000",
           accentColor: "#FFFFFF",
-          // Solana + EVM: pay-with-any-crypto routes EVM holdings through Delora.
+          // EVM + Solana wallets can still be LINKED (for paying) — not for login.
           walletChainType: "ethereum-and-solana",
           logo: "https://oxar.app/images/white.svg",
           landingHeader: "Welcome to OXAR",
@@ -52,10 +56,8 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
         supportedChains: [mainnet, base, arbitrum, optimism, polygon],
         embeddedWallets: {
           solana: {
-            // Only mint a built-in wallet for users who DON'T bring their own
-            // (e.g. email sign-in). Phantom users get no shadow wallet — one
-            // wallet, no confusion, nowhere for cross-chain funds to go astray.
-            createOnLogin: "users-without-wallets",
+            // The account IS the embedded Solana wallet — every user gets one.
+            createOnLogin: "all-users",
           },
           // EVM funds come from the user's external wallet (MetaMask/Rainbow);
           // don't litter every account with an empty embedded EVM wallet.
