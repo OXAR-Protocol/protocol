@@ -66,6 +66,7 @@ const asset = (over: Partial<WalletAsset> & { mint: string; amount: bigint }): W
   decimals: 9,
   uiAmount: 1,
   usdValue: 1,
+  chain: "solana",
   ...over,
 });
 
