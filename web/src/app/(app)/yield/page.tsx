@@ -12,6 +12,7 @@ import { YieldProviderRow } from "@/components/yield-provider-row";
 import { YieldGroupRow } from "@/components/yield-group-row";
 import { SourceCard } from "@/components/source-card";
 import { YieldSourceSheet } from "@/components/yield-source-sheet";
+import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
 import { groupProviderViews } from "@/lib/yield";
 
 type Layout = "list" | "grid";
@@ -86,6 +87,8 @@ export default function YieldPage() {
           into the protocol — you hold your own position.
         </p>
       </motion.div>
+
+      <PendingBridgeBanner />
 
       {/* Filters */}
       <motion.section

@@ -1,9 +1,9 @@
 import { toBaseUnits } from "@/lib/yield";
 import type { WalletAsset } from "./assets";
 
-/** Address we use to represent a native EVM coin (ETH/MATIC/…) — Delora/most
- * aggregators accept this sentinel for "the native asset". */
-export const EVM_NATIVE_SENTINEL = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+/** Address representing a native EVM coin (ETH/POL/…). The zero address is the
+ * canonical native representation Delora expects as `originCurrency`. */
+export const EVM_NATIVE_SENTINEL = "0x0000000000000000000000000000000000000000";
 
 const DUST_USD = 0.01;
 
