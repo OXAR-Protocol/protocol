@@ -8,6 +8,7 @@ import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
 import { useDeposit } from "@/hooks/use-deposit";
 import { useNetPreview } from "@/hooks/use-net-preview";
+import { useSolanaContext } from "@/providers/solana-provider";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 
 interface Props {
@@ -23,6 +24,7 @@ export function DepositPanel({ view, onDeposited }: Props) {
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
   const { assets: evmAssets, evmAddress, loading: evmLoading } = useEvmAssets();
   const { depositWith, busy, label, error } = useDeposit(view.id);
+  const { walletAddress } = useSolanaContext();
 
   const [usdAmount, setUsdAmount] = useState(50);
   const [selectedMint, setSelectedMint] = useState<string | null>(null);
@@ -118,6 +120,14 @@ export function DepositPanel({ view, onDeposited }: Props) {
                     ? ` · fee ~$${(preview.feeUsd ?? 0).toFixed(2)}${preview.etaSec ? ` · ~${preview.etaSec}s` : ""}`
                     : " (after swap)")
                 : "couldn't quote — try a different amount"}
+        </p>
+      )}
+
+      {/* Cross-chain: show exactly where USDC lands, so it never surprises. */}
+      {payAsset?.chain === "ethereum" && walletAddress && (
+        <p className="mt-1 font-mono text-[10px] text-white/30">
+          → arrives on Solana at {walletAddress.toBase58().slice(0, 4)}…{walletAddress.toBase58().slice(-4)}
+          {" "}(switch wallet in the menu to change)
         </p>
       )}
 
