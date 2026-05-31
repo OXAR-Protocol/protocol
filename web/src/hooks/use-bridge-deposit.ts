@@ -5,7 +5,7 @@ import { useWallets } from "@privy-io/react-auth";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
-import { getProvider, toBaseUnits, toFriendlyError } from "@/lib/yield";
+import { getProvider, toBaseUnits, toFriendlyError, UserFacingError } from "@/lib/yield";
 import { USDC_MINT } from "@/lib/constants";
 import { spendableBase, type WalletAsset } from "@/lib/portfolio/assets";
 import {
@@ -64,15 +64,14 @@ export function useBridgeDeposit(providerId: string) {
       if (usdAmount <= 0) return BigInt(0);
 
       const originChainId = payAsset.network ? networkToChainId(payAsset.network) : null;
-      if (!originChainId) throw new Error("This chain isn't supported yet");
+      if (!originChainId) throw new UserFacingError("This chain isn't supported yet");
 
       const evmWallet = (wallets as unknown as EvmWallet[]).find(
         (w) => w.walletClientType && w.walletClientType !== "privy",
       ) ?? (wallets as unknown as EvmWallet[])[0];
-      if (!evmWallet) throw new Error("Connect an EVM wallet (MetaMask) to pay from another chain");
+      if (!evmWallet) throw new UserFacingError("Connect an EVM wallet (MetaMask) to pay from another chain");
 
       setError(null);
-      let specificError = false;
       try {
         // USD → pay-asset base units (cap by balance; reserve handled by spendableBase).
         const price = payAsset.usdValue / payAsset.uiAmount;
@@ -80,7 +79,7 @@ export function useBridgeDeposit(providerId: string) {
         let payBase = toBaseUnits(payUi.toFixed(payAsset.decimals), payAsset.decimals);
         const max = spendableBase(payAsset);
         if (payBase > max) payBase = max;
-        if (payBase <= BigInt(0)) throw new Error(`Not enough ${payAsset.symbol}`);
+        if (payBase <= BigInt(0)) throw new UserFacingError(`Not enough ${payAsset.symbol}`);
 
         setStatus("quoting");
         const req = buildQuoteRequest({
@@ -93,7 +92,10 @@ export function useBridgeDeposit(providerId: string) {
         });
         const quote = await fetchQuote(req);
         if (bridgeFeeTooHigh(quote, usdAmount)) {
-          throw new Error("Bridge fees are too high for this amount — try more");
+          throw new UserFacingError(
+            `Fees are too high for $${usdAmount.toFixed(2)} on this network. ` +
+              "Try a larger amount, or a cheaper chain like Base or Arbitrum.",
+          );
         }
 
         const provider1193 = await evmWallet.getEthereumProvider();
@@ -145,7 +147,7 @@ export function useBridgeDeposit(providerId: string) {
         const arrived = await pollUsdcArrival({ connection, owner: walletAddress, mint: USDC_MINT, baseline, expected });
         if (!arrived) {
           // Pending record is kept → recovery (use-pending-bridge) finishes the deposit later.
-          throw new Error("Funds are taking longer than usual to arrive — they'll auto-deposit once they land.");
+          throw new UserFacingError("Funds are taking longer than usual to arrive — they'll auto-deposit once they land.");
         }
 
         // Claim the deposit by clearing pending BEFORE depositing, so a concurrent
@@ -157,17 +159,15 @@ export function useBridgeDeposit(providerId: string) {
           await deposit(expected);
         } catch (depositErr) {
           console.error("Deposit after bridge failed:", depositErr);
-          setError(
+          throw new UserFacingError(
             "Funds arrived on Solana but the deposit failed — your USDC is in your wallet. " +
               "You can deposit it directly (select USDC).",
           );
-          specificError = true;
-          throw depositErr;
         }
         return expected;
       } catch (e) {
         console.error("Bridge deposit failed:", e);
-        if (!specificError) setError(toFriendlyError(e));
+        setError(toFriendlyError(e));
         throw e;
       } finally {
         setStatus("idle");

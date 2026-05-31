@@ -5,7 +5,7 @@ import { VersionedTransaction } from "@solana/web3.js";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
-import { getProvider, toBaseUnits, toFriendlyError } from "@/lib/yield";
+import { getProvider, toBaseUnits, toFriendlyError, UserFacingError } from "@/lib/yield";
 import { chooseDepositPath } from "@/lib/yield/deposit-path";
 import { getSwapQuote, buildSwapTx, priceImpactTooHigh } from "@/lib/swap/jupiter-swap";
 import { spendableBase, type WalletAsset } from "@/lib/portfolio/assets";
@@ -34,7 +34,6 @@ export function useUniversalDeposit(providerId: string) {
       const path = chooseDepositPath({ payMint: payAsset.mint, payChain: payAsset.chain, productMint });
 
       setError(null);
-      let specificError = false;
       try {
         if (path === "direct") {
           setStatus("depositing");
@@ -49,8 +48,8 @@ export function useUniversalDeposit(providerId: string) {
           const payUi = usdAmount / price;
           const payBase = toBaseUnits(payUi.toFixed(payAsset.decimals), payAsset.decimals);
           const maxSpend = spendableBase(payAsset);
-          if (maxSpend <= BigInt(0)) throw new Error(`Not enough ${payAsset.symbol} after network fees`);
-          if (payBase > maxSpend) throw new Error(`Not enough ${payAsset.symbol}`);
+          if (maxSpend <= BigInt(0)) throw new UserFacingError(`Not enough ${payAsset.symbol} after network fees`);
+          if (payBase > maxSpend) throw new UserFacingError(`Not enough ${payAsset.symbol}`);
 
           setStatus("swapping");
           const quote = await getSwapQuote({
@@ -59,7 +58,7 @@ export function useUniversalDeposit(providerId: string) {
             amount: payBase,
           });
           if (priceImpactTooHigh(quote)) {
-            throw new Error("Price impact too high — try a smaller amount");
+            throw new UserFacingError("Price impact too high — try a smaller amount");
           }
 
           const b64 = await buildSwapTx(quote, walletAddress.toBase58());
@@ -77,21 +76,19 @@ export function useUniversalDeposit(providerId: string) {
             await deposit(depositAmount);
           } catch (depositErr) {
             console.error("Deposit failed after swap:", depositErr);
-            setError(
+            throw new UserFacingError(
               "Swap succeeded but the deposit failed — your USDC is in your wallet. " +
                 "You can deposit it directly (select USDC).",
             );
-            specificError = true;
-            throw depositErr;
           }
           return depositAmount;
         }
 
-        // path === "bridge" — cross-chain (Story 4) not wired yet.
-        throw new Error("Cross-chain deposits are coming soon");
+        // path === "bridge" — handled by useBridgeDeposit, not here.
+        throw new UserFacingError("Cross-chain deposits are coming soon");
       } catch (e) {
         console.error("Universal deposit failed:", e);
-        if (!specificError) setError(toFriendlyError(e));
+        setError(toFriendlyError(e));
         throw e;
       } finally {
         setStatus("idle");
