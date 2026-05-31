@@ -8,13 +8,11 @@ import { Copy, Check, LogOut, ArrowUpRight, LineChart, Sun, Moon } from "lucide-
 
 import { SectionLabel } from "@/components/section-label";
 import { useSolanaContext } from "@/providers/solana-provider";
-import { useEvmAddress } from "@/hooks/use-evm-address";
 import { useTheme } from "@/context/theme-context";
 
 export default function YouPage() {
   const { user, logout, ready, authenticated } = usePrivy();
   const { walletAddress } = useSolanaContext();
-  const evmAddress = useEvmAddress();
   const { theme, toggleTheme } = useTheme();
   const [copiedAddr, setCopiedAddr] = useState<string | null>(null);
 
@@ -64,16 +62,6 @@ export default function YouPage() {
               address={solana}
               copied={copiedAddr === solana}
               onCopy={() => handleCopy(solana)}
-            />
-          )}
-          {evmAddress && (
-            <WalletCard
-              label="Connected wallet (EVM)"
-              hint="For paying from & withdrawing to other chains"
-              address={evmAddress}
-              copied={copiedAddr === evmAddress}
-              onCopy={() => handleCopy(evmAddress)}
-              dim
             />
           )}
           {!authenticated && (

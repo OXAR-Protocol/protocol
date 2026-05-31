@@ -7,7 +7,6 @@ import { AnimatePresence } from "framer-motion";
 import { Copy, Check, LogOut, ChevronDown, ArrowUpRight, KeyRound } from "lucide-react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
-import { useEvmAddress } from "@/hooks/use-evm-address";
 import { SendSheet } from "@/components/send-sheet";
 
 /**
@@ -19,7 +18,6 @@ export function WalletMenu() {
   const { user, logout } = usePrivy();
   const { walletAddress } = useSolanaContext();
   const { exportWallet } = useExportWallet();
-  const evmAddress = useEvmAddress();
   const [open, setOpen] = useState(false);
   const [showSend, setShowSend] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -64,8 +62,7 @@ export function WalletMenu() {
 
       {open && (
         <div className="absolute right-0 mt-2 w-64 rounded-[6px] border border-white/15 bg-black shadow-lg overflow-hidden z-50">
-          <AddressRow label="Solana" address={solana} />
-          {evmAddress && <AddressRow label="EVM" address={evmAddress} />}
+          <AddressRow label="Your wallet" address={solana} />
 
           <button
             onClick={() => { setOpen(false); setShowSend(true); }}
