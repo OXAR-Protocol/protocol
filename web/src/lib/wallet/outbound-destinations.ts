@@ -3,7 +3,6 @@ import { SOL_MINT } from "@/lib/portfolio/assets";
 
 const EVM_NATIVE = "0x0000000000000000000000000000000000000000";
 
-/** How a destination asset is reached from the user's USDC. */
 export type OutboundKind = "transfer" | "swap" | "bridge";
 
 export interface DestAsset {
@@ -11,7 +10,6 @@ export interface DestAsset {
   /** Solana mint, or EVM token contract (zero address = native coin). */
   mint: string;
   decimals: number;
-  kind: OutboundKind;
 }
 
 export interface DestChain {
@@ -29,20 +27,20 @@ const evm = (label: string, key: string, chainId: number, usdc: string, nativeSy
   chain: "ethereum",
   chainId,
   assets: [
-    { symbol: "USDC", mint: usdc, decimals: 6, kind: "bridge" },
-    { symbol: nativeSym, mint: EVM_NATIVE, decimals: 18, kind: "bridge" },
+    { symbol: "USDC", mint: usdc, decimals: 6 },
+    { symbol: nativeSym, mint: EVM_NATIVE, decimals: 18 },
   ],
 });
 
-/** Withdraw your USDC into any of these. Source is always USDC (the yield asset). */
+/** Send any held Solana asset into any of these. */
 export const DEST_CHAINS: DestChain[] = [
   {
     key: "solana",
     label: "Solana",
     chain: "solana",
     assets: [
-      { symbol: "USDC", mint: USDC_MINT, decimals: 6, kind: "transfer" },
-      { symbol: "SOL", mint: SOL_MINT, decimals: 9, kind: "swap" },
+      { symbol: "USDC", mint: USDC_MINT, decimals: 6 },
+      { symbol: "SOL", mint: SOL_MINT, decimals: 9 },
     ],
   },
   evm("Base", "base", 8453, "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", "ETH"),
@@ -54,3 +52,12 @@ export const DEST_CHAINS: DestChain[] = [
 
 export const getDestChain = (key: string): DestChain =>
   DEST_CHAINS.find((d) => d.key === key) ?? DEST_CHAINS[0];
+
+/**
+ * How to reach the destination from the source: cross-chain → bridge; same Solana
+ * asset → plain transfer; different Solana asset → swap.
+ */
+export function outboundKind(sourceMint: string, destChain: DestChain, destMint: string): OutboundKind {
+  if (destChain.chain === "ethereum") return "bridge";
+  return destMint === sourceMint ? "transfer" : "swap";
+}

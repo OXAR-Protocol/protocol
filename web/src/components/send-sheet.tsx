@@ -11,33 +11,40 @@ import { useSend } from "@/hooks/use-send";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { toBaseUnits } from "@/lib/yield";
 import { USDC_MINT } from "@/lib/constants";
-import { isValidAddressForChain } from "@/lib/wallet/transfer";
-import { DEST_CHAINS, getDestChain } from "@/lib/wallet/outbound-destinations";
+import { isValidAddressForChain, maxSendable } from "@/lib/wallet/transfer";
+import { DEST_CHAINS, getDestChain, outboundKind } from "@/lib/wallet/outbound-destinations";
 
-/** Withdraw your USDC into any asset, anywhere: Solana (USDC/SOL) or an EVM chain (USDC/native). */
+/** Send any held Solana asset into any asset, anywhere (transfer / swap / bridge). */
 export function SendSheet({ onClose }: { onClose: () => void }) {
   const { assets, loading } = useWalletAssets();
   const { walletAddress } = useSolanaContext();
   const { send, status, error: sendError } = useSend();
 
-  const [destKey, setDestKey] = useState("solana");
+  const [sourceMint, setSourceMint] = useState<string | null>(null);
+  const [destKey, setDestKey] = useState("base");
   const [assetSym, setAssetSym] = useState("USDC");
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [result, setResult] = useState<{ sig: string; crossChain: boolean } | null>(null);
 
-  const source = useMemo(() => assets.find((a) => a.mint === USDC_MINT) ?? null, [assets]);
+  // Default source: USDC if held, else the largest holding.
+  const source = useMemo(() => {
+    const pick = sourceMint ?? assets.find((a) => a.mint === USDC_MINT)?.mint ?? assets[0]?.mint;
+    return assets.find((a) => a.mint === pick) ?? null;
+  }, [assets, sourceMint]);
+
   const destChain = getDestChain(destKey);
   const destAsset = destChain.assets.find((a) => a.symbol === assetSym) ?? destChain.assets[0];
-  const needsAddress = destAsset.kind !== "swap"; // swap (→SOL) lands in your own wallet
+  const kind = source ? outboundKind(source.mint, destChain, destAsset.mint) : "transfer";
+  const needsAddress = kind !== "swap"; // swap lands in your own wallet
 
   const amountBase = source ? toBaseUnits(amount || "0", source.decimals) : BigInt(0);
   const validation = !source
-    ? "You need USDC to withdraw"
+    ? "No assets to send"
     : amountBase <= BigInt(0)
       ? "Enter an amount"
-      : amountBase > source.amount
-        ? "Not enough USDC"
+      : amountBase > maxSendable(source)
+        ? `Not enough ${source.symbol}`
         : needsAddress && !isValidAddressForChain(to, destChain.chain)
           ? `Enter a valid ${destChain.chain === "ethereum" ? "EVM" : "Solana"} address`
           : null;
@@ -71,8 +78,8 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-start justify-between mb-5">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">Withdraw</p>
-            <h2 className="mt-1 font-sans text-xl text-white">Take your USDC anywhere</h2>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">Send / Withdraw</p>
+            <h2 className="mt-1 font-sans text-xl text-white">Take it anywhere</h2>
           </div>
           <button onClick={onClose} className="text-white/40 hover:text-white transition">
             <X size={18} strokeWidth={1.5} />
@@ -96,12 +103,20 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
           </div>
         ) : (
           <>
-            <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-1.5">From</p>
-            <p className="font-mono text-xs text-white/60 mb-4">
-              {loading ? "Loading…" : source ? `USDC · ${source.uiAmount}` : "No USDC in your wallet"}
-            </p>
+            <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-1.5">You send</p>
+            {loading ? (
+              <p className="font-mono text-xs text-white/30">Loading…</p>
+            ) : assets.length === 0 ? (
+              <p className="font-mono text-xs text-white/30">No assets to send.</p>
+            ) : (
+              <CustomSelect
+                value={source?.mint ?? ""}
+                onChange={setSourceMint}
+                options={assets.map((a) => ({ value: a.mint, label: `${a.symbol} · ${a.uiAmount}` }))}
+              />
+            )}
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 mt-4">
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-1.5">To chain</p>
                 <CustomSelect
@@ -133,14 +148,16 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
                 />
               </>
             ) : (
-              <p className="mt-4 font-mono text-[11px] text-white/40">→ swapped into SOL in your wallet</p>
+              <p className="mt-4 font-mono text-[11px] text-white/40">→ {destAsset.symbol} into your wallet</p>
             )}
 
             <div className="flex items-center justify-between mt-4 mb-1.5">
-              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">Amount (USDC)</p>
+              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
+                Amount{source ? ` (${source.symbol})` : ""}
+              </p>
               {source && (
                 <button
-                  onClick={() => setAmount(source.uiAmount.toString())}
+                  onClick={() => setAmount((Number(maxSendable(source)) / 10 ** source.decimals).toString())}
                   className="font-mono text-[10px] uppercase tracking-wide text-accent/80 hover:text-accent"
                 >
                   max
@@ -162,7 +179,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
               disabled={busy || !!validation}
               className="mt-5 w-full px-4 py-2.5 rounded-[5px] bg-white text-black font-mono text-xs uppercase tracking-wide hover:bg-white/90 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
             >
-              {busy ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : validation ?? `Withdraw ${destAsset.symbol} to ${destChain.label}`}
+              {busy ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : validation ?? `Send ${destAsset.symbol} → ${destChain.label}`}
             </button>
 
             {sendError && <p className="mt-3 font-mono text-xs text-red-400 text-center">{sendError}</p>}
