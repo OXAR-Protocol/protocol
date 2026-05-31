@@ -8,25 +8,29 @@ import { Copy, Check, LogOut, ArrowUpRight, LineChart, Sun, Moon } from "lucide-
 
 import { SectionLabel } from "@/components/section-label";
 import { useSolanaContext } from "@/providers/solana-provider";
+import { useEvmAddress } from "@/hooks/use-evm-address";
 import { useTheme } from "@/context/theme-context";
 
 export default function YouPage() {
   const { user, logout, ready, authenticated } = usePrivy();
   const { walletAddress } = useSolanaContext();
+  const evmAddress = useEvmAddress();
   const { theme, toggleTheme } = useTheme();
-  const [copied, setCopied] = useState(false);
+  const [copiedAddr, setCopiedAddr] = useState<string | null>(null);
 
   const email = user?.email?.address;
-  // The address OXAR actually uses for balances/deposits (prefers the connected
-  // external wallet), not necessarily Privy's primary wallet.
-  const wallet = walletAddress?.toBase58() ?? user?.wallet?.address;
-  const shortWallet = wallet ? `${wallet.slice(0, 6)}…${wallet.slice(-6)}` : "";
+  // The Solana address OXAR uses for balances/deposits + cross-chain receiving.
+  const solana = walletAddress?.toBase58() ?? user?.wallet?.address ?? null;
+  // EVM address (origin for cross-chain deposits), shown when an EVM wallet is linked.
+  const accounts = [
+    { label: "Solana wallet", address: solana },
+    { label: "EVM wallet", address: evmAddress },
+  ].filter((a): a is { label: string; address: string } => Boolean(a.address));
 
-  const handleCopy = () => {
-    if (!wallet) return;
-    navigator.clipboard.writeText(wallet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+  const handleCopy = (address: string) => {
+    navigator.clipboard.writeText(address);
+    setCopiedAddr(address);
+    setTimeout(() => setCopiedAddr(null), 1500);
   };
 
   if (!ready) return null;
@@ -58,21 +62,24 @@ export default function YouPage() {
           {email && (
             <Row label="Email" value={email} />
           )}
-          {wallet && (
-            <div className="flex items-center justify-between p-4 rounded-[5px] border border-white/10">
+          {accounts.map(({ label, address }) => (
+            <div
+              key={label}
+              className="flex items-center justify-between p-4 rounded-[5px] border border-white/10"
+            >
               <div>
                 <p className="font-mono text-xs uppercase tracking-wide text-white/30">
-                  Wallet
+                  {label}
                 </p>
                 <p className="mt-1 font-mono text-sm text-white">
-                  {shortWallet}
+                  {`${address.slice(0, 6)}…${address.slice(-6)}`}
                 </p>
               </div>
               <button
-                onClick={handleCopy}
+                onClick={() => handleCopy(address)}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-white/15 hover:border-white/30 font-mono text-[11px] uppercase tracking-wide text-white/60 hover:text-white transition"
               >
-                {copied ? (
+                {copiedAddr === address ? (
                   <>
                     <Check size={12} strokeWidth={1.5} />
                     Copied
@@ -85,7 +92,7 @@ export default function YouPage() {
                 )}
               </button>
             </div>
-          )}
+          ))}
           {!authenticated && (
             <div className="p-4 rounded-[5px] border border-white/10 text-center font-mono text-sm text-white/40">
               You're signed out

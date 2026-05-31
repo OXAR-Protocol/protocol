@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useCallback, useEffect, useState } from "react";
 
 import { buildEvmAssets } from "@/lib/portfolio/evm-assets";
 import type { WalletAsset } from "@/lib/portfolio/assets";
+import { useEvmAddress } from "./use-evm-address";
 
 /**
  * The connected EVM wallet's holdings across our supported chains, USD-valued.
@@ -13,21 +13,9 @@ import type { WalletAsset } from "@/lib/portfolio/assets";
  * polling (web convention); `refresh()` after actions.
  */
 export function useEvmAssets() {
-  const { authenticated, user } = usePrivy();
+  const evmAddress = useEvmAddress();
   const [assets, setAssets] = useState<WalletAsset[]>([]);
   const [loading, setLoading] = useState(false);
-
-  // Prefer a connected external EVM wallet (MetaMask/Rainbow) — that's where funds
-  // are — over any embedded one. Mirrors the Solana address-selection logic.
-  const evmAddress = useMemo<string | null>(() => {
-    if (!authenticated || !user) return null;
-    // SAFETY: linkedAccounts is loosely typed by Privy; we read type/chainType/address/walletClientType.
-    const wallets = user.linkedAccounts.filter(
-      (a: any) => a.type === "wallet" && a.chainType === "ethereum",
-    ) as Array<{ address?: string; walletClientType?: string }>;
-    const external = wallets.find((w) => w.walletClientType && w.walletClientType !== "privy");
-    return (external ?? wallets[0])?.address ?? null;
-  }, [authenticated, user]);
 
   const load = useCallback(async () => {
     if (!evmAddress) {
