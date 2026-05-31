@@ -46,6 +46,9 @@ export function deriveSolanaWallets(
   const overrideValid = override && options.some((o) => o.address === override);
   if (overrideValid) return { active: override, options };
 
-  const preferred = options.find((o) => o.isExternal) ?? options[0];
+  // Standard: the account is the built-in (embedded) wallet. External wallets are
+  // funding rails, not the account — so prefer the embedded one. (see
+  // docs/plans/2026-06-01-wallet-account-standard.md)
+  const preferred = options.find((o) => !o.isExternal) ?? options[0];
   return { active: preferred.address, options };
 }

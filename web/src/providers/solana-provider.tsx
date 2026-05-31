@@ -110,10 +110,9 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   const creatingWalletRef = useRef(false);
   const lastAddressRef = useRef<string | null>(null);
 
-  // The active Solana wallet = the connected external wallet (Phantom, where the
-  // user's funds are), else the built-in one. One wallet, no choice — and it's used
-  // everywhere (balances, positions, AND the cross-chain bridge receiver) so funds
-  // always land where the app shows them.
+  // The account = the built-in (embedded) Solana wallet, always. External wallets
+  // are funding rails, not the account. One wallet shown everywhere (balances,
+  // positions, bridge receiver). See docs/plans/2026-06-01-wallet-account-standard.md.
   const solanaAddress = useMemo<string | null>(() => {
     if (!authenticated || !user) return null;
     return deriveSolanaWallets(user.linkedAccounts as any[], null).active;

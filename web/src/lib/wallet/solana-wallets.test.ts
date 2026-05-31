@@ -15,20 +15,20 @@ describe("deriveSolanaWallets", () => {
     ]);
   });
 
-  it("prefers an external wallet when no override", () => {
-    expect(deriveSolanaWallets([embedded, phantom], null).active).toBe("PHANTOM22");
+  it("prefers the built-in (embedded) wallet as the account", () => {
+    expect(deriveSolanaWallets([phantom, embedded], null).active).toBe("EMBED111");
   });
 
-  it("falls back to the only (embedded) wallet", () => {
-    expect(deriveSolanaWallets([embedded], null).active).toBe("EMBED111");
+  it("falls back to the only wallet (e.g. an external one) if no embedded", () => {
+    expect(deriveSolanaWallets([phantom], null).active).toBe("PHANTOM22");
   });
 
-  it("honors a valid override over the external preference", () => {
-    expect(deriveSolanaWallets([embedded, phantom], "EMBED111").active).toBe("EMBED111");
+  it("honors a valid override", () => {
+    expect(deriveSolanaWallets([embedded, phantom], "PHANTOM22").active).toBe("PHANTOM22");
   });
 
-  it("ignores a stale override that is no longer linked", () => {
-    expect(deriveSolanaWallets([embedded, phantom], "GONE999").active).toBe("PHANTOM22");
+  it("ignores a stale override → back to the embedded account", () => {
+    expect(deriveSolanaWallets([embedded, phantom], "GONE999").active).toBe("EMBED111");
   });
 
   it("returns null active when there are no Solana wallets", () => {
