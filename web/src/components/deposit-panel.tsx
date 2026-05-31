@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { usePrivy } from "@privy-io/react-auth";
+import { Loader2, Plus } from "lucide-react";
 
 import { CustomSelect } from "@/components/custom-select";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
@@ -20,6 +21,7 @@ const chainTag = (a: { chain: string; network?: string }) =>
 
 /** Deposit with any asset on any chain: pick a pay-asset, enter USD, see net USDC. */
 export function DepositPanel({ view, onDeposited }: Props) {
+  const { linkWallet } = usePrivy();
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
   const { assets: evmAssets, evmAddress, loading: evmLoading } = useEvmAssets();
   const { depositWith, busy, label, error } = useDeposit(view.id);
@@ -102,6 +104,17 @@ export function DepositPanel({ view, onDeposited }: Props) {
                   : ` · ${chainTag(a)}`),
             }))}
           />
+        )}
+
+        {/* Pay from another chain: link an external wallet (EVM) as a funding rail. */}
+        {!evmAddress && (
+          <button
+            onClick={() => linkWallet()}
+            className="mt-2 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-white/40 hover:text-white/70 transition"
+          >
+            <Plus size={11} strokeWidth={1.5} />
+            Connect a wallet to pay from another chain
+          </button>
         )}
       </div>
 
