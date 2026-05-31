@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
+import { PublicKey, Transaction, SystemProgram, VersionedTransaction } from "@solana/web3.js";
 import {
   getAssociatedTokenAddress,
   createTransferInstruction,
@@ -10,10 +10,10 @@ import {
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { toFriendlyError, UserFacingError } from "@/lib/yield";
-import type { WalletAsset } from "@/lib/portfolio/assets";
+import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
 import { getSwapQuote, buildSwapTx, priceImpactTooHigh } from "@/lib/swap/jupiter-swap";
 import { DELORA_SOLANA_CHAIN_ID, bridgeFeeTooHigh, type BridgeQuote } from "@/lib/bridge/delora";
-import type { DestChain, DestAsset } from "@/lib/wallet/outbound-destinations";
+import { outboundKind, type DestChain, type DestAsset } from "@/lib/wallet/outbound-destinations";
 
 export type SendStatus = "idle" | "sending";
 export interface SendResult {
@@ -56,11 +56,12 @@ export function useSend() {
       const { source, destChain, destAsset, to, amountBase } = params;
       if (!wallet || !walletAddress) throw new Error("Wallet not connected");
       const owner = walletAddress.toBase58();
+      const kind = outboundKind(source.mint, destChain, destAsset.mint);
 
       setError(null);
       setStatus("sending");
       try {
-        if (destAsset.kind === "bridge") {
+        if (kind === "bridge") {
           if (!destChain.chainId) throw new UserFacingError("Unsupported destination chain");
           const res = await fetch("/api/bridge-quote", {
             method: "POST",
@@ -84,21 +85,26 @@ export function useSend() {
           return { sig: await sendVersioned(deserialize(quote.calldata.data)), crossChain: true };
         }
 
-        if (destAsset.kind === "swap") {
+        if (kind === "swap") {
           const quote = await getSwapQuote({ inputMint: source.mint, outputMint: destAsset.mint, amount: amountBase });
           if (priceImpactTooHigh(quote)) throw new UserFacingError("Price impact too high — try a smaller amount");
           return { sig: await sendVersioned(deserialize(await buildSwapTx(quote, owner))), crossChain: false };
         }
 
-        // transfer: same-asset SPL transfer to the address.
+        // transfer: same asset to the address (native SOL or SPL).
         const toPubkey = new PublicKey(to.trim());
-        const mint = new PublicKey(source.mint);
-        const fromAta = await getAssociatedTokenAddress(mint, walletAddress);
-        const toAta = await getAssociatedTokenAddress(mint, toPubkey);
-        const tx = new Transaction().add(
-          createAssociatedTokenAccountIdempotentInstruction(walletAddress, toAta, toPubkey, mint),
-          createTransferInstruction(fromAta, toAta, walletAddress, amountBase),
-        );
+        const tx = new Transaction();
+        if (source.mint === SOL_MINT) {
+          tx.add(SystemProgram.transfer({ fromPubkey: walletAddress, toPubkey, lamports: amountBase }));
+        } else {
+          const mint = new PublicKey(source.mint);
+          const fromAta = await getAssociatedTokenAddress(mint, walletAddress);
+          const toAta = await getAssociatedTokenAddress(mint, toPubkey);
+          tx.add(
+            createAssociatedTokenAccountIdempotentInstruction(walletAddress, toAta, toPubkey, mint),
+            createTransferInstruction(fromAta, toAta, walletAddress, amountBase),
+          );
+        }
         const { blockhash } = await connection.getLatestBlockhash();
         tx.recentBlockhash = blockhash;
         tx.feePayer = walletAddress;
