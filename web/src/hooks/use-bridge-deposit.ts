@@ -15,7 +15,7 @@ import {
   networkToChainId,
   type BridgeQuote,
 } from "@/lib/bridge/delora";
-import { savePending, clearPending } from "@/lib/bridge/pending";
+import { savePending, clearPending, loadPending } from "@/lib/bridge/pending";
 import { readUsdcBase, pollUsdcArrival } from "@/lib/bridge/arrival";
 import { isNativeEvm, encodeApprove, readAllowance } from "@/lib/evm/erc20";
 import { publicClientFor } from "@/lib/evm/chains";
@@ -72,6 +72,7 @@ export function useBridgeDeposit(providerId: string) {
       if (!evmWallet) throw new Error("Connect an EVM wallet (MetaMask) to pay from another chain");
 
       setError(null);
+      let specificError = false;
       try {
         // USD → pay-asset base units (cap by balance; reserve handled by spendableBase).
         const price = payAsset.usdValue / payAsset.uiAmount;
@@ -122,9 +123,11 @@ export function useBridgeDeposit(providerId: string) {
         const expected = bridgeNetOut(quote);
 
         setStatus("bridging");
+        // EIP-1193 wants a hex value; normalize whether Delora returns hex ("0x00") or decimal.
+        const valueHex = `0x${BigInt(quote.calldata.value || "0").toString(16)}`;
         const txHash = (await provider1193.request({
           method: "eth_sendTransaction",
-          params: [{ from: evmWallet.address, to: quote.calldata.to, value: quote.calldata.value, data: quote.calldata.data }],
+          params: [{ from: evmWallet.address, to: quote.calldata.to, value: valueHex, data: quote.calldata.data }],
         })) as string;
 
         savePending({
@@ -141,16 +144,30 @@ export function useBridgeDeposit(providerId: string) {
         setStatus("arriving");
         const arrived = await pollUsdcArrival({ connection, owner: walletAddress, mint: USDC_MINT, baseline, expected });
         if (!arrived) {
+          // Pending record is kept → recovery (use-pending-bridge) finishes the deposit later.
           throw new Error("Funds are taking longer than usual to arrive — they'll auto-deposit once they land.");
         }
 
-        setStatus("depositing");
-        await deposit(expected);
+        // Claim the deposit by clearing pending BEFORE depositing, so a concurrent
+        // recovery flow (e.g. after a reload) sees null and can't double-deposit.
+        if (!loadPending()) return expected; // another flow already claimed + deposited
         clearPending();
+        setStatus("depositing");
+        try {
+          await deposit(expected);
+        } catch (depositErr) {
+          console.error("Deposit after bridge failed:", depositErr);
+          setError(
+            "Funds arrived on Solana but the deposit failed — your USDC is in your wallet. " +
+              "You can deposit it directly (select USDC).",
+          );
+          specificError = true;
+          throw depositErr;
+        }
         return expected;
       } catch (e) {
         console.error("Bridge deposit failed:", e);
-        setError(toFriendlyError(e));
+        if (!specificError) setError(toFriendlyError(e));
         throw e;
       } finally {
         setStatus("idle");

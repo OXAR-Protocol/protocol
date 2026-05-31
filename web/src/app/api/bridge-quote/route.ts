@@ -12,6 +12,7 @@ export async function POST(req: Request) {
   const key = process.env.DELORA_API_KEY;
   const base = process.env.NEXT_PUBLIC_DELORA_BASE_URL || "https://api.delora.build/v1";
   const integrator = process.env.DELORA_INTEGRATOR || "oxarforoxar";
+  // Delora `fee` is a FRACTION (0–0.1), not basis points: 0.001 = 0.1% markup.
   const fee = process.env.DELORA_FEE_BPS || "0.001";
   if (!key) return NextResponse.json({ error: "Bridge unavailable" }, { status: 503 });
 

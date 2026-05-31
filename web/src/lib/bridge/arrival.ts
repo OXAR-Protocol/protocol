@@ -41,7 +41,9 @@ export async function pollUsdcArrival(params: {
   while (Date.now() < deadline) {
     if (params.signal?.aborted) return false;
     const current = await readUsdcBase(connection, owner, mint);
-    if (current - baseline >= expected) return true;
+    // (bigint is signed in JS, so a spent-down balance just yields a negative
+    // delta — no wrap — but guard explicitly for clarity.)
+    if (current > baseline && current - baseline >= expected) return true;
     await sleep(intervalMs);
   }
   return false;
