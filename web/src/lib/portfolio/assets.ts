@@ -3,12 +3,17 @@ export const SOL_MINT = "So11111111111111111111111111111111111111112";
 
 /** A wallet holding, valued in USD. `amount` is in base units. */
 export interface WalletAsset {
+  /** Asset id: Solana mint, or EVM token contract (native sentinel for ETH/etc.). */
   mint: string;
   symbol: string;
   decimals: number;
   amount: bigint;
   uiAmount: number;
   usdValue: number;
+  /** Chain the asset lives on — drives the deposit router (direct/swap vs bridge). */
+  chain: "solana" | "ethereum";
+  /** Alchemy network id (EVM only), e.g. "base-mainnet" — needed for bridge quotes. */
+  network?: string;
   logo?: string;
 }
 
@@ -57,6 +62,7 @@ export function buildWalletAssets(das: DasResult, prices: PriceMap): WalletAsset
       amount,
       uiAmount: Number(amount) / 1e9,
       usdValue: native.total_price ?? 0,
+      chain: "solana",
     });
   }
 
@@ -75,6 +81,7 @@ export function buildWalletAssets(das: DasResult, prices: PriceMap): WalletAsset
       amount,
       uiAmount,
       usdValue: uiAmount * usdPrice,
+      chain: "solana",
       logo: item.content?.links?.image,
     });
   }

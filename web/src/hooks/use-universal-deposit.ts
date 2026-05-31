@@ -31,7 +31,7 @@ export function useUniversalDeposit(providerId: string) {
       if (usdAmount <= 0) return BigInt(0);
 
       const productMint = provider.asset.toBase58();
-      const path = chooseDepositPath({ payMint: payAsset.mint, payChain: "solana", productMint });
+      const path = chooseDepositPath({ payMint: payAsset.mint, payChain: payAsset.chain, productMint });
 
       setError(null);
       let specificError = false;

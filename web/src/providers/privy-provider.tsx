@@ -3,6 +3,7 @@
 import { PrivyProvider as PrivyProviderBase } from "@privy-io/react-auth";
 import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
+import { mainnet, base, arbitrum, optimism, polygon } from "viem/chains";
 import { ReactNode } from "react";
 import { RPC_URL } from "@/lib/constants";
 
@@ -39,15 +40,24 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
         appearance: {
           theme: "#000000",
           accentColor: "#FFFFFF",
-          walletChainType: "solana-only",
+          // Solana + EVM: pay-with-any-crypto routes EVM holdings through Delora.
+          walletChainType: "ethereum-and-solana",
           logo: "https://oxar.app/images/white.svg",
           landingHeader: "Welcome to OXAR",
           loginMessage: "Real-world yields. On-chain access.",
           showWalletLoginFirst: false,
         },
+        // EVM networks we read balances on / bridge from (Story 4 cross-chain).
+        defaultChain: mainnet,
+        supportedChains: [mainnet, base, arbitrum, optimism, polygon],
         embeddedWallets: {
           solana: {
             createOnLogin: "all-users",
+          },
+          // EVM funds come from the user's external wallet (MetaMask/Rainbow);
+          // don't litter every account with an empty embedded EVM wallet.
+          ethereum: {
+            createOnLogin: "off",
           },
         },
         externalWallets: {
