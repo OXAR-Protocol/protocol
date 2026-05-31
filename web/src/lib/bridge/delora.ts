@@ -69,14 +69,15 @@ export interface QuoteRequest {
   receiverAddress: string;
 }
 
-/** Build the (server-route) quote request for an EVM → Solana-USDC bridge. */
+/** Build the (server-route) quote request for an EVM → Solana bridge. The
+ * destination is the selected market's asset (USDC / USDG / USDT), not hardcoded. */
 export function buildQuoteRequest(params: {
   senderAddress: string;
   originChainId: number;
   amount: bigint;
   originCurrency: string;
   receiverAddress: string;
-  usdcMint: string;
+  destinationMint: string;
 }): QuoteRequest {
   return {
     senderAddress: params.senderAddress,
@@ -84,7 +85,7 @@ export function buildQuoteRequest(params: {
     destinationChainId: DELORA_SOLANA_CHAIN_ID,
     amount: params.amount.toString(),
     originCurrency: params.originCurrency,
-    destinationCurrency: params.usdcMint,
+    destinationCurrency: params.destinationMint,
     receiverAddress: params.receiverAddress,
   };
 }

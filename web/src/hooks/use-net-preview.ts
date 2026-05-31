@@ -69,7 +69,7 @@ export function useNetPreview(params: {
             amount: payBaseFor(payAsset, usdAmount),
             originCurrency: payAsset.mint,
             receiverAddress: walletAddress.toBase58(),
-            usdcMint: productMint,
+            destinationMint: productMint,
           });
           const res = await fetch("/api/bridge-quote", {
             method: "POST",
