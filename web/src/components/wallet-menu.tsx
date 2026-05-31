@@ -2,24 +2,36 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { Copy, Check, LogOut, ChevronDown } from "lucide-react";
+import { useExportWallet } from "@privy-io/react-auth/solana";
+import { AnimatePresence } from "framer-motion";
+import { Copy, Check, LogOut, ChevronDown, ArrowUpRight, KeyRound } from "lucide-react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useEvmAddress } from "@/hooks/use-evm-address";
+import { SendSheet } from "@/components/send-sheet";
 
 /**
  * Header wallet control: shows the active Solana address as a pill; the dropdown
- * lists the user's addresses (Solana + EVM) to copy, plus disconnect.
+ * lists addresses (Solana + EVM) to copy, a Send action (move funds out to any
+ * address), an Export action for the built-in wallet, and disconnect.
  */
 export function WalletMenu() {
-  const { logout } = usePrivy();
+  const { user, logout } = usePrivy();
   const { walletAddress } = useSolanaContext();
+  const { exportWallet } = useExportWallet();
   const evmAddress = useEvmAddress();
   const [open, setOpen] = useState(false);
+  const [showSend, setShowSend] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const solana = walletAddress?.toBase58() ?? null;
   const shortSolana = solana ? `${solana.slice(0, 4)}…${solana.slice(-4)}` : "";
+  // Export only applies to the built-in (embedded) wallet — externals you already control.
+  // SAFETY: linkedAccounts is loosely typed by Privy; we read type/chainType/address/walletClientType.
+  const isEmbedded = (user?.linkedAccounts ?? []).some(
+    (a: any) =>
+      a.type === "wallet" && a.chainType === "solana" && a.address === solana && a.walletClientType === "privy",
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -32,11 +44,12 @@ export function WalletMenu() {
 
   if (!solana) {
     return (
-      <span className="font-mono text-[11px] tracking-[0.15em] uppercase text-white/30">
-        Connecting…
-      </span>
+      <span className="font-mono text-[11px] tracking-[0.15em] uppercase text-white/30">Connecting…</span>
     );
   }
+
+  const item =
+    "w-full flex items-center gap-2 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wide text-white/60 transition text-left";
 
   return (
     <div ref={ref} className="relative">
@@ -53,18 +66,36 @@ export function WalletMenu() {
         <div className="absolute right-0 mt-2 w-64 rounded-[6px] border border-white/15 bg-black shadow-lg overflow-hidden z-50">
           <AddressRow label="Solana" address={solana} />
           {evmAddress && <AddressRow label="EVM" address={evmAddress} />}
+
           <button
-            onClick={() => {
-              setOpen(false);
-              logout();
-            }}
-            className="w-full flex items-center gap-2 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wide text-white/60 hover:text-red-400 hover:bg-white/[0.06] transition text-left border-t border-white/10"
+            onClick={() => { setOpen(false); setShowSend(true); }}
+            className={`${item} hover:text-white hover:bg-white/[0.06] border-b border-white/10`}
+          >
+            <ArrowUpRight size={12} strokeWidth={1.5} />
+            Send
+          </button>
+
+          {isEmbedded && (
+            <button
+              onClick={() => { setOpen(false); void exportWallet({ address: solana }); }}
+              className={`${item} hover:text-white hover:bg-white/[0.06] border-b border-white/10`}
+            >
+              <KeyRound size={12} strokeWidth={1.5} />
+              Export private key
+            </button>
+          )}
+
+          <button
+            onClick={() => { setOpen(false); logout(); }}
+            className={`${item} hover:text-red-400 hover:bg-white/[0.06]`}
           >
             <LogOut size={12} strokeWidth={1.5} />
             Disconnect
           </button>
         </div>
       )}
+
+      <AnimatePresence>{showSend && <SendSheet onClose={() => setShowSend(false)} />}</AnimatePresence>
     </div>
   );
 }

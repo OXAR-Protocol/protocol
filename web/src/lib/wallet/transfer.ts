@@ -1,0 +1,40 @@
+import { PublicKey } from "@solana/web3.js";
+
+import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
+
+/** Keep this much SOL back for the transfer fee (+ a small buffer). */
+export const SOL_SEND_RESERVE = BigInt(1_000_000); // 0.001 SOL
+
+/** A recipient address is valid if it parses as a Solana public key. */
+export function isValidSolanaAddress(address: string): boolean {
+  try {
+    // eslint-disable-next-line no-new
+    new PublicKey(address.trim());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Max base units the user can send of an asset — reserves SOL for the fee. */
+export function maxSendable(asset: WalletAsset): bigint {
+  if (asset.mint !== SOL_MINT) return asset.amount;
+  const max = asset.amount - SOL_SEND_RESERVE;
+  return max > BigInt(0) ? max : BigInt(0);
+}
+
+/** Validate a send request; returns an error string or null if OK. */
+export function validateSend(params: {
+  asset: WalletAsset | null;
+  to: string;
+  amountBase: bigint;
+}): string | null {
+  const { asset, to, amountBase } = params;
+  if (!asset) return "Pick an asset to send";
+  if (!isValidSolanaAddress(to)) return "Enter a valid Solana address";
+  if (amountBase <= BigInt(0)) return "Enter an amount";
+  if (amountBase > maxSendable(asset)) {
+    return asset.mint === SOL_MINT ? "Not enough SOL (leave a little for the fee)" : `Not enough ${asset.symbol}`;
+  }
+  return null;
+}
