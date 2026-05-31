@@ -14,9 +14,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
 import { RPC_URL } from "@/lib/constants";
 import { clearCache } from "@/lib/cache";
-import { deriveSolanaWallets, type SolanaWalletOption } from "@/lib/wallet/solana-wallets";
-
-const ACTIVE_WALLET_KEY = "oxar:active-solana-wallet";
+import { deriveSolanaWallets } from "@/lib/wallet/solana-wallets";
 
 /** Minimal wallet signer — what yield providers need to sign + send. */
 export interface WalletSigner {
@@ -31,10 +29,6 @@ interface SolanaContextValue {
   walletAddress: PublicKey | null;
   walletError: string | null;
   retryCreateWallet: () => void;
-  /** All linked Solana wallets (built-in + external) the user can switch between. */
-  wallets: SolanaWalletOption[];
-  /** Pin the active wallet — used everywhere (balances, positions, bridge receiver). */
-  setActiveWallet: (address: string) => void;
 }
 
 const SolanaContext = createContext<SolanaContextValue>({
@@ -43,8 +37,6 @@ const SolanaContext = createContext<SolanaContextValue>({
   walletAddress: null,
   walletError: null,
   retryCreateWallet: () => {},
-  wallets: [],
-  setActiveWallet: () => {},
 });
 
 export function useSolanaContext() {
@@ -118,24 +110,14 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   const creatingWalletRef = useRef(false);
   const lastAddressRef = useRef<string | null>(null);
 
-  // The user's explicit wallet choice (persisted), if any.
-  const [override, setOverride] = useState<string | null>(null);
-  useEffect(() => {
-    setOverride(window.localStorage.getItem(ACTIVE_WALLET_KEY));
-  }, []);
-
-  const setActiveWallet = (address: string) => {
-    window.localStorage.setItem(ACTIVE_WALLET_KEY, address);
-    setOverride(address);
-  };
-
-  // Resolve the active Solana wallet + the switchable list. The active address is
-  // used everywhere — balances, positions, AND the cross-chain bridge receiver —
-  // so funds can never land in a wallet the app isn't showing.
-  const { active: solanaAddress, options: wallets } = useMemo(() => {
-    if (!authenticated || !user) return { active: null, options: [] as SolanaWalletOption[] };
-    return deriveSolanaWallets(user.linkedAccounts as any[], override);
-  }, [authenticated, user, override]);
+  // The active Solana wallet = the connected external wallet (Phantom, where the
+  // user's funds are), else the built-in one. One wallet, no choice — and it's used
+  // everywhere (balances, positions, AND the cross-chain bridge receiver) so funds
+  // always land where the app shows them.
+  const solanaAddress = useMemo<string | null>(() => {
+    if (!authenticated || !user) return null;
+    return deriveSolanaWallets(user.linkedAccounts as any[], null).active;
+  }, [authenticated, user]);
 
   // Clear the RPC cache when the wallet changes so stale per-wallet data doesn't leak.
   useEffect(() => {
@@ -185,7 +167,7 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
 
   return (
     <SolanaContext.Provider
-      value={{ connection, wallet, walletAddress, walletError, retryCreateWallet, wallets, setActiveWallet }}
+      value={{ connection, wallet, walletAddress, walletError, retryCreateWallet }}
     >
       {children}
     </SolanaContext.Provider>
