@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { PublicKey, Transaction, SystemProgram, VersionedTransaction } from "@solana/web3.js";
+import { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import {
   getAssociatedTokenAddress,
   createTransferInstruction,
@@ -10,81 +10,95 @@ import {
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { toFriendlyError, UserFacingError } from "@/lib/yield";
-import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
+import type { WalletAsset } from "@/lib/portfolio/assets";
+import { getSwapQuote, buildSwapTx, priceImpactTooHigh } from "@/lib/swap/jupiter-swap";
 import { DELORA_SOLANA_CHAIN_ID, bridgeFeeTooHigh, type BridgeQuote } from "@/lib/bridge/delora";
-import type { DestChain } from "@/lib/wallet/outbound-destinations";
+import type { DestChain, DestAsset } from "@/lib/wallet/outbound-destinations";
 
 export type SendStatus = "idle" | "sending";
 export interface SendResult {
   sig: string;
-  /** True when funds were bridged to another chain (arrival takes a bit). */
+  /** Funds bridged to another chain (arrival takes ~a minute). */
   crossChain: boolean;
 }
 
+const deserialize = (b64: string) =>
+  VersionedTransaction.deserialize(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)));
+
 /**
- * Outbound transfer: send a held asset to any address, on Solana (plain transfer)
- * or cross-chain to an EVM chain (Delora bridge → USDC there). The active Solana
- * wallet signs + pays the SOL fee; the EVM recipient needs no gas to receive.
+ * Withdraw your USDC into any asset, anywhere: same-asset Solana transfer, a
+ * Jupiter swap into another Solana asset (e.g. SOL), or a Delora bridge to USDC /
+ * native on an EVM chain. The active Solana wallet signs + pays the SOL fee.
  */
 export function useSend() {
   const { wallet, walletAddress, connection } = useSolanaContext();
   const [status, setStatus] = useState<SendStatus>("idle");
   const [error, setError] = useState<string | null>(null);
 
+  const sendVersioned = useCallback(
+    async (tx: VersionedTransaction): Promise<string> => {
+      const signed = await wallet!.signTransaction(tx);
+      const sig = await connection.sendRawTransaction(signed.serialize());
+      await connection.confirmTransaction(sig, "confirmed");
+      return sig;
+    },
+    [wallet, connection],
+  );
+
   const send = useCallback(
-    async (params: { asset: WalletAsset; dest: DestChain; to: string; amountBase: bigint }): Promise<SendResult> => {
-      const { asset, dest, to, amountBase } = params;
+    async (params: {
+      source: WalletAsset;
+      destChain: DestChain;
+      destAsset: DestAsset;
+      to: string;
+      amountBase: bigint;
+    }): Promise<SendResult> => {
+      const { source, destChain, destAsset, to, amountBase } = params;
       if (!wallet || !walletAddress) throw new Error("Wallet not connected");
+      const owner = walletAddress.toBase58();
 
       setError(null);
       setStatus("sending");
       try {
-        // Cross-chain: bridge to USDC on the chosen EVM chain via Delora.
-        if (dest.chain === "ethereum") {
-          if (!dest.chainId) throw new UserFacingError("Unsupported destination chain");
+        if (destAsset.kind === "bridge") {
+          if (!destChain.chainId) throw new UserFacingError("Unsupported destination chain");
           const res = await fetch("/api/bridge-quote", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              senderAddress: walletAddress.toBase58(),
+              senderAddress: owner,
               originChainId: DELORA_SOLANA_CHAIN_ID,
-              destinationChainId: dest.chainId,
+              destinationChainId: destChain.chainId,
               amount: amountBase.toString(),
-              originCurrency: asset.mint,
-              destinationCurrency: dest.usdc,
+              originCurrency: source.mint,
+              destinationCurrency: destAsset.mint,
               receiverAddress: to.trim(),
             }),
           });
           const quote = (await res.json()) as BridgeQuote & { error?: string };
           if (!res.ok) throw new UserFacingError(quote.error || "No route to that chain");
-          const usd = Number(amountBase) / 10 ** asset.decimals;
-          if (bridgeFeeTooHigh(quote, usd)) {
+          if (bridgeFeeTooHigh(quote, Number(amountBase) / 10 ** source.decimals)) {
             throw new UserFacingError("Fees are too high for this amount — try a larger amount.");
           }
-          // SVM origin: calldata.data is a base64 Solana transaction — sign + send it.
-          const tx = VersionedTransaction.deserialize(
-            Uint8Array.from(atob(quote.calldata.data), (c) => c.charCodeAt(0)),
-          );
-          const signed = await wallet.signTransaction(tx);
-          const sig = await connection.sendRawTransaction(signed.serialize());
-          await connection.confirmTransaction(sig, "confirmed");
-          return { sig, crossChain: true };
+          // SVM origin: calldata.data is a base64 Solana transaction.
+          return { sig: await sendVersioned(deserialize(quote.calldata.data)), crossChain: true };
         }
 
-        // Same-chain (Solana) transfer.
-        const toPubkey = new PublicKey(to.trim());
-        const tx = new Transaction();
-        if (asset.mint === SOL_MINT) {
-          tx.add(SystemProgram.transfer({ fromPubkey: walletAddress, toPubkey, lamports: amountBase }));
-        } else {
-          const mint = new PublicKey(asset.mint);
-          const fromAta = await getAssociatedTokenAddress(mint, walletAddress);
-          const toAta = await getAssociatedTokenAddress(mint, toPubkey);
-          tx.add(
-            createAssociatedTokenAccountIdempotentInstruction(walletAddress, toAta, toPubkey, mint),
-            createTransferInstruction(fromAta, toAta, walletAddress, amountBase),
-          );
+        if (destAsset.kind === "swap") {
+          const quote = await getSwapQuote({ inputMint: source.mint, outputMint: destAsset.mint, amount: amountBase });
+          if (priceImpactTooHigh(quote)) throw new UserFacingError("Price impact too high — try a smaller amount");
+          return { sig: await sendVersioned(deserialize(await buildSwapTx(quote, owner))), crossChain: false };
         }
+
+        // transfer: same-asset SPL transfer to the address.
+        const toPubkey = new PublicKey(to.trim());
+        const mint = new PublicKey(source.mint);
+        const fromAta = await getAssociatedTokenAddress(mint, walletAddress);
+        const toAta = await getAssociatedTokenAddress(mint, toPubkey);
+        const tx = new Transaction().add(
+          createAssociatedTokenAccountIdempotentInstruction(walletAddress, toAta, toPubkey, mint),
+          createTransferInstruction(fromAta, toAta, walletAddress, amountBase),
+        );
         const { blockhash } = await connection.getLatestBlockhash();
         tx.recentBlockhash = blockhash;
         tx.feePayer = walletAddress;
@@ -100,7 +114,7 @@ export function useSend() {
         setStatus("idle");
       }
     },
-    [wallet, walletAddress, connection],
+    [wallet, walletAddress, connection, sendVersioned],
   );
 
   return { send, status, error };

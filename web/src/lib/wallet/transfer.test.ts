@@ -1,6 +1,13 @@
 import { describe, it, expect } from "vitest";
 
-import { isValidSolanaAddress, maxSendable, validateSend, SOL_SEND_RESERVE } from "./transfer";
+import {
+  isValidSolanaAddress,
+  isValidEvmAddress,
+  isValidAddressForChain,
+  maxSendable,
+  validateSend,
+  SOL_SEND_RESERVE,
+} from "./transfer";
 import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
 
 const asset = (over: Partial<WalletAsset> & { mint: string; amount: bigint }): WalletAsset => ({
@@ -14,6 +21,27 @@ const asset = (over: Partial<WalletAsset> & { mint: string; amount: bigint }): W
 
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const VALID = "AkC8BHHNJQ61fXVsHVnWsferBm4PC6t8oT8YwRmrwDtB";
+const EVM_ADDR = "0xdfa8ec34bab1f63606afa24616775f0bcc729356";
+
+describe("isValidEvmAddress", () => {
+  it("accepts a 0x40-hex address (trimmed)", () => {
+    expect(isValidEvmAddress(EVM_ADDR)).toBe(true);
+    expect(isValidEvmAddress(`  ${EVM_ADDR}  `)).toBe(true);
+  });
+  it("rejects non-EVM", () => {
+    expect(isValidEvmAddress(VALID)).toBe(false);
+    expect(isValidEvmAddress("0x123")).toBe(false);
+  });
+});
+
+describe("isValidAddressForChain", () => {
+  it("validates per chain", () => {
+    expect(isValidAddressForChain(EVM_ADDR, "ethereum")).toBe(true);
+    expect(isValidAddressForChain(VALID, "ethereum")).toBe(false);
+    expect(isValidAddressForChain(VALID, "solana")).toBe(true);
+    expect(isValidAddressForChain(EVM_ADDR, "solana")).toBe(false);
+  });
+});
 
 describe("isValidSolanaAddress", () => {
   it("accepts a real base58 address", () => {
