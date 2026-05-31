@@ -52,7 +52,10 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
         supportedChains: [mainnet, base, arbitrum, optimism, polygon],
         embeddedWallets: {
           solana: {
-            createOnLogin: "all-users",
+            // Only mint a built-in wallet for users who DON'T bring their own
+            // (e.g. email sign-in). Phantom users get no shadow wallet — one
+            // wallet, no confusion, nowhere for cross-chain funds to go astray.
+            createOnLogin: "users-without-wallets",
           },
           // EVM funds come from the user's external wallet (MetaMask/Rainbow);
           // don't litter every account with an empty embedded EVM wallet.
