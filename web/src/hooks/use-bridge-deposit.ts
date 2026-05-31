@@ -22,6 +22,9 @@ import { publicClientFor } from "@/lib/evm/chains";
 
 export type BridgeStatus = "idle" | "quoting" | "approving" | "bridging" | "arriving" | "depositing";
 
+/** Min SOL the receiver needs for the post-bridge deposit (tx fee + jlToken ATA rent). */
+const MIN_RECEIVER_LAMPORTS = 5_000_000; // ~0.005 SOL
+
 // SAFETY: Privy ConnectedWallet shape is loosely typed across versions; we use a
 // minimal structural interface for the EVM send path.
 interface EvmWallet {
@@ -73,6 +76,17 @@ export function useBridgeDeposit(providerId: string) {
 
       setError(null);
       try {
+        // The post-bridge deposit is a Solana tx — the RECEIVING wallet must hold a
+        // little SOL for its fee + the lending-token account rent, or the deposit
+        // can't land and the bridged USDC gets stranded. Block BEFORE moving money.
+        const receiverSol = await connection.getBalance(walletAddress);
+        if (receiverSol < MIN_RECEIVER_LAMPORTS) {
+          throw new UserFacingError(
+            "Your Solana wallet needs a little SOL (~0.01) to finish the deposit after bridging. " +
+              "Add some SOL to it and try again.",
+          );
+        }
+
         // USD → pay-asset base units (cap by balance; reserve handled by spendableBase).
         const price = payAsset.usdValue / payAsset.uiAmount;
         const payUi = usdAmount / price;
