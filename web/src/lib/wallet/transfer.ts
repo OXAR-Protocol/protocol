@@ -16,6 +16,16 @@ export function isValidSolanaAddress(address: string): boolean {
   }
 }
 
+/** A 20-byte hex EVM address (0x + 40 hex chars). */
+export function isValidEvmAddress(address: string): boolean {
+  return /^0x[0-9a-fA-F]{40}$/.test(address.trim());
+}
+
+/** Validate a destination address for the chosen chain. */
+export function isValidAddressForChain(address: string, chain: "solana" | "ethereum"): boolean {
+  return chain === "ethereum" ? isValidEvmAddress(address) : isValidSolanaAddress(address);
+}
+
 /** Max base units the user can send of an asset — reserves SOL for the fee. */
 export function maxSendable(asset: WalletAsset): bigint {
   if (asset.mint !== SOL_MINT) return asset.amount;
