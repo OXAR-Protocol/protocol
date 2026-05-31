@@ -19,13 +19,8 @@ export default function YouPage() {
   const [copiedAddr, setCopiedAddr] = useState<string | null>(null);
 
   const email = user?.email?.address;
-  // The Solana address OXAR uses for balances/deposits + cross-chain receiving.
+  // The OXAR account wallet — your funds & positions live here (yield is on Solana).
   const solana = walletAddress?.toBase58() ?? user?.wallet?.address ?? null;
-  // EVM address (origin for cross-chain deposits), shown when an EVM wallet is linked.
-  const accounts = [
-    { label: "Solana wallet", address: solana },
-    { label: "EVM wallet", address: evmAddress },
-  ].filter((a): a is { label: string; address: string } => Boolean(a.address));
 
   const handleCopy = (address: string) => {
     navigator.clipboard.writeText(address);
@@ -62,37 +57,25 @@ export default function YouPage() {
           {email && (
             <Row label="Email" value={email} />
           )}
-          {accounts.map(({ label, address }) => (
-            <div
-              key={label}
-              className="flex items-center justify-between p-4 rounded-[5px] border border-white/10"
-            >
-              <div>
-                <p className="font-mono text-xs uppercase tracking-wide text-white/30">
-                  {label}
-                </p>
-                <p className="mt-1 font-mono text-sm text-white">
-                  {`${address.slice(0, 6)}…${address.slice(-6)}`}
-                </p>
-              </div>
-              <button
-                onClick={() => handleCopy(address)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-white/15 hover:border-white/30 font-mono text-[11px] uppercase tracking-wide text-white/60 hover:text-white transition"
-              >
-                {copiedAddr === address ? (
-                  <>
-                    <Check size={12} strokeWidth={1.5} />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy size={12} strokeWidth={1.5} />
-                    Copy
-                  </>
-                )}
-              </button>
-            </div>
-          ))}
+          {solana && (
+            <WalletCard
+              label="Your wallet"
+              hint="Your funds & positions live here"
+              address={solana}
+              copied={copiedAddr === solana}
+              onCopy={() => handleCopy(solana)}
+            />
+          )}
+          {evmAddress && (
+            <WalletCard
+              label="Connected wallet (EVM)"
+              hint="For paying from & withdrawing to other chains"
+              address={evmAddress}
+              copied={copiedAddr === evmAddress}
+              onCopy={() => handleCopy(evmAddress)}
+              dim
+            />
+          )}
           {!authenticated && (
             <div className="p-4 rounded-[5px] border border-white/10 text-center font-mono text-sm text-white/40">
               You're signed out
@@ -205,6 +188,54 @@ export default function YouPage() {
           </button>
         </motion.section>
       )}
+    </div>
+  );
+}
+
+function WalletCard({
+  label,
+  hint,
+  address,
+  copied,
+  onCopy,
+  dim,
+}: {
+  label: string;
+  hint: string;
+  address: string;
+  copied: boolean;
+  onCopy: () => void;
+  dim?: boolean;
+}) {
+  return (
+    <div
+      className={`flex items-center justify-between p-4 rounded-[5px] border ${
+        dim ? "border-white/[0.06] bg-white/[0.01]" : "border-white/10"
+      }`}
+    >
+      <div className="min-w-0">
+        <p className="font-mono text-xs uppercase tracking-wide text-white/30">{label}</p>
+        <p className={`mt-1 font-mono text-sm ${dim ? "text-white/50" : "text-white"}`}>
+          {`${address.slice(0, 6)}…${address.slice(-6)}`}
+        </p>
+        <p className="mt-1 font-mono text-[10px] text-white/30">{hint}</p>
+      </div>
+      <button
+        onClick={onCopy}
+        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-white/15 hover:border-white/30 font-mono text-[11px] uppercase tracking-wide text-white/60 hover:text-white transition"
+      >
+        {copied ? (
+          <>
+            <Check size={12} strokeWidth={1.5} />
+            Copied
+          </>
+        ) : (
+          <>
+            <Copy size={12} strokeWidth={1.5} />
+            Copy
+          </>
+        )}
+      </button>
     </div>
   );
 }
