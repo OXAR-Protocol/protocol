@@ -5,21 +5,22 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Copy, Check, LogOut, ChevronDown } from "lucide-react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
+import { useEvmAddress } from "@/hooks/use-evm-address";
 
 /**
- * Header wallet control: shows the connected address as a pill; clicking it opens
- * a small menu to copy the address or disconnect. Renders nothing until a wallet
- * address is available (Privy may still be creating the embedded one).
+ * Header wallet control: shows the connected Solana address as a pill; clicking
+ * opens a menu listing every linked address (Solana + EVM) to copy, and a
+ * disconnect action. Renders nothing until a wallet address is available.
  */
 export function WalletMenu() {
   const { logout } = usePrivy();
   const { walletAddress } = useSolanaContext();
+  const evmAddress = useEvmAddress();
   const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const wallet = walletAddress?.toBase58() ?? null;
-  const shortWallet = wallet ? `${wallet.slice(0, 4)}…${wallet.slice(-4)}` : "";
+  const solana = walletAddress?.toBase58() ?? null;
+  const shortSolana = solana ? `${solana.slice(0, 4)}…${solana.slice(-4)}` : "";
 
   // Close on click outside.
   useEffect(() => {
@@ -31,19 +32,13 @@ export function WalletMenu() {
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
-  if (!wallet) {
+  if (!solana) {
     return (
       <span className="font-mono text-[11px] tracking-[0.15em] uppercase text-white/30">
         Connecting…
       </span>
     );
   }
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(wallet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
 
   return (
     <div ref={ref} className="relative">
@@ -52,7 +47,7 @@ export function WalletMenu() {
         className="inline-flex items-center gap-2 px-3 py-2 rounded-[5px] border border-white/10 hover:border-white/30 font-mono text-[11px] tracking-[0.1em] uppercase text-white/70 hover:text-white transition-colors"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-        {shortWallet}
+        {shortSolana}
         <ChevronDown
           size={12}
           strokeWidth={1.5}
@@ -61,23 +56,9 @@ export function WalletMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-44 rounded-[6px] border border-white/15 bg-black shadow-lg overflow-hidden z-50">
-          <button
-            onClick={handleCopy}
-            className="w-full flex items-center gap-2 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wide text-white/60 hover:text-white hover:bg-white/[0.06] transition text-left"
-          >
-            {copied ? (
-              <>
-                <Check size={12} strokeWidth={1.5} />
-                Copied
-              </>
-            ) : (
-              <>
-                <Copy size={12} strokeWidth={1.5} />
-                Copy address
-              </>
-            )}
-          </button>
+        <div className="absolute right-0 mt-2 w-64 rounded-[6px] border border-white/15 bg-black shadow-lg overflow-hidden z-50">
+          <AddressRow label="Solana" address={solana} />
+          {evmAddress && <AddressRow label="EVM" address={evmAddress} />}
           <button
             onClick={() => {
               setOpen(false);
@@ -91,5 +72,34 @@ export function WalletMenu() {
         </div>
       )}
     </div>
+  );
+}
+
+/** One copyable address line in the wallet menu. */
+function AddressRow({ label, address }: { label: string; address: string }) {
+  const [copied, setCopied] = useState(false);
+  const short = `${address.slice(0, 6)}…${address.slice(-6)}`;
+  const copy = () => {
+    navigator.clipboard.writeText(address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button
+      onClick={copy}
+      className="w-full flex items-center justify-between gap-2 px-3 py-2.5 hover:bg-white/[0.06] transition text-left border-b border-white/10"
+    >
+      <span className="min-w-0">
+        <span className="block font-mono text-[9px] uppercase tracking-wide text-white/30">
+          {label}
+        </span>
+        <span className="block font-mono text-[11px] text-white/80 truncate">{short}</span>
+      </span>
+      {copied ? (
+        <Check size={13} strokeWidth={1.5} className="text-accent shrink-0" />
+      ) : (
+        <Copy size={13} strokeWidth={1.5} className="text-white/40 shrink-0" />
+      )}
+    </button>
   );
 }
