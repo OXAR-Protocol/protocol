@@ -1,8 +1,23 @@
 /**
+ * An error whose message is ALREADY user-facing (a deliberate, friendly message
+ * we threw on purpose — e.g. "Fees are too high"). `toFriendlyError` surfaces it
+ * verbatim instead of re-mapping it to a generic fallback.
+ */
+export class UserFacingError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UserFacingError";
+  }
+}
+
+/**
  * Map raw chain / wallet / SDK errors to a short, friendly, non-scary message.
  * The raw error is still logged to the console for debugging.
  */
 export function toFriendlyError(e: unknown): string {
+  // Our own deliberate messages pass straight through — don't clobber them.
+  if (e instanceof UserFacingError) return e.message;
+
   const raw = (e instanceof Error ? e.message : String(e)).toLowerCase();
 
   // User dismissed the wallet popup — not really an error.
@@ -51,6 +66,24 @@ export function toFriendlyError(e: unknown): string {
     raw.includes("503")
   ) {
     return "Network's being slow right now. Please try again in a moment.";
+  }
+
+  // EVM on-chain revert / failed gas estimation — the tx would fail as built.
+  if (
+    raw.includes("reverted") ||
+    raw.includes("transfer_from_failed") ||
+    raw.includes("cannot estimate gas")
+  ) {
+    return "That transaction would fail on-chain. Try a larger amount or a different asset.";
+  }
+
+  // Wrong EVM network selected in the wallet.
+  if (
+    raw.includes("unsupported chain") ||
+    raw.includes("wrong network") ||
+    raw.includes("switch chain")
+  ) {
+    return "Switch your wallet to the right network and try again.";
   }
 
   // Generic on-chain failure (simulation, etc.) — after the specific cases above.
