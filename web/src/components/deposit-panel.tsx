@@ -1,90 +1,71 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { CustomSelect } from "@/components/custom-select";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
-import { useUniversalDeposit } from "@/hooks/use-universal-deposit";
+import { useEvmAssets } from "@/hooks/use-evm-assets";
+import { useDeposit } from "@/hooks/use-deposit";
+import { useNetPreview } from "@/hooks/use-net-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
-import { toBaseUnits } from "@/lib/yield";
-import { getSwapQuote } from "@/lib/swap/jupiter-swap";
 
 interface Props {
   view: ProviderView;
   onDeposited: (usdAmount: number) => void;
 }
 
-/** Deposit with any Solana asset: pick a pay-asset, enter USD, see net USDC. */
+const chainTag = (a: { chain: string; network?: string }) =>
+  a.chain === "ethereum" ? `${(a.network ?? "evm").replace("-mainnet", "")} · bridge` : "";
+
+/** Deposit with any asset on any chain: pick a pay-asset, enter USD, see net USDC. */
 export function DepositPanel({ view, onDeposited }: Props) {
-  const { assets, loading: assetsLoading } = useWalletAssets();
-  const { depositWith, status, error } = useUniversalDeposit(view.id);
+  const { assets: solAssets, loading: solLoading } = useWalletAssets();
+  const { assets: evmAssets, evmAddress, loading: evmLoading } = useEvmAssets();
+  const { depositWith, busy, label, error } = useDeposit(view.id);
 
   const [usdAmount, setUsdAmount] = useState(50);
   const [selectedMint, setSelectedMint] = useState<string | null>(null);
 
-  // Default pay-asset: the product's own asset if held, else the largest holding.
+  // Solana first (instant/swap), then EVM (bridge).
+  const assets = useMemo(() => [...solAssets, ...evmAssets], [solAssets, evmAssets]);
+  const assetsLoading = solLoading || evmLoading;
+
+  // Default: the product's own asset if held, else the largest Solana holding, else first.
   const defaultMint = useMemo(() => {
     if (assets.length === 0) return null;
-    return assets.find((a) => a.mint === view.assetMint)?.mint ?? assets[0].mint;
-  }, [assets, view.assetMint]);
+    return (
+      assets.find((a) => a.chain === "solana" && a.mint === view.assetMint)?.mint ??
+      solAssets[0]?.mint ??
+      assets[0].mint
+    );
+  }, [assets, solAssets, view.assetMint]);
+
   const activeMint = selectedMint ?? defaultMint;
   const payAsset = assets.find((a) => a.mint === activeMint) ?? null;
-  const isDirect = payAsset?.mint === view.assetMint;
+  const isDirect = payAsset?.chain === "solana" && payAsset.mint === view.assetMint;
 
-  // Live net quote for swap paths (debounced); direct path nets the full amount.
-  const [netUsdc, setNetUsdc] = useState<number | null>(null);
-  const [quoting, setQuoting] = useState(false);
-  useEffect(() => {
-    if (!payAsset || usdAmount <= 0) {
-      setNetUsdc(null);
-      return;
-    }
-    if (isDirect) {
-      setNetUsdc(usdAmount);
-      return;
-    }
-    let cancelled = false;
-    setQuoting(true);
-    const t = setTimeout(async () => {
-      try {
-        const price = payAsset.usdValue / payAsset.uiAmount;
-        const payBase = toBaseUnits((usdAmount / price).toFixed(payAsset.decimals), payAsset.decimals);
-        const q = await getSwapQuote({ inputMint: payAsset.mint, outputMint: view.assetMint, amount: payBase });
-        // Show the guaranteed-min out — that's exactly what gets deposited.
-        if (!cancelled) setNetUsdc(Number(q.otherAmountThreshold) / 10 ** view.decimals);
-      } catch {
-        if (!cancelled) setNetUsdc(null);
-      } finally {
-        if (!cancelled) setQuoting(false);
-      }
-    }, 350);
-    return () => {
-      cancelled = true;
-      clearTimeout(t);
-    };
-  }, [payAsset, usdAmount, isDirect, view.assetMint, view.decimals]);
-
-  const busy = status !== "idle";
-  const label =
-    status === "swapping" ? "Swapping…" : status === "depositing" ? "Depositing…" : null;
+  const preview = useNetPreview({
+    payAsset,
+    usdAmount,
+    productMint: view.assetMint,
+    productDecimals: view.decimals,
+    evmAddress,
+  });
 
   const handleDeposit = async () => {
     if (!payAsset || usdAmount <= 0) return;
     try {
       const depositedBase = await depositWith(payAsset, usdAmount);
-      // Report the amount actually deposited (USDC ≈ USD), not the input USD.
       onDeposited(Number(depositedBase) / 10 ** view.decimals);
     } catch {
-      // Error is surfaced via the hook's `error` state.
+      // surfaced via `error`
     }
   };
 
   return (
     <div className="p-4 rounded-[6px] border border-white/10">
-      <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-2">
-        Deposit
-      </p>
+      <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-2">Deposit</p>
 
       {/* USD amount */}
       <div className="flex items-baseline gap-3">
@@ -101,9 +82,7 @@ export function DepositPanel({ view, onDeposited }: Props) {
 
       {/* Pay-with picker */}
       <div className="mt-3">
-        <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-1.5">
-          Pay with
-        </p>
+        <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-1.5">Pay with</p>
         {assetsLoading ? (
           <p className="font-mono text-xs text-white/30">Loading your assets…</p>
         ) : assets.length === 0 ? (
@@ -116,7 +95,11 @@ export function DepositPanel({ view, onDeposited }: Props) {
               value: a.mint,
               label:
                 `${a.symbol} · $${a.usdValue.toFixed(2)}` +
-                (a.mint === view.assetMint ? " · ⚡ instant" : " · swap"),
+                (a.chain === "solana"
+                  ? a.mint === view.assetMint
+                    ? " · ⚡ instant"
+                    : " · swap"
+                  : ` · ${chainTag(a)}`),
             }))}
           />
         )}
@@ -127,11 +110,14 @@ export function DepositPanel({ view, onDeposited }: Props) {
         <p className="mt-2 font-mono text-[11px] text-white/40">
           {isDirect
             ? `you'll deposit $${usdAmount.toFixed(2)} ${view.assetSymbol}`
-            : quoting
+            : preview.quoting
               ? "quoting…"
-              : netUsdc !== null
-                ? `you'll deposit ~$${netUsdc.toFixed(2)} ${view.assetSymbol} (after swap)`
-                : "couldn't quote — try a smaller amount"}
+              : preview.netUsdc !== null
+                ? `you'll deposit ~$${preview.netUsdc.toFixed(2)} ${view.assetSymbol}` +
+                  (preview.kind === "bridge"
+                    ? ` · fee ~$${(preview.feeUsd ?? 0).toFixed(2)}${preview.etaSec ? ` · ~${preview.etaSec}s` : ""}`
+                    : " (after swap)")
+                : "couldn't quote — try a different amount"}
         </p>
       )}
 
