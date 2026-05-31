@@ -6,6 +6,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Sun, Moon } from "lucide-react";
 
 import { useTheme } from "@/context/theme-context";
+import { WalletMenu } from "@/components/wallet-menu";
 
 const tabs = [
   { href: "/home", label: "Home" },
@@ -27,7 +28,7 @@ export function TopNav() {
         </Link>
 
         <div className="flex items-center gap-6">
-          {authenticated ? (
+          {authenticated && (
             <div className="hidden md:flex items-center gap-10">
               {tabs.map((tab) => {
                 const isActive = pathname.startsWith(tab.href);
@@ -44,15 +45,19 @@ export function TopNav() {
                 );
               })}
             </div>
-          ) : (
-            <button
-              onClick={login}
-              disabled={!ready}
-              className="font-mono text-[11px] font-semibold tracking-[0.15em] uppercase px-4 py-2 rounded-[5px] bg-white text-black hover:bg-white/90 disabled:bg-white/[0.04] disabled:text-white/30 transition-colors"
-            >
-              Sign in
-            </button>
           )}
+
+          {ready &&
+            (authenticated ? (
+              <WalletMenu />
+            ) : (
+              <button
+                onClick={login}
+                className="font-mono text-[11px] font-semibold tracking-[0.15em] uppercase px-4 py-2 rounded-[5px] bg-white text-black hover:bg-white/90 transition-colors"
+              >
+                Sign in
+              </button>
+            ))}
 
           <button
             onClick={toggleTheme}
