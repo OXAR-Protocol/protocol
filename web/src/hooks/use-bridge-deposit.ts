@@ -6,7 +6,6 @@ import { useWallets } from "@privy-io/react-auth";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { getProvider, toBaseUnits, toFriendlyError, UserFacingError } from "@/lib/yield";
-import { USDC_MINT } from "@/lib/constants";
 import { spendableBase, type WalletAsset } from "@/lib/portfolio/assets";
 import {
   buildQuoteRequest,
@@ -66,6 +65,9 @@ export function useBridgeDeposit(providerId: string) {
       if (!walletAddress || !provider) throw new Error("Wallet not connected");
       if (usdAmount <= 0) return BigInt(0);
 
+      // Bridge to the SELECTED market's asset (USDC / USDG / USDT), not hardcoded USDC.
+      const destinationMint = provider.asset.toBase58();
+
       const originChainId = payAsset.network ? networkToChainId(payAsset.network) : null;
       if (!originChainId) throw new UserFacingError("This chain isn't supported yet");
 
@@ -102,7 +104,7 @@ export function useBridgeDeposit(providerId: string) {
           amount: payBase,
           originCurrency: payAsset.mint,
           receiverAddress: walletAddress.toBase58(),
-          usdcMint: USDC_MINT,
+          destinationMint,
         });
         const quote = await fetchQuote(req);
         if (bridgeFeeTooHigh(quote, usdAmount)) {
@@ -134,8 +136,8 @@ export function useBridgeDeposit(providerId: string) {
           }
         }
 
-        // Baseline Solana USDC so we can detect the bridged funds landing.
-        const baseline = await readUsdcBase(connection, walletAddress, USDC_MINT);
+        // Baseline destination-token balance so we can detect the bridged funds landing.
+        const baseline = await readUsdcBase(connection, walletAddress, destinationMint);
         const expected = bridgeNetOut(quote);
 
         setStatus("bridging");
@@ -150,6 +152,7 @@ export function useBridgeDeposit(providerId: string) {
           providerId,
           originChainId,
           originTxHash: txHash,
+          mint: destinationMint,
           expectedUsdc: expected.toString(),
           baselineUsdc: baseline.toString(),
           receiver: walletAddress.toBase58(),
@@ -158,7 +161,7 @@ export function useBridgeDeposit(providerId: string) {
         });
 
         setStatus("arriving");
-        const arrived = await pollUsdcArrival({ connection, owner: walletAddress, mint: USDC_MINT, baseline, expected });
+        const arrived = await pollUsdcArrival({ connection, owner: walletAddress, mint: destinationMint, baseline, expected });
         if (!arrived) {
           // Pending record is kept → recovery (use-pending-bridge) finishes the deposit later.
           throw new UserFacingError("Funds are taking longer than usual to arrive — they'll auto-deposit once they land.");

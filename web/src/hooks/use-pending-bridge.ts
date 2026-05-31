@@ -6,6 +6,7 @@ import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { USDC_MINT } from "@/lib/constants";
 import { loadPending, clearPending, type PendingBridge } from "@/lib/bridge/pending";
+// Older pending records (pre-multi-asset) had no `mint` → default to USDC.
 // loadPending is re-checked before depositing to avoid a double-deposit race.
 import { pollUsdcArrival } from "@/lib/bridge/arrival";
 
@@ -30,7 +31,8 @@ export function usePendingBridge() {
       try {
         const baseline = BigInt(pending.baselineUsdc);
         const expected = BigInt(pending.expectedUsdc);
-        const arrived = await pollUsdcArrival({ connection, owner: walletAddress, mint: USDC_MINT, baseline, expected });
+        const mint = pending.mint ?? USDC_MINT;
+        const arrived = await pollUsdcArrival({ connection, owner: walletAddress, mint, baseline, expected });
         if (arrived) {
           // Claim before depositing so the live flow / another tab can't double-deposit.
           if (!loadPending()) {

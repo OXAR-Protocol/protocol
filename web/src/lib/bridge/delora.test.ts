@@ -77,7 +77,7 @@ describe("buildQuoteRequest", () => {
       amount: 10_000_000n,
       originCurrency: USDC_BASE,
       receiverAddress: "SoLReceiver",
-      usdcMint: USDC_SOL,
+      destinationMint: USDC_SOL,
     });
     expect(req).toEqual({
       senderAddress: "0xSENDER",
@@ -96,7 +96,7 @@ describe("buildQuoteRequest", () => {
       amount: 1_000_000_000_000_000_000n,
       originCurrency: EVM_NATIVE_SENTINEL,
       receiverAddress: "SoLReceiver",
-      usdcMint: USDC_SOL,
+      destinationMint: USDC_SOL,
     });
     expect(req.originCurrency).toBe(EVM_NATIVE_SENTINEL);
   });

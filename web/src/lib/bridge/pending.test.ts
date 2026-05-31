@@ -13,6 +13,7 @@ const sample: PendingBridge = {
   providerId: "jupiter-lend-usdc",
   originChainId: 8453,
   originTxHash: "0xhash",
+  mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
   expectedUsdc: "9869224",
   baselineUsdc: "1000000",
   receiver: "SoLReceiver",

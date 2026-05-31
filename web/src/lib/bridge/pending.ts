@@ -10,9 +10,11 @@ export interface PendingBridge {
   originChainId: number;
   /** Origin-chain tx hash — shown to the user as proof of "funds in transit". */
   originTxHash: string;
-  /** Guaranteed-min USDC out (base units) — what we deposit on arrival. */
+  /** Destination token mint on Solana (the market's asset: USDC / USDG / USDT). */
+  mint: string;
+  /** Guaranteed-min tokens out (base units) — what we deposit on arrival. */
   expectedUsdc: string;
-  /** Solana USDC balance at submit time (base units) — arrival = balance rises. */
+  /** Destination-token balance at submit time (base units) — arrival = balance rises. */
   baselineUsdc: string;
   /** Solana receiver address. */
   receiver: string;
