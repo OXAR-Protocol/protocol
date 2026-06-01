@@ -11,6 +11,37 @@ export class UserFacingError extends Error {
 }
 
 /**
+ * Best-effort readable text from any thrown value. Plain objects (Privy / wallet /
+ * WalletConnect errors) `String()` to a useless "[object Object]", so dig out a
+ * message field, else JSON-stringify, else list keys.
+ */
+function rawText(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (typeof e === "string") return e;
+  if (e && typeof e === "object") {
+    const o = e as Record<string, unknown>;
+    const nested = (o.error ?? o.data) as Record<string, unknown> | undefined;
+    const msg = o.message ?? nested?.message ?? o.reason ?? o.error;
+    if (typeof msg === "string" && msg.trim()) {
+      const code = o.code ?? nested?.code;
+      return code != null ? `${msg} [${String(code)}]` : msg;
+    }
+    try {
+      const json = JSON.stringify(e);
+      if (json && json !== "{}") return json;
+    } catch {
+      /* circular — fall through */
+    }
+    try {
+      return `object keys: ${Object.keys(o).join(", ")}`;
+    } catch {
+      /* exotic — fall through */
+    }
+  }
+  return String(e);
+}
+
+/**
  * Map raw chain / wallet / SDK errors to a short, friendly, non-scary message.
  * The raw error is still logged to the console for debugging.
  */
@@ -18,7 +49,7 @@ export function toFriendlyError(e: unknown): string {
   // Our own deliberate messages pass straight through — don't clobber them.
   if (e instanceof UserFacingError) return e.message;
 
-  const rawMsg = e instanceof Error ? e.message : String(e);
+  const rawMsg = rawText(e);
   const raw = rawMsg.toLowerCase();
 
   // User dismissed the wallet popup — not really an error.
@@ -99,6 +130,6 @@ export function toFriendlyError(e: unknown): string {
   // Unrecognized error — surface a trimmed raw detail so it's diagnosable in the
   // field (esp. external-wallet signing failures that don't match any pattern
   // above) instead of being swallowed by a bare generic message.
-  const detail = rawMsg.trim().replace(/\s+/g, " ").slice(0, 160);
+  const detail = rawMsg.trim().replace(/\s+/g, " ").slice(0, 300);
   return `Something went wrong. Please try again.${detail ? ` (${detail})` : ""}`;
 }
