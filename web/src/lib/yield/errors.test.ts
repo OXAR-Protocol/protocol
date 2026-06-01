@@ -31,4 +31,16 @@ describe("toFriendlyError", () => {
   it("does not crash on a non-Error value and still surfaces it", () => {
     expect(toFriendlyError("plain string boom")).toContain("plain string boom");
   });
+
+  it("extracts a message from a thrown object (not [object Object])", () => {
+    const out = toFriendlyError({ code: 4001, message: "user rejected the request" });
+    expect(out).not.toContain("[object Object]");
+    expect(out).toMatch(/cancelled/i);
+  });
+
+  it("JSON-stringifies an object that has no message field", () => {
+    const out = toFriendlyError({ code: -32603, detail: "boom" });
+    expect(out).not.toContain("[object Object]");
+    expect(out).toContain("-32603");
+  });
 });
