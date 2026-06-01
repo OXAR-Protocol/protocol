@@ -91,7 +91,12 @@ export default function LoginPage() {
           className="mt-10 flex flex-col items-center gap-3"
         >
           <button
-            onClick={login}
+            // v2: the account must be a Solana wallet (email → embedded, or a
+            // Solana wallet you log in with). Restrict the login modal to Solana
+            // wallets so an EVM wallet can't become an account — EVM wallets are
+            // linked later only to PAY (deposit panel). See
+            // docs/plans/2026-06-01-wallet-payment-architecture-v2.md.
+            onClick={() => login({ walletChainType: "solana-only" })}
             disabled={!ready || authenticated}
             className="inline-flex items-center gap-2 px-8 py-3 rounded font-mono text-sm uppercase tracking-wide transition-all duration-200 bg-white text-surface-0 hover:bg-white/90 disabled:bg-white/[0.06] disabled:text-white/30 disabled:cursor-not-allowed"
           >
@@ -99,7 +104,7 @@ export default function LoginPage() {
           </button>
 
           <span className="font-mono text-[10px] text-white/25 uppercase tracking-wide">
-            Email · Phantom · MetaMask · Backpack
+            Email · Phantom · Solflare · Backpack
           </span>
         </motion.div>
 

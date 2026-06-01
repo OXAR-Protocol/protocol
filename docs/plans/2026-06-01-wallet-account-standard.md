@@ -1,5 +1,11 @@
 # OXAR Wallet & Account Standard
 
+> **Superseded by `2026-06-01-wallet-payment-architecture-v2.md`.** The
+> "embedded-wallet-always" rule below broke deposits for users whose funds live in
+> an external wallet. v2 keeps the email/embedded wedge but makes the account the
+> wallet you log in with (wallet-login users operate from their own wallet, no
+> second embedded wallet). Read v2 first; this is kept for history.
+
 The canonical model for accounts, wallets, deposits and withdrawals. Decided
 2026-06-01 to end the embedded-vs-external confusion. Build to THIS; don't improvise.
 

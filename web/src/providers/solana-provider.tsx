@@ -14,7 +14,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
 import { RPC_URL } from "@/lib/constants";
 import { clearCache } from "@/lib/cache";
-import { deriveSolanaWallets } from "@/lib/wallet/solana-wallets";
+import { deriveSolanaWallets, hasExternalSolanaWallet } from "@/lib/wallet/solana-wallets";
 
 /** Minimal wallet signer — what yield providers need to sign + send. */
 export interface WalletSigner {
@@ -110,9 +110,10 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   const creatingWalletRef = useRef(false);
   const lastAddressRef = useRef<string | null>(null);
 
-  // The account = the built-in (embedded) Solana wallet, always. External wallets
-  // are funding rails, not the account. One wallet shown everywhere (balances,
-  // positions, bridge receiver). See docs/plans/2026-06-01-wallet-account-standard.md.
+  // v2: the account = the wallet you logged in with. For an email user that's the
+  // embedded wallet; for a wallet-login user it's their own Solana wallet (no
+  // embedded is created). One wallet everywhere (balances, positions, bridge
+  // receiver). See docs/plans/2026-06-01-wallet-payment-architecture-v2.md.
   const solanaAddress = useMemo<string | null>(() => {
     if (!authenticated || !user) return null;
     return deriveSolanaWallets(user.linkedAccounts as any[], null).active;
@@ -137,10 +138,14 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
     creatingWalletRef.current = false;
   };
 
-  // Auto-create Solana wallet once per session if the user is authenticated but has none.
+  // Auto-create an embedded Solana wallet once per session for users who have no
+  // wallet of their own (email/social login). NEVER for a wallet-login user — they
+  // operate from their own wallet, so a second empty embedded one would re-create
+  // the very confusion v2 removes.
   useEffect(() => {
     if (!authenticated || !user) return;
     if (solanaAddress) return;
+    if (hasExternalSolanaWallet(user.linkedAccounts as any[])) return;
     if (creatingWalletRef.current) return;
     creatingWalletRef.current = true;
     setWalletError(null);
