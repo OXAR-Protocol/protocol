@@ -10,7 +10,6 @@ import {
   useState,
 } from "react";
 import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
-import bs58 from "bs58"; // transitive dep of @solana/web3.js — always present
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
 import { RPC_URL } from "@/lib/constants";
@@ -60,16 +59,11 @@ class ReadOnlyWallet implements WalletSigner {
   }
 }
 
-// SAFETY: Privy wallet shape is opaque across versions — interface is stable for these
-// methods. `chain` is Privy's CAIP-2 SolanaChain (`solana:mainnet`), a template literal.
+// SAFETY: Privy wallet shape is opaque across versions — interface is stable for this
+// method. `chain` is Privy's CAIP-2 SolanaChain (`solana:mainnet`), a template literal.
 type SolanaChainId = `${string}:${string}`;
 interface PrivyWalletLike {
   signTransaction(args: { transaction: Uint8Array; chain?: SolanaChainId }): Promise<{ signedTransaction: Uint8Array }>;
-  signAndSendTransaction(args: {
-    transaction: Uint8Array;
-    address: string;
-    chain: SolanaChainId;
-  }): Promise<{ signature: Uint8Array }>;
   address: string;
 }
 
@@ -91,10 +85,14 @@ class PrivySolanaAdapter implements WalletSigner {
   }
 
   /**
-   * Sign and broadcast. External wallets (Phantom/Solflare/Trust, often mobile via
-   * WalletConnect) cannot reliably return a re-serializable signed tx — deserializing
-   * it throws "Reached end of buffer". So for them we use the wallet's
-   * signAndSendTransaction (it signs AND broadcasts, returning just the signature).
+   * Sign and broadcast; returns the signature.
+   *
+   * External wallets (Phantom/Solflare/Trust, often mobile via WalletConnect)
+   * support `signTransaction` but NOT `signAndSendTransaction` (Trust returns
+   * JSON-RPC -32601 "Method not found"). Re-deserializing their signed bytes also
+   * throws "Reached end of buffer". So for them we call `signTransaction` and
+   * broadcast the returned signed bytes DIRECTLY — no deserialize round-trip.
+   *
    * The embedded wallet keeps the sign-then-we-broadcast path (auto-send is flaky
    * for embedded — see web/CLAUDE.md).
    */
@@ -111,12 +109,15 @@ class PrivySolanaAdapter implements WalletSigner {
         tx instanceof Transaction
           ? tx.serialize({ requireAllSignatures: false, verifySignatures: false })
           : tx.serialize();
-      const { signature } = await this._wallet.signAndSendTransaction({
+      const { signedTransaction } = await this._wallet.signTransaction({
         transaction: txBytes,
-        address: this._publicKey.toBase58(),
         chain: "solana:mainnet",
       });
-      return bs58.encode(signature);
+      // Some external wallets return the signed tx base64-encoded; normalize to bytes.
+      const st = signedTransaction as Uint8Array | string;
+      const rawSigned =
+        typeof st === "string" ? Uint8Array.from(atob(st), (c) => c.charCodeAt(0)) : st;
+      return this._connection.sendRawTransaction(rawSigned);
     }
 
     const signed = await this.signTransaction(tx);
