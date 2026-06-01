@@ -16,7 +16,13 @@ export class UserFacingError extends Error {
  * message field, else JSON-stringify, else list keys.
  */
 function rawText(e: unknown): string {
-  if (e instanceof Error) return e.message;
+  if (e instanceof Error) {
+    // Solana SendTransactionError carries the on-chain reason in `.logs`, not the
+    // message — surface the tail so program errors are diagnosable.
+    const logs = (e as { logs?: unknown }).logs;
+    const tail = Array.isArray(logs) && logs.length ? ` | logs: ${logs.slice(-4).join(" / ")}` : "";
+    return e.message + tail;
+  }
   if (typeof e === "string") return e;
   if (e && typeof e === "object") {
     const o = e as Record<string, unknown>;
@@ -51,6 +57,7 @@ export function toFriendlyError(e: unknown): string {
 
   const rawMsg = rawText(e);
   const raw = rawMsg.toLowerCase();
+  const detail = rawMsg.trim().replace(/\s+/g, " ").slice(0, 300);
 
   // User dismissed the wallet popup — not really an error.
   if (
@@ -78,7 +85,8 @@ export function toFriendlyError(e: unknown): string {
     raw.includes("insufficient") ||
     raw.includes("not enough") ||
     raw.includes("debit an account") ||
-    raw.includes("0x1")
+    // SPL InsufficientFunds is exactly 0x1 — don't match 0x1771 (slippage) etc.
+    /0x1(?![0-9a-f])/.test(raw)
   ) {
     return "Not enough balance — check you have enough USDC, plus a little SOL for the network fee.";
   }
@@ -119,17 +127,18 @@ export function toFriendlyError(e: unknown): string {
   }
 
   // Generic on-chain failure (simulation, etc.) — after the specific cases above.
+  // Include the raw detail/logs: the on-chain reason (program error, slippage) is
+  // the actionable part and is otherwise invisible in the field.
   if (
     raw.includes("simulation failed") ||
     raw.includes("transaction") ||
     raw.includes("instruction")
   ) {
-    return "Couldn't complete that transaction. Please try again.";
+    return `Couldn't complete that transaction. Please try again.${detail ? ` (${detail})` : ""}`;
   }
 
   // Unrecognized error — surface a trimmed raw detail so it's diagnosable in the
   // field (esp. external-wallet signing failures that don't match any pattern
   // above) instead of being swallowed by a bare generic message.
-  const detail = rawMsg.trim().replace(/\s+/g, " ").slice(0, 300);
   return `Something went wrong. Please try again.${detail ? ` (${detail})` : ""}`;
 }
