@@ -22,7 +22,13 @@ describe("toFriendlyError", () => {
     expect(toFriendlyError(new Error("Unsupported chain id"))).toMatch(/network/i);
   });
 
-  it("falls back to a generic message for unknown raw errors", () => {
-    expect(toFriendlyError(new Error("kaboom 12345"))).toBe("Something went wrong. Please try again.");
+  it("appends the raw detail to the generic fallback (so unknown errors are diagnosable)", () => {
+    const out = toFriendlyError(new Error("kaboom 12345"));
+    expect(out).toMatch(/^Something went wrong\. Please try again\./);
+    expect(out).toContain("kaboom 12345");
+  });
+
+  it("does not crash on a non-Error value and still surfaces it", () => {
+    expect(toFriendlyError("plain string boom")).toContain("plain string boom");
   });
 });
