@@ -121,15 +121,6 @@ class PrivySolanaAdapter implements WalletSigner {
       const st = signedTransaction as Uint8Array | string;
       const rawSigned =
         typeof st === "string" ? Uint8Array.from(atob(st), (c) => c.charCodeAt(0)) : st;
-      // DIAGNOSTIC (temp): what did the external wallet actually return?
-      console.log("[OXAR/send/ext]", {
-        kind: tx instanceof Transaction ? "legacy" : "v0",
-        sentBytes: txBytes.length,
-        returnedType: typeof st,
-        returnedLen: typeof st === "string" ? st.length : (st as Uint8Array)?.length,
-        rawSignedLen: rawSigned?.length,
-        head: Array.from((rawSigned ?? new Uint8Array()).slice(0, 6)),
-      });
       return this._connection.sendRawTransaction(rawSigned);
     }
 
