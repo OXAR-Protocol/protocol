@@ -37,10 +37,11 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
     <PrivyProviderBase
       appId={PRIVY_APP_ID}
       config={{
-        // Standard: log in with email only. The account = the embedded Solana
-        // wallet. External wallets are linked later as funding rails (linkWallet),
-        // never a login. See docs/plans/2026-06-01-wallet-account-standard.md.
-        loginMethods: ["email"],
+        // v2: the account is the wallet you log in with. Email → we create an
+        // embedded wallet (the wedge). Solana wallet → that wallet IS the account,
+        // no embedded is created. See
+        // docs/plans/2026-06-01-wallet-payment-architecture-v2.md.
+        loginMethods: ["email", "wallet"],
         appearance: {
           theme: "#000000",
           accentColor: "#FFFFFF",
@@ -56,8 +57,10 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
         supportedChains: [mainnet, base, arbitrum, optimism, polygon],
         embeddedWallets: {
           solana: {
-            // The account IS the embedded Solana wallet — every user gets one.
-            createOnLogin: "all-users",
+            // Create an embedded wallet ONLY for users who have no wallet of their
+            // own (email/social login). A wallet-login user operates from their own
+            // wallet — don't spawn a second, empty one (the v2 fix).
+            createOnLogin: "users-without-wallets",
           },
           // EVM funds come from the user's external wallet (MetaMask/Rainbow);
           // don't litter every account with an empty embedded EVM wallet.

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { deriveSolanaWallets } from "./solana-wallets";
+import { deriveSolanaWallets, hasExternalSolanaWallet } from "./solana-wallets";
 
 const embedded = { type: "wallet", chainType: "solana", address: "EMBED111", walletClientType: "privy" };
 const phantom = { type: "wallet", chainType: "solana", address: "PHANTOM22", walletClientType: "phantom" };
@@ -33,5 +33,24 @@ describe("deriveSolanaWallets", () => {
 
   it("returns null active when there are no Solana wallets", () => {
     expect(deriveSolanaWallets([evm], null)).toEqual({ active: null, options: [] });
+  });
+});
+
+describe("hasExternalSolanaWallet", () => {
+  it("is true when an external Solana wallet is linked (the login wallet)", () => {
+    expect(hasExternalSolanaWallet([phantom])).toBe(true);
+    expect(hasExternalSolanaWallet([embedded, phantom])).toBe(true);
+  });
+
+  it("is false when only the built-in embedded wallet exists (email user)", () => {
+    expect(hasExternalSolanaWallet([embedded])).toBe(false);
+  });
+
+  it("is false when the only external wallet is on another chain (EVM pay rail)", () => {
+    expect(hasExternalSolanaWallet([embedded, evm])).toBe(false);
+  });
+
+  it("is false for no wallets", () => {
+    expect(hasExternalSolanaWallet([])).toBe(false);
   });
 });
