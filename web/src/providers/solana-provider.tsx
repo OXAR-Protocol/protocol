@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
+import bs58 from "bs58"; // transitive dep of @solana/web3.js — always present
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
 import { RPC_URL } from "@/lib/constants";
@@ -20,6 +21,12 @@ import { deriveSolanaWallets, hasExternalSolanaWallet } from "@/lib/wallet/solan
 export interface WalletSigner {
   publicKey: PublicKey;
   signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T>;
+  /**
+   * Sign AND broadcast a transaction; returns the signature. External (mobile)
+   * wallets can't round-trip a signed tx back through our deserialize (it fails
+   * "Reached end of buffer"), so they sign-and-send via the wallet instead.
+   */
+  signAndSend(tx: Transaction | VersionedTransaction): Promise<string>;
 }
 
 interface SolanaContextValue {
@@ -48,11 +55,21 @@ class ReadOnlyWallet implements WalletSigner {
   async signTransaction<T extends Transaction | VersionedTransaction>(_tx: T): Promise<T> {
     throw new Error("Please connect your wallet to sign transactions.");
   }
+  async signAndSend(_tx: Transaction | VersionedTransaction): Promise<string> {
+    throw new Error("Please connect your wallet to sign transactions.");
+  }
 }
 
-// SAFETY: Privy wallet shape is opaque across versions — interface is stable for signTransaction.
+// SAFETY: Privy wallet shape is opaque across versions — interface is stable for these
+// methods. `chain` is Privy's CAIP-2 SolanaChain (`solana:mainnet`), a template literal.
+type SolanaChainId = `${string}:${string}`;
 interface PrivyWalletLike {
-  signTransaction(args: { transaction: Uint8Array; chain?: string }): Promise<{ signedTransaction: Uint8Array }>;
+  signTransaction(args: { transaction: Uint8Array; chain?: SolanaChainId }): Promise<{ signedTransaction: Uint8Array }>;
+  signAndSendTransaction(args: {
+    transaction: Uint8Array;
+    address: string;
+    chain: SolanaChainId;
+  }): Promise<{ signature: Uint8Array }>;
   address: string;
 }
 
@@ -60,15 +77,50 @@ class PrivySolanaAdapter implements WalletSigner {
   private _publicKey: PublicKey;
   private _wallet: PrivyWalletLike;
   private _connection: Connection;
+  private _isExternal: boolean;
 
-  constructor(pubkey: PublicKey, wallet: PrivyWalletLike, connection: Connection) {
+  constructor(pubkey: PublicKey, wallet: PrivyWalletLike, connection: Connection, isExternal: boolean) {
     this._publicKey = pubkey;
     this._wallet = wallet;
     this._connection = connection;
+    this._isExternal = isExternal;
   }
 
   get publicKey(): PublicKey {
     return this._publicKey;
+  }
+
+  /**
+   * Sign and broadcast. External wallets (Phantom/Solflare/Trust, often mobile via
+   * WalletConnect) cannot reliably return a re-serializable signed tx — deserializing
+   * it throws "Reached end of buffer". So for them we use the wallet's
+   * signAndSendTransaction (it signs AND broadcasts, returning just the signature).
+   * The embedded wallet keeps the sign-then-we-broadcast path (auto-send is flaky
+   * for embedded — see web/CLAUDE.md).
+   */
+  async signAndSend(tx: Transaction | VersionedTransaction): Promise<string> {
+    if (tx instanceof Transaction) {
+      if (!tx.recentBlockhash) {
+        tx.recentBlockhash = (await this._connection.getLatestBlockhash()).blockhash;
+      }
+      if (!tx.feePayer) tx.feePayer = this._publicKey;
+    }
+
+    if (this._isExternal) {
+      const txBytes =
+        tx instanceof Transaction
+          ? tx.serialize({ requireAllSignatures: false, verifySignatures: false })
+          : tx.serialize();
+      const { signature } = await this._wallet.signAndSendTransaction({
+        transaction: txBytes,
+        address: this._publicKey.toBase58(),
+        chain: "solana:mainnet",
+      });
+      return bs58.encode(signature);
+    }
+
+    const signed = await this.signTransaction(tx);
+    return this._connection.sendRawTransaction(signed.serialize());
   }
 
   async signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T> {
@@ -119,6 +171,14 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
     return deriveSolanaWallets(user.linkedAccounts as any[], null).active;
   }, [authenticated, user]);
 
+  // Is the active account an external wallet (Phantom/Solflare/Trust) vs the
+  // embedded one? Drives the signing strategy (external → signAndSend).
+  const isExternalActive = useMemo<boolean>(() => {
+    if (!authenticated || !user || !solanaAddress) return false;
+    const { options } = deriveSolanaWallets(user.linkedAccounts as any[], null);
+    return options.find((o) => o.address === solanaAddress)?.isExternal ?? false;
+  }, [authenticated, user, solanaAddress]);
+
   // Clear the RPC cache when the wallet changes so stale per-wallet data doesn't leak.
   useEffect(() => {
     if (lastAddressRef.current && lastAddressRef.current !== solanaAddress) {
@@ -164,10 +224,10 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
     }
     const pubkey = new PublicKey(solanaAddress);
     const signer: WalletSigner = connectedWallet
-      ? new PrivySolanaAdapter(pubkey, connectedWallet, connection)
+      ? new PrivySolanaAdapter(pubkey, connectedWallet, connection, isExternalActive)
       : new ReadOnlyWallet(pubkey);
     return { wallet: signer, walletAddress: pubkey };
-  }, [solanaAddress, connectedWallet, connection]);
+  }, [solanaAddress, connectedWallet, connection, isExternalActive]);
 
   return (
     <SolanaContext.Provider
