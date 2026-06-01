@@ -43,4 +43,17 @@ describe("toFriendlyError", () => {
     expect(out).not.toContain("[object Object]");
     expect(out).toContain("-32603");
   });
+
+  it("includes the raw detail on a Solana on-chain failure", () => {
+    const out = toFriendlyError(new Error("Transaction simulation failed: custom program error: 0x1771"));
+    expect(out).toMatch(/^Couldn't complete that transaction\./);
+    expect(out).toContain("0x1771");
+  });
+
+  it("surfaces Solana tx logs (where the program error lives)", () => {
+    const err = Object.assign(new Error("Transaction simulation failed"), {
+      logs: ["Program log: AnchorError: SlippageToleranceExceeded", "Program failed"],
+    });
+    expect(toFriendlyError(err)).toContain("SlippageToleranceExceeded");
+  });
 });
