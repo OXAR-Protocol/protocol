@@ -18,7 +18,8 @@ export function toFriendlyError(e: unknown): string {
   // Our own deliberate messages pass straight through — don't clobber them.
   if (e instanceof UserFacingError) return e.message;
 
-  const raw = (e instanceof Error ? e.message : String(e)).toLowerCase();
+  const rawMsg = e instanceof Error ? e.message : String(e);
+  const raw = rawMsg.toLowerCase();
 
   // User dismissed the wallet popup — not really an error.
   if (
@@ -95,5 +96,9 @@ export function toFriendlyError(e: unknown): string {
     return "Couldn't complete that transaction. Please try again.";
   }
 
-  return "Something went wrong. Please try again.";
+  // Unrecognized error — surface a trimmed raw detail so it's diagnosable in the
+  // field (esp. external-wallet signing failures that don't match any pattern
+  // above) instead of being swallowed by a bare generic message.
+  const detail = rawMsg.trim().replace(/\s+/g, " ").slice(0, 160);
+  return `Something went wrong. Please try again.${detail ? ` (${detail})` : ""}`;
 }
