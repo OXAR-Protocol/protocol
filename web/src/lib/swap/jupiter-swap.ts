@@ -1,8 +1,14 @@
 /**
  * Jupiter swap (in-Solana) for the deposit router: quote an exact-in swap of any
- * SPL/SOL into USDC, then build the swap transaction. The wallet signs+sends it
- * (the Privy adapter handles the v0 tx); the router then deposits the realized USDC.
+ * SPL/SOL into USDC, then build the swap transaction. The wallet signs+sends it;
+ * the router then deposits the realized USDC.
+ *
+ * `asLegacy`: build a LEGACY (non-versioned) transaction. External wallets
+ * (Phantom/Trust, esp. mobile) mishandle Jupiter's default v0 tx and broadcast
+ * malformed bytes ("failed to deserialize VersionedTransaction"); legacy txs are
+ * universally signable. The embedded wallet keeps v0 (better routing, no size cap).
  */
+import { Transaction, VersionedTransaction } from "@solana/web3.js";
 
 const QUOTE_URL = "https://lite-api.jup.ag/swap/v1/quote";
 const SWAP_URL = "https://lite-api.jup.ag/swap/v1/swap";
@@ -41,28 +47,43 @@ export async function getSwapQuote(params: {
   outputMint: string;
   amount: bigint;
   slippageBps?: number;
+  /** Constrain the route so it fits a legacy transaction (for external wallets). */
+  asLegacy?: boolean;
 }): Promise<SwapQuote> {
-  const { inputMint, outputMint, amount, slippageBps = 50 } = params;
-  const url = `${QUOTE_URL}?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount.toString()}&slippageBps=${slippageBps}`;
+  const { inputMint, outputMint, amount, slippageBps = 50, asLegacy = false } = params;
+  let url = `${QUOTE_URL}?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount.toString()}&slippageBps=${slippageBps}`;
+  if (asLegacy) url += "&asLegacyTransaction=true";
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Swap quote failed (${res.status})`);
   return (await res.json()) as SwapQuote;
 }
 
-/** Build the swap transaction (base64-encoded v0) for a quote + owner. */
-export async function buildSwapTx(quote: SwapQuote, ownerBase58: string): Promise<string> {
+/** Build the swap transaction (base64) for a quote + owner. v0 by default; legacy when asked. */
+export async function buildSwapTx(
+  quote: SwapQuote,
+  ownerBase58: string,
+  opts?: { asLegacy?: boolean },
+): Promise<string> {
+  const body: Record<string, unknown> = {
+    quoteResponse: quote,
+    userPublicKey: ownerBase58,
+    dynamicComputeUnitLimit: true,
+    dynamicSlippage: false,
+  };
+  if (opts?.asLegacy) body.asLegacyTransaction = true;
   const res = await fetch(SWAP_URL, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      quoteResponse: quote,
-      userPublicKey: ownerBase58,
-      dynamicComputeUnitLimit: true,
-      dynamicSlippage: false,
-    }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`Swap build failed (${res.status})`);
   const json = (await res.json()) as { swapTransaction?: string };
   if (!json.swapTransaction) throw new Error("Swap build returned no transaction");
   return json.swapTransaction;
+}
+
+/** Deserialize Jupiter's base64 swap tx — legacy `Transaction` or v0 `VersionedTransaction`. */
+export function deserializeSwapTx(b64: string, asLegacy: boolean): Transaction | VersionedTransaction {
+  const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  return asLegacy ? Transaction.from(bytes) : VersionedTransaction.deserialize(bytes);
 }
