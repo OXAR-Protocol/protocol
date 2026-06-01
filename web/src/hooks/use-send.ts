@@ -37,8 +37,7 @@ export function useSend() {
 
   const sendVersioned = useCallback(
     async (tx: VersionedTransaction): Promise<string> => {
-      const signed = await wallet!.signTransaction(tx);
-      const sig = await connection.sendRawTransaction(signed.serialize());
+      const sig = await wallet!.signAndSend(tx);
       await connection.confirmTransaction(sig, "confirmed");
       return sig;
     },
@@ -105,11 +104,8 @@ export function useSend() {
             createTransferInstruction(fromAta, toAta, walletAddress, amountBase),
           );
         }
-        const { blockhash } = await connection.getLatestBlockhash();
-        tx.recentBlockhash = blockhash;
-        tx.feePayer = walletAddress;
-        const signed = await wallet.signTransaction(tx);
-        const sig = await connection.sendRawTransaction(signed.serialize());
+        // signAndSend sets blockhash/feePayer + handles the embedded-vs-external split.
+        const sig = await wallet.signAndSend(tx);
         await connection.confirmTransaction(sig, "confirmed");
         return { sig, crossChain: false };
       } catch (e) {

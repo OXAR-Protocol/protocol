@@ -28,11 +28,8 @@ export function useYieldActions(providerId: string) {
     async (ixs: TransactionInstruction[]): Promise<string> => {
       if (!wallet || !walletAddress) throw new Error("Wallet not connected");
       const tx = new Transaction().add(...ixs);
-      const { blockhash } = await connection.getLatestBlockhash();
-      tx.recentBlockhash = blockhash;
-      tx.feePayer = walletAddress;
-      const signed = await wallet.signTransaction(tx);
-      const sig = await connection.sendRawTransaction(signed.serialize());
+      // signAndSend handles blockhash/feePayer + the embedded-vs-external split.
+      const sig = await wallet.signAndSend(tx);
       await connection.confirmTransaction(sig, "confirmed");
       return sig;
     },
@@ -42,8 +39,7 @@ export function useYieldActions(providerId: string) {
   const sendTx = useCallback(
     async (tx: VersionedTransaction): Promise<string> => {
       if (!wallet) throw new Error("Wallet not connected");
-      const signed = await wallet.signTransaction(tx);
-      const sig = await connection.sendRawTransaction(signed.serialize());
+      const sig = await wallet.signAndSend(tx);
       await connection.confirmTransaction(sig, "confirmed");
       return sig;
     },

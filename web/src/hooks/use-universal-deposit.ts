@@ -63,8 +63,7 @@ export function useUniversalDeposit(providerId: string) {
 
           const b64 = await buildSwapTx(quote, walletAddress.toBase58());
           const tx = VersionedTransaction.deserialize(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)));
-          const signed = await wallet.signTransaction(tx);
-          const sig = await connection.sendRawTransaction(signed.serialize());
+          const sig = await wallet.signAndSend(tx);
           await connection.confirmTransaction(sig, "confirmed");
 
           // Deposit the guaranteed-min output (otherAmountThreshold ≤ realized), so the
