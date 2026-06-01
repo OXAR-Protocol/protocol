@@ -1,13 +1,12 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { VersionedTransaction } from "@solana/web3.js";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { getProvider, toBaseUnits, toFriendlyError, UserFacingError } from "@/lib/yield";
 import { chooseDepositPath } from "@/lib/yield/deposit-path";
-import { getSwapQuote, buildSwapTx, priceImpactTooHigh } from "@/lib/swap/jupiter-swap";
+import { getSwapQuote, buildSwapTx, deserializeSwapTx, priceImpactTooHigh } from "@/lib/swap/jupiter-swap";
 import { spendableBase, type WalletAsset } from "@/lib/portfolio/assets";
 
 export type DepositStatus = "idle" | "swapping" | "depositing";
@@ -19,7 +18,7 @@ export type DepositStatus = "idle" | "swapping" | "depositing";
  * USDC base units actually deposited.
  */
 export function useUniversalDeposit(providerId: string) {
-  const { wallet, connection, walletAddress } = useSolanaContext();
+  const { wallet, connection, walletAddress, isExternal } = useSolanaContext();
   const { deposit } = useYieldActions(providerId);
   const [status, setStatus] = useState<DepositStatus>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -52,17 +51,20 @@ export function useUniversalDeposit(providerId: string) {
           if (payBase > maxSpend) throw new UserFacingError(`Not enough ${payAsset.symbol}`);
 
           setStatus("swapping");
+          // External wallets need a legacy tx (they mishandle Jupiter's v0); embedded keeps v0.
+          const asLegacy = isExternal;
           const quote = await getSwapQuote({
             inputMint: payAsset.mint,
             outputMint: productMint,
             amount: payBase,
+            asLegacy,
           });
           if (priceImpactTooHigh(quote)) {
             throw new UserFacingError("Price impact too high — try a smaller amount");
           }
 
-          const b64 = await buildSwapTx(quote, walletAddress.toBase58());
-          const tx = VersionedTransaction.deserialize(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)));
+          const b64 = await buildSwapTx(quote, walletAddress.toBase58(), { asLegacy });
+          const tx = deserializeSwapTx(b64, asLegacy);
           const sig = await wallet.signAndSend(tx);
           await connection.confirmTransaction(sig, "confirmed");
 

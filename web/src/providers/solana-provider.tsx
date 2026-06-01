@@ -35,6 +35,9 @@ interface SolanaContextValue {
   walletAddress: PublicKey | null;
   walletError: string | null;
   retryCreateWallet: () => void;
+  /** True when the active wallet is an external one (Phantom/Trust) vs the embedded
+   * one — external wallets need legacy (not v0) swap txs. */
+  isExternal: boolean;
 }
 
 const SolanaContext = createContext<SolanaContextValue>({
@@ -43,6 +46,7 @@ const SolanaContext = createContext<SolanaContextValue>({
   walletAddress: null,
   walletError: null,
   retryCreateWallet: () => {},
+  isExternal: false,
 });
 
 export function useSolanaContext() {
@@ -232,7 +236,7 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
 
   return (
     <SolanaContext.Provider
-      value={{ connection, wallet, walletAddress, walletError, retryCreateWallet }}
+      value={{ connection, wallet, walletAddress, walletError, retryCreateWallet, isExternal: isExternalActive }}
     >
       {children}
     </SolanaContext.Provider>

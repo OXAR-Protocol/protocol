@@ -11,7 +11,7 @@ import {
 import { useSolanaContext } from "@/providers/solana-provider";
 import { toFriendlyError, UserFacingError } from "@/lib/yield";
 import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
-import { getSwapQuote, buildSwapTx, priceImpactTooHigh } from "@/lib/swap/jupiter-swap";
+import { getSwapQuote, buildSwapTx, deserializeSwapTx, priceImpactTooHigh } from "@/lib/swap/jupiter-swap";
 import { DELORA_SOLANA_CHAIN_ID, bridgeFeeTooHigh, type BridgeQuote } from "@/lib/bridge/delora";
 import { outboundKind, type DestChain, type DestAsset } from "@/lib/wallet/outbound-destinations";
 
@@ -31,7 +31,7 @@ const deserialize = (b64: string) =>
  * native on an EVM chain. The active Solana wallet signs + pays the SOL fee.
  */
 export function useSend() {
-  const { wallet, walletAddress, connection } = useSolanaContext();
+  const { wallet, walletAddress, connection, isExternal } = useSolanaContext();
   const [status, setStatus] = useState<SendStatus>("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -85,9 +85,14 @@ export function useSend() {
         }
 
         if (kind === "swap") {
-          const quote = await getSwapQuote({ inputMint: source.mint, outputMint: destAsset.mint, amount: amountBase });
+          // External wallets need a legacy tx (they mishandle Jupiter's v0); embedded keeps v0.
+          const asLegacy = isExternal;
+          const quote = await getSwapQuote({ inputMint: source.mint, outputMint: destAsset.mint, amount: amountBase, asLegacy });
           if (priceImpactTooHigh(quote)) throw new UserFacingError("Price impact too high — try a smaller amount");
-          return { sig: await sendVersioned(deserialize(await buildSwapTx(quote, owner))), crossChain: false };
+          const tx = deserializeSwapTx(await buildSwapTx(quote, owner, { asLegacy }), asLegacy);
+          const sig = await wallet.signAndSend(tx);
+          await connection.confirmTransaction(sig, "confirmed");
+          return { sig, crossChain: false };
         }
 
         // transfer: same asset to the address (native SOL or SPL).
