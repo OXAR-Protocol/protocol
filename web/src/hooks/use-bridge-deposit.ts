@@ -116,7 +116,8 @@ export function useBridgeDeposit(providerId: string) {
 
         const provider1193 = await evmWallet.getEthereumProvider();
         await evmWallet.switchChain(originChainId);
-        const client = publicClientFor(originChainId);
+        // Read/receipt via the wallet's own RPC (the default public RPC is flaky).
+        const client = publicClientFor(originChainId, provider1193);
 
         // ERC-20 needs an allowance to the Delora diamond before bridging.
         if (!isNativeEvm(payAsset.mint) && quote.approvalAddress) {
@@ -125,6 +126,7 @@ export function useBridgeDeposit(providerId: string) {
             token: payAsset.mint,
             owner: evmWallet.address,
             spender: quote.approvalAddress,
+            provider: provider1193,
           });
           if (allowance < payBase) {
             setStatus("approving");

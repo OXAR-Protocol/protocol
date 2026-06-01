@@ -1,7 +1,7 @@
 import { encodeFunctionData, erc20Abi } from "viem";
 
 import { EVM_NATIVE_SENTINEL } from "@/lib/portfolio/evm-assets";
-import { publicClientFor } from "./chains";
+import { publicClientFor, type Eip1193 } from "./chains";
 
 /** True for the native coin (zero address) — no ERC-20 approval needed. */
 export function isNativeEvm(tokenAddress: string): boolean {
@@ -17,14 +17,16 @@ export function encodeApprove(spender: string, amount: bigint): string {
   });
 }
 
-/** Current ERC-20 allowance the owner has granted the spender (base units). */
+/** Current ERC-20 allowance the owner has granted the spender (base units).
+ * Reads via the connected wallet's RPC (`provider`) — the default public RPC is flaky. */
 export async function readAllowance(params: {
   chainId: number;
   token: string;
   owner: string;
   spender: string;
+  provider?: Eip1193;
 }): Promise<bigint> {
-  const client = publicClientFor(params.chainId);
+  const client = publicClientFor(params.chainId, params.provider);
   return client.readContract({
     address: params.token as `0x${string}`,
     abi: erc20Abi,
