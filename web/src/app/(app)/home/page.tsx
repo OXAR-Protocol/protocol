@@ -7,12 +7,13 @@ import { usePrivy } from "@privy-io/react-auth";
 import { ArrowUpRight, Sparkles, Loader2 } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
+import { LiveAmount } from "@/components/live-amount";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { fromBaseUnits } from "@/lib/yield";
 
 export default function HomePage() {
   const { user } = usePrivy();
-  const { totalUsdc, dailyYield, positionCount, views, loading } =
+  const { totalUsdc, dailyYield, blendedApy, positionCount, views, loading } =
     useAggregatePersonalBalance();
   const [greeting, setGreeting] = useState("Welcome");
 
@@ -61,12 +62,7 @@ export default function HomePage() {
               <Loader2 className="animate-spin inline" size={28} />
             </span>
           ) : (
-            <span className="text-[clamp(2.5rem,6vw,4rem)] font-sans font-light text-white leading-none tabular-nums">
-              ${totalUsdc.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </span>
+            <LiveAmount value={totalUsdc} apy={blendedApy} variant="hero" />
           )}
           {totalUsdc > 0 && dailyYield > 0 && (
             <span className="font-mono text-sm text-accent">
@@ -161,9 +157,7 @@ export default function HomePage() {
                       {(v.apy * 100).toFixed(2)}% APY · {v.assetSymbol}
                     </p>
                   </div>
-                  <p className="font-sans text-xl text-white tabular-nums">
-                    ${value.toFixed(2)}
-                  </p>
+                  <LiveAmount value={value} apy={v.apy} variant="md" />
                 </Link>
               );
             })}
