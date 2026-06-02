@@ -9,12 +9,12 @@ skip-lint = false
 # Program IDs are synced from target/deploy/*-keypair.json via `anchor keys sync`
 # after the first build. Placeholders below are replaced on sync.
 [programs.localnet]
-dispatcher = "Disp1111111111111111111111111111111111111111"
-kamino_usdc = "Kami1111111111111111111111111111111111111111"
+dispatcher = "CDit4o9LeqFaxEMkS7mHDKkUxrhhr8K9kH4CYfqZxEok"
+kamino_usdc = "BSwbiwogeLmYLYXfYb3t4WWNDD3x5tJHCZyZJLVRLuf9"
 
 [programs.devnet]
-dispatcher = "Disp1111111111111111111111111111111111111111"
-kamino_usdc = "Kami1111111111111111111111111111111111111111"
+dispatcher = "CDit4o9LeqFaxEMkS7mHDKkUxrhhr8K9kH4CYfqZxEok"
+kamino_usdc = "BSwbiwogeLmYLYXfYb3t4WWNDD3x5tJHCZyZJLVRLuf9"
 
 [registry]
 url = "https://api.apr.dev"

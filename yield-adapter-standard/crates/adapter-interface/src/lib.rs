@@ -36,7 +36,7 @@ pub const MAX_VALUE_STALENESS_SLOTS: u64 = 60;
 
 /// The dispatcher program ID. Every adapter verifies the CPI caller against this.
 /// Synced from `target/deploy/dispatcher-keypair.json` via `anchor keys sync`.
-pub const DISPATCHER_ID: Pubkey = pubkey!("Disp1111111111111111111111111111111111111111");
+pub const DISPATCHER_ID: Pubkey = pubkey!("CDit4o9LeqFaxEMkS7mHDKkUxrhhr8K9kH4CYfqZxEok");
 
 // ============================================================================
 // Canonical adapter-state header
