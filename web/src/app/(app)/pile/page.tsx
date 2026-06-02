@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Loader2, ArrowUpRight, List, LayoutGrid } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
+import { LiveAmount } from "@/components/live-amount";
 import { YieldSourceSheet } from "@/components/yield-source-sheet";
 import { PositionCard } from "@/components/position-card";
 import {
@@ -34,6 +35,15 @@ export default function PilePage() {
   // Pile is the portfolio: only sources where you actually hold a position.
   // (Browse/deposit lives on /yield.)
   const held = views.filter((v) => v.underlyingBalance > BigInt(0));
+
+  // Value-weighted APY across held positions — drives the live total ticker.
+  const blendedApy =
+    totalValue > 0
+      ? held.reduce(
+          (acc, v) => acc + fromBaseUnits(v.underlyingBalance, v.decimals) * v.apy,
+          0,
+        ) / totalValue
+      : 0;
 
   return (
     <div className="max-w-[900px] mx-auto pt-8 pb-32 px-4">
@@ -66,12 +76,7 @@ export default function PilePage() {
           {loading ? (
             <Loader2 className="animate-spin text-white/30" size={28} />
           ) : (
-            <span className="font-sans text-4xl font-light text-white tabular-nums">
-              ${totalValue.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </span>
+            <LiveAmount value={totalValue} apy={blendedApy} variant="lg" />
           )}
         </div>
       </motion.section>
@@ -156,9 +161,7 @@ export default function PilePage() {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-sans text-xl text-white tabular-nums">
-                        ${value.toFixed(2)}
-                      </p>
+                      <LiveAmount value={value} apy={v.apy} variant="md" />
                       <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
                         your position
                       </p>

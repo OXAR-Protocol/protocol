@@ -6,6 +6,7 @@ import type { ProviderView } from "@/hooks/use-yield-positions";
 import { useApyHistory } from "@/hooks/use-apy-history";
 import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
 import { Sparkline } from "@/components/sparkline";
+import { LiveAmount } from "@/components/live-amount";
 
 interface Props {
   view: ProviderView;
@@ -40,7 +41,7 @@ export function PositionCard({ view, onOpen }: Props) {
 
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-sans text-xl text-white tabular-nums">${value.toFixed(2)}</p>
+          <LiveAmount value={value} apy={view.apy} variant="md" />
           <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
             {value > 0 ? "your position" : "tap to deposit"}
           </p>

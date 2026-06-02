@@ -24,9 +24,13 @@ export function useAggregatePersonalBalance() {
     }
   }
 
+  // Value-weighted APY across positions — drives the live balance ticker.
+  const blendedApy = totalUsdc > 0 ? (dailyYield * 365) / totalUsdc : 0;
+
   return {
     totalUsdc,
     dailyYield,
+    blendedApy,
     positionCount,
     views,
     loading,
