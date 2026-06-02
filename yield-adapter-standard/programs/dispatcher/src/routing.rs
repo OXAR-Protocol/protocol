@@ -16,7 +16,11 @@ use adapter_interface::{encode_current_value, encode_deposit, encode_initialize,
 
 use crate::error::DispatcherError;
 
-fn forward(metas: &mut Vec<AccountMeta>, infos: &mut Vec<AccountInfo>, remaining: &[AccountInfo]) {
+fn forward<'a>(
+    metas: &mut Vec<AccountMeta>,
+    infos: &mut Vec<AccountInfo<'a>>,
+    remaining: &[AccountInfo<'a>],
+) {
     for acc in remaining {
         metas.push(AccountMeta {
             pubkey: acc.key(),

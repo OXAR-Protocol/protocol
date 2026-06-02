@@ -1,5 +1,3 @@
-use anchor_lang::prelude::*;
-
 /// Governance registry PDA: `seeds = [REGISTRY_SEED]`.
 pub const REGISTRY_SEED: &[u8] = b"registry";
 
