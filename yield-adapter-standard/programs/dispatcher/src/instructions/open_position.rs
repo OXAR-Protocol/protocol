@@ -69,17 +69,22 @@ pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, OpenPosition<'info>>) -> R
     );
 
     let position_key = ctx.accounts.position.key();
+    let owner_key = ctx.accounts.owner.key();
+    let adapter_key = ctx.accounts.adapter_program.key();
+    let bump = ctx.bumps.position;
     let clock = Clock::get()?;
     {
         let p = &mut ctx.accounts.position;
-        p.owner = ctx.accounts.owner.key();
-        p.adapter_program = ctx.accounts.adapter_program.key();
+        p.owner = owner_key;
+        p.adapter_program = adapter_key;
         p.usdc_pool = ctx.accounts.position_usdc_pool.key();
         p.usdc_mint = ctx.accounts.usdc_mint.key();
         p.created_at = clock.unix_timestamp;
-        p.bump = ctx.bumps.position;
+        p.bump = bump;
     }
 
+    let bump_arr = [bump];
+    let seeds: &[&[u8]] = &[POSITION_SEED, owner_key.as_ref(), adapter_key.as_ref(), &bump_arr];
     route_initialize(
         &ctx.accounts.adapter_program,
         &ctx.accounts.instructions_sysvar,
@@ -88,6 +93,7 @@ pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, OpenPosition<'info>>) -> R
         &ctx.accounts.owner.to_account_info(),
         &ctx.accounts.system_program.to_account_info(),
         ctx.remaining_accounts,
+        &[seeds],
     )?;
 
     emit!(PositionOpened {

@@ -15,6 +15,9 @@ const fs = require("fs");
 
 const RESERVE = new PublicKey("D6q6wuQSrifJKZYpR1M8R4YawnLDtDsMmWM1NbBmgJ59");
 const SCOPE = new PublicKey("3t4JZcueEzTbVP6kLxXrL3VpWx45jDer4eqysweBchNH");
+// MarginFi USDC bank's Pyth pull oracle (PriceUpdateV2); posted_slot at byte 125.
+const MFI_ORACLE = new PublicKey("Dpw1EAVrSB1ibxiDQyTAW6Zip3J4Btk2x4SgApQCeFbX");
+const ORACLE_POSTED_SLOT_OFF = 125;
 const RPC = process.env.MAINNET_RPC_URL ?? "https://api.mainnet-beta.solana.com";
 
 const LOW_SLOT = 1n;
@@ -38,7 +41,7 @@ function toFixture(pubkey, info) {
 
 (async () => {
   const c = new Connection(RPC, "confirmed");
-  const [reserve, scope] = await c.getMultipleAccountsInfo([RESERVE, SCOPE]);
+  const [reserve, scope, oracle] = await c.getMultipleAccountsInfo([RESERVE, SCOPE, MFI_ORACLE]);
 
   // Reserve: last_update.slot at byte 16.
   reserve.data.writeBigUInt64LE(LOW_SLOT, 16);
@@ -49,10 +52,15 @@ function toFixture(pubkey, info) {
     if (off + 8 <= scope.data.length) scope.data.writeBigUInt64LE(LOW_SLOT, off);
   }
 
+  // MarginFi oracle: rewrite PriceUpdateV2 posted_slot low (publish_time stays
+  // fresh via the validator's wall clock, so the seconds-based staleness passes).
+  oracle.data.writeBigUInt64LE(LOW_SLOT, ORACLE_POSTED_SLOT_OFF);
+
   const dir = `${__dirname}/../tests/fork/fixtures`;
   fs.writeFileSync(`${dir}/reserve-patched.json`, JSON.stringify(toFixture(RESERVE, reserve), null, 2));
   fs.writeFileSync(`${dir}/scope-patched.json`, JSON.stringify(toFixture(SCOPE, scope), null, 2));
-  console.log("wrote reserve-patched.json + scope-patched.json (slots -> 1)");
+  fs.writeFileSync(`${dir}/oracle-patched.json`, JSON.stringify(toFixture(MFI_ORACLE, oracle), null, 2));
+  console.log("wrote reserve-patched.json + scope-patched.json + oracle-patched.json (slots -> 1)");
 })().catch((e) => {
   console.error(e.message);
   process.exit(1);

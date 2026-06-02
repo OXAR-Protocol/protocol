@@ -31,9 +31,10 @@ fn forward<'a>(
     }
 }
 
-/// CPI `adapter_initialize`. The owner (top-level signer + rent payer) authorizes
-/// account creation, so a plain `invoke` suffices — no PDA signature needed.
-/// Prefix: [instructions_sysvar, position, adapter_state, rent_payer, system_program].
+/// CPI `adapter_initialize`. Signed by the `position` PDA so an adapter whose
+/// underlying init needs the position as a signing authority (e.g. MarginFi's
+/// account PDA) works; the rent payer (top-level owner) covers account creation.
+/// Prefix: [instructions_sysvar, position(signer), adapter_state, rent_payer, system_program].
 #[allow(clippy::too_many_arguments)]
 pub fn route_initialize<'info>(
     adapter_program: &AccountInfo<'info>,
@@ -43,10 +44,11 @@ pub fn route_initialize<'info>(
     rent_payer: &AccountInfo<'info>,
     system_program: &AccountInfo<'info>,
     remaining: &[AccountInfo<'info>],
+    signer_seeds: &[&[&[u8]]],
 ) -> Result<()> {
     let mut metas = vec![
         AccountMeta::new_readonly(instructions_sysvar.key(), false),
-        AccountMeta::new_readonly(position.key(), false),
+        AccountMeta::new_readonly(position.key(), true),
         AccountMeta::new(adapter_state.key(), false),
         AccountMeta::new(rent_payer.key(), true),
         AccountMeta::new_readonly(system_program.key(), false),
@@ -65,7 +67,7 @@ pub fn route_initialize<'info>(
         accounts: metas,
         data: encode_initialize(&[]),
     };
-    invoke(&ix, &infos).map_err(|e| {
+    invoke_signed(&ix, &infos, signer_seeds).map_err(|e| {
         msg!("adapter_initialize CPI failed: {:?}", e);
         error!(DispatcherError::AdapterMismatch)
     })

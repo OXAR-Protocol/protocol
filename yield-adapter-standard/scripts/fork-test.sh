@@ -30,8 +30,13 @@ solana-test-validator --reset --quiet --ledger "$LEDGER" --url "$RPC" \
   --clone B8V6WVjPxW1UGwVDfxH2d2r8SyT4cqn7dQRK6XneVa7D \
   --clone 3DzjXRfxRm6iejfyyMynR4tScddaanrePJ1NJU2XnPPL \
   --clone EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
+  --clone-upgradeable-program MFv2hWf31Z9kbCa1snEPYctwafyhdvnV7FZnsebVacA \
+  --clone 4qp6Fx6tnZkY5Wropq9wUYgtFxXKwE6viZxFHg3rdAG8 \
+  --clone 2s37akK2eyBbp8DZgCm7RtsaEz8eJP3Nxd4urLHQv7yB \
+  --clone 7jaiZR5Sk8hdYN9MxTpczTcwbWpb5WEoxSANuUwveuat \
   --account D6q6wuQSrifJKZYpR1M8R4YawnLDtDsMmWM1NbBmgJ59 tests/fork/fixtures/reserve-patched.json \
   --account 3t4JZcueEzTbVP6kLxXrL3VpWx45jDer4eqysweBchNH tests/fork/fixtures/scope-patched.json \
+  --account Dpw1EAVrSB1ibxiDQyTAW6Zip3J4Btk2x4SgApQCeFbX tests/fork/fixtures/oracle-patched.json \
   --account 96mBCxzaYW4nwyXac5oLGV6m16aEmXbwWZ4XsTq4AJBT tests/fork/fixtures/usdc-funded.json &
 VPID=$!
 trap 'kill $VPID 2>/dev/null || true' EXIT
@@ -50,6 +55,7 @@ solana airdrop 1000 --url "$U" >/dev/null 2>&1 || true
 solana airdrop 1000 --url "$U" >/dev/null 2>&1 || true
 solana program deploy --url "$U" --program-id target/deploy/dispatcher-keypair.json target/deploy/dispatcher.so
 solana program deploy --url "$U" --program-id target/deploy/kamino_usdc-keypair.json target/deploy/kamino_usdc.so
+solana program deploy --url "$U" --program-id target/deploy/marginfi_usdc-keypair.json target/deploy/marginfi_usdc.so
 
-echo "▸ running e2e"
-yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/fork/02-kamino-native.ts
+echo "▸ running e2e (all adapters)"
+yarn run ts-mocha -p ./tsconfig.json -t 1000000 'tests/fork/*-native.ts'
