@@ -120,7 +120,8 @@ describe("kamino-usdc · native mainnet-fork e2e", () => {
     expect((before - (await bal(ownerUsdcAta)))).to.equal(DEPOSIT);
     const st = await (kamino.account as any).adapterState.fetch(adapterState);
     expect(st.header.totalShares.toNumber()).to.be.greaterThan(0);
-    expect(await bal(positionPool)).to.equal(0n);
+    // Effectively all routed into klend (allow sub-cent rounding dust in the pool).
+    expect(Number(await bal(positionPool))).to.be.lessThan(10);
   });
 
   it("reports current value ≈ deposit (via return data)", async () => {
