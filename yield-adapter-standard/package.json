@@ -5,8 +5,8 @@
   "description": "A standard interface for Solana yield adapters: a dispatcher, an on-chain registry, and five reference adapters.",
   "scripts": {
     "lint": "cargo clippy --all-targets -- -D warnings",
-    "test": "anchor test",
-    "test-fork": "anchor test --skip-build -- --features fork"
+    "build": "anchor build",
+    "test-fork": "bash scripts/fork-test.sh"
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.31.1"
