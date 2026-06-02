@@ -140,14 +140,44 @@ pub fn verify_caller_is_dispatcher(
 ) -> Result<()> {
     let idx = load_current_index_checked(instructions_sysvar)?;
     let parent = load_instruction_at_checked(idx as usize, instructions_sysvar)?;
-    require_keys_eq!(parent.program_id, *dispatcher, InterfaceError::UnauthorizedCaller);
+    require_keys_eq!(parent.program_id, *dispatcher, AdapterError::Unauthorized);
     Ok(())
 }
 
+/// Canonical adapter error codes — shared by every adapter so a given code means
+/// the same thing across the whole standard (spec §Canonical Error Codes).
+///
+/// Variant order is LOAD-BEARING: Anchor assigns codes from 6000 in declaration
+/// order. Do NOT reorder or insert before existing variants.
 #[error_code]
-pub enum InterfaceError {
+pub enum AdapterError {
+    /// 6000 — CPI caller is not the registered dispatcher.
     #[msg("Unauthorized: caller is not the registered dispatcher")]
-    UnauthorizedCaller,
+    Unauthorized,
+    /// 6001 — `amount == 0` or `shares == 0`.
+    #[msg("Amount or shares must be greater than zero")]
+    ZeroAmount,
+    /// 6002 — withdraw exceeds the adapter's tracked share balance.
+    #[msg("Withdraw exceeds adapter share balance")]
+    InsufficientShares,
+    /// 6003 — checked arithmetic returned `None`.
+    #[msg("Arithmetic overflow")]
+    MathOverflow,
+    /// 6004 — `adapter_data` version byte does not match ADAPTER_INTERFACE_VERSION.
+    #[msg("adapter_data version mismatch")]
+    VersionMismatch,
+    /// 6005 — oracle / reserve state older than MAX_VALUE_STALENESS_SLOTS.
+    #[msg("Oracle data is stale")]
+    StaleOracle,
+    /// 6006 — `adapter_state` not yet initialized via `adapter_initialize`.
+    #[msg("adapter_state is not initialized")]
+    AdapterStateUninit,
+    /// 6007 — `adapter_data` exceeds MAX_ADAPTER_DATA_LEN bytes.
+    #[msg("adapter_data exceeds the maximum length")]
+    AdapterDataTooLarge,
+    /// 6008 — an underlying protocol CPI failed (see program logs).
+    #[msg("Underlying protocol CPI failed")]
+    CpiFailed,
 }
 
 #[cfg(test)]
