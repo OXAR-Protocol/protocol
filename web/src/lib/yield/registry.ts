@@ -4,6 +4,7 @@ import {
   jupiterUsdgProvider,
 } from "./jupiter";
 import { kaminoUsdcProvider } from "./kamino";
+import { ondoUsdyProvider } from "./ondo";
 import type { YieldProvider } from "./types";
 
 /**
@@ -15,6 +16,7 @@ export const PROVIDERS: readonly YieldProvider[] = [
   jupiterUsdtProvider,
   jupiterUsdgProvider,
   kaminoUsdcProvider,
+  ondoUsdyProvider,
 ];
 
 export function getProvider(id: string): YieldProvider | undefined {
