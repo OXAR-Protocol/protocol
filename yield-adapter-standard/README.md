@@ -40,6 +40,26 @@ scripts                    fork-test runner + fixture generator
 | `maple-syrup` | ✅ `anchor build` | ✅ swap-and-hold round-trip (Orca whirlpool) |
 | `drift-if` | ✅ `anchor build` | ⏳ written; fork test skipped pending the deployed Drift `initialize_user_stats` discriminator (see test note) |
 
+## Devnet
+
+The dispatcher (which holds the governance registry) is deployed to **devnet**:
+
+| | address |
+|---|---|
+| `dispatcher` program | `CDit4o9LeqFaxEMkS7mHDKkUxrhhr8K9kH4CYfqZxEok` |
+| `Registry` account (admin-gated) | `85V49kHnLrCyVsJThSsjLCyTVzcMvoJPszZfayJvCzLN` |
+
+```bash
+# deploy + initialize the registry
+solana program deploy --url devnet --program-id target/deploy/dispatcher-keypair.json target/deploy/dispatcher.so
+ANCHOR_PROVIDER_URL=https://api.devnet.solana.com ANCHOR_WALLET=~/.config/solana/id.json \
+  yarn ts-node scripts/init-registry.ts
+# deploy an adapter, then whitelist it
+anchor deploy --provider.cluster devnet --program-name kamino-usdc
+ANCHOR_PROVIDER_URL=https://api.devnet.solana.com ANCHOR_WALLET=~/.config/solana/id.json \
+  yarn ts-node scripts/whitelist-adapter.ts <ADAPTER_PROGRAM_ID> "Kamino USDC"
+```
+
 ## Toolchain
 
 Anchor **0.31.1**, Solana **2.2.20**, Rust edition 2021. `Cargo.lock` is committed and
