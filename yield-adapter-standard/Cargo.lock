@@ -840,6 +840,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "jupiter-lp"
+version = "1.0.0"
+dependencies = [
+ "adapter-interface",
+ "anchor-lang",
+ "anchor-spl",
+]
+
+[[package]]
 name = "kamino-usdc"
 version = "1.0.0"
 dependencies = [

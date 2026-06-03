@@ -36,7 +36,8 @@ scripts                    fork-test runner + fixture generator
 | `dispatcher` (router + registry) | ✅ `anchor build` | ✅ via Kamino e2e |
 | `kamino-usdc` | ✅ `anchor build` | ✅ deposit/withdraw/value round-trip |
 | `marginfi-usdc` | ✅ `anchor build` | ✅ deposit/withdraw/value round-trip |
-| jupiter-lp · maple-syrup · drift-insurance-fund | planned | planned |
+| `jupiter-lp` | ✅ `anchor build` | ✅ add/remove-liquidity round-trip (multi-custody AUM) |
+| maple-syrup · drift-insurance-fund | planned | planned |
 
 ## Toolchain
 
