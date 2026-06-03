@@ -1,6 +1,7 @@
 import type {
   Connection,
   PublicKey,
+  Transaction,
   TransactionInstruction,
   VersionedTransaction,
 } from "@solana/web3.js";
@@ -84,13 +85,14 @@ export interface YieldProvider {
    */
   buildRedeemIxs?(p: RedeemIxParams): Promise<TransactionInstruction[]>;
 
-  // --- Transaction-based path (Kamino: server-built v0 VersionedTransaction) ---
+  // --- Transaction-based path (Kamino: server-built v0 VersionedTransaction;
+  //     Ondo: a legacy Jupiter swap tx) ---
   /** A fully-built deposit transaction the wallet signs+sends as-is. */
-  buildDepositTx?(p: BuildIxParams): Promise<VersionedTransaction>;
+  buildDepositTx?(p: BuildIxParams): Promise<VersionedTransaction | Transaction>;
   /** A fully-built partial-withdraw transaction. */
-  buildWithdrawTx?(p: BuildIxParams): Promise<VersionedTransaction>;
+  buildWithdrawTx?(p: BuildIxParams): Promise<VersionedTransaction | Transaction>;
   /** A fully-built full-exit transaction (no share count needed). */
-  buildRedeemTx?(p: RedeemTxParams): Promise<VersionedTransaction>;
+  buildRedeemTx?(p: RedeemTxParams): Promise<VersionedTransaction | Transaction>;
 
   /** Current position for `owner` (zeroed if none). */
   getPosition(owner: PublicKey, connection: Connection): Promise<YieldPosition>;

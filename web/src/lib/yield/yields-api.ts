@@ -16,7 +16,7 @@ export interface DefiLlamaPool {
   apy: number | null;
 }
 
-const PROJECTS = new Set(["kamino-lend", "jupiter-lend"]);
+const PROJECTS = new Set(["kamino-lend", "jupiter-lend", "ondo-yield-assets"]);
 
 /** DefiLlama APY is a percent (5.63 = 5.63%); our providers want a fraction. */
 export function toApyFraction(percent: number | null | undefined): number {

@@ -37,7 +37,7 @@ export function useYieldActions(providerId: string) {
   );
 
   const sendTx = useCallback(
-    async (tx: VersionedTransaction): Promise<string> => {
+    async (tx: VersionedTransaction | Transaction): Promise<string> => {
       if (!wallet) throw new Error("Wallet not connected");
       const sig = await wallet.signAndSend(tx);
       await connection.confirmTransaction(sig, "confirmed");

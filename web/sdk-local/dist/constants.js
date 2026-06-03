@@ -68,16 +68,8 @@ exports.YIELD_SOURCES = [
         available: false,
     },
     // RWA Treasuries — облигации США через Delora cross-chain
-    {
-        id: "ondo-usdy",
-        name: "Ondo USDY",
-        description: "Tokenized US Treasuries · short duration",
-        chain: "ethereum",
-        baseApy: 5.0,
-        riskLevel: "low",
-        viaDelora: true,
-        available: false,
-    },
+    // (Ondo USDY is now LIVE natively on Solana — see web yield provider
+    //  `lib/yield/ondo.ts`; it lists under "Live now", not the roadmap.)
     {
         id: "mountain-usdm",
         name: "Mountain USDM",
