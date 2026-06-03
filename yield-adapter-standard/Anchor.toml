@@ -14,6 +14,7 @@ kamino_usdc = "BSwbiwogeLmYLYXfYb3t4WWNDD3x5tJHCZyZJLVRLuf9"
 marginfi_usdc = "5C6BQ9tJdyUjP8Dz1MxHXtYF8EuXX8nXZPLwZvwc6d93"
 jupiter_lp = "DwqPJD68SpERitR6NNp9AaizEn5W7ERbDArCkPJqwmzq"
 maple_syrup = "3Y1AddXDAnzw14UYpjLByWSJYTncMj7uFNJN9Egwzqh9"
+drift_if = "CUa5e7HetWzXfn7czcFSsr8gd6SrfaK2dqzTC11jeGnF"
 
 [programs.devnet]
 dispatcher = "CDit4o9LeqFaxEMkS7mHDKkUxrhhr8K9kH4CYfqZxEok"
@@ -21,6 +22,7 @@ kamino_usdc = "BSwbiwogeLmYLYXfYb3t4WWNDD3x5tJHCZyZJLVRLuf9"
 marginfi_usdc = "5C6BQ9tJdyUjP8Dz1MxHXtYF8EuXX8nXZPLwZvwc6d93"
 jupiter_lp = "DwqPJD68SpERitR6NNp9AaizEn5W7ERbDArCkPJqwmzq"
 maple_syrup = "3Y1AddXDAnzw14UYpjLByWSJYTncMj7uFNJN9Egwzqh9"
+drift_if = "CUa5e7HetWzXfn7czcFSsr8gd6SrfaK2dqzTC11jeGnF"
 
 [registry]
 url = "https://api.apr.dev"

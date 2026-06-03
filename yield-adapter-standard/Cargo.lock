@@ -643,6 +643,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "drift-if"
+version = "1.0.0"
+dependencies = [
+ "adapter-interface",
+ "anchor-lang",
+ "anchor-spl",
+]
+
+[[package]]
 name = "either"
 version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

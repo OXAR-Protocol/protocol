@@ -63,6 +63,11 @@ solana-test-validator --reset --quiet --ledger "$LEDGER" --url "$RPC" \
   --clone 9qUH5rp6Xw7NqghvbR9eQu6xTjEu5QTCHMbjdiiDVd5S \
   --clone BQ95wDV5A7z4c9cExYMWE2KvcqhbdjoxXcoQ88erFtyH \
   --clone AvZZF1YaZDziPY2RCK4oJrRVrbN3mTD9NL24hPeaZeUj \
+  --clone-upgradeable-program dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH \
+  --clone 5zpq7DvB6UdFFvpmBPspGPNfUGoBRRCE2HHg5u3gxcsN \
+  --clone GXWqPpjQpdz7KZw9p7f5PX2eGxHAhvpNXiviFkAB8zXg \
+  --clone 2CqkQvYxp9Mq4PqLvAQ1eryYxebUh4Liyn5YMDtXsYci \
+  --account 6gMq3mRCKf8aP3ttTyYhuijVZ2LGi14oDsBbkgubfLB3 tests/fork/fixtures/drift-spotmarket-patched.json \
   --account 96mBCxzaYW4nwyXac5oLGV6m16aEmXbwWZ4XsTq4AJBT tests/fork/fixtures/usdc-funded.json &
 VPID=$!
 trap 'kill $VPID 2>/dev/null || true' EXIT
@@ -84,6 +89,7 @@ solana program deploy --url "$U" --program-id target/deploy/kamino_usdc-keypair.
 solana program deploy --url "$U" --program-id target/deploy/marginfi_usdc-keypair.json target/deploy/marginfi_usdc.so
 solana program deploy --url "$U" --program-id target/deploy/jupiter_lp-keypair.json target/deploy/jupiter_lp.so
 solana program deploy --url "$U" --program-id target/deploy/maple_syrup-keypair.json target/deploy/maple_syrup.so
+solana program deploy --url "$U" --program-id target/deploy/drift_if-keypair.json target/deploy/drift_if.so
 
 echo "▸ running e2e (all adapters)"
 yarn run ts-mocha -p ./tsconfig.json -t 1000000 'tests/fork/*-native.ts'

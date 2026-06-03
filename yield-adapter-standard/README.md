@@ -38,7 +38,7 @@ scripts                    fork-test runner + fixture generator
 | `marginfi-usdc` | ✅ `anchor build` | ✅ deposit/withdraw/value round-trip |
 | `jupiter-lp` | ✅ `anchor build` | ✅ add/remove-liquidity round-trip (multi-custody AUM) |
 | `maple-syrup` | ✅ `anchor build` | ✅ swap-and-hold round-trip (Orca whirlpool) |
-| drift-insurance-fund | planned | planned |
+| `drift-if` | ✅ `anchor build` | ⏳ written; fork test skipped pending the deployed Drift `initialize_user_stats` discriminator (see test note) |
 
 ## Toolchain
 

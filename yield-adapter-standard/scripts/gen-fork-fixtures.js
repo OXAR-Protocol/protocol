@@ -51,8 +51,13 @@ function toFixture(pubkey, info) {
 
 (async () => {
   const c = new Connection(RPC, "confirmed");
-  const [reserve, scope, oracle, doves] = await c.getMultipleAccountsInfo([
-    RESERVE, SCOPE, PYTH_ORACLE, DOVES_ORACLE,
+  // Drift USDC spot market — its insurance_fund.unstaking_period (i64 @384) is the
+  // unstake cooldown; patch to 0 so request_remove + remove settle in one tx on the fork.
+  const DRIFT_SPOT_MARKET = new PublicKey("6gMq3mRCKf8aP3ttTyYhuijVZ2LGi14oDsBbkgubfLB3");
+  const SM_UNSTAKING_PERIOD_OFF = 384;
+
+  const [reserve, scope, oracle, doves, spotMarket] = await c.getMultipleAccountsInfo([
+    RESERVE, SCOPE, PYTH_ORACLE, DOVES_ORACLE, DRIFT_SPOT_MARKET,
   ]);
 
   // Reserve: last_update.slot at byte 16.
@@ -71,8 +76,11 @@ function toFixture(pubkey, info) {
   oracle.data.writeBigInt64LE(FAR_FUTURE, PYTH_PREV_PUBLISH_OFF);
   // Doves oracle (USDC): publish timestamp far-future.
   doves.data.writeBigInt64LE(FAR_FUTURE, DOVES_TS_OFF);
+  // Drift: zero the IF unstake cooldown so request_remove + remove settle in one tx.
+  spotMarket.data.writeBigInt64LE(0n, SM_UNSTAKING_PERIOD_OFF);
 
   const dir = `${__dirname}/../tests/fork/fixtures`;
+  fs.writeFileSync(`${dir}/drift-spotmarket-patched.json`, JSON.stringify(toFixture(DRIFT_SPOT_MARKET, spotMarket), null, 2));
 
   // Jupiter values AUM with each custody's "doves aggregator" oracle (custody
   // field @384), a different feed (DoVEsk-owned, len 394, timestamp @177) than
