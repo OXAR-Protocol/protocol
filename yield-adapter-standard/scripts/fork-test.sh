@@ -53,6 +53,16 @@ solana-test-validator --reset --quiet --ledger "$LEDGER" --url "$RPC" \
   --account 3t4JZcueEzTbVP6kLxXrL3VpWx45jDer4eqysweBchNH tests/fork/fixtures/scope-patched.json \
   --account Dpw1EAVrSB1ibxiDQyTAW6Zip3J4Btk2x4SgApQCeFbX tests/fork/fixtures/oracle-patched.json \
   --account A28T5pKtscnhDo6C1Sz786Tup88aTjt8uyKewjVvPrGk tests/fork/fixtures/doves-patched.json \
+  --clone-upgradeable-program whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc \
+  --clone 6fteKNvMdv7tYmBoJHhj1jx6rHcEwC6RdSEmVpyS613J \
+  --clone FM2RuqFYo9umA1yc5FyQn6pSDZJZ1MXAdaekJZ4dQCvi \
+  --clone Fw6Xr45rBBrXbWJd5ZbSg44kacrKRLef4rHkZ8gWC5Ab \
+  --clone 4yRC9NUHB2dwxfZyrqA8dDqH8GkcUVKU5F7W3ZPnbQtd \
+  --clone AdLyWhs7xrwkBFCYEo3n9BiwgXMZzXMefh8K9wMWoy1j \
+  --clone AofDEAkfQxcyeochNwxyQehYm6SpL3qrtxm7ZEZtPptp \
+  --clone 9qUH5rp6Xw7NqghvbR9eQu6xTjEu5QTCHMbjdiiDVd5S \
+  --clone BQ95wDV5A7z4c9cExYMWE2KvcqhbdjoxXcoQ88erFtyH \
+  --clone AvZZF1YaZDziPY2RCK4oJrRVrbN3mTD9NL24hPeaZeUj \
   --account 96mBCxzaYW4nwyXac5oLGV6m16aEmXbwWZ4XsTq4AJBT tests/fork/fixtures/usdc-funded.json &
 VPID=$!
 trap 'kill $VPID 2>/dev/null || true' EXIT
@@ -73,6 +83,7 @@ solana program deploy --url "$U" --program-id target/deploy/dispatcher-keypair.j
 solana program deploy --url "$U" --program-id target/deploy/kamino_usdc-keypair.json target/deploy/kamino_usdc.so
 solana program deploy --url "$U" --program-id target/deploy/marginfi_usdc-keypair.json target/deploy/marginfi_usdc.so
 solana program deploy --url "$U" --program-id target/deploy/jupiter_lp-keypair.json target/deploy/jupiter_lp.so
+solana program deploy --url "$U" --program-id target/deploy/maple_syrup-keypair.json target/deploy/maple_syrup.so
 
 echo "▸ running e2e (all adapters)"
 yarn run ts-mocha -p ./tsconfig.json -t 1000000 'tests/fork/*-native.ts'
