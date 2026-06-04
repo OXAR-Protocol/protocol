@@ -15,6 +15,9 @@ export default function HomePage() {
   const { user } = usePrivy();
   const { totalUsdc, dailyYield, blendedApy, positionCount, views, loading } =
     useAggregatePersonalBalance();
+  // Projected earnings at the current blended APY. Shown per YEAR: at small
+  // balances a per-day figure rounds to $0.00, so the year view is the legible one.
+  const yearlyYield = dailyYield * 365;
   const [greeting, setGreeting] = useState("Welcome");
 
   useEffect(() => {
@@ -64,9 +67,13 @@ export default function HomePage() {
           ) : (
             <LiveAmount value={totalUsdc} apy={blendedApy} variant="hero" />
           )}
-          {totalUsdc > 0 && dailyYield > 0 && (
+          {totalUsdc > 0 && yearlyYield > 0 && (
             <span className="font-mono text-sm text-accent">
-              +${dailyYield.toFixed(2)} / day
+              +${yearlyYield.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+              / year
             </span>
           )}
         </div>
