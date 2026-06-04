@@ -18,7 +18,8 @@ export function encodeApprove(spender: string, amount: bigint): string {
 }
 
 /** Current ERC-20 allowance the owner has granted the spender (base units).
- * Reads via the connected wallet's RPC (`provider`) — the default public RPC is flaky. */
+ * Reads via our Alchemy-backed proxy (see `publicClientFor`); the wallet RPC is
+ * only a fallback. `provider` is still passed for that fallback. */
 export async function readAllowance(params: {
   chainId: number;
   token: string;
