@@ -121,20 +121,28 @@ export function useBridgeDeposit(providerId: string) {
 
         // ERC-20 needs an allowance to the Delora diamond before bridging.
         if (!isNativeEvm(payAsset.mint) && quote.approvalAddress) {
+          const spender = quote.approvalAddress;
           const allowance = await readAllowance({
             chainId: originChainId,
             token: payAsset.mint,
             owner: evmWallet.address,
-            spender: quote.approvalAddress,
+            spender,
             provider: provider1193,
           });
           if (allowance < payBase) {
             setStatus("approving");
-            const approveHash = (await provider1193.request({
-              method: "eth_sendTransaction",
-              params: [{ from: evmWallet.address, to: payAsset.mint, data: encodeApprove(quote.approvalAddress, payBase) }],
-            })) as `0x${string}`;
-            await client.waitForTransactionReceipt({ hash: approveHash });
+            const approve = async (amount: bigint) => {
+              const hash = (await provider1193.request({
+                method: "eth_sendTransaction",
+                params: [{ from: evmWallet.address, to: payAsset.mint, data: encodeApprove(spender, amount) }],
+              })) as `0x${string}`;
+              await client.waitForTransactionReceipt({ hash });
+            };
+            // USDT (and some tokens) REVERT on approve() when the current allowance
+            // is already non-zero — they require resetting it to 0 first. So when a
+            // stale/partial allowance is in the way, reset to 0, then set the amount.
+            if (allowance > BigInt(0)) await approve(BigInt(0));
+            await approve(payBase);
           }
         }
 
