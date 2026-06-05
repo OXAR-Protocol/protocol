@@ -1,0 +1,36 @@
+name: Money-path simulation
+
+# Builds a real deposit transaction for each Solana-buildable provider and
+# simulates it against mainnet — catches SDK breakage / missing swap routes /
+# malformed txs before they reach prod. Kept OUT of the per-PR gate (it hits
+# mainnet and can be flaky); run it on demand before a money-path merge, or weekly.
+# Locally:  SIM_RPC=<helius url> yarn sim   (set SIM_OWNER to a funded wallet for a
+# full on-chain sim; otherwise it validates the build + best-effort simulates).
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * 1" # Mondays 08:00 UTC
+
+defaults:
+  run:
+    working-directory: web
+
+jobs:
+  sim:
+    name: simulate deposits (mainnet)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: web/yarn.lock
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Simulate
+        env:
+          # Optional repo secrets; falls back to public mainnet-beta if unset.
+          SIM_RPC: ${{ secrets.SIM_RPC }}
+          SIM_OWNER: ${{ secrets.SIM_OWNER }}
+        run: yarn sim
