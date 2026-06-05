@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { alchemySubdomainFor } from "@/lib/evm/rpc-proxy";
+import { fetchWithRetry } from "@/lib/net/fetch-retry";
 
 // Server-side EVM JSON-RPC proxy → Alchemy. Keeps the Alchemy key off the client
 // and gives EVM reads (allowance, receipts) a reliable RPC instead of the wallet's
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const res = await fetch(`https://${subdomain}.g.alchemy.com/v2/${key}`, {
+    const res = await fetchWithRetry(`https://${subdomain}.g.alchemy.com/v2/${key}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body,
