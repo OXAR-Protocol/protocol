@@ -1,0 +1,43 @@
+name: CI
+
+# Gate every PR (and main) on the web app's lint + unit tests + production build.
+# build (strict TypeScript) and tests are the hard safety net for the money path;
+# lint blocks on real errors (pre-existing stylistic/compiler-hint findings are
+# demoted to warnings in eslint.config.mjs and tracked separately).
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: web · lint · test · build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: web/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Unit tests
+        run: yarn test
+
+      - name: Production build
+        run: yarn build
