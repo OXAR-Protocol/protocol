@@ -16,6 +16,10 @@ interface Props {
   view: ProviderView;
   token: string;
   name: string;
+  /** Asset-class label, e.g. "Stock" / "Commodity". */
+  kind?: string;
+  /** Sub-line after the name, e.g. "tokenized · non-US" / "physical gold · tokenized". */
+  note?: string;
   price?: StockPrice;
   /** Realized + unrealized P&L in USD (current value − on-chain cost basis). */
   earned?: number;
@@ -23,9 +27,10 @@ interface Props {
   onDone?: () => void;
 }
 
-/** Buy/sell a tokenized stock — price-framed (not yield). Buy = swap USDC→xStock,
- *  sell = swap back; reuses the deposit/withdraw rails under stock labels. */
-export function StockSheet({ view, token, name, price, earned, onClose, onDone }: Props) {
+/** Buy/sell a price-exposure asset (tokenized stock or commodity) — price-framed
+ *  (not yield). Buy = swap USDC→asset, sell = swap back; reuses the deposit/withdraw
+ *  rails under price labels. */
+export function StockSheet({ view, token, name, kind = "Stock", note = "tokenized · non-US", price, earned, onClose, onDone }: Props) {
   const { withdraw, redeemAll, loading, error } = useYieldActions(view.id);
   const [sellAmount, setSellAmount] = useState(10);
   const [result, setResult] = useState<ActionResult | null>(null);
@@ -67,9 +72,9 @@ export function StockSheet({ view, token, name, price, earned, onClose, onDone }
         >
           <div className="flex items-start justify-between gap-4 mb-6">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">Stock</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">{kind}</p>
               <h2 className="mt-2 font-sans text-2xl text-white">{token}</h2>
-              <p className="mt-1 font-mono text-xs text-white/40">{name} · tokenized · non-US</p>
+              <p className="mt-1 font-mono text-xs text-white/40">{name} · {note}</p>
             </div>
             <button onClick={onClose} className="text-white/40 hover:text-white transition">
               <X size={18} strokeWidth={1.5} />

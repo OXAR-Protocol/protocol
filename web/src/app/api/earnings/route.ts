@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { netInvestedFromSwaps, type HeliusTx } from "@/lib/earnings/swaps";
 import { XSTOCKS } from "@/lib/yield/xstocks";
+import { GOLD } from "@/lib/yield/gold";
 
 // On-chain cost-basis proxy. Reads the wallet's parsed transaction history from
 // Helius (key stays server-side) and derives net USD invested per swap-and-hold
@@ -17,6 +18,7 @@ const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const SOURCES: { id: string; heldMint: string; costMint: string }[] = [
   { id: "ondo-usdy", heldMint: "A1KLoBrKBde8Ty9qtNQUtq3C2ortoC3u7twggz7sEto6", costMint: USDC },
   ...XSTOCKS.map((s) => ({ id: s.id, heldMint: s.mint, costMint: USDC })),
+  ...GOLD.map((g) => ({ id: g.id, heldMint: g.mint, costMint: USDC })),
 ];
 
 const isAddress = (a: unknown): a is string =>

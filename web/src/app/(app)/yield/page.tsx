@@ -14,8 +14,10 @@ import { SourceCard } from "@/components/source-card";
 import { YieldSourceSheet } from "@/components/yield-source-sheet";
 import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
 import { groupProviderViews } from "@/lib/yield";
-import { isXStock } from "@/lib/yield/xstocks";
-import { StocksSection } from "@/components/stocks-section";
+import { isPriceExposure } from "@/lib/yield/assets";
+import { XSTOCKS } from "@/lib/yield/xstocks";
+import { GOLD } from "@/lib/yield/gold";
+import { AssetSection } from "@/components/asset-section";
 
 type Layout = "list" | "grid";
 import {
@@ -52,7 +54,7 @@ export default function YieldPage() {
 
   const liveSources = useMemo(() => {
     return views.filter((v) => {
-      if (isXStock(v.id)) return false; // tokenized stocks live on /stocks, not here
+      if (isPriceExposure(v.id)) return false; // stocks & gold show in their own price-framed sections
       if (chain !== "all" && v.chain !== chain) return false;
       return matchesApyBucket(apyBucket, v.apy * 100);
     });
@@ -201,7 +203,25 @@ export default function YieldPage() {
       )}
 
       {/* Tokenized stocks — price-framed section (Reg S geoblocked) */}
-      <StocksSection layout={layout} />
+      <AssetSection
+        catalog={XSTOCKS}
+        title="Stocks · tokenized"
+        badge="non-US"
+        kind="Stock"
+        note="tokenized · non-US"
+        gated
+        layout={layout}
+      />
+
+      {/* Tokenized commodities — physical gold (not a security; no geoblock) */}
+      <AssetSection
+        catalog={GOLD}
+        title="Commodities · gold"
+        badge="physical"
+        kind="Commodity"
+        note="physical gold · tokenized"
+        layout={layout}
+      />
 
       {/* Roadmap — native */}
       {roadmapNative.length > 0 && (

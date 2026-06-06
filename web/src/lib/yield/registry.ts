@@ -6,6 +6,7 @@ import {
 import { kaminoUsdcProvider } from "./kamino";
 import { ondoUsdyProvider } from "./ondo";
 import { xstockProviders } from "./xstocks";
+import { goldProviders } from "./gold";
 import type { YieldProvider } from "./types";
 
 /**
@@ -19,6 +20,7 @@ export const PROVIDERS: readonly YieldProvider[] = [
   kaminoUsdcProvider,
   ondoUsdyProvider,
   ...xstockProviders,
+  ...goldProviders,
 ];
 
 export function getProvider(id: string): YieldProvider | undefined {
