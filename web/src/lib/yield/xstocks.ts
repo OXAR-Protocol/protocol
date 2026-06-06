@@ -158,8 +158,20 @@ export function createXStockProvider(cfg: XStockConfig): YieldProvider {
   };
 }
 
+/** True for a tokenized-stock provider id (vs a yield source). */
+export function isXStock(id: string): boolean {
+  return id.startsWith("xstock-");
+}
+
 // --- Catalog (prototype: two liquid tickers; extend by appending a row) ---
-export const xstockProviders: readonly YieldProvider[] = [
-  createXStockProvider({ symbol: "SPY", token: "SPYx", name: "S&P 500", mint: "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W" }),
-  createXStockProvider({ symbol: "AAPL", token: "AAPLx", name: "Apple", mint: "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp" }),
+export interface XStockMeta extends XStockConfig {
+  /** Provider id — matches `xstock-${symbol.toLowerCase()}`. */
+  id: string;
+}
+
+export const XSTOCKS: readonly XStockMeta[] = [
+  { id: "xstock-spy", symbol: "SPY", token: "SPYx", name: "S&P 500", mint: "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W" },
+  { id: "xstock-aapl", symbol: "AAPL", token: "AAPLx", name: "Apple", mint: "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp" },
 ];
+
+export const xstockProviders: readonly YieldProvider[] = XSTOCKS.map(createXStockProvider);

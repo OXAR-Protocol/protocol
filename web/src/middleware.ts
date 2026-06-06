@@ -6,6 +6,7 @@ const MARKETING_DOMAIN = "oxar.app";
 const APP_ROUTES = [
   "/home",
   "/yield",
+  "/stocks",
   "/pile",
   "/you",
   "/markets",
