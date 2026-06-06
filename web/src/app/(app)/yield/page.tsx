@@ -201,7 +201,7 @@ export default function YieldPage() {
       )}
 
       {/* Tokenized stocks — price-framed section (Reg S geoblocked) */}
-      <StocksSection />
+      <StocksSection layout={layout} />
 
       {/* Roadmap — native */}
       {roadmapNative.length > 0 && (

@@ -12,13 +12,25 @@ import { LiveEarned } from "@/components/live-earned";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
 import { fromBaseUnits } from "@/lib/yield";
+import { isXStock } from "@/lib/yield/xstocks";
+
+/** Sum a set of earning sources into the inputs LiveEarned needs. */
+function aggregate(sources: { currentValue: number; invested: number; apy: number }[]) {
+  const value = sources.reduce((a, s) => a + s.currentValue, 0);
+  const invested = sources.reduce((a, s) => a + s.invested, 0);
+  const apy = value > 0 ? sources.reduce((a, s) => a + s.currentValue * s.apy, 0) / value : 0;
+  return { value, invested, apy };
+}
 
 export default function HomePage() {
   const { user } = usePrivy();
   const { totalUsdc, blendedApy, positionCount, views, loading } =
     useAggregatePersonalBalance();
   // Real earnings already made (current value − on-chain cost basis), not a projection.
+  // Split yield vs stocks — they're different products.
   const earnings = useEarnings();
+  const yieldEarn = aggregate(earnings.sources.filter((s) => !isXStock(s.id)));
+  const stockEarn = aggregate(earnings.sources.filter((s) => isXStock(s.id)));
   const [greeting, setGreeting] = useState("Welcome");
 
   useEffect(() => {
@@ -68,17 +80,20 @@ export default function HomePage() {
           ) : (
             <LiveAmount value={totalUsdc} apy={blendedApy} variant="hero" />
           )}
-          {earnings.supportedValue > 0 && (
-            <span
-              className="font-mono text-sm text-accent"
-              title="Real earnings since you bought in — current value minus what you put in, read on-chain (not a projection)."
-            >
-              <LiveEarned
-                currentValue={earnings.supportedValue}
-                invested={earnings.totalInvested}
-                apy={earnings.blendedApy}
-              />{" "}
-              earned
+          {(yieldEarn.value > 0 || stockEarn.value > 0) && (
+            <span className="font-mono text-sm text-accent flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              {yieldEarn.value > 0 && (
+                <span title="Earned from yield — current value minus what you put in, on-chain.">
+                  <span className="text-white/40">yield</span>{" "}
+                  <LiveEarned currentValue={yieldEarn.value} invested={yieldEarn.invested} apy={yieldEarn.apy} />
+                </span>
+              )}
+              {stockEarn.value > 0 && (
+                <span title="Earned from stocks — current value minus cost basis, on-chain.">
+                  <span className="text-white/40">stocks</span>{" "}
+                  <LiveEarned currentValue={stockEarn.value} invested={stockEarn.invested} apy={stockEarn.apy} />
+                </span>
+              )}
             </span>
           )}
         </div>
