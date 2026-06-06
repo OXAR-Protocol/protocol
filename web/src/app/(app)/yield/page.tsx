@@ -14,6 +14,8 @@ import { SourceCard } from "@/components/source-card";
 import { YieldSourceSheet } from "@/components/yield-source-sheet";
 import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
 import { groupProviderViews } from "@/lib/yield";
+import { isXStock } from "@/lib/yield/xstocks";
+import { StocksSection } from "@/components/stocks-section";
 
 type Layout = "list" | "grid";
 import {
@@ -50,6 +52,7 @@ export default function YieldPage() {
 
   const liveSources = useMemo(() => {
     return views.filter((v) => {
+      if (isXStock(v.id)) return false; // tokenized stocks live on /stocks, not here
       if (chain !== "all" && v.chain !== chain) return false;
       return matchesApyBucket(apyBucket, v.apy * 100);
     });
@@ -196,6 +199,9 @@ export default function YieldPage() {
           )}
         </motion.section>
       )}
+
+      {/* Tokenized stocks — price-framed section (Reg S geoblocked) */}
+      <StocksSection />
 
       {/* Roadmap — native */}
       {roadmapNative.length > 0 && (

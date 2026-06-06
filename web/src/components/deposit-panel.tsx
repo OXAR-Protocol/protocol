@@ -14,13 +14,16 @@ import type { ProviderView } from "@/hooks/use-yield-positions";
 interface Props {
   view: ProviderView;
   onDeposited: (usdAmount: number) => void;
+  /** Action verb — "Deposit" (default) for yield sources, "Buy" for stocks. */
+  verb?: string;
 }
 
 const chainTag = (a: { chain: string; network?: string }) =>
   a.chain === "ethereum" ? `${(a.network ?? "evm").replace("-mainnet", "")} · bridge` : "";
 
 /** Deposit with any asset on any chain: pick a pay-asset, enter USD, see net USDC. */
-export function DepositPanel({ view, onDeposited }: Props) {
+export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
+  const lower = verb.toLowerCase();
   const { linkWallet } = usePrivy();
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
   const { assets: evmAssets, evmAddress, loading: evmLoading } = useEvmAssets();
@@ -67,7 +70,7 @@ export function DepositPanel({ view, onDeposited }: Props) {
 
   return (
     <div className="p-4 rounded-[6px] border border-white/10">
-      <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-2">Deposit</p>
+      <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-2">{verb}</p>
 
       {/* USD amount */}
       <div className="flex items-baseline gap-3">
@@ -122,11 +125,11 @@ export function DepositPanel({ view, onDeposited }: Props) {
       {payAsset && usdAmount > 0 && (
         <p className="mt-2 font-mono text-[11px] text-white/40">
           {isDirect
-            ? `you'll deposit $${usdAmount.toFixed(2)} ${view.assetSymbol}`
+            ? `you'll ${lower} $${usdAmount.toFixed(2)} ${view.assetSymbol}`
             : preview.quoting
               ? "quoting…"
               : preview.netUsdc !== null
-                ? `you'll deposit ~$${preview.netUsdc.toFixed(2)} ${view.assetSymbol}` +
+                ? `you'll ${lower} ~$${preview.netUsdc.toFixed(2)} ${view.assetSymbol}` +
                   (preview.kind === "bridge"
                     ? ` · fee ~$${(preview.feeUsd ?? 0).toFixed(2)}${preview.etaSec ? ` · ~${preview.etaSec}s` : ""}`
                     : " (after swap)")
@@ -145,7 +148,7 @@ export function DepositPanel({ view, onDeposited }: Props) {
             {label}
           </>
         ) : (
-          "Deposit"
+          verb
         )}
       </button>
 
