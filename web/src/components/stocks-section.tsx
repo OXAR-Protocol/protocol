@@ -3,15 +3,18 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
-import { SectionLabel } from "@/components/section-label";
 import { StockSheet } from "@/components/stock-sheet";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import { useEarnings } from "@/hooks/use-earnings";
+import { useStocksAllowed } from "@/hooks/use-stocks-allowed";
 import { XSTOCKS, type XStockMeta } from "@/lib/yield/xstocks";
 import { fromBaseUnits } from "@/lib/yield";
 
-export default function StocksPage() {
+/** Tokenized stocks as a section on /yield — price-framed, buy/sell in USDC.
+ *  Hidden entirely where Reg S blocks the offering (see useStocksAllowed). */
+export function StocksSection() {
+  const allowed = useStocksAllowed();
   const { views, refresh } = useYieldPositions();
   const { prices } = useStockPrices(XSTOCKS.map((s) => s.mint));
   const { sources } = useEarnings();
@@ -23,25 +26,25 @@ export default function StocksPage() {
     [sources],
   );
 
-  return (
-    <div className="max-w-[900px] mx-auto pt-8 pb-32 px-4">
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <SectionLabel>Stocks</SectionLabel>
-        <h1 className="mt-4 font-sans text-3xl md:text-4xl text-white leading-tight">
-          Own a slice of the market
-        </h1>
-        <p className="mt-3 font-mono text-sm text-white/40 max-w-lg">
-          Tokenized US stocks &amp; ETFs. Buy and sell in USDC, hold them in your
-          own wallet. Backed 1:1 by real shares · non-US only.
-        </p>
-      </motion.div>
+  if (!allowed) return null;
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="mt-8 space-y-2"
-      >
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.18 }}
+      className="mt-10"
+    >
+      <div className="flex items-baseline justify-between mb-3">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">
+          Stocks · tokenized
+        </p>
+        <span className="font-mono text-[10px] uppercase tracking-wide text-white/30">
+          non-US
+        </span>
+      </div>
+
+      <div className="space-y-2">
         {XSTOCKS.map((s) => {
           const view = viewById[s.id];
           const px = prices[s.mint];
@@ -85,15 +88,6 @@ export default function StocksPage() {
             </button>
           );
         })}
-      </motion.div>
-
-      <div className="mt-10 p-5 rounded-[8px] border border-white/10">
-        <p className="font-sans text-sm text-white">Tokenized securities</p>
-        <p className="mt-1 font-mono text-xs text-white/40 leading-relaxed">
-          Prices track the underlying share and can fall as well as rise. Off-hours
-          (nights / weekends) liquidity is thinner and the price may drift from the
-          live market. You always hold and sign your own position.
-        </p>
       </div>
 
       {active && viewById[active.id] && (
@@ -107,6 +101,6 @@ export default function StocksPage() {
           onDone={refresh}
         />
       )}
-    </div>
+    </motion.section>
   );
 }

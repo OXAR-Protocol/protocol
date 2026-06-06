@@ -15,6 +15,7 @@ import { YieldSourceSheet } from "@/components/yield-source-sheet";
 import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
 import { groupProviderViews } from "@/lib/yield";
 import { isXStock } from "@/lib/yield/xstocks";
+import { StocksSection } from "@/components/stocks-section";
 
 type Layout = "list" | "grid";
 import {
@@ -198,6 +199,9 @@ export default function YieldPage() {
           )}
         </motion.section>
       )}
+
+      {/* Tokenized stocks — price-framed section (Reg S geoblocked) */}
+      <StocksSection />
 
       {/* Roadmap — native */}
       {roadmapNative.length > 0 && (
