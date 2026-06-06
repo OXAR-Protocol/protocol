@@ -128,6 +128,8 @@ export const ondoUsdyProvider: YieldProvider = {
   riskLevel: "low",
   chain: "solana",
   defiLlamaPoolId: DEFILLAMA_POOL,
+  heldMint: USDY_MINT,
+  heldDecimals: 6,
 
   // Deposit: swap `amount` USDC (base units) → USDY, held in the user's wallet.
   async buildDepositTx({ owner, amount }: BuildIxParams) {
