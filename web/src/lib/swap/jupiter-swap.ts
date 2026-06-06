@@ -10,6 +10,8 @@
  */
 import { Transaction, VersionedTransaction } from "@solana/web3.js";
 
+import { fetchWithRetry } from "@/lib/net/fetch-retry";
+
 const QUOTE_URL = "https://lite-api.jup.ag/swap/v1/quote";
 const SWAP_URL = "https://lite-api.jup.ag/swap/v1/swap";
 
@@ -53,7 +55,7 @@ export async function getSwapQuote(params: {
   const { inputMint, outputMint, amount, slippageBps = 50, asLegacy = false } = params;
   let url = `${QUOTE_URL}?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount.toString()}&slippageBps=${slippageBps}`;
   if (asLegacy) url += "&asLegacyTransaction=true";
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   if (!res.ok) throw new Error(`Swap quote failed (${res.status})`);
   return (await res.json()) as SwapQuote;
 }
@@ -71,7 +73,7 @@ export async function buildSwapTx(
     dynamicSlippage: false,
   };
   if (opts?.asLegacy) body.asLegacyTransaction = true;
-  const res = await fetch(SWAP_URL, {
+  const res = await fetchWithRetry(SWAP_URL, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),

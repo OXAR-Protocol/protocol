@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { buildApyMap, type DefiLlamaPool } from "@/lib/yield/yields-api";
+import { fetchWithRetry } from "@/lib/net/fetch-retry";
 
 // Lightweight DefiLlama proxy — NO protocol SDK here (unlike /api/kamino), so it
 // stays fast and never cold-starts klend. Returns APY for our pools + history.
@@ -15,7 +16,7 @@ let apyCache: { map: Record<string, number>; ts: number } | null = null;
 
 async function loadApyMap(): Promise<Record<string, number>> {
   if (apyCache && Date.now() - apyCache.ts < 600_000) return apyCache.map;
-  const res = await fetch(POOLS_URL);
+  const res = await fetchWithRetry(POOLS_URL);
   if (!res.ok) throw new Error(`DefiLlama ${res.status}`);
   const json = (await res.json()) as { data?: DefiLlamaPool[] };
   const map = buildApyMap(json?.data ?? []);
@@ -32,7 +33,7 @@ export async function GET(req: Request) {
       if (!UUID.test(history)) {
         return NextResponse.json({ history: [] }, { status: 400 });
       }
-      const res = await fetch(`https://yields.llama.fi/chart/${history}`);
+      const res = await fetchWithRetry(`https://yields.llama.fi/chart/${history}`);
       if (!res.ok) return NextResponse.json({ history: [] });
       const json = (await res.json()) as {
         data?: Array<{ timestamp: string; apy: number | null }>;
