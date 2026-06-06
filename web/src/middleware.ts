@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { isStockBlockedCountry } from "@/lib/compliance/geoblock";
+
 const APP_DOMAIN = "app.oxar.app";
 const MARKETING_DOMAIN = "oxar.app";
 
@@ -65,6 +67,15 @@ export function middleware(req: NextRequest) {
   if (isApp && isMarketingRoute(pathname)) {
     const url = new URL(`https://${MARKETING_DOMAIN}${pathname}${search}`);
     return NextResponse.redirect(url, 308);
+  }
+
+  // Reg S geoblock: tokenized stocks aren't offered to US/restricted jurisdictions.
+  if (
+    pathname.startsWith("/stocks") &&
+    !pathname.startsWith("/stocks/unavailable") &&
+    isStockBlockedCountry(req.headers.get("x-vercel-ip-country"))
+  ) {
+    return NextResponse.rewrite(new URL("/stocks/unavailable", req.url));
   }
 
   return NextResponse.next();

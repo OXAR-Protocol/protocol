@@ -4,29 +4,28 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
 import { SectionLabel } from "@/components/section-label";
-import { YieldSourceSheet } from "@/components/yield-source-sheet";
-import { useYieldPositions, type ProviderView } from "@/hooks/use-yield-positions";
+import { StockSheet } from "@/components/stock-sheet";
+import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
-import { XSTOCKS } from "@/lib/yield/xstocks";
+import { useEarnings } from "@/hooks/use-earnings";
+import { XSTOCKS, type XStockMeta } from "@/lib/yield/xstocks";
 import { fromBaseUnits } from "@/lib/yield";
 
 export default function StocksPage() {
   const { views, refresh } = useYieldPositions();
   const { prices } = useStockPrices(XSTOCKS.map((s) => s.mint));
-  const [active, setActive] = useState<ProviderView[] | null>(null);
+  const { sources } = useEarnings();
+  const [active, setActive] = useState<XStockMeta | null>(null);
 
-  const viewById = useMemo(
-    () => Object.fromEntries(views.map((v) => [v.id, v])),
-    [views],
+  const viewById = useMemo(() => Object.fromEntries(views.map((v) => [v.id, v])), [views]);
+  const earnedById = useMemo(
+    () => Object.fromEntries(sources.map((s) => [s.id, s.earned])),
+    [sources],
   );
 
   return (
     <div className="max-w-[900px] mx-auto pt-8 pb-32 px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <SectionLabel>Stocks</SectionLabel>
         <h1 className="mt-4 font-sans text-3xl md:text-4xl text-white leading-tight">
           Own a slice of the market
@@ -47,13 +46,14 @@ export default function StocksPage() {
           const view = viewById[s.id];
           const px = prices[s.mint];
           const holdings = view ? fromBaseUnits(view.underlyingBalance, view.decimals) : 0;
+          const earned = earnedById[s.id];
           const up = (px?.change24h ?? 0) >= 0;
           return (
             <button
               key={s.id}
               type="button"
               disabled={!view}
-              onClick={() => view && setActive([view])}
+              onClick={() => view && setActive(s)}
               className="w-full flex items-center justify-between p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition-colors text-left disabled:opacity-50"
             >
               <div>
@@ -62,6 +62,12 @@ export default function StocksPage() {
                 {holdings > 0 && (
                   <p className="mt-1 font-mono text-[11px] text-accent/80 tabular-nums">
                     you own ${holdings.toFixed(2)}
+                    {typeof earned === "number" && (
+                      <span className={earned >= 0 ? "text-emerald-400/70" : "text-red-400/70"}>
+                        {" · "}
+                        {earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)}
+                      </span>
+                    )}
                   </p>
                 )}
               </div>
@@ -70,11 +76,7 @@ export default function StocksPage() {
                   {px ? `$${px.price.toFixed(2)}` : "—"}
                 </p>
                 {px && (
-                  <p
-                    className={`mt-0.5 font-mono text-xs tabular-nums ${
-                      up ? "text-emerald-400/80" : "text-red-400/80"
-                    }`}
-                  >
+                  <p className={`mt-0.5 font-mono text-xs tabular-nums ${up ? "text-emerald-400/80" : "text-red-400/80"}`}>
                     {up ? "+" : ""}
                     {px.change24h.toFixed(2)}% 24h
                   </p>
@@ -94,8 +96,16 @@ export default function StocksPage() {
         </p>
       </div>
 
-      {active && (
-        <YieldSourceSheet views={active} onClose={() => setActive(null)} onDone={refresh} />
+      {active && viewById[active.id] && (
+        <StockSheet
+          view={viewById[active.id]}
+          token={active.token}
+          name={active.name}
+          price={prices[active.mint]}
+          earned={earnedById[active.id]}
+          onClose={() => setActive(null)}
+          onDone={refresh}
+        />
       )}
     </div>
   );
