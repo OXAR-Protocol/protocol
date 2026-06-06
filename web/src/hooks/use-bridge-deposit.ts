@@ -83,9 +83,11 @@ export function useBridgeDeposit(providerId: string) {
         // can't land and the bridged USDC gets stranded. Block BEFORE moving money.
         const receiverSol = await connection.getBalance(walletAddress);
         if (receiverSol < MIN_RECEIVER_LAMPORTS) {
+          const have = (receiverSol / 1e9).toFixed(4);
+          const need = (MIN_RECEIVER_LAMPORTS / 1e9).toFixed(3);
           throw new UserFacingError(
-            "Your Solana wallet needs a little SOL (~0.01) to finish the deposit after bridging. " +
-              "Add some SOL to it and try again.",
+            `Your Solana wallet needs a little SOL to finish the deposit after bridging — ` +
+              `you have ${have} SOL but need at least ${need}. Add a bit of SOL and try again.`,
           );
         }
 
