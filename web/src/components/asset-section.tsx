@@ -10,23 +10,35 @@ import { useStockPrices } from "@/hooks/use-stock-prices";
 import { useStockCharts } from "@/hooks/use-stock-charts";
 import { useEarnings } from "@/hooks/use-earnings";
 import { useStocksAllowed } from "@/hooks/use-stocks-allowed";
-import { XSTOCKS, type XStockMeta } from "@/lib/yield/xstocks";
+import type { AssetMeta } from "@/lib/yield/assets";
 import { fromBaseUnits } from "@/lib/yield";
 
 interface Props {
+  /** Price-exposure catalog (stocks or commodities). */
+  catalog: readonly AssetMeta[];
+  /** Section title, e.g. "Stocks · tokenized". */
+  title: string;
+  /** Small right-aligned badge, e.g. "non-US" / "physical". */
+  badge: string;
+  /** Sheet label for one holding, e.g. "Stock" / "Commodity". */
+  kind: string;
+  /** Sheet sub-line, e.g. "tokenized · non-US" / "physical gold · tokenized". */
+  note: string;
+  /** Gate behind the Reg S stock geoblock (true for US securities, false for gold). */
+  gated?: boolean;
   /** Shares the /yield list/grid toggle. */
   layout?: "list" | "grid";
 }
 
-/** Tokenized stocks as a section on /yield — price-framed, list or grid view.
- *  Hidden entirely where Reg S blocks the offering (see useStocksAllowed). */
-export function StocksSection({ layout = "list" }: Props) {
+/** Buy/sell section for price-exposure assets (tokenized stocks or commodities) —
+ *  price-framed cards, list or grid. Gated entries hide where Reg S blocks them. */
+export function AssetSection({ catalog, title, badge, kind, note, gated = false, layout = "list" }: Props) {
   const allowed = useStocksAllowed();
   const { views, refresh } = useYieldPositions();
-  const { prices } = useStockPrices(XSTOCKS.map((s) => s.mint));
+  const { prices } = useStockPrices(catalog.map((s) => s.mint));
   const charts = useStockCharts();
   const { sources } = useEarnings();
-  const [active, setActive] = useState<XStockMeta | null>(null);
+  const [active, setActive] = useState<AssetMeta | null>(null);
 
   const viewById = useMemo(() => Object.fromEntries(views.map((v) => [v.id, v])), [views]);
   const earnedById = useMemo(
@@ -34,9 +46,9 @@ export function StocksSection({ layout = "list" }: Props) {
     [sources],
   );
 
-  if (!allowed) return null;
+  if (gated && !allowed) return null;
 
-  const card = (s: XStockMeta) => {
+  const card = (s: AssetMeta) => {
     const view = viewById[s.id];
     const px = prices[s.mint];
     const holdings = view ? fromBaseUnits(view.underlyingBalance, view.decimals) : 0;
@@ -125,14 +137,14 @@ export function StocksSection({ layout = "list" }: Props) {
       className="mt-10"
     >
       <div className="flex items-baseline justify-between mb-3">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">Stocks · tokenized</p>
-        <span className="font-mono text-[10px] uppercase tracking-wide text-white/30">non-US</span>
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">{title}</p>
+        <span className="font-mono text-[10px] uppercase tracking-wide text-white/30">{badge}</span>
       </div>
 
       {layout === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{XSTOCKS.map(card)}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{catalog.map(card)}</div>
       ) : (
-        <div className="space-y-2">{XSTOCKS.map(card)}</div>
+        <div className="space-y-2">{catalog.map(card)}</div>
       )}
 
       {active && viewById[active.id] && (
@@ -140,6 +152,8 @@ export function StocksSection({ layout = "list" }: Props) {
           view={viewById[active.id]}
           token={active.token}
           name={active.name}
+          kind={kind}
+          note={note}
           price={prices[active.mint]}
           earned={earnedById[active.id]}
           onClose={() => setActive(null)}

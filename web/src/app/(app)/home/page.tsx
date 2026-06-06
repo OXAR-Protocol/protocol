@@ -13,6 +13,7 @@ import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
 import { fromBaseUnits } from "@/lib/yield";
 import { isXStock } from "@/lib/yield/xstocks";
+import { isGold } from "@/lib/yield/gold";
 
 /** Sum a set of earning sources into the inputs LiveEarned needs. */
 function aggregate(sources: { currentValue: number; invested: number; apy: number }[]) {
@@ -29,8 +30,9 @@ export default function HomePage() {
   // Real earnings already made (current value − on-chain cost basis), not a projection.
   // Split yield vs stocks — they're different products.
   const earnings = useEarnings();
-  const yieldEarn = aggregate(earnings.sources.filter((s) => !isXStock(s.id)));
+  const yieldEarn = aggregate(earnings.sources.filter((s) => !isXStock(s.id) && !isGold(s.id)));
   const stockEarn = aggregate(earnings.sources.filter((s) => isXStock(s.id)));
+  const goldEarn = aggregate(earnings.sources.filter((s) => isGold(s.id)));
   const [greeting, setGreeting] = useState("Welcome");
 
   useEffect(() => {
@@ -80,7 +82,7 @@ export default function HomePage() {
           ) : (
             <LiveAmount value={totalUsdc} apy={blendedApy} variant="hero" />
           )}
-          {(yieldEarn.value > 0 || stockEarn.value > 0) && (
+          {(yieldEarn.value > 0 || stockEarn.value > 0 || goldEarn.value > 0) && (
             <span className="font-mono text-sm text-accent flex flex-wrap items-baseline gap-x-3 gap-y-1">
               {yieldEarn.value > 0 && (
                 <span title="Earned from yield — current value minus what you put in, on-chain.">
@@ -92,6 +94,12 @@ export default function HomePage() {
                 <span title="Earned from stocks — current value minus cost basis, on-chain.">
                   <span className="text-white/40">stocks</span>{" "}
                   <LiveEarned currentValue={stockEarn.value} invested={stockEarn.invested} apy={stockEarn.apy} />
+                </span>
+              )}
+              {goldEarn.value > 0 && (
+                <span title="Earned from gold — current value minus cost basis, on-chain.">
+                  <span className="text-white/40">gold</span>{" "}
+                  <LiveEarned currentValue={goldEarn.value} invested={goldEarn.invested} apy={goldEarn.apy} />
                 </span>
               )}
             </span>

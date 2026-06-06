@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { XSTOCKS } from "@/lib/yield/xstocks";
+import { GOLD } from "@/lib/yield/gold";
 import { fetchWithRetry } from "@/lib/net/fetch-retry";
 
-// Batched price-history for the stock-card sparklines. Fetches ~2 days of hourly
-// closes for every xStock from Jupiter's datapi (no key) server-side, in one cached
-// call — so 26 cards cost one client request, not 26. Cached 5 min.
+// Batched price-history for the price-exposure card sparklines (stocks + gold).
+// Fetches ~2 days of hourly closes for every mint from Jupiter's datapi (no key)
+// server-side, in one cached call — so all cards cost one client request. Cached 5 min.
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -32,8 +33,9 @@ export async function GET() {
     return NextResponse.json({ charts: cache.charts });
   }
   const to = Date.now();
+  const mints = [...XSTOCKS.map((s) => s.mint), ...GOLD.map((g) => g.mint)];
   const entries = await Promise.all(
-    XSTOCKS.map(async (s) => [s.mint, await closesFor(s.mint, to)] as const),
+    mints.map(async (mint) => [mint, await closesFor(mint, to)] as const),
   );
   const charts: Record<string, number[]> = {};
   for (const [mint, closes] of entries) if (closes.length > 1) charts[mint] = closes;
