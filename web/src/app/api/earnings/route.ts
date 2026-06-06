@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { netInvestedFromSwaps, type HeliusTx } from "@/lib/earnings/swaps";
+import { XSTOCKS } from "@/lib/yield/xstocks";
 
 // On-chain cost-basis proxy. Reads the wallet's parsed transaction history from
 // Helius (key stays server-side) and derives net USD invested per swap-and-hold
@@ -10,23 +11,12 @@ export const dynamic = "force-dynamic";
 
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
-// Swap-and-hold sources: net invested = USDC spent acquiring `heldMint`.
-// (Vault-based sources like Kamino/Jupiter Lend will attribute by vault address —
-// added here next, same shared engine.)
+// Swap-and-hold sources: net invested = USDC spent acquiring `heldMint`. Stocks come
+// straight from the xStocks catalog so the two never drift. (Vault-based sources like
+// Kamino/Jupiter Lend will attribute by vault address next — same shared engine.)
 const SOURCES: { id: string; heldMint: string; costMint: string }[] = [
   { id: "ondo-usdy", heldMint: "A1KLoBrKBde8Ty9qtNQUtq3C2ortoC3u7twggz7sEto6", costMint: USDC },
-  // Tokenized stocks (Backed xStocks) — same swap-leg cost basis. ids match the
-  // providers in lib/yield/xstocks.ts so useEarnings attributes P&L per stock.
-  { id: "xstock-spy", heldMint: "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W", costMint: USDC },
-  { id: "xstock-qqq", heldMint: "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ", costMint: USDC },
-  { id: "xstock-nvda", heldMint: "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh", costMint: USDC },
-  { id: "xstock-aapl", heldMint: "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp", costMint: USDC },
-  { id: "xstock-msft", heldMint: "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX", costMint: USDC },
-  { id: "xstock-tsla", heldMint: "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB", costMint: USDC },
-  { id: "xstock-googl", heldMint: "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN", costMint: USDC },
-  { id: "xstock-amzn", heldMint: "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg", costMint: USDC },
-  { id: "xstock-meta", heldMint: "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu", costMint: USDC },
-  { id: "xstock-coin", heldMint: "Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu", costMint: USDC },
+  ...XSTOCKS.map((s) => ({ id: s.id, heldMint: s.mint, costMint: USDC })),
 ];
 
 const isAddress = (a: unknown): a is string =>
