@@ -163,7 +163,8 @@ export function isXStock(id: string): boolean {
   return id.startsWith("xstock-");
 }
 
-// --- Catalog (prototype: two liquid tickers; extend by appending a row) ---
+// --- Catalog (top-10 tickers; extend by appending a row). Mints verified via the
+//     Jupiter token registry — the official Backed xStocks (vanity "Xs…" prefix). ---
 export interface XStockMeta extends XStockConfig {
   /** Provider id — matches `xstock-${symbol.toLowerCase()}`. */
   id: string;
@@ -171,7 +172,15 @@ export interface XStockMeta extends XStockConfig {
 
 export const XSTOCKS: readonly XStockMeta[] = [
   { id: "xstock-spy", symbol: "SPY", token: "SPYx", name: "S&P 500", mint: "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W" },
+  { id: "xstock-qqq", symbol: "QQQ", token: "QQQx", name: "Nasdaq 100", mint: "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ" },
+  { id: "xstock-nvda", symbol: "NVDA", token: "NVDAx", name: "NVIDIA", mint: "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh" },
   { id: "xstock-aapl", symbol: "AAPL", token: "AAPLx", name: "Apple", mint: "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp" },
+  { id: "xstock-msft", symbol: "MSFT", token: "MSFTx", name: "Microsoft", mint: "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX" },
+  { id: "xstock-tsla", symbol: "TSLA", token: "TSLAx", name: "Tesla", mint: "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB" },
+  { id: "xstock-googl", symbol: "GOOGL", token: "GOOGLx", name: "Alphabet", mint: "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN" },
+  { id: "xstock-amzn", symbol: "AMZN", token: "AMZNx", name: "Amazon", mint: "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg" },
+  { id: "xstock-meta", symbol: "META", token: "METAx", name: "Meta", mint: "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu" },
+  { id: "xstock-coin", symbol: "COIN", token: "COINx", name: "Coinbase", mint: "Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu" },
 ];
 
 export const xstockProviders: readonly YieldProvider[] = XSTOCKS.map(createXStockProvider);

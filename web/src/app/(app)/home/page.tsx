@@ -8,16 +8,17 @@ import { ArrowUpRight, Sparkles, Loader2 } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { LiveAmount } from "@/components/live-amount";
+import { LiveEarned } from "@/components/live-earned";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
+import { useEarnings } from "@/hooks/use-earnings";
 import { fromBaseUnits } from "@/lib/yield";
 
 export default function HomePage() {
   const { user } = usePrivy();
-  const { totalUsdc, dailyYield, blendedApy, positionCount, views, loading } =
+  const { totalUsdc, blendedApy, positionCount, views, loading } =
     useAggregatePersonalBalance();
-  // Projected earnings at the current blended APY. Shown per YEAR: at small
-  // balances a per-day figure rounds to $0.00, so the year view is the legible one.
-  const yearlyYield = dailyYield * 365;
+  // Real earnings already made (current value − on-chain cost basis), not a projection.
+  const earnings = useEarnings();
   const [greeting, setGreeting] = useState("Welcome");
 
   useEffect(() => {
@@ -67,13 +68,17 @@ export default function HomePage() {
           ) : (
             <LiveAmount value={totalUsdc} apy={blendedApy} variant="hero" />
           )}
-          {totalUsdc > 0 && yearlyYield > 0 && (
-            <span className="font-mono text-sm text-accent">
-              +${yearlyYield.toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}{" "}
-              / year
+          {earnings.supportedValue > 0 && (
+            <span
+              className="font-mono text-sm text-accent"
+              title="Real earnings since you bought in — current value minus what you put in, read on-chain (not a projection)."
+            >
+              <LiveEarned
+                currentValue={earnings.supportedValue}
+                invested={earnings.totalInvested}
+                apy={earnings.blendedApy}
+              />{" "}
+              earned
             </span>
           )}
         </div>
