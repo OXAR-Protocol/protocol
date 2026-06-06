@@ -24,7 +24,7 @@ const chainTag = (a: { chain: string; network?: string }) =>
 /** Deposit with any asset on any chain: pick a pay-asset, enter USD, see net USDC. */
 export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
   const lower = verb.toLowerCase();
-  const { linkWallet } = usePrivy();
+  const { linkWallet, unlinkWallet } = usePrivy();
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
   const { assets: evmAssets, evmAddress, loading: evmLoading } = useEvmAssets();
   const { depositWith, busy, label, error } = useDeposit(view.id);
@@ -110,7 +110,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
         )}
 
         {/* Pay from another chain: link an external wallet (EVM) as a funding rail. */}
-        {!evmAddress && (
+        {!evmAddress ? (
           <button
             onClick={() => linkWallet()}
             className="mt-2 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-white/40 hover:text-white/70 transition"
@@ -118,6 +118,19 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
             <Plus size={11} strokeWidth={1.5} />
             Connect a wallet to pay from another chain
           </button>
+        ) : (
+          // Connected EVM wallet — let the user disconnect it (e.g. to link another).
+          <div className="mt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-white/40">
+            <span>
+              EVM {evmAddress.slice(0, 6)}…{evmAddress.slice(-4)}
+            </span>
+            <button
+              onClick={() => unlinkWallet(evmAddress)}
+              className="underline hover:text-white/70 transition"
+            >
+              disconnect
+            </button>
+          </div>
         )}
       </div>
 

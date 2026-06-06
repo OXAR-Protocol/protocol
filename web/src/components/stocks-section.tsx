@@ -4,8 +4,10 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
 import { StockSheet } from "@/components/stock-sheet";
+import { Sparkline } from "@/components/sparkline";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
+import { useStockCharts } from "@/hooks/use-stock-charts";
 import { useEarnings } from "@/hooks/use-earnings";
 import { useStocksAllowed } from "@/hooks/use-stocks-allowed";
 import { XSTOCKS, type XStockMeta } from "@/lib/yield/xstocks";
@@ -22,6 +24,7 @@ export function StocksSection({ layout = "list" }: Props) {
   const allowed = useStocksAllowed();
   const { views, refresh } = useYieldPositions();
   const { prices } = useStockPrices(XSTOCKS.map((s) => s.mint));
+  const charts = useStockCharts();
   const { sources } = useEarnings();
   const [active, setActive] = useState<XStockMeta | null>(null);
 
@@ -39,6 +42,11 @@ export function StocksSection({ layout = "list" }: Props) {
     const holdings = view ? fromBaseUnits(view.underlyingBalance, view.decimals) : 0;
     const earned = earnedById[s.id];
     const up = (px?.change24h ?? 0) >= 0;
+    const chart = charts[s.mint];
+    const spark =
+      chart && chart.length > 1 ? (
+        <Sparkline values={chart} height={32} className={`w-full h-8 ${up ? "text-emerald-400/40" : "text-red-400/40"}`} />
+      ) : null;
 
     const price = (
       <p className="font-sans text-lg text-white tabular-nums">
@@ -79,7 +87,8 @@ export function StocksSection({ layout = "list" }: Props) {
           className="p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition-colors text-left disabled:opacity-50 min-h-[120px] flex flex-col justify-between"
         >
           {head}
-          <div className="mt-3">
+          {spark && <div className="my-2">{spark}</div>}
+          <div className={spark ? "mt-1" : "mt-3"}>
             {price}
             {change}
             {owned}
@@ -95,10 +104,11 @@ export function StocksSection({ layout = "list" }: Props) {
         onClick={() => view && setActive(s)}
         className="w-full flex items-center justify-between p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition-colors text-left disabled:opacity-50"
       >
-        <div>
+        <div className="min-w-0">
           {head}
           {owned}
         </div>
+        {spark && <div className="hidden sm:block flex-1 mx-4 max-w-[140px]">{spark}</div>}
         <div className="text-right">
           {price}
           {change}
