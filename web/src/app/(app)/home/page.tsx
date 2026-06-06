@@ -9,6 +9,7 @@ import { ArrowUpRight, Sparkles, Loader2 } from "lucide-react";
 import { SectionLabel } from "@/components/section-label";
 import { LiveAmount } from "@/components/live-amount";
 import { LiveEarned } from "@/components/live-earned";
+import { ActivityFeed } from "@/components/activity-feed";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
 import { fromBaseUnits } from "@/lib/yield";
@@ -209,11 +210,7 @@ export default function HomePage() {
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30 mb-4">
           Recent activity
         </p>
-        <div className="border border-white/10 rounded-[8px] p-6 text-center">
-          <p className="font-mono text-sm text-white/40">
-            Nothing yet — your money is still snoring.
-          </p>
-        </div>
+        <ActivityFeed />
       </motion.section>
     </div>
   );
