@@ -18,7 +18,15 @@ const SOURCES: { id: string; heldMint: string; costMint: string }[] = [
   // Tokenized stocks (Backed xStocks) — same swap-leg cost basis. ids match the
   // providers in lib/yield/xstocks.ts so useEarnings attributes P&L per stock.
   { id: "xstock-spy", heldMint: "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W", costMint: USDC },
+  { id: "xstock-qqq", heldMint: "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ", costMint: USDC },
+  { id: "xstock-nvda", heldMint: "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh", costMint: USDC },
   { id: "xstock-aapl", heldMint: "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp", costMint: USDC },
+  { id: "xstock-msft", heldMint: "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX", costMint: USDC },
+  { id: "xstock-tsla", heldMint: "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB", costMint: USDC },
+  { id: "xstock-googl", heldMint: "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN", costMint: USDC },
+  { id: "xstock-amzn", heldMint: "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg", costMint: USDC },
+  { id: "xstock-meta", heldMint: "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu", costMint: USDC },
+  { id: "xstock-coin", heldMint: "Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu", costMint: USDC },
 ];
 
 const isAddress = (a: unknown): a is string =>
