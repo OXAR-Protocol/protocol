@@ -21,6 +21,9 @@ export interface ProviderView {
   group?: string;
   /** DefiLlama pool id — for the APY history sparkline. */
   defiLlamaPoolId?: string;
+  /** Swap-and-hold acquired asset (Ondo/stocks) — for the swap-spread preview. */
+  heldMint?: string;
+  heldDecimals?: number;
   /** Supply APY as a fraction (0.06 = 6%). */
   apy: number;
   /** User's principal + accrued yield, in asset base units. 0 if not connected. */
@@ -65,6 +68,8 @@ async function fetchSnapshot(
         chain: p.chain,
         group: p.group,
         defiLlamaPoolId: p.defiLlamaPoolId,
+        heldMint: p.heldMint,
+        heldDecimals: p.heldDecimals,
         apy,
         underlyingBalance: position.underlyingBalance,
         shares: position.shares,

@@ -173,6 +173,8 @@ export function createXStockProvider(cfg: XStockMeta): YieldProvider {
     riskLevel: "medium",
     chain: "solana",
     group: "xstocks",
+    heldMint,
+    heldDecimals: 8, // xStocks are Token-2022 with 8 decimals
 
     async buildDepositTx({ owner, amount }: BuildIxParams) {
       return swap(owner, USDC_MINT, heldMint, amount);

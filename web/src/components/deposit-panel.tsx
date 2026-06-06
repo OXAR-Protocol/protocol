@@ -9,6 +9,7 @@ import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
 import { useDeposit } from "@/hooks/use-deposit";
 import { useNetPreview } from "@/hooks/use-net-preview";
+import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 
 interface Props {
@@ -56,6 +57,15 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
     productMint: view.assetMint,
     productDecimals: view.decimals,
     evmAddress,
+  });
+
+  // Swap-and-hold (Ondo / stocks): the deposit swaps USDC → the held asset, so show
+  // what you'll actually hold + the swap cost up front (no surprise minus after).
+  const swapIn = useSwapInPreview({
+    heldMint: view.heldMint,
+    heldDecimals: view.heldDecimals,
+    usdAmount,
+    enabled: !!view.heldMint && !!payAsset,
   });
 
   const handleDeposit = async () => {
@@ -137,16 +147,28 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
       {/* Net received */}
       {payAsset && usdAmount > 0 && (
         <p className="mt-2 font-mono text-[11px] text-white/40">
-          {isDirect
-            ? `you'll ${lower} $${usdAmount.toFixed(2)} ${view.assetSymbol}`
-            : preview.quoting
+          {view.heldMint ? (
+            // Swap-and-hold: show what you'll actually hold + the swap cost.
+            swapIn.quoting
               ? "quoting…"
-              : preview.netUsdc !== null
-                ? `you'll ${lower} ~$${preview.netUsdc.toFixed(2)} ${view.assetSymbol}` +
-                  (preview.kind === "bridge"
-                    ? ` · fee ~$${(preview.feeUsd ?? 0).toFixed(2)}${preview.etaSec ? ` · ~${preview.etaSec}s` : ""}`
-                    : " (after swap)")
-                : "couldn't quote — try a different amount"}
+              : swapIn.valueUsd !== null
+                ? `you'll hold ≈ $${swapIn.valueUsd.toFixed(2)}` +
+                  (swapIn.spreadUsd && swapIn.spreadUsd > 0
+                    ? ` · swap cost ~$${swapIn.spreadUsd < 0.01 ? swapIn.spreadUsd.toFixed(4) : swapIn.spreadUsd.toFixed(2)}`
+                    : "")
+                : "couldn't quote — try a different amount"
+          ) : isDirect ? (
+            `you'll ${lower} $${usdAmount.toFixed(2)} ${view.assetSymbol}`
+          ) : preview.quoting ? (
+            "quoting…"
+          ) : preview.netUsdc !== null ? (
+            `you'll ${lower} ~$${preview.netUsdc.toFixed(2)} ${view.assetSymbol}` +
+            (preview.kind === "bridge"
+              ? ` · fee ~$${(preview.feeUsd ?? 0).toFixed(2)}${preview.etaSec ? ` · ~${preview.etaSec}s` : ""}`
+              : " (after swap)")
+          ) : (
+            "couldn't quote — try a different amount"
+          )}
         </p>
       )}
 

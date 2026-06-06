@@ -94,6 +94,12 @@ export interface YieldProvider {
   /** A fully-built full-exit transaction (no share count needed). */
   buildRedeemTx?(p: RedeemTxParams): Promise<VersionedTransaction | Transaction>;
 
+  /** For swap-and-hold sources (Ondo, stocks): the asset actually acquired (the
+   *  deposit swaps USDC → this). Lets the UI preview the swap spread before buying.
+   *  Undefined for sources that deposit USDC directly (no swap). */
+  readonly heldMint?: string;
+  readonly heldDecimals?: number;
+
   /** Current position for `owner` (zeroed if none). */
   getPosition(owner: PublicKey, connection: Connection): Promise<YieldPosition>;
   /** Current supply APY as a fraction (0.06 = 6%). */
