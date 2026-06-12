@@ -10,6 +10,7 @@ import type { StockPrice } from "@/hooks/use-stock-prices";
 import { fromBaseUnits, planWithdrawal } from "@/lib/yield";
 import { YieldAmountField } from "@/components/yield-amount-field";
 import { DepositPanel } from "@/components/deposit-panel";
+import { AssetChart } from "@/components/asset-chart";
 import { YieldActionSuccess, type ActionResult } from "@/components/yield-action-success";
 
 interface Props {
@@ -96,6 +97,9 @@ export function StockSheet({ view, token, name, kind = "Stock", note = "tokenize
               )}
             </div>
           </div>
+
+          {/* Price history — switchable range, so you can see what you're buying */}
+          {view.heldMint && <AssetChart mint={view.heldMint} />}
 
           {/* Position + P&L */}
           {holdings > 0 && (
