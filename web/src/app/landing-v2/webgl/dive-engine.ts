@@ -44,8 +44,13 @@ export class DiveEngine {
       depth: false,
       powerPreference: "low-power",
     });
-    if (!gl) throw new Error("webgl unavailable");
+    if (!gl || gl.isContextLost()) throw new Error("webgl unavailable");
     this.gl = gl;
+    // If the context ever dies, hide the canvas — a lost-context canvas
+    // composites as opaque white on macOS and would cover the page.
+    canvas.addEventListener("webglcontextlost", () => {
+      canvas.style.display = "none";
+    });
     this.reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     this.count = window.innerWidth < 768 ? 4000 : 9000;
 
@@ -145,6 +150,8 @@ export class DiveEngine {
     this.pause();
     window.removeEventListener("resize", this.onResize);
     document.removeEventListener("visibilitychange", this.onVisibility);
-    this.gl.getExtension("WEBGL_lose_context")?.loseContext();
+    // Do NOT loseContext() here: StrictMode double-mounts effects in dev, and
+    // getContext() on remount returns the SAME (then-lost) context — a canvas
+    // with a lost context composites as opaque white on macOS.
   }
 }
