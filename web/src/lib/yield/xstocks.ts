@@ -73,6 +73,7 @@ export const XSTOCKS: readonly XStockMeta[] = [
   { id: "xstock-ko", symbol: "KO", token: "KOx", name: "Coca-Cola", mint: "XsaBXg8dU5cPM6ehmVctMkVqoiRG2ZjMo1cyBJ3AykQ" },
   { id: "xstock-mcd", symbol: "MCD", token: "MCDx", name: "McDonald's", mint: "XsqE9cRRpzxcGKDXj1BJ7Xmg4GRhZoyY1KpmGSxAWT2" },
   { id: "xstock-gld", symbol: "GLD", token: "GLDx", name: "Gold", mint: "Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re" },
+  { id: "xstock-spcx", symbol: "SPCX", token: "SPCXx", name: "SpaceX", mint: "Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8" },
 ];
 
 const STOCK_MINTS = XSTOCKS.map((s) => s.mint);
