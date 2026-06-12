@@ -59,9 +59,12 @@ export class DiveEngine {
     gl.useProgram(prog);
 
     this.buildAttributes(prog);
-    for (const name of ["uCP", "uTime", "uScroll", "uAspect", "uDPR", "uMouse"]) {
+    for (const name of ["uTime", "uScroll", "uAspect", "uDPR", "uMouse"]) {
       this.uniforms[name] = gl.getUniformLocation(prog, name);
     }
+    // Array uniforms must be queried as "name[0]" on some drivers.
+    this.uniforms.uCP =
+      gl.getUniformLocation(prog, "uCP[0]") ?? gl.getUniformLocation(prog, "uCP");
     gl.uniform2fv(this.uniforms.uCP, CONTROL_POINTS);
 
     gl.enable(gl.BLEND);

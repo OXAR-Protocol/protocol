@@ -21,7 +21,13 @@ export default function RootLayout({
       lang="en"
       className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
-      <body className="bg-surface-0 text-white font-sans antialiased overflow-x-hidden">
+      {/* suppressHydrationWarning: wallet extensions (Trust/Bitwarden inpage scripts)
+          inject attributes into <body> before React loads — harmless, but the
+          mismatch makes dev re-mount the tree and flash white. */}
+      <body
+        suppressHydrationWarning
+        className="bg-surface-0 text-white font-sans antialiased overflow-x-hidden"
+      >
         {/* Apply the saved theme before paint to avoid a dark→light flash. */}
         <script
           dangerouslySetInnerHTML={{
