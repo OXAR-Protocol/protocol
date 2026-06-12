@@ -13,7 +13,9 @@ import {
   useYieldPositions,
   type ProviderView,
 } from "@/hooks/use-yield-positions";
+import { useStockPrices } from "@/hooks/use-stock-prices";
 import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
+import { isPriceExposure } from "@/lib/yield/assets";
 
 type Layout = "list" | "grid";
 
@@ -35,6 +37,15 @@ export default function PilePage() {
   // Pile is the portfolio: only sources where you actually hold a position.
   // (Browse/deposit lives on /yield.)
   const held = views.filter((v) => v.underlyingBalance > BigInt(0));
+
+  // 24h price change for price-exposure positions (stocks/gold) — shown instead
+  // of "0.00% APY" on those cards.
+  const priceMints = held
+    .filter((v) => isPriceExposure(v.id) && v.heldMint)
+    .map((v) => v.heldMint as string);
+  const { prices } = useStockPrices(priceMints);
+  const change24hOf = (v: ProviderView) =>
+    isPriceExposure(v.id) && v.heldMint ? prices[v.heldMint]?.change24h : undefined;
 
   // Value-weighted APY across held positions — drives the live total ticker.
   const blendedApy =
@@ -136,7 +147,7 @@ export default function PilePage() {
         ) : layout === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {held.map((v) => (
-              <PositionCard key={v.id} view={v} onOpen={() => setActive(v)} />
+              <PositionCard key={v.id} view={v} onOpen={() => setActive(v)} change24h={change24hOf(v)} />
             ))}
           </div>
         ) : (
@@ -152,13 +163,30 @@ export default function PilePage() {
                   <div className="flex items-center gap-4">
                     <div className="flex-1 min-w-0">
                       <p className="font-sans text-base text-white truncate">{v.name}</p>
-                      <p
-                        className={`mt-1 font-mono text-[10px] uppercase tracking-wide ${
-                          RISK_TONE[v.riskLevel] ?? "text-white/40"
-                        }`}
-                      >
-                        {(v.apy * 100).toFixed(2)}% APY · {v.assetSymbol}
-                      </p>
+                      {(() => {
+                        const ch = change24hOf(v);
+                        if (typeof ch === "number") {
+                          const up = ch >= 0;
+                          return (
+                            <p className="mt-1 font-mono text-[10px] uppercase tracking-wide">
+                              <span className={up ? "text-emerald-400/80" : "text-red-400/80"}>
+                                {up ? "+" : ""}
+                                {ch.toFixed(2)}% 24h
+                              </span>
+                              <span className="text-white/40"> · {v.assetSymbol}</span>
+                            </p>
+                          );
+                        }
+                        return (
+                          <p
+                            className={`mt-1 font-mono text-[10px] uppercase tracking-wide ${
+                              RISK_TONE[v.riskLevel] ?? "text-white/40"
+                            }`}
+                          >
+                            {(v.apy * 100).toFixed(2)}% APY · {v.assetSymbol}
+                          </p>
+                        );
+                      })()}
                     </div>
                     <div className="text-right shrink-0">
                       <LiveAmount value={value} apy={v.apy} variant="md" />

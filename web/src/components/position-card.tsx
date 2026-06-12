@@ -4,19 +4,29 @@ import { ArrowUpRight } from "lucide-react";
 
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { useApyHistory } from "@/hooks/use-apy-history";
+import { useStockCharts } from "@/hooks/use-stock-charts";
 import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
+import { isPriceExposure } from "@/lib/yield/assets";
 import { Sparkline } from "@/components/sparkline";
 import { LiveAmount } from "@/components/live-amount";
 
 interface Props {
   view: ProviderView;
   onOpen: () => void;
+  /** 24h price change (%) for price-exposure assets — shown instead of APY. */
+  change24h?: number;
 }
 
-/** Grid ("квадратик") card for one source — with a real APY history sparkline. */
-export function PositionCard({ view, onOpen }: Props) {
+/** Grid ("квадратик") card for one source — APY trend for yield, price trend
+ *  + 24h change for price-exposure assets (stocks/gold). */
+export function PositionCard({ view, onOpen, change24h }: Props) {
   const value = fromBaseUnits(view.underlyingBalance, view.decimals);
-  const history = useApyHistory(view.defiLlamaPoolId);
+  const apyHistory = useApyHistory(view.defiLlamaPoolId);
+  const charts = useStockCharts();
+
+  const isPrice = isPriceExposure(view.id);
+  const priceUp = (change24h ?? 0) >= 0;
+  const history = isPrice ? (view.heldMint ? charts[view.heldMint] ?? [] : []) : apyHistory;
 
   return (
     <button
@@ -37,7 +47,12 @@ export function PositionCard({ view, onOpen }: Props) {
         />
       </div>
 
-      <Sparkline values={history} className="w-full h-9 text-accent/60" />
+      <Sparkline
+        values={history}
+        className={`w-full h-9 ${
+          isPrice ? (priceUp ? "text-emerald-400/50" : "text-red-400/50") : "text-accent/60"
+        }`}
+      />
 
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
@@ -46,13 +61,24 @@ export function PositionCard({ view, onOpen }: Props) {
             {value > 0 ? "your position" : "tap to deposit"}
           </p>
         </div>
-        <p
-          className={`font-mono text-xs tabular-nums shrink-0 ${
-            RISK_TONE[view.riskLevel] ?? "text-white/40"
-          }`}
-        >
-          {(view.apy * 100).toFixed(2)}% APY
-        </p>
+        {isPrice && typeof change24h === "number" ? (
+          <p
+            className={`font-mono text-xs tabular-nums shrink-0 ${
+              priceUp ? "text-emerald-400/80" : "text-red-400/80"
+            }`}
+          >
+            {priceUp ? "+" : ""}
+            {change24h.toFixed(2)}% 24h
+          </p>
+        ) : (
+          <p
+            className={`font-mono text-xs tabular-nums shrink-0 ${
+              RISK_TONE[view.riskLevel] ?? "text-white/40"
+            }`}
+          >
+            {(view.apy * 100).toFixed(2)}% APY
+          </p>
+        )}
       </div>
     </button>
   );

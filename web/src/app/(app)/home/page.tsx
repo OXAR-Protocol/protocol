@@ -12,9 +12,11 @@ import { LiveEarned } from "@/components/live-earned";
 import { ActivityFeed } from "@/components/activity-feed";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
+import { useStockPrices } from "@/hooks/use-stock-prices";
 import { fromBaseUnits } from "@/lib/yield";
 import { isXStock } from "@/lib/yield/xstocks";
 import { isGold } from "@/lib/yield/gold";
+import { isPriceExposure } from "@/lib/yield/assets";
 
 /** Sum a set of earning sources into the inputs LiveEarned needs. */
 function aggregate(sources: { currentValue: number; invested: number; apy: number }[]) {
@@ -53,6 +55,13 @@ export default function HomePage() {
   const activePositions = views.filter(
     (v) => Number(v.underlyingBalance) > 0,
   );
+
+  // 24h price change for price-exposure positions (stocks/gold) — shown instead
+  // of a meaningless "0.00% APY" on those cards.
+  const priceMints = activePositions
+    .filter((v) => isPriceExposure(v.id) && v.heldMint)
+    .map((v) => v.heldMint as string);
+  const { prices } = useStockPrices(priceMints);
 
   return (
     <div className="max-w-[1100px] mx-auto pt-8 pb-32">
@@ -189,9 +198,26 @@ export default function HomePage() {
                 >
                   <div>
                     <p className="font-sans text-base text-white">{v.name}</p>
-                    <p className="mt-1 font-mono text-xs text-white/40">
-                      {(v.apy * 100).toFixed(2)}% APY · {v.assetSymbol}
-                    </p>
+                    {(() => {
+                      const ch = v.heldMint ? prices[v.heldMint]?.change24h : undefined;
+                      if (isPriceExposure(v.id) && typeof ch === "number") {
+                        const up = ch >= 0;
+                        return (
+                          <p className="mt-1 font-mono text-xs">
+                            <span className={up ? "text-emerald-400/80" : "text-red-400/80"}>
+                              {up ? "+" : ""}
+                              {ch.toFixed(2)}% 24h
+                            </span>
+                            <span className="text-white/40"> · {v.assetSymbol}</span>
+                          </p>
+                        );
+                      }
+                      return (
+                        <p className="mt-1 font-mono text-xs text-white/40">
+                          {(v.apy * 100).toFixed(2)}% APY · {v.assetSymbol}
+                        </p>
+                      );
+                    })()}
                   </div>
                   <LiveAmount value={value} apy={v.apy} variant="md" />
                 </Link>

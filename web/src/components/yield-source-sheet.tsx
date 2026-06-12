@@ -5,10 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
 import { useYieldActions } from "@/hooks/use-yield-actions";
+import { useApyHistory } from "@/hooks/use-apy-history";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { RISK_LABEL, fromBaseUnits, planWithdrawal } from "@/lib/yield";
 import { YieldAmountField } from "@/components/yield-amount-field";
 import { DepositPanel } from "@/components/deposit-panel";
+import { AssetChart } from "@/components/asset-chart";
+import { Sparkline } from "@/components/sparkline";
 import {
   YieldActionSuccess,
   type ActionResult,
@@ -27,11 +30,15 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
   const view = views.find((v) => v.id === selectedId) ?? views[0];
 
   const { withdraw, redeemAll, loading, error } = useYieldActions(view.id);
+  const apyHistory = useApyHistory(view.defiLlamaPoolId);
 
   const [withdrawAmount, setWithdrawAmount] = useState(10);
   const [result, setResult] = useState<ActionResult | null>(null);
 
   const positionValue = fromBaseUnits(view.underlyingBalance, view.decimals);
+  // Price-exposure asset (stock / gold): held via swap, no yield. Reframe the
+  // yield-flavoured labels so they read honestly when opened from the pile.
+  const priceExposure = !!view.heldMint && view.apy === 0;
 
   // Confirmed commitment can still lag a slot — refresh after a beat to avoid stale $0.
   const settleAndRefresh = () => {
@@ -78,7 +85,7 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
           <div className="flex items-start justify-between gap-4 mb-6">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
-                Yield source
+                {priceExposure ? "Asset" : "Yield source"}
               </p>
               <h2 className="mt-2 font-sans text-2xl text-white">{view.name}</h2>
               <p className="mt-1 font-mono text-xs text-white/40">{view.description}</p>
@@ -112,9 +119,11 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
 
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="p-4 rounded-[6px] border border-white/10">
-              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">APY</p>
+              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
+                {priceExposure ? "Exposure" : "APY"}
+              </p>
               <p className="mt-1 font-sans text-2xl text-white tabular-nums">
-                {(view.apy * 100).toFixed(2)}%
+                {priceExposure ? "Price" : `${(view.apy * 100).toFixed(2)}%`}
               </p>
             </div>
             <div className="p-4 rounded-[6px] border border-white/10">
@@ -125,6 +134,19 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
             </div>
           </div>
 
+          {/* History — price (switchable range) for swap-and-hold assets like Ondo,
+              else the APY trend for pure-yield sources (Kamino / Jupiter Lend). */}
+          {view.heldMint ? (
+            <AssetChart mint={view.heldMint} />
+          ) : apyHistory.length > 1 ? (
+            <div className="mb-6 p-4 rounded-[6px] border border-white/10">
+              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-3">
+                APY · last {apyHistory.length} days
+              </p>
+              <Sparkline values={apyHistory} height={96} className="w-full h-24 text-accent/60" />
+            </div>
+          ) : null}
+
           {positionValue > 0 && (
             <div className="mb-6 p-4 rounded-[6px] border border-accent/30 bg-accent/[0.04]">
               <p className="font-mono text-[10px] uppercase tracking-wide text-white/50">
@@ -133,7 +155,9 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
               <p className="mt-1 font-sans text-2xl text-white tabular-nums">
                 ${positionValue.toFixed(2)}
               </p>
-              <p className="mt-1 font-mono text-[11px] text-white/40">principal + accrued yield</p>
+              <p className="mt-1 font-mono text-[11px] text-white/40">
+                {priceExposure ? "current market value" : "principal + accrued yield"}
+              </p>
             </div>
           )}
 
