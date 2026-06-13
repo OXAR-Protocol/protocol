@@ -7,7 +7,8 @@ import { useTheme } from "@/context/theme-context";
 // nearby particles, which then ease back into formation. Canvas2D (no WebGL
 // fragility); pauses off-screen / hidden / reduced-motion.
 const DPR_CAP = 2;
-const LOGO_FILL = 0.42; // logo height as a fraction of the canvas height
+const LOGO_FILL = 0.62; // logo height as a fraction of the canvas height
+const REPEL2 = 4200; // pointer reaction radius², ~65px
 
 type P = { x: number; y: number; tx: number; ty: number; vx: number; vy: number; r: number };
 
@@ -29,8 +30,9 @@ export function LogoParticles({ className = "" }: { className?: string }) {
     let running = false;
     const mouse = { x: -9999, y: -9999 };
     const dark = theme !== "light";
-    const baseColor = dark ? "232,212,180" : "26,23,20"; // warm ivory vs ink
-    const accent = "200,132,30"; // amber
+    // Brand blue → violet.
+    const baseColor = dark ? "114,162,240" : "99,86,200"; // blue (dark) / deep violet (light)
+    const accent = "139,92,246"; // violet, near the pointer
 
     function sampleTargets(w: number, h: number, img: HTMLImageElement) {
       const targetH = h * LOGO_FILL;
@@ -85,8 +87,8 @@ export function LogoParticles({ className = "" }: { className?: string }) {
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const d2 = dx * dx + dy * dy;
-        if (d2 < 14000) {
-          const f = (14000 - d2) / 14000;
+        if (d2 < REPEL2) {
+          const f = (REPEL2 - d2) / REPEL2;
           const d = Math.sqrt(d2) || 1;
           p.vx += (dx / d) * f * 6;
           p.vy += (dy / d) * f * 6;
@@ -95,7 +97,7 @@ export function LogoParticles({ className = "" }: { className?: string }) {
         p.vy *= 0.86;
         p.x += p.vx;
         p.y += p.vy;
-        const near = d2 < 14000;
+        const near = d2 < REPEL2;
         c.fillStyle = `rgba(${near ? accent : baseColor},${dark ? 0.55 : 0.5})`;
         c.fillRect(p.x, p.y, p.r, p.r);
       }
