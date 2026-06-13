@@ -357,9 +357,9 @@ input[type="number"] {
   ) !important;
 }
 
-/* Hero video for light theme — brighter */
+/* Hero video for light theme — softened so it doesn't glare */
 [data-theme="light"] .hero-video {
-  opacity: 0.5 !important;
+  opacity: 0.18 !important;
   filter: invert(1) hue-rotate(180deg);
 }
 

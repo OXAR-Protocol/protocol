@@ -15,7 +15,7 @@ export const STEPS = [
     number: "03",
     title: "Money wakes up",
     description:
-      "Your USDC flows into curated yield sources — Ondo, Maple, Kamino, Ethena. Daily yield, transparent on-chain.",
+      "Your USDC earns on Jupiter Lend today, with Ondo, Maple, Kamino and Ethena on the way. Daily yield, transparent on-chain.",
   },
   {
     number: "04",

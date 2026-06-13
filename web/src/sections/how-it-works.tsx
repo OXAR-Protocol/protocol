@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { SectionLabel } from "@/components/section-label";
-import { IsometricBoxes } from "@/components/isometric-boxes";
+import { LogoParticles } from "@/components/logo-particles";
 import {
   STEPS,
   ARC_RADIUS,
@@ -78,7 +78,7 @@ export function HowItWorks() {
     <section id="how-it-works">
       <div ref={sectionRef} className="relative" style={{ height: `${STEPS.length * 100}vh` }}>
         <div className="sticky top-0 h-screen overflow-hidden">
-          <IsometricBoxes className="opacity-30 pointer-events-none" />
+          <LogoParticles className="absolute inset-0 w-full h-full pointer-events-none z-0" />
 
           <div className="pointer-events-none absolute inset-x-0 top-8 z-20 mx-auto max-w-[1200px] px-6">
             <SectionLabel>How It Works</SectionLabel>

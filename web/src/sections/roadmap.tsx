@@ -9,7 +9,7 @@ const MILESTONES = [
   {
     phase: "Now",
     name: "Building",
-    details: "Smart contracts live on devnet. Auto-distribute and group vaults under construction.",
+    details: "USDC yield live on Solana mainnet via Jupiter Lend. Group piles and more sources under construction.",
     status: "current" as const,
   },
   {
@@ -43,7 +43,7 @@ export function Roadmap() {
       <div className="max-w-[1200px] mx-auto">
         <AnimatedSection>
           <SectionLabel>What's ahead</SectionLabel>
-          <SectionTitle>From devnet to your phone</SectionTitle>
+          <SectionTitle>From mainnet to your phone</SectionTitle>
         </AnimatedSection>
 
         {/* Desktop */}
