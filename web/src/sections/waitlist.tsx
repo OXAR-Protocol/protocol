@@ -34,11 +34,11 @@ export function Waitlist() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="font-sans font-normal text-[clamp(2rem,5vw,3rem)] leading-[1.1] text-white max-w-[760px]"
+          className="font-serif font-normal text-[clamp(2.4rem,5.5vw,3.6rem)] leading-[1.02] tracking-[-0.01em] text-white max-w-[760px]"
         >
           Be first to wake up your money.
           <br />
-          <span className="text-white/60">Bring friends along.</span>
+          <span className="italic text-white/50">Bring friends along.</span>
         </motion.h2>
 
         <motion.p
