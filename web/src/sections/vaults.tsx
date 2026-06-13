@@ -11,7 +11,6 @@ import { TemplateCard, type RiskTemplate } from "./vaults/template-card";
 const TEMPLATES: RiskTemplate[] = [
   {
     id: "sleepy",
-    emoji: "😴",
     label: "Sleepy",
     description: "Slow but steady",
     apyLow: 4,
@@ -21,7 +20,6 @@ const TEMPLATES: RiskTemplate[] = [
   },
   {
     id: "walking",
-    emoji: "🚶",
     label: "Walking",
     description: "Balanced pace",
     apyLow: 6,
@@ -32,7 +30,6 @@ const TEMPLATES: RiskTemplate[] = [
   },
   {
     id: "running",
-    emoji: "🏃",
     label: "Running",
     description: "Fast and loud",
     apyLow: 9,

@@ -12,7 +12,6 @@ import { ComparisonChart } from "./comparison-chart";
 
 export interface RiskTemplate {
   id: string;
-  emoji: string;
   label: string;
   description: string;
   apyLow: number;
@@ -85,11 +84,10 @@ export function TemplateCard({
         />
 
         <div className="relative">
-          <div className="flex items-center justify-between mb-1">
+          <div className="mb-1">
             <span className="font-mono text-xs uppercase tracking-wide text-white/30">
               {template.description}
             </span>
-            <span className="text-2xl leading-none">{template.emoji}</span>
           </div>
 
           <h3 className="font-sans text-base text-white mb-4">
