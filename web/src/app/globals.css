@@ -19,6 +19,7 @@
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-instrument-serif);
 
   --animate-breathing: breathing 8s ease-in-out infinite;
   --animate-bounce-slow: bounce-slow 2s ease-in-out infinite;

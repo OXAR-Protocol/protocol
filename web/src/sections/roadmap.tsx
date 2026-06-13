@@ -110,7 +110,7 @@ export function Roadmap() {
                         </span>
                       )}
                     </div>
-                    <h3 className={`mt-2 font-sans text-lg ${isCurrent ? "text-white" : "text-white/60"}`}>
+                    <h3 className={`mt-2 font-serif text-xl ${isCurrent ? "text-white" : "text-white/60"}`}>
                       {m.name}
                     </h3>
                     <p className="mt-2 font-mono text-sm text-white/30 leading-relaxed">
@@ -173,7 +173,7 @@ export function Roadmap() {
                             </span>
                           )}
                         </div>
-                        <h3 className={`mt-1 font-sans text-lg ${isCurrent ? "text-white" : "text-white/60"}`}>
+                        <h3 className={`mt-1 font-serif text-xl ${isCurrent ? "text-white" : "text-white/60"}`}>
                           {m.name}
                         </h3>
                         <p className="mt-1 font-mono text-sm text-white/30 leading-relaxed">

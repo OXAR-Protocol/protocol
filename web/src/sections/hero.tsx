@@ -54,14 +54,14 @@ export function Hero() {
         </motion.div>
 
         <motion.h1
-          className="mt-6 text-[clamp(2.5rem,6vw,3.5rem)] font-sans font-normal leading-tight"
+          className="mt-6 text-[clamp(3rem,7vw,5rem)] font-serif font-normal leading-[0.98] tracking-[-0.015em]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
         >
           Where does your money
           <br />
-          sleep?
+          <span className="italic text-white/45">sleep?</span>
         </motion.h1>
 
         <FadeIn delay={0.4}>

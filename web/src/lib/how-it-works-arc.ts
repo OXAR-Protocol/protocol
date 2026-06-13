@@ -33,42 +33,43 @@ export const STEPS = [
 
 export const ARC_RADIUS = 600;
 export const ARC_CENTER_Y_RATIO = 0.5;
-const STEP_ARC_SPAN = 25;
-const CENTER_ANGLE = 0;
+// The arc behaves like a wheel: scroll rotates it continuously. The step whose
+// index equals the current (fractional) progress sits at the active angle;
+// neighbours fan out by STEP_ARC_SPAN and fade with distance.
+const STEP_ARC_SPAN = 26; // degrees between adjacent steps
+const ACTIVE_ANGLE = 0; // 3 o'clock — the active slot
 
 // Mobile: push arc further left so numbers don't overlap text.
 export function getArcCenterX(screenWidth: number) {
-  if (screenWidth < 640) return -ARC_RADIUS + 80;
-  if (screenWidth < 768) return -ARC_RADIUS + 120;
-  return -ARC_RADIUS + 200;
+  if (screenWidth < 640) return -ARC_RADIUS + 70;
+  if (screenWidth < 768) return -ARC_RADIUS + 110;
+  return -ARC_RADIUS + 190;
 }
 
+// Position of a step given the continuous scroll progress (0..totalSteps-1).
 export function getArcPosition(
   stepIndex: number,
-  activeStep: number,
+  progress: number,
   screenHeight: number,
   centerX: number,
 ) {
-  const offset = stepIndex - activeStep;
-  const angleDeg = CENTER_ANGLE - offset * STEP_ARC_SPAN;
+  const angleDeg = ACTIVE_ANGLE - (stepIndex - progress) * STEP_ARC_SPAN;
   const angleRad = (angleDeg * Math.PI) / 180;
-  const cx = centerX;
   const cy = screenHeight * ARC_CENTER_Y_RATIO;
 
   return {
-    x: cx + ARC_RADIUS * Math.cos(angleRad),
+    x: centerX + ARC_RADIUS * Math.cos(angleRad),
     y: cy - ARC_RADIUS * Math.sin(angleRad),
     angleDeg,
   };
 }
 
-export function getStepStyle(offset: number) {
-  const absOffset = Math.abs(offset);
-  if (absOffset === 0) {
-    return { scale: 1, opacity: 1, fontSize: "clamp(3rem, 8vw, 5rem)" };
-  }
-  if (absOffset === 1) {
-    return { scale: 0.6, opacity: 0.25, fontSize: "clamp(2rem, 5vw, 3.5rem)" };
-  }
-  return { scale: 0.4, opacity: 0.1, fontSize: "clamp(1.5rem, 4vw, 2.5rem)" };
+// Emphasis by distance from the active slot: near = bright/large, far = gone.
+export function getMarkerStyle(distance: number) {
+  const d = Math.abs(distance);
+  return {
+    opacity: Math.max(0, 1 - d * 0.55),
+    fontRem: Math.max(0.9, 2.7 - d * 0.8),
+    dotScale: Math.max(0.45, 1 - d * 0.32),
+  };
 }
