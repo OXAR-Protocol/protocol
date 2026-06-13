@@ -30,9 +30,10 @@ export function LogoParticles({ className = "" }: { className?: string }) {
     let running = false;
     const mouse = { x: -9999, y: -9999 };
     const dark = theme !== "light";
-    // Brand blue → violet.
-    const baseColor = dark ? "114,162,240" : "99,86,200"; // blue (dark) / deep violet (light)
-    const accent = "139,92,246"; // violet, near the pointer
+    // Logo = white on dark / black on light. Pointer flips particles to the
+    // opposite ink so the cursor leaves a contrasting trail.
+    const baseColor = dark ? "255,255,255" : "0,0,0";
+    const accent = dark ? "0,0,0" : "255,255,255";
 
     function sampleTargets(w: number, h: number, img: HTMLImageElement) {
       const targetH = h * LOGO_FILL;
