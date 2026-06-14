@@ -49,27 +49,9 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom cursor — hide default on desktop only */
-@media (pointer: fine) {
-  * {
-    cursor: none !important;
-  }
-  body.privy-open,
-  body.privy-open * {
-    cursor: auto !important;
-  }
-  body.privy-open a,
-  body.privy-open button,
-  body.privy-open [role="button"],
-  body.privy-open input,
-  body.privy-open select,
-  body.privy-open textarea {
-    cursor: pointer !important;
-  }
-  body.privy-open input,
-  body.privy-open textarea {
-    cursor: text !important;
-  }
+button:not(:disabled),
+[role="button"] {
+  cursor: pointer;
 }
 
 ::selection {
