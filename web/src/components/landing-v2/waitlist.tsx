@@ -1,27 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useWaitlist } from "@/hooks/use-waitlist";
 import { Reveal } from "./primitives";
 
-// Approximate seat positions over the crowd image (% of the frame). The user's
-// number lands on one of them, picked from their serial so it stays put.
-const SEATS: Array<{ x: number; y: number }> = [];
-for (let r = 0; r < 5; r++) {
-  for (let c = 0; c < 8; c++) {
-    SEATS.push({ x: 11 + c * (78 / 7), y: 16 + r * (66 / 4) });
-  }
-}
-
 export function Waitlist() {
-  const { status, serial, error, submit } = useWaitlist();
+  const { status, error, submit } = useWaitlist();
   const [email, setEmail] = useState("");
   const [honeypot, setHoneypot] = useState("");
 
   const sealed = status === "sealed";
   const busy = status === "submitting";
-  const seat = serial !== null ? SEATS[serial % SEATS.length] : null;
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,26 +61,15 @@ export function Waitlist() {
         </Reveal>
         {error && <p className="mt-3 lowercase text-[14px] text-[#ff6b6b]">{error} — try again</p>}
         {sealed && (
-          <p className="mt-4 lowercase text-[14px] text-white/55">
-            you&apos;re seated — find your number in the crowd ↓
+          <p className="mt-4 lowercase text-[clamp(13px,1.3vw,16px)] text-white/55">
+            you&apos;re on the list — we&apos;ll be in touch.
           </p>
         )}
       </div>
 
-      {/* The crowd — the user's number appears on one of them. */}
-      <div className="relative mx-auto mt-[clamp(40px,6vw,80px)] w-full max-w-[820px]">
+      {/* The crowd. */}
+      <div className="mx-auto mt-[clamp(40px,6vw,80px)] w-full max-w-[820px]">
         <img src="/waitlist-crowd.jpg" alt="" className="block w-full select-none" />
-        {seat && sealed && (
-          <motion.span
-            initial={{ opacity: 0, scale: 0.4 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 320, damping: 18, delay: 0.15 }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 font-bold leading-none text-[#3c05c7] text-[clamp(20px,3.4vw,44px)]"
-            style={{ left: `${seat.x}%`, top: `${seat.y}%` }}
-          >
-            {serial}
-          </motion.span>
-        )}
       </div>
     </section>
   );
