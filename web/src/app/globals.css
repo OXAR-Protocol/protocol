@@ -472,3 +472,9 @@ input[type="number"] {
   color: #be123c;
 }
 
+
+/* Landing-v2 hero scroll cue */
+@keyframes scrollcue {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(900%); }
+}
