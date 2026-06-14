@@ -5,7 +5,7 @@ import { DM_Sans } from "next/font/google";
  * "OXAR." wordmarks / big numbers (DM Sans Bold), matching the Figma 1:1.
  */
 export const dmSans = DM_Sans({
-  weight: ["400", "500", "700"],
+  weight: ["300", "400", "500", "700"],
   style: ["normal", "italic"],
   subsets: ["latin"],
   variable: "--font-dm-sans",

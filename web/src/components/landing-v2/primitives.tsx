@@ -25,7 +25,7 @@ export function Reveal({
   );
 }
 
-/** Bracketed eyebrow label, e.g. `[ the problem ]`. */
+/** Bracketed eyebrow label — 24px black, as in Figma. Position via className. */
 export function Label({
   children,
   className = "",
@@ -34,41 +34,25 @@ export function Label({
   className?: string;
 }) {
   return (
-    <span
-      className={`lowercase text-[clamp(13px,1.1vw,16px)] tracking-[0.02em] ${className}`}
+    <p
+      className={`lowercase text-[clamp(18px,1.7vw,24px)] leading-none text-black ${className}`}
     >
       [ {children} ]
-    </span>
+    </p>
   );
 }
 
-/** Shared editorial headline scale (Figma node 193:164 — the problem header). */
-export const HEADLINE =
-  "lowercase text-[clamp(34px,6.8vw,72px)] leading-[1.04] tracking-[-0.07em]";
-
-/** Section header in the "problem" style: bracket label + big statement. */
-export function SectionHead({
-  label,
+/** A headline line whose words spread edge-to-edge. */
+export function Spread({
   children,
+  className = "",
 }: {
-  label: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <>
-      <Reveal>
-        <Label className="text-black/45">{label}</Label>
-      </Reveal>
-      <Reveal delay={0.05}>
-        <div className={`mt-8 ${HEADLINE}`}>{children}</div>
-      </Reveal>
-    </>
-  );
-}
-
-/** A headline line whose words spread edge-to-edge, e.g. "we  break  the  tradeoff". */
-export function Spread({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="flex flex-wrap justify-between gap-x-4">{children}</p>
+    <p className={`flex flex-wrap justify-between gap-x-4 ${className}`}>
+      {children}
+    </p>
   );
 }
