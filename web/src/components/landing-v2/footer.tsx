@@ -26,7 +26,7 @@ const COLUMNS: Link[][] = [
 export function Footer() {
   return (
     <footer
-      id="waitlist"
+      id="contact"
       className="relative overflow-hidden bg-black px-[clamp(24px,5.5vw,80px)] pt-[clamp(48px,6vw,80px)] text-white"
     >
       <Reveal>

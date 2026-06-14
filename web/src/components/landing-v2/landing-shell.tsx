@@ -8,6 +8,7 @@ import { Problem } from "./problem";
 import { HowItWorks } from "./how-it-works";
 import { Speeds } from "./speeds";
 import { Roadmap } from "./roadmap";
+import { Waitlist } from "./waitlist";
 import { Footer } from "./footer";
 
 type Gate = "open" | "closing" | "closed";
@@ -57,6 +58,7 @@ export function LandingShell() {
       <HowItWorks />
       <Speeds />
       <Roadmap />
+      <Waitlist />
       <Footer />
     </>
   );
