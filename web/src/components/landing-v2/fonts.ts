@@ -1,16 +1,16 @@
 import { DM_Sans } from "next/font/google";
 
 /**
- * Editorial landing typeface. DM Sans (regular + italic) carries every
- * non-wordmark element; the giant "OXAR." marks use Helvetica Neue Bold via
- * the HELVETICA stack below (system font on the target platforms).
+ * Editorial landing typeface. DM Sans carries everything — body AND the giant
+ * "OXAR." wordmarks / big numbers (DM Sans Bold), matching the Figma 1:1.
  */
 export const dmSans = DM_Sans({
-  weight: ["400", "500"],
+  weight: ["400", "500", "700"],
   style: ["normal", "italic"],
   subsets: ["latin"],
   variable: "--font-dm-sans",
   display: "swap",
 });
 
-export const HELVETICA = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+/** Display/wordmark face — same DM Sans family as the body (Figma-faithful). */
+export const DISPLAY = "var(--font-dm-sans)";

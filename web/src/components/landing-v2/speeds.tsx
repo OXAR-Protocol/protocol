@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { HELVETICA } from "./fonts";
+import { DISPLAY } from "./fonts";
 import { Reveal, SectionHead, Spread } from "./primitives";
 
 const SPEEDS = [
@@ -45,7 +45,7 @@ export function Speeds() {
                     className={`whitespace-nowrap font-bold leading-[0.9] tracking-[-0.04em] transition-[opacity,transform] duration-300 ${
                       s.accent ? "text-[#3c05c7]" : "text-black"
                     } ${dim ? "opacity-25" : "opacity-100"} ${active ? "translate-x-[0.04em]" : ""}`}
-                    style={{ fontFamily: HELVETICA, fontSize: s.size }}
+                    style={{ fontFamily: DISPLAY, fontSize: s.size }}
                   >
                     {s.name}
                   </span>
@@ -53,7 +53,7 @@ export function Speeds() {
                     className={`shrink-0 font-bold leading-[0.9] tabular-nums transition-[opacity] duration-300 ${
                       s.accent ? "text-[#3c05c7]" : "text-black"
                     } ${active ? "opacity-100" : "opacity-0"}`}
-                    style={{ fontFamily: HELVETICA, fontSize: "clamp(32px,4.5vw,72px)" }}
+                    style={{ fontFamily: DISPLAY, fontSize: "clamp(32px,4.5vw,72px)" }}
                   >
                     {s.apy}
                   </span>

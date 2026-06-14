@@ -1,6 +1,6 @@
 "use client";
 
-import { HELVETICA } from "./fonts";
+import { DISPLAY } from "./fonts";
 import { HEADLINE, Label, Reveal } from "./primitives";
 
 export function Problem() {
@@ -43,7 +43,7 @@ export function Problem() {
           <Reveal delay={0.15}>
             <span
               className="block whitespace-nowrap font-bold leading-[0.8] text-[#3c05c7]"
-              style={{ fontFamily: HELVETICA, fontSize: "clamp(96px,21vw,360px)" }}
+              style={{ fontFamily: DISPLAY, fontSize: "clamp(96px,21vw,360px)" }}
             >
               5-12%
             </span>
@@ -74,7 +74,7 @@ function Stat({
     <Reveal className="flex flex-col">
       <span
         className={`font-bold leading-[0.8] ${muted ? "text-black/30" : "text-black"}`}
-        style={{ fontFamily: HELVETICA, fontSize: size }}
+        style={{ fontFamily: DISPLAY, fontSize: size }}
       >
         {value}
       </span>

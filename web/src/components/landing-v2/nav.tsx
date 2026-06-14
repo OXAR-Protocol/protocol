@@ -1,4 +1,4 @@
-import { HELVETICA } from "./fonts";
+import { DISPLAY } from "./fonts";
 
 const ITEMS = [
   { label: "problem", href: "#problem" },
@@ -18,7 +18,7 @@ export function Nav() {
         <a
           href="#problem"
           className="text-[24px] font-bold leading-none text-[#3c05c7]"
-          style={{ fontFamily: HELVETICA }}
+          style={{ fontFamily: DISPLAY }}
         >
           OXAR.
         </a>

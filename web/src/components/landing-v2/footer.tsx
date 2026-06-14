@@ -1,6 +1,6 @@
 "use client";
 
-import { HELVETICA } from "./fonts";
+import { DISPLAY } from "./fonts";
 import { Reveal } from "./primitives";
 
 const COLUMNS = [
@@ -46,7 +46,7 @@ export function Footer() {
 
       <h2
         className="mt-6 select-none font-bold leading-[0.78] tracking-[-0.02em] text-[27vw]"
-        style={{ fontFamily: HELVETICA }}
+        style={{ fontFamily: DISPLAY }}
         aria-hidden
       >
         OXAR.
