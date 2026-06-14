@@ -41,3 +41,34 @@ export function Label({
     </span>
   );
 }
+
+/** Shared editorial headline scale (Figma node 193:164 — the problem header). */
+export const HEADLINE =
+  "lowercase text-[clamp(34px,6.8vw,72px)] leading-[1.04] tracking-[-0.07em]";
+
+/** Section header in the "problem" style: bracket label + big statement. */
+export function SectionHead({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <Reveal>
+        <Label className="text-black/45">{label}</Label>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className={`mt-8 ${HEADLINE}`}>{children}</div>
+      </Reveal>
+    </>
+  );
+}
+
+/** A headline line whose words spread edge-to-edge, e.g. "we  break  the  tradeoff". */
+export function Spread({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="flex flex-wrap justify-between gap-x-4">{children}</p>
+  );
+}

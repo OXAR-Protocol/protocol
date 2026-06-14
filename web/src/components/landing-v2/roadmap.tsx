@@ -1,6 +1,6 @@
 "use client";
 
-import { Label, Reveal } from "./primitives";
+import { Reveal, SectionHead, Spread } from "./primitives";
 
 const MILESTONES = [
   {
@@ -38,16 +38,16 @@ export function Roadmap() {
   return (
     <section
       id="roadmap"
-      className="overflow-hidden bg-[#d9d9d9] px-[clamp(24px,5.5vw,80px)] py-[clamp(80px,10vw,140px)] text-black"
+      className="overflow-hidden bg-white px-[clamp(24px,5.5vw,80px)] py-[clamp(80px,10vw,140px)] text-black"
     >
-      <Reveal>
-        <Label className="text-black/45">roadmap</Label>
-      </Reveal>
-      <Reveal delay={0.05}>
-        <h2 className="mt-8 lowercase text-[clamp(26px,4.2vw,48px)] leading-[1.04] tracking-[-0.05em] text-black/70">
-          from mainnet <span className="italic">to your phone.</span>
-        </h2>
-      </Reveal>
+      <SectionHead label="roadmap">
+        <p>from mainnet</p>
+        <Spread>
+          <span className="italic">to</span>
+          <span className="italic">your</span>
+          <span className="italic">phone.</span>
+        </Spread>
+      </SectionHead>
 
       {/* The road recedes: today is enormous, the future shrinks toward the
           horizon. Scale stands in for distance-in-time. */}
