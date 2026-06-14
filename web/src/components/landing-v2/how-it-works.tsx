@@ -1,6 +1,6 @@
 "use client";
 
-import { HELVETICA } from "./fonts";
+import { DISPLAY } from "./fonts";
 import { Reveal, SectionHead, Spread } from "./primitives";
 
 const STEPS = [
@@ -45,7 +45,7 @@ export function HowItWorks() {
                     left ? "-left-[0.06em]" : "-right-[0.06em]"
                   }`}
                   style={{
-                    fontFamily: HELVETICA,
+                    fontFamily: DISPLAY,
                     fontWeight: 700,
                     fontSize: "clamp(160px,34vw,520px)",
                     color: "transparent",

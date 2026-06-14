@@ -1,6 +1,6 @@
 "use client";
 
-import { HELVETICA } from "./fonts";
+import { DISPLAY } from "./fonts";
 
 /**
  * Dark full-bleed entry gate, rendered as a fixed overlay above the page. The
@@ -60,7 +60,7 @@ export function HeroGate({
 
       <h1
         className="absolute bottom-[-0.12em] left-[clamp(24px,5.5vw,80px)] z-10 font-bold leading-none tracking-[-0.01em] text-[clamp(72px,12.5vw,180px)]"
-        style={{ fontFamily: HELVETICA }}
+        style={{ fontFamily: DISPLAY }}
       >
         OXAR.
       </h1>
