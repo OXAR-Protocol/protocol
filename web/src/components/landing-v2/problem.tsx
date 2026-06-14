@@ -1,9 +1,7 @@
 "use client";
 
 import { HELVETICA } from "./fonts";
-import { Label, Reveal } from "./primitives";
-
-const HEADLINE = "text-[clamp(34px,6.8vw,72px)] leading-[1.02] tracking-[-0.06em]";
+import { HEADLINE, Label, Reveal } from "./primitives";
 
 export function Problem() {
   return (
@@ -16,19 +14,20 @@ export function Problem() {
       </Reveal>
 
       <Reveal delay={0.05}>
-        <div className={`mt-10 lowercase ${HEADLINE}`}>
+        <div className={`mt-10 ${HEADLINE}`}>
           <p>banks force a choice: high yield or instant access.</p>
-          {/* The line literally enacts itself — "tradeoff" is broken in two. */}
+          {/* "tradeoff" is broken in two and struck clean through both halves
+              — we cancel the whole word, not just part of it. */}
           <p className="mt-1 flex flex-wrap items-baseline gap-x-[0.4em]">
             <span>we</span>
             <span className="italic">break</span>
             <span className="italic">the</span>
-            <span className="relative inline-flex italic">
+            <span className="relative inline-flex items-baseline italic">
               <span>trade</span>
-              <span className="translate-y-[0.14em] text-[#3c05c7]">off</span>
+              <span className="ml-[0.22em] text-[#3c05c7]">off</span>
               <span
                 aria-hidden
-                className="absolute left-0 right-0 top-1/2 h-px -rotate-3 bg-black/70"
+                className="absolute left-[-0.04em] right-[-0.04em] top-[0.52em] h-[0.07em] bg-black"
               />
             </span>
           </p>

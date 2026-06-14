@@ -1,7 +1,7 @@
 "use client";
 
 import { HELVETICA } from "./fonts";
-import { Label, Reveal } from "./primitives";
+import { Reveal, SectionHead, Spread } from "./primitives";
 
 const STEPS = [
   { n: "01", title: "connect or tap", copy: "Crypto wallet or Apple Pay. No bank account, no broker. Setup takes a minute." },
@@ -15,13 +15,19 @@ export function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="overflow-hidden bg-[#d9d9d9] px-[clamp(24px,5.5vw,80px)] py-[clamp(80px,10vw,140px)] text-black"
+      className="overflow-hidden bg-white px-[clamp(24px,5.5vw,80px)] py-[clamp(80px,10vw,140px)] text-black"
     >
-      <Reveal>
-        <Label className="text-black/45">how it works</Label>
-      </Reveal>
+      <SectionHead label="how it works">
+        <p>your money wakes up</p>
+        <Spread>
+          <span>in</span>
+          <span className="italic">five</span>
+          <span className="italic">simple</span>
+          <span className="italic">steps.</span>
+        </Spread>
+      </SectionHead>
 
-      <div className="mt-[clamp(48px,7vw,96px)] flex flex-col gap-[clamp(56px,9vw,140px)]">
+      <div className="mt-[clamp(56px,8vw,112px)] flex flex-col gap-[clamp(56px,9vw,140px)]">
         {STEPS.map((step, i) => {
           const left = i % 2 === 0;
           return (
@@ -31,10 +37,11 @@ export function HowItWorks() {
                   left ? "items-start text-left" : "items-end text-right md:ml-auto"
                 }`}
               >
-                {/* Ghost numeral — outlined, bleeding off the page edge. */}
+                {/* Ghost numeral — outlined, bleeds off the side (never upward
+                    into the section header). */}
                 <span
                   aria-hidden
-                  className={`pointer-events-none absolute -top-[0.32em] select-none leading-[0.75] ${
+                  className={`pointer-events-none absolute top-0 select-none leading-[0.75] ${
                     left ? "-left-[0.06em]" : "-right-[0.06em]"
                   }`}
                   style={{

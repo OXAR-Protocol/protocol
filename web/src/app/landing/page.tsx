@@ -1,32 +1,21 @@
 import type { Metadata } from "next";
 
 import { dmSans } from "@/components/landing-v2/fonts";
-import { Header } from "@/components/landing-v2/header";
-import { Hero } from "@/components/landing-v2/hero";
-import { Problem } from "@/components/landing-v2/problem";
-import { HowItWorks } from "@/components/landing-v2/how-it-works";
-import { Speeds } from "@/components/landing-v2/speeds";
-import { Roadmap } from "@/components/landing-v2/roadmap";
-import { Footer } from "@/components/landing-v2/footer";
+import { LandingShell } from "@/components/landing-v2/landing-shell";
 
 export const metadata: Metadata = {
   title: "OXAR. — where your money sleeps",
 };
 
 /**
- * Editorial landing (Figma "инфа" + "футера"). Dark hero → light/grey
- * content sections → black footer, in strict Swiss-typographic minimalism.
+ * Editorial landing (Figma "инфа" + "футера"). A one-time dark hero gate, then
+ * light/grey content sections → black footer, in strict Swiss-typographic
+ * minimalism. The shell handles the gate; sections are composed inside it.
  */
 export default function LandingPage() {
   return (
     <div className={`${dmSans.variable} ${dmSans.className} bg-white`}>
-      <Header />
-      <Hero />
-      <Problem />
-      <HowItWorks />
-      <Speeds />
-      <Roadmap />
-      <Footer />
+      <LandingShell />
     </div>
   );
 }

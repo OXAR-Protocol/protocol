@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { HELVETICA } from "./fonts";
-import { Label, Reveal } from "./primitives";
+import { Reveal, SectionHead, Spread } from "./primitives";
 
 const SPEEDS = [
   { name: "sleepy", apy: "4-6%", tagline: "slow but steady", sources: "Ondo USDY · Kamino USDC", size: "clamp(44px,8vw,110px)" },
@@ -18,14 +18,15 @@ export function Speeds() {
       id="speeds"
       className="overflow-hidden bg-white px-[clamp(24px,5.5vw,80px)] py-[clamp(80px,10vw,140px)] text-black"
     >
-      <Reveal>
-        <Label className="text-black/45">speeds</Label>
-      </Reveal>
-      <Reveal delay={0.05}>
-        <h2 className="mt-8 max-w-[14ch] lowercase text-[clamp(28px,4.6vw,52px)] leading-[1.04] tracking-[-0.05em]">
-          how loud do you want <span className="italic">your money?</span>
-        </h2>
-      </Reveal>
+      <SectionHead label="speeds">
+        <p>how loud do you want</p>
+        <Spread>
+          <span>your</span>
+          <span className="italic">money</span>
+          <span className="italic">to</span>
+          <span className="italic">be?</span>
+        </Spread>
+      </SectionHead>
 
       {/* Type size encodes volume: sleepy whispers, running shouts off-edge. */}
       <div className="mt-[clamp(48px,7vw,96px)]" onMouseLeave={() => setHover(null)}>

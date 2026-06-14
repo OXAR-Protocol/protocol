@@ -1,41 +1,26 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
 import { HELVETICA } from "./fonts";
 
 /**
- * Dark full-bleed entry gate. On load the page is scroll-locked: the only way
- * in is one of the two choices. Picking one unlocks the page and glides to the
- * matching anchor — the hero is a fork in the road, not a scrollable banner.
+ * Dark full-bleed entry gate, rendered as a fixed overlay above the page. The
+ * only way past it is one of the two choices; picking one fades the gate away
+ * for good (the parent unmounts it), so the video screen can never be reached
+ * again by scrolling — "the problem" becomes the real first section.
  */
-export function Hero() {
-  const lock = useCallback((on: boolean) => {
-    const v = on ? "hidden" : "";
-    document.documentElement.style.overflow = v;
-    document.body.style.overflow = v;
-  }, []);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    lock(true);
-    return () => lock(false);
-  }, [lock]);
-
-  const enter = useCallback(
-    (id: string) => (e: React.MouseEvent) => {
-      e.preventDefault();
-      lock(false);
-      requestAnimationFrame(() =>
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }),
-      );
-    },
-    [lock],
-  );
-
+export function HeroGate({
+  onEnter,
+  closing,
+}: {
+  onEnter: (target: "problem" | "waitlist") => void;
+  closing: boolean;
+}) {
   return (
     <section
       id="top"
-      className="relative h-screen min-h-[600px] w-full overflow-hidden bg-[#171717] text-white"
+      className={`fixed inset-0 z-[60] overflow-hidden bg-[#171717] text-white transition-opacity duration-500 ${
+        closing ? "pointer-events-none opacity-0" : "opacity-100"
+      }`}
     >
       {/* Same hero clip the live site uses — deeply dimmed under the wordmark. */}
       <video
@@ -54,18 +39,17 @@ export function Hero() {
       >
         <source src="/hero-bg.mp4" type="video/mp4" />
       </video>
-      {/* Extra darkening pass over the video. */}
       <div className="pointer-events-none absolute inset-0 z-[1] bg-black/45" />
 
       <div className="absolute right-[clamp(24px,4.2vw,60px)] top-[clamp(28px,2.4vw,38px)] z-10 flex items-center gap-[clamp(28px,3.9vw,56px)]">
         <button
-          onClick={enter("waitlist")}
+          onClick={() => onEnter("waitlist")}
           className="lowercase text-[clamp(15px,1.25vw,18px)] leading-none whitespace-nowrap"
         >
           <span className="italic">get </span>early access
         </button>
         <button
-          onClick={enter("problem")}
+          onClick={() => onEnter("problem")}
           className="flex h-[38px] items-center justify-center rounded-[42.5px] bg-white/[0.34] px-[26px] backdrop-blur-[14.15px] transition-colors hover:bg-white/[0.45]"
         >
           <span className="lowercase text-[clamp(15px,1.25vw,18px)] leading-none whitespace-nowrap">
