@@ -20,7 +20,7 @@ export function DocPage({
     >
       <div className="mx-auto max-w-[860px]">
         <Link
-          href="/landing"
+          href="/"
           className="lowercase text-[14px] text-black/40 transition-colors hover:text-black"
         >
           ← back
