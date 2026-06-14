@@ -1,7 +1,7 @@
 "use client";
 
 import { DISPLAY } from "./fonts";
-import { Reveal, SectionHead, Spread } from "./primitives";
+import { Label, Reveal, Spread } from "./primitives";
 
 const STEPS = [
   { n: "01", title: "connect or tap", copy: "Crypto wallet or Apple Pay. No bank account, no broker. Setup takes a minute." },
@@ -17,37 +17,35 @@ export function HowItWorks() {
       id="how-it-works"
       className="overflow-hidden bg-white px-[clamp(24px,5.5vw,80px)] py-[clamp(80px,10vw,140px)] text-black"
     >
-      <SectionHead label="how it works">
-        <p>your money wakes up</p>
-        <Spread>
-          <span>in</span>
-          <span className="italic">five</span>
-          <span className="italic">simple</span>
-          <span className="italic">steps.</span>
-        </Spread>
-      </SectionHead>
+      <Reveal>
+        <Label className="md:ml-[58%]">how it works</Label>
+      </Reveal>
+
+      <Reveal delay={0.05}>
+        <div className="mt-6 font-light text-[clamp(32px,4.5vw,64px)] leading-[1.05] tracking-[-0.07em] md:ml-[25%]">
+          <p>your money wakes up</p>
+          <Spread>
+            <span>in</span>
+            <span>five</span>
+            <span>simple</span>
+            <span>steps.</span>
+          </Spread>
+        </div>
+      </Reveal>
 
       <div className="mt-[clamp(56px,8vw,112px)] flex flex-col gap-[clamp(56px,9vw,140px)]">
         {STEPS.map((step, i) => {
           const left = i % 2 === 0;
           return (
             <Reveal key={step.n} delay={0.04}>
-              <div
-                className={`relative flex flex-col ${
-                  left ? "items-start text-left" : "items-end text-right md:ml-auto"
-                }`}
-              >
-                {/* Ghost numeral — outlined, bleeds off the side (never upward
-                    into the section header). */}
+              <div className={`relative flex flex-col ${left ? "items-start text-left" : "items-end text-right md:ml-auto"}`}>
                 <span
                   aria-hidden
-                  className={`pointer-events-none absolute top-0 select-none leading-[0.75] ${
-                    left ? "-left-[0.06em]" : "-right-[0.06em]"
-                  }`}
+                  className={`pointer-events-none absolute top-0 select-none leading-[0.75] ${left ? "-left-[0.06em]" : "-right-[0.06em]"}`}
                   style={{
                     fontFamily: DISPLAY,
                     fontWeight: 700,
-                    fontSize: "clamp(160px,34vw,520px)",
+                    fontSize: "clamp(160px,33vw,480px)",
                     color: "transparent",
                     WebkitTextStroke: "1.5px rgba(0,0,0,0.22)",
                   }}
@@ -55,18 +53,11 @@ export function HowItWorks() {
                   {step.n}
                 </span>
 
-                <div className="relative z-10 max-w-[560px] pt-[clamp(40px,9vw,150px)]">
-                  <span className="lowercase text-[clamp(12px,1vw,14px)] tracking-[0.06em] text-black/40">
-                    step {i + 1} of 5
-                  </span>
-                  <h3 className="mt-3 lowercase text-[clamp(30px,5.2vw,68px)] leading-[1.0] tracking-[-0.05em]">
+                <div className="relative z-10 max-w-[520px] pt-[clamp(40px,9vw,150px)]">
+                  <h3 className="lowercase text-[clamp(30px,3.9vw,56px)] leading-none tracking-[-0.05em]">
                     {step.title}
                   </h3>
-                  <p
-                    className={`mt-5 lowercase text-[clamp(16px,1.5vw,22px)] leading-snug text-black/55 ${
-                      left ? "" : "ml-auto"
-                    }`}
-                  >
+                  <p className={`mt-5 text-[clamp(16px,1.5vw,22px)] leading-snug text-black/55 ${left ? "" : "ml-auto"}`}>
                     {step.copy}
                   </p>
                 </div>
