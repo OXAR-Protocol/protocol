@@ -3,10 +3,24 @@
 import { DISPLAY } from "./fonts";
 import { Reveal } from "./primitives";
 
-const COLUMNS = [
-  ["blog", "audits & bug bounty", "brand kit"],
-  ["twitter", "telegram", "github"],
-  ["integrate your venue", "contact support"],
+type Link = { label: string; href: string; ext?: boolean };
+
+const COLUMNS: Link[][] = [
+  [
+    { label: "twitter", href: "https://x.com/the_oxar", ext: true },
+    { label: "telegram", href: "https://t.me/eternaki", ext: true },
+    { label: "email us", href: "mailto:support@oxar.app", ext: true },
+  ],
+  [
+    { label: "how it works", href: "#how-it-works" },
+    { label: "speeds", href: "#speeds" },
+    { label: "roadmap", href: "#roadmap" },
+  ],
+  [
+    { label: "brand kit", href: "/kit" },
+    { label: "investors", href: "/investors" },
+    { label: "terms", href: "/terms" },
+  ],
 ];
 
 export function Footer() {
@@ -17,7 +31,10 @@ export function Footer() {
     >
       <Reveal>
         <p className="lowercase text-[clamp(18px,1.7vw,24px)] leading-snug">
-          feel free to drop us a message
+          feel free to{" "}
+          <a href="mailto:support@oxar.app" className="underline decoration-1 underline-offset-4 hover:no-underline">
+            drop us a message
+          </a>
           <br />
           if you have any questions.
         </p>
@@ -27,10 +44,14 @@ export function Footer() {
         <div className="hidden lg:block" />
         {COLUMNS.map((col, i) => (
           <ul key={i} className="flex flex-col gap-2 lowercase text-[clamp(14px,1.1vw,16px)]">
-            {col.map((item) => (
-              <li key={item}>
-                <a href="#" className="text-white/80 transition-colors hover:text-white">
-                  {item}
+            {col.map((link) => (
+              <li key={link.label}>
+                <a
+                  href={link.href}
+                  {...(link.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className="text-white/80 transition-colors hover:text-white"
+                >
+                  {link.label}
                 </a>
               </li>
             ))}
@@ -39,8 +60,8 @@ export function Footer() {
       </div>
 
       <div className="mt-[clamp(48px,7vw,110px)] flex flex-wrap justify-between gap-y-3 lowercase text-[12px] tracking-[0.02em] text-white/55">
-        <a href="/terms" className="hover:text-white">privacy policy</a>
         <a href="/terms" className="hover:text-white">terms of service</a>
+        <span>built on solana</span>
         <span>project oxar ©2026</span>
       </div>
 
