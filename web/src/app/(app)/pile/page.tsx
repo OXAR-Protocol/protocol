@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Loader2, ArrowUpRight, List, LayoutGrid } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { LiveAmount } from "@/components/live-amount";
-import { YieldSourceSheet } from "@/components/yield-source-sheet";
 import { PositionCard } from "@/components/position-card";
 import {
   useYieldPositions,
@@ -20,8 +20,8 @@ import { isPriceExposure } from "@/lib/yield/assets";
 type Layout = "list" | "grid";
 
 export default function PilePage() {
-  const { views, totalValue, loading, refresh } = useYieldPositions();
-  const [active, setActive] = useState<ProviderView | null>(null);
+  const router = useRouter();
+  const { views, totalValue, loading } = useYieldPositions();
   const [layout, setLayout] = useState<Layout>("list");
 
   // Remember the user's preferred layout across visits.
@@ -147,7 +147,7 @@ export default function PilePage() {
         ) : layout === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {held.map((v) => (
-              <PositionCard key={v.id} view={v} onOpen={() => setActive(v)} change24h={change24hOf(v)} />
+              <PositionCard key={v.id} view={v} onOpen={() => router.push(`/asset/${v.id}`)} change24h={change24hOf(v)} />
             ))}
           </div>
         ) : (
@@ -157,7 +157,7 @@ export default function PilePage() {
               return (
                 <button
                   key={v.id}
-                  onClick={() => setActive(v)}
+                  onClick={() => router.push(`/asset/${v.id}`)}
                   className="group w-full text-left p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition"
                 >
                   <div className="flex items-center gap-4">
@@ -206,14 +206,6 @@ export default function PilePage() {
           </div>
         )}
       </motion.section>
-
-      {active && (
-        <YieldSourceSheet
-          views={[active]}
-          onClose={() => setActive(null)}
-          onDone={refresh}
-        />
-      )}
     </div>
   );
 }
