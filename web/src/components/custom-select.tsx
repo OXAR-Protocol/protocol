@@ -86,7 +86,7 @@ export function CustomSelect({
                   onChange(opt.value);
                   setOpen(false);
                 }}
-                className={`w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-left hover:bg-white/[0.04] transition ${
+                className={`w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-left hover:bg-black/[0.04] transition ${
                   isActive ? "text-black" : "text-black/70"
                 }`}
               >

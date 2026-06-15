@@ -26,16 +26,16 @@ export function YieldActionSuccess({ result, onDone }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-5 rounded-[12px] bg-black px-6 text-center"
+      className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-5 rounded-[12px] bg-white px-6 text-center"
     >
       <motion.div
         initial={{ scale: 0.4, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", damping: 14, stiffness: 240 }}
-        className="relative flex h-20 w-20 items-center justify-center rounded-full border border-accent/40 bg-accent/[0.08]"
+        className="relative flex h-20 w-20 items-center justify-center rounded-full border border-[#3c05c7]/40 bg-[#3c05c7]/[0.08]"
       >
         <motion.span
-          className="absolute inset-0 rounded-full border border-accent/40"
+          className="absolute inset-0 rounded-full border border-[#3c05c7]/40"
           initial={{ scale: 1, opacity: 0.7 }}
           animate={{ scale: 1.8, opacity: 0 }}
           transition={{ duration: 1, ease: "easeOut" }}
@@ -47,7 +47,7 @@ export function YieldActionSuccess({ result, onDone }: Props) {
             strokeWidth={2.5}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-accent"
+            className="text-[#3c05c7]"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
             transition={{ duration: 0.45, delay: 0.15, ease: "easeInOut" }}
@@ -60,13 +60,13 @@ export function YieldActionSuccess({ result, onDone }: Props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
+        <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">
           {verb}
         </p>
-        <p className="mt-2 font-sans text-3xl text-white tabular-nums">
+        <p className="mt-2 text-3xl text-black tabular-nums">
           ${result.amount.toFixed(2)}
         </p>
-        <p className="mt-1 font-mono text-xs text-white/40">{result.symbol}</p>
+        <p className="mt-1 text-xs text-black/45">{result.symbol}</p>
       </motion.div>
 
       <motion.button
@@ -74,7 +74,7 @@ export function YieldActionSuccess({ result, onDone }: Props) {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.45 }}
         onClick={onDone}
-        className="mt-2 px-6 py-2.5 rounded-[5px] bg-white text-black font-mono text-xs uppercase tracking-wide hover:bg-white/90 transition"
+        className="mt-2 px-6 py-2.5 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
       >
         Done
       </motion.button>

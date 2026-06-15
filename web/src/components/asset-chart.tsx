@@ -52,12 +52,12 @@ export function AssetChart({ mint }: { mint: string }) {
   const up = (changePct ?? 0) >= 0;
 
   return (
-    <div className="mb-6 p-4 rounded-[6px] border border-white/10">
+    <div className="mb-6 p-4 rounded-[6px] border border-black/10">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-baseline gap-2">
-          <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">Price</p>
+          <p className="text-[10px] lowercase tracking-wide text-black/40">Price</p>
           {changePct !== null && (
-            <span className={`font-mono text-xs tabular-nums ${up ? "text-emerald-400/80" : "text-red-400/80"}`}>
+            <span className={`text-xs tabular-nums ${up ? "text-emerald-600" : "text-red-600"}`}>
               {up ? "+" : ""}
               {changePct.toFixed(2)}% · {range}
             </span>
@@ -68,10 +68,10 @@ export function AssetChart({ mint }: { mint: string }) {
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`px-2 py-1 rounded-[4px] font-mono text-[10px] uppercase tracking-wide transition ${
+              className={`px-2 py-1 rounded-[4px] text-[10px] lowercase tracking-wide transition ${
                 range === r
-                  ? "border border-white/30 text-white"
-                  : "border border-transparent text-white/40 hover:text-white/70"
+                  ? "border border-black/30 text-black"
+                  : "border border-transparent text-black/45 hover:text-black/70"
               }`}
             >
               {r}
@@ -82,7 +82,7 @@ export function AssetChart({ mint }: { mint: string }) {
 
       <div className="h-24 flex items-center justify-center">
         {loading ? (
-          <Loader2 className="animate-spin text-white/30" size={18} />
+          <Loader2 className="animate-spin text-black/40" size={18} />
         ) : closes.length > 1 ? (
           <Sparkline
             values={closes}
@@ -90,7 +90,7 @@ export function AssetChart({ mint }: { mint: string }) {
             className={`w-full h-24 ${up ? "text-emerald-400/60" : "text-red-400/60"}`}
           />
         ) : (
-          <p className="font-mono text-xs text-white/30">No price history for this range.</p>
+          <p className="text-xs text-black/40">No price history for this range.</p>
         )}
       </div>
     </div>

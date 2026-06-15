@@ -53,7 +53,7 @@ export function ActivityFeed() {
             href={`https://solscan.io/tx/${e.signature}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between gap-3 p-4 hover:bg-white/[0.04] transition-colors"
+            className="flex items-center justify-between gap-3 p-4 hover:bg-black/[0.04] transition-colors"
           >
             <div className="flex items-center gap-3 min-w-0">
               <Icon

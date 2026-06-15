@@ -148,7 +148,7 @@ export default function HomePage() {
               <div className="mt-6">
                 <Link
                   href="/yield"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white text-black text-xs lowercase tracking-wide hover:bg-white/85 transition"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
                 >
                   wake up your money
                   <ArrowUpRight size={14} strokeWidth={1.5} />
