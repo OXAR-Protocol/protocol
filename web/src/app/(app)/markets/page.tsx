@@ -32,7 +32,7 @@ export default function MarketsPage() {
         transition={{ duration: 0.5 }}
       >
         <SectionLabel>Markets</SectionLabel>
-        <h1 className="mt-4 text-3xl md:text-4xl text-black leading-tight">
+        <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-black leading-[1.04] tracking-[-0.04em] lowercase">
           Where your money can sleep
         </h1>
         <p className="mt-3 text-sm text-black/45 max-w-lg">
@@ -48,7 +48,7 @@ export default function MarketsPage() {
         transition={{ duration: 0.5, delay: 0.05 }}
         className="mt-10"
       >
-        <p className="text-xs uppercase tracking-[0.2em] text-black/40 mb-3">
+        <p className="text-xs lowercase tracking-[0.2em] text-black/40 mb-3">
           On Solana
         </p>
         <div className="space-y-2">
@@ -66,10 +66,10 @@ export default function MarketsPage() {
         className="mt-12"
       >
         <div className="flex items-baseline justify-between mb-3">
-          <p className="text-xs uppercase tracking-[0.2em] text-black/40">
+          <p className="text-xs lowercase tracking-[0.2em] text-black/40">
             Cross-chain
           </p>
-          <p className="text-[10px] uppercase tracking-wide text-black/40">
+          <p className="text-[10px] lowercase tracking-wide text-black/40">
             via Delora
           </p>
         </div>
@@ -125,11 +125,11 @@ function MarketRow({ source }: { source: YieldSourceConfig }) {
             <p className="text-base text-black truncate">
               {source.name}
             </p>
-            <span className="text-[10px] uppercase tracking-wide text-black/40">
+            <span className="text-[10px] lowercase tracking-wide text-black/40">
               {chain}
             </span>
             {!source.available && (
-              <span className="text-[10px] uppercase tracking-wide text-black/40">
+              <span className="text-[10px] lowercase tracking-wide text-black/40">
                 · soon
               </span>
             )}
@@ -143,7 +143,7 @@ function MarketRow({ source }: { source: YieldSourceConfig }) {
           <p className="text-xl text-black tabular-nums">
             {source.baseApy.toFixed(1)}%
           </p>
-          <p className={`text-[10px] uppercase tracking-wide ${risk.tone}`}>
+          <p className={`text-[10px] lowercase tracking-wide ${risk.tone}`}>
             {risk.label}
           </p>
         </div>

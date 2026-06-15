@@ -78,7 +78,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-start justify-between mb-5">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-black/40">Send / Withdraw</p>
+            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">Send / Withdraw</p>
             <h2 className="mt-1 text-xl text-black">Take it anywhere</h2>
           </div>
           <button onClick={onClose} className="text-black/45 hover:text-black transition">
@@ -103,7 +103,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
           </div>
         ) : (
           <>
-            <p className="text-[10px] uppercase tracking-wide text-black/40 mb-1.5">You send</p>
+            <p className="text-[10px] lowercase tracking-wide text-black/40 mb-1.5">You send</p>
             {loading ? (
               <p className="text-xs text-black/40">Loading…</p>
             ) : assets.length === 0 ? (
@@ -118,7 +118,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
 
             <div className="grid grid-cols-2 gap-3 mt-4">
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-black/40 mb-1.5">To chain</p>
+                <p className="text-[10px] lowercase tracking-wide text-black/40 mb-1.5">To chain</p>
                 <CustomSelect
                   value={destKey}
                   onChange={(k) => { setDestKey(k); setAssetSym(getDestChain(k).assets[0].symbol); }}
@@ -126,7 +126,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
                 />
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-black/40 mb-1.5">Receive</p>
+                <p className="text-[10px] lowercase tracking-wide text-black/40 mb-1.5">Receive</p>
                 <CustomSelect
                   value={destAsset.symbol}
                   onChange={setAssetSym}
@@ -137,7 +137,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
 
             {needsAddress ? (
               <>
-                <p className="text-[10px] uppercase tracking-wide text-black/40 mt-4 mb-1.5">
+                <p className="text-[10px] lowercase tracking-wide text-black/40 mt-4 mb-1.5">
                   To {destChain.chain === "ethereum" ? "EVM" : "Solana"} address
                 </p>
                 <input
@@ -152,13 +152,13 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
             )}
 
             <div className="flex items-center justify-between mt-4 mb-1.5">
-              <p className="text-[10px] uppercase tracking-wide text-black/40">
+              <p className="text-[10px] lowercase tracking-wide text-black/40">
                 Amount{source ? ` (${source.symbol})` : ""}
               </p>
               {source && (
                 <button
                   onClick={() => setAmount((Number(maxSendable(source)) / 10 ** source.decimals).toString())}
-                  className="text-[10px] uppercase tracking-wide text-[#3c05c7]/80 hover:text-[#3c05c7]"
+                  className="text-[10px] lowercase tracking-wide text-[#3c05c7]/80 hover:text-[#3c05c7]"
                 >
                   max
                 </button>
@@ -177,7 +177,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
             <button
               onClick={handleSend}
               disabled={busy || !!validation}
-              className="mt-5 w-full px-4 py-2.5 rounded-[5px] bg-white text-black text-xs uppercase tracking-wide hover:bg-white/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
+              className="mt-5 w-full px-4 py-2.5 rounded-[5px] bg-white text-black text-xs lowercase tracking-wide hover:bg-white/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
             >
               {busy ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : validation ?? `Send ${destAsset.symbol} → ${destChain.label}`}
             </button>

@@ -30,11 +30,11 @@ export function YieldGroupRow({ group, onOpen }: Props) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-base text-black truncate">{group.name}</p>
-            <span className="text-[10px] uppercase tracking-wide text-emerald-600">
+            <span className="text-[10px] lowercase tracking-wide text-emerald-600">
               ● live
             </span>
             {positionTotal > 0 && (
-              <span className="text-[10px] uppercase tracking-wide text-[#3c05c7]">
+              <span className="text-[10px] lowercase tracking-wide text-[#3c05c7]">
                 · you&apos;re in
               </span>
             )}
@@ -43,7 +43,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
             {group.views.map((v) => (
               <span
                 key={v.id}
-                className="text-[10px] uppercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15"
+                className="text-[10px] lowercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15"
               >
                 {v.assetSymbol}
               </span>
@@ -61,7 +61,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
             up to {(group.maxApy * 100).toFixed(2)}%
           </p>
           <p
-            className={`text-[10px] uppercase tracking-wide ${
+            className={`text-[10px] lowercase tracking-wide ${
               RISK_TONE[top.riskLevel] ?? "text-black/55"
             }`}
           >

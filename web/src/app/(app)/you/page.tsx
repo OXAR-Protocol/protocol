@@ -114,7 +114,7 @@ export default function YouPage() {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="mt-10"
       >
-        <p className="text-xs uppercase tracking-[0.2em] text-black/40 mb-4">
+        <p className="text-xs lowercase tracking-[0.2em] text-black/40 mb-4">
           Notifications
         </p>
         <div className="space-y-2">
@@ -134,7 +134,7 @@ export default function YouPage() {
         >
           <button
             onClick={logout}
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-[5px] border border-black/15 hover:border-red-500/40 hover:text-red-400 text-xs uppercase tracking-wide text-black/60 transition"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-[5px] border border-black/15 hover:border-red-500/40 hover:text-red-400 text-xs lowercase tracking-wide text-black/60 transition"
           >
             <LogOut size={12} strokeWidth={1.5} />
             Sign out
@@ -167,7 +167,7 @@ function WalletCard({
       }`}
     >
       <div className="min-w-0">
-        <p className="text-xs uppercase tracking-wide text-black/40">{label}</p>
+        <p className="text-xs lowercase tracking-wide text-black/40">{label}</p>
         <p className={`mt-1 text-sm ${dim ? "text-black/55" : "text-black"}`}>
           {`${address.slice(0, 6)}…${address.slice(-6)}`}
         </p>
@@ -175,7 +175,7 @@ function WalletCard({
       </div>
       <button
         onClick={onCopy}
-        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-black/15 hover:border-black/30 text-[11px] uppercase tracking-wide text-black/60 hover:text-black transition"
+        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-black/15 hover:border-black/30 text-[11px] lowercase tracking-wide text-black/60 hover:text-black transition"
       >
         {copied ? (
           <>
@@ -196,7 +196,7 @@ function WalletCard({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="p-4 rounded-[5px] border border-black/10">
-      <p className="text-xs uppercase tracking-wide text-black/40">
+      <p className="text-xs lowercase tracking-wide text-black/40">
         {label}
       </p>
       <p className="mt-1 text-sm text-black">{value}</p>

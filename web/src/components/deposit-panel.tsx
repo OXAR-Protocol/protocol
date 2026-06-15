@@ -80,7 +80,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
 
   return (
     <div className="p-4 rounded-[6px] border border-black/10">
-      <p className="text-[10px] uppercase tracking-wide text-black/40 mb-2">{verb}</p>
+      <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">{verb}</p>
 
       {/* USD amount */}
       <div className="flex items-baseline gap-3">
@@ -97,7 +97,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
 
       {/* Pay-with picker */}
       <div className="mt-3">
-        <p className="text-[10px] uppercase tracking-wide text-black/40 mb-1.5">Pay with</p>
+        <p className="text-[10px] lowercase tracking-wide text-black/40 mb-1.5">Pay with</p>
         {assetsLoading ? (
           <p className="text-xs text-black/40">Loading your assets…</p>
         ) : assets.length === 0 ? (
@@ -123,14 +123,14 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
         {!evmAddress ? (
           <button
             onClick={() => linkWallet()}
-            className="mt-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-wide text-black/45 hover:text-black/70 transition"
+            className="mt-2 inline-flex items-center gap-1 text-[10px] lowercase tracking-wide text-black/45 hover:text-black/70 transition"
           >
             <Plus size={11} strokeWidth={1.5} />
             Connect a wallet to pay from another chain
           </button>
         ) : (
           // Connected EVM wallet — let the user disconnect it (e.g. to link another).
-          <div className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-wide text-black/45">
+          <div className="mt-2 flex items-center gap-2 text-[10px] lowercase tracking-wide text-black/45">
             <span>
               EVM {evmAddress.slice(0, 6)}…{evmAddress.slice(-4)}
             </span>
@@ -175,7 +175,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
       <button
         onClick={handleDeposit}
         disabled={busy || !payAsset || usdAmount <= 0}
-        className="mt-3 w-full px-4 py-2.5 rounded-[5px] bg-white text-black text-xs uppercase tracking-wide hover:bg-white/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
+        className="mt-3 w-full px-4 py-2.5 rounded-[5px] bg-white text-black text-xs lowercase tracking-wide hover:bg-white/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
       >
         {busy ? (
           <>

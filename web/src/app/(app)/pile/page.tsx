@@ -64,7 +64,7 @@ export default function PilePage() {
         transition={{ duration: 0.5 }}
       >
         <SectionLabel>Your pile</SectionLabel>
-        <h1 className="mt-4 text-3xl md:text-4xl text-black leading-tight">
+        <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-black leading-[1.04] tracking-[-0.04em] lowercase">
           Everything you've got working
         </h1>
         <p className="mt-3 text-sm text-black/45 max-w-lg">
@@ -80,7 +80,7 @@ export default function PilePage() {
         transition={{ duration: 0.5, delay: 0.05 }}
         className="mt-8 p-6 rounded-[8px] border border-black/10"
       >
-        <p className="text-xs uppercase tracking-[0.2em] text-black/40">
+        <p className="text-xs lowercase tracking-[0.2em] text-black/40">
           Total balance
         </p>
         <div className="mt-2">
@@ -100,7 +100,7 @@ export default function PilePage() {
         className="mt-8"
       >
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs uppercase tracking-[0.2em] text-black/40">
+          <p className="text-xs lowercase tracking-[0.2em] text-black/40">
             Positions
           </p>
           {held.length > 0 && (
@@ -138,7 +138,7 @@ export default function PilePage() {
             </p>
             <Link
               href="/yield"
-              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-[5px] bg-white text-black text-xs uppercase tracking-wide hover:bg-white/85 transition"
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-[5px] bg-white text-black text-xs lowercase tracking-wide hover:bg-white/85 transition"
             >
               Explore yield
               <ArrowUpRight size={14} strokeWidth={1.5} />
@@ -168,7 +168,7 @@ export default function PilePage() {
                         if (typeof ch === "number") {
                           const up = ch >= 0;
                           return (
-                            <p className="mt-1 text-[10px] uppercase tracking-wide">
+                            <p className="mt-1 text-[10px] lowercase tracking-wide">
                               <span className={up ? "text-emerald-600" : "text-red-600"}>
                                 {up ? "+" : ""}
                                 {ch.toFixed(2)}% 24h
@@ -179,7 +179,7 @@ export default function PilePage() {
                         }
                         return (
                           <p
-                            className={`mt-1 text-[10px] uppercase tracking-wide ${
+                            className={`mt-1 text-[10px] lowercase tracking-wide ${
                               RISK_TONE[v.riskLevel] ?? "text-black/45"
                             }`}
                           >
@@ -190,7 +190,7 @@ export default function PilePage() {
                     </div>
                     <div className="text-right shrink-0">
                       <LiveAmount value={value} apy={v.apy} variant="md" />
-                      <p className="text-[10px] uppercase tracking-wide text-black/40">
+                      <p className="text-[10px] lowercase tracking-wide text-black/40">
                         your position
                       </p>
                     </div>
