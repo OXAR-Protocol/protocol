@@ -138,7 +138,7 @@ export default function PilePage() {
             </p>
             <Link
               href="/yield"
-              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-[5px] bg-white text-black text-xs lowercase tracking-wide hover:bg-white/85 transition"
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
             >
               Explore yield
               <ArrowUpRight size={14} strokeWidth={1.5} />

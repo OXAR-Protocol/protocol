@@ -225,7 +225,7 @@ function Toggle({
       </div>
       <span
         className={`relative inline-block w-10 h-5 rounded-full transition-colors ${
-          on ? "bg-[#3c05c7]/40" : "bg-white/10"
+          on ? "bg-[#3c05c7]/40" : "bg-black/10"
         }`}
       >
         <span

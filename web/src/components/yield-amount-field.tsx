@@ -20,8 +20,8 @@ interface Props {
 }
 
 const BUTTON_VARIANT = {
-  primary: "bg-white text-black hover:bg-white/90",
-  secondary: "border border-white/20 hover:border-white/40 text-white",
+  primary: "bg-black text-white hover:bg-black/85",
+  secondary: "border border-black/20 hover:border-black/40 text-black",
 } as const;
 
 /** One deposit/withdraw input + action button. Shared so both flows stay in sync. */
@@ -38,8 +38,8 @@ export function YieldAmountField({
   variant,
 }: Props) {
   return (
-    <div className="p-4 rounded-[6px] border border-white/10">
-      <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-2">
+    <div className="p-4 rounded-[6px] border border-black/10">
+      <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">
         {label}
       </p>
       <div className="flex items-baseline gap-3">
@@ -49,15 +49,15 @@ export function YieldAmountField({
           step="any"
           value={value}
           onChange={(e) => onChange(Math.max(0, Number(e.target.value)))}
-          className="flex-1 bg-transparent border-b border-white/15 focus:border-white/40 outline-none font-mono text-2xl text-white py-1"
+          className="flex-1 bg-transparent border-b border-black/15 focus:border-black/40 outline-none text-2xl text-black py-1"
         />
-        <span className="font-mono text-sm text-white/40">{symbol}</span>
+        <span className="text-sm text-black/45">{symbol}</span>
       </div>
-      <div className="mt-2 font-mono text-[11px] text-white/30">{hint}</div>
+      <div className="mt-2 text-[11px] text-black/40">{hint}</div>
       <button
         onClick={onAction}
         disabled={disabled}
-        className={`mt-3 w-full px-4 py-2.5 rounded-[5px] font-mono text-xs uppercase tracking-wide disabled:opacity-30 transition inline-flex items-center justify-center gap-2 ${BUTTON_VARIANT[variant]}`}
+        className={`mt-3 w-full px-4 py-2.5 rounded-[5px] text-xs lowercase tracking-wide disabled:opacity-30 transition inline-flex items-center justify-center gap-2 ${BUTTON_VARIANT[variant]}`}
       >
         {loading ? (
           <>

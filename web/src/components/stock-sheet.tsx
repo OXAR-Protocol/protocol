@@ -60,7 +60,7 @@ export function StockSheet({ view, token, name, kind = "Stock", note = "tokenize
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center px-4 pb-4 md:pb-0"
+        className="fixed inset-0 z-50 bg-white/70 backdrop-blur-sm flex items-end md:items-center justify-center px-4 pb-4 md:pb-0"
         onClick={onClose}
       >
         <motion.div
@@ -69,28 +69,28 @@ export function StockSheet({ view, token, name, kind = "Stock", note = "tokenize
           exit={{ y: 60, opacity: 0 }}
           transition={{ type: "spring", damping: 26, stiffness: 220 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-[520px] bg-black border border-white/15 rounded-[12px] p-6 md:p-8 max-h-[90vh] overflow-auto"
+          className="relative w-full max-w-[520px] bg-white border border-black/15 rounded-[12px] p-6 md:p-8 max-h-[90vh] overflow-auto"
         >
           <div className="flex items-start justify-between gap-4 mb-6">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">{kind}</p>
-              <h2 className="mt-2 font-sans text-2xl text-white">{token}</h2>
-              <p className="mt-1 font-mono text-xs text-white/40">{name} · {note}</p>
+              <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">{kind}</p>
+              <h2 className="mt-2 text-2xl text-black">{token}</h2>
+              <p className="mt-1 text-xs text-black/45">{name} · {note}</p>
             </div>
-            <button onClick={onClose} className="text-white/40 hover:text-white transition">
+            <button onClick={onClose} className="text-black/45 hover:text-black transition">
               <X size={18} strokeWidth={1.5} />
             </button>
           </div>
 
           {/* Price */}
-          <div className="mb-6 p-4 rounded-[6px] border border-white/10">
-            <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">Price</p>
+          <div className="mb-6 p-4 rounded-[6px] border border-black/10">
+            <p className="text-[10px] lowercase tracking-wide text-black/40">Price</p>
             <div className="mt-1 flex items-baseline gap-3">
-              <p className="font-sans text-2xl text-white tabular-nums">
+              <p className="text-2xl text-black tabular-nums">
                 {price ? `$${price.price.toFixed(2)}` : "—"}
               </p>
               {price && (
-                <span className={`font-mono text-xs tabular-nums ${up ? "text-emerald-400/80" : "text-red-400/80"}`}>
+                <span className={`text-xs tabular-nums ${up ? "text-emerald-600" : "text-red-600"}`}>
                   {up ? "+" : ""}
                   {price.change24h.toFixed(2)}% 24h
                 </span>
@@ -103,11 +103,11 @@ export function StockSheet({ view, token, name, kind = "Stock", note = "tokenize
 
           {/* Position + P&L */}
           {holdings > 0 && (
-            <div className="mb-6 p-4 rounded-[6px] border border-accent/30 bg-accent/[0.04]">
-              <p className="font-mono text-[10px] uppercase tracking-wide text-white/50">Your position</p>
-              <p className="mt-1 font-sans text-2xl text-white tabular-nums">${holdings.toFixed(2)}</p>
+            <div className="mb-6 p-4 rounded-[6px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.04]">
+              <p className="text-[10px] lowercase tracking-wide text-black/55">Your position</p>
+              <p className="mt-1 text-2xl text-black tabular-nums">${holdings.toFixed(2)}</p>
               {typeof earned === "number" && (
-                <p className={`mt-1 font-mono text-[11px] tabular-nums ${earned >= 0 ? "text-emerald-400/80" : "text-red-400/80"}`}>
+                <p className={`mt-1 text-[11px] tabular-nums ${earned >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                   {earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)} since you bought · on-chain P&L
                 </p>
               )}
@@ -136,7 +136,7 @@ export function StockSheet({ view, token, name, kind = "Stock", note = "tokenize
                     <button
                       type="button"
                       onClick={() => setSellAmount(holdings)}
-                      className="uppercase tracking-wide text-accent/80 hover:text-accent transition"
+                      className="lowercase tracking-wide text-[#3c05c7]/80 hover:text-[#3c05c7] transition"
                     >
                       max
                     </button>
@@ -151,7 +151,7 @@ export function StockSheet({ view, token, name, kind = "Stock", note = "tokenize
             />
           </div>
 
-          {error && <p className="mt-4 font-mono text-xs text-red-400 text-center">{error}</p>}
+          {error && <p className="mt-4 text-xs text-red-400 text-center">{error}</p>}
 
           <AnimatePresence>
             {result && <YieldActionSuccess result={result} onDone={() => setResult(null)} />}
