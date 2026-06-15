@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
-import { StockSheet } from "@/components/stock-sheet";
 import { Sparkline } from "@/components/sparkline";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
@@ -32,13 +32,13 @@ interface Props {
 
 /** Buy/sell section for price-exposure assets (tokenized stocks or commodities) —
  *  price-framed cards, list or grid. Gated entries hide where Reg S blocks them. */
-export function AssetSection({ catalog, title, badge, kind, note, gated = false, layout = "list" }: Props) {
+export function AssetSection({ catalog, title, badge, gated = false, layout = "list" }: Props) {
+  const router = useRouter();
   const allowed = useStocksAllowed();
-  const { views, refresh } = useYieldPositions();
+  const { views } = useYieldPositions();
   const { prices } = useStockPrices(catalog.map((s) => s.mint));
   const charts = useStockCharts();
   const { sources } = useEarnings();
-  const [active, setActive] = useState<AssetMeta | null>(null);
 
   const viewById = useMemo(() => Object.fromEntries(views.map((v) => [v.id, v])), [views]);
   const earnedById = useMemo(
@@ -95,7 +95,7 @@ export function AssetSection({ catalog, title, badge, kind, note, gated = false,
           key={s.id}
           type="button"
           disabled={!view}
-          onClick={() => view && setActive(s)}
+          onClick={() => view && router.push(`/asset/${s.id}`)}
           className="p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition-colors text-left disabled:opacity-50 min-h-[120px] flex flex-col justify-between"
         >
           {head}
@@ -113,7 +113,7 @@ export function AssetSection({ catalog, title, badge, kind, note, gated = false,
         key={s.id}
         type="button"
         disabled={!view}
-        onClick={() => view && setActive(s)}
+        onClick={() => view && router.push(`/asset/${s.id}`)}
         className="w-full flex items-center justify-between p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition-colors text-left disabled:opacity-50"
       >
         <div className="min-w-0">
@@ -145,20 +145,6 @@ export function AssetSection({ catalog, title, badge, kind, note, gated = false,
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{catalog.map(card)}</div>
       ) : (
         <div className="space-y-2">{catalog.map(card)}</div>
-      )}
-
-      {active && viewById[active.id] && (
-        <StockSheet
-          view={viewById[active.id]}
-          token={active.token}
-          name={active.name}
-          kind={kind}
-          note={note}
-          price={prices[active.mint]}
-          earned={earnedById[active.id]}
-          onClose={() => setActive(null)}
-          onDone={refresh}
-        />
       )}
     </motion.section>
   );

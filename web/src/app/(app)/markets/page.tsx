@@ -111,7 +111,7 @@ function MarketRow({ source }: { source: YieldSourceConfig }) {
 
   return (
     <Link
-      href={source.available ? "/yield" : "#"}
+      href={source.available ? `/asset/${source.id}` : "#"}
       aria-disabled={!source.available}
       className={`group block p-5 rounded-[8px] border transition ${
         source.available

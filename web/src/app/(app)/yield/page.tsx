@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X, List, LayoutGrid } from "lucide-react";
 
@@ -11,19 +12,15 @@ import { YieldSourceRow } from "@/components/yield-source-row";
 import { YieldProviderRow } from "@/components/yield-provider-row";
 import { YieldGroupRow } from "@/components/yield-group-row";
 import { SourceCard } from "@/components/source-card";
-import { YieldSourceSheet } from "@/components/yield-source-sheet";
 import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
 import { groupProviderViews } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { XSTOCKS } from "@/lib/yield/xstocks";
 import { GOLD } from "@/lib/yield/gold";
 import { AssetSection } from "@/components/asset-section";
+import { useYieldPositions } from "@/hooks/use-yield-positions";
 
 type Layout = "list" | "grid";
-import {
-  useYieldPositions,
-  type ProviderView,
-} from "@/hooks/use-yield-positions";
 
 type ChainFilter = "all" | "solana" | "ethereum";
 
@@ -34,10 +31,9 @@ function matchesApyBucket(bucket: ApyBucket | null, apyPercent: number): boolean
 }
 
 export default function YieldPage() {
+  const router = useRouter();
   const [apyBucket, setApyBucket] = useState<ApyBucket | null>(null);
   const [chain, setChain] = useState<ChainFilter>("all");
-  // The sheet operates on a group (1 provider, or Jupiter's stablecoin set).
-  const [active, setActive] = useState<ProviderView[] | null>(null);
   const [layout, setLayout] = useState<Layout>("list");
 
   useEffect(() => {
@@ -50,7 +46,7 @@ export default function YieldPage() {
   };
 
   // Live, openable sources backed by real protocol SDKs (v1: Jupiter Lend, Kamino).
-  const { views, refresh } = useYieldPositions();
+  const { views } = useYieldPositions();
 
   const liveSources = useMemo(() => {
     return views.filter((v) => {
@@ -181,19 +177,19 @@ export default function YieldPage() {
           {layout === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {liveGroups.map((g) => (
-                <SourceCard key={g.key} group={g} onOpen={() => setActive(g.views)} />
+                <SourceCard key={g.key} group={g} onOpen={() => router.push(`/asset/${g.views[0].id}`)} />
               ))}
             </div>
           ) : (
             <div className="space-y-2">
               {liveGroups.map((g) =>
                 g.views.length > 1 ? (
-                  <YieldGroupRow key={g.key} group={g} onOpen={() => setActive(g.views)} />
+                  <YieldGroupRow key={g.key} group={g} onOpen={() => router.push(`/asset/${g.views[0].id}`)} />
                 ) : (
                   <YieldProviderRow
                     key={g.key}
                     view={g.views[0]}
-                    onOpen={() => setActive(g.views)}
+                    onOpen={() => router.push(`/asset/${g.views[0].id}`)}
                   />
                 ),
               )}
@@ -279,13 +275,6 @@ export default function YieldPage() {
         </p>
       </div>
 
-      {active && (
-        <YieldSourceSheet
-          views={active}
-          onClose={() => setActive(null)}
-          onDone={refresh}
-        />
-      )}
     </div>
   );
 }

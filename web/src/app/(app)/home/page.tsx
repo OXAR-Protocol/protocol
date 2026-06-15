@@ -185,7 +185,7 @@ export default function HomePage() {
               return (
                 <Link
                   key={v.id}
-                  href="/pile"
+                  href={`/asset/${v.id}`}
                   className="p-5 rounded-[12px] border border-black/10 bg-white hover:border-black/30 transition-colors min-h-[120px] flex flex-col justify-between"
                 >
                   <div>
