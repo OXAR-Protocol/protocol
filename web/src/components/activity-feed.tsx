@@ -26,24 +26,24 @@ export function ActivityFeed() {
 
   if (loading) {
     return (
-      <div className="border border-white/10 rounded-[8px] p-6 text-center">
-        <Loader2 className="animate-spin inline text-white/30" size={18} />
+      <div className="border border-black/10 bg-white rounded-[12px] p-6 text-center">
+        <Loader2 className="animate-spin inline text-black/40" size={18} />
       </div>
     );
   }
 
   if (events.length === 0) {
     return (
-      <div className="border border-white/10 rounded-[8px] p-6 text-center">
-        <p className="font-mono text-sm text-white/40">
-          Nothing yet — your money is still snoring.
+      <div className="border border-black/10 bg-white rounded-[12px] p-6 text-center">
+        <p className="text-sm text-black/45">
+          nothing yet — your money is still snoring.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="border border-white/10 rounded-[8px] divide-y divide-white/[0.06]">
+    <div className="border border-black/10 bg-white rounded-[12px] divide-y divide-black/[0.06]">
       {events.map((e, i) => {
         const inflow = INFLOW.includes(e.kind);
         const Icon = inflow ? ArrowDownLeft : ArrowUpRight;
@@ -53,23 +53,23 @@ export function ActivityFeed() {
             href={`https://solscan.io/tx/${e.signature}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between gap-3 p-4 hover:bg-white/[0.02] transition-colors"
+            className="flex items-center justify-between gap-3 p-4 hover:bg-white/[0.04] transition-colors"
           >
             <div className="flex items-center gap-3 min-w-0">
               <Icon
                 size={15}
                 strokeWidth={1.5}
-                className={inflow ? "text-emerald-400/70" : "text-white/40"}
+                className={inflow ? "text-emerald-600" : "text-black/40"}
               />
-              <span className="font-sans text-sm text-white truncate">{e.label}</span>
+              <span className="text-sm text-black truncate">{e.label}</span>
             </div>
             <div className="flex items-baseline gap-3 shrink-0">
               {e.usd !== null && (
-                <span className="font-mono text-sm text-white/80 tabular-nums">
+                <span className="text-sm text-black/60 tabular-nums">
                   ${e.usd.toFixed(2)}
                 </span>
               )}
-              <span className="font-mono text-[10px] uppercase tracking-wide text-white/30">
+              <span className="text-[10px] lowercase tracking-wide text-black/45">
                 {timeAgo(e.timestamp)}
               </span>
             </div>

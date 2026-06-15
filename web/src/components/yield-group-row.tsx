@@ -24,17 +24,17 @@ export function YieldGroupRow({ group, onOpen }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group w-full text-left p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition"
+      className="group w-full text-left p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition"
     >
       <div className="flex items-center gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-sans text-base text-white truncate">{group.name}</p>
-            <span className="font-mono text-[10px] uppercase tracking-wide text-emerald-300/70">
+            <p className="text-base text-black truncate">{group.name}</p>
+            <span className="text-[10px] uppercase tracking-wide text-emerald-600">
               ● live
             </span>
             {positionTotal > 0 && (
-              <span className="font-mono text-[10px] uppercase tracking-wide text-accent">
+              <span className="text-[10px] uppercase tracking-wide text-[#3c05c7]">
                 · you&apos;re in
               </span>
             )}
@@ -43,26 +43,26 @@ export function YieldGroupRow({ group, onOpen }: Props) {
             {group.views.map((v) => (
               <span
                 key={v.id}
-                className="font-mono text-[10px] uppercase tracking-wide text-white/50 px-1.5 py-0.5 rounded border border-white/15"
+                className="text-[10px] uppercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15"
               >
                 {v.assetSymbol}
               </span>
             ))}
           </div>
           {positionTotal > 0 && (
-            <p className="mt-2 font-mono text-[11px] text-white/50">
+            <p className="mt-2 text-[11px] text-black/55">
               your position: ${positionTotal.toFixed(2)}
             </p>
           )}
         </div>
 
         <div className="text-right shrink-0">
-          <p className="font-sans text-xl text-white tabular-nums">
+          <p className="text-xl text-black tabular-nums">
             up to {(group.maxApy * 100).toFixed(2)}%
           </p>
           <p
-            className={`font-mono text-[10px] uppercase tracking-wide ${
-              RISK_TONE[top.riskLevel] ?? "text-white/50"
+            className={`text-[10px] uppercase tracking-wide ${
+              RISK_TONE[top.riskLevel] ?? "text-black/55"
             }`}
           >
             {RISK_LABEL[top.riskLevel] ?? top.riskLevel}
@@ -72,7 +72,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
         <ArrowUpRight
           size={16}
           strokeWidth={1.5}
-          className="text-white/30 group-hover:text-white transition shrink-0"
+          className="text-black/40 group-hover:text-black transition shrink-0"
         />
       </div>
     </button>

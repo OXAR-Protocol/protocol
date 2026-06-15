@@ -61,18 +61,18 @@ export function AssetSection({ catalog, title, badge, kind, note, gated = false,
       ) : null;
 
     const price = (
-      <p className="font-sans text-lg text-white tabular-nums">
+      <p className="text-lg text-black tabular-nums">
         {px ? `$${px.price.toFixed(2)}` : "—"}
       </p>
     );
     const change = px ? (
-      <p className={`mt-0.5 font-mono text-xs tabular-nums ${up ? "text-emerald-400/80" : "text-red-400/80"}`}>
+      <p className={`mt-0.5 text-xs tabular-nums ${up ? "text-emerald-600" : "text-red-600"}`}>
         {up ? "+" : ""}
         {px.change24h.toFixed(2)}% 24h
       </p>
     ) : null;
     const owned = holdings > 0 ? (
-      <p className="mt-1 font-mono text-[11px] text-accent/80 tabular-nums">
+      <p className="mt-1 text-[11px] text-[#3c05c7]/80 tabular-nums">
         you own ${holdings.toFixed(2)}
         {typeof earned === "number" && (
           <span className={earned >= 0 ? "text-emerald-400/70" : "text-red-400/70"}>
@@ -84,8 +84,8 @@ export function AssetSection({ catalog, title, badge, kind, note, gated = false,
     ) : null;
     const head = (
       <div>
-        <p className="font-sans text-base text-white">{s.token}</p>
-        <p className="mt-0.5 font-mono text-xs text-white/40">{s.name}</p>
+        <p className="text-base text-black">{s.token}</p>
+        <p className="mt-0.5 text-xs text-black/45">{s.name}</p>
       </div>
     );
 
@@ -96,7 +96,7 @@ export function AssetSection({ catalog, title, badge, kind, note, gated = false,
           type="button"
           disabled={!view}
           onClick={() => view && setActive(s)}
-          className="p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition-colors text-left disabled:opacity-50 min-h-[120px] flex flex-col justify-between"
+          className="p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition-colors text-left disabled:opacity-50 min-h-[120px] flex flex-col justify-between"
         >
           {head}
           {spark && <div className="my-2">{spark}</div>}
@@ -114,7 +114,7 @@ export function AssetSection({ catalog, title, badge, kind, note, gated = false,
         type="button"
         disabled={!view}
         onClick={() => view && setActive(s)}
-        className="w-full flex items-center justify-between p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition-colors text-left disabled:opacity-50"
+        className="w-full flex items-center justify-between p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition-colors text-left disabled:opacity-50"
       >
         <div className="min-w-0">
           {head}
@@ -137,8 +137,8 @@ export function AssetSection({ catalog, title, badge, kind, note, gated = false,
       className="mt-10"
     >
       <div className="flex items-baseline justify-between mb-3">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">{title}</p>
-        <span className="font-mono text-[10px] uppercase tracking-wide text-white/30">{badge}</span>
+        <p className="text-xs uppercase tracking-[0.2em] text-black/40">{title}</p>
+        <span className="text-[10px] uppercase tracking-wide text-black/40">{badge}</span>
       </div>
 
       {layout === "grid" ? (

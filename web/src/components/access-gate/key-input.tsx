@@ -54,10 +54,10 @@ export const KeyInput = forwardRef<HTMLInputElement, KeyInputProps>(
         onKeyDown={(e) => {
           if (e.key === "Enter") onSubmit();
         }}
-        className={`w-full bg-transparent border outline-none font-mono tracking-[0.25em] text-center py-4 rounded-[4px] transition-colors ${
+        className={`w-full rounded-full border bg-transparent py-4 text-center uppercase tracking-[0.2em] outline-none transition-colors ${
           invalid
-            ? "border-[#A8222B] text-[#D4313C]"
-            : "border-white/15 focus:border-white text-white placeholder:text-white/15 disabled:text-white/40"
+            ? "border-[#dc2626] text-[#dc2626]"
+            : "border-black/15 text-black placeholder:text-black/20 focus:border-black disabled:text-black/40"
         }`}
         style={{ fontSize: "16px", letterSpacing: "0.2em" }}
         aria-label="Access key"

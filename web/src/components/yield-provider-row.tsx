@@ -18,41 +18,41 @@ export function YieldProviderRow({ view, onOpen }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group w-full text-left p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition"
+      className="group w-full text-left p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition"
     >
       <div className="flex items-center gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">
-            <p className="font-sans text-base text-white truncate">{view.name}</p>
-            <span className="font-mono text-[10px] uppercase tracking-wide text-white/60 px-1.5 py-0.5 rounded border border-white/15">
+            <p className="text-base text-black truncate">{view.name}</p>
+            <span className="text-[10px] uppercase tracking-wide text-black/60 px-1.5 py-0.5 rounded border border-black/15">
               {view.assetSymbol}
             </span>
-            <span className="font-mono text-[10px] uppercase tracking-wide text-emerald-300/70">
+            <span className="text-[10px] uppercase tracking-wide text-emerald-600">
               ● live
             </span>
             {inPosition && (
-              <span className="font-mono text-[10px] uppercase tracking-wide text-accent">
+              <span className="text-[10px] uppercase tracking-wide text-[#3c05c7]">
                 · you're in
               </span>
             )}
           </div>
-          <p className="mt-1 font-mono text-xs text-white/40 truncate">
+          <p className="mt-1 text-xs text-black/45 truncate">
             {view.description}
           </p>
           {inPosition && (
-            <p className="mt-2 font-mono text-[11px] text-white/50">
+            <p className="mt-2 text-[11px] text-black/55">
               your position: ${positionValue.toFixed(2)}
             </p>
           )}
         </div>
 
         <div className="text-right shrink-0">
-          <p className="font-sans text-xl text-white tabular-nums">
+          <p className="text-xl text-black tabular-nums">
             {(view.apy * 100).toFixed(2)}%
           </p>
           <p
-            className={`font-mono text-[10px] uppercase tracking-wide ${
-              RISK_TONE[view.riskLevel] ?? "text-white/50"
+            className={`text-[10px] uppercase tracking-wide ${
+              RISK_TONE[view.riskLevel] ?? "text-black/55"
             }`}
           >
             {RISK_LABEL[view.riskLevel] ?? view.riskLevel}
@@ -62,7 +62,7 @@ export function YieldProviderRow({ view, onOpen }: Props) {
         <ArrowUpRight
           size={16}
           strokeWidth={1.5}
-          className="text-white/30 group-hover:text-white transition shrink-0"
+          className="text-black/40 group-hover:text-black transition shrink-0"
         />
       </div>
     </button>

@@ -40,10 +40,8 @@ export function AccessGate({ children }: AccessGateProps) {
 
   if (state.kind === "loading") {
     return (
-      <div className="fixed inset-0 z-50 bg-surface-0 flex items-center justify-center">
-        <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-white/30">
-          Loading
-        </span>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
+        <span className="lowercase text-[14px] text-black/35">loading…</span>
       </div>
     );
   }
@@ -58,33 +56,23 @@ export function AccessGate({ children }: AccessGateProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.4 }}
-        className="fixed inset-0 z-50 bg-surface-0 flex items-center justify-center px-6 overflow-hidden"
+        className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-white px-6 text-black"
       >
-        {/* Ambient glow */}
-        <div
-          aria-hidden
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(114,162,240,0.1), rgba(139,92,246,0.05), transparent)",
-          }}
-        />
-
-        <div className="relative w-full max-w-[440px] flex flex-col items-center text-center gap-8">
+        <div className="relative flex w-full max-w-[440px] flex-col items-center gap-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="flex flex-col items-center gap-2"
+            className="flex flex-col items-center gap-3"
           >
-            <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-white/30">
-              Restricted · Early Access
+            <span className="lowercase text-[clamp(15px,1.4vw,18px)] text-black/45">
+              [ early access ]
             </span>
-            <h1 className="font-sans font-normal text-[clamp(1.8rem,5vw,2.4rem)] leading-[1.1] text-white">
-              Enter your key
+            <h1 className="lowercase text-[clamp(34px,6vw,56px)] leading-[1.0] tracking-[-0.04em] text-black">
+              enter your key
             </h1>
-            <p className="font-mono text-[11px] text-white/40 leading-relaxed max-w-[340px] mt-1">
-              OXAR is in closed alpha. Paste the invite key you received.
+            <p className="mt-1 max-w-[340px] lowercase text-[clamp(14px,1.3vw,16px)] leading-snug text-black/45">
+              oxar is in closed alpha. paste the invite key you received.
             </p>
           </motion.div>
 
@@ -92,7 +80,7 @@ export function AccessGate({ children }: AccessGateProps) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="w-full flex flex-col gap-3"
+            className="flex w-full flex-col gap-3"
           >
             <KeyInput
               ref={inputRef}
@@ -106,13 +94,13 @@ export function AccessGate({ children }: AccessGateProps) {
             <button
               onClick={submit}
               disabled={!isValid || redeeming}
-              className="w-full py-4 rounded-[4px] font-mono text-[11px] uppercase tracking-[0.25em] bg-white text-surface-0 hover:bg-white/90 disabled:bg-white/[0.06] disabled:text-white/30 disabled:cursor-not-allowed transition-all"
+              className="w-full rounded-full bg-black py-4 lowercase text-[15px] font-medium text-white transition-all hover:bg-black/85 disabled:cursor-not-allowed disabled:bg-black/10 disabled:text-black/30"
             >
-              {redeeming ? "Unlocking…" : "Unlock"}
+              {redeeming ? "unlocking…" : "unlock"}
             </button>
 
             {error && (
-              <span className="font-mono text-[10px] text-[#D4313C]">
+              <span className="lowercase text-[13px] text-[#dc2626]">
                 {errorCopy(error)}
               </span>
             )}
@@ -122,16 +110,16 @@ export function AccessGate({ children }: AccessGateProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.35 }}
-            className="flex flex-col items-center gap-2 pt-4 border-t border-white/[0.06] w-full"
+            className="flex w-full flex-col items-center gap-2 border-t border-black/10 pt-5"
           >
-            <span className="font-mono text-[10px] text-white/30">
-              Don&apos;t have a key?
+            <span className="lowercase text-[13px] text-black/40">
+              don&apos;t have a key?
             </span>
             <a
               href="https://oxar.app/#waitlist"
-              className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/60 hover:text-white transition-colors"
+              className="lowercase text-[13px] text-black/70 underline decoration-1 underline-offset-4 transition-colors hover:text-black"
             >
-              Join the waitlist →
+              join the waitlist →
             </a>
           </motion.div>
         </div>

@@ -64,10 +64,10 @@ export default function PilePage() {
         transition={{ duration: 0.5 }}
       >
         <SectionLabel>Your pile</SectionLabel>
-        <h1 className="mt-4 font-sans text-3xl md:text-4xl text-white leading-tight">
+        <h1 className="mt-4 text-3xl md:text-4xl text-black leading-tight">
           Everything you've got working
         </h1>
-        <p className="mt-3 font-mono text-sm text-white/40 max-w-lg">
+        <p className="mt-3 text-sm text-black/45 max-w-lg">
           Your live positions across every source. Tap one to deposit more or
           withdraw — funds stay in your own on-chain position.
         </p>
@@ -78,14 +78,14 @@ export default function PilePage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.05 }}
-        className="mt-8 p-6 rounded-[8px] border border-white/10"
+        className="mt-8 p-6 rounded-[8px] border border-black/10"
       >
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">
+        <p className="text-xs uppercase tracking-[0.2em] text-black/40">
           Total balance
         </p>
         <div className="mt-2">
           {loading ? (
-            <Loader2 className="animate-spin text-white/30" size={28} />
+            <Loader2 className="animate-spin text-black/40" size={28} />
           ) : (
             <LiveAmount value={totalValue} apy={blendedApy} variant="lg" />
           )}
@@ -100,7 +100,7 @@ export default function PilePage() {
         className="mt-8"
       >
         <div className="flex items-center justify-between mb-3">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">
+          <p className="text-xs uppercase tracking-[0.2em] text-black/40">
             Positions
           </p>
           {held.length > 0 && (
@@ -115,8 +115,8 @@ export default function PilePage() {
                   aria-label={`${mode} view`}
                   className={`p-1.5 rounded-[5px] border transition ${
                     layout === mode
-                      ? "border-white/30 text-white"
-                      : "border-white/10 text-white/40 hover:text-white/70"
+                      ? "border-black/30 text-black"
+                      : "border-black/10 text-black/45 hover:text-black/70"
                   }`}
                 >
                   <Icon size={14} strokeWidth={1.5} />
@@ -128,17 +128,17 @@ export default function PilePage() {
 
         {loading ? (
           <div className="p-8 flex justify-center">
-            <Loader2 className="animate-spin text-white/30" size={24} />
+            <Loader2 className="animate-spin text-black/40" size={24} />
           </div>
         ) : held.length === 0 ? (
-          <div className="p-8 rounded-[8px] border border-white/10 text-center">
-            <p className="font-sans text-base text-white">You haven&apos;t deposited yet</p>
-            <p className="mt-1 font-mono text-xs text-white/40">
+          <div className="p-8 rounded-[8px] border border-black/10 text-center">
+            <p className="text-base text-black">You haven&apos;t deposited yet</p>
+            <p className="mt-1 text-xs text-black/45">
               Your positions show up here once you put money to work.
             </p>
             <Link
               href="/yield"
-              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-[5px] bg-white text-black font-mono text-xs uppercase tracking-wide hover:bg-white/90 transition"
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-[5px] bg-white text-black text-xs uppercase tracking-wide hover:bg-white/85 transition"
             >
               Explore yield
               <ArrowUpRight size={14} strokeWidth={1.5} />
@@ -158,29 +158,29 @@ export default function PilePage() {
                 <button
                   key={v.id}
                   onClick={() => setActive(v)}
-                  className="group w-full text-left p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition"
+                  className="group w-full text-left p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex-1 min-w-0">
-                      <p className="font-sans text-base text-white truncate">{v.name}</p>
+                      <p className="text-base text-black truncate">{v.name}</p>
                       {(() => {
                         const ch = change24hOf(v);
                         if (typeof ch === "number") {
                           const up = ch >= 0;
                           return (
-                            <p className="mt-1 font-mono text-[10px] uppercase tracking-wide">
-                              <span className={up ? "text-emerald-400/80" : "text-red-400/80"}>
+                            <p className="mt-1 text-[10px] uppercase tracking-wide">
+                              <span className={up ? "text-emerald-600" : "text-red-600"}>
                                 {up ? "+" : ""}
                                 {ch.toFixed(2)}% 24h
                               </span>
-                              <span className="text-white/40"> · {v.assetSymbol}</span>
+                              <span className="text-black/45"> · {v.assetSymbol}</span>
                             </p>
                           );
                         }
                         return (
                           <p
-                            className={`mt-1 font-mono text-[10px] uppercase tracking-wide ${
-                              RISK_TONE[v.riskLevel] ?? "text-white/40"
+                            className={`mt-1 text-[10px] uppercase tracking-wide ${
+                              RISK_TONE[v.riskLevel] ?? "text-black/45"
                             }`}
                           >
                             {(v.apy * 100).toFixed(2)}% APY · {v.assetSymbol}
@@ -190,14 +190,14 @@ export default function PilePage() {
                     </div>
                     <div className="text-right shrink-0">
                       <LiveAmount value={value} apy={v.apy} variant="md" />
-                      <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
+                      <p className="text-[10px] uppercase tracking-wide text-black/40">
                         your position
                       </p>
                     </div>
                     <ArrowUpRight
                       size={16}
                       strokeWidth={1.5}
-                      className="text-white/30 group-hover:text-white transition shrink-0"
+                      className="text-black/40 group-hover:text-black transition shrink-0"
                     />
                   </div>
                 </button>

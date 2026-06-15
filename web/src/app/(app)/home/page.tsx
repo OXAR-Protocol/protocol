@@ -81,44 +81,44 @@ export default function HomePage() {
         transition={{ duration: 0.5, delay: 0.05 }}
         className="mt-6 mb-12"
       >
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">
-          Your sleeping money
+        <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
+          your sleeping money
         </p>
         <div className="mt-3 flex items-baseline gap-4">
           {loading ? (
-            <span className="text-[clamp(2rem,5vw,3rem)] font-sans font-light text-white/30 leading-none">
+            <span className="text-[clamp(2rem,5vw,3rem)] font-light text-black/40 leading-none">
               <Loader2 className="animate-spin inline" size={28} />
             </span>
           ) : (
             <LiveAmount value={totalUsdc} apy={blendedApy} variant="hero" />
           )}
           {(yieldEarn.value > 0 || stockEarn.value > 0 || goldEarn.value > 0) && (
-            <span className="font-mono text-sm text-accent flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="text-sm text-[#3c05c7] flex flex-wrap items-baseline gap-x-3 gap-y-1">
               {yieldEarn.value > 0 && (
                 <span title="Earned from yield — current value minus what you put in, on-chain.">
-                  <span className="text-white/40">yield</span>{" "}
+                  <span className="text-black/45">yield</span>{" "}
                   <LiveEarned currentValue={yieldEarn.value} invested={yieldEarn.invested} apy={yieldEarn.apy} />
                 </span>
               )}
               {stockEarn.value > 0 && (
                 <span title="Earned from stocks — current value minus cost basis, on-chain.">
-                  <span className="text-white/40">stocks</span>{" "}
+                  <span className="text-black/45">stocks</span>{" "}
                   <LiveEarned currentValue={stockEarn.value} invested={stockEarn.invested} apy={stockEarn.apy} />
                 </span>
               )}
               {goldEarn.value > 0 && (
                 <span title="Earned from gold — current value minus cost basis, on-chain.">
-                  <span className="text-white/40">gold</span>{" "}
+                  <span className="text-black/45">gold</span>{" "}
                   <LiveEarned currentValue={goldEarn.value} invested={goldEarn.invested} apy={goldEarn.apy} />
                 </span>
               )}
             </span>
           )}
         </div>
-        <p className="mt-3 font-mono text-sm text-white/40">
+        <p className="mt-3 text-sm text-black/45">
           {totalUsdc > 0
             ? `${positionCount} source${positionCount === 1 ? "" : "s"} · earning every block`
-            : "Drop USDC into a source to start earning"}
+            : "drop USDC into a source to start earning"}
         </p>
       </motion.section>
 
@@ -130,35 +130,27 @@ export default function HomePage() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="mb-12"
         >
-          <div className="relative overflow-hidden rounded-[8px] border border-white/10 p-8 md:p-10">
-            <div
-              aria-hidden
-              className="absolute -top-32 -right-32 w-[400px] h-[400px] rounded-full blur-[120px] opacity-30"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(114,162,240,0.4), rgba(139,92,246,0.2), transparent)",
-              }}
-            />
+          <div className="relative overflow-hidden rounded-[12px] border border-black/10 bg-white p-8 md:p-10">
             <div className="relative">
-              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-accent/10 border border-accent/30 font-mono text-[10px] uppercase tracking-widest text-accent">
+              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#3c05c7]/10 border border-[#3c05c7]/30 lowercase text-[10px] tracking-widest text-[#3c05c7]">
                 <Sparkles size={10} strokeWidth={1.5} />
-                Start here
+                start here
               </span>
-              <h2 className="mt-4 font-sans text-2xl md:text-3xl text-white leading-tight">
-                Your money's been napping.
+              <h2 className="mt-4 text-2xl md:text-3xl text-black leading-tight lowercase">
+                your money's been napping.
                 <br />
-                <span className="text-white/50">Let's wake it up.</span>
+                <span className="text-black/55">let's wake it up.</span>
               </h2>
-              <p className="mt-3 font-mono text-sm text-white/40 max-w-md leading-relaxed">
-                Pick a source. Deposit USDC. Earn yield from day one. Withdraw
+              <p className="mt-3 text-sm text-black/45 max-w-md leading-relaxed">
+                pick a source. deposit USDC. earn yield from day one. withdraw
                 whenever you want — you always hold your own position.
               </p>
               <div className="mt-6">
                 <Link
                   href="/yield"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-[5px] bg-white text-black font-mono text-xs uppercase tracking-wide hover:bg-white/90 transition"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white text-black text-xs lowercase tracking-wide hover:bg-white/85 transition"
                 >
-                  Wake up your money
+                  wake up your money
                   <ArrowUpRight size={14} strokeWidth={1.5} />
                 </Link>
               </div>
@@ -176,14 +168,14 @@ export default function HomePage() {
           className="mb-12"
         >
           <div className="flex items-baseline justify-between mb-4">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">
-              Where it's sleeping
+            <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
+              where it's sleeping
             </p>
             <Link
               href="/pile"
-              className="font-mono text-xs text-white/40 hover:text-white transition-colors"
+              className="text-xs text-black/45 hover:text-black transition-colors"
             >
-              Manage →
+              manage →
             </Link>
           </div>
 
@@ -194,26 +186,26 @@ export default function HomePage() {
                 <Link
                   key={v.id}
                   href="/pile"
-                  className="p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition-colors min-h-[120px] flex flex-col justify-between"
+                  className="p-5 rounded-[12px] border border-black/10 bg-white hover:border-black/30 transition-colors min-h-[120px] flex flex-col justify-between"
                 >
                   <div>
-                    <p className="font-sans text-base text-white">{v.name}</p>
+                    <p className="text-base text-black">{v.name}</p>
                     {(() => {
                       const ch = v.heldMint ? prices[v.heldMint]?.change24h : undefined;
                       if (isPriceExposure(v.id) && typeof ch === "number") {
                         const up = ch >= 0;
                         return (
-                          <p className="mt-1 font-mono text-xs">
-                            <span className={up ? "text-emerald-400/80" : "text-red-400/80"}>
+                          <p className="mt-1 text-xs">
+                            <span className={up ? "text-emerald-600" : "text-red-600"}>
                               {up ? "+" : ""}
                               {ch.toFixed(2)}% 24h
                             </span>
-                            <span className="text-white/40"> · {v.assetSymbol}</span>
+                            <span className="text-black/45"> · {v.assetSymbol}</span>
                           </p>
                         );
                       }
                       return (
-                        <p className="mt-1 font-mono text-xs text-white/40">
+                        <p className="mt-1 text-xs text-black/45">
                           {(v.apy * 100).toFixed(2)}% APY · {v.assetSymbol}
                         </p>
                       );
@@ -233,8 +225,8 @@ export default function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.35 }}
       >
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30 mb-4">
-          Recent activity
+        <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45 mb-4">
+          recent activity
         </p>
         <ActivityFeed />
       </motion.section>

@@ -79,29 +79,29 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
   };
 
   return (
-    <div className="p-4 rounded-[6px] border border-white/10">
-      <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-2">{verb}</p>
+    <div className="p-4 rounded-[6px] border border-black/10">
+      <p className="text-[10px] uppercase tracking-wide text-black/40 mb-2">{verb}</p>
 
       {/* USD amount */}
       <div className="flex items-baseline gap-3">
-        <span className="font-mono text-2xl text-white/40">$</span>
+        <span className="text-2xl text-black/45">$</span>
         <input
           type="number"
           min={0}
           step="any"
           value={usdAmount}
           onChange={(e) => setUsdAmount(Math.max(0, Number(e.target.value)))}
-          className="flex-1 bg-transparent border-b border-white/15 focus:border-white/40 outline-none font-mono text-2xl text-white py-1"
+          className="flex-1 bg-transparent border-b border-black/15 focus:border-black/40 outline-none text-2xl text-black py-1"
         />
       </div>
 
       {/* Pay-with picker */}
       <div className="mt-3">
-        <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-1.5">Pay with</p>
+        <p className="text-[10px] uppercase tracking-wide text-black/40 mb-1.5">Pay with</p>
         {assetsLoading ? (
-          <p className="font-mono text-xs text-white/30">Loading your assets…</p>
+          <p className="text-xs text-black/40">Loading your assets…</p>
         ) : assets.length === 0 ? (
-          <p className="font-mono text-xs text-white/30">No assets found in your wallet.</p>
+          <p className="text-xs text-black/40">No assets found in your wallet.</p>
         ) : (
           <CustomSelect
             value={activeMint ?? ""}
@@ -123,20 +123,20 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
         {!evmAddress ? (
           <button
             onClick={() => linkWallet()}
-            className="mt-2 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-white/40 hover:text-white/70 transition"
+            className="mt-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-wide text-black/45 hover:text-black/70 transition"
           >
             <Plus size={11} strokeWidth={1.5} />
             Connect a wallet to pay from another chain
           </button>
         ) : (
           // Connected EVM wallet — let the user disconnect it (e.g. to link another).
-          <div className="mt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-white/40">
+          <div className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-wide text-black/45">
             <span>
               EVM {evmAddress.slice(0, 6)}…{evmAddress.slice(-4)}
             </span>
             <button
               onClick={() => unlinkWallet(evmAddress)}
-              className="underline hover:text-white/70 transition"
+              className="underline hover:text-black/70 transition"
             >
               disconnect
             </button>
@@ -146,7 +146,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
 
       {/* Net received */}
       {payAsset && usdAmount > 0 && (
-        <p className="mt-2 font-mono text-[11px] text-white/40">
+        <p className="mt-2 text-[11px] text-black/45">
           {view.heldMint ? (
             // Swap-and-hold: show what you'll actually hold + the swap cost.
             swapIn.quoting
@@ -175,7 +175,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
       <button
         onClick={handleDeposit}
         disabled={busy || !payAsset || usdAmount <= 0}
-        className="mt-3 w-full px-4 py-2.5 rounded-[5px] bg-white text-black font-mono text-xs uppercase tracking-wide hover:bg-white/90 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
+        className="mt-3 w-full px-4 py-2.5 rounded-[5px] bg-white text-black text-xs uppercase tracking-wide hover:bg-white/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
       >
         {busy ? (
           <>
@@ -187,7 +187,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
         )}
       </button>
 
-      {error && <p className="mt-3 font-mono text-xs text-red-400 text-center">{error}</p>}
+      {error && <p className="mt-3 text-xs text-red-400 text-center">{error}</p>}
     </div>
   );
 }
