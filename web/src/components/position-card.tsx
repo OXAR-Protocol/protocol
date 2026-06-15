@@ -31,40 +31,40 @@ export function PositionCard({ view, onOpen, change24h }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group flex flex-col gap-4 p-5 rounded-[8px] border border-white/10 hover:border-white/30 transition text-left"
+      className="group flex flex-col gap-4 p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition text-left"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-sans text-base text-white truncate">{view.name}</p>
-          <span className="mt-1 inline-block font-mono text-[10px] uppercase tracking-wide text-white/50 px-1.5 py-0.5 rounded border border-white/15">
+          <p className="text-base text-black truncate">{view.name}</p>
+          <span className="mt-1 inline-block text-[10px] uppercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15">
             {view.assetSymbol}
           </span>
         </div>
         <ArrowUpRight
           size={16}
           strokeWidth={1.5}
-          className="text-white/30 group-hover:text-white transition shrink-0"
+          className="text-black/40 group-hover:text-black transition shrink-0"
         />
       </div>
 
       <Sparkline
         values={history}
         className={`w-full h-9 ${
-          isPrice ? (priceUp ? "text-emerald-400/50" : "text-red-400/50") : "text-accent/60"
+          isPrice ? (priceUp ? "text-emerald-400/50" : "text-red-400/50") : "text-[#3c05c7]/60"
         }`}
       />
 
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
           <LiveAmount value={value} apy={view.apy} variant="md" />
-          <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
+          <p className="text-[10px] uppercase tracking-wide text-black/40">
             {value > 0 ? "your position" : "tap to deposit"}
           </p>
         </div>
         {isPrice && typeof change24h === "number" ? (
           <p
-            className={`font-mono text-xs tabular-nums shrink-0 ${
-              priceUp ? "text-emerald-400/80" : "text-red-400/80"
+            className={`text-xs tabular-nums shrink-0 ${
+              priceUp ? "text-emerald-600" : "text-red-600"
             }`}
           >
             {priceUp ? "+" : ""}
@@ -72,8 +72,8 @@ export function PositionCard({ view, onOpen, change24h }: Props) {
           </p>
         ) : (
           <p
-            className={`font-mono text-xs tabular-nums shrink-0 ${
-              RISK_TONE[view.riskLevel] ?? "text-white/40"
+            className={`text-xs tabular-nums shrink-0 ${
+              RISK_TONE[view.riskLevel] ?? "text-black/45"
             }`}
           >
             {(view.apy * 100).toFixed(2)}% APY

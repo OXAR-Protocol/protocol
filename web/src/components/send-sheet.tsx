@@ -65,7 +65,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4"
+      className="fixed inset-0 z-[60] bg-white/70 backdrop-blur-sm flex items-center justify-center px-4"
       onClick={onClose}
     >
       <motion.div
@@ -74,40 +74,40 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
         exit={{ y: 60, opacity: 0 }}
         transition={{ type: "spring", damping: 26, stiffness: 220 }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[440px] bg-black border border-white/15 rounded-[12px] p-6 md:p-7"
+        className="relative w-full max-w-[440px] bg-white border border-black/15 rounded-[12px] p-6 md:p-7"
       >
         <div className="flex items-start justify-between mb-5">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">Send / Withdraw</p>
-            <h2 className="mt-1 font-sans text-xl text-white">Take it anywhere</h2>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-black/40">Send / Withdraw</p>
+            <h2 className="mt-1 text-xl text-black">Take it anywhere</h2>
           </div>
-          <button onClick={onClose} className="text-white/40 hover:text-white transition">
+          <button onClick={onClose} className="text-black/45 hover:text-black transition">
             <X size={18} strokeWidth={1.5} />
           </button>
         </div>
 
         {result ? (
           <div className="text-center py-6">
-            <p className="font-sans text-lg text-white">Sent ✓</p>
+            <p className="text-lg text-black">Sent ✓</p>
             {result.crossChain && (
-              <p className="mt-1 font-mono text-[11px] text-white/40">Arriving on {destChain.label} shortly (~1 min)</p>
+              <p className="mt-1 text-[11px] text-black/45">Arriving on {destChain.label} shortly (~1 min)</p>
             )}
             <a
               href={`https://solscan.io/tx/${result.sig}`}
               target="_blank"
               rel="noreferrer"
-              className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs text-accent hover:underline"
+              className="mt-3 inline-flex items-center gap-1.5 text-xs text-[#3c05c7] hover:underline"
             >
               View on Solscan <ExternalLink size={12} strokeWidth={1.5} />
             </a>
           </div>
         ) : (
           <>
-            <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-1.5">You send</p>
+            <p className="text-[10px] uppercase tracking-wide text-black/40 mb-1.5">You send</p>
             {loading ? (
-              <p className="font-mono text-xs text-white/30">Loading…</p>
+              <p className="text-xs text-black/40">Loading…</p>
             ) : assets.length === 0 ? (
-              <p className="font-mono text-xs text-white/30">No assets to send.</p>
+              <p className="text-xs text-black/40">No assets to send.</p>
             ) : (
               <CustomSelect
                 value={source?.mint ?? ""}
@@ -118,7 +118,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
 
             <div className="grid grid-cols-2 gap-3 mt-4">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-1.5">To chain</p>
+                <p className="text-[10px] uppercase tracking-wide text-black/40 mb-1.5">To chain</p>
                 <CustomSelect
                   value={destKey}
                   onChange={(k) => { setDestKey(k); setAssetSym(getDestChain(k).assets[0].symbol); }}
@@ -126,7 +126,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
                 />
               </div>
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mb-1.5">Receive</p>
+                <p className="text-[10px] uppercase tracking-wide text-black/40 mb-1.5">Receive</p>
                 <CustomSelect
                   value={destAsset.symbol}
                   onChange={setAssetSym}
@@ -137,28 +137,28 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
 
             {needsAddress ? (
               <>
-                <p className="font-mono text-[10px] uppercase tracking-wide text-white/30 mt-4 mb-1.5">
+                <p className="text-[10px] uppercase tracking-wide text-black/40 mt-4 mb-1.5">
                   To {destChain.chain === "ethereum" ? "EVM" : "Solana"} address
                 </p>
                 <input
                   value={to}
                   onChange={(e) => setTo(e.target.value)}
                   placeholder={destChain.chain === "ethereum" ? "0x…" : "Solana address"}
-                  className="w-full bg-transparent border border-white/15 focus:border-white/40 outline-none rounded-[5px] px-3 py-2 font-mono text-xs text-white"
+                  className="w-full bg-transparent border border-black/15 focus:border-black/40 outline-none rounded-[5px] px-3 py-2 text-xs text-black"
                 />
               </>
             ) : (
-              <p className="mt-4 font-mono text-[11px] text-white/40">→ {destAsset.symbol} into your wallet</p>
+              <p className="mt-4 text-[11px] text-black/45">→ {destAsset.symbol} into your wallet</p>
             )}
 
             <div className="flex items-center justify-between mt-4 mb-1.5">
-              <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
+              <p className="text-[10px] uppercase tracking-wide text-black/40">
                 Amount{source ? ` (${source.symbol})` : ""}
               </p>
               {source && (
                 <button
                   onClick={() => setAmount((Number(maxSendable(source)) / 10 ** source.decimals).toString())}
-                  className="font-mono text-[10px] uppercase tracking-wide text-accent/80 hover:text-accent"
+                  className="text-[10px] uppercase tracking-wide text-[#3c05c7]/80 hover:text-[#3c05c7]"
                 >
                   max
                 </button>
@@ -171,18 +171,18 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
-              className="w-full bg-transparent border-b border-white/15 focus:border-white/40 outline-none font-mono text-xl text-white py-1"
+              className="w-full bg-transparent border-b border-black/15 focus:border-black/40 outline-none text-xl text-black py-1"
             />
 
             <button
               onClick={handleSend}
               disabled={busy || !!validation}
-              className="mt-5 w-full px-4 py-2.5 rounded-[5px] bg-white text-black font-mono text-xs uppercase tracking-wide hover:bg-white/90 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
+              className="mt-5 w-full px-4 py-2.5 rounded-[5px] bg-white text-black text-xs uppercase tracking-wide hover:bg-white/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
             >
               {busy ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : validation ?? `Send ${destAsset.symbol} → ${destChain.label}`}
             </button>
 
-            {sendError && <p className="mt-3 font-mono text-xs text-red-400 text-center">{sendError}</p>}
+            {sendError && <p className="mt-3 text-xs text-red-400 text-center">{sendError}</p>}
           </>
         )}
       </motion.div>

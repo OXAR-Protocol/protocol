@@ -36,7 +36,7 @@ export function LiveAmount({ value, apy, variant = "md", className }: Props) {
   });
 
   return (
-    <span className={`font-sans tabular-nums text-white leading-none ${SIZES[variant]} ${className ?? ""}`}>
+    <span className={`tabular-nums text-black leading-none tracking-[-0.02em] ${SIZES[variant]} ${className ?? ""}`}>
       ${text}
     </span>
   );

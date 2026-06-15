@@ -84,10 +84,10 @@ export default function YieldPage() {
         transition={{ duration: 0.5 }}
       >
         <SectionLabel>Yield</SectionLabel>
-        <h1 className="mt-4 font-sans text-3xl md:text-4xl text-white leading-tight">
+        <h1 className="mt-4 text-3xl md:text-4xl text-black leading-tight">
           Where your money can sleep
         </h1>
-        <p className="mt-3 font-mono text-sm text-white/40 max-w-lg">
+        <p className="mt-3 text-sm text-black/45 max-w-lg">
           Pick a source. Open it. Deposit. Withdraw anytime. Funds go straight
           into the protocol — you hold your own position.
         </p>
@@ -109,10 +109,10 @@ export default function YieldPage() {
               <button
                 key={bucket.id}
                 onClick={() => setApyBucket(isActive ? null : bucket.id)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-mono text-xs transition ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs transition ${
                   isActive
-                    ? "border-accent/60 bg-accent/[0.06] text-white"
-                    : "border-white/10 hover:border-white/30 text-white/60"
+                    ? "border-[#3c05c7]/60 bg-[#3c05c7]/[0.06] text-black"
+                    : "border-black/10 hover:border-black/30 text-black/60"
                 }`}
               >
                 <span>{bucket.emoji}</span>
@@ -123,7 +123,7 @@ export default function YieldPage() {
           {apyBucket && (
             <button
               onClick={() => setApyBucket(null)}
-              className="inline-flex items-center gap-1 px-2 py-1.5 font-mono text-[10px] uppercase tracking-wide text-white/30 hover:text-white"
+              className="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wide text-black/40 hover:text-black"
               title="Clear filter"
             >
               <X size={11} strokeWidth={1.5} />
@@ -154,7 +154,7 @@ export default function YieldPage() {
           className="mt-10"
         >
           <div className="flex items-center justify-between mb-3">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-emerald-300/50">
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-600">
               Live now
             </p>
             <div className="flex gap-1">
@@ -168,8 +168,8 @@ export default function YieldPage() {
                   aria-label={`${mode} view`}
                   className={`p-1.5 rounded-[5px] border transition ${
                     layout === mode
-                      ? "border-white/30 text-white"
-                      : "border-white/10 text-white/40 hover:text-white/70"
+                      ? "border-black/30 text-black"
+                      : "border-black/10 text-black/45 hover:text-black/70"
                   }`}
                 >
                   <Icon size={14} strokeWidth={1.5} />
@@ -231,7 +231,7 @@ export default function YieldPage() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="mt-10"
         >
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30 mb-3">
+          <p className="text-xs uppercase tracking-[0.2em] text-black/40 mb-3">
             On Solana · soon
           </p>
           <div className="space-y-2">
@@ -251,10 +251,10 @@ export default function YieldPage() {
           className="mt-12"
         >
           <div className="flex items-baseline justify-between mb-3">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/30">
+            <p className="text-xs uppercase tracking-[0.2em] text-black/40">
               Cross-chain · soon
             </p>
-            <p className="font-mono text-[10px] uppercase tracking-wide text-white/30">
+            <p className="text-[10px] uppercase tracking-wide text-black/40">
               via Delora
             </p>
           </div>
@@ -267,14 +267,14 @@ export default function YieldPage() {
       )}
 
       {nothingMatches && (
-        <p className="mt-12 font-mono text-sm text-white/30 text-center">
+        <p className="mt-12 text-sm text-black/40 text-center">
           No sources match these filters.
         </p>
       )}
 
-      <div className="mt-12 p-5 rounded-[8px] border border-white/10">
-        <p className="font-sans text-sm text-white">Not financial advice</p>
-        <p className="mt-1 font-mono text-xs text-white/40 leading-relaxed">
+      <div className="mt-12 p-5 rounded-[8px] border border-black/10">
+        <p className="text-sm text-black">Not financial advice</p>
+        <p className="mt-1 text-xs text-black/45 leading-relaxed">
           APYs are current targets, not guarantees. You always sign every move.
         </p>
       </div>

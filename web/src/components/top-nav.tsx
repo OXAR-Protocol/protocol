@@ -3,44 +3,42 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
-import { Sun, Moon } from "lucide-react";
 
-import { useTheme } from "@/context/theme-context";
+import { DISPLAY } from "@/components/landing-v2/fonts";
 import { WalletMenu } from "@/components/wallet-menu";
 
 const tabs = [
-  { href: "/home", label: "Home" },
-  { href: "/yield", label: "Yield" },
-  { href: "/pile", label: "Pile" },
-  { href: "/you", label: "You" },
+  { href: "/home", label: "home" },
+  { href: "/yield", label: "yield" },
+  { href: "/pile", label: "pile" },
+  { href: "/you", label: "you" },
 ] as const;
 
 export function TopNav() {
   const pathname = usePathname();
   const { authenticated, ready, login } = usePrivy();
-  const { theme, toggleTheme } = useTheme();
 
   return (
-    <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/[0.06]">
-      <div className="max-w-[1300px] mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/home" className="shrink-0">
-          <img src="/images/white.svg" alt="OXAR" className="h-7 w-auto" />
+    <nav className="sticky top-0 z-40 border-b border-black/10 bg-white/85 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5">
+        <Link href="/home" className="shrink-0 text-[22px] font-bold leading-none text-black" style={{ fontFamily: DISPLAY }}>
+          OXAR.
         </Link>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-[clamp(16px,3vw,40px)]">
           {authenticated && (
-            <div className="hidden md:flex items-center gap-10">
+            <div className="hidden items-center gap-[clamp(16px,2.4vw,36px)] md:flex">
               {tabs.map((tab) => {
                 const isActive = pathname.startsWith(tab.href);
                 return (
                   <Link
                     key={tab.href}
                     href={tab.href}
-                    className={`font-mono text-[11px] font-semibold tracking-[0.15em] uppercase transition-colors ${
-                      isActive ? "text-white" : "text-white/25 hover:text-white/60"
+                    className={`lowercase text-[15px] transition-colors ${
+                      isActive ? "text-black" : "text-black/40 hover:text-black"
                     }`}
                   >
-                    [ {tab.label} ]
+                    {tab.label}
                   </Link>
                 );
               })}
@@ -52,24 +50,12 @@ export function TopNav() {
               <WalletMenu />
             ) : (
               <button
-                onClick={login}
-                className="font-mono text-[11px] font-semibold tracking-[0.15em] uppercase px-4 py-2 rounded-[5px] bg-white text-black hover:bg-white/90 transition-colors"
+                onClick={() => login()}
+                className="rounded-full bg-black px-5 py-2 lowercase text-[14px] font-medium text-white transition-colors hover:bg-black/85"
               >
-                Sign in
+                sign in
               </button>
             ))}
-
-          <button
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-            className="text-white/40 hover:text-white transition p-1.5 -mr-1.5"
-          >
-            {theme === "dark" ? (
-              <Sun size={16} strokeWidth={1.5} />
-            ) : (
-              <Moon size={16} strokeWidth={1.5} />
-            )}
-          </button>
         </div>
       </div>
     </nav>
