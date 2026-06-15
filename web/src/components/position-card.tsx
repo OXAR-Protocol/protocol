@@ -36,7 +36,7 @@ export function PositionCard({ view, onOpen, change24h }: Props) {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-base text-black truncate">{view.name}</p>
-          <span className="mt-1 inline-block text-[10px] uppercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15">
+          <span className="mt-1 inline-block text-[10px] lowercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15">
             {view.assetSymbol}
           </span>
         </div>
@@ -57,7 +57,7 @@ export function PositionCard({ view, onOpen, change24h }: Props) {
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
           <LiveAmount value={value} apy={view.apy} variant="md" />
-          <p className="text-[10px] uppercase tracking-wide text-black/40">
+          <p className="text-[10px] lowercase tracking-wide text-black/40">
             {value > 0 ? "your position" : "tap to deposit"}
           </p>
         </div>

@@ -24,14 +24,14 @@ export function YieldProviderRow({ view, onOpen }: Props) {
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">
             <p className="text-base text-black truncate">{view.name}</p>
-            <span className="text-[10px] uppercase tracking-wide text-black/60 px-1.5 py-0.5 rounded border border-black/15">
+            <span className="text-[10px] lowercase tracking-wide text-black/60 px-1.5 py-0.5 rounded border border-black/15">
               {view.assetSymbol}
             </span>
-            <span className="text-[10px] uppercase tracking-wide text-emerald-600">
+            <span className="text-[10px] lowercase tracking-wide text-emerald-600">
               ● live
             </span>
             {inPosition && (
-              <span className="text-[10px] uppercase tracking-wide text-[#3c05c7]">
+              <span className="text-[10px] lowercase tracking-wide text-[#3c05c7]">
                 · you're in
               </span>
             )}
@@ -51,7 +51,7 @@ export function YieldProviderRow({ view, onOpen }: Props) {
             {(view.apy * 100).toFixed(2)}%
           </p>
           <p
-            className={`text-[10px] uppercase tracking-wide ${
+            className={`text-[10px] lowercase tracking-wide ${
               RISK_TONE[view.riskLevel] ?? "text-black/55"
             }`}
           >

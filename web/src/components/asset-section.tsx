@@ -137,8 +137,8 @@ export function AssetSection({ catalog, title, badge, kind, note, gated = false,
       className="mt-10"
     >
       <div className="flex items-baseline justify-between mb-3">
-        <p className="text-xs uppercase tracking-[0.2em] text-black/40">{title}</p>
-        <span className="text-[10px] uppercase tracking-wide text-black/40">{badge}</span>
+        <p className="text-xs lowercase tracking-[0.2em] text-black/40">{title}</p>
+        <span className="text-[10px] lowercase tracking-wide text-black/40">{badge}</span>
       </div>
 
       {layout === "grid" ? (

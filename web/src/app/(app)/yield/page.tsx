@@ -84,7 +84,7 @@ export default function YieldPage() {
         transition={{ duration: 0.5 }}
       >
         <SectionLabel>Yield</SectionLabel>
-        <h1 className="mt-4 text-3xl md:text-4xl text-black leading-tight">
+        <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-black leading-[1.04] tracking-[-0.04em] lowercase">
           Where your money can sleep
         </h1>
         <p className="mt-3 text-sm text-black/45 max-w-lg">
@@ -116,14 +116,14 @@ export default function YieldPage() {
                 }`}
               >
                 <span>{bucket.emoji}</span>
-                <span className="uppercase tracking-wide">{bucket.label}</span>
+                <span className="lowercase tracking-wide">{bucket.label}</span>
               </button>
             );
           })}
           {apyBucket && (
             <button
               onClick={() => setApyBucket(null)}
-              className="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wide text-black/40 hover:text-black"
+              className="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] lowercase tracking-wide text-black/40 hover:text-black"
               title="Clear filter"
             >
               <X size={11} strokeWidth={1.5} />
@@ -154,7 +154,7 @@ export default function YieldPage() {
           className="mt-10"
         >
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-600">
+            <p className="text-xs lowercase tracking-[0.2em] text-emerald-600">
               Live now
             </p>
             <div className="flex gap-1">
@@ -231,7 +231,7 @@ export default function YieldPage() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="mt-10"
         >
-          <p className="text-xs uppercase tracking-[0.2em] text-black/40 mb-3">
+          <p className="text-xs lowercase tracking-[0.2em] text-black/40 mb-3">
             On Solana · soon
           </p>
           <div className="space-y-2">
@@ -251,10 +251,10 @@ export default function YieldPage() {
           className="mt-12"
         >
           <div className="flex items-baseline justify-between mb-3">
-            <p className="text-xs uppercase tracking-[0.2em] text-black/40">
+            <p className="text-xs lowercase tracking-[0.2em] text-black/40">
               Cross-chain · soon
             </p>
-            <p className="text-[10px] uppercase tracking-wide text-black/40">
+            <p className="text-[10px] lowercase tracking-wide text-black/40">
               via Delora
             </p>
           </div>

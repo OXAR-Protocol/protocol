@@ -84,7 +84,7 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
         >
           <div className="flex items-start justify-between gap-4 mb-6">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-black/40">
+              <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">
                 {priceExposure ? "Asset" : "Yield source"}
               </p>
               <h2 className="mt-2 text-2xl text-black">{view.name}</h2>
@@ -102,7 +102,7 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
                 <button
                   key={v.id}
                   onClick={() => setSelectedId(v.id)}
-                  className={`flex-1 px-3 py-2 rounded-[6px] border text-xs uppercase tracking-wide transition ${
+                  className={`flex-1 px-3 py-2 rounded-[6px] border text-xs lowercase tracking-wide transition ${
                     v.id === view.id
                       ? "border-[#3c05c7]/60 bg-[#3c05c7]/[0.06] text-black"
                       : "border-black/10 text-black/55 hover:border-black/30"
@@ -119,7 +119,7 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
 
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="p-4 rounded-[6px] border border-black/10">
-              <p className="text-[10px] uppercase tracking-wide text-black/40">
+              <p className="text-[10px] lowercase tracking-wide text-black/40">
                 {priceExposure ? "Exposure" : "APY"}
               </p>
               <p className="mt-1 text-2xl text-black tabular-nums">
@@ -127,7 +127,7 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
               </p>
             </div>
             <div className="p-4 rounded-[6px] border border-black/10">
-              <p className="text-[10px] uppercase tracking-wide text-black/40">Risk</p>
+              <p className="text-[10px] lowercase tracking-wide text-black/40">Risk</p>
               <p className="mt-1 text-2xl text-black">
                 {RISK_LABEL[view.riskLevel] ?? view.riskLevel}
               </p>
@@ -140,7 +140,7 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
             <AssetChart mint={view.heldMint} />
           ) : apyHistory.length > 1 ? (
             <div className="mb-6 p-4 rounded-[6px] border border-black/10">
-              <p className="text-[10px] uppercase tracking-wide text-black/40 mb-3">
+              <p className="text-[10px] lowercase tracking-wide text-black/40 mb-3">
                 APY · last {apyHistory.length} days
               </p>
               <Sparkline values={apyHistory} height={96} className="w-full h-24 text-[#3c05c7]/60" />
@@ -149,7 +149,7 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
 
           {positionValue > 0 && (
             <div className="mb-6 p-4 rounded-[6px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.04]">
-              <p className="text-[10px] uppercase tracking-wide text-black/55">
+              <p className="text-[10px] lowercase tracking-wide text-black/55">
                 Your position
               </p>
               <p className="mt-1 text-2xl text-black tabular-nums">
@@ -182,7 +182,7 @@ export function YieldSourceSheet({ views, onClose, onDone }: Props) {
                     <button
                       type="button"
                       onClick={() => setWithdrawAmount(positionValue)}
-                      className="uppercase tracking-wide text-[#3c05c7]/80 hover:text-[#3c05c7] transition"
+                      className="lowercase tracking-wide text-[#3c05c7]/80 hover:text-[#3c05c7] transition"
                     >
                       max
                     </button>

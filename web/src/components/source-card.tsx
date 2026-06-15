@@ -34,7 +34,7 @@ export function SourceCard({ group, onOpen }: Props) {
             {group.views.map((v) => (
               <span
                 key={v.id}
-                className="text-[10px] uppercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15"
+                className="text-[10px] lowercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15"
               >
                 {v.assetSymbol}
               </span>
@@ -56,12 +56,12 @@ export function SourceCard({ group, onOpen }: Props) {
             {grouped ? "up to " : ""}
             {(group.maxApy * 100).toFixed(2)}%
           </p>
-          <p className="text-[10px] uppercase tracking-wide text-black/40">
+          <p className="text-[10px] lowercase tracking-wide text-black/40">
             {positionTotal > 0 ? `$${positionTotal.toFixed(2)} in` : "APY"}
           </p>
         </div>
         <p
-          className={`text-[10px] uppercase tracking-wide shrink-0 ${
+          className={`text-[10px] lowercase tracking-wide shrink-0 ${
             RISK_TONE[top.riskLevel] ?? "text-black/45"
           }`}
         >

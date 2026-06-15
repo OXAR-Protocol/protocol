@@ -20,10 +20,10 @@ export function YieldSourceRow({ source }: Props) {
             <p className="text-base text-black truncate">
               {source.name}
             </p>
-            <span className="text-[10px] uppercase tracking-wide text-black/40">
+            <span className="text-[10px] lowercase tracking-wide text-black/40">
               {CHAIN_LABEL[source.chain] ?? source.chain}
             </span>
-            <span className="text-[10px] uppercase tracking-wide text-black/40">
+            <span className="text-[10px] lowercase tracking-wide text-black/40">
               · soon
             </span>
           </div>
@@ -37,7 +37,7 @@ export function YieldSourceRow({ source }: Props) {
             {source.baseApy.toFixed(1)}%
           </p>
           <p
-            className={`text-[10px] uppercase tracking-wide ${
+            className={`text-[10px] lowercase tracking-wide ${
               RISK_TONE[source.riskLevel] ?? "text-black/55"
             }`}
           >
