@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { Loader2, Plus } from "lucide-react";
 
+import { PayWithField } from "@/components/pay-with-field";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
 import { useDeposit } from "@/hooks/use-deposit";
@@ -18,11 +19,8 @@ interface Props {
   verb?: string;
 }
 
-/** Settlement label per funding route — what happens + roughly how long. */
-const routeTag = (a: { chain: string }, isDirect: boolean) =>
-  a.chain !== "solana" ? "bridge · ~2 min" : isDirect ? "instant" : "swap · ~5s";
-
-/** Deposit with any asset on any chain: pick a pay-asset, enter USD, see net USDC. */
+/** Deposit with any asset on any chain: pick a pay-asset, enter an amount in that
+ *  currency, see the net USDC. The money path stays USD-denominated underneath. */
 export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
   const lower = verb.toLowerCase();
   const { linkWallet, unlinkWallet } = usePrivy();
@@ -30,7 +28,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
   const { assets: evmAssets, evmAddress, loading: evmLoading } = useEvmAssets();
   const { depositWith, busy, label, error } = useDeposit(view.id);
 
-  const [usdAmount, setUsdAmount] = useState(50);
+  // Amount is entered in the selected currency's units; USD is derived for the
+  // (USD-denominated) money path below via the asset's unit price. `null` = the
+  // field is untouched, so it shows a ≈ $50 default of the current currency.
+  const [amount, setAmount] = useState<string | null>(null);
   const [selectedMint, setSelectedMint] = useState<string | null>(null);
 
   // Solana first (instant/swap), then EVM (bridge).
@@ -50,6 +51,12 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
   const activeMint = selectedMint ?? defaultMint;
   const payAsset = assets.find((a) => a.mint === activeMint) ?? null;
   const isDirect = payAsset?.chain === "solana" && payAsset.mint === view.assetMint;
+
+  const unitPrice = payAsset && payAsset.uiAmount > 0 ? payAsset.usdValue / payAsset.uiAmount : 0;
+  // Until the user types, default to ≈ $50 of the selected currency.
+  const defaultAmount = unitPrice > 0 ? String(Number((50 / unitPrice).toPrecision(4))) : "";
+  const effectiveAmount = amount ?? defaultAmount;
+  const usdAmount = (parseFloat(effectiveAmount) || 0) * unitPrice;
 
   const preview = useNetPreview({
     payAsset,
@@ -82,57 +89,22 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
     <div className="p-4 rounded-[6px] border border-black/10">
       <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">{verb}</p>
 
-      {/* USD amount */}
-      <div className="flex items-baseline gap-3">
-        <span className="text-2xl text-black/45">$</span>
-        <input
-          type="number"
-          min={0}
-          step="any"
-          value={usdAmount}
-          onChange={(e) => setUsdAmount(Math.max(0, Number(e.target.value)))}
-          className="flex-1 bg-transparent border-b border-black/15 focus:border-black/40 outline-none text-2xl text-black py-1"
-        />
-      </div>
-
-      {/* Pay-with picker */}
-      <div className="mt-3">
-        <p className="text-[10px] lowercase tracking-wide text-black/40 mb-1.5">Pay with</p>
+      {/* Pay with: currency + amount in one field */}
+      <div className="mt-2">
         {assetsLoading ? (
           <p className="text-xs text-black/40">Loading your assets…</p>
         ) : assets.length === 0 ? (
           <p className="text-xs text-black/40">No assets found in your wallet.</p>
         ) : (
-          <div className="flex flex-wrap gap-2">
-            {assets.map((a) => {
-              const isActive = a.mint === activeMint;
-              const tag = routeTag(a, a.chain === "solana" && a.mint === view.assetMint);
-              return (
-                <button
-                  key={a.mint}
-                  type="button"
-                  onClick={() => setSelectedMint(a.mint)}
-                  className={`flex flex-col items-start gap-0.5 rounded-[10px] border px-3 py-2 text-left transition ${
-                    isActive
-                      ? "border-[#3c05c7] bg-[#3c05c7]/[0.05]"
-                      : "border-black/10 hover:border-black/30"
-                  }`}
-                >
-                  <span className="flex items-center gap-1.5">
-                    <span className={`text-[13px] font-medium ${isActive ? "text-black" : "text-black/80"}`}>
-                      {a.symbol}
-                    </span>
-                    <span className="text-[9px] lowercase tracking-wide text-black/40">
-                      {tag}
-                    </span>
-                  </span>
-                  <span className="text-[11px] tabular-nums text-black/45">
-                    ${a.usdValue.toFixed(2)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <PayWithField
+            assets={assets}
+            activeMint={activeMint}
+            onSelectMint={setSelectedMint}
+            amount={effectiveAmount}
+            onAmountChange={setAmount}
+            usdAmount={usdAmount}
+            productMint={view.assetMint}
+          />
         )}
 
         {/* Pay from another chain: link an external wallet (EVM) as a funding rail. */}
