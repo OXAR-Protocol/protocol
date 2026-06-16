@@ -18,8 +18,9 @@ interface Props {
   verb?: string;
 }
 
-const chainTag = (a: { chain: string; network?: string }) =>
-  a.chain === "ethereum" ? `${(a.network ?? "evm").replace("-mainnet", "")} · bridge` : "";
+/** Settlement label per funding route — what happens + roughly how long. */
+const routeTag = (a: { chain: string }, isDirect: boolean) =>
+  a.chain !== "solana" ? "bridge · ~2 min" : isDirect ? "instant" : "swap · ~5s";
 
 /** Deposit with any asset on any chain: pick a pay-asset, enter USD, see net USDC. */
 export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
@@ -105,12 +106,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
           <div className="flex flex-wrap gap-2">
             {assets.map((a) => {
               const isActive = a.mint === activeMint;
-              const tag =
-                a.chain === "solana"
-                  ? a.mint === view.assetMint
-                    ? "⚡ instant"
-                    : "swap"
-                  : chainTag(a);
+              const tag = routeTag(a, a.chain === "solana" && a.mint === view.assetMint);
               return (
                 <button
                   key={a.mint}
@@ -126,15 +122,9 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
                     <span className={`text-[13px] font-medium ${isActive ? "text-black" : "text-black/80"}`}>
                       {a.symbol}
                     </span>
-                    {tag && (
-                      <span
-                        className={`text-[9px] lowercase tracking-wide ${
-                          tag === "⚡ instant" ? "text-[#3c05c7]" : "text-black/40"
-                        }`}
-                      >
-                        {tag}
-                      </span>
-                    )}
+                    <span className="text-[9px] lowercase tracking-wide text-black/40">
+                      {tag}
+                    </span>
                   </span>
                   <span className="text-[11px] tabular-nums text-black/45">
                     ${a.usdValue.toFixed(2)}
