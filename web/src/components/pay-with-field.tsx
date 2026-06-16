@@ -13,6 +13,21 @@ export const routeTag = (a: WalletAsset, productMint: string) =>
 const fmtAmount = (n: number) =>
   n >= 1 ? n.toLocaleString("en-US", { maximumFractionDigits: 2 }) : Number(n.toPrecision(4));
 
+/** Token logo, or a symbol-initial monogram when the asset has no image
+ *  (e.g. native SOL, or tokens missing metadata). `className` sets the size. */
+function TokenIcon({ asset, className }: { asset: WalletAsset; className: string }) {
+  if (asset.logo)
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={asset.logo} alt="" className={`${className} rounded-full object-cover`} />;
+  return (
+    <span
+      className={`${className} flex items-center justify-center rounded-full bg-black/[0.06] text-[10px] font-semibold uppercase text-black/50`}
+    >
+      {asset.symbol.slice(0, 1)}
+    </span>
+  );
+}
+
 interface Props {
   assets: WalletAsset[];
   activeMint: string | null;
@@ -71,9 +86,8 @@ export function PayWithField({
           onClick={() => setOpen((v) => !v)}
           className="flex shrink-0 items-center gap-2 border-r border-black/10 px-3 py-3"
         >
-          {active?.logo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={active.logo} alt="" className="h-5 w-5 rounded-full" />
+          {active ? (
+            <TokenIcon asset={active} className="h-5 w-5" />
           ) : (
             <span className="h-5 w-5 rounded-full bg-black/10" />
           )}
@@ -132,12 +146,7 @@ export function PayWithField({
                 a.mint === activeMint ? "bg-black/[0.03]" : ""
               }`}
             >
-              {a.logo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={a.logo} alt="" className="h-6 w-6 rounded-full" />
-              ) : (
-                <span className="h-6 w-6 rounded-full bg-black/10" />
-              )}
+              <TokenIcon asset={a} className="h-6 w-6" />
               <span className="flex min-w-0 flex-col">
                 <span className="flex items-center gap-1.5">
                   <span className="text-[13px] font-medium text-black">{a.symbol}</span>
