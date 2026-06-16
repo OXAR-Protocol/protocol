@@ -50,16 +50,22 @@ export function AssetChart({ mint }: { mint: string }) {
   const last = closes[closes.length - 1];
   const changePct = first && last && first > 0 ? ((last - first) / first) * 100 : null;
   const up = (changePct ?? 0) >= 0;
+  const lo = closes.length > 1 ? Math.min(...closes) : null;
+  const hi = closes.length > 1 ? Math.max(...closes) : null;
 
   return (
-    <div className="mb-6 p-4 rounded-[6px] border border-black/10">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-baseline gap-2">
-          <p className="text-[10px] lowercase tracking-wide text-black/40">Price</p>
+    <div className="p-5 rounded-[12px] border border-black/10">
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex flex-col gap-1">
           {changePct !== null && (
-            <span className={`text-xs tabular-nums ${up ? "text-emerald-600" : "text-red-600"}`}>
+            <span className={`text-[13px] tabular-nums ${up ? "text-emerald-600" : "text-red-600"}`}>
               {up ? "+" : ""}
               {changePct.toFixed(2)}% · {range}
+            </span>
+          )}
+          {lo !== null && hi !== null && (
+            <span className="text-[11px] tabular-nums text-black/40">
+              ${lo.toFixed(2)} – ${hi.toFixed(2)} range
             </span>
           )}
         </div>
@@ -80,14 +86,15 @@ export function AssetChart({ mint }: { mint: string }) {
         </div>
       </div>
 
-      <div className="h-24 flex items-center justify-center">
+      <div className="h-56 flex items-center justify-center">
         {loading ? (
           <Loader2 className="animate-spin text-black/40" size={18} />
         ) : closes.length > 1 ? (
           <Sparkline
             values={closes}
-            height={96}
-            className={`w-full h-24 ${up ? "text-emerald-400/60" : "text-red-400/60"}`}
+            height={220}
+            fill
+            className={`w-full h-56 ${up ? "text-emerald-500/80" : "text-red-500/80"}`}
           />
         ) : (
           <p className="text-xs text-black/40">No price history for this range.</p>
