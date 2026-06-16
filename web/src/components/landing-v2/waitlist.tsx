@@ -48,7 +48,7 @@ export function Waitlist() {
               disabled={sealed}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@email.com"
-              className="h-12 flex-1 rounded-full border border-white/20 bg-transparent px-5 lowercase text-[16px] text-white placeholder:text-white/30 outline-none transition-colors focus:border-white/60 disabled:opacity-40"
+              className="h-12 w-full shrink-0 rounded-full border border-white/20 bg-transparent px-5 lowercase text-[16px] text-white placeholder:text-white/30 outline-none transition-colors focus:border-white/60 disabled:opacity-40 md:w-auto md:flex-1"
             />
             <button
               type="submit"
