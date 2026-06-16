@@ -6,7 +6,7 @@ export function PitchManifesto() {
           WAKE UP YOUR MONEY.
         </h2>
         <h2 className="font-light italic text-[clamp(28px,3.2vw,48px)] leading-tight tracking-tight text-white mt-1">
-          SAVE WITH YOUR PEOPLE.
+          OWN REAL ASSETS.
         </h2>
         <h2 className="font-light italic text-[clamp(28px,3.2vw,48px)] leading-tight tracking-tight text-white mt-1">
           WITHDRAW WHENEVER.

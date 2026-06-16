@@ -16,7 +16,7 @@ export function PitchHero() {
         Where does your money sleep?
       </h1>
       <p className="font-light text-center text-white/70 text-base leading-relaxed max-w-md">
-        Wake it up. Earn yield. Save together. No bank. No broker. No lock.
+        Wake it up. Earn yield. Own real assets. No bank. No broker. No lock.
       </p>
     </section>
   );
