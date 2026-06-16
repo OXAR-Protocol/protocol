@@ -42,12 +42,12 @@ export function PitchCards() {
         {/* Card 2 — Solution */}
         <article className="relative border border-white/15 rounded-[34px] aspect-[864/910] flex flex-col items-center justify-between px-12 pt-16 pb-10 overflow-hidden">
           <h2 className="font-extralight italic text-[clamp(28px,2.4vw,46px)] tracking-tight text-center leading-[1.15] text-[#f0f0f2]">
-            WALLET → YIELD → PILE
+            WALLET → YIELD → ASSETS
           </h2>
           <div className="flex-1 flex flex-col items-center justify-center gap-4 sm:gap-5 lg:gap-6">
             <span className={actionWordClass}>connect</span>
             <span className={actionWordClass}>earn</span>
-            <span className={actionWordClass + " font-normal"}>gather</span>
+            <span className={actionWordClass + " font-normal"}>own</span>
             <span className={actionWordClass}>withdraw</span>
           </div>
           <div className="h-2" />

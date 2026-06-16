@@ -7,7 +7,7 @@ import { PitchManifesto } from "@/components/pitch/pitch-manifesto";
 export const metadata: Metadata = {
   title: "OXAR — Pitch",
   description:
-    "OXAR tokenizes emerging market government bonds. We're starting in Ukraine — and we're going global.",
+    "OXAR — where your money sleeps. Earn yield on your USDC and own tokenized stocks, gold and (soon) bonds. Non-custodial, withdraw anytime.",
 };
 
 export default function PitchPage() {
