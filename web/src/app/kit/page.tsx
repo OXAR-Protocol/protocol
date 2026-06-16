@@ -27,14 +27,14 @@ export default function KitPage() {
       <section>
         <h2>About OXAR</h2>
         <p>
-          OXAR is a <strong>savings app for the crypto-paid generation</strong>. Where does your money sleep? Wake it up. Earn yield (5-12% APY) from curated RWA and DeFi sources, save together with friends on real goals, withdraw anytime — never custodial. Apple Pay or wallet connect, your choice.
+          OXAR is a <strong>savings-and-investing app for the crypto-paid generation</strong>. Where does your money sleep? Wake it up. Earn yield (5-12% APY) from curated sources, or buy tokenized stocks and gold to hold — withdraw anytime, never custodial. Wallet connect today, Apple Pay on the way.
         </p>
       </section>
 
       <section>
         <h2>Tagline</h2>
         <p className="text-black">Where does your money sleep?</p>
-        <p className="mt-2">Sub: <em>Wake it up. Earn yield. Save together.</em></p>
+        <p className="mt-2">Sub: <em>Wake it up. Earn yield. Own real assets.</em></p>
       </section>
 
       <section>
@@ -99,7 +99,7 @@ export default function KitPage() {
         <p className="mt-4">Examples:</p>
         <ul className="mt-3 list-none space-y-2">
           <li>→ Avoid: "Auto-invest your salary" → Use: "Tell your money where to sleep"</li>
-          <li>→ Avoid: "Group savings vault" → Use: "Friends pile" or "Crew pile"</li>
+          <li>→ Avoid: "Buy tokenized securities" → Use: "Own a slice of Apple"</li>
           <li>→ Avoid: "Withdraw funds" → Use: "Wake some money up"</li>
         </ul>
       </section>

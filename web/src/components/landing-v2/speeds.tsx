@@ -71,7 +71,7 @@ export function Speeds() {
         <div className="border-t border-black/15" />
         <Reveal delay={0.1}>
           <p className="mt-7 lowercase text-[clamp(12px,1vw,14px)] text-black/35">
-            pick once, change anytime. one pile, your keys, your money.
+            pick once, change anytime. your keys, your money, withdraw whenever.
           </p>
         </Reveal>
       </div>

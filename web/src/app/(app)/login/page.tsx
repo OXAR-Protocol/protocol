@@ -48,7 +48,7 @@ export default function LoginPage() {
           transition={{ duration: 0.6, delay: 0.25 }}
           className="mt-6 max-w-[420px] lowercase text-[clamp(15px,1.4vw,18px)] leading-snug text-black/50"
         >
-          wake it up. earn yield. save together. no bank, no broker, no lock.
+          wake it up. earn yield. own real assets. no bank, no broker, no lock.
         </motion.p>
 
         <motion.div
