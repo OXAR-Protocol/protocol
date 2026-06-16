@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
+import { TokenIcon } from "@/components/token-icon";
 import { spendableBase, type WalletAsset } from "@/lib/portfolio/assets";
 
 /** What happens to the funds + roughly how long, per funding route. */
@@ -12,21 +13,6 @@ export const routeTag = (a: WalletAsset, productMint: string) =>
 /** Compact token-amount formatting: thousands for big, 4 sig-figs for small. */
 const fmtAmount = (n: number) =>
   n >= 1 ? n.toLocaleString("en-US", { maximumFractionDigits: 2 }) : Number(n.toPrecision(4));
-
-/** Token logo, or a symbol-initial monogram when the asset has no image
- *  (e.g. native SOL, or tokens missing metadata). `className` sets the size. */
-function TokenIcon({ asset, className }: { asset: WalletAsset; className: string }) {
-  if (asset.logo)
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={asset.logo} alt="" className={`${className} rounded-full object-cover`} />;
-  return (
-    <span
-      className={`${className} flex items-center justify-center rounded-full bg-black/[0.06] text-[10px] font-semibold uppercase text-black/50`}
-    >
-      {asset.symbol.slice(0, 1)}
-    </span>
-  );
-}
 
 interface Props {
   assets: WalletAsset[];
