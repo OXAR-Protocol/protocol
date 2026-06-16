@@ -11,6 +11,7 @@ import {
 } from "@/lib/portfolio/assets";
 
 const JUP_PRICE_URL = "https://lite-api.jup.ag/price/v3";
+const JUP_TOKEN_URL = "https://lite-api.jup.ag/tokens/v2/search";
 const MAX_PRICED_MINTS = 50; // keep the price query URL well under length limits
 
 async function fetchDasAssets(rpc: string, owner: string): Promise<DasResult> {
@@ -41,6 +42,20 @@ async function fetchPrices(mints: string[]): Promise<PriceMap> {
   return (await res.json()) as PriceMap;
 }
 
+/** Token logos by mint, from the Jupiter token index — fills gaps DAS leaves
+ *  (notably native SOL). Best-effort: returns {} on any failure. */
+async function fetchIcons(mints: string[]): Promise<Record<string, string>> {
+  if (mints.length === 0) return {};
+  try {
+    const res = await fetch(`${JUP_TOKEN_URL}?query=${mints.join(",")}`);
+    if (!res.ok) return {};
+    const list = (await res.json()) as Array<{ id: string; icon?: string }>;
+    return Object.fromEntries(list.filter((t) => t.icon).map((t) => [t.id, t.icon as string]));
+  } catch {
+    return {};
+  }
+}
+
 /** The connected wallet's Solana holdings, valued in USD (fetch-on-mount). */
 export function useWalletAssets() {
   const { connection, walletAddress } = useSolanaContext();
@@ -63,7 +78,15 @@ export function useWalletAssets() {
         .map((i) => i.id)
         .slice(0, MAX_PRICED_MINTS);
       const prices = await fetchPrices(mints);
-      setAssets(buildWalletAssets(das, prices));
+      const built = buildWalletAssets(das, prices);
+      // Fill missing logos (e.g. native SOL) from the Jupiter token index.
+      const missing = built.filter((a) => !a.logo).map((a) => a.mint).slice(0, MAX_PRICED_MINTS);
+      const icons = await fetchIcons(missing);
+      setAssets(
+        missing.length
+          ? built.map((a) => (a.logo || !icons[a.mint] ? a : { ...a, logo: icons[a.mint] }))
+          : built,
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setAssets([]);
