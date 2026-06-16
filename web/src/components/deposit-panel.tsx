@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { Loader2, Plus } from "lucide-react";
 
-import { CustomSelect } from "@/components/custom-select";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
 import { useDeposit } from "@/hooks/use-deposit";
@@ -103,20 +102,47 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
         ) : assets.length === 0 ? (
           <p className="text-xs text-black/40">No assets found in your wallet.</p>
         ) : (
-          <CustomSelect
-            value={activeMint ?? ""}
-            onChange={setSelectedMint}
-            options={assets.map((a) => ({
-              value: a.mint,
-              label:
-                `${a.symbol} · $${a.usdValue.toFixed(2)}` +
-                (a.chain === "solana"
+          <div className="flex flex-wrap gap-2">
+            {assets.map((a) => {
+              const isActive = a.mint === activeMint;
+              const tag =
+                a.chain === "solana"
                   ? a.mint === view.assetMint
-                    ? " · ⚡ instant"
-                    : " · swap"
-                  : ` · ${chainTag(a)}`),
-            }))}
-          />
+                    ? "⚡ instant"
+                    : "swap"
+                  : chainTag(a);
+              return (
+                <button
+                  key={a.mint}
+                  type="button"
+                  onClick={() => setSelectedMint(a.mint)}
+                  className={`flex flex-col items-start gap-0.5 rounded-[10px] border px-3 py-2 text-left transition ${
+                    isActive
+                      ? "border-[#3c05c7] bg-[#3c05c7]/[0.05]"
+                      : "border-black/10 hover:border-black/30"
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <span className={`text-[13px] font-medium ${isActive ? "text-black" : "text-black/80"}`}>
+                      {a.symbol}
+                    </span>
+                    {tag && (
+                      <span
+                        className={`text-[9px] lowercase tracking-wide ${
+                          tag === "⚡ instant" ? "text-[#3c05c7]" : "text-black/40"
+                        }`}
+                      >
+                        {tag}
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-[11px] tabular-nums text-black/45">
+                    ${a.usdValue.toFixed(2)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         )}
 
         {/* Pay from another chain: link an external wallet (EVM) as a funding rail. */}

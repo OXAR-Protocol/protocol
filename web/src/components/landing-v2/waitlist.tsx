@@ -31,7 +31,7 @@ export function Waitlist() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <form onSubmit={onSubmit} className="mx-auto mt-8 flex max-w-[520px] flex-col gap-3 sm:flex-row">
+          <form onSubmit={onSubmit} className="mx-auto mt-8 flex max-w-[520px] flex-col gap-3 md:flex-row">
             <input
               type="text"
               tabIndex={-1}
