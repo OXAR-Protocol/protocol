@@ -8,6 +8,7 @@ import { Problem } from "./problem";
 import { HowItWorks } from "./how-it-works";
 import { Speeds } from "./speeds";
 import { Roadmap } from "./roadmap";
+import { Partners } from "./partners";
 import { Waitlist } from "./waitlist";
 import { Footer } from "./footer";
 
@@ -58,6 +59,7 @@ export function LandingShell() {
       <HowItWorks />
       <Speeds />
       <Roadmap />
+      <Partners />
       <Waitlist />
       <Footer />
     </>
