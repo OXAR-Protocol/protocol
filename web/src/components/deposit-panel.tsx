@@ -29,11 +29,16 @@ interface Props {
   onDeposited: (usdAmount: number, pending?: boolean) => void;
   /** Action verb — "Deposit" (default) for yield sources, "Buy" for stocks. */
   verb?: string;
+  /** Per-unit USD price (e.g. a share price). When set, a "buy N units" input
+   *  appears that auto-fills the pay amount. */
+  sharePriceUsd?: number;
+  /** Label for one unit in the quantity input, e.g. "SPCXx" / "shares". */
+  unitLabel?: string;
 }
 
 /** Deposit with any asset on any chain: pick a pay-asset, enter an amount in that
  *  currency, see the net USDC. The money path stays USD-denominated underneath. */
-export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
+export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUsd, unitLabel = "shares" }: Props) {
   const lower = verb.toLowerCase();
   const { linkWallet, unlinkWallet } = usePrivy();
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
@@ -75,6 +80,15 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
   const defaultAmount = unitPrice > 0 ? String(Number((50 / unitPrice).toPrecision(4))) : "";
   const effectiveAmount = amount ?? defaultAmount;
   const usdAmount = (parseFloat(effectiveAmount) || 0) * unitPrice;
+
+  // Quantity entry: type N units (e.g. shares) → fill the pay amount with the
+  // USD-equivalent (units × unit price), expressed in the pay-asset's currency.
+  const canQuantity = !!sharePriceUsd && sharePriceUsd > 0 && unitPrice > 0;
+  const sharesValue = canQuantity ? usdAmount / sharePriceUsd! : 0;
+  const onSharesChange = (s: string) => {
+    const n = parseFloat(s);
+    setAmount(n > 0 ? String(Number(((n * sharePriceUsd!) / unitPrice).toPrecision(6))) : "");
+  };
 
   const preview = useNetPreview({
     payAsset,
@@ -160,6 +174,24 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
             usdAmount={usdAmount}
             productMint={view.assetMint}
           />
+        )}
+
+        {/* Quantity shortcut — type how many units to buy; the pay amount fills in. */}
+        {canQuantity && payAsset && (
+          <div className="mt-2 flex items-center justify-between gap-2 rounded-[10px] border border-black/10 px-3 py-2">
+            <span className="text-[11px] lowercase tracking-wide text-black/40">{lower}</span>
+            <input
+              type="number"
+              min={0}
+              step="any"
+              inputMode="decimal"
+              value={sharesValue ? Number(sharesValue.toPrecision(4)) : ""}
+              onChange={(e) => onSharesChange(e.target.value)}
+              placeholder="0"
+              className="min-w-0 flex-1 bg-transparent text-right text-[15px] text-black outline-none placeholder:text-black/25"
+            />
+            <span className="shrink-0 text-[12px] text-black/45">{unitLabel}</span>
+          </div>
         )}
 
         {/* Pay from another chain: link an external wallet (EVM) as a funding rail. */}

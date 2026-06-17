@@ -21,6 +21,10 @@ interface Props {
   onSell: () => void;
   loading: boolean;
   error: string | null;
+  /** Per-unit USD price → enables the "buy N units" quantity input on buy. */
+  sharePriceUsd?: number;
+  /** Label for one unit, e.g. "SPCXx". */
+  unitLabel?: string;
 }
 
 /** Sticky Buy / Sell rail beside the chart (Ondo-style). Buy = DepositPanel;
@@ -35,6 +39,8 @@ export function AssetActionRail({
   onSell,
   loading,
   error,
+  sharePriceUsd,
+  unitLabel,
 }: Props) {
   const [tab, setTab] = useState<"buy" | "sell">("buy");
   const canSell = positionValue > 0;
@@ -62,7 +68,13 @@ export function AssetActionRail({
       </div>
 
       {tab === "buy" || !canSell ? (
-        <DepositPanel view={view} verb={price ? "Buy" : "Deposit"} onDeposited={onDeposited} />
+        <DepositPanel
+          view={view}
+          verb={price ? "Buy" : "Deposit"}
+          onDeposited={onDeposited}
+          sharePriceUsd={sharePriceUsd}
+          unitLabel={unitLabel}
+        />
       ) : (
         <YieldAmountField
           label={price ? `Sell ${view.assetSymbol}` : `Withdraw ${view.assetSymbol}`}
