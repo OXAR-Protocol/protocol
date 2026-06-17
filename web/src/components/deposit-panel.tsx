@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { Loader2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { PayWithField } from "@/components/pay-with-field";
+import { DepositConfirm } from "@/components/deposit-confirm";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
 import { useDeposit } from "@/hooks/use-deposit";
@@ -33,6 +34,8 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
   // field is untouched, so it shows a ≈ $50 default of the current currency.
   const [amount, setAmount] = useState<string | null>(null);
   const [selectedMint, setSelectedMint] = useState<string | null>(null);
+  // Show the "no surprises" review before the deposit signs.
+  const [confirming, setConfirming] = useState(false);
 
   // Solana first (instant/swap), then EVM (bridge).
   const assets = useMemo(() => [...solAssets, ...evmAssets], [solAssets, evmAssets]);
@@ -84,6 +87,27 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
       // surfaced via `error`
     }
   };
+
+  if (confirming && payAsset) {
+    return (
+      <div className="p-4 rounded-[6px] border border-black/10">
+        <DepositConfirm
+          verb={verb}
+          usdAmount={usdAmount}
+          payAsset={payAsset}
+          view={view}
+          isDirect={isDirect}
+          preview={preview}
+          swapIn={swapIn}
+          busy={busy}
+          label={label}
+          error={error}
+          onConfirm={handleDeposit}
+          onBack={() => setConfirming(false)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 rounded-[6px] border border-black/10">
@@ -161,18 +185,11 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
       )}
 
       <button
-        onClick={handleDeposit}
+        onClick={() => setConfirming(true)}
         disabled={busy || !payAsset || usdAmount <= 0}
         className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
       >
-        {busy ? (
-          <>
-            <Loader2 className="animate-spin" size={14} />
-            {label}
-          </>
-        ) : (
-          verb
-        )}
+        {verb}
       </button>
 
       {error && <p className="mt-3 text-xs text-red-400 text-center">{error}</p>}

@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 
 export interface ActionResult {
   kind: "deposit" | "withdraw";
@@ -12,13 +14,15 @@ export interface ActionResult {
 interface Props {
   result: ActionResult;
   onDone: () => void;
+  /** Wallet address — links the receipt to on-chain proof (Solscan). */
+  address?: string;
 }
 
 /**
  * Confirmation overlay shown after a deposit/withdraw lands on-chain. An animated
  * check + amount so the user has unmistakable feedback that the move happened.
  */
-export function YieldActionSuccess({ result, onDone }: Props) {
+export function YieldActionSuccess({ result, onDone, address }: Props) {
   const verb = result.kind === "deposit" ? "Deposited" : "Withdrew";
 
   return (
@@ -69,12 +73,35 @@ export function YieldActionSuccess({ result, onDone }: Props) {
         <p className="mt-1 text-xs text-black/45">{result.symbol}</p>
       </motion.div>
 
+      {/* On-chain proof — it's in your wallet, verifiable. */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="flex items-center gap-4 text-[12px] lowercase tracking-wide text-black/50"
+      >
+        <Link href="/pile" className="underline-offset-2 hover:text-black hover:underline transition">
+          view your position
+        </Link>
+        {address && (
+          <a
+            href={`https://solscan.io/account/${address}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-0.5 underline-offset-2 hover:text-black hover:underline transition"
+          >
+            on Solscan
+            <ArrowUpRight size={12} strokeWidth={1.5} />
+          </a>
+        )}
+      </motion.div>
+
       <motion.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.45 }}
         onClick={onDone}
-        className="mt-2 px-6 py-2.5 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
+        className="mt-1 px-6 py-2.5 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
       >
         Done
       </motion.button>
