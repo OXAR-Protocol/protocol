@@ -71,7 +71,9 @@ async function pollSolArrival(
  */
 export function useFundAndBuy(providerId: string) {
   const { connection, walletAddress } = useSolanaContext();
-  const { fundWallet } = useFundWallet();
+  const { fundWallet } = useFundWallet({
+    onUserExited: (params) => console.warn("[oxar] funding exited", params),
+  });
   const { depositWith } = useUniversalDeposit(providerId);
   const [status, setStatus] = useState<FundBuyStatus>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -84,13 +86,11 @@ export function useFundAndBuy(providerId: string) {
 
       setError(null);
       try {
-        const solPrice = await getSolPrice();
-        if (solPrice <= 0) throw new UserFacingError("Couldn't price SOL — try again");
-
-        const baseline = await connection.getBalance(owner);
-
+        // Open the funding flow IMMEDIATELY, still inside the click gesture —
+        // mobile Safari blocks the provider window if it's opened after an
+        // `await` (broken user gesture → blank screen). Do the reads in parallel.
         setStatus("funding");
-        await fundWallet({
+        const funding = fundWallet({
           address: owner.toBase58(),
           options: {
             asset: "native-currency", // buy SOL → covers the buy's own gas, no sponsorship needed
@@ -98,6 +98,14 @@ export function useFundAndBuy(providerId: string) {
             defaultFundingMethod: "card", // card flow surfaces Apple Pay on supported devices
           },
         });
+
+        const [baseline, solPrice] = await Promise.all([
+          connection.getBalance(owner),
+          getSolPrice(),
+        ]);
+        if (solPrice <= 0) throw new UserFacingError("Couldn't price SOL — try again");
+
+        await funding;
 
         // Card top-ups settle a beat after the modal closes — wait for the SOL to
         // land. The on-ramp delivers net-of-fee, so accept any clear arrival
