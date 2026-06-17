@@ -23,24 +23,25 @@ export function Partners() {
       className="bg-white px-[clamp(24px,5.5vw,80px)] py-[clamp(80px,10vw,140px)] text-black"
     >
       <Reveal>
-        <Label className="md:ml-[51%]">partners</Label>
+        <Label className="text-center">partners</Label>
       </Reveal>
       <Reveal delay={0.05}>
-        <div className="mt-6 text-[clamp(32px,4.5vw,64px)] leading-[1.05] tracking-[-0.04em] md:ml-[51%]">
-          <p>who we</p>
-          <p className="italic">build with.</p>
+        <div className="mt-6 text-center text-[clamp(32px,4.5vw,64px)] leading-[1.05] tracking-[-0.04em]">
+          <p>
+            who we <span className="italic">build with.</span>
+          </p>
         </div>
       </Reveal>
 
       <Reveal delay={0.1}>
-        <div className="mt-[clamp(48px,7vw,96px)] flex flex-wrap items-center gap-x-[clamp(40px,6vw,88px)] gap-y-10 md:ml-[51%]">
+        <div className="mx-auto mt-[clamp(56px,8vw,112px)] flex max-w-[820px] flex-wrap items-center justify-center gap-x-[clamp(56px,11vw,160px)] gap-y-12 md:justify-around">
           {PARTNERS.map((p) => {
             const logo = (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={p.logo}
                 alt={p.name}
-                className="h-7 md:h-9 w-auto opacity-50 transition hover:opacity-100"
+                className="h-9 md:h-12 w-auto opacity-55 transition hover:opacity-100"
               />
             );
             return p.href ? (
