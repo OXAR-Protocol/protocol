@@ -198,10 +198,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         {!evmAddress ? (
           <button
             onClick={() => linkWallet()}
-            className="mt-2 inline-flex items-center gap-1 text-[10px] lowercase tracking-wide text-black/45 hover:text-black/70 transition"
+            className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-2.5 text-[13px] lowercase tracking-wide text-black/70 hover:border-black/40 hover:text-black transition"
           >
-            <Plus size={11} strokeWidth={1.5} />
-            Connect a wallet to pay from another chain
+            <Plus size={15} strokeWidth={1.75} />
+            pay from another chain
           </button>
         ) : (
           // Connected EVM wallet — let the user disconnect it (e.g. to link another).
