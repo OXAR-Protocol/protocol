@@ -67,7 +67,6 @@ export function AssetDetail({ view, onDone }: { view: ProviderView; onDone: () =
         <p className="lowercase text-[clamp(14px,1.3vw,18px)] text-black/45">[ {info?.category ?? (price ? "asset" : "yield source")} ]</p>
         <h1 className="mt-3 flex flex-wrap items-baseline gap-x-3 text-[clamp(28px,4.4vw,46px)] leading-[1.02] tracking-[-0.04em]">
           {view.name}
-          {price && <span className="text-[clamp(14px,1.4vw,18px)] text-black/35">{view.assetSymbol}</span>}
         </h1>
         <div className="mt-5 flex flex-wrap items-baseline gap-x-5 gap-y-1">
           {price ? (

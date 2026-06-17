@@ -41,8 +41,8 @@ export function buildWarpPaths(): { paths: WarpPath[]; glass: WarpGlassPath[] } 
 
 function strokeGradient(ctx: CanvasRenderingContext2D, alphaA: number, alphaB: number) {
   const gradient = ctx.createLinearGradient(0, 0, LOGO_VIEWBOX.width, 0);
-  gradient.addColorStop(0, `rgba(51, 136, 255, ${alphaA})`);
-  gradient.addColorStop(1, `rgba(0, 229, 255, ${alphaB})`);
+  gradient.addColorStop(0, `rgba(0, 0, 0, ${alphaA})`);
+  gradient.addColorStop(1, `rgba(60, 60, 60, ${alphaB})`);
   return gradient;
 }
 
@@ -69,7 +69,7 @@ export function drawPhaseDraw(ctx: CanvasRenderingContext2D, progress: number, p
     ctx.setLineDash([entry.length]);
     ctx.lineDashOffset = dashOffset;
 
-    ctx.strokeStyle = `rgba(51, 136, 255, ${0.3 * segP})`;
+    ctx.strokeStyle = `rgba(0, 0, 0, ${0.3 * segP})`;
     ctx.lineWidth = 8;
     ctx.filter = "blur(6px)";
     ctx.stroke(entry.path2d);
@@ -106,11 +106,11 @@ export function drawPhaseFill(
   ctx.rect(0, wipeY, LOGO_VIEWBOX.width, LOGO_VIEWBOX.height - wipeY);
   ctx.clip();
 
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = "#000000";
   for (const entry of paths) ctx.fill(entry.path2d);
 
   for (const g of glass) {
-    ctx.fillStyle = "rgba(177, 172, 172, 0.15)";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
     ctx.fill(g.path2d);
   }
   ctx.restore();
@@ -134,10 +134,10 @@ export function drawPhaseBreath(
   ctx.scale(scale, scale);
   ctx.translate(-lcx, -lcy);
 
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = "#000000";
   for (const entry of paths) ctx.fill(entry.path2d);
   for (const g of glass) {
-    ctx.fillStyle = "rgba(177, 172, 172, 0.15)";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
     ctx.fill(g.path2d);
   }
   ctx.restore();
@@ -160,11 +160,11 @@ export function drawPhaseUnfill(
     ctx.rect(0, wipeY, LOGO_VIEWBOX.width, LOGO_VIEWBOX.height - wipeY);
     ctx.clip();
 
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#000000";
     for (const entry of paths) ctx.fill(entry.path2d);
 
     for (const g of glass) {
-      ctx.fillStyle = `rgba(177, 172, 172, ${0.15 * (1 - eased)})`;
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.2 * (1 - eased)})`;
       ctx.fill(g.path2d);
     }
     ctx.restore();
@@ -204,7 +204,7 @@ export function drawPhaseUndraw(ctx: CanvasRenderingContext2D, progress: number,
     ctx.setLineDash([entry.length]);
     ctx.lineDashOffset = dashOffset;
 
-    ctx.strokeStyle = `rgba(51, 136, 255, ${0.3 * revealFraction})`;
+    ctx.strokeStyle = `rgba(0, 0, 0, ${0.3 * revealFraction})`;
     ctx.lineWidth = 8;
     ctx.filter = "blur(6px)";
     ctx.stroke(entry.path2d);
@@ -239,8 +239,8 @@ export function drawRadialGlow(
   if (glowAlpha <= 0.01) return;
 
   const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 200);
-  grad.addColorStop(0, `rgba(51, 136, 255, ${glowAlpha})`);
-  grad.addColorStop(0.5, `rgba(0, 229, 255, ${glowAlpha * 0.3})`);
+  grad.addColorStop(0, `rgba(0, 0, 0, ${glowAlpha * 0.35})`);
+  grad.addColorStop(0.5, `rgba(0, 0, 0, ${glowAlpha * 0.12})`);
   grad.addColorStop(1, "rgba(0, 0, 0, 0)");
   ctx.fillStyle = grad;
   ctx.beginPath();
@@ -252,6 +252,6 @@ export function drawRadialGlow(
 export function drawPhaseFade(ctx: CanvasRenderingContext2D, progress: number, w: number, h: number) {
   if (progress < 0.96) return;
   const fadeP = (progress - 0.96) / 0.04;
-  ctx.fillStyle = `rgba(0, 0, 0, ${fadeP})`;
+  ctx.fillStyle = `rgba(255, 255, 255, ${fadeP})`;
   ctx.fillRect(0, 0, w, h);
 }

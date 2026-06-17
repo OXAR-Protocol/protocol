@@ -114,7 +114,7 @@ export function WarpProvider({ children }: { children: ReactNode }) {
       const elapsed = now - startTimeRef.current;
       const progress = Math.min(elapsed / duration, 1);
 
-      ctx.fillStyle = "#000000";
+      ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, w, h);
 
       ctx.save();
@@ -176,7 +176,7 @@ export function WarpProvider({ children }: { children: ReactNode }) {
                 style={{
                   top: "50%",
                   marginTop: "120px",
-                  color: "rgba(255, 255, 255, 0.5)",
+                  color: "rgba(0, 0, 0, 0.5)",
                 }}
               >
                 OXAR PROTOCOL
