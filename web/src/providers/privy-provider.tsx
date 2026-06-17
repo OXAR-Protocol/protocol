@@ -1,7 +1,7 @@
 "use client";
 
 import { PrivyProvider as PrivyProviderBase } from "@privy-io/react-auth";
-import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
+import { toSolanaWalletConnectors, useSolanaFundingPlugin } from "@privy-io/react-auth/solana";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { mainnet, base, arbitrum, optimism, polygon } from "viem/chains";
 import { ReactNode } from "react";
@@ -31,6 +31,13 @@ const solanaRpcs = {
     rpcSubscriptions: createSolanaRpcSubscriptions(HELIUS_WSS),
   },
 };
+
+/** Registers Privy's Solana fiat-funding capability (on-ramp). Must be mounted
+ *  inside PrivyProvider or `fundWallet` opens an empty modal. */
+function SolanaFundingPlugin() {
+  useSolanaFundingPlugin();
+  return null;
+}
 
 export function PrivyProvider({ children }: { children: ReactNode }) {
   return (
@@ -78,6 +85,7 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
         },
       } as any}
     >
+      <SolanaFundingPlugin />
       {children}
     </PrivyProviderBase>
   );
