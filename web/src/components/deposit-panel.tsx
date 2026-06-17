@@ -82,9 +82,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
     if (!payAsset || usdAmount <= 0) return;
     try {
       const depositedBase = await depositWith(payAsset, usdAmount);
+      setConfirming(false); // leave the review so the panel resets behind the success overlay
       onDeposited(Number(depositedBase) / 10 ** view.decimals);
     } catch {
-      // surfaced via `error`
+      // surfaced via `error` — stay on the review so the user can retry
     }
   };
 
