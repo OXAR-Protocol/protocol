@@ -140,7 +140,9 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
 
   return (
     <div className="p-4 rounded-[6px] border border-black/10">
-      <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">{verb}</p>
+      {/* Label the field as the PAYMENT method — without this the prominent "USDC"
+          reads as if the user is buying USDC, not paying with it for the asset. */}
+      <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">pay with</p>
 
       {/* Pay with: currency + amount in one field */}
       <div className="mt-2">
