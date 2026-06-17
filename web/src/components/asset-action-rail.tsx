@@ -15,8 +15,8 @@ interface Props {
   /** Sell/withdraw amount (controlled) + its setter. */
   amount: number;
   onAmountChange: (v: number) => void;
-  /** Buy success — surface the deposited amount upstream. */
-  onDeposited: (usd: number) => void;
+  /** Buy success — surface the deposited amount upstream (`pending` = still bridging). */
+  onDeposited: (usd: number, pending?: boolean) => void;
   /** Run the sell/withdraw (planWithdrawal + redeem/withdraw lives upstream). */
   onSell: () => void;
   loading: boolean;

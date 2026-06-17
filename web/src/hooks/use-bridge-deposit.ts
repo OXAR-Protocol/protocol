@@ -4,7 +4,6 @@ import { useCallback, useState } from "react";
 import { useWallets } from "@privy-io/react-auth";
 
 import { useSolanaContext } from "@/providers/solana-provider";
-import { useYieldActions } from "@/hooks/use-yield-actions";
 import { getProvider, toBaseUnits, toFriendlyError, UserFacingError } from "@/lib/yield";
 import { spendableBase, type WalletAsset } from "@/lib/portfolio/assets";
 import {
@@ -14,8 +13,8 @@ import {
   networkToChainId,
   type BridgeQuote,
 } from "@/lib/bridge/delora";
-import { savePending, clearPending, loadPending } from "@/lib/bridge/pending";
-import { readUsdcBase, pollUsdcArrival } from "@/lib/bridge/arrival";
+import { savePending } from "@/lib/bridge/pending";
+import { readUsdcBase } from "@/lib/bridge/arrival";
 import { isNativeEvm, encodeApprove, readAllowance } from "@/lib/evm/erc20";
 import { publicClientFor } from "@/lib/evm/chains";
 
@@ -41,7 +40,6 @@ interface EvmWallet {
 export function useBridgeDeposit(providerId: string) {
   const { connection, walletAddress } = useSolanaContext();
   const { wallets } = useWallets();
-  const { deposit } = useYieldActions(providerId);
   const [status, setStatus] = useState<BridgeStatus>("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -172,27 +170,9 @@ export function useBridgeDeposit(providerId: string) {
           createdAt: Date.now(),
         });
 
-        setStatus("arriving");
-        const arrived = await pollUsdcArrival({ connection, owner: walletAddress, mint: destinationMint, baseline, expected });
-        if (!arrived) {
-          // Pending record is kept → recovery (use-pending-bridge) finishes the deposit later.
-          throw new UserFacingError("Funds are taking longer than usual to arrive — they'll auto-deposit once they land.");
-        }
-
-        // Claim the deposit by clearing pending BEFORE depositing, so a concurrent
-        // recovery flow (e.g. after a reload) sees null and can't double-deposit.
-        if (!loadPending()) return expected; // another flow already claimed + deposited
-        clearPending();
-        setStatus("depositing");
-        try {
-          await deposit(expected);
-        } catch (depositErr) {
-          console.error("Deposit after bridge failed:", depositErr);
-          throw new UserFacingError(
-            "Funds arrived on Solana but the deposit failed — your USDC is in your wallet. " +
-              "You can deposit it directly (select USDC).",
-          );
-        }
+        // Don't trap the UI waiting for the (sometimes multi-minute) bridge: the
+        // user is done once the origin tx is submitted. The global pending-bridge
+        // watcher polls for arrival and finishes the deposit in the background.
         return expected;
       } catch (e) {
         console.error("Bridge deposit failed:", e);
@@ -202,7 +182,7 @@ export function useBridgeDeposit(providerId: string) {
         setStatus("idle");
       }
     },
-    [providerId, walletAddress, wallets, connection, deposit, fetchQuote],
+    [providerId, walletAddress, wallets, connection, fetchQuote],
   );
 
   return { bridgeAndDeposit, status, error };

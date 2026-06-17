@@ -5,27 +5,40 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { USDC_MINT } from "@/lib/constants";
-import { loadPending, clearPending, type PendingBridge } from "@/lib/bridge/pending";
-// Older pending records (pre-multi-asset) had no `mint` → default to USDC.
-// loadPending is re-checked before depositing to avoid a double-deposit race.
+import { loadPending, clearPending, PENDING_EVENT, type PendingBridge } from "@/lib/bridge/pending";
 import { pollUsdcArrival } from "@/lib/bridge/arrival";
 
 /**
- * Recovery for an interrupted cross-chain deposit. On mount, if a bridge was
- * left in flight (page closed before the USDC landed), resume polling the
- * Solana side and deposit once the funds arrive. Funds are never lost — at worst
- * they sit as USDC in the wallet and we finish the deposit on the next visit.
+ * Global watcher for a cross-chain deposit in flight. Mounted app-wide, it picks
+ * up a pending record the moment a bridge tx is submitted (same-tab PENDING_EVENT)
+ * or on a reload/focus, polls the Solana side for arrival, and finishes the
+ * deposit in the background — so the user is never trapped on a spinner and funds
+ * are never lost. Pre-multi-asset records had no `mint` → default to USDC.
  */
 export function usePendingBridge() {
   const { connection, walletAddress } = useSolanaContext();
   const [pending, setPending] = useState<PendingBridge | null>(() => loadPending());
   const [resuming, setResuming] = useState(false);
-  const startedRef = useRef(false);
+  // originTxHash currently being polled — guards against double-processing.
+  const processingRef = useRef<string | null>(null);
   const { deposit } = useYieldActions(pending?.providerId ?? "");
 
+  // Pick up newly-saved / cleared records (same tab) and on tab focus.
   useEffect(() => {
-    if (!pending || !walletAddress || startedRef.current) return;
-    startedRef.current = true;
+    const sync = () => setPending(loadPending());
+    window.addEventListener(PENDING_EVENT, sync);
+    window.addEventListener("focus", sync);
+    return () => {
+      window.removeEventListener(PENDING_EVENT, sync);
+      window.removeEventListener("focus", sync);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!pending || !walletAddress) return;
+    if (processingRef.current === pending.originTxHash) return;
+    processingRef.current = pending.originTxHash;
+    let cancelled = false;
     (async () => {
       setResuming(true);
       try {
@@ -33,8 +46,9 @@ export function usePendingBridge() {
         const expected = BigInt(pending.expectedUsdc);
         const mint = pending.mint ?? USDC_MINT;
         const arrived = await pollUsdcArrival({ connection, owner: walletAddress, mint, baseline, expected });
+        if (cancelled) return;
         if (arrived) {
-          // Claim before depositing so the live flow / another tab can't double-deposit.
+          // Claim before depositing so another tab / reload can't double-deposit.
           if (!loadPending()) {
             setPending(null);
             return;
@@ -42,18 +56,26 @@ export function usePendingBridge() {
           clearPending();
           await deposit(expected);
           setPending(null);
+        } else {
+          // Timed out without arrival — let the next focus/visit retry.
+          processingRef.current = null;
         }
       } catch (e) {
         console.error("Pending bridge resume failed:", e);
+        processingRef.current = null;
       } finally {
-        setResuming(false);
+        if (!cancelled) setResuming(false);
       }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [pending, walletAddress, connection, deposit]);
 
   const dismiss = useCallback(() => {
     clearPending();
     setPending(null);
+    processingRef.current = null;
   }, []);
 
   return { pending, resuming, dismiss };

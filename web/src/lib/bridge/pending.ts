@@ -23,6 +23,9 @@ export interface PendingBridge {
 }
 
 const KEY = "oxar:pending-bridge";
+/** Same-tab signal that the pending record changed (localStorage `storage`
+ *  events only fire in OTHER tabs, so the global watcher listens for this). */
+export const PENDING_EVENT = "oxar:pending-bridge-changed";
 
 type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -30,8 +33,13 @@ function defaultStore(): StorageLike | null {
   return typeof window !== "undefined" ? window.localStorage : null;
 }
 
+function notifyChanged(): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(PENDING_EVENT));
+}
+
 export function savePending(p: PendingBridge, store = defaultStore()): void {
   store?.setItem(KEY, JSON.stringify(p));
+  notifyChanged();
 }
 
 export function loadPending(store = defaultStore()): PendingBridge | null {
@@ -46,4 +54,5 @@ export function loadPending(store = defaultStore()): PendingBridge | null {
 
 export function clearPending(store = defaultStore()): void {
   store?.removeItem(KEY);
+  notifyChanged();
 }

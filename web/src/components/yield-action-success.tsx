@@ -9,6 +9,8 @@ export interface ActionResult {
   /** Human amount moved (e.g. 1.5 for $1.50). */
   amount: number;
   symbol: string;
+  /** Cross-chain buy still bridging — credited in the background, not done yet. */
+  pending?: boolean;
 }
 
 interface Props {
@@ -23,7 +25,7 @@ interface Props {
  * check + amount so the user has unmistakable feedback that the move happened.
  */
 export function YieldActionSuccess({ result, onDone, address }: Props) {
-  const verb = result.kind === "deposit" ? "Deposited" : "Withdrew";
+  const verb = result.pending ? "Bridging" : result.kind === "deposit" ? "Deposited" : "Withdrew";
 
   return (
     <motion.div
@@ -71,6 +73,11 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
           ${result.amount.toFixed(2)}
         </p>
         <p className="mt-1 text-xs text-black/45">{result.symbol}</p>
+        {result.pending && (
+          <p className="mt-2 max-w-[260px] text-[12px] leading-snug text-black/45">
+            bridging to Solana — we&apos;ll finish the deposit automatically. you can keep browsing.
+          </p>
+        )}
       </motion.div>
 
       {/* On-chain proof — it's in your wallet, verifiable. */}
@@ -80,9 +87,11 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         transition={{ delay: 0.4 }}
         className="flex items-center gap-4 text-[12px] lowercase tracking-wide text-black/50"
       >
-        <Link href="/pile" className="underline-offset-2 hover:text-black hover:underline transition">
-          view your position
-        </Link>
+        {!result.pending && (
+          <Link href="/pile" className="underline-offset-2 hover:text-black hover:underline transition">
+            view your position
+          </Link>
+        )}
         {address && (
           <a
             href={`https://solscan.io/account/${address}`}

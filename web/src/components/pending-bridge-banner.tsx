@@ -13,7 +13,7 @@ export function PendingBridgeBanner() {
   if (!pending) return null;
 
   return (
-    <div className="mt-6 p-4 rounded-[8px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.05] flex items-start gap-3">
+    <div className="mb-6 p-4 rounded-[8px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.05] flex items-start gap-3">
       <Loader2 className="text-[#3c05c7] mt-0.5 animate-spin" size={16} strokeWidth={1.5} />
       <div className="flex-1">
         <p className="text-sm text-black">

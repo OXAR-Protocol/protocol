@@ -7,6 +7,7 @@ import { AuthGuard } from "@/components/auth-guard";
 import { AccessGate } from "@/components/access-gate/access-gate";
 import { WarpProvider } from "@/components/warp-transition";
 import { WarpOnEntry } from "@/components/warp-on-entry";
+import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <div className="min-h-screen bg-white">
                   <TopNav />
                   <div className="mx-auto max-w-[1100px] px-5 pb-28 pt-6 md:pb-16">
+                    <PendingBridgeBanner />
                     {children}
                   </div>
                 </div>
