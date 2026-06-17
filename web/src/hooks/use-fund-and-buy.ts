@@ -7,9 +7,16 @@ import type { Connection, PublicKey } from "@solana/web3.js";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useUniversalDeposit } from "@/hooks/use-universal-deposit";
 import { toFriendlyError, UserFacingError } from "@/lib/yield";
-import { SOL_MINT, SOL_FEE_RESERVE, type WalletAsset } from "@/lib/portfolio/assets";
+import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
 
 export type FundBuyStatus = "idle" | "funding" | "arriving" | "buying";
+
+// Gas reserve kept back from an Apple Pay buy. Larger than the generic
+// SOL_FEE_RESERVE (0.01) because this buy is TWO transactions (swap + deposit)
+// plus token-account rent (~0.002 SOL each) — so we leave headroom for priority
+// fees and a couple of new ATAs. It's the user's own SOL (stays as usable gas;
+// ATA rent is refundable), so the extra isn't lost.
+const APPLE_PAY_GAS_RESERVE = 25_000_000; // ~0.025 SOL
 
 const LABELS: Record<Exclude<FundBuyStatus, "idle">, string> = {
   funding: "Opening Apple Pay…",
@@ -109,7 +116,7 @@ export function useFundAndBuy(providerId: string) {
         // asset. Only touch the newly-funded SOL (don't spend the user's prior SOL
         // beyond topping the reserve), and pass USD slightly under the spendable cap.
         const current = await connection.getBalance(owner);
-        const reserve = Number(SOL_FEE_RESERVE);
+        const reserve = APPLE_PAY_GAS_RESERVE;
         const fundedDelta = Math.max(0, current - baseline);
         const keepFromFunded = Math.max(0, reserve - baseline);
         const spendLamports = fundedDelta - keepFromFunded;
