@@ -15,7 +15,8 @@ import type { ProviderView } from "@/hooks/use-yield-positions";
 
 interface Props {
   view: ProviderView;
-  onDeposited: (usdAmount: number) => void;
+  /** `pending` = a cross-chain buy that's still bridging (credited in background). */
+  onDeposited: (usdAmount: number, pending?: boolean) => void;
   /** Action verb — "Deposit" (default) for yield sources, "Buy" for stocks. */
   verb?: string;
 }
@@ -83,7 +84,8 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
     try {
       const depositedBase = await depositWith(payAsset, usdAmount);
       setConfirming(false); // leave the review so the panel resets behind the success overlay
-      onDeposited(Number(depositedBase) / 10 ** view.decimals);
+      // EVM pay-assets bridge in the background — the deposit isn't done yet.
+      onDeposited(Number(depositedBase) / 10 ** view.decimals, payAsset.chain === "ethereum");
     } catch {
       // surfaced via `error` — stay on the review so the user can retry
     }

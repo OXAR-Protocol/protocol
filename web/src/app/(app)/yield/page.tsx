@@ -12,7 +12,6 @@ import { YieldSourceRow } from "@/components/yield-source-row";
 import { YieldProviderRow } from "@/components/yield-provider-row";
 import { YieldGroupRow } from "@/components/yield-group-row";
 import { SourceCard } from "@/components/source-card";
-import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
 import { groupProviderViews } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { XSTOCKS } from "@/lib/yield/xstocks";
@@ -88,8 +87,6 @@ export default function YieldPage() {
           into the protocol — you hold your own position.
         </p>
       </motion.div>
-
-      <PendingBridgeBanner />
 
       {/* Filters */}
       <motion.section

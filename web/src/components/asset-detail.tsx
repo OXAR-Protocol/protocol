@@ -141,7 +141,7 @@ export function AssetDetail({ view, onDone }: { view: ProviderView; onDone: () =
             positionValue={positionValue}
             amount={amount}
             onAmountChange={setAmount}
-            onDeposited={(usd) => { setResult({ kind: "deposit", amount: usd, symbol: price ? "USDC" : view.assetSymbol }); settle(); }}
+            onDeposited={(usd, pending) => { setResult({ kind: "deposit", amount: usd, symbol: price ? "USDC" : view.assetSymbol, pending }); settle(); }}
             onSell={handleExit}
             loading={loading}
             error={error}
