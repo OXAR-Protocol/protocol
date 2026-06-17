@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useFundWallet } from "@privy-io/react-auth/solana";
 import type { Connection, PublicKey } from "@solana/web3.js";
 
@@ -11,13 +11,6 @@ import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
 
 export type FundBuyStatus = "idle" | "funding" | "arriving" | "buying";
 
-// Gas reserve kept back from an Apple Pay buy. Larger than the generic
-// SOL_FEE_RESERVE (0.01) because this buy is TWO transactions (swap + deposit)
-// plus token-account rent (~0.002 SOL each) — so we leave headroom for priority
-// fees and a couple of new ATAs. It's the user's own SOL (stays as usable gas;
-// ATA rent is refundable), so the extra isn't lost.
-const APPLE_PAY_GAS_RESERVE = 25_000_000; // ~0.025 SOL
-
 const LABELS: Record<Exclude<FundBuyStatus, "idle">, string> = {
   funding: "Opening Apple Pay…",
   arriving: "Waiting for your funds…",
@@ -25,6 +18,11 @@ const LABELS: Record<Exclude<FundBuyStatus, "idle">, string> = {
 };
 
 const LAMPORTS_PER_SOL = 1_000_000_000;
+// Gas reserve kept back from the buy — larger than the generic SOL_FEE_RESERVE
+// because this buy is two txs (swap + deposit) plus token-account rent.
+const APPLE_PAY_GAS_RESERVE = 25_000_000; // ~0.025 SOL
+// "Real funds landed" floor for arrival detection (well below any real purchase).
+const MIN_ARRIVAL_LAMPORTS = 15_000_000; // ~0.015 SOL
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Current SOL price (USD) via Jupiter Price v3. 0 if unavailable. */
@@ -63,11 +61,16 @@ async function pollSolArrival(
  *   small gas reserve → swap the rest into the chosen asset via the existing
  *   universal deposit (SOL→USDC→product).
  *
- * Funding SOL (not USDC) means the wallet ALSO ends up with the SOL it needs to
- * pay for the buy transaction — so it works end-to-end even on a brand-new, empty
- * wallet, with no gas sponsorship / backend. The deposit path already reserves
- * `SOL_FEE_RESERVE` for fees + token-account rent. Non-custodial throughout: the
- * on-ramp provider is the regulated merchant.
+ * The on-ramp is sized in SOL from the USD the user typed in our field, so the
+ * provider opens PRE-FILLED to that amount (no re-entry, no surprise). NOTE:
+ * Privy's funding `amount` is denominated in the asset (SOL), not USD — passing
+ * USD directly would charge that many SOL (the ~$1,400 bug). We convert with a
+ * pre-fetched SOL price so the conversion is synchronous at click time (an
+ * `await` before fundWallet breaks the mobile user-gesture → blank screen).
+ *
+ * Funding SOL means the wallet also ends up with the SOL it needs to pay for the
+ * buy tx — works on a brand-new empty wallet, no gas sponsorship. Non-custodial:
+ * the on-ramp provider is the regulated merchant.
  */
 export function useFundAndBuy(providerId: string) {
   const { connection, walletAddress } = useSolanaContext();
@@ -78,6 +81,16 @@ export function useFundAndBuy(providerId: string) {
   const [status, setStatus] = useState<FundBuyStatus>("idle");
   const [error, setError] = useState<string | null>(null);
 
+  // Keep a fresh SOL price ready so we can size the on-ramp synchronously on tap.
+  const solPriceRef = useRef(0);
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = () => getSolPrice().then((p) => { if (!cancelled && p > 0) solPriceRef.current = p; });
+    refresh();
+    const id = setInterval(refresh, 60_000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
   const buyWithApplePay = useCallback(
     async (usdAmount: number): Promise<bigint> => {
       if (!walletAddress) throw new Error("Wallet not connected");
@@ -86,33 +99,26 @@ export function useFundAndBuy(providerId: string) {
 
       setError(null);
       try {
-        // Open the funding flow IMMEDIATELY, still inside the click gesture —
-        // mobile Safari blocks the provider window if it's opened after an
-        // `await` (broken user gesture → blank screen). Do the reads in parallel.
+        // Pre-fetched price → no await before fundWallet (keeps the mobile gesture).
+        const price = solPriceRef.current || (await getSolPrice());
+        if (price <= 0) throw new UserFacingError("Couldn't price SOL — try again");
+        const solAmount = usdAmount / price; // SOL units ≈ the USD the user entered
+
         setStatus("funding");
         const funding = fundWallet({
           address: owner.toBase58(),
           options: {
-            asset: "native-currency", // buy SOL → covers the buy's own gas, no sponsorship needed
-            amount: usdAmount.toFixed(2),
+            asset: "native-currency",
+            amount: solAmount.toFixed(4), // pre-fills the provider to ~$usdAmount
             defaultFundingMethod: "card", // card flow surfaces Apple Pay on supported devices
           },
         });
 
-        const [baseline, solPrice] = await Promise.all([
-          connection.getBalance(owner),
-          getSolPrice(),
-        ]);
-        if (solPrice <= 0) throw new UserFacingError("Couldn't price SOL — try again");
-
+        const baseline = await connection.getBalance(owner);
         await funding;
 
-        // Card top-ups settle a beat after the modal closes — wait for the SOL to
-        // land. The on-ramp delivers net-of-fee, so accept any clear arrival
-        // (floor at half the requested USD worth of SOL to avoid dust false-positives).
         setStatus("arriving");
-        const expectedLamports = Math.floor((usdAmount * 0.5 / solPrice) * LAMPORTS_PER_SOL);
-        const arrived = await pollSolArrival(connection, owner, baseline, expectedLamports);
+        const arrived = await pollSolArrival(connection, owner, baseline, MIN_ARRIVAL_LAMPORTS);
         if (!arrived) {
           throw new UserFacingError(
             "We didn't see your funds arrive yet — card top-ups can take a few minutes. " +
@@ -120,9 +126,7 @@ export function useFundAndBuy(providerId: string) {
           );
         }
 
-        // Keep ~SOL_FEE_RESERVE for gas; swap the rest of what just arrived into the
-        // asset. Only touch the newly-funded SOL (don't spend the user's prior SOL
-        // beyond topping the reserve), and pass USD slightly under the spendable cap.
+        // Keep the gas reserve; swap the rest of what just arrived into the asset.
         const current = await connection.getBalance(owner);
         const reserve = APPLE_PAY_GAS_RESERVE;
         const fundedDelta = Math.max(0, current - baseline);
@@ -131,7 +135,7 @@ export function useFundAndBuy(providerId: string) {
         if (spendLamports <= 0) {
           throw new UserFacingError("That's too small after the gas reserve — try a bit more.");
         }
-        const spendUsd = (spendLamports / LAMPORTS_PER_SOL) * solPrice * 0.99;
+        const spendUsd = (spendLamports / LAMPORTS_PER_SOL) * price * 0.99;
 
         const sol: WalletAsset = {
           mint: SOL_MINT,
@@ -139,7 +143,7 @@ export function useFundAndBuy(providerId: string) {
           decimals: 9,
           amount: BigInt(current),
           uiAmount: current / LAMPORTS_PER_SOL,
-          usdValue: (current / LAMPORTS_PER_SOL) * solPrice,
+          usdValue: (current / LAMPORTS_PER_SOL) * price,
           chain: "solana",
         };
 
