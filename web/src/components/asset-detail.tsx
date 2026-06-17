@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import { useEarnings } from "@/hooks/use-earnings";
@@ -28,6 +29,7 @@ const fade = (delay: number) => ({
 export function AssetDetail({ view, onDone }: { view: ProviderView; onDone: () => void }) {
   const price = isPriceExposure(view.id);
   const info = getAssetInfo(view.id);
+  const { walletAddress } = useSolanaContext();
   const { withdraw, redeemAll, loading, error } = useYieldActions(view.id);
   const apyHistory = useApyHistory(view.defiLlamaPoolId);
   const { prices } = useStockPrices(price && view.heldMint ? [view.heldMint] : []);
@@ -147,7 +149,7 @@ export function AssetDetail({ view, onDone }: { view: ProviderView; onDone: () =
         </motion.div>
       </div>
 
-      <AnimatePresence>{result && <YieldActionSuccess result={result} onDone={() => setResult(null)} />}</AnimatePresence>
+      <AnimatePresence>{result && <YieldActionSuccess result={result} onDone={() => setResult(null)} address={walletAddress?.toBase58()} />}</AnimatePresence>
     </div>
   );
 }
