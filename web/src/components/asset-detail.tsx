@@ -43,6 +43,8 @@ export function AssetDetail({ view, onDone }: { view: ProviderView; onDone: () =
   const up = (quote?.change24h ?? 0) >= 0;
   const src = earnings.sources.find((s) => s.id === view.id);
   const earned = src ? src.currentValue - src.invested : undefined;
+  // Unit label for the quantity input — the ticker in the name, e.g. "SPCXx".
+  const unitLabel = view.name.match(/\(([^)]+)\)/)?.[1] ?? "units";
 
   const settle = () => setTimeout(onDone, 1500);
 
@@ -144,6 +146,8 @@ export function AssetDetail({ view, onDone }: { view: ProviderView; onDone: () =
             onSell={handleExit}
             loading={loading}
             error={error}
+            sharePriceUsd={price ? quote?.price : undefined}
+            unitLabel={unitLabel}
           />
         </motion.div>
       </div>
