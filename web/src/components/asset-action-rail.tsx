@@ -97,7 +97,7 @@ export function AssetActionRail({
           onAction={onSell}
           loading={loading}
           disabled={loading || amount <= 0 || amount > positionValue}
-          variant="secondary"
+          variant="primary"
         />
       )}
 
