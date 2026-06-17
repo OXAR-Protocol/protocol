@@ -9,6 +9,7 @@ import { DepositConfirm } from "@/components/deposit-confirm";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
 import { useDeposit } from "@/hooks/use-deposit";
+import { useFundAndBuy } from "@/hooks/use-fund-and-buy";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
@@ -29,6 +30,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
   const { assets: evmAssets, evmAddress, loading: evmLoading } = useEvmAssets();
   const { depositWith, busy, label, error } = useDeposit(view.id);
+  // Apple Pay / card path — funds fresh USDC via Privy's on-ramp, then buys.
+  // Works with no crypto in the wallet (the whole point), so it's independent
+  // of the pay-asset picker below.
+  const applePay = useFundAndBuy(view.id);
 
   // Amount is entered in the selected currency's units; USD is derived for the
   // (USD-denominated) money path below via the asset's unit price. `null` = the
@@ -88,6 +93,18 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
       onDeposited(Number(depositedBase) / 10 ** view.decimals, payAsset.chain === "ethereum");
     } catch {
       // surfaced via `error` — stay on the review so the user can retry
+    }
+  };
+
+  // Apple Pay buys a fixed USD value (the typed amount if any, else ~$50). No
+  // pay-asset needed — the on-ramp delivers fresh USDC, then we buy.
+  const applePayUsd = usdAmount > 0 ? usdAmount : 50;
+  const handleApplePay = async () => {
+    try {
+      const base = await applePay.buyWithApplePay(applePayUsd);
+      onDeposited(Number(base) / 10 ** view.decimals);
+    } catch {
+      // surfaced via `applePay.error`
     }
   };
 
@@ -189,13 +206,32 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit" }: Props) {
 
       <button
         onClick={() => setConfirming(true)}
-        disabled={busy || !payAsset || usdAmount <= 0}
+        disabled={busy || applePay.busy || !payAsset || usdAmount <= 0}
         className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
       >
         {verb}
       </button>
 
       {error && <p className="mt-3 text-xs text-red-400 text-center">{error}</p>}
+
+      {/* or — pay with Apple Pay / card (no crypto needed; funds USDC then buys) */}
+      <div className="mt-3 flex items-center gap-3 text-[10px] lowercase tracking-wide text-black/30">
+        <span className="h-px flex-1 bg-black/10" />
+        or
+        <span className="h-px flex-1 bg-black/10" />
+      </div>
+      <button
+        onClick={handleApplePay}
+        disabled={applePay.busy || busy}
+        className="mt-3 w-full px-4 py-3 rounded-full border border-black/15 text-black text-[14px] font-medium lowercase tracking-wide hover:border-black/40 disabled:opacity-40 transition inline-flex items-center justify-center gap-2"
+      >
+        {applePay.busy ? applePay.label : "apple pay"}
+      </button>
+      <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/30">
+        {lower} ≈ ${applePayUsd.toFixed(0)} with apple pay or card
+      </p>
+
+      {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{applePay.error}</p>}
     </div>
   );
 }
