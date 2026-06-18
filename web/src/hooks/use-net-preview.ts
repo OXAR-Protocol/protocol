@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
-import { toBaseUnits } from "@/lib/yield";
 import { getSwapQuote } from "@/lib/swap/jupiter-swap";
 import { buildQuoteRequest, networkToChainId, bridgeFeeUsd } from "@/lib/bridge/delora";
-import type { WalletAsset } from "@/lib/portfolio/assets";
+import { usdToBase, type WalletAsset } from "@/lib/portfolio/assets";
 
 export interface NetPreview {
   kind: "direct" | "swap" | "bridge";
@@ -16,11 +15,6 @@ export interface NetPreview {
   feeUsd?: number;
   etaSec?: number;
 }
-
-const payBaseFor = (asset: WalletAsset, usd: number) => {
-  const price = asset.usdValue / asset.uiAmount;
-  return toBaseUnits((usd / price).toFixed(asset.decimals), asset.decimals);
-};
 
 /**
  * Live "you'll deposit ~$X" preview for the selected pay-asset: direct (full
@@ -66,7 +60,7 @@ export function useNetPreview(params: {
           const req = buildQuoteRequest({
             senderAddress: evmAddress ?? "0x0000000000000000000000000000000000000000",
             originChainId,
-            amount: payBaseFor(payAsset, usdAmount),
+            amount: usdToBase(payAsset, usdAmount),
             originCurrency: payAsset.mint,
             receiverAddress: walletAddress.toBase58(),
             destinationMint: productMint,
@@ -90,7 +84,7 @@ export function useNetPreview(params: {
           const q = await getSwapQuote({
             inputMint: payAsset.mint,
             outputMint: productMint,
-            amount: payBaseFor(payAsset, usdAmount),
+            amount: usdToBase(payAsset, usdAmount),
           });
           if (!cancelled) setState({ netUsdc: Number(q.otherAmountThreshold) / 10 ** productDecimals, quoting: false });
         }

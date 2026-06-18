@@ -14,6 +14,7 @@ import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
 import { getSwapQuote, buildSwapTx, deserializeSwapTx, priceImpactTooHigh } from "@/lib/swap/jupiter-swap";
 import { DELORA_SOLANA_CHAIN_ID, bridgeFeeTooHigh, type BridgeQuote } from "@/lib/bridge/delora";
 import { outboundKind, type DestChain, type DestAsset } from "@/lib/wallet/outbound-destinations";
+import { validateSend } from "@/lib/wallet/transfer";
 
 export type SendStatus = "idle" | "sending";
 export interface SendResult {
@@ -60,6 +61,12 @@ export function useSend() {
       setError(null);
       setStatus("sending");
       try {
+        // Defensive guard: validate the destination address (against its chain) and
+        // the amount before signing anything — the UI gates this too, but never
+        // move funds on an unvalidated request.
+        const problem = validateSend({ asset: source, to: to.trim(), amountBase, chain: destChain.chain });
+        if (problem) throw new UserFacingError(problem);
+
         if (kind === "bridge") {
           if (!destChain.chainId) throw new UserFacingError("Unsupported destination chain");
           const res = await fetch("/api/bridge-quote", {
