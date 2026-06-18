@@ -55,7 +55,6 @@ src/
     use-yield-positions.ts     APY + the wallet's position per provider
     use-yield-actions.ts       deposit / withdraw / redeemAll (Privy sign+send)
     use-aggregate-balance.ts   Sum across all provider positions
-    use-usdc-balance.ts        Wallet USDC balance
     use-waitlist.ts            Waitlist submit (marketing)
     use-count-up.ts, use-animated-progress.ts, use-canvas-perf.ts   UI helpers
   providers/
@@ -63,7 +62,7 @@ src/
   lib/
     constants.ts          RPC_URL / USDC mint + yield-source catalog re-export (from @oxar/sdk)
     yield/                Provider abstraction: types, registry, jupiter, units, display, errors
-    growth.ts, cache.ts, supabase-server.ts, …
+    cache.ts, supabase-server.ts, …
 ```
 
 ## Rules

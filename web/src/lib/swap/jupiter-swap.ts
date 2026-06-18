@@ -27,11 +27,6 @@ export interface SwapQuote {
   swapMode: string;
 }
 
-/** Net output in UI units (e.g. USDC received) from a quote. */
-export function swapNetOut(quote: SwapQuote, outDecimals: number): number {
-  return Number(quote.outAmount) / 10 ** outDecimals;
-}
-
 /** Price impact as a fraction (0.01 = 1%). */
 export function swapPriceImpact(quote: SwapQuote): number {
   const pct = Number(quote.priceImpactPct);
