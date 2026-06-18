@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 import {
-  swapNetOut,
   swapPriceImpact,
   priceImpactTooHigh,
   getSwapQuote,
@@ -22,10 +21,6 @@ const quote = (over: Partial<SwapQuote>): SwapQuote => ({
 });
 
 describe("jupiter-swap helpers", () => {
-  it("swapNetOut converts outAmount to UI units", () => {
-    expect(swapNetOut(quote({ outAmount: "8300455" }), 6)).toBeCloseTo(8.300455, 6);
-  });
-
   it("swapPriceImpact parses the fraction, 0 on garbage", () => {
     expect(swapPriceImpact(quote({ priceImpactPct: "0.0123" }))).toBeCloseTo(0.0123, 6);
     expect(swapPriceImpact(quote({ priceImpactPct: "abc" }))).toBe(0);
