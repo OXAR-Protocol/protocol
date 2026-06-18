@@ -18,4 +18,6 @@ export const RISK_LABEL: Record<string, string> = {
 export const CHAIN_LABEL: Record<string, string> = {
   solana: "Solana",
   ethereum: "Ethereum",
+  base: "Base",
+  arbitrum: "Arbitrum",
 };

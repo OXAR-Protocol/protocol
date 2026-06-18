@@ -5,14 +5,8 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
+import { CHAIN_LABEL } from "@/lib/yield";
 import { YIELD_SOURCES, type YieldSourceConfig } from "@oxar/sdk";
-
-const CHAIN_LABEL: Record<string, string> = {
-  solana: "Solana",
-  ethereum: "Ethereum",
-  base: "Base",
-  arbitrum: "Arbitrum",
-};
 
 const RISK_LABEL: Record<string, { label: string; tone: string }> = {
   low: { label: "Low risk", tone: "text-emerald-600" },
