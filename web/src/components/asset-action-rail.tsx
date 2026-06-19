@@ -105,13 +105,14 @@ export function AssetActionRail({
             variant="primary"
           />
 
-          {/* Cash all the way out — sell to USDC here, then off-ramp to a card. */}
+          {/* Cash all the way out — sell to USDC here, then off-ramp to a card.
+              Secondary button beside the primary "sell" — same shape, lighter weight. */}
           <button
             type="button"
             onClick={() => setShowCashOut(true)}
-            className="mt-2 inline-flex w-full items-center justify-center gap-1.5 py-2 text-[12px] lowercase tracking-wide text-black/45 transition hover:text-black/70"
+            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-3 text-[14px] lowercase tracking-wide text-black/70 transition hover:border-black/40 hover:text-black"
           >
-            <CreditCard size={12} strokeWidth={1.5} />
+            <CreditCard size={14} strokeWidth={1.5} />
             cash out to card
           </button>
         </>
