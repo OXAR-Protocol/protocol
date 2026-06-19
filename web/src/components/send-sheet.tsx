@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { X, Loader2, ExternalLink } from "lucide-react";
 
 import { CustomSelect } from "@/components/custom-select";
+import { AssetPicker } from "@/components/asset-picker";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useSend } from "@/hooks/use-send";
 import { useSolanaContext } from "@/providers/solana-provider";
@@ -21,7 +22,9 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
   const { send, status, error: sendError } = useSend();
 
   const [sourceMint, setSourceMint] = useState<string | null>(null);
-  const [destKey, setDestKey] = useState("base");
+  // Default to a same-chain Solana send — the common case. Cross-chain (Base/Arbitrum)
+  // is still selectable below; opening straight onto a bridge was the confusing part.
+  const [destKey, setDestKey] = useState("solana");
   const [assetSym, setAssetSym] = useState("USDC");
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
@@ -109,11 +112,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
             ) : assets.length === 0 ? (
               <p className="text-xs text-black/40">No assets to send.</p>
             ) : (
-              <CustomSelect
-                value={source?.mint ?? ""}
-                onChange={setSourceMint}
-                options={assets.map((a) => ({ value: a.mint, label: `${a.symbol} · ${a.uiAmount}` }))}
-              />
+              <AssetPicker assets={assets} value={source?.mint ?? null} onChange={setSourceMint} />
             )}
 
             <div className="grid grid-cols-2 gap-3 mt-4">
