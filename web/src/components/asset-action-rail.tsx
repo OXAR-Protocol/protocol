@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import { CreditCard } from "lucide-react";
 
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { DepositPanel } from "@/components/deposit-panel";
 import { YieldAmountField } from "@/components/yield-amount-field";
+import { CashOutSheet } from "@/components/cash-out-sheet";
 
 interface Props {
   view: ProviderView;
@@ -43,6 +46,7 @@ export function AssetActionRail({
   unitLabel,
 }: Props) {
   const [tab, setTab] = useState<"buy" | "sell">("buy");
+  const [showCashOut, setShowCashOut] = useState(false);
   const canSell = positionValue > 0;
   const tabClass = (active: boolean) =>
     `rounded-full py-2 text-[13px] lowercase tracking-wide transition ${
@@ -76,32 +80,48 @@ export function AssetActionRail({
           unitLabel={unitLabel}
         />
       ) : (
-        <YieldAmountField
-          label={price ? `Sell ${view.assetSymbol}` : `Withdraw ${view.assetSymbol}`}
-          symbol={price ? "USDC" : view.assetSymbol}
-          value={amount}
-          onChange={onAmountChange}
-          hint={
-            <span className="flex items-center gap-2">
-              {price ? "worth" : "available"}: ${positionValue.toFixed(2)}
-              <button
-                type="button"
-                onClick={() => onAmountChange(positionValue)}
-                className="lowercase tracking-wide text-[#3c05c7]/80 transition hover:text-[#3c05c7]"
-              >
-                max
-              </button>
-            </span>
-          }
-          actionLabel={price ? "Sell" : "Withdraw"}
-          onAction={onSell}
-          loading={loading}
-          disabled={loading || amount <= 0 || amount > positionValue}
-          variant="primary"
-        />
+        <>
+          <YieldAmountField
+            label={price ? `Sell ${view.assetSymbol}` : `Withdraw ${view.assetSymbol}`}
+            symbol={price ? "USDC" : view.assetSymbol}
+            value={amount}
+            onChange={onAmountChange}
+            hint={
+              <span className="flex items-center gap-2">
+                {price ? "worth" : "available"}: ${positionValue.toFixed(2)}
+                <button
+                  type="button"
+                  onClick={() => onAmountChange(positionValue)}
+                  className="lowercase tracking-wide text-[#3c05c7]/80 transition hover:text-[#3c05c7]"
+                >
+                  max
+                </button>
+              </span>
+            }
+            actionLabel={price ? "Sell" : "Withdraw"}
+            onAction={onSell}
+            loading={loading}
+            disabled={loading || amount <= 0 || amount > positionValue}
+            variant="primary"
+          />
+
+          {/* Cash all the way out — sell to USDC here, then off-ramp to a card. */}
+          <button
+            type="button"
+            onClick={() => setShowCashOut(true)}
+            className="mt-2 inline-flex w-full items-center justify-center gap-1.5 py-2 text-[12px] lowercase tracking-wide text-black/45 transition hover:text-black/70"
+          >
+            <CreditCard size={12} strokeWidth={1.5} />
+            cash out to card
+          </button>
+        </>
       )}
 
       {error && <p className="mt-3 text-center text-xs text-red-600">{error}</p>}
+
+      <AnimatePresence>
+        {showCashOut && <CashOutSheet onClose={() => setShowCashOut(false)} />}
+      </AnimatePresence>
     </div>
   );
 }
