@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useExportWallet } from "@privy-io/react-auth/solana";
 import { AnimatePresence } from "framer-motion";
-import { Copy, Check, LogOut, ChevronDown, ArrowUpRight, KeyRound } from "lucide-react";
+import { Copy, Check, LogOut, ChevronDown, ArrowUpRight, KeyRound, CreditCard } from "lucide-react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { SendSheet } from "@/components/send-sheet";
+import { CashOutSheet } from "@/components/cash-out-sheet";
 
 /**
  * Header wallet control: shows the active Solana address as a pill; the dropdown
@@ -20,6 +21,7 @@ export function WalletMenu() {
   const { exportWallet } = useExportWallet();
   const [open, setOpen] = useState(false);
   const [showSend, setShowSend] = useState(false);
+  const [showCashOut, setShowCashOut] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const solana = walletAddress?.toBase58() ?? null;
@@ -72,6 +74,14 @@ export function WalletMenu() {
             send
           </button>
 
+          <button
+            onClick={() => { setOpen(false); setShowCashOut(true); }}
+            className={`${item} border-b border-black/10 hover:bg-black/[0.04] hover:text-black`}
+          >
+            <CreditCard size={13} strokeWidth={1.5} />
+            cash out to card
+          </button>
+
           {isEmbedded && (
             <button
               onClick={() => { setOpen(false); void exportWallet({ address: solana }); }}
@@ -93,6 +103,7 @@ export function WalletMenu() {
       )}
 
       <AnimatePresence>{showSend && <SendSheet onClose={() => setShowSend(false)} />}</AnimatePresence>
+      <AnimatePresence>{showCashOut && <CashOutSheet onClose={() => setShowCashOut(false)} />}</AnimatePresence>
     </div>
   );
 }
