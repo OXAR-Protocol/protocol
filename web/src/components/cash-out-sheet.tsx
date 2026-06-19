@@ -5,27 +5,33 @@ import { motion } from "framer-motion";
 import { X, ExternalLink, ShieldCheck } from "lucide-react";
 
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
+import { useSolanaContext } from "@/providers/solana-provider";
 import { USDC_MINT } from "@/lib/constants";
-import { offrampSellUrl } from "@/lib/offramp/sell-redirect";
+import { offrampConfigured, transakSellUrl } from "@/lib/offramp/sell-redirect";
 
 const STEPS = [
-  "choose Sell → USDC (Solana)",
-  "verify (account-free, fast) + pick your card",
-  "send your USDC to the address shown",
+  "enter the amount + verify (KYC)",
+  "pick your card to receive the cash",
+  "send your USDC to the address Transak shows",
 ];
 
 /**
- * Cash out to a bank card via Guardarian (no-account redirect). Explains the flow,
- * shows the wallet's USDC, and opens Guardarian's account-free sell page in a new
- * tab — Guardarian handles KYC, the card and the payout (we never touch card data).
+ * Cash out to a bank card via the Transak SELL widget. Shows the wallet's USDC and
+ * opens Transak pre-filled (USDC · Solana · your address) — Transak handles KYC,
+ * the card and the payout (we never touch card data). Gated by the Transak apiKey.
  */
 export function CashOutSheet({ onClose }: { onClose: () => void }) {
   const { assets } = useWalletAssets();
+  const { walletAddress } = useSolanaContext();
   const usdc = assets.find((a) => a.mint === USDC_MINT);
   const usdcValue = usdc?.usdValue ?? 0;
 
+  const url = transakSellUrl({ walletAddress: walletAddress?.toBase58() });
+  const ready = offrampConfigured() && !!url;
+
   const go = () => {
-    window.open(offrampSellUrl(), "_blank", "noopener,noreferrer");
+    if (!url) return;
+    window.open(url, "_blank", "noopener,noreferrer");
     onClose();
   };
 
@@ -47,7 +53,7 @@ export function CashOutSheet({ onClose }: { onClose: () => void }) {
       >
         <div className="mb-5 flex items-start justify-between">
           <div>
-            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">off-ramp · guardarian</p>
+            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">off-ramp · transak</p>
             <h2 className="mt-1 text-xl text-black">Cash out to your card</h2>
           </div>
           <button onClick={onClose} className="text-black/45 transition hover:text-black">
@@ -57,7 +63,7 @@ export function CashOutSheet({ onClose }: { onClose: () => void }) {
 
         <p className="text-[14px] leading-snug text-black/70">
           Sell your USDC for cash straight to your Visa / Mastercard via{" "}
-          <span className="text-black">Guardarian</span> — licensed, non-custodial, no account, lands in minutes.
+          <span className="text-black">Transak</span> — licensed, non-custodial, lands in minutes.
         </p>
 
         <div className="mt-4 rounded-[10px] border border-black/10 px-4 py-3">
@@ -79,15 +85,16 @@ export function CashOutSheet({ onClose }: { onClose: () => void }) {
 
         <button
           onClick={go}
-          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85"
+          disabled={!ready}
+          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-40"
         >
-          continue to guardarian
-          <ExternalLink size={14} strokeWidth={1.5} />
+          {ready ? "continue to transak" : "cash-out is being set up"}
+          {ready && <ExternalLink size={14} strokeWidth={1.5} />}
         </button>
 
         <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-black/40">
           <ShieldCheck size={12} strokeWidth={1.5} />
-          Guardarian handles the card &amp; ID check — OXAR never sees your card.
+          Transak handles the card &amp; ID check — OXAR never sees your card.
         </p>
       </motion.div>
     </motion.div>,

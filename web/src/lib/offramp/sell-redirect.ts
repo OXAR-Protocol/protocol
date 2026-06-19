@@ -1,17 +1,37 @@
 /**
- * No-account off-ramp redirect (sell crypto → fiat to card).
+ * Off-ramp via the Transak SELL widget (the user's own Transak account/apiKey).
  *
- * Mercuryo's `exchange.mercuryo.io` is a partner-only widget endpoint — opened
- * directly without a `widget_id` it returns 403 "Service unavailable for your
- * region" (it has no public consumer sell page; it's B2B-only). So we point at
- * Guardarian's **account-free** consumer flow instead — EU-licensed, non-custodial,
- * sells USDC to a card, and covers Ukraine + the EU with no integrator account.
+ * Transak renders the whole sell flow (KYC, card/SEPA payout, the receive address)
+ * — non-custodial, no PCI/MSB on us. We just open it pre-filled. The apiKey is a
+ * publishable frontend key (safe under NEXT_PUBLIC_). Staging needs no KYB and is
+ * great for testing; production payouts need Transak's KYB (a Transak requirement,
+ * unrelated to Privy). SELL must be enabled in the Transak partner portal, and the
+ * app's domain added to the portal's allowed domains.
  *
- * Override via NEXT_PUBLIC_OFFRAMP_SELL_URL once the exact sell deep-link / params
- * are confirmed on a live test (grab the URL Guardarian shows after picking "Sell").
+ * Env:
+ *   NEXT_PUBLIC_TRANSAK_API_KEY   — your Transak apiKey (staging or production)
+ *   NEXT_PUBLIC_TRANSAK_ENV       — "STAGING" (default) | "PRODUCTION"
  */
-const SELL_URL = process.env.NEXT_PUBLIC_OFFRAMP_SELL_URL ?? "https://guardarian.com/";
+const API_KEY = process.env.NEXT_PUBLIC_TRANSAK_API_KEY;
+const ENV = (process.env.NEXT_PUBLIC_TRANSAK_ENV ?? "STAGING").toUpperCase();
+const BASE = ENV === "PRODUCTION" ? "https://global.transak.com" : "https://global-stg.transak.com";
 
-export function offrampSellUrl(): string {
-  return SELL_URL;
+/** Whether a Transak apiKey is configured (gates the cash-out button). */
+export function offrampConfigured(): boolean {
+  return !!API_KEY;
+}
+
+/** Transak SELL URL pre-filled for USDC on Solana → card (EUR). Null if no apiKey. */
+export function transakSellUrl(opts: { walletAddress?: string } = {}): string | null {
+  if (!API_KEY) return null;
+  const params = new URLSearchParams({
+    apiKey: API_KEY,
+    productsAvailed: "SELL",
+    cryptoCurrencyCode: "USDC",
+    network: "solana",
+    fiatCurrency: "EUR",
+    paymentMethod: "credit_debit_card",
+  });
+  if (opts.walletAddress) params.set("walletAddress", opts.walletAddress);
+  return `${BASE}/?${params.toString()}`;
 }
