@@ -80,6 +80,9 @@ export function WalletMenu() {
           >
             <CreditCard size={13} strokeWidth={1.5} />
             cash out to card
+            <span className="ml-auto rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] lowercase tracking-wide text-black/45">
+              soon
+            </span>
           </button>
 
           {isEmbedded && (
