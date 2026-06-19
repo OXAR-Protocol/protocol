@@ -8,7 +8,6 @@ export const SOL_SEND_RESERVE = BigInt(1_000_000); // 0.001 SOL
 /** A recipient address is valid if it parses as a Solana public key. */
 export function isValidSolanaAddress(address: string): boolean {
   try {
-    // eslint-disable-next-line no-new
     new PublicKey(address.trim());
     return true;
   } catch {
@@ -33,15 +32,18 @@ export function maxSendable(asset: WalletAsset): bigint {
   return max > BigInt(0) ? max : BigInt(0);
 }
 
-/** Validate a send request; returns an error string or null if OK. */
+/** Validate a send request; returns an error string or null if OK. The address is
+ *  checked against `chain` (the DESTINATION chain — EVM for a bridge), default Solana. */
 export function validateSend(params: {
   asset: WalletAsset | null;
   to: string;
   amountBase: bigint;
+  chain?: "solana" | "ethereum";
 }): string | null {
-  const { asset, to, amountBase } = params;
+  const { asset, to, amountBase, chain = "solana" } = params;
   if (!asset) return "Pick an asset to send";
-  if (!isValidSolanaAddress(to)) return "Enter a valid Solana address";
+  if (!isValidAddressForChain(to, chain))
+    return chain === "ethereum" ? "Enter a valid wallet address" : "Enter a valid Solana address";
   if (amountBase <= BigInt(0)) return "Enter an amount";
   if (amountBase > maxSendable(asset)) {
     return asset.mint === SOL_MINT ? "Not enough SOL (leave a little for the fee)" : `Not enough ${asset.symbol}`;

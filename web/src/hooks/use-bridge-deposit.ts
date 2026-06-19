@@ -4,8 +4,8 @@ import { useCallback, useState } from "react";
 import { useWallets } from "@privy-io/react-auth";
 
 import { useSolanaContext } from "@/providers/solana-provider";
-import { getProvider, toBaseUnits, toFriendlyError, UserFacingError } from "@/lib/yield";
-import { spendableBase, type WalletAsset } from "@/lib/portfolio/assets";
+import { getProvider, toFriendlyError, UserFacingError } from "@/lib/yield";
+import { spendableBase, usdToBase, type WalletAsset } from "@/lib/portfolio/assets";
 import {
   buildQuoteRequest,
   bridgeFeeTooHigh,
@@ -90,9 +90,7 @@ export function useBridgeDeposit(providerId: string) {
         }
 
         // USD → pay-asset base units (cap by balance; reserve handled by spendableBase).
-        const price = payAsset.usdValue / payAsset.uiAmount;
-        const payUi = usdAmount / price;
-        let payBase = toBaseUnits(payUi.toFixed(payAsset.decimals), payAsset.decimals);
+        let payBase = usdToBase(payAsset, usdAmount);
         const max = spendableBase(payAsset);
         if (payBase > max) payBase = max;
         if (payBase <= BigInt(0)) throw new UserFacingError(`Not enough ${payAsset.symbol}`);

@@ -1,3 +1,5 @@
+import { toBaseUnits } from "@/lib/yield/units";
+
 /** Native SOL wrapped-mint sentinel (used as the asset id for SOL). */
 export const SOL_MINT = "So11111111111111111111111111111111111111112";
 
@@ -42,6 +44,13 @@ export function spendableBase(asset: WalletAsset): bigint {
   if (asset.mint !== SOL_MINT) return asset.amount;
   const max = asset.amount - SOL_FEE_RESERVE;
   return max > BigInt(0) ? max : BigInt(0);
+}
+
+/** USD amount → base units of `asset`, at its current unit price (usdValue/uiAmount).
+ *  Single source of truth for the USD-denominated money path. */
+export function usdToBase(asset: WalletAsset, usd: number): bigint {
+  const price = asset.usdValue / asset.uiAmount;
+  return toBaseUnits((usd / price).toFixed(asset.decimals), asset.decimals);
 }
 
 /**

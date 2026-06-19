@@ -86,4 +86,8 @@ describe("validateSend", () => {
   it("requires an asset", () => {
     expect(validateSend({ asset: null, to: VALID, amountBase: BigInt(1) })).toMatch(/Pick an asset/);
   });
+  it("validates the destination against an EVM chain when given", () => {
+    expect(validateSend({ asset: usdc, to: EVM_ADDR, amountBase: BigInt(1_000_000), chain: "ethereum" })).toBeNull();
+    expect(validateSend({ asset: usdc, to: VALID, amountBase: BigInt(1_000_000), chain: "ethereum" })).toMatch(/valid wallet address/);
+  });
 });
