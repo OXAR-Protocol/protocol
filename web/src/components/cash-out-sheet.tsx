@@ -6,18 +6,18 @@ import { X, ExternalLink, ShieldCheck } from "lucide-react";
 
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { USDC_MINT } from "@/lib/constants";
-import { mercuryoSellUrl } from "@/lib/offramp/mercuryo";
+import { offrampSellUrl } from "@/lib/offramp/sell-redirect";
 
 const STEPS = [
-  "verify once (no docs under €699)",
-  "pick the card to receive the cash",
-  "send your USDC to the address Mercuryo shows",
+  "choose Sell → USDC (Solana)",
+  "verify (account-free, fast) + pick your card",
+  "send your USDC to the address shown",
 ];
 
 /**
- * Cash out to a bank card via Mercuryo (no-account redirect). Explains the flow,
- * shows the wallet's USDC, and opens Mercuryo's licensed sell page in a new tab —
- * Mercuryo handles KYC, the card and the payout (we never touch card data).
+ * Cash out to a bank card via Guardarian (no-account redirect). Explains the flow,
+ * shows the wallet's USDC, and opens Guardarian's account-free sell page in a new
+ * tab — Guardarian handles KYC, the card and the payout (we never touch card data).
  */
 export function CashOutSheet({ onClose }: { onClose: () => void }) {
   const { assets } = useWalletAssets();
@@ -25,7 +25,7 @@ export function CashOutSheet({ onClose }: { onClose: () => void }) {
   const usdcValue = usdc?.usdValue ?? 0;
 
   const go = () => {
-    window.open(mercuryoSellUrl({ currency: "USDC", network: "SOLANA" }), "_blank", "noopener,noreferrer");
+    window.open(offrampSellUrl(), "_blank", "noopener,noreferrer");
     onClose();
   };
 
@@ -47,7 +47,7 @@ export function CashOutSheet({ onClose }: { onClose: () => void }) {
       >
         <div className="mb-5 flex items-start justify-between">
           <div>
-            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">off-ramp · mercuryo</p>
+            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">off-ramp · guardarian</p>
             <h2 className="mt-1 text-xl text-black">Cash out to your card</h2>
           </div>
           <button onClick={onClose} className="text-black/45 transition hover:text-black">
@@ -57,7 +57,7 @@ export function CashOutSheet({ onClose }: { onClose: () => void }) {
 
         <p className="text-[14px] leading-snug text-black/70">
           Sell your USDC for cash straight to your Visa / Mastercard via{" "}
-          <span className="text-black">Mercuryo</span> — licensed, non-custodial, lands in minutes.
+          <span className="text-black">Guardarian</span> — licensed, non-custodial, no account, lands in minutes.
         </p>
 
         <div className="mt-4 rounded-[10px] border border-black/10 px-4 py-3">
@@ -81,13 +81,13 @@ export function CashOutSheet({ onClose }: { onClose: () => void }) {
           onClick={go}
           className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85"
         >
-          continue to mercuryo
+          continue to guardarian
           <ExternalLink size={14} strokeWidth={1.5} />
         </button>
 
         <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-black/40">
           <ShieldCheck size={12} strokeWidth={1.5} />
-          Mercuryo handles the card &amp; ID check — OXAR never sees your card.
+          Guardarian handles the card &amp; ID check — OXAR never sees your card.
         </p>
       </motion.div>
     </motion.div>,
