@@ -99,23 +99,30 @@ export function useFundAndBuy(providerId: string) {
 
       setError(null);
       try {
-        // Pre-fetched price → no await before fundWallet (keeps the mobile gesture).
-        const price = solPriceRef.current || (await getSolPrice());
-        if (price <= 0) throw new UserFacingError("Couldn't price SOL — try again");
-        const solAmount = usdAmount / price; // SOL units ≈ the USD the user entered
+        // CRITICAL (mobile): fundWallet MUST be called synchronously inside the click.
+        // Any `await` before it drops the user-activation, and iOS/Android then BLOCK the
+        // funding popup ("doesn't open on phone"). So size the on-ramp from the CACHED
+        // price only — never await here; if it isn't ready, open without a pre-fill and
+        // let the user type the amount. The exact price is fetched AFTER funding (below).
+        const cachedPrice = solPriceRef.current;
 
         setStatus("funding");
         const funding = fundWallet({
           address: owner.toBase58(),
           options: {
             asset: "native-currency",
-            amount: solAmount.toFixed(4), // pre-fills the provider to ~$usdAmount
+            // Pre-fill ~$usdAmount when we already know the price; omit it otherwise.
+            ...(cachedPrice > 0 ? { amount: (usdAmount / cachedPrice).toFixed(4) } : {}),
             defaultFundingMethod: "card", // card flow surfaces Apple Pay on supported devices
           },
         });
 
         const baseline = await connection.getBalance(owner);
         await funding;
+
+        // Past the user gesture now — awaiting is safe. We need the price for the swap math.
+        const price = solPriceRef.current || (await getSolPrice());
+        if (price <= 0) throw new UserFacingError("Couldn't price SOL — try again");
 
         setStatus("arriving");
         const arrived = await pollSolArrival(connection, owner, baseline, MIN_ARRIVAL_LAMPORTS);
