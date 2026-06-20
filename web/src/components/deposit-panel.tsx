@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 
 import { PayWithField } from "@/components/pay-with-field";
 import { DepositConfirm } from "@/components/deposit-confirm";
+import { useSolanaContext } from "@/providers/solana-provider";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
 import { useDeposit } from "@/hooks/use-deposit";
@@ -41,6 +42,11 @@ interface Props {
 export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUsd, unitLabel = "shares" }: Props) {
   const lower = verb.toLowerCase();
   const { linkWallet, unlinkWallet } = usePrivy();
+  // Apple Pay / card on-ramp is for users WITHOUT crypto (email login → embedded
+  // wallet). A user who logged in with an external wallet (Phantom) already has
+  // crypto AND runs inside that wallet's in-app browser, where the card widget
+  // can't render (black screen) — so don't offer it to them.
+  const { isExternal } = useSolanaContext();
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
   const { assets: evmAssets, evmAddress, loading: evmLoading } = useEvmAssets();
   const { depositWith, busy, label, error } = useDeposit(view.id);
@@ -257,33 +263,39 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
       {error && <p className="mt-3 text-xs text-red-400 text-center">{error}</p>}
 
-      {/* or — pay with Apple Pay / card (no crypto needed; funds USDC then buys) */}
-      <div className="mt-3 flex items-center gap-3 text-[10px] lowercase tracking-wide text-black/30">
-        <span className="h-px flex-1 bg-black/10" />
-        or
-        <span className="h-px flex-1 bg-black/10" />
-      </div>
-      <button
-        onClick={handleApplePay}
-        disabled={applePay.busy || busy}
-        className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[15px] font-medium tracking-tight hover:bg-black/90 disabled:opacity-40 transition inline-flex items-center justify-center gap-1.5"
-      >
-        {applePay.busy ? (
-          <span className="lowercase">{applePay.label}</span>
-        ) : (
-          <>
-            <span className="capitalize">{verb}</span>
-            <span>with</span>
-            <AppleLogo className="h-[15px] w-auto -translate-y-[1px]" />
-            <span>Pay</span>
-          </>
-        )}
-      </button>
-      <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/30">
-        ≈ ${applePayUsd.toFixed(0)} · apple pay or card · no crypto needed
-      </p>
+      {/* Apple Pay / card — only for embedded (email) wallets. External-wallet
+          (Phantom) users already have crypto and run inside the wallet's in-app
+          browser, where the card widget can't render. They pay with their crypto. */}
+      {!isExternal && (
+        <>
+          <div className="mt-3 flex items-center gap-3 text-[10px] lowercase tracking-wide text-black/30">
+            <span className="h-px flex-1 bg-black/10" />
+            or
+            <span className="h-px flex-1 bg-black/10" />
+          </div>
+          <button
+            onClick={handleApplePay}
+            disabled={applePay.busy || busy}
+            className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[15px] font-medium tracking-tight hover:bg-black/90 disabled:opacity-40 transition inline-flex items-center justify-center gap-1.5"
+          >
+            {applePay.busy ? (
+              <span className="lowercase">{applePay.label}</span>
+            ) : (
+              <>
+                <span className="capitalize">{verb}</span>
+                <span>with</span>
+                <AppleLogo className="h-[15px] w-auto -translate-y-[1px]" />
+                <span>Pay</span>
+              </>
+            )}
+          </button>
+          <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/30">
+            ≈ ${applePayUsd.toFixed(0)} · apple pay or card · no crypto needed
+          </p>
 
-      {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{applePay.error}</p>}
+          {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{applePay.error}</p>}
+        </>
+      )}
     </div>
   );
 }
