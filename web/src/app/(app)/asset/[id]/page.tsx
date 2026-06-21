@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 import { useYieldPositions } from "@/hooks/use-yield-positions";
+import { isPriceExposure } from "@/lib/yield/assets";
 import { AssetDetail } from "@/components/asset-detail";
 
 export default function AssetPage() {
@@ -14,10 +15,12 @@ export default function AssetPage() {
   const { views, loading, refresh } = useYieldPositions();
   const baseView = views.find((v) => v.id === id);
 
-  // Grouped protocols (e.g. Jupiter Lend USDC/USDT/USDG) — let the page switch
-  // between the stablecoin markets, each with its own APY + deposit target.
+  // Stablecoin-market switcher — ONLY for grouped YIELD protocols (Jupiter Lend
+  // USDC/USDT/USDG). Price-exposure groups (xStocks all share group "xstocks")
+  // are NOT variants of one market, so never show the picker there.
   const [variantId, setVariantId] = useState<string | null>(null);
-  const variants = baseView?.group ? views.filter((v) => v.group === baseView.group) : [];
+  const grouped = !!baseView?.group && !isPriceExposure(baseView.id);
+  const variants = grouped ? views.filter((v) => v.group === baseView!.group) : [];
   const view = variants.find((v) => v.id === variantId) ?? baseView;
 
   return (
