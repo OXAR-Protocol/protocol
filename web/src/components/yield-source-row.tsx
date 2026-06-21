@@ -34,7 +34,7 @@ export function YieldSourceRow({ source }: Props) {
 
         <div className="text-right shrink-0">
           <p className="text-xl text-black tabular-nums">
-            {source.baseApy.toFixed(1)}%
+            {source.apyLabel ?? `${source.baseApy.toFixed(1)}%`}
           </p>
           <p
             className={`text-[10px] lowercase tracking-wide ${

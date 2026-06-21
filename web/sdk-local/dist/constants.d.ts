@@ -12,6 +12,7 @@ export interface YieldSourceConfig {
     readonly description: string;
     readonly chain: Chain;
     readonly baseApy: number;
+    readonly apyLabel?: string;
     readonly riskLevel: RiskLevel;
     readonly viaDelora: boolean;
     readonly available: boolean;

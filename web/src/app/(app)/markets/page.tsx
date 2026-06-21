@@ -52,13 +52,14 @@ export default function MarketsPage() {
         </div>
       </motion.section>
 
-      {/* Cross-chain via Delora */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="mt-12"
-      >
+      {/* Cross-chain via Delora — hidden when there are no cross-chain sources */}
+      {crossChain.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mt-12"
+        >
         <div className="flex items-baseline justify-between mb-3">
           <p className="text-xs lowercase tracking-[0.2em] text-black/40">
             Cross-chain
@@ -72,7 +73,8 @@ export default function MarketsPage() {
             <MarketRow key={src.id} source={src} />
           ))}
         </div>
-      </motion.section>
+        </motion.section>
+      )}
 
       {/* Footer note */}
       <motion.div
@@ -135,7 +137,7 @@ function MarketRow({ source }: { source: YieldSourceConfig }) {
 
         <div className="text-right shrink-0">
           <p className="text-xl text-black tabular-nums">
-            {source.baseApy.toFixed(1)}%
+            {source.apyLabel ?? `${source.baseApy.toFixed(1)}%`}
           </p>
           <p className={`text-[10px] lowercase tracking-wide ${risk.tone}`}>
             {risk.label}
