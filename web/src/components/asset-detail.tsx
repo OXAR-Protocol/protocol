@@ -26,7 +26,18 @@ const fade = (delay: number) => ({
 /** Full-page asset detail, Ondo-style: live price/APY + area chart on the left,
  *  a sticky buy/sell rail on the right, curated "what it is" + position below.
  *  Mounted only once the ProviderView is resolved, so view-hooks are safe. */
-export function AssetDetail({ view, onDone }: { view: ProviderView; onDone: () => void }) {
+export function AssetDetail({
+  view,
+  variants,
+  onSelectVariant,
+  onDone,
+}: {
+  view: ProviderView;
+  /** Sibling markets of the same protocol (e.g. Jupiter Lend USDC/USDT/USDG). */
+  variants?: ProviderView[];
+  onSelectVariant?: (id: string) => void;
+  onDone: () => void;
+}) {
   const price = isPriceExposure(view.id);
   const info = getAssetInfo(view.id);
   const { walletAddress } = useSolanaContext();
@@ -87,6 +98,31 @@ export function AssetDetail({ view, onDone }: { view: ProviderView; onDone: () =
             </>
           )}
         </div>
+
+        {/* Stablecoin picker for grouped markets (Jupiter Lend USDC/USDT/USDG) —
+            each with its own APY; selecting switches the deposit target. */}
+        {variants && variants.length > 1 && (
+          <div className="mt-5 flex flex-wrap gap-2">
+            {variants.map((v) => {
+              const active = v.id === view.id;
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => onSelectVariant?.(v.id)}
+                  className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px] transition ${
+                    active
+                      ? "border-[#3c05c7] bg-[#3c05c7]/[0.05] text-black"
+                      : "border-black/10 text-black/60 hover:border-black/30 hover:text-black"
+                  }`}
+                >
+                  <span className="font-medium">{v.assetSymbol}</span>
+                  <span className="tabular-nums text-[#3c05c7]">{(v.apy * 100).toFixed(2)}%</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </motion.div>
 
       {/* Two columns: content + sticky action rail */}

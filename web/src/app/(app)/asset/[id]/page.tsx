@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
@@ -11,7 +12,13 @@ export default function AssetPage() {
   const id = String(params.id);
   const router = useRouter();
   const { views, loading, refresh } = useYieldPositions();
-  const view = views.find((v) => v.id === id);
+  const baseView = views.find((v) => v.id === id);
+
+  // Grouped protocols (e.g. Jupiter Lend USDC/USDT/USDG) — let the page switch
+  // between the stablecoin markets, each with its own APY + deposit target.
+  const [variantId, setVariantId] = useState<string | null>(null);
+  const variants = baseView?.group ? views.filter((v) => v.group === baseView.group) : [];
+  const view = variants.find((v) => v.id === variantId) ?? baseView;
 
   return (
     <div className="pt-2">
@@ -32,7 +39,12 @@ export default function AssetPage() {
           <p className="mt-1 lowercase text-[14px] text-black/45">this asset isn&apos;t in the catalog.</p>
         </div>
       ) : (
-        <AssetDetail view={view} onDone={refresh} />
+        <AssetDetail
+          view={view}
+          variants={variants.length > 1 ? variants : undefined}
+          onSelectVariant={setVariantId}
+          onDone={refresh}
+        />
       )}
     </div>
   );
