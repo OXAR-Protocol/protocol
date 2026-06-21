@@ -30,106 +30,24 @@ export interface YieldSourceConfig {
   readonly name: string;
   readonly description: string;
   readonly chain: Chain;
-  readonly baseApy: number; // % current rate
+  readonly baseApy: number; // % current rate (single figure used for filtering)
+  readonly apyLabel?: string; // optional display override, e.g. a range "4–16%"
   readonly riskLevel: RiskLevel;
   readonly viaDelora: boolean; // true if accessed via cross-chain bridge
   readonly available: boolean; // false = roadmap, not yet integrated
 }
 
 export const YIELD_SOURCES: readonly YieldSourceConfig[] = [
-  // Foundation — Solana-native
+  // The roadmap headline: tokenized Ukrainian government bonds (OVDP).
   {
-    id: "kamino-usdc",
-    name: "Kamino USDC",
-    description: "USDC lending on Solana",
+    id: "ukraine-gov-bonds",
+    name: "Ukrainian Gov Bonds",
+    description: "Tokenized Ukrainian government bonds (OVDP) — sovereign-backed, USD & UAH terms.",
     chain: "solana",
-    baseApy: 5.5,
+    baseApy: 16,
+    apyLabel: "4–16%",
     riskLevel: "low",
     viaDelora: false,
-    available: false,
-  },
-  {
-    id: "marginfi-usdc",
-    name: "MarginFi USDC",
-    description: "USDC lending alternative to Kamino",
-    chain: "solana",
-    baseApy: 4.5,
-    riskLevel: "low",
-    viaDelora: false,
-    available: false,
-  },
-  {
-    id: "jlp",
-    name: "Jupiter LP",
-    description: "Jupiter Perps liquidity provider token",
-    chain: "solana",
-    baseApy: 9.5,
-    riskLevel: "medium",
-    viaDelora: false,
-    available: false,
-  },
-  {
-    id: "maple-solana",
-    name: "Maple Syrup USDC",
-    description: "Institutional credit on Solana",
-    chain: "solana",
-    baseApy: 7.5,
-    riskLevel: "medium",
-    viaDelora: false,
-    available: false,
-  },
-  {
-    id: "drift-insurance",
-    name: "Drift Insurance Fund",
-    description: "Backstop liquidity for Drift Perps",
-    chain: "solana",
-    baseApy: 10.0,
-    riskLevel: "medium",
-    viaDelora: false,
-    available: false,
-  },
-  // RWA Treasuries — облигации США через Delora cross-chain
-  // (Ondo USDY is now LIVE natively on Solana — see web yield provider
-  //  `lib/yield/ondo.ts`; it lists under "Live now", not the roadmap.)
-  {
-    id: "mountain-usdm",
-    name: "Mountain USDM",
-    description: "Retail-regulated US Treasuries (Bermuda)",
-    chain: "ethereum",
-    baseApy: 5.0,
-    riskLevel: "low",
-    viaDelora: true,
-    available: false,
-  },
-  {
-    id: "openeden-tbill",
-    name: "OpenEden TBILL",
-    description: "Institutional T-Bills with daily NAV",
-    chain: "ethereum",
-    baseApy: 5.2,
-    riskLevel: "low",
-    viaDelora: true,
-    available: false,
-  },
-  // Stable / advanced DeFi yields
-  {
-    id: "sky-sdai",
-    name: "Sky sDAI",
-    description: "Sky (formerly Maker) savings rate",
-    chain: "ethereum",
-    baseApy: 6.5,
-    riskLevel: "low",
-    viaDelora: true,
-    available: false,
-  },
-  {
-    id: "ethena-susde",
-    name: "Ethena sUSDe",
-    description: "Delta-neutral stablecoin yield (advanced)",
-    chain: "ethereum",
-    baseApy: 11.0,
-    riskLevel: "high",
-    viaDelora: true,
     available: false,
   },
 ];
