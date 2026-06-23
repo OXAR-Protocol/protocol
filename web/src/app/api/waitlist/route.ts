@@ -100,9 +100,11 @@ export async function POST(req: NextRequest) {
   const supabase = getSupabaseServer();
   const userAgent = req.headers.get("user-agent")?.slice(0, 255) ?? null;
 
+  // Only the `serial` is read here — never the optional `wallet` column — so
+  // existing/new email signups keep working even if migration 0002 hasn't run.
   const { data: existing, error: lookupErr } = await supabase
     .from("waitlist")
-    .select("serial, wallet")
+    .select("serial")
     .eq("email", email)
     .maybeSingle();
 
@@ -110,17 +112,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
   if (existing) {
-    // Let an existing signup attach (or update) a wallet later — e.g. when they
-    // come back to claim Galxe rewards. Only write when a new wallet is given.
-    if (wallet && wallet !== existing.wallet) {
+    // Let an existing signup attach a wallet later — e.g. when they come back to
+    // claim Galxe rewards. Best-effort: a failure here never blocks the signup.
+    if (wallet) {
       await supabase.from("waitlist").update({ wallet }).eq("email", email);
     }
     return NextResponse.json({ serial: existing.serial, existed: true });
   }
 
+  // Include `wallet` only when given, so an email-only insert never references
+  // the column — signups survive even if the migration is applied later.
+  const row: Record<string, unknown> = { email, amount_usd: amount, ip_hash: ipHash, user_agent: userAgent };
+  if (wallet) row.wallet = wallet;
+
   const { data, error } = await supabase
     .from("waitlist")
-    .insert({ email, amount_usd: amount, ip_hash: ipHash, user_agent: userAgent, wallet })
+    .insert(row)
     .select("serial")
     .single();
 
