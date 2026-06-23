@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "crypto";
+import { PublicKey } from "@solana/web3.js";
 import { getSupabaseServer } from "@/lib/supabase-server";
 
 export const runtime = "nodejs";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Returns a normalized base58 Solana address, or null if absent/invalid.
+function parseWallet(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  try {
+    return new PublicKey(trimmed).toBase58();
+  } catch {
+    return null;
+  }
+}
 const MAX_AMOUNT = 10_000_000;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 const RATE_LIMIT_MAX = 20;
@@ -42,7 +55,7 @@ function fakeSerial(email: string): number {
 }
 
 export async function POST(req: NextRequest) {
-  let body: { email?: unknown; amount?: unknown; website?: unknown };
+  let body: { email?: unknown; amount?: unknown; website?: unknown; wallet?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -51,6 +64,14 @@ export async function POST(req: NextRequest) {
 
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   const honeypot = typeof body.website === "string" ? body.website : "";
+
+  // Wallet is optional. If the field is non-empty but not a valid Solana
+  // address, reject so the user can fix it; empty/absent is fine.
+  const walletProvided = typeof body.wallet === "string" && body.wallet.trim().length > 0;
+  const wallet = parseWallet(body.wallet);
+  if (walletProvided && !wallet) {
+    return NextResponse.json({ error: "Invalid wallet address" }, { status: 400 });
+  }
 
   // Amount is legacy — waitlist no longer collects it. Accept and validate
   // only if present; default to 0 so the existing NOT NULL column stays happy.
@@ -81,7 +102,7 @@ export async function POST(req: NextRequest) {
 
   const { data: existing, error: lookupErr } = await supabase
     .from("waitlist")
-    .select("serial")
+    .select("serial, wallet")
     .eq("email", email)
     .maybeSingle();
 
@@ -89,12 +110,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
   if (existing) {
+    // Let an existing signup attach (or update) a wallet later — e.g. when they
+    // come back to claim Galxe rewards. Only write when a new wallet is given.
+    if (wallet && wallet !== existing.wallet) {
+      await supabase.from("waitlist").update({ wallet }).eq("email", email);
+    }
     return NextResponse.json({ serial: existing.serial, existed: true });
   }
 
   const { data, error } = await supabase
     .from("waitlist")
-    .insert({ email, amount_usd: amount, ip_hash: ipHash, user_agent: userAgent })
+    .insert({ email, amount_usd: amount, ip_hash: ipHash, user_agent: userAgent, wallet })
     .select("serial")
     .single();
 
