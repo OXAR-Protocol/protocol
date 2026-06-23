@@ -37,7 +37,7 @@ interface UseWaitlistReturn {
   savedEmail: string | null;
   existed: boolean;
   error: string | null;
-  submit: (email: string, honeypot: string) => Promise<void>;
+  submit: (email: string, honeypot: string, wallet?: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -58,14 +58,14 @@ export function useWaitlist(): UseWaitlistReturn {
     }
   }, []);
 
-  const submit = useCallback(async (email: string, honeypot: string) => {
+  const submit = useCallback(async (email: string, honeypot: string, wallet?: string) => {
     setStatus("submitting");
     setError(null);
     try {
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, website: honeypot }),
+        body: JSON.stringify({ email, website: honeypot, wallet: wallet?.trim() || undefined }),
       });
       const json = (await res.json()) as WaitlistResult & { error?: string };
       if (!res.ok || typeof json.serial !== "number") {

@@ -7,6 +7,7 @@ import { Reveal } from "./primitives";
 export function Waitlist() {
   const { status, error, submit } = useWaitlist();
   const [email, setEmail] = useState("");
+  const [wallet, setWallet] = useState("");
   const [honeypot, setHoneypot] = useState("");
 
   const sealed = status === "sealed";
@@ -14,7 +15,7 @@ export function Waitlist() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!busy && !sealed) submit(email.trim(), honeypot);
+    if (!busy && !sealed) submit(email.trim(), honeypot, wallet.trim());
   };
 
   return (
@@ -59,6 +60,22 @@ export function Waitlist() {
             </button>
           </form>
         </Reveal>
+
+        {!sealed && (
+          <Reveal delay={0.13}>
+            <input
+              type="text"
+              value={wallet}
+              disabled={sealed}
+              onChange={(e) => setWallet(e.target.value)}
+              placeholder="solana wallet — optional, for rewards"
+              spellCheck={false}
+              autoComplete="off"
+              className="mx-auto mt-3 block h-12 w-full max-w-[520px] rounded-full border border-white/10 bg-transparent px-5 lowercase text-[15px] text-white placeholder:text-white/25 outline-none transition-colors focus:border-white/40 disabled:opacity-40"
+            />
+          </Reveal>
+        )}
+
         {error && <p className="mt-3 lowercase text-[14px] text-[#ff6b6b]">{error} — try again</p>}
         {sealed && (
           <p className="mt-4 lowercase text-[clamp(13px,1.3vw,16px)] text-white/55">
