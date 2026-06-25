@@ -12,25 +12,25 @@ const SPEEDS: Speed[] = [
     label: "Sleepy",
     description: "Slow but steady",
     apy: "4-6%",
-    glow: "rgba(232,167,0,0.10)",
+    glow: "rgba(255,255,255,0.05)",
   },
   {
     level: 2,
     label: "Walking",
     description: "Balanced pace",
     apy: "6-9%",
-    glow: "rgba(232,167,0,0.18)",
+    glow: "rgba(255,255,255,0.08)",
   },
   {
     level: 3,
     label: "Running",
     description: "Fast and loud",
     apy: "9-14%",
-    glow: "rgba(232,167,0,0.30)",
+    glow: "rgba(255,255,255,0.13)",
   },
 ];
 
-const ACCENT = "#E8A700";
+const ACCENT = "#FFFFFF";
 
 // Equalizer mark — rising bars, `level` of them lit. Reads as "how loud".
 function Tempo({ level }: { level: number }) {
@@ -43,8 +43,7 @@ function Tempo({ level }: { level: number }) {
           className="w-[10px] rounded-full"
           style={{
             height: h,
-            background: i < level ? ACCENT : "rgba(255,255,255,0.12)",
-            boxShadow: i < level ? `0 0 18px ${ACCENT}55` : "none",
+            background: i < level ? ACCENT : "rgba(255,255,255,0.14)",
           }}
         />
       ))}

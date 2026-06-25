@@ -11,7 +11,7 @@ const ASSETS: Asset[] = [
   { name: "Government bonds", note: "4–16% APY", status: "SOON" },
 ];
 
-const ACCENT = "#E8A700";
+const ACCENT = "#FFFFFF";
 
 export function PitchAssets() {
   return (
