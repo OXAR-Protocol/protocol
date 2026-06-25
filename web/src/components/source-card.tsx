@@ -6,6 +6,8 @@ import type { ProviderGroup } from "@/lib/yield";
 import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
 import { useApyHistory } from "@/hooks/use-apy-history";
 import { Sparkline } from "@/components/sparkline";
+import { AssetIcon } from "@/components/asset-icon";
+import { assetLogoSrc } from "@/lib/yield/asset-logo";
 
 interface Props {
   group: ProviderGroup;
@@ -28,7 +30,9 @@ export function SourceCard({ group, onOpen }: Props) {
       className="group flex flex-col gap-4 p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition text-left"
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
+        <div className="flex items-start gap-3 min-w-0">
+          <AssetIcon src={assetLogoSrc(group.views[0]?.id ?? "")} label={group.name} size={32} />
+          <div className="min-w-0">
           <p className="text-base text-black truncate">{group.name}</p>
           <div className="mt-1 flex items-center gap-1.5 flex-wrap">
             {group.views.map((v) => (
@@ -39,6 +43,7 @@ export function SourceCard({ group, onOpen }: Props) {
                 {v.assetSymbol}
               </span>
             ))}
+          </div>
           </div>
         </div>
         <ArrowUpRight

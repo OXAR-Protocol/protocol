@@ -20,30 +20,29 @@ export function AssetIcon({
 
   const initials =
     label.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase() || "•";
-  const dim = { width: size, height: size, minWidth: size };
+  const radius = Math.max(8, Math.round(size * 0.26));
+  const dim = { width: size, height: size, minWidth: size, borderRadius: radius };
+  const tile =
+    "inline-flex shrink-0 items-center justify-center overflow-hidden bg-white ring-1 ring-black/10";
 
   if (!src || failed) {
     return (
-      <span
-        style={dim}
-        className={`inline-flex shrink-0 items-center justify-center rounded-full bg-black/[0.06] font-medium text-black/55 ${className}`}
-      >
-        <span style={{ fontSize: Math.round(size * 0.34) }}>{initials}</span>
+      <span style={dim} className={`${tile} bg-black/[0.04] font-medium text-black/55 ${className}`}>
+        <span style={{ fontSize: Math.round(size * 0.36) }}>{initials}</span>
       </span>
     );
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt=""
-      width={size}
-      height={size}
-      loading="lazy"
-      onError={() => setFailed(true)}
-      style={dim}
-      className={`shrink-0 rounded-full bg-white object-contain ring-1 ring-black/10 ${className}`}
-    />
+    <span style={dim} className={`${tile} ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        onError={() => setFailed(true)}
+        className="h-full w-full object-contain p-[14%]"
+      />
+    </span>
   );
 }
