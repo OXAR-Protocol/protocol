@@ -8,7 +8,6 @@ const APP_ROUTES = [
   "/yield",
   "/pile",
   "/you",
-  "/markets",
   "/asset",
   "/onboarding",
   "/login",
