@@ -9,6 +9,8 @@ import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { Sparkline } from "@/components/sparkline";
 import { LiveAmount } from "@/components/live-amount";
+import { AssetIcon } from "@/components/asset-icon";
+import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 
 interface Props {
   view: ProviderView;
@@ -34,11 +36,14 @@ export function PositionCard({ view, onOpen, change24h }: Props) {
       className="group flex flex-col gap-4 p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition text-left"
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-base text-black truncate">{view.name}</p>
-          <span className="mt-1 inline-block text-[10px] lowercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15">
-            {view.assetSymbol}
-          </span>
+        <div className="flex items-start gap-3 min-w-0">
+          <AssetIcon src={assetLogoSrc(view.id)} label={assetIconLabel(view.id, view.assetSymbol)} size={32} />
+          <div className="min-w-0">
+            <p className="text-base text-black truncate">{view.name}</p>
+            <span className="mt-1 inline-block text-[10px] lowercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15">
+              {view.assetSymbol}
+            </span>
+          </div>
         </div>
         <ArrowUpRight
           size={16}

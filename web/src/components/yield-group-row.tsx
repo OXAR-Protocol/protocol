@@ -4,6 +4,8 @@ import { ArrowUpRight } from "lucide-react";
 
 import type { ProviderGroup } from "@/lib/yield";
 import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
+import { AssetIcon } from "@/components/asset-icon";
+import { assetLogoSrc } from "@/lib/yield/asset-logo";
 
 interface Props {
   group: ProviderGroup;
@@ -27,6 +29,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
       className="group w-full text-left p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition"
     >
       <div className="flex items-center gap-4">
+        <AssetIcon src={assetLogoSrc(group.views[0]?.id ?? "")} label={group.name} size={36} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-base text-black truncate">{group.name}</p>

@@ -8,3 +8,10 @@ export function assetLogoSrc(id: string): string | undefined {
   }
   return undefined;
 }
+
+/** Monogram text for the <AssetIcon> fallback: a stock's ticker, else the
+ *  asset symbol (e.g. USDC) for yield sources. */
+export function assetIconLabel(id: string, assetSymbol: string): string {
+  if (id.startsWith("xstock-")) return id.slice("xstock-".length).toUpperCase();
+  return assetSymbol;
+}

@@ -16,6 +16,8 @@ import {
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
+import { AssetIcon } from "@/components/asset-icon";
+import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 
 type Layout = "list" | "grid";
 
@@ -161,6 +163,7 @@ export default function PilePage() {
                   className="group w-full text-left p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition"
                 >
                   <div className="flex items-center gap-4">
+                    <AssetIcon src={assetLogoSrc(v.id)} label={assetIconLabel(v.id, v.assetSymbol)} size={36} />
                     <div className="flex-1 min-w-0">
                       <p className="text-base text-black truncate">{v.name}</p>
                       {(() => {

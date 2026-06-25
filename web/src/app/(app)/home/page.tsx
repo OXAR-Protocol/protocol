@@ -17,6 +17,8 @@ import { fromBaseUnits } from "@/lib/yield";
 import { isXStock } from "@/lib/yield/xstocks";
 import { isGold } from "@/lib/yield/gold";
 import { isPriceExposure } from "@/lib/yield/assets";
+import { AssetIcon } from "@/components/asset-icon";
+import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 
 /** Sum a set of earning sources into the inputs LiveEarned needs. */
 function aggregate(sources: { currentValue: number; invested: number; apy: number }[]) {
@@ -188,7 +190,9 @@ export default function HomePage() {
                   href={`/asset/${v.id}`}
                   className="p-5 rounded-[12px] border border-black/10 bg-white hover:border-black/30 transition-colors min-h-[120px] flex flex-col justify-between"
                 >
-                  <div>
+                  <div className="flex items-center gap-3">
+                    <AssetIcon src={assetLogoSrc(v.id)} label={assetIconLabel(v.id, v.assetSymbol)} size={32} />
+                    <div className="min-w-0">
                     <p className="text-base text-black">{v.name}</p>
                     {(() => {
                       const ch = v.heldMint ? prices[v.heldMint]?.change24h : undefined;
@@ -210,6 +214,7 @@ export default function HomePage() {
                         </p>
                       );
                     })()}
+                    </div>
                   </div>
                   <LiveAmount value={value} apy={v.apy} variant="md" />
                 </Link>
