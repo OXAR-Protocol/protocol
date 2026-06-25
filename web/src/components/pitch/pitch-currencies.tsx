@@ -1,5 +1,5 @@
 type Speed = {
-  emoji: string;
+  level: number;
   label: string;
   description: string;
   apy: string;
@@ -8,27 +8,49 @@ type Speed = {
 
 const SPEEDS: Speed[] = [
   {
-    emoji: "😴",
+    level: 1,
     label: "Sleepy",
     description: "Slow but steady",
     apy: "4-6%",
-    glow: "rgba(114,162,240,0.25)",
+    glow: "rgba(232,167,0,0.10)",
   },
   {
-    emoji: "🚶",
+    level: 2,
     label: "Walking",
     description: "Balanced pace",
     apy: "6-9%",
-    glow: "rgba(139,92,246,0.35)",
+    glow: "rgba(232,167,0,0.18)",
   },
   {
-    emoji: "🏃",
+    level: 3,
     label: "Running",
     description: "Fast and loud",
     apy: "9-14%",
-    glow: "rgba(236,72,153,0.3)",
+    glow: "rgba(232,167,0,0.30)",
   },
 ];
+
+const ACCENT = "#E8A700";
+
+// Equalizer mark — rising bars, `level` of them lit. Reads as "how loud".
+function Tempo({ level }: { level: number }) {
+  const heights = [26, 44, 64];
+  return (
+    <div className="flex h-[64px] items-end gap-2.5" aria-hidden>
+      {heights.map((h, i) => (
+        <span
+          key={i}
+          className="w-[10px] rounded-full"
+          style={{
+            height: h,
+            background: i < level ? ACCENT : "rgba(255,255,255,0.12)",
+            boxShadow: i < level ? `0 0 18px ${ACCENT}55` : "none",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function PitchCurrencies() {
   return (
@@ -52,10 +74,8 @@ export function PitchCurrencies() {
             }}
           >
             <div className="flex flex-col items-center">
-              <span className="text-[clamp(56px,8vw,120px)] leading-none">
-                {speed.emoji}
-              </span>
-              <h3 className="mt-4 font-extralight italic text-[clamp(28px,3vw,48px)] tracking-tight text-white">
+              <Tempo level={speed.level} />
+              <h3 className="mt-7 font-extralight italic text-[clamp(28px,3vw,48px)] tracking-tight text-white">
                 {speed.label}
               </h3>
               <p className="mt-2 font-mono text-xs uppercase tracking-[0.25em] text-white/40">
