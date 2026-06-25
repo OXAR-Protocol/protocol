@@ -53,8 +53,9 @@ export async function fetchRank(
   const { data } = await supabase.rpc("oxar_waitlist_rank", { p_ref_code: refCode });
   const row = Array.isArray(data) ? data[0] : data;
   if (!row) return null;
+  // SQL column is `pos` ("position" is a reserved Postgres keyword).
   return {
-    position: Number(row.position),
+    position: Number(row.pos),
     total: Number(row.total),
     referrals: Number(row.referrals),
   };

@@ -27,7 +27,7 @@ $$;
 -- (lower = closer to the front). GAIN=5 lives here as the single source for the math.
 -- Ties broken by serial (earlier join wins) so position is deterministic.
 create or replace function oxar_waitlist_rank(p_ref_code text)
-returns table(position bigint, total bigint, referrals int)
+returns table(pos bigint, total bigint, referrals int)
 language sql stable as $$
   with me as (
     select serial,
