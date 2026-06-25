@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
-import { Copy, Check, LogOut, ArrowUpRight, LineChart } from "lucide-react";
+import { Copy, Check, LogOut } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { useSolanaContext } from "@/providers/solana-provider";
@@ -67,43 +66,6 @@ export default function YouPage() {
               you're signed out
             </div>
           )}
-        </div>
-      </motion.section>
-
-      {/* Rules link */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.18 }}
-        className="mt-10"
-      >
-        <p className="mb-4 lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
-          explore
-        </p>
-        <div className="space-y-3">
-          <Link
-            href="/markets"
-            className="block p-5 rounded-[12px] border border-black/10 bg-white hover:border-black/30 transition-colors group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-start gap-3">
-                <LineChart className="text-[#3c05c7] mt-0.5" size={18} strokeWidth={1.5} />
-                <div>
-                  <p className="text-base text-black">
-                    markets
-                  </p>
-                  <p className="mt-1 text-xs text-black/45">
-                    browse every yield source we route to
-                  </p>
-                </div>
-              </div>
-              <ArrowUpRight
-                className="text-black/40 group-hover:text-black transition"
-                size={16}
-                strokeWidth={1.5}
-              />
-            </div>
-          </Link>
         </div>
       </motion.section>
 
