@@ -143,15 +143,21 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Resolve referrer: ignore unknown codes, self-referral, and same-device farming.
+  // Resolve referrer: ignore unknown codes and self-referral by email.
+  // NOTE: we deliberately do NOT block same-IP referrals. Our emerging-markets
+  // audience signs up over mobile carriers (carrier-grade NAT) and shared Wi-Fi,
+  // where thousands of legit users share one IP — a hard same-IP block would
+  // silently drop real referrals. The real anti-farm gate is Phase 2 email
+  // verification (referral_status: pending → confirmed); Phase 1 is "raise the
+  // cost" only. ip_hash is still recorded for later review.
   let referrer: { ref_code: string } | null = null;
   if (refCode) {
     const { data: r } = await supabase
       .from("waitlist")
-      .select("ref_code, email, ip_hash")
+      .select("ref_code, email")
       .eq("ref_code", refCode)
       .maybeSingle();
-    if (r && r.email !== email && r.ip_hash !== ipHash) referrer = { ref_code: r.ref_code };
+    if (r && r.email !== email) referrer = { ref_code: r.ref_code };
   }
 
   // Insert with a unique share code (retry on the rare collision).
