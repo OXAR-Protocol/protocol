@@ -1,4 +1,4 @@
-const ACCENT = "#E8A700";
+const ACCENT = "#FFFFFF";
 
 const LIVE = [
   "Stablecoin lending — live on mainnet",

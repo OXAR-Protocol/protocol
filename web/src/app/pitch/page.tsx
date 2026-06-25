@@ -3,8 +3,6 @@ import { PitchHero } from "@/components/pitch/pitch-hero";
 import { PitchCards } from "@/components/pitch/pitch-cards";
 import { PitchAssets } from "@/components/pitch/pitch-assets";
 import { PitchCurrencies } from "@/components/pitch/pitch-currencies";
-import { PitchHow } from "@/components/pitch/pitch-how";
-import { PitchModel } from "@/components/pitch/pitch-model";
 import { PitchTraction } from "@/components/pitch/pitch-traction";
 import { PitchManifesto } from "@/components/pitch/pitch-manifesto";
 
@@ -21,8 +19,6 @@ export default function PitchPage() {
       <PitchCards />
       <PitchAssets />
       <PitchCurrencies />
-      <PitchHow />
-      <PitchModel />
       <PitchTraction />
       <PitchManifesto />
     </main>
