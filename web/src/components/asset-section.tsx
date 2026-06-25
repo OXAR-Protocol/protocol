@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 import { Sparkline } from "@/components/sparkline";
+import { AssetIcon } from "@/components/asset-icon";
+import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import { useStockCharts } from "@/hooks/use-stock-charts";
@@ -83,9 +85,12 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
       </p>
     ) : null;
     const head = (
-      <div>
-        <p className="text-base text-black">{s.token}</p>
-        <p className="mt-0.5 text-xs text-black/45">{s.name}</p>
+      <div className="flex items-center gap-3 min-w-0">
+        <AssetIcon src={assetLogoSrc(s.id)} label={s.symbol || s.token} size={36} />
+        <div className="min-w-0">
+          <p className="text-base text-black">{s.token}</p>
+          <p className="mt-0.5 text-xs text-black/45 truncate">{s.name}</p>
+        </div>
       </div>
     );
 

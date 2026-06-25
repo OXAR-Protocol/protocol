@@ -13,6 +13,8 @@ import { fromBaseUnits, planWithdrawal, RISK_LABEL } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { getAssetInfo } from "@/lib/yield/asset-info";
 import { AssetActionRail } from "@/components/asset-action-rail";
+import { AssetIcon } from "@/components/asset-icon";
+import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { AssetChart } from "@/components/asset-chart";
 import { Sparkline } from "@/components/sparkline";
 import { YieldActionSuccess, type ActionResult } from "@/components/yield-action-success";
@@ -76,7 +78,14 @@ export function AssetDetail({
   return (
     <div className="relative mx-auto max-w-[1100px] pb-32 pt-2">
       {/* Headline */}
-      <motion.div {...fade(0)}>
+      <motion.div {...fade(0)} className="flex items-start gap-4">
+        <AssetIcon
+          src={assetLogoSrc(view.id)}
+          label={unitLabel !== "units" ? unitLabel : view.assetSymbol}
+          size={56}
+          className="mt-1.5"
+        />
+        <div className="min-w-0 flex-1">
         <p className="lowercase text-[clamp(14px,1.3vw,18px)] text-black/45">[ {info?.category ?? (price ? "asset" : "yield source")} ]</p>
         <h1 className="mt-3 flex flex-wrap items-baseline gap-x-3 text-[clamp(28px,4.4vw,46px)] leading-[1.02] tracking-[-0.04em]">
           {view.name}
@@ -123,6 +132,7 @@ export function AssetDetail({
             })}
           </div>
         )}
+        </div>
       </motion.div>
 
       {/* Two columns: content + sticky action rail */}
