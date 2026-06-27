@@ -14,6 +14,7 @@ export interface DefiLlamaPool {
   project: string;
   pool: string;
   apy: number | null;
+  tvlUsd?: number | null;
 }
 
 const PROJECTS = new Set(["kamino-lend", "jupiter-lend", "ondo-yield-assets"]);
@@ -25,43 +26,73 @@ export function toApyFraction(percent: number | null | undefined): number {
     : 0;
 }
 
+/** Is this DefiLlama pool one of our curated Solana sources? */
+function isOurPool(p: DefiLlamaPool): boolean {
+  return p?.chain === "Solana" && PROJECTS.has(p?.project);
+}
+
 /** Filter DefiLlama pools to our Solana lending sources → `{ poolId: apyPercent }`. */
 export function buildApyMap(pools: DefiLlamaPool[]): Record<string, number> {
   const map: Record<string, number> = {};
   for (const p of pools ?? []) {
-    if (p?.chain === "Solana" && PROJECTS.has(p?.project) && typeof p?.apy === "number") {
-      map[p.pool] = p.apy;
-    }
+    if (isOurPool(p) && typeof p?.apy === "number") map[p.pool] = p.apy;
   }
   return map;
 }
 
-// --- Client: read APYs via our /api/yields proxy (memoized per page load) ---
+/** Filter DefiLlama pools to our sources → `{ poolId: tvlUsd }` (USD deposited). */
+export function buildTvlMap(pools: DefiLlamaPool[]): Record<string, number> {
+  const map: Record<string, number> = {};
+  for (const p of pools ?? []) {
+    if (isOurPool(p) && typeof p?.tvlUsd === "number") map[p.pool] = p.tvlUsd;
+  }
+  return map;
+}
 
-let inflight: Promise<Record<string, number>> | null = null;
+// --- Client: read APY + TVL via our /api/yields proxy (memoized per page load) ---
+
+interface Yields {
+  apy: Record<string, number>; // APY fraction
+  tvl: Record<string, number>; // USD deposited
+}
+
+let inflight: Promise<Yields> | null = null;
 let fetchedAt = 0;
 
-/** Map of `poolId → APY fraction` for all our sources. One memoized fetch (~60s). */
-export async function getApyMap(): Promise<Record<string, number>> {
+/** APY fraction + TVL for all our sources. One memoized fetch (~60s). */
+async function getYields(): Promise<Yields> {
   if (inflight && Date.now() - fetchedAt < 60_000) return inflight;
   fetchedAt = Date.now();
   inflight = (async () => {
     const res = await fetch("/api/yields");
     if (!res.ok) throw new Error("yields unavailable");
-    const { apy } = (await res.json()) as { apy?: Record<string, number> };
-    const out: Record<string, number> = {};
-    for (const [poolId, pct] of Object.entries(apy ?? {})) out[poolId] = toApyFraction(pct);
-    return out;
+    const { apy, tvl } = (await res.json()) as {
+      apy?: Record<string, number>;
+      tvl?: Record<string, number>;
+    };
+    const apyOut: Record<string, number> = {};
+    for (const [poolId, pct] of Object.entries(apy ?? {})) apyOut[poolId] = toApyFraction(pct);
+    return { apy: apyOut, tvl: tvl ?? {} };
   })().catch(() => {
     inflight = null; // allow retry on next call
-    return {};
+    return { apy: {}, tvl: {} };
   });
   return inflight;
+}
+
+/** Map of `poolId → APY fraction` for all our sources. */
+export async function getApyMap(): Promise<Record<string, number>> {
+  return (await getYields()).apy;
 }
 
 /** APY fraction for one pool (0 if unknown). */
 export async function getProviderApy(poolId: string): Promise<number> {
   return (await getApyMap())[poolId] ?? 0;
+}
+
+/** USD deposited (TVL) in one pool (0 if unknown). A social-proof trust signal. */
+export async function getProviderTvl(poolId: string): Promise<number> {
+  return (await getYields()).tvl[poolId] ?? 0;
 }
 
 export interface ApyHistoryPoint {

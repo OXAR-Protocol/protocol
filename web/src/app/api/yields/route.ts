@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { buildApyMap, type DefiLlamaPool } from "@/lib/yield/yields-api";
+import { buildApyMap, buildTvlMap, type DefiLlamaPool } from "@/lib/yield/yields-api";
 import { fetchWithRetry } from "@/lib/net/fetch-retry";
 
 // Lightweight DefiLlama proxy — NO protocol SDK here (unlike /api/kamino), so it
@@ -12,16 +12,21 @@ const POOLS_URL = "https://yields.llama.fi/pools";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // Server-side cache of the heavy (~10MB) /pools response, filtered to our pools.
-let apyCache: { map: Record<string, number>; ts: number } | null = null;
+interface PoolMaps {
+  apy: Record<string, number>;
+  tvl: Record<string, number>;
+}
+let cache: { maps: PoolMaps; ts: number } | null = null;
 
-async function loadApyMap(): Promise<Record<string, number>> {
-  if (apyCache && Date.now() - apyCache.ts < 600_000) return apyCache.map;
+async function loadMaps(): Promise<PoolMaps> {
+  if (cache && Date.now() - cache.ts < 600_000) return cache.maps;
   const res = await fetchWithRetry(POOLS_URL);
   if (!res.ok) throw new Error(`DefiLlama ${res.status}`);
   const json = (await res.json()) as { data?: DefiLlamaPool[] };
-  const map = buildApyMap(json?.data ?? []);
-  apyCache = { map, ts: Date.now() };
-  return map;
+  const pools = json?.data ?? [];
+  const maps = { apy: buildApyMap(pools), tvl: buildTvlMap(pools) };
+  cache = { maps, ts: Date.now() };
+  return maps;
 }
 
 export async function GET(req: Request) {
@@ -44,10 +49,11 @@ export async function GET(req: Request) {
       return NextResponse.json({ history: points });
     }
 
-    return NextResponse.json({ apy: await loadApyMap() });
+    const maps = await loadMaps();
+    return NextResponse.json({ apy: maps.apy, tvl: maps.tvl });
   } catch (e) {
     // Soft-fail so the client falls back gracefully (card keeps last/0, never breaks).
     console.error("Yields route error:", e);
-    return NextResponse.json({ apy: {}, history: [] });
+    return NextResponse.json({ apy: {}, tvl: {}, history: [] });
   }
 }
