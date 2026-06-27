@@ -13,6 +13,7 @@ import { fromBaseUnits, planWithdrawal, RISK_LABEL } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { getAssetInfo } from "@/lib/yield/asset-info";
 import { AssetActionRail } from "@/components/asset-action-rail";
+import { AssetTrustStrip } from "@/components/asset-trust-strip";
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { AssetChart } from "@/components/asset-chart";
@@ -134,6 +135,9 @@ export function AssetDetail({
         )}
         </div>
       </motion.div>
+
+      {/* Trust strip: TVL social-proof + non-custodial guarantees */}
+      <AssetTrustStrip view={view} />
 
       {/* Two columns: content + sticky action rail */}
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px]">
