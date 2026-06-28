@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
-import { Sparkline } from "@/components/sparkline";
+import { HoverChart } from "@/components/hover-chart";
 import { getCached, setCache } from "@/lib/cache";
 
 const RANGES = ["24h", "7d", "30d", "90d"] as const;
@@ -90,11 +90,12 @@ export function AssetChart({ mint }: { mint: string }) {
         {loading ? (
           <Loader2 className="animate-spin text-black/40" size={18} />
         ) : closes.length > 1 ? (
-          <Sparkline
+          <HoverChart
             values={closes}
             height={220}
             fill
-            className={`w-full h-56 ${up ? "text-emerald-500/80" : "text-red-500/80"}`}
+            format={(v) => `$${v.toFixed(2)}`}
+            className={up ? "text-emerald-500/80" : "text-red-500/80"}
           />
         ) : (
           <p className="text-xs text-black/40">No price history for this range.</p>

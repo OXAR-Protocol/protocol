@@ -17,7 +17,7 @@ import { AssetTrustStrip } from "@/components/asset-trust-strip";
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { AssetChart } from "@/components/asset-chart";
-import { Sparkline } from "@/components/sparkline";
+import { HoverChart } from "@/components/hover-chart";
 import { YieldActionSuccess, type ActionResult } from "@/components/yield-action-success";
 
 const fade = (delay: number) => ({
@@ -149,7 +149,13 @@ export function AssetDetail({
             ) : apyHistory.length > 1 ? (
               <div className="rounded-[12px] border border-black/10 p-5">
                 <p className="lowercase text-[13px] text-black/45 mb-3">apy · last {apyHistory.length} days</p>
-                <Sparkline values={apyHistory} height={220} fill className="w-full h-56 text-[#3c05c7]/70" />
+                <HoverChart
+                  values={apyHistory}
+                  height={220}
+                  fill
+                  format={(v) => `${v.toFixed(2)}%`}
+                  className="text-[#3c05c7]/70"
+                />
               </div>
             ) : null}
           </motion.div>

@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 
 import { useProviderTvl } from "@/hooks/use-provider-tvl";
 import { isPriceExposure } from "@/lib/yield/assets";
+import { getPlatform } from "@/lib/yield/platform";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 
 /** Compact USD: $143M, $1.4B, $920K. */
@@ -26,6 +27,7 @@ function compactUsd(n: number): string {
 export function AssetTrustStrip({ view }: { view: ProviderView }) {
   const tvl = useProviderTvl(view.defiLlamaPoolId);
   const price = isPriceExposure(view.id);
+  const platform = getPlatform(view.id);
 
   const chips = price
     ? ["sell anytime", "no lock-up", "self-custody"]
@@ -35,10 +37,21 @@ export function AssetTrustStrip({ view }: { view: ProviderView }) {
 
   return (
     <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
-      {tvl !== null && (
+      {(platform || tvl !== null) && (
         <p className="text-[14px] text-black/55">
-          <span className="font-medium text-black tabular-nums">{compactUsd(tvl)}</span>{" "}
-          {price ? "held here" : "deposited here"}
+          {platform && (
+            <>
+              {platform.kind === "lent" ? "lent on " : "issued by "}
+              <span className="font-medium text-black">{platform.name}</span>
+            </>
+          )}
+          {platform && tvl !== null && " · "}
+          {tvl !== null && (
+            <>
+              <span className="font-medium text-black tabular-nums">{compactUsd(tvl)}</span>{" "}
+              {price ? "held" : "deposited"}
+            </>
+          )}
         </p>
       )}
       <div className="flex flex-wrap gap-2">
