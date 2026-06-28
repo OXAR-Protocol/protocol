@@ -212,11 +212,6 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
     category: "yield · savings rate",
     facts: [{ label: "earns from", value: "Sky savings rate" }, { label: "where", value: "Sky / Ethereum" }, { label: "risk", value: "low" }],
   },
-  "ethena-susde": {
-    about: "Ethena's sUSDe yield comes from a delta-neutral trade (holding crypto while shorting futures) plus funding rates. High yield, more moving parts — the advanced option.",
-    category: "yield · delta-neutral",
-    facts: [{ label: "earns from", value: "funding + staking" }, { label: "issuer", value: "Ethena" }, { label: "risk", value: "high" }],
-  },
 };
 
 /** Look up curated info for an asset/source id. */

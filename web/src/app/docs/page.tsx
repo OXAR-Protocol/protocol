@@ -10,7 +10,7 @@ export default function DocsPage() {
       <section>
         <h2>Overview</h2>
         <p>
-          OXAR is a <strong>non-custodial app where your money earns and grows</strong>. Connect a crypto wallet (Phantom, Backpack, MetaMask). Your USDC routes into curated yield sources — Jupiter Lend and Kamino USDC live today, with Ondo Treasuries, Maple credit and Ethena sUSDe on the way. Beyond yield, buy tokenized stocks and gold to hold. Withdraw anytime, never custodial.
+          OXAR is a <strong>non-custodial app where your money earns and grows</strong>. Connect a crypto wallet (Phantom, Backpack, MetaMask). Your USDC routes into curated yield sources — Jupiter Lend, Kamino USDC, Ondo Treasuries and Maple credit live today, with more on the way. Beyond yield, buy tokenized stocks and gold to hold. Withdraw anytime, never custodial.
         </p>
       </section>
 
@@ -29,7 +29,7 @@ export default function DocsPage() {
         <ul className="mt-4 list-none space-y-3">
           <li>→ <strong>😴 Sleepy (4-6% APY)</strong> — Ondo USDY (US Treasuries) + Kamino USDC. Lowest volatility.</li>
           <li>→ <strong>🚶 Walking (6-9% APY)</strong> — a mix of Maple Syrup, Kamino, JLP. Balanced.</li>
-          <li>→ <strong>🏃 Running (9-14% APY)</strong> — Ethena sUSDe, Jupiter LP, Drift insurance. Higher volatility, higher upside.</li>
+          <li>→ <strong>🏃 Running (9-14% APY)</strong> — Jupiter LP, Drift insurance. Higher volatility, higher upside.</li>
         </ul>
         <p className="mt-4">
           We don&apos;t make personalized recommendations. APYs shown are current rates from the underlying sources; they move with the market.
@@ -59,7 +59,7 @@ export default function DocsPage() {
       <section>
         <h2>Cross-chain (Delora)</h2>
         <p>
-          Some of the best yield sources live on Ethereum (Ondo USDY, Ethena sUSDe, Sky sDAI). OXAR routes through <strong>Delora</strong>, a cross-chain bridge and swap aggregator: your USDC on Solana → bridged → deposited into the source → tracked back in OXAR. One transaction from your side.
+          Some of the best yield sources live on Ethereum (Ondo USDY, Sky sDAI). OXAR routes through <strong>Delora</strong>, a cross-chain bridge and swap aggregator: your USDC on Solana → bridged → deposited into the source → tracked back in OXAR. One transaction from your side.
         </p>
       </section>
 
