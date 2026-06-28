@@ -19,7 +19,7 @@ export default function TermsPage() {
       <section>
         <h2>2. What OXAR is</h2>
         <p>
-          OXAR is a <strong>non-custodial software interface</strong> that routes user-owned USDC into curated third-party yield sources (Ondo, Maple, Kamino, Jupiter LP, Ethena, Sky, and others) and provides infrastructure for shared savings vaults among groups of users.
+          OXAR is a <strong>non-custodial software interface</strong> that routes user-owned USDC into curated third-party yield sources (Ondo, Maple, Kamino, Jupiter LP, Sky, and others) and provides infrastructure for shared savings vaults among groups of users.
         </p>
         <p className="mt-3">
           We <strong>are not</strong> a bank, broker, custodian, money transmitter, investment advisor, or securities issuer. We do not hold your funds. We do not make investment decisions on your behalf.
@@ -36,7 +36,7 @@ export default function TermsPage() {
       <section>
         <h2>4. Non-custodial design</h2>
         <p>
-          OXAR is <strong>fully non-custodial</strong>. Your USDC and yield-bearing tokens (USDY, sUSDe, etc.) sit in your own wallet (Phantom, Backpack, MetaMask, or a Privy-issued embedded wallet under your control). OXAR smart contracts have <strong>no administrative withdrawal keys</strong> over user funds.
+          OXAR is <strong>fully non-custodial</strong>. Your USDC and yield-bearing tokens (USDY, syrupUSDC, etc.) sit in your own wallet (Phantom, Backpack, MetaMask, or a Privy-issued embedded wallet under your control). OXAR smart contracts have <strong>no administrative withdrawal keys</strong> over user funds.
         </p>
         <p className="mt-3">
           <strong>Group vaults</strong> use a pro-rata claim design: each member holds shares proportional to their contribution and may withdraw their portion at any time without group approval. There is no pooled investment decision-making.
@@ -53,7 +53,7 @@ export default function TermsPage() {
       <section>
         <h2>6. Yield sources are third parties</h2>
         <p>
-          The yield sources we integrate (Ondo Finance, Maple Finance, Ethena Labs, Sky, Kamino, Jupiter, and others) are <strong>independent protocols and issuers</strong> with their own terms, risks, and compliance. We curate but do not operate them. Yield is paid by them, not us.
+          The yield sources we integrate (Ondo Finance, Maple Finance, Sky, Kamino, Jupiter, and others) are <strong>independent protocols and issuers</strong> with their own terms, risks, and compliance. We curate but do not operate them. Yield is paid by them, not us.
         </p>
       </section>
 
@@ -62,7 +62,7 @@ export default function TermsPage() {
         <p>By using OXAR you acknowledge:</p>
         <ul className="mt-3 list-none space-y-2">
           <li>→ <strong>Smart contract risk</strong> — bugs in OXAR or integrated protocols may result in loss of funds. We audit but cannot guarantee.</li>
-          <li>→ <strong>Yield source risk</strong> — third-party protocols may depeg (sUSDe), default (Maple pools), or shut down. We disclose risk levels but do not insure.</li>
+          <li>→ <strong>Yield source risk</strong> — third-party protocols may depeg, default (Maple pools), or shut down. We disclose risk levels but do not insure.</li>
           <li>→ <strong>Stablecoin risk</strong> — USDC, USDT, and similar may de-peg from $1.</li>
           <li>→ <strong>Blockchain risk</strong> — network outages, transaction failures, fee spikes.</li>
           <li>→ <strong>Regulatory risk</strong> — the legal status of crypto, stablecoins, and DeFi protocols may change in your jurisdiction.</li>

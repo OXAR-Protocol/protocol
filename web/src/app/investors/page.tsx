@@ -32,7 +32,7 @@ export default function InvestorsPage() {
           <strong>Connect your wallet</strong> (Phantom, Backpack, MetaMask). Apple Pay / Google Pay deposits via Ramp Network are on the way. Pick a risk template: Sleepy (4-6%), Walking (6-9%), Running (9-14%).
         </p>
         <p className="mt-3">
-          Your USDC routes into <strong>curated yield sources</strong>: Jupiter Lend and Kamino USDC live today, with Ondo USDY (US Treasuries), Maple (institutional credit) and Ethena sUSDe on the way. Cross-chain access via Delora — no bridges to manage.
+          Your USDC routes into <strong>curated yield sources</strong>: Jupiter Lend, Kamino USDC, Ondo USDY (US Treasuries) and Maple (institutional credit) live today, with more on the way. Cross-chain access via Delora — no bridges to manage.
         </p>
         <p className="mt-3">
           Beyond yield, buy <strong>tokenized stocks and gold</strong> (Backed xStocks, Tether Gold) and hold them in your own wallet — real price exposure with on-chain P&amp;L. Each asset has its own page explaining what it is. <strong>Tokenized bonds</strong> and new asset classes are next.
@@ -42,7 +42,7 @@ export default function InvestorsPage() {
       <section>
         <h2>4. Why now</h2>
         <p>
-          Crypto-paid workforce is real and growing: Bitwage (150k+ workers), Toku (100+ countries), Deel crypto payroll, Superfluid streaming. <strong>Tokenized RWA is maturing</strong>: Ondo USDY ($500M+), Ethena sUSDe ($5B+), Maple ($1B+). Apple Pay → crypto via licensed providers like Ramp Network just became frictionless.
+          Crypto-paid workforce is real and growing: Bitwage (150k+ workers), Toku (100+ countries), Deel crypto payroll, Superfluid streaming. <strong>Tokenized RWA is maturing</strong>: Ondo USDY ($500M+), Maple ($1B+), tokenized stocks via Backed. Apple Pay → crypto via licensed providers like Ramp Network just became frictionless.
         </p>
         <p className="mt-3">
           Banks (Apple, Wealthfront, Marcus) cap at 4-5% because of US Treasury rates. Crypto-native users want more without taking obscure risks. <strong>This window opens for the next 12-24 months</strong> before Revolut / Coinbase close it.
