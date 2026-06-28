@@ -18,6 +18,7 @@ const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 // Kamino/Jupiter Lend will attribute by vault address next — same shared engine.)
 const SOURCES: { id: string; heldMint: string; costMint: string }[] = [
   { id: "ondo-usdy", heldMint: "A1KLoBrKBde8Ty9qtNQUtq3C2ortoC3u7twggz7sEto6", costMint: USDC },
+  { id: "maple-solana", heldMint: "AvZZF1YaZDziPY2RCK4oJrRVrbN3mTD9NL24hPeaZeUj", costMint: USDC },
   ...XSTOCKS.map((s) => ({ id: s.id, heldMint: s.mint, costMint: USDC })),
   ...GOLD.map((g) => ({ id: g.id, heldMint: g.mint, costMint: USDC })),
 ];

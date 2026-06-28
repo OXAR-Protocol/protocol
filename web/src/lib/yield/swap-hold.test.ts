@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
 
-import { usdyToSwapForWithdraw } from "./ondo";
+import { amountToSwapForWithdraw as usdyToSwapForWithdraw } from "./swap-hold";
 
 // USDY ≈ $1.1337. A position of 88.07 USDY ≈ 99.85 USDC. Both mints are 6-decimal.
 const USDY = BigInt(88_070_000); // 88.07 USDY base units
 const VALUE = BigInt(99_850_000); // ~99.85 USDC base units
 
-describe("usdyToSwapForWithdraw", () => {
+describe("amountToSwapForWithdraw", () => {
   it("swaps the whole balance when the request meets or exceeds the position value", () => {
     expect(usdyToSwapForWithdraw(USDY, VALUE, VALUE)).toBe(USDY);
     expect(usdyToSwapForWithdraw(USDY, VALUE, VALUE + BigInt(1))).toBe(USDY);

@@ -19,6 +19,11 @@ export interface DefiLlamaPool {
 
 const PROJECTS = new Set(["kamino-lend", "jupiter-lend", "ondo-yield-assets"]);
 
+// Pools we want by exact id regardless of chain. Maple's protocol-wide USDC rate
+// lives on its Ethereum pool, but it's the same Syrup yield that syrupUSDC accrues
+// on Solana — so we surface that pool's APY/TVL for the Maple source.
+const EXTRA_POOLS = new Set(["43641cf5-a92e-416b-bce9-27113d3c0db6"]);
+
 /** DefiLlama APY is a percent (5.63 = 5.63%); our providers want a fraction. */
 export function toApyFraction(percent: number | null | undefined): number {
   return typeof percent === "number" && Number.isFinite(percent) && percent > 0
@@ -26,9 +31,9 @@ export function toApyFraction(percent: number | null | undefined): number {
     : 0;
 }
 
-/** Is this DefiLlama pool one of our curated Solana sources? */
+/** Is this DefiLlama pool one of our curated sources (Solana projects + allowlist)? */
 function isOurPool(p: DefiLlamaPool): boolean {
-  return p?.chain === "Solana" && PROJECTS.has(p?.project);
+  return (p?.chain === "Solana" && PROJECTS.has(p?.project)) || EXTRA_POOLS.has(p?.pool);
 }
 
 /** Filter DefiLlama pools to our Solana lending sources → `{ poolId: apyPercent }`. */

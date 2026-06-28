@@ -5,6 +5,7 @@ import {
 } from "./jupiter";
 import { kaminoUsdcProvider } from "./kamino";
 import { ondoUsdyProvider } from "./ondo";
+import { mapleSyrupProvider } from "./maple";
 import { xstockProviders } from "./xstocks";
 import { goldProviders } from "./gold";
 import type { YieldProvider } from "./types";
@@ -19,6 +20,7 @@ export const PROVIDERS: readonly YieldProvider[] = [
   jupiterUsdgProvider,
   kaminoUsdcProvider,
   ondoUsdyProvider,
+  mapleSyrupProvider,
   ...xstockProviders,
   ...goldProviders,
 ];
