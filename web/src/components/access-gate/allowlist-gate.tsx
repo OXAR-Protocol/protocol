@@ -3,12 +3,22 @@
 import { ReactNode, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
-import { ComingSoon } from "./coming-soon";
+import type { Rank } from "@/hooks/use-waitlist";
+import { ComingSoon, type Standing } from "./coming-soon";
 
 // Routes that must render without an allowlist check (you log in here).
 const PUBLIC_APP_PATHS = ["/login"];
 
 type Status = "loading" | "allowed" | "denied";
+type Denial = { onWaitlist: boolean; standing: Standing | null };
+
+interface CheckResult {
+  allowed?: boolean;
+  onWaitlist?: boolean;
+  serial?: number;
+  refCode?: string | null;
+  rank?: Rank | null;
+}
 
 const CACHE_KEY = "oxar.allow.v1";
 
@@ -21,6 +31,7 @@ export function AllowlistGate({ children }: { children: ReactNode }) {
   const { ready, authenticated, user } = usePrivy();
   const pathname = usePathname();
   const [status, setStatus] = useState<Status>("loading");
+  const [denial, setDenial] = useState<Denial>({ onWaitlist: false, standing: null });
 
   const email = user?.email?.address?.toLowerCase() ?? null;
   const isPublic = PUBLIC_APP_PATHS.some((p) => pathname.startsWith(p));
@@ -49,7 +60,7 @@ export function AllowlistGate({ children }: { children: ReactNode }) {
       body: JSON.stringify({ email }),
     })
       .then((r) => r.json())
-      .then((j: { allowed?: boolean }) => {
+      .then((j: CheckResult) => {
         if (cancelled) return;
         if (j.allowed) {
           try {
@@ -59,6 +70,13 @@ export function AllowlistGate({ children }: { children: ReactNode }) {
           }
           setStatus("allowed");
         } else {
+          setDenial({
+            onWaitlist: !!j.onWaitlist,
+            standing:
+              j.onWaitlist && typeof j.serial === "number"
+                ? { serial: j.serial, refCode: j.refCode ?? null, rank: j.rank ?? null }
+                : null,
+          });
           setStatus("denied");
         }
       })
@@ -82,7 +100,14 @@ export function AllowlistGate({ children }: { children: ReactNode }) {
     );
   }
 
-  if (status === "denied") return <ComingSoon email={email} />;
+  if (status === "denied")
+    return (
+      <ComingSoon
+        email={email}
+        onWaitlist={denial.onWaitlist}
+        standing={denial.standing}
+      />
+    );
 
   return <>{children}</>;
 }

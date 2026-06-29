@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "crypto";
 import { getSupabaseServer } from "@/lib/supabase-server";
+import { fetchRank } from "@/lib/waitlist-referral";
 
 export const runtime = "nodejs";
 
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getSupabaseServer();
-  const { data: row, error } = await supabase
+  const { data: allowRow, error } = await supabase
     .from("allowlist")
     .select("email")
     .ilike("email", email) // case-insensitive exact match (no wildcards)
@@ -67,6 +68,29 @@ export async function POST(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
+  if (allowRow) {
+    return NextResponse.json({ allowed: true });
+  }
 
-  return NextResponse.json({ allowed: Boolean(row) });
+  // Not allowlisted — report waitlist standing so the gate can pick the right
+  // "coming soon" state: already on the list (with their referral rank) vs. not
+  // yet (offer the sign-up form).
+  const { data: wlRow } = await supabase
+    .from("waitlist")
+    .select("serial, ref_code")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (!wlRow) {
+    return NextResponse.json({ allowed: false, onWaitlist: false });
+  }
+
+  const rank = wlRow.ref_code ? await fetchRank(supabase, wlRow.ref_code) : null;
+  return NextResponse.json({
+    allowed: false,
+    onWaitlist: true,
+    serial: wlRow.serial,
+    refCode: wlRow.ref_code,
+    rank,
+  });
 }
