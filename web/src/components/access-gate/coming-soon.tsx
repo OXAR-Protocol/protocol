@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { usePrivy } from "@privy-io/react-auth";
 import type { Rank } from "@/hooks/use-waitlist";
 import { WaitlistForm } from "@/components/landing-v2/waitlist-form";
 import { WaitlistSuccess } from "@/components/landing-v2/waitlist-success";
@@ -14,10 +13,10 @@ export interface Standing {
 }
 
 /**
- * Shown to anyone who is not on the allowlist — both the pre-Privy access gate
- * (before a wallet is created) and the post-login backstop. Two states:
+ * Shown by the access wall to anyone not on the allowlist. Two states:
  *   • onWaitlist  → "you already took your spot" + their live referral standing.
  *   • not on list → the waitlist sign-up form (same logic as the landing page).
+ * Privy-free on purpose: the wall lives outside the Privy provider.
  */
 export function ComingSoon({
   email,
@@ -30,8 +29,6 @@ export function ComingSoon({
   standing: Standing | null;
   onBack?: () => void;
 }) {
-  const { authenticated, logout } = usePrivy();
-
   const shareUrl = useMemo(() => {
     if (!standing?.refCode || typeof window === "undefined") return null;
     return `${window.location.origin}/?ref=${standing.refCode}`;
@@ -82,21 +79,14 @@ export function ComingSoon({
         )}
 
         <div className="mt-2 flex flex-col items-center gap-2">
-          {authenticated ? (
-            <button
-              onClick={() => logout()}
-              className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/40 transition-colors hover:text-white/80"
-            >
-              Log out
-            </button>
-          ) : onBack ? (
+          {onBack && (
             <button
               onClick={onBack}
               className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/40 transition-colors hover:text-white/80"
             >
               &larr; Use a different email
             </button>
-          ) : null}
+          )}
           {email && <p className="font-mono text-[10px] text-white/25">{email}</p>}
         </div>
       </div>
