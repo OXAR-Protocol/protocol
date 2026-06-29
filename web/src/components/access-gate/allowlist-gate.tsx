@@ -21,6 +21,10 @@ interface CheckResult {
 }
 
 const CACHE_KEY = "oxar.allow.v1";
+// Set by the pre-login /login gate once an email passes the allowlist. Honoured
+// here so a wallet login (which carries no email) isn't re-denied after the
+// user already cleared the gate. Cleared by the gate on a denied email.
+const GATEPASS_KEY = "oxar.gatepass.v1";
 
 /**
  * Closed-alpha barrier. After Privy login, checks the signed-in email against
@@ -38,9 +42,17 @@ export function AllowlistGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!ready || !authenticated) return;
-    // Wallet-only login has no email → not allowlisted by email.
+    // Wallet login carries no email — honor the pre-login gate pass instead of an
+    // allowlist lookup (the gate already approved an email in this browser).
+    // Email logins below are still validated against the allowlist directly.
     if (!email) {
-      setStatus("denied");
+      let pass = false;
+      try {
+        pass = !!window.localStorage.getItem(GATEPASS_KEY);
+      } catch {
+        /* ignore */
+      }
+      setStatus(pass ? "allowed" : "denied");
       return;
     }
     // Warm from cache to avoid a flash on reload / navigation.

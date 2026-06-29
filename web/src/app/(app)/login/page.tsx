@@ -47,9 +47,22 @@ export default function LoginPage() {
         rank?: Standing["rank"];
       };
       if (j.allowed) {
+        // Mark this browser gate-approved so the post-login backstop also lets a
+        // wallet login through (a wallet carries no email to re-check).
+        try {
+          window.localStorage.setItem("oxar.gatepass.v1", value);
+        } catch {
+          /* ignore */
+        }
         // Approved — hand off to the normal Privy registration (email or wallet).
         login({ walletChainType: "solana-only" });
       } else {
+        // Clear any stale gate pass so a now-revoked email loses access.
+        try {
+          window.localStorage.removeItem("oxar.gatepass.v1");
+        } catch {
+          /* ignore */
+        }
         setDenied({
           onWaitlist: !!j.onWaitlist,
           standing:
