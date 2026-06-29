@@ -4,7 +4,7 @@ import { dmSans } from "@/components/landing-v2/fonts";
 import { TopNav } from "@/components/top-nav";
 import { TabBar } from "@/components/tab-bar";
 import { AuthGuard } from "@/components/auth-guard";
-import { AccessGate } from "@/components/access-gate/access-gate";
+import { AllowlistGate } from "@/components/access-gate/allowlist-gate";
 import { WarpProvider } from "@/components/warp-transition";
 import { WarpOnEntry } from "@/components/warp-on-entry";
 import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
@@ -15,11 +15,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className={`${dmSans.variable} ${dmSans.className} min-h-screen bg-white text-black`}>
       <Suspense fallback={null}>
-        <AccessGate>
-          <Providers>
-            <WarpProvider>
-              <WarpOnEntry />
-              <AuthGuard>
+        <Providers>
+          <WarpProvider>
+            <WarpOnEntry />
+            <AuthGuard>
+              <AllowlistGate>
                 <div className="min-h-screen bg-white">
                   <TopNav />
                   <div className="mx-auto max-w-[1100px] px-5 pb-28 pt-6 md:pb-16">
@@ -28,10 +28,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
                 <TabBar />
-              </AuthGuard>
-            </WarpProvider>
-          </Providers>
-        </AccessGate>
+              </AllowlistGate>
+            </AuthGuard>
+          </WarpProvider>
+        </Providers>
       </Suspense>
     </div>
   );
