@@ -11,7 +11,6 @@ const APP_ROUTES = [
   "/asset",
   "/onboarding",
   "/login",
-  "/gate",
 ];
 
 const MARKETING_ROUTES = [
@@ -27,8 +26,8 @@ function isAppRoute(pathname: string): boolean {
 
 function isMarketingRoute(pathname: string): boolean {
   // "/" is handled separately per-host — on the marketing domain it's the
-  // landing page; on the app domain bare "/" routes to /home (the AccessGate
-  // wrapper in (app)/layout then gates entry behind an invite key).
+  // landing page; on the app domain bare "/" routes to /home (the AllowlistGate
+  // wrapper in (app)/layout then gates entry behind the email allowlist).
   return MARKETING_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
 }
 
