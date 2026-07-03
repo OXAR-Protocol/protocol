@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { useProviderTvl } from "@/hooks/use-provider-tvl";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { getPlatform } from "@/lib/yield/platform";
+import { useT } from "@/lib/i18n";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 
 /** Compact USD: $143M, $1.4B, $920K. */
@@ -25,15 +26,16 @@ function compactUsd(n: number): string {
  * carry a one-time swap cost, so they never claim "no fees" — only pure lend does.
  */
 export function AssetTrustStrip({ view }: { view: ProviderView }) {
+  const { t } = useT();
   const tvl = useProviderTvl(view.defiLlamaPoolId);
   const price = isPriceExposure(view.id);
   const platform = getPlatform(view.id);
 
   const chips = price
-    ? ["sell anytime", "no lock-up", "self-custody"]
+    ? [t("trust.sellAnytime"), t("trust.noLock"), t("trust.selfCustody")]
     : view.heldMint
-      ? ["withdraw anytime", "no lock-up", "self-custody"]
-      : ["withdraw anytime", "no lock-up", "no fees"];
+      ? [t("trust.withdrawAnytime"), t("trust.noLock"), t("trust.selfCustody")]
+      : [t("trust.withdrawAnytime"), t("trust.noLock"), t("trust.noFees")];
 
   return (
     <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
@@ -41,7 +43,7 @@ export function AssetTrustStrip({ view }: { view: ProviderView }) {
         <p className="text-[14px] text-black/55">
           {platform && (
             <>
-              {platform.kind === "lent" ? "lent on " : "issued by "}
+              {platform.kind === "lent" ? `${t("trust.lentOn")} ` : `${t("trust.issuedBy")} `}
               <span className="font-medium text-black">{platform.name}</span>
             </>
           )}
@@ -49,7 +51,7 @@ export function AssetTrustStrip({ view }: { view: ProviderView }) {
           {tvl !== null && (
             <>
               <span className="font-medium text-black tabular-nums">{compactUsd(tvl)}</span>{" "}
-              {price ? "held" : "deposited"}
+              {price ? t("trust.held") : t("trust.deposited")}
             </>
           )}
         </p>

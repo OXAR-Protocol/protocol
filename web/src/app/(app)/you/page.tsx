@@ -6,11 +6,14 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Copy, Check, LogOut } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
+import { LanguagePicker } from "@/components/language-picker";
 import { useSolanaContext } from "@/providers/solana-provider";
+import { useT } from "@/lib/i18n";
 
 export default function YouPage() {
   const { user, logout, ready, authenticated } = usePrivy();
   const { walletAddress } = useSolanaContext();
+  const { t } = useT();
   const [copiedAddr, setCopiedAddr] = useState<string | null>(null);
 
   const email = user?.email?.address;
@@ -34,7 +37,7 @@ export default function YouPage() {
       >
         <SectionLabel>you</SectionLabel>
         <h1 className="mt-4 text-[clamp(26px,4vw,44px)] leading-[1.04] tracking-[-0.04em] lowercase text-black">
-          settings & profile
+          {t("you.title")}
         </h1>
       </motion.div>
 
@@ -46,16 +49,16 @@ export default function YouPage() {
         className="mt-10"
       >
         <p className="mb-4 lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
-          account
+          {t("you.account")}
         </p>
         <div className="space-y-3">
           {email && (
-            <Row label="email" value={email} />
+            <Row label={t("you.email")} value={email} />
           )}
           {solana && (
             <WalletCard
-              label="your wallet"
-              hint="your funds & positions live here"
+              label={t("you.wallet")}
+              hint={t("you.walletHint")}
               address={solana}
               copied={copiedAddr === solana}
               onCopy={() => handleCopy(solana)}
@@ -63,10 +66,23 @@ export default function YouPage() {
           )}
           {!authenticated && (
             <div className="p-4 rounded-[12px] border border-black/10 bg-white text-center text-sm text-black/45">
-              you're signed out
+              {t("you.signedOut")}
             </div>
           )}
         </div>
+      </motion.section>
+
+      {/* Language */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="mt-10"
+      >
+        <p className="mb-4 lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
+          {t("you.language")}
+        </p>
+        <LanguagePicker />
       </motion.section>
 
       {/* Notifications */}
@@ -99,7 +115,7 @@ export default function YouPage() {
             className="inline-flex items-center gap-2 px-5 py-3 rounded-[5px] border border-black/15 hover:border-red-500/40 hover:text-red-400 text-xs lowercase tracking-wide text-black/60 transition"
           >
             <LogOut size={12} strokeWidth={1.5} />
-            Sign out
+            {t("you.signOut")}
           </button>
         </motion.section>
       )}

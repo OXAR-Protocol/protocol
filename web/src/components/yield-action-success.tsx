@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
+import { useT } from "@/lib/i18n";
+
 export interface ActionResult {
   kind: "deposit" | "withdraw";
   /** Human amount moved (e.g. 1.5 for $1.50). */
@@ -25,7 +27,12 @@ interface Props {
  * check + amount so the user has unmistakable feedback that the move happened.
  */
 export function YieldActionSuccess({ result, onDone, address }: Props) {
-  const verb = result.pending ? "Bridging" : result.kind === "deposit" ? "Deposited" : "Withdrew";
+  const { t } = useT();
+  const verb = result.pending
+    ? t("success.bridging")
+    : result.kind === "deposit"
+      ? t("success.deposited")
+      : t("success.withdrew");
 
   return (
     <motion.div
@@ -75,7 +82,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         <p className="mt-1 text-xs text-black/45">{result.symbol}</p>
         {result.pending && (
           <p className="mt-2 max-w-[260px] text-[12px] leading-snug text-black/45">
-            bridging to Solana — we&apos;ll finish the deposit automatically. you can keep browsing.
+            {t("success.bridgingBody")}
           </p>
         )}
       </motion.div>
@@ -89,7 +96,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
       >
         {!result.pending && (
           <Link href="/pile" className="underline-offset-2 hover:text-black hover:underline transition">
-            view your position
+            {t("success.viewPosition")}
           </Link>
         )}
         {address && (
@@ -99,7 +106,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-0.5 underline-offset-2 hover:text-black hover:underline transition"
           >
-            on Solscan
+            {t("success.onSolscan")}
             <ArrowUpRight size={12} strokeWidth={1.5} />
           </a>
         )}
@@ -112,7 +119,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         onClick={onDone}
         className="mt-1 px-6 py-2.5 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
       >
-        Done
+        {t("success.done")}
       </motion.button>
     </motion.div>
   );

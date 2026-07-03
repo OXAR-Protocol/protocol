@@ -6,6 +6,7 @@ import type { ProviderView } from "@/hooks/use-yield-positions";
 import type { NetPreview } from "@/hooks/use-net-preview";
 import type { SwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { WalletAsset } from "@/lib/portfolio/assets";
+import { useT } from "@/lib/i18n";
 
 interface Props {
   verb: string;
@@ -47,24 +48,25 @@ export function DepositConfirm({
   onConfirm,
   onBack,
 }: Props) {
+  const { t } = useT();
   const held = !!view.heldMint;
   const route = isDirect
-    ? "instant"
+    ? t("confirm.route.instant")
     : payAsset.chain === "ethereum"
       ? `bridge${preview.etaSec ? ` · ~${Math.round(preview.etaSec / 60)} min` : ""}${preview.feeUsd ? ` · fee ~${money(preview.feeUsd)}` : ""}`
-      : "swap · ~5s";
+      : t("confirm.route.swap");
 
   // What you'll end up with, net of any conversion.
   const get = held
     ? swapIn.quoting
-      ? "quoting…"
+      ? t("deposit.quoting")
       : swapIn.valueUsd !== null
         ? `≈ ${money(swapIn.valueUsd)} ${view.assetSymbol}`
         : "—"
     : isDirect
       ? `${money(usdAmount)} ${view.assetSymbol}`
       : preview.quoting
-        ? "quoting…"
+        ? t("deposit.quoting")
         : preview.netUsdc !== null
           ? `≈ ${money(preview.netUsdc)} ${view.assetSymbol}`
           : "—";
@@ -72,18 +74,18 @@ export function DepositConfirm({
 
   return (
     <div>
-      <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">review your {verb.toLowerCase()}</p>
+      <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">{t("confirm.review", { verb: verb.toLowerCase() })}</p>
 
       <div className="divide-y divide-black/5">
-        <Row k="you pay" v={`${money(usdAmount)} · ${payAsset.symbol}`} />
-        <Row k={held ? "you'll hold" : "you'll get"} v={get} />
-        {swapCost !== null && <Row k="swap cost (one-time)" v={`~${money(swapCost)}`} />}
-        <Row k="route" v={route} />
-        <Row k="where it goes" v={held ? "your own wallet" : view.name} />
+        <Row k={t("confirm.youPay")} v={`${money(usdAmount)} · ${payAsset.symbol}`} />
+        <Row k={held ? t("confirm.youllHold") : t("confirm.youllGet")} v={get} />
+        {swapCost !== null && <Row k={t("confirm.swapCostOneTime")} v={`~${money(swapCost)}`} />}
+        <Row k={t("confirm.route")} v={route} />
+        <Row k={t("confirm.whereItGoes")} v={held ? t("confirm.ownWallet") : view.name} />
       </div>
 
       <p className="mt-3 text-[11px] leading-snug text-black/45">
-        withdraw anytime · no lock · OXAR never holds your funds — your wallet signs it.
+        {t("confirm.footer")}
       </p>
 
       {error && <p className="mt-3 text-xs text-red-500 text-center">{error}</p>}
@@ -99,7 +101,7 @@ export function DepositConfirm({
             {label}
           </>
         ) : (
-          `confirm ${verb.toLowerCase()}`
+          `${t("confirm.confirm", { verb: verb.toLowerCase() })}`
         )}
       </button>
       <button
@@ -107,7 +109,7 @@ export function DepositConfirm({
         disabled={busy}
         className="mt-2 w-full py-2 text-[12px] lowercase tracking-wide text-black/45 hover:text-black/70 disabled:opacity-30 transition"
       >
-        back
+        {t("confirm.back")}
       </button>
     </div>
   );
