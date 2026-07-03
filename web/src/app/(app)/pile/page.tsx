@@ -18,11 +18,13 @@ import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
+import { useT } from "@/lib/i18n";
 
 type Layout = "list" | "grid";
 
 export default function PilePage() {
   const router = useRouter();
+  const { t } = useT();
   const { views, totalValue, loading } = useYieldPositions();
   const [layout, setLayout] = useState<Layout>("list");
 
@@ -67,11 +69,10 @@ export default function PilePage() {
       >
         <SectionLabel>Your pile</SectionLabel>
         <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-black leading-[1.04] tracking-[-0.04em] lowercase">
-          Everything you've got working
+          {t("pile.title")}
         </h1>
         <p className="mt-3 text-sm text-black/45 max-w-lg">
-          Your live positions across every source. Tap one to deposit more or
-          withdraw — funds stay in your own on-chain position.
+          {t("pile.subtitle")}
         </p>
       </motion.div>
 
@@ -83,7 +84,7 @@ export default function PilePage() {
         className="mt-8 p-6 rounded-[8px] border border-black/10"
       >
         <p className="text-xs lowercase tracking-[0.2em] text-black/40">
-          Total balance
+          {t("pile.total")}
         </p>
         <div className="mt-2">
           {loading ? (
@@ -103,7 +104,7 @@ export default function PilePage() {
       >
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs lowercase tracking-[0.2em] text-black/40">
-            Positions
+            {t("pile.positions")}
           </p>
           {held.length > 0 && (
             <div className="flex gap-1">
@@ -134,15 +135,15 @@ export default function PilePage() {
           </div>
         ) : held.length === 0 ? (
           <div className="p-8 rounded-[8px] border border-black/10 text-center">
-            <p className="text-base text-black">You haven&apos;t deposited yet</p>
+            <p className="text-base text-black">{t("pile.empty.title")}</p>
             <p className="mt-1 text-xs text-black/45">
-              Your positions show up here once you put money to work.
+              {t("pile.empty.body")}
             </p>
             <Link
               href="/yield"
               className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
             >
-              Explore yield
+              {t("pile.explore")}
               <ArrowUpRight size={14} strokeWidth={1.5} />
             </Link>
           </div>
@@ -194,7 +195,7 @@ export default function PilePage() {
                     <div className="text-right shrink-0">
                       <LiveAmount value={value} apy={v.apy} variant="md" />
                       <p className="text-[10px] lowercase tracking-wide text-black/40">
-                        your position
+                        {t("pile.yourPosition")}
                       </p>
                     </div>
                     <ArrowUpRight

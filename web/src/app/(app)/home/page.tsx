@@ -19,6 +19,7 @@ import { isGold } from "@/lib/yield/gold";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
+import { useT } from "@/lib/i18n";
 
 /** Sum a set of earning sources into the inputs LiveEarned needs. */
 function aggregate(sources: { currentValue: number; invested: number; apy: number }[]) {
@@ -38,15 +39,17 @@ export default function HomePage() {
   const yieldEarn = aggregate(earnings.sources.filter((s) => !isXStock(s.id) && !isGold(s.id)));
   const stockEarn = aggregate(earnings.sources.filter((s) => isXStock(s.id)));
   const goldEarn = aggregate(earnings.sources.filter((s) => isGold(s.id)));
-  const [greeting, setGreeting] = useState("Welcome");
+  const { t } = useT();
+  const [greetKey, setGreetKey] = useState<"greet.morning" | "greet.afternoon" | "greet.evening" | "greet.late" | null>(null);
 
   useEffect(() => {
     const hour = new Date().getHours();
-    if (hour < 6) setGreeting("Up late");
-    else if (hour < 12) setGreeting("Good morning");
-    else if (hour < 18) setGreeting("Good afternoon");
-    else setGreeting("Good evening");
+    if (hour < 6) setGreetKey("greet.late");
+    else if (hour < 12) setGreetKey("greet.morning");
+    else if (hour < 18) setGreetKey("greet.afternoon");
+    else setGreetKey("greet.evening");
   }, []);
+  const greeting = greetKey ? t(greetKey) : "Welcome";
 
   const handle = user?.email?.address
     ? user.email.address.split("@")[0]
@@ -84,7 +87,7 @@ export default function HomePage() {
         className="mt-6 mb-12"
       >
         <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
-          your sleeping money
+          {t("home.sleepingMoney")}
         </p>
         <div className="mt-3 flex items-baseline gap-4">
           {loading ? (
@@ -98,19 +101,19 @@ export default function HomePage() {
             <span className="text-sm text-[#3c05c7] flex flex-wrap items-baseline gap-x-3 gap-y-1">
               {yieldEarn.value > 0 && (
                 <span title="Earned from yield — current value minus what you put in, on-chain.">
-                  <span className="text-black/45">yield</span>{" "}
+                  <span className="text-black/45">{t("home.earned.yield")}</span>{" "}
                   <LiveEarned currentValue={yieldEarn.value} invested={yieldEarn.invested} apy={yieldEarn.apy} />
                 </span>
               )}
               {stockEarn.value > 0 && (
                 <span title="Earned from stocks — current value minus cost basis, on-chain.">
-                  <span className="text-black/45">stocks</span>{" "}
+                  <span className="text-black/45">{t("home.earned.stocks")}</span>{" "}
                   <LiveEarned currentValue={stockEarn.value} invested={stockEarn.invested} apy={stockEarn.apy} />
                 </span>
               )}
               {goldEarn.value > 0 && (
                 <span title="Earned from gold — current value minus cost basis, on-chain.">
-                  <span className="text-black/45">gold</span>{" "}
+                  <span className="text-black/45">{t("home.earned.gold")}</span>{" "}
                   <LiveEarned currentValue={goldEarn.value} invested={goldEarn.invested} apy={goldEarn.apy} />
                 </span>
               )}
@@ -119,8 +122,8 @@ export default function HomePage() {
         </div>
         <p className="mt-3 text-sm text-black/45">
           {totalUsdc > 0
-            ? `${positionCount} source${positionCount === 1 ? "" : "s"} · earning every block`
-            : "drop USDC into a source to start earning"}
+            ? t(positionCount === 1 ? "home.sources.one" : "home.sources.many", { n: positionCount })
+            : t("home.empty.cta")}
         </p>
       </motion.section>
 
@@ -136,23 +139,22 @@ export default function HomePage() {
             <div className="relative">
               <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#3c05c7]/10 border border-[#3c05c7]/30 lowercase text-[10px] tracking-widest text-[#3c05c7]">
                 <Sparkles size={10} strokeWidth={1.5} />
-                start here
+                {t("home.startHere")}
               </span>
               <h2 className="mt-4 text-2xl md:text-3xl text-black leading-tight lowercase">
-                your money's been napping.
+                {t("home.napping1")}
                 <br />
-                <span className="text-black/55">let's wake it up.</span>
+                <span className="text-black/55">{t("home.napping2")}</span>
               </h2>
               <p className="mt-3 text-sm text-black/45 max-w-md leading-relaxed">
-                pick a source. deposit USDC. earn yield from day one. withdraw
-                whenever you want — you always hold your own position.
+                {t("home.empty.body")}
               </p>
               <div className="mt-6">
                 <Link
                   href="/yield"
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
                 >
-                  wake up your money
+                  {t("home.wakeUp")}
                   <ArrowUpRight size={14} strokeWidth={1.5} />
                 </Link>
               </div>
@@ -171,13 +173,13 @@ export default function HomePage() {
         >
           <div className="flex items-baseline justify-between mb-4">
             <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
-              where it's sleeping
+              {t("home.whereSleeping")}
             </p>
             <Link
               href="/pile"
               className="text-xs text-black/45 hover:text-black transition-colors"
             >
-              manage →
+              {t("home.manage")}
             </Link>
           </div>
 
@@ -231,7 +233,7 @@ export default function HomePage() {
         transition={{ duration: 0.5, delay: 0.35 }}
       >
         <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45 mb-4">
-          recent activity
+          {t("home.recentActivity")}
         </p>
         <ActivityFeed />
       </motion.section>

@@ -5,16 +5,19 @@ import { usePathname } from "next/navigation";
 import { Home, TrendingUp, Users, User } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 
+import { useT } from "@/lib/i18n";
+
 const tabs = [
-  { href: "/home", label: "Home", icon: Home },
-  { href: "/yield", label: "Yield", icon: TrendingUp },
-  { href: "/pile", label: "Pile", icon: Users },
-  { href: "/you", label: "You", icon: User },
+  { href: "/home", key: "nav.home", icon: Home },
+  { href: "/yield", key: "nav.yield", icon: TrendingUp },
+  { href: "/pile", key: "nav.pile", icon: Users },
+  { href: "/you", key: "nav.you", icon: User },
 ] as const;
 
 export function TabBar() {
   const pathname = usePathname();
   const { authenticated } = usePrivy();
+  const { t } = useT();
 
   if (!authenticated) return null;
 
@@ -35,7 +38,7 @@ export function TabBar() {
             >
               <Icon size={18} strokeWidth={1.5} />
               <span className="lowercase text-[10px] tracking-[0.04em]">
-                {tab.label.toLowerCase()}
+                {t(tab.key)}
               </span>
             </Link>
           );

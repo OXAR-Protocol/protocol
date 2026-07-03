@@ -18,6 +18,7 @@ import { XSTOCKS } from "@/lib/yield/xstocks";
 import { GOLD } from "@/lib/yield/gold";
 import { AssetSection } from "@/components/asset-section";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
+import { useT } from "@/lib/i18n";
 
 type Layout = "list" | "grid";
 
@@ -31,6 +32,7 @@ function matchesApyBucket(bucket: ApyBucket | null, apyPercent: number): boolean
 
 export default function YieldPage() {
   const router = useRouter();
+  const { t } = useT();
   const [apyBucket, setApyBucket] = useState<ApyBucket | null>(null);
   const [chain, setChain] = useState<ChainFilter>("all");
   const [layout, setLayout] = useState<Layout>("list");
@@ -80,11 +82,10 @@ export default function YieldPage() {
       >
         <SectionLabel>Yield</SectionLabel>
         <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-black leading-[1.04] tracking-[-0.04em] lowercase">
-          Where your money can sleep
+          {t("yield.title")}
         </h1>
         <p className="mt-3 text-sm text-black/45 max-w-lg">
-          Pick a source. Open it. Deposit. Withdraw anytime. Funds go straight
-          into the protocol — you hold your own position.
+          {t("yield.subtitle")}
         </p>
       </motion.div>
 
@@ -120,7 +121,7 @@ export default function YieldPage() {
               title="Clear filter"
             >
               <X size={11} strokeWidth={1.5} />
-              clear
+              {t("yield.clear")}
             </button>
           )}
         </div>
@@ -130,9 +131,9 @@ export default function YieldPage() {
             value={chain}
             onChange={(v) => setChain(v as ChainFilter)}
             options={[
-              { value: "all", label: "All chains" },
-              { value: "solana", label: "Solana only" },
-              { value: "ethereum", label: "Cross-chain only" },
+              { value: "all", label: t("yield.chain.all") },
+              { value: "solana", label: t("yield.chain.solana") },
+              { value: "ethereum", label: t("yield.chain.cross") },
             ]}
           />
         </div>
@@ -148,7 +149,7 @@ export default function YieldPage() {
         >
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs lowercase tracking-[0.2em] text-emerald-600">
-              Live now
+              {t("yield.liveNow")}
             </p>
             <div className="flex gap-1">
               {([
@@ -198,7 +199,7 @@ export default function YieldPage() {
       {/* Tokenized stocks — price-framed section (Reg S geoblocked) */}
       <AssetSection
         catalog={XSTOCKS}
-        title="Stocks · tokenized"
+        title={t("yield.stocksTitle")}
         badge="non-US"
         kind="Stock"
         note="tokenized · non-US"
@@ -209,7 +210,7 @@ export default function YieldPage() {
       {/* Tokenized commodities — physical gold (not a security; no geoblock) */}
       <AssetSection
         catalog={GOLD}
-        title="Commodities · gold"
+        title={t("yield.goldTitle")}
         badge="physical"
         kind="Commodity"
         note="physical gold · tokenized"
@@ -225,7 +226,7 @@ export default function YieldPage() {
           className="mt-10"
         >
           <p className="text-xs lowercase tracking-[0.2em] text-black/40 mb-3">
-            On Solana · soon
+            {t("yield.soonSolana")}
           </p>
           <div className="space-y-2">
             {roadmapNative.map((src) => (
@@ -245,7 +246,7 @@ export default function YieldPage() {
         >
           <div className="flex items-baseline justify-between mb-3">
             <p className="text-xs lowercase tracking-[0.2em] text-black/40">
-              Cross-chain · soon
+              {t("yield.soonCross")}
             </p>
             <p className="text-[10px] lowercase tracking-wide text-black/40">
               via Delora
@@ -261,14 +262,14 @@ export default function YieldPage() {
 
       {nothingMatches && (
         <p className="mt-12 text-sm text-black/40 text-center">
-          No sources match these filters.
+          {t("yield.noMatch")}
         </p>
       )}
 
       <div className="mt-12 p-5 rounded-[8px] border border-black/10">
-        <p className="text-sm text-black">Not financial advice</p>
+        <p className="text-sm text-black">{t("yield.nfa.title")}</p>
         <p className="mt-1 text-xs text-black/45 leading-relaxed">
-          APYs are current targets, not guarantees. You always sign every move.
+          {t("yield.nfa.body")}
         </p>
       </div>
 

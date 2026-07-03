@@ -9,7 +9,8 @@ import { useStockPrices } from "@/hooks/use-stock-prices";
 import { useEarnings } from "@/hooks/use-earnings";
 import { useApyHistory } from "@/hooks/use-apy-history";
 import type { ProviderView } from "@/hooks/use-yield-positions";
-import { fromBaseUnits, planWithdrawal, RISK_LABEL } from "@/lib/yield";
+import { fromBaseUnits, planWithdrawal } from "@/lib/yield";
+import { useT } from "@/lib/i18n";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { getAssetInfo } from "@/lib/yield/asset-info";
 import { AssetActionRail } from "@/components/asset-action-rail";
@@ -43,6 +44,7 @@ export function AssetDetail({
 }) {
   const price = isPriceExposure(view.id);
   const info = getAssetInfo(view.id);
+  const { t } = useT();
   const { walletAddress } = useSolanaContext();
   const { withdraw, redeemAll, loading, error } = useYieldActions(view.id);
   const apyHistory = useApyHistory(view.defiLlamaPoolId);
@@ -104,7 +106,7 @@ export function AssetDetail({
           ) : (
             <>
               <span className="text-[clamp(26px,4vw,40px)] font-bold tabular-nums text-[#3c05c7]">{(view.apy * 100).toFixed(2)}%</span>
-              <span className="lowercase text-[15px] text-black/45">apy · {RISK_LABEL[view.riskLevel] ?? view.riskLevel}</span>
+              <span className="lowercase text-[15px] text-black/45">{t("asset.apy")} · {t(`risk.${view.riskLevel}`)}</span>
             </>
           )}
         </div>
@@ -148,7 +150,7 @@ export function AssetDetail({
               <AssetChart mint={view.heldMint} />
             ) : apyHistory.length > 1 ? (
               <div className="rounded-[12px] border border-black/10 p-5">
-                <p className="lowercase text-[13px] text-black/45 mb-3">apy · last {apyHistory.length} days</p>
+                <p className="lowercase text-[13px] text-black/45 mb-3">{t("asset.apyLastDays", { n: apyHistory.length })}</p>
                 <HoverChart
                   values={apyHistory}
                   height={220}
@@ -162,7 +164,7 @@ export function AssetDetail({
 
           {info && (
             <motion.section {...fade(0.1)} className="mt-10">
-              <p className="lowercase text-[13px] text-black/45 mb-3">what it is</p>
+              <p className="lowercase text-[13px] text-black/45 mb-3">{t("asset.whatItIs")}</p>
               <p className="text-[clamp(17px,1.6vw,21px)] leading-snug text-black/80">{info.about}</p>
               {info.facts && info.facts.length > 0 && (
                 <div className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-[12px] border border-black/10 bg-black/10 sm:grid-cols-2">
@@ -179,12 +181,12 @@ export function AssetDetail({
 
           {positionValue > 0 && (
             <motion.section {...fade(0.15)} className="mt-10 rounded-[12px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.04] p-5">
-              <p className="lowercase text-[13px] text-black/55">your position</p>
+              <p className="lowercase text-[13px] text-black/55">{t("asset.yourPosition")}</p>
               <p className="mt-1 text-[clamp(24px,3.4vw,34px)] font-bold tabular-nums">${positionValue.toFixed(2)}</p>
               <p className="mt-1 text-[13px] text-black/45">
                 {price && typeof earned === "number"
-                  ? <span className={`tabular-nums ${earned >= 0 ? "text-emerald-600" : "text-red-600"}`}>{earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)} since you bought · on-chain p&l</span>
-                  : price ? "current market value" : "principal + accrued yield"}
+                  ? <span className={`tabular-nums ${earned >= 0 ? "text-emerald-600" : "text-red-600"}`}>{earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)} {t("asset.sinceYouBought")}</span>
+                  : price ? t("asset.marketValue") : t("asset.principalYield")}
               </p>
             </motion.section>
           )}

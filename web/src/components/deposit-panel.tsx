@@ -14,6 +14,7 @@ import { useFundAndBuy } from "@/hooks/use-fund-and-buy";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
+import { useT } from "@/lib/i18n";
 
 /** Apple logo as inline SVG (renders on every platform, unlike the  glyph). */
 function AppleLogo({ className }: { className?: string }) {
@@ -40,6 +41,7 @@ interface Props {
 /** Deposit with any asset on any chain: pick a pay-asset, enter an amount in that
  *  currency, see the net USDC. The money path stays USD-denominated underneath. */
 export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUsd, unitLabel = "shares" }: Props) {
+  const { t } = useT();
   const lower = verb.toLowerCase();
   const { linkWallet, unlinkWallet } = usePrivy();
   // Apple Pay / card on-ramp is for users WITHOUT crypto (email login → embedded
@@ -162,14 +164,14 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
     <div className="p-4 rounded-[6px] border border-black/10">
       {/* Label the field as the PAYMENT method — without this the prominent "USDC"
           reads as if the user is buying USDC, not paying with it for the asset. */}
-      <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">pay with</p>
+      <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">{t("deposit.payWith")}</p>
 
       {/* Pay with: currency + amount in one field */}
       <div className="mt-2">
         {assetsLoading ? (
-          <p className="text-xs text-black/40">Loading your assets…</p>
+          <p className="text-xs text-black/40">{t("deposit.loadingAssets")}</p>
         ) : assets.length === 0 ? (
-          <p className="text-xs text-black/40">No assets found in your wallet.</p>
+          <p className="text-xs text-black/40">{t("deposit.noAssets")}</p>
         ) : (
           <PayWithField
             assets={assets}
@@ -207,7 +209,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-2.5 text-[13px] lowercase tracking-wide text-black/70 hover:border-black/40 hover:text-black transition"
           >
             <Plus size={15} strokeWidth={1.75} />
-            pay from another chain
+            {t("deposit.payFromAnotherChain")}
           </button>
         ) : (
           // Connected EVM wallet — let the user disconnect it (e.g. to link another).
@@ -219,7 +221,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
               onClick={() => unlinkWallet(evmAddress)}
               className="underline hover:text-black/70 transition"
             >
-              disconnect
+              {t("deposit.disconnect")}
             </button>
           </div>
         )}
@@ -231,24 +233,24 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           {view.heldMint ? (
             // Swap-and-hold: show what you'll actually hold + the swap cost.
             swapIn.quoting
-              ? "quoting…"
+              ? t("deposit.quoting")
               : swapIn.valueUsd !== null
-                ? `you'll hold ≈ $${swapIn.valueUsd.toFixed(2)}` +
+                ? t("deposit.youllHold", { value: `$${swapIn.valueUsd.toFixed(2)}` }) +
                   (swapIn.spreadUsd && swapIn.spreadUsd > 0
-                    ? ` · swap cost ~$${swapIn.spreadUsd < 0.01 ? swapIn.spreadUsd.toFixed(4) : swapIn.spreadUsd.toFixed(2)}`
+                    ? ` · ${t("deposit.swapCost", { value: `$${swapIn.spreadUsd < 0.01 ? swapIn.spreadUsd.toFixed(4) : swapIn.spreadUsd.toFixed(2)}` })}`
                     : "")
-                : "couldn't quote — try a different amount"
+                : t("deposit.cantQuote")
           ) : isDirect ? (
             `you'll ${lower} $${usdAmount.toFixed(2)} ${view.assetSymbol}`
           ) : preview.quoting ? (
-            "quoting…"
+            t("deposit.quoting")
           ) : preview.netUsdc !== null ? (
             `you'll ${lower} ~$${preview.netUsdc.toFixed(2)} ${view.assetSymbol}` +
             (preview.kind === "bridge"
               ? ` · fee ~$${(preview.feeUsd ?? 0).toFixed(2)}${preview.etaSec ? ` · ~${preview.etaSec}s` : ""}`
               : " (after swap)")
           ) : (
-            "couldn't quote — try a different amount"
+            t("deposit.cantQuote")
           )}
         </p>
       )}
@@ -290,7 +292,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             )}
           </button>
           <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/30">
-            ≈ ${applePayUsd.toFixed(0)} · apple pay or card · no crypto needed
+            {t("deposit.applePayHint", { value: `$${applePayUsd.toFixed(0)}` })}
           </p>
 
           {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{applePay.error}</p>}
