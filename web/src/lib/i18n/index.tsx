@@ -4,16 +4,14 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 
 import { en, type TranslationKey } from "./en";
 import { uk } from "./uk";
-import { ru } from "./ru";
 
-export type Locale = "en" | "uk" | "ru";
+export type Locale = "en" | "uk";
 export const LOCALES: { value: Locale; label: string }[] = [
   { value: "en", label: "English" },
   { value: "uk", label: "Українська" },
-  { value: "ru", label: "Русский" },
 ];
 
-const DICTS: Record<Locale, Partial<Record<TranslationKey, string>>> = { en, uk, ru };
+const DICTS: Record<Locale, Partial<Record<TranslationKey, string>>> = { en, uk };
 const STORAGE_KEY = "oxar:locale";
 
 interface I18n {
@@ -33,9 +31,10 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");
 
   // Restore the saved choice (client-only; EN renders first paint, then swaps).
+  // A previously-saved "ru" (removed locale) falls through to the EN default.
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "uk" || saved === "ru" || saved === "en") setLocaleState(saved);
+    if (saved === "uk" || saved === "en") setLocaleState(saved);
   }, []);
 
   const setLocale = useCallback((l: Locale) => {
@@ -58,4 +57,31 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
 /** Core-flow translations. `t("home.wakeUp")`, `t("home.sources.many", { n: 3 })`. */
 export function useT(): I18n {
   return useContext(I18nContext);
+}
+
+// Thrown user-facing error messages are English constants (lib code can't call
+// hooks). Map the known ones to keys at display time; unknown text passes through.
+const ERROR_KEYS: Record<string, TranslationKey> = {
+  "Price impact too high — try a smaller amount": "err.priceImpact",
+  "Nothing to withdraw": "err.nothingToWithdraw",
+  "Price unavailable — try again": "err.priceUnavailable",
+  "Amount too small to withdraw": "err.amountTooSmall",
+  "Wallet not connected": "err.walletNotConnected",
+  "That's too small after the gas reserve — try a bit more.": "err.tooSmallAfterGas",
+  "We didn't see your funds arrive yet — card top-ups can take a few minutes. Once your SOL lands you can buy straight from your wallet balance.":
+    "err.fundsNotArrived",
+  "Couldn't price SOL — try again": "err.solPrice",
+  "Cancelled — nothing left your wallet.": "err.cancelled",
+  "That took too long and expired before it was sent. Please try again.": "err.expired",
+  "Not enough balance — check you have enough USDC, plus a little SOL for the network fee.":
+    "err.insufficient",
+  "Connect your wallet to continue.": "err.connectWallet",
+  "Network's being slow right now. Please try again in a moment.": "err.networkSlow",
+};
+
+/** Localize a user-facing error message if we recognise it; else return as-is. */
+export function localizeError(msg: string | null, t: I18n["t"]): string | null {
+  if (!msg) return msg;
+  const key = ERROR_KEYS[msg];
+  return key ? t(key) : msg;
 }

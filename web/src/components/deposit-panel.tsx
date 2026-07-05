@@ -14,7 +14,7 @@ import { useFundAndBuy } from "@/hooks/use-fund-and-buy";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
-import { useT } from "@/lib/i18n";
+import { useT, localizeError } from "@/lib/i18n";
 
 /** Apple logo as inline SVG (renders on every platform, unlike the  glyph). */
 function AppleLogo({ className }: { className?: string }) {
@@ -51,7 +51,8 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const { isExternal } = useSolanaContext();
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
   const { assets: evmAssets, evmAddress, loading: evmLoading } = useEvmAssets();
-  const { depositWith, busy, label, error } = useDeposit(view.id);
+  const { depositWith, busy, status, error } = useDeposit(view.id);
+  const busyLabel = busy ? t(`status.${status}` as "status.working") : null;
   // Apple Pay / card path — funds fresh USDC via Privy's on-ramp, then buys.
   // Works with no crypto in the wallet (the whole point), so it's independent
   // of the pay-asset picker below.
@@ -151,7 +152,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           preview={preview}
           swapIn={swapIn}
           busy={busy}
-          label={label}
+          label={busyLabel}
           error={error}
           onConfirm={handleDeposit}
           onBack={() => setConfirming(false)}
@@ -241,14 +242,14 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
                     : "")
                 : t("deposit.cantQuote")
           ) : isDirect ? (
-            `you'll ${lower} $${usdAmount.toFixed(2)} ${view.assetSymbol}`
+            t("deposit.youllDo", { verb: lower, value: `$${usdAmount.toFixed(2)} ${view.assetSymbol}` })
           ) : preview.quoting ? (
             t("deposit.quoting")
           ) : preview.netUsdc !== null ? (
-            `you'll ${lower} ~$${preview.netUsdc.toFixed(2)} ${view.assetSymbol}` +
+            t("deposit.youllDo", { verb: lower, value: `~$${preview.netUsdc.toFixed(2)} ${view.assetSymbol}` }) +
             (preview.kind === "bridge"
-              ? ` · fee ~$${(preview.feeUsd ?? 0).toFixed(2)}${preview.etaSec ? ` · ~${preview.etaSec}s` : ""}`
-              : " (after swap)")
+              ? ` · ${t("confirm.route.fee")} ~$${(preview.feeUsd ?? 0).toFixed(2)}${preview.etaSec ? ` · ~${preview.etaSec}s` : ""}`
+              : t("deposit.afterSwap"))
           ) : (
             t("deposit.cantQuote")
           )}
@@ -263,7 +264,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         {verb}
       </button>
 
-      {error && <p className="mt-3 text-xs text-red-400 text-center">{error}</p>}
+      {error && <p className="mt-3 text-xs text-red-400 text-center">{localizeError(error, t)}</p>}
 
       {/* Apple Pay / card — only for embedded (email) wallets. External-wallet
           (Phantom) users already have crypto and run inside the wallet's in-app
@@ -272,7 +273,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         <>
           <div className="mt-3 flex items-center gap-3 text-[10px] lowercase tracking-wide text-black/30">
             <span className="h-px flex-1 bg-black/10" />
-            or
+            {t("common.or")}
             <span className="h-px flex-1 bg-black/10" />
           </div>
           <button
@@ -281,7 +282,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[15px] font-medium tracking-tight hover:bg-black/90 disabled:opacity-40 transition inline-flex items-center justify-center gap-1.5"
           >
             {applePay.busy ? (
-              <span className="lowercase">{applePay.label}</span>
+              <span className="lowercase">{t(`status.${applePay.status}` as "status.funding")}</span>
             ) : (
               <>
                 <span className="capitalize">{verb}</span>
@@ -295,7 +296,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             {t("deposit.applePayHint", { value: `$${applePayUsd.toFixed(0)}` })}
           </p>
 
-          {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{applePay.error}</p>}
+          {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}
         </>
       )}
     </div>

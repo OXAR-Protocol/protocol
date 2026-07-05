@@ -9,6 +9,7 @@ import { Copy, Check, LogOut, ChevronDown, ArrowUpRight, KeyRound, CreditCard } 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { SendSheet } from "@/components/send-sheet";
 import { CashOutSheet } from "@/components/cash-out-sheet";
+import { useT } from "@/lib/i18n";
 
 /**
  * Header wallet control: shows the active Solana address as a pill; the dropdown
@@ -19,6 +20,7 @@ export function WalletMenu() {
   const { user, logout } = usePrivy();
   const { walletAddress } = useSolanaContext();
   const { exportWallet } = useExportWallet();
+  const { t } = useT();
   const [open, setOpen] = useState(false);
   const [showSend, setShowSend] = useState(false);
   const [showCashOut, setShowCashOut] = useState(false);
@@ -44,7 +46,7 @@ export function WalletMenu() {
 
   if (!solana) {
     return (
-      <span className="lowercase text-[14px] text-black/40">connecting…</span>
+      <span className="lowercase text-[14px] text-black/40">{t("wallet.connecting")}</span>
     );
   }
 
@@ -64,14 +66,14 @@ export function WalletMenu() {
 
       {open && (
         <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-[12px] border border-black/10 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
-          <AddressRow label="your wallet" address={solana} />
+          <AddressRow label={t("you.wallet")} address={solana} />
 
           <button
             onClick={() => { setOpen(false); setShowSend(true); }}
             className={`${item} border-b border-black/10 hover:bg-black/[0.04] hover:text-black`}
           >
             <ArrowUpRight size={13} strokeWidth={1.5} />
-            send
+            {t("wallet.send")}
           </button>
 
           <button
@@ -79,9 +81,9 @@ export function WalletMenu() {
             className={`${item} border-b border-black/10 hover:bg-black/[0.04] hover:text-black`}
           >
             <CreditCard size={13} strokeWidth={1.5} />
-            cash out to card
+            {t("rail.cashOut")}
             <span className="ml-auto rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] lowercase tracking-wide text-black/45">
-              soon
+              {t("common.soon")}
             </span>
           </button>
 
@@ -91,7 +93,7 @@ export function WalletMenu() {
               className={`${item} border-b border-black/10 hover:bg-black/[0.04] hover:text-black`}
             >
               <KeyRound size={13} strokeWidth={1.5} />
-              export private key
+              {t("wallet.exportKey")}
             </button>
           )}
 
@@ -100,7 +102,7 @@ export function WalletMenu() {
             className={`${item} hover:bg-black/[0.04] hover:text-red-600`}
           >
             <LogOut size={13} strokeWidth={1.5} />
-            disconnect
+            {t("wallet.disconnect")}
           </button>
         </div>
       )}

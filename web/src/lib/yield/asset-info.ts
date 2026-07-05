@@ -6,6 +6,8 @@
  * (xstocks / gold / YIELD_SOURCES). Missing key → page falls back to the
  * source's own `description`.
  */
+import { ASSET_INFO_UK as UK_INFO } from "./asset-info-uk";
+
 export interface AssetFact {
   label: string;
   value: string;
@@ -172,6 +174,26 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
   },
 
   // ── Yield sources ───────────────────────────────────────
+  "jupiter-lend-usdc": {
+    about: "Your dollars are lent out on Jupiter Lend, Solana's largest lending market, to borrowers who post collateral. You earn the interest they pay. Withdraw any time.",
+    category: "yield · lending",
+    facts: [{ label: "earns from", value: "over-collateralised borrowers" }, { label: "where", value: "Jupiter (Solana)" }, { label: "risk", value: "low" }],
+  },
+  "jupiter-lend-usdt": {
+    about: "Same Jupiter Lend market, denominated in USDT — your digital dollars earn the interest borrowers pay. Withdraw any time.",
+    category: "yield · lending",
+    facts: [{ label: "earns from", value: "over-collateralised borrowers" }, { label: "where", value: "Jupiter (Solana)" }, { label: "risk", value: "low" }],
+  },
+  "jupiter-lend-usdg": {
+    about: "Same Jupiter Lend market, denominated in USDG — your digital dollars earn the interest borrowers pay. Withdraw any time.",
+    category: "yield · lending",
+    facts: [{ label: "earns from", value: "over-collateralised borrowers" }, { label: "where", value: "Jupiter (Solana)" }, { label: "risk", value: "low" }],
+  },
+  "ondo-usdy": {
+    about: "USDY is backed by short-term US Treasuries — essentially lending to the US government. The token's price rises as interest accrues; holding it earns. Swap out any time.",
+    category: "yield · treasuries",
+    facts: [{ label: "earns from", value: "US T-bills" }, { label: "issuer", value: "Ondo Finance" }, { label: "risk", value: "low" }],
+  },
   "kamino-usdc": {
     about: "Your USDC is lent out on Kamino, a big Solana lending market, to borrowers who post collateral. You earn the interest they pay. Withdraw any time.",
     category: "yield · lending",
@@ -214,7 +236,12 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
   },
 };
 
-/** Look up curated info for an asset/source id. */
-export function getAssetInfo(id: string): AssetInfo | undefined {
+/** Look up curated info for an asset/source id, in the requested language
+ *  (Ukrainian falls back to English per-entry). */
+export function getAssetInfo(id: string, locale?: string): AssetInfo | undefined {
+  if (locale === "uk") {
+    // Lazy import avoided on purpose — the UK map is small text, statically bundled.
+    return UK_INFO[id] ?? ASSET_INFO[id];
+  }
   return ASSET_INFO[id];
 }

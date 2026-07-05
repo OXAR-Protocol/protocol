@@ -8,6 +8,7 @@ import type { ProviderView } from "@/hooks/use-yield-positions";
 import { DepositPanel } from "@/components/deposit-panel";
 import { YieldAmountField } from "@/components/yield-amount-field";
 import { CashOutSheet } from "@/components/cash-out-sheet";
+import { useT, localizeError } from "@/lib/i18n";
 
 interface Props {
   view: ProviderView;
@@ -45,6 +46,7 @@ export function AssetActionRail({
   sharePriceUsd,
   unitLabel,
 }: Props) {
+  const { t } = useT();
   const [tab, setTab] = useState<"buy" | "sell">("buy");
   const [showCashOut, setShowCashOut] = useState(false);
   const canSell = positionValue > 0;
@@ -58,23 +60,23 @@ export function AssetActionRail({
       {/* Buy / Sell toggle */}
       <div className="mb-3 grid grid-cols-2 gap-1 rounded-full bg-black/[0.05] p-1">
         <button type="button" onClick={() => setTab("buy")} className={tabClass(tab === "buy")}>
-          {price ? "buy" : "deposit"}
+          {price ? t("rail.buy") : t("rail.deposit")}
         </button>
         <button
           type="button"
           onClick={() => canSell && setTab("sell")}
           disabled={!canSell}
-          title={canSell ? undefined : "nothing to sell yet"}
+          title={canSell ? undefined : t("rail.nothingToSell")}
           className={`${tabClass(tab === "sell" && canSell)} disabled:cursor-not-allowed disabled:opacity-40`}
         >
-          {price ? "sell" : "withdraw"}
+          {price ? t("rail.sell") : t("rail.withdraw")}
         </button>
       </div>
 
       {tab === "buy" || !canSell ? (
         <DepositPanel
           view={view}
-          verb={price ? "Buy" : "Deposit"}
+          verb={price ? t("rail.verbBuy") : t("rail.verbDeposit")}
           onDeposited={onDeposited}
           sharePriceUsd={sharePriceUsd}
           unitLabel={unitLabel}
@@ -82,23 +84,23 @@ export function AssetActionRail({
       ) : (
         <>
           <YieldAmountField
-            label={price ? `Sell ${view.assetSymbol}` : `Withdraw ${view.assetSymbol}`}
+            label={t(price ? "rail.sellLabel" : "rail.withdrawLabel", { sym: view.assetSymbol })}
             symbol={price ? "USDC" : view.assetSymbol}
             value={amount}
             onChange={onAmountChange}
             hint={
               <span className="flex items-center gap-2">
-                {price ? "worth" : "available"}: ${positionValue.toFixed(2)}
+                {price ? t("rail.worth") : t("rail.available")}: ${positionValue.toFixed(2)}
                 <button
                   type="button"
                   onClick={() => onAmountChange(positionValue)}
                   className="lowercase tracking-wide text-[#3c05c7]/80 transition hover:text-[#3c05c7]"
                 >
-                  max
+                  {t("rail.max")}
                 </button>
               </span>
             }
-            actionLabel={price ? "Sell" : "Withdraw"}
+            actionLabel={price ? t("rail.actionSell") : t("rail.actionWithdraw")}
             onAction={onSell}
             loading={loading}
             disabled={loading || amount <= 0 || amount > positionValue}
@@ -113,15 +115,15 @@ export function AssetActionRail({
             className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-3 text-[14px] lowercase tracking-wide text-black/70 transition hover:border-black/40 hover:text-black"
           >
             <CreditCard size={14} strokeWidth={1.5} />
-            cash out to card
+            {t("rail.cashOut")}
             <span className="rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] lowercase tracking-wide text-black/45">
-              soon
+              {t("common.soon")}
             </span>
           </button>
         </>
       )}
 
-      {error && <p className="mt-3 text-center text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-3 text-center text-xs text-red-600">{localizeError(error, t)}</p>}
 
       <AnimatePresence>
         {showCashOut && <CashOutSheet onClose={() => setShowCashOut(false)} />}

@@ -36,5 +36,5 @@ export function useDeposit(providerId: string) {
   const busy = status !== "idle";
   const error = bridge.error ?? solana.error;
 
-  return { depositWith, busy, label: busy ? LABELS[status] ?? "Working…" : null, error };
+  return { depositWith, busy, status, label: busy ? LABELS[status] ?? "Working…" : null, error };
 }

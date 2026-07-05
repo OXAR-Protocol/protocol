@@ -6,9 +6,12 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
 
+import { useT } from "@/lib/i18n";
+
 export default function LoginPage() {
   const { login, authenticated, ready } = usePrivy();
   const router = useRouter();
+  const { t } = useT();
 
   useEffect(() => {
     if (ready && authenticated) router.replace("/home");
@@ -27,7 +30,7 @@ export default function LoginPage() {
         href="/"
         className="absolute left-6 top-6 lowercase text-[14px] text-black/40 transition-colors hover:text-black"
       >
-        ← back to home
+        {t("login.back")}
       </Link>
 
       <div className="relative flex max-w-[560px] flex-col items-center text-center">
@@ -37,7 +40,7 @@ export default function LoginPage() {
           transition={{ duration: 0.6 }}
           className="lowercase text-[clamp(15px,1.4vw,18px)] text-black/45"
         >
-          [ welcome ]
+          {t("login.welcome")}
         </motion.span>
 
         <motion.h1
@@ -46,7 +49,7 @@ export default function LoginPage() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mt-6 lowercase text-[clamp(38px,7vw,68px)] leading-[1.0] tracking-[-0.05em]"
         >
-          where does your <span className="italic text-black/45">money sleep?</span>
+          {t("login.titleA")} <span className="italic text-black/45">{t("login.titleB")}</span>
         </motion.h1>
 
         <motion.p
@@ -55,7 +58,7 @@ export default function LoginPage() {
           transition={{ duration: 0.6, delay: 0.25 }}
           className="mt-6 max-w-[420px] lowercase text-[clamp(15px,1.4vw,18px)] leading-snug text-black/50"
         >
-          wake it up. earn yield. own real assets. no bank, no broker, no lock.
+          {t("login.body")}
         </motion.p>
 
         <motion.div
@@ -69,7 +72,7 @@ export default function LoginPage() {
             disabled={!ready || authenticated}
             className="w-full rounded-full bg-black px-8 py-3.5 lowercase text-[16px] font-medium text-white transition-colors hover:bg-black/85 disabled:cursor-not-allowed disabled:bg-black/10 disabled:text-black/30"
           >
-            {authenticated ? "redirecting…" : "continue"}
+            {authenticated ? t("login.redirecting") : t("login.continue")}
           </button>
 
           <span className="lowercase text-[13px] text-black/35">

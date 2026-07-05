@@ -4,6 +4,7 @@ import { ArrowDownLeft, ArrowUpRight, Loader2 } from "lucide-react";
 
 import { useActivity } from "@/hooks/use-activity";
 import type { ActivityKind } from "@/lib/activity/parse";
+import { useT } from "@/lib/i18n";
 
 /** USDC flowing IN (sell/withdraw/receive) points down-left; OUT (buy/deposit/send) up-right. */
 const INFLOW: ActivityKind[] = ["sell", "withdraw", "receive"];
@@ -23,6 +24,7 @@ function timeAgo(unixSec: number): string {
  *  static "Nothing yet" placeholder with a real feed (links to Solscan). */
 export function ActivityFeed() {
   const { events, loading } = useActivity();
+  const { t } = useT();
 
   if (loading) {
     return (
@@ -36,7 +38,7 @@ export function ActivityFeed() {
     return (
       <div className="border border-black/10 bg-white rounded-[12px] p-6 text-center">
         <p className="text-sm text-black/45">
-          nothing yet — your money is still snoring.
+          {t("activity.empty")}
         </p>
       </div>
     );

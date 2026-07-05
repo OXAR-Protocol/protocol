@@ -6,7 +6,7 @@ import type { ProviderView } from "@/hooks/use-yield-positions";
 import type { NetPreview } from "@/hooks/use-net-preview";
 import type { SwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { WalletAsset } from "@/lib/portfolio/assets";
-import { useT } from "@/lib/i18n";
+import { useT, localizeError } from "@/lib/i18n";
 
 interface Props {
   verb: string;
@@ -53,7 +53,7 @@ export function DepositConfirm({
   const route = isDirect
     ? t("confirm.route.instant")
     : payAsset.chain === "ethereum"
-      ? `bridge${preview.etaSec ? ` · ~${Math.round(preview.etaSec / 60)} min` : ""}${preview.feeUsd ? ` · fee ~${money(preview.feeUsd)}` : ""}`
+      ? `${t("confirm.route.bridge")}${preview.etaSec ? ` · ~${Math.round(preview.etaSec / 60)} min` : ""}${preview.feeUsd ? ` · ${t("confirm.route.fee")} ~${money(preview.feeUsd)}` : ""}`
       : t("confirm.route.swap");
 
   // What you'll end up with, net of any conversion.
@@ -88,7 +88,7 @@ export function DepositConfirm({
         {t("confirm.footer")}
       </p>
 
-      {error && <p className="mt-3 text-xs text-red-500 text-center">{error}</p>}
+      {error && <p className="mt-3 text-xs text-red-500 text-center">{localizeError(error, t)}</p>}
 
       <button
         onClick={onConfirm}
