@@ -93,12 +93,12 @@ export default function YouPage() {
         className="mt-10"
       >
         <p className="text-xs lowercase tracking-[0.2em] text-black/40 mb-4">
-          Notifications
+          {t("you.notifications")}
         </p>
         <div className="space-y-2">
-          <Toggle label="Pile activity" description="Someone joined or pulled their share" defaultOn />
-          <Toggle label="Daily yield digest" description="One line, once a day" defaultOn />
-          <Toggle label="Goal milestones" description="When you cross 25 / 50 / 75 / 100%" defaultOn />
+          <Toggle label={t("you.notif1")} description={t("you.notif1d")} defaultOn />
+          <Toggle label={t("you.notif2")} description={t("you.notif2d")} defaultOn />
+          <Toggle label={t("you.notif3")} description={t("you.notif3d")} defaultOn />
         </div>
       </motion.section>
 
@@ -138,6 +138,7 @@ function WalletCard({
   onCopy: () => void;
   dim?: boolean;
 }) {
+  const { t } = useT();
   return (
     <div
       className={`flex items-center justify-between p-4 rounded-[5px] border ${
@@ -158,12 +159,12 @@ function WalletCard({
         {copied ? (
           <>
             <Check size={12} strokeWidth={1.5} />
-            Copied
+            {t("common.copied")}
           </>
         ) : (
           <>
             <Copy size={12} strokeWidth={1.5} />
-            Copy
+            {t("common.copy")}
           </>
         )}
       </button>

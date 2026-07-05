@@ -6,6 +6,7 @@ import { X, Clock } from "lucide-react";
 
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { USDC_MINT } from "@/lib/constants";
+import { useT } from "@/lib/i18n";
 
 /**
  * Cash out to a bank card — COMING SOON. Direct card payout needs a licensed
@@ -15,6 +16,7 @@ import { USDC_MINT } from "@/lib/constants";
  * partner account is approved — see /api/transak-session.
  */
 export function CashOutSheet({ onClose }: { onClose: () => void }) {
+  const { t } = useT();
   const { assets } = useWalletAssets();
   const usdc = assets.find((a) => a.mint === USDC_MINT);
   const usdcValue = usdc?.usdValue ?? 0;
@@ -37,8 +39,8 @@ export function CashOutSheet({ onClose }: { onClose: () => void }) {
       >
         <div className="mb-5 flex items-start justify-between">
           <div>
-            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">cash out · coming soon</p>
-            <h2 className="mt-1 text-xl text-black">Cash out to your card</h2>
+            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">{t("cashout.label")}</p>
+            <h2 className="mt-1 text-xl text-black">{t("cashout.title")}</h2>
           </div>
           <button onClick={onClose} className="text-black/45 transition hover:text-black">
             <X size={18} strokeWidth={1.5} />
@@ -48,19 +50,16 @@ export function CashOutSheet({ onClose }: { onClose: () => void }) {
         <div className="flex items-start gap-3 rounded-[10px] border border-[#3c05c7]/25 bg-[#3c05c7]/[0.04] px-4 py-3">
           <Clock size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-[#3c05c7]" />
           <p className="text-[13px] leading-snug text-black/70">
-            Direct card payout is <span className="text-black">coming soon</span> — we&apos;re finishing the
-            licensed off-ramp so you can sell straight to a Visa / Mastercard, in minutes.
+            {t("cashout.body1a")}<span className="text-black">{t("cashout.body1b")}</span>{t("cashout.body1c")}
           </p>
         </div>
 
         <p className="mt-4 text-[13px] leading-snug text-black/55">
-          In the meantime you can withdraw your USDC to any wallet or exchange you already use (Binance,
-          Revolut, etc.) with <span className="text-black">Send</span>, and cash out from there — your funds,
-          your keys, anytime.
+          {t("cashout.body2a")}<span className="text-black">{t("cashout.body2b")}</span>{t("cashout.body2c")}
         </p>
 
         <div className="mt-4 rounded-[10px] border border-black/10 px-4 py-3">
-          <p className="text-[11px] lowercase tracking-wide text-black/40">your USDC</p>
+          <p className="text-[11px] lowercase tracking-wide text-black/40">{t("cashout.yourUsdc")}</p>
           <p className="mt-0.5 text-[18px] tabular-nums text-black">${usdcValue.toFixed(2)}</p>
         </div>
 
@@ -68,7 +67,7 @@ export function CashOutSheet({ onClose }: { onClose: () => void }) {
           onClick={onClose}
           className="mt-5 w-full rounded-full bg-black px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85"
         >
-          got it
+          {t("cashout.gotIt")}
         </button>
       </motion.div>
     </motion.div>,

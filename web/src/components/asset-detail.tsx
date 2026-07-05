@@ -43,8 +43,8 @@ export function AssetDetail({
   onDone: () => void;
 }) {
   const price = isPriceExposure(view.id);
-  const info = getAssetInfo(view.id);
-  const { t } = useT();
+  const { t, locale } = useT();
+  const info = getAssetInfo(view.id, locale);
   const { walletAddress } = useSolanaContext();
   const { withdraw, redeemAll, loading, error } = useYieldActions(view.id);
   const apyHistory = useApyHistory(view.defiLlamaPoolId);
