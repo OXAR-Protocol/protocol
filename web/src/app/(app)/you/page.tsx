@@ -85,23 +85,6 @@ export default function YouPage() {
         <LanguagePicker />
       </motion.section>
 
-      {/* Notifications */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="mt-10"
-      >
-        <p className="text-xs lowercase tracking-[0.2em] text-black/40 mb-4">
-          {t("you.notifications")}
-        </p>
-        <div className="space-y-2">
-          <Toggle label={t("you.notif1")} description={t("you.notif1d")} defaultOn />
-          <Toggle label={t("you.notif2")} description={t("you.notif2d")} defaultOn />
-          <Toggle label={t("you.notif3")} description={t("you.notif3d")} defaultOn />
-        </div>
-      </motion.section>
-
       {/* Sign out */}
       {authenticated && (
         <motion.section
@@ -183,36 +166,3 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Toggle({
-  label,
-  description,
-  defaultOn,
-}: {
-  label: string;
-  description: string;
-  defaultOn: boolean;
-}) {
-  const [on, setOn] = useState(defaultOn);
-  return (
-    <button
-      onClick={() => setOn(!on)}
-      className="w-full p-4 rounded-[5px] border border-black/10 hover:border-black/20 transition flex items-center justify-between text-left"
-    >
-      <div>
-        <p className="text-sm text-black">{label}</p>
-        <p className="mt-0.5 text-xs text-black/45">{description}</p>
-      </div>
-      <span
-        className={`relative inline-block w-10 h-5 rounded-full transition-colors ${
-          on ? "bg-[#3c05c7]/40" : "bg-black/10"
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-            on ? "translate-x-5" : "translate-x-0"
-          }`}
-        />
-      </span>
-    </button>
-  );
-}

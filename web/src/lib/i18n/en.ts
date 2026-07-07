@@ -238,15 +238,6 @@ export const en = {
   "send.action": "Send {asset} → {chain}",
   "deposit.youllDo": "you'll {verb} {value}",
 
-  // You / notifications
-  "you.notifications": "Notifications",
-  "you.notif1": "Pile activity",
-  "you.notif1d": "Someone joined or pulled their share",
-  "you.notif2": "Daily yield digest",
-  "you.notif2d": "One line, once a day",
-  "you.notif3": "Goal milestones",
-  "you.notif3d": "When you cross 25 / 50 / 75 / 100%",
-
   // User-facing errors (mapped from thrown messages)
   "err.priceImpact": "Price impact too high — try a smaller amount",
   "err.nothingToWithdraw": "Nothing to withdraw",
