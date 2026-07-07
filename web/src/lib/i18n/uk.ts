@@ -217,14 +217,6 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "send.action": "Надіслати {asset} → {chain}",
   "deposit.youllDo": "сума: {value}",
 
-  "you.notifications": "Сповіщення",
-  "you.notif1": "Активність у скарбничці",
-  "you.notif1d": "Хтось приєднався або забрав свою частку",
-  "you.notif2": "Щоденний підсумок доходу",
-  "you.notif2d": "Один рядок, раз на день",
-  "you.notif3": "Віхи цілей",
-  "you.notif3d": "Коли перетинаєш 25 / 50 / 75 / 100%",
-
   "err.priceImpact": "Завеликий вплив на ціну — спробуй меншу суму",
   "err.nothingToWithdraw": "Нема чого знімати",
   "err.priceUnavailable": "Ціна недоступна — спробуй ще раз",
