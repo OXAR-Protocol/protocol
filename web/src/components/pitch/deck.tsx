@@ -1,7 +1,6 @@
 import Image from "next/image";
 
 import { SlideFrame, Kicker } from "@/components/pitch/slide-frame";
-import { HubDiagram } from "@/components/pitch/hub-diagram";
 
 const C = "/pitch/collage";
 // Accent: italic + a violet tint, so it lifts off the plain-white running text.
@@ -70,8 +69,13 @@ export function Deck() {
         sub="one simple, non-custodial account: hold dollars, earn a real yield, own treasuries, stocks and gold. sign in with email, pay with apple pay, withdraw anytime — in plain language."
       />
 
-      {/* 07 — Hub */}
-      <HubDiagram />
+      {/* 07 — Hub (every source in one account) */}
+      <SlideFrame
+        kicker="one account" variant="full"
+        image={`${C}/microphones.png`} imageAlt="Microphones labelled yield, rwa, gold, bonds, stocks, credit"
+        title={<>every way to grow, <span className={ACCENT}>in one place.</span></>}
+        sub="yield, treasuries, credit, stocks, gold — every source in a single non-custodial account. one tap, no apps to juggle, no wallets to manage."
+      />
 
       {/* 08 — Grow / access */}
       <SlideFrame
