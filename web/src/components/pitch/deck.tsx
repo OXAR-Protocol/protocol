@@ -31,9 +31,9 @@ export function Deck() {
         </div>
       </section>
 
-      {/* 02 — Problem */}
+      {/* 02 — Problem — light */}
       <SlideFrame
-        kicker="the problem" variant="right"
+        light kicker="the problem" variant="right"
         image={`${C}/dripping-dollar.png`} imageAlt="Money losing value"
         title={<>inflation quietly <span className={ACCENT}>eats</span> your savings.</>}
         sub="for most of the world, keeping money in the local currency means losing value year after year. the fix — holding dollars, and making them earn — is the hard part."
@@ -47,9 +47,9 @@ export function Deck() {
         sub="a dollar savings account, where you can get one, pays close to nothing. a real return and global assets sit behind brokers, borders, minimums and paperwork most people never clear."
       />
 
-      {/* 04 — Status quo: crypto */}
+      {/* 04 — Status quo: crypto — light */}
       <SlideFrame
-        kicker="today's options" variant="right"
+        light kicker="today's options" variant="right"
         image={`${C}/dollar-hook.png`} imageAlt="Dollar on a hook"
         title={<>crypto solved access — and made a <span className={ACCENT}>mess.</span></>}
         sub="the tools that actually reach dollars and yield are built for traders: seed phrases, gas, jargon, scams. powerful — but not something a normal person can use."
