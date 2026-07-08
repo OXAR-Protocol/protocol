@@ -102,7 +102,7 @@ export function Deck() {
         <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4">
           {[
             ["live", "on solana mainnet"],
-            ["86", "waitlist signups"],
+            ["100+", "waitlist signups"],
             ["$75k", "intended deposits"],
             ["30+", "assets — yield, stocks, gold"],
           ].map(([n, l]) => (
