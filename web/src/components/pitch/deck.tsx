@@ -7,6 +7,8 @@ const C = "/pitch/collage";
 const ACCENT = "italic text-[#8B5CF6]";
 const TITLE = "font-bold lowercase leading-[0.95] tracking-[-0.02em] text-white";
 const SUB = "font-light lowercase text-white/55 leading-relaxed";
+const TITLE_L = "font-bold lowercase leading-[0.95] tracking-[-0.02em] text-black";
+const SUB_L = "font-light lowercase text-black/55 leading-relaxed";
 
 /** The OXAR pitch — a dark, scroll-snap deck on cut-out photo collages, typeset
  *  in the landing's DM Sans / lowercase / bracketed-label system. Copy is written
@@ -61,9 +63,9 @@ export function Deck() {
         sub="emerging-market savers, freelancers paid across borders, anyone who wants to hold and grow dollars without becoming a crypto trader. we begin with the underserved — and build for everyone."
       />
 
-      {/* 06 — Solution (hero image) */}
+      {/* 06 — Solution (hero image) — light: the turn from the dark problem */}
       <SlideFrame
-        kicker="the solution" variant="full"
+        light kicker="the solution" variant="full"
         image={`${C}/sleeping-money.png`} imageAlt="Money asleep on a cloud"
         title={<>a dollar account that <span className={ACCENT}>actually earns.</span></>}
         sub="one simple, non-custodial account: hold dollars, earn a real yield, own treasuries, stocks and gold. sign in with email, pay with apple pay, withdraw anytime — in plain language."
@@ -77,9 +79,9 @@ export function Deck() {
         sub="yield, treasuries, credit, stocks, gold — every source in a single non-custodial account. one tap, no apps to juggle, no wallets to manage."
       />
 
-      {/* 08 — Grow / access */}
+      {/* 08 — Grow / access — light */}
       <SlideFrame
-        kicker="not just safe" variant="right"
+        light kicker="not just safe" variant="right"
         image={`${C}/coin-stack.png`} imageAlt="Coins growing"
         title={<>protect, then <span className={ACCENT}>grow.</span></>}
         sub="us treasuries, institutional credit, tokenized stocks and gold — global assets usually gated by geography or a us brokerage, now a few taps away."
@@ -93,10 +95,10 @@ export function Deck() {
         sub="your money moves straight from your wallet into audited protocols. oxar holds nothing, runs no smart contract of its own, and takes no cut of your funds. nothing to hack, no keys to lose, withdraw anytime."
       />
 
-      {/* 10 — Traction */}
-      <section className="flex min-h-screen w-full flex-col justify-center bg-black px-6 py-16 md:px-16">
-        <Kicker>traction</Kicker>
-        <h2 className={`${TITLE} mt-4 max-w-3xl text-[clamp(30px,5vw,64px)]`}>
+      {/* 10 — Traction — light */}
+      <section className="flex min-h-screen w-full flex-col justify-center bg-white px-6 py-16 md:px-16">
+        <Kicker light>traction</Kicker>
+        <h2 className={`${TITLE_L} mt-4 max-w-3xl text-[clamp(30px,5vw,64px)]`}>
           a working product, <span className={ACCENT}>already live.</span>
         </h2>
         <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4">
@@ -107,12 +109,12 @@ export function Deck() {
             ["30+", "assets — yield, stocks, gold"],
           ].map(([n, l]) => (
             <div key={l}>
-              <p className="font-bold leading-none text-white text-[clamp(40px,6vw,76px)]">{n}</p>
-              <p className="mt-3 text-sm lowercase text-white/50">{l}</p>
+              <p className="font-bold leading-none text-black text-[clamp(40px,6vw,76px)]">{n}</p>
+              <p className="mt-3 text-sm lowercase text-black/50">{l}</p>
             </div>
           ))}
         </div>
-        <p className="mt-14 max-w-xl text-sm lowercase text-white/40">
+        <p className="mt-14 max-w-xl text-sm lowercase text-black/40">
           bootstrapped two-person team · a real product on mainnet, not a prototype · every asset verified on-chain before it ships.
         </p>
       </section>
@@ -125,17 +127,17 @@ export function Deck() {
         sub="tokenized real-world assets have crossed into the billions, cross-border and crypto payroll is mainstream, and card-to-crypto onramps finally work. the rails to give anyone a dollar account exist for the first time."
       />
 
-      {/* 12 — Team + ask */}
-      <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-6 text-center">
-        <Kicker>the team</Kicker>
-        <h2 className={`${TITLE} mt-4 text-[clamp(30px,5vw,64px)]`}>
+      {/* 12 — Team + ask — light */}
+      <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-white px-6 text-center">
+        <Kicker light>the team</Kicker>
+        <h2 className={`${TITLE_L} mt-4 text-[clamp(30px,5vw,64px)]`}>
           two founders, one <span className={ACCENT}>live product.</span>
         </h2>
-        <p className={`${SUB} mx-auto mt-6 max-w-lg text-[clamp(15px,1.5vw,19px)]`}>
+        <p className={`${SUB_L} mx-auto mt-6 max-w-lg text-[clamp(15px,1.5vw,19px)]`}>
           daniel lohachov & anna tarapatska — building from ukraine for the people banks and
           brokers underserve. shipped to mainnet in months, bootstrapped.
         </p>
-        <p className="mt-8 text-[13px] lowercase text-white/50">oxar.app · daniel.l@oxar.app</p>
+        <p className="mt-8 text-[13px] lowercase text-black/50">oxar.app · daniel.l@oxar.app</p>
       </section>
     </>
   );
