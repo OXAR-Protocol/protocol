@@ -4,11 +4,9 @@ import type { ReactNode } from "react";
 export type SlideVariant = "right" | "left" | "full" | "center";
 
 interface Props {
-  /** Two-digit index shown in the mono kicker, e.g. "01". */
-  index?: string;
-  /** Small mono label above the headline. */
+  /** Small bracketed eyebrow label above the headline. */
   kicker: string;
-  /** Big serif headline (JSX so you can accent a word). */
+  /** Big DM Sans Bold headline (JSX so you can italicise a word). */
   title: ReactNode;
   /** One or two supporting lines under the headline. */
   sub?: ReactNode;
@@ -20,14 +18,22 @@ interface Props {
   variant?: SlideVariant;
 }
 
-const KICKER = "font-[family-name:var(--font-geist-mono)] text-[11px] uppercase tracking-[0.28em] text-white/40";
-const TITLE =
-  "font-[family-name:var(--font-instrument-serif)] leading-[0.98] tracking-[-0.02em] text-white text-[clamp(34px,6vw,88px)]";
-const SUB = "font-light text-white/60 text-[clamp(15px,1.5vw,20px)] leading-relaxed max-w-xl";
+// Landing-matched type system: DM Sans (set on the page wrapper), lowercase,
+// bracketed labels, tight bold headlines, italics for accents (not colour).
+export const KICKER =
+  "lowercase text-white/40 text-[clamp(12px,1vw,15px)] leading-none tracking-[0.01em]";
+export const TITLE =
+  "font-bold lowercase leading-[0.95] tracking-[-0.02em] text-white text-[clamp(34px,6vw,86px)]";
+export const SUB = "font-light text-white/55 text-[clamp(15px,1.5vw,20px)] leading-relaxed max-w-xl";
+
+/** Bracketed lowercase eyebrow, as on the landing (`[ the problem ]`). */
+export function Kicker({ children }: { children: ReactNode }) {
+  return <p className={KICKER}>[ {children} ]</p>;
+}
 
 /** One full-screen deck slide. `full` = image-dominant with text overlaid low;
  *  `right`/`left` = split; `center` = image behind centered text. */
-export function SlideFrame({ index, kicker, title, sub, image, imageAlt = "", children, variant = "right" }: Props) {
+export function SlideFrame({ kicker, title, sub, image, imageAlt = "", children, variant = "right" }: Props) {
   if (variant === "full") {
     return (
       <section className="relative min-h-screen w-full overflow-hidden bg-black">
@@ -36,7 +42,7 @@ export function SlideFrame({ index, kicker, title, sub, image, imageAlt = "", ch
         )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/70 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 px-6 pb-16 md:px-16 md:pb-20">
-          <p className={KICKER}>{index ? `${index} · ` : ""}{kicker}</p>
+          <Kicker>{kicker}</Kicker>
           <h2 className={`${TITLE} mt-4 max-w-4xl`}>{title}</h2>
           {sub && <p className={`${SUB} mt-5`}>{sub}</p>}
           {children}
@@ -49,10 +55,10 @@ export function SlideFrame({ index, kicker, title, sub, image, imageAlt = "", ch
     return (
       <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-6 text-center">
         {image && (
-          <Image src={image} alt={imageAlt} fill priority sizes="100vw" className="object-contain opacity-25" />
+          <Image src={image} alt={imageAlt} fill priority sizes="100vw" className="scale-110 object-contain opacity-45" />
         )}
-        <div className="relative z-10">
-          <p className={KICKER}>{index ? `${index} · ` : ""}{kicker}</p>
+        <div className="relative z-10 max-w-2xl">
+          <Kicker>{kicker}</Kicker>
           <h2 className={`${TITLE} mt-5 mx-auto max-w-4xl`}>{title}</h2>
           {sub && <p className={`${SUB} mx-auto mt-6 text-center`}>{sub}</p>}
           {children}
@@ -66,7 +72,7 @@ export function SlideFrame({ index, kicker, title, sub, image, imageAlt = "", ch
   return (
     <section className="grid min-h-screen w-full grid-cols-1 items-center gap-6 bg-black px-6 py-16 md:grid-cols-2 md:gap-10 md:px-16">
       <div className={`${imgFirst ? "md:order-2" : ""} max-w-xl`}>
-        <p className={KICKER}>{index ? `${index} · ` : ""}{kicker}</p>
+        <Kicker>{kicker}</Kicker>
         <h2 className={`${TITLE} mt-4`}>{title}</h2>
         {sub && <p className={`${SUB} mt-6`}>{sub}</p>}
         {children}

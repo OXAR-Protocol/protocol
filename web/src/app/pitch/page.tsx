@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { dmSans } from "@/components/landing-v2/fonts";
 import { Deck } from "@/components/pitch/deck";
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function PitchPage() {
   return (
-    <main className="h-screen overflow-y-auto overflow-x-hidden snap-y snap-mandatory bg-black text-white scroll-smooth [&>section]:snap-start [&>section]:snap-always">
+    <main className={`${dmSans.variable} ${dmSans.className} h-screen overflow-y-auto overflow-x-hidden snap-y snap-mandatory bg-black text-white scroll-smooth [&>section]:snap-start [&>section]:snap-always`}>
       <Deck />
     </main>
   );
