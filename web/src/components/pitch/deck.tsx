@@ -4,8 +4,8 @@ import { SlideFrame, Kicker } from "@/components/pitch/slide-frame";
 import { HubDiagram } from "@/components/pitch/hub-diagram";
 
 const C = "/pitch/collage";
-// Landing-matched accent: italics, not colour (the violet lives in the collages).
-const ACCENT = "italic";
+// Accent: italic + a violet tint, so it lifts off the plain-white running text.
+const ACCENT = "italic text-[#8B5CF6]";
 const TITLE = "font-bold lowercase leading-[0.95] tracking-[-0.02em] text-white";
 const SUB = "font-light lowercase text-white/55 leading-relaxed";
 
@@ -38,11 +38,11 @@ export function Deck() {
         sub="for most of the world, keeping money in the local currency means losing value year after year. the fix — holding dollars, and making them earn — is the hard part."
       />
 
-      {/* 03 — Status quo: the old system */}
+      {/* 03 — Status quo: the old system (hands "hold" the text) */}
       <SlideFrame
-        kicker="today's options" variant="left"
-        image={`${C}/bank-phone.png`} imageAlt="The old banking system"
-        title={<>the old system wasn&apos;t <span className={ACCENT}>built for this.</span></>}
+        kicker="today's options" variant="center"
+        image={`${C}/grasping-hands.png`} imageAlt="Hands holding money out of reach"
+        title={<>your money is <span className={ACCENT}>held back.</span></>}
         sub="a dollar savings account, where you can get one, pays close to nothing. a real return and global assets sit behind brokers, borders, minimums and paperwork most people never clear."
       />
 

@@ -55,9 +55,9 @@ export function SlideFrame({ kicker, title, sub, image, imageAlt = "", children,
     return (
       <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-6 text-center">
         {image && (
-          <Image src={image} alt={imageAlt} fill priority sizes="100vw" className="object-contain opacity-25" />
+          <Image src={image} alt={imageAlt} fill priority sizes="100vw" className="scale-110 object-contain opacity-45" />
         )}
-        <div className="relative z-10">
+        <div className="relative z-10 max-w-2xl">
           <Kicker>{kicker}</Kicker>
           <h2 className={`${TITLE} mt-5 mx-auto max-w-4xl`}>{title}</h2>
           {sub && <p className={`${SUB} mx-auto mt-6 text-center`}>{sub}</p>}
