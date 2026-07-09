@@ -127,13 +127,13 @@ export function Deck() {
 
       {/* 12 — Team + ask — dark */}
       <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-6 text-center">
-        <Kicker>the team</Kicker>
+        <Kicker>the founder</Kicker>
         <h2 className={`${TITLE} mt-4 text-[clamp(30px,5vw,64px)]`}>
-          two founders, one <span className={ACCENT}>live product.</span>
+          one founder, one <span className={ACCENT}>live product.</span>
         </h2>
         <p className={`${SUB} mx-auto mt-6 max-w-lg text-[clamp(15px,1.5vw,19px)]`}>
-          daniel lohachov & anna tarapatska — building from ukraine. shipped to mainnet in
-          months, bootstrapped.
+          daniel lohachov — building from ukraine. shipped a live product to mainnet in
+          months, solo and bootstrapped.
         </p>
         <p className="mt-8 text-[13px] lowercase text-white/50">oxar.app · daniel.l@oxar.app</p>
       </section>
