@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { Plus, CreditCard } from "lucide-react";
 
@@ -48,10 +48,15 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // Works with no crypto in the wallet (the whole point), so it's independent
   // of the pay-asset picker below.
   const applePay = useFundAndBuy(view.id);
-  // Card on-ramp is offered ONLY to embedded (email) wallets. A user who connected
-  // an external wallet already has crypto (pays with it) AND, in that wallet's
-  // mobile in-app browser, the card widget renders a black screen — so don't offer it.
   const { isExternal } = useSolanaContext();
+  // The card on-ramp widget black-screens ONLY inside a mobile wallet's in-app
+  // browser (external wallet + mobile). It's fine for embedded wallets anywhere and
+  // for external wallets on desktop (a normal browser tab), so only hide it there.
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+  }, []);
+  const canUseCard = !(isExternal && isMobile);
 
   // Amount is entered in the selected currency's units; USD is derived for the
   // (USD-denominated) money path below via the asset's unit price. `null` = the
@@ -180,12 +185,12 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         {assetsLoading ? (
           <p className="text-xs text-black/40">{t("deposit.loadingAssets")}</p>
         ) : emptyWallet ? (
-          isExternal ? (
-            // Empty external wallet: no crypto to pay with, and no card on-ramp for
-            // external wallets — fund the wallet itself, then come back.
+          !canUseCard ? (
+            // Empty external wallet on mobile: no crypto to pay with, and the card
+            // widget black-screens here — fund the wallet itself, then come back.
             <p className="text-xs text-black/40">{t("deposit.noAssets")}</p>
           ) : (
-            // Empty embedded wallet → the card on-ramp is the route. Enter how much (USD).
+            // Empty wallet with a usable card route → enter how much to buy (USD).
             <div className="rounded-[12px] border border-black/10 px-3 py-2.5 transition-colors focus-within:border-black/30">
               <div className="flex items-center gap-1">
                 <span className="text-[20px] text-black/40">$</span>
@@ -300,10 +305,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         </>
       )}
 
-      {/* Card on-ramp (Privy → MoonPay / Coinbase / Stripe, routed by geo) — embedded
-          (email) wallets only. External-wallet users already have crypto AND hit a
-          black screen in their wallet's in-app browser, so they pay with their crypto. */}
-      {!isExternal && (
+      {/* Card on-ramp (Privy → MoonPay / Coinbase / Stripe, routed by geo). Shown
+          everywhere EXCEPT inside a mobile wallet's in-app browser (external + mobile),
+          where the widget black-screens. Desktop external wallets are fine. */}
+      {canUseCard && (
         <>
           {/* Divider only when the crypto path is also shown above. */}
           {!emptyWallet && (
