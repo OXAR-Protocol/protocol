@@ -150,6 +150,13 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
               placeholder={destChain.chain === "ethereum" ? "0x…" : t("send.addressPlaceholder")}
               className="w-full bg-transparent border border-black/15 focus:border-black/40 outline-none rounded-[5px] px-3 py-2 text-xs text-black"
             />
+            {/* EVM addresses look identical on every chain — remind which network
+                the funds land on so nothing is sent to the wrong one. */}
+            {!isSolanaDest && to.trim() !== "" && (
+              <p className="mt-1.5 text-[10px] leading-snug text-[#3c05c7]/80">
+                {t("send.evmWarning", { chain: destChain.label })}
+              </p>
+            )}
 
             <div className="flex items-center justify-between mt-4 mb-1.5">
               <p className="text-[10px] lowercase tracking-wide text-black/40">

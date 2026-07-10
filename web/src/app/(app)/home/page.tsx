@@ -10,6 +10,7 @@ import { SectionLabel } from "@/components/section-label";
 import { LiveAmount } from "@/components/live-amount";
 import { LiveEarned } from "@/components/live-earned";
 import { ActivityFeed } from "@/components/activity-feed";
+import { WalletCash } from "@/components/wallet-cash";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
 import { useStockPrices } from "@/hooks/use-stock-prices";
@@ -126,6 +127,9 @@ export default function HomePage() {
             : t("home.empty.cta")}
         </p>
       </motion.section>
+
+      {/* Money in the wallet, not put to work yet — nudge to invest it. */}
+      <WalletCash />
 
       {/* Empty state — first-time hero */}
       {totalUsdc === 0 && !loading && (
