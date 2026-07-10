@@ -168,12 +168,17 @@ export function AssetDetail({
               <p className="text-[clamp(17px,1.6vw,21px)] leading-snug text-black/80">{info.about}</p>
               {info.facts && info.facts.length > 0 && (
                 <div className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-[12px] border border-black/10 bg-black/10 sm:grid-cols-2">
-                  {info.facts.map((f) => (
-                    <div key={f.label} className="bg-white p-4">
-                      <p className="lowercase text-[12px] text-black/40">{f.label}</p>
-                      <p className="mt-1 text-[15px] text-black">{f.value}</p>
-                    </div>
-                  ))}
+                  {info.facts.map((f, i) => {
+                    // An odd last fact would leave an empty 2nd cell showing the grey
+                    // grid background — span it full width so the row stays filled.
+                    const spanFull = i === info.facts!.length - 1 && info.facts!.length % 2 === 1;
+                    return (
+                      <div key={f.label} className={`bg-white p-4 ${spanFull ? "sm:col-span-2" : ""}`}>
+                        <p className="lowercase text-[12px] text-black/40">{f.label}</p>
+                        <p className="mt-1 text-[15px] text-black">{f.value}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </motion.section>
