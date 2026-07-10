@@ -114,10 +114,8 @@ export function useFundAndBuy(providerId: string) {
             // Pre-fill ~$usdAmount when we already know the price; omit it otherwise.
             ...(cachedPrice > 0 ? { amount: (usdAmount / cachedPrice).toFixed(4) } : {}),
             defaultFundingMethod: "card", // card flow surfaces Apple Pay on supported devices
-            // Prefer Coinbase: it serves Ukraine + the EU (where MoonPay is geo-blocked)
-            // and has a lower minimum. Privy falls back to MoonPay where Coinbase can't.
-            // (Stripe isn't a Privy option for Solana funding — MoonPay/Coinbase only.)
-            card: { preferredProvider: "coinbase" },
+            // No provider pinned — Privy routes to whichever on-ramp is enabled +
+            // available for the user's geo (MoonPay / Stripe / Coinbase).
           },
         });
 
