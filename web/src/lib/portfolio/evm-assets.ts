@@ -30,6 +30,13 @@ export function networkLabel(network?: string): string | null {
   return network ? NETWORK_LABEL[network] ?? null : null;
 }
 
+/** Network name for ANY asset — "Solana" for Solana holdings, else the EVM
+ *  network. Every pay-asset shows its chain so nothing is ambiguous. */
+export function assetNetworkLabel(a: WalletAsset): string {
+  if (a.chain === "solana") return "Solana";
+  return networkLabel(a.network) ?? "Ethereum";
+}
+
 /** One token entry from Alchemy `assets/tokens/by-address` (fields we read). */
 export interface AlchemyToken {
   address: string;
