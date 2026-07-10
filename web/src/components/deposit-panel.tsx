@@ -17,6 +17,10 @@ import type { ProviderView } from "@/hooks/use-yield-positions";
 import { assetUid } from "@/lib/portfolio/assets";
 import { useT, localizeError } from "@/lib/i18n";
 
+// On-ramp minimum (MoonPay/Transak floor) and the pre-filled default for the buy.
+const APPLE_PAY_MIN_USD = 20;
+const APPLE_PAY_DEFAULT_USD = 50;
+
 /** Apple logo as inline SVG (renders on every platform, unlike the  glyph). */
 function AppleLogo({ className }: { className?: string }) {
   return (
@@ -68,10 +72,15 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const [selectedUid, setSelectedUid] = useState<string | null>(null);
   // Show the "no surprises" review before the deposit signs.
   const [confirming, setConfirming] = useState(false);
+  // USD to buy via Apple Pay when the wallet is empty — there's no pay-asset to
+  // size the amount from, so the user enters it directly. Pre-filled, editable.
+  const [buyUsdInput, setBuyUsdInput] = useState(String(APPLE_PAY_DEFAULT_USD));
 
   // Solana first (instant/swap), then EVM (bridge).
   const assets = useMemo(() => [...solAssets, ...evmAssets], [solAssets, evmAssets]);
   const assetsLoading = solLoading || evmLoading;
+  // No crypto to pay with (fresh email wallet) — Apple Pay is the only route.
+  const emptyWallet = !assetsLoading && assets.length === 0;
 
   // Default: the product's own asset if held, else the largest Solana holding, else first.
   const defaultUid = useMemo(() => {
@@ -131,9 +140,15 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
     }
   };
 
-  // Apple Pay buys a fixed USD value (the typed amount if any, else ~$50). No
+  // USD the Apple Pay buy will charge. With crypto in the wallet it mirrors the
+  // typed pay amount; with an empty wallet the user enters it directly above. No
   // pay-asset needed — the on-ramp delivers fresh USDC, then we buy.
-  const applePayUsd = usdAmount > 0 ? usdAmount : 50;
+  const applePayUsd = emptyWallet
+    ? Math.max(0, parseFloat(buyUsdInput) || 0)
+    : usdAmount > 0
+      ? usdAmount
+      : APPLE_PAY_DEFAULT_USD;
+  const applePayBelowMin = applePayUsd < APPLE_PAY_MIN_USD;
   const handleApplePay = async () => {
     try {
       const base = await applePay.buyWithApplePay(applePayUsd);
@@ -174,8 +189,28 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
       <div className="mt-2">
         {assetsLoading ? (
           <p className="text-xs text-black/40">{t("deposit.loadingAssets")}</p>
-        ) : assets.length === 0 ? (
-          <p className="text-xs text-black/40">{t("deposit.noAssets")}</p>
+        ) : emptyWallet ? (
+          isExternal ? (
+            <p className="text-xs text-black/40">{t("deposit.noAssets")}</p>
+          ) : (
+            // Empty embedded wallet → Apple Pay is the route. Enter how much to buy (USD).
+            <div className="rounded-[12px] border border-black/10 px-3 py-2.5 transition-colors focus-within:border-black/30">
+              <div className="flex items-center gap-1">
+                <span className="text-[20px] text-black/40">$</span>
+                <input
+                  type="number"
+                  min={APPLE_PAY_MIN_USD}
+                  step="any"
+                  inputMode="decimal"
+                  value={buyUsdInput}
+                  onChange={(e) => setBuyUsdInput(e.target.value)}
+                  placeholder={String(APPLE_PAY_DEFAULT_USD)}
+                  className="w-full bg-transparent text-[20px] text-black outline-none placeholder:text-black/25"
+                />
+              </div>
+              <p className="mt-0.5 text-[10px] lowercase tracking-wide text-black/40">{t("deposit.buyAmountHint")}</p>
+            </div>
+          )
         ) : (
           <PayWithField
             assets={assets}
@@ -259,29 +294,36 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         </p>
       )}
 
-      <button
-        onClick={() => setConfirming(true)}
-        disabled={busy || applePay.busy || !payAsset || usdAmount <= 0}
-        className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
-      >
-        {verb}
-      </button>
-
-      {error && <p className="mt-3 text-xs text-red-400 text-center">{localizeError(error, t)}</p>}
+      {/* Crypto deposit — hidden on an empty wallet (nothing to pay with). */}
+      {!emptyWallet && (
+        <>
+          <button
+            onClick={() => setConfirming(true)}
+            disabled={busy || applePay.busy || !payAsset || usdAmount <= 0}
+            className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
+          >
+            {verb}
+          </button>
+          {error && <p className="mt-3 text-xs text-red-400 text-center">{localizeError(error, t)}</p>}
+        </>
+      )}
 
       {/* Apple Pay / card — only for embedded (email) wallets. External-wallet
           (Phantom) users already have crypto and run inside the wallet's in-app
           browser, where the card widget can't render. They pay with their crypto. */}
       {!isExternal && (
         <>
-          <div className="mt-3 flex items-center gap-3 text-[10px] lowercase tracking-wide text-black/30">
-            <span className="h-px flex-1 bg-black/10" />
-            {t("common.or")}
-            <span className="h-px flex-1 bg-black/10" />
-          </div>
+          {/* Divider only when the crypto path is also shown above. */}
+          {!emptyWallet && (
+            <div className="mt-3 flex items-center gap-3 text-[10px] lowercase tracking-wide text-black/30">
+              <span className="h-px flex-1 bg-black/10" />
+              {t("common.or")}
+              <span className="h-px flex-1 bg-black/10" />
+            </div>
+          )}
           <button
             onClick={handleApplePay}
-            disabled={applePay.busy || busy}
+            disabled={applePay.busy || busy || applePayBelowMin}
             className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[15px] font-medium tracking-tight hover:bg-black/90 disabled:opacity-40 transition inline-flex items-center justify-center gap-1.5"
           >
             {applePay.busy ? (
@@ -296,7 +338,9 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             )}
           </button>
           <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/30">
-            {t("deposit.applePayHint", { value: `$${applePayUsd.toFixed(0)}` })}
+            {applePayBelowMin
+              ? t("deposit.minAmount", { value: `$${APPLE_PAY_MIN_USD}` })
+              : t("deposit.applePayHint", { value: `$${applePayUsd.toFixed(0)}` })}
           </p>
 
           {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}

@@ -74,6 +74,8 @@ export const en = {
   "deposit.swapCost": "swap cost ~{value}",
   "deposit.cantQuote": "couldn't quote — try a different amount",
   "deposit.applePayHint": "≈ {value} · apple pay or card · no crypto needed",
+  "deposit.buyAmountHint": "how much to buy · apple pay or card",
+  "deposit.minAmount": "minimum {value}",
   "confirm.review": "review your {verb}",
   "confirm.youPay": "you pay",
   "confirm.youllHold": "you'll hold",
