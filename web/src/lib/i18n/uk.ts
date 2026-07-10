@@ -22,6 +22,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "home.empty.body":
     "обери джерело. поклади долари. заробляй з першого дня. знімай коли завгодно — гроші завжди твої.",
   "home.wakeUp": "розбудити гроші",
+  "home.wallet.label": "у гаманці · ще не працюють",
+  "home.wallet.cta": "нехай працюють",
   "home.whereSleeping": "де вони сплять",
   "home.manage": "керувати →",
   "home.recentActivity": "остання активність",
@@ -207,6 +209,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "send.toChain": "У мережу",
   "send.receive": "Отримання",
   "send.toAddress": "Адреса в мережі {chain}",
+  "send.evmWarning": "переконайся, що ця адреса приймає в мережі {chain} — кошти, надіслані в іншу мережу, повернути неможливо.",
   "send.addressPlaceholder": "Адреса Solana",
   "send.errNoAssets": "Нема чого надсилати",
   "send.errAmount": "Вкажи суму",

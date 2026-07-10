@@ -28,6 +28,8 @@ export const en = {
   "home.empty.body":
     "pick a source. add dollars. earn from day one. withdraw whenever you want — the money always stays yours.",
   "home.wakeUp": "wake up your money",
+  "home.wallet.label": "in your wallet · not working yet",
+  "home.wallet.cta": "put it to work",
   "home.whereSleeping": "where it's sleeping",
   "home.manage": "manage →",
   "home.recentActivity": "recent activity",
@@ -228,6 +230,7 @@ export const en = {
   "send.toChain": "To chain",
   "send.receive": "Receive",
   "send.toAddress": "To {chain} address",
+  "send.evmWarning": "make sure this address receives on {chain} — funds sent to the wrong network can't be recovered.",
   "send.addressPlaceholder": "Solana address",
   "send.errNoAssets": "No assets to send",
   "send.errAmount": "Enter an amount",
