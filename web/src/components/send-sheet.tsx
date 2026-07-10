@@ -9,18 +9,16 @@ import { CustomSelect } from "@/components/custom-select";
 import { AssetPicker } from "@/components/asset-picker";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useSend } from "@/hooks/use-send";
-import { useSolanaContext } from "@/providers/solana-provider";
 import { toBaseUnits } from "@/lib/yield";
 import { USDC_MINT } from "@/lib/constants";
 import { isValidAddressForChain, maxSendable } from "@/lib/wallet/transfer";
-import { DEST_CHAINS, getDestChain, outboundKind } from "@/lib/wallet/outbound-destinations";
+import { DEST_CHAINS, getDestChain, type DestAsset } from "@/lib/wallet/outbound-destinations";
 import { useT } from "@/lib/i18n";
 
 /** Send any held Solana asset into any asset, anywhere (transfer / swap / bridge). */
 export function SendSheet({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   const { assets, loading } = useWalletAssets();
-  const { walletAddress } = useSolanaContext();
   const { send, status, error: sendError } = useSend();
 
   const [sourceMint, setSourceMint] = useState<string | null>(null);
@@ -39,9 +37,13 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
   }, [assets, sourceMint]);
 
   const destChain = getDestChain(destKey);
-  const destAsset = destChain.assets.find((a) => a.symbol === assetSym) ?? destChain.assets[0];
-  const kind = source ? outboundKind(source.mint, destChain, destAsset.mint) : "transfer";
-  const needsAddress = kind !== "swap"; // swap lands in your own wallet
+  const isSolanaDest = destChain.chain === "solana";
+  // Same-chain send moves the SAME asset to the address; only a cross-chain
+  // (Delora) send lets you choose what lands on the other network.
+  const destAsset: DestAsset =
+    isSolanaDest && source
+      ? { symbol: source.symbol, mint: source.mint, decimals: source.decimals }
+      : destChain.assets.find((a) => a.symbol === assetSym) ?? destChain.assets[0];
 
   const amountBase = source ? toBaseUnits(amount || "0", source.decimals) : BigInt(0);
   const validation = !source
@@ -50,7 +52,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
       ? t("send.errAmount")
       : amountBase > maxSendable(source)
         ? t("send.notEnough", { sym: source.symbol })
-        : needsAddress && !isValidAddressForChain(to, destChain.chain)
+        : !isValidAddressForChain(to, destChain.chain)
           ? t("send.errAddress", { chain: destChain.chain === "ethereum" ? "EVM" : "Solana" })
           : null;
   const busy = status !== "idle";
@@ -58,8 +60,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
   const handleSend = async () => {
     if (!source || validation) return;
     try {
-      const target = needsAddress ? to : walletAddress?.toBase58() ?? "";
-      setResult(await send({ source, destChain, destAsset, to: target, amountBase }));
+      setResult(await send({ source, destChain, destAsset, to, amountBase }));
     } catch {
       /* surfaced via sendError */
     }
@@ -117,7 +118,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
               <AssetPicker assets={assets} value={source?.mint ?? null} onChange={setSourceMint} />
             )}
 
-            <div className="grid grid-cols-2 gap-3 mt-4">
+            <div className={`mt-4 grid gap-3 ${isSolanaDest ? "grid-cols-1" : "grid-cols-2"}`}>
               <div>
                 <p className="text-[10px] lowercase tracking-wide text-black/40 mb-1.5">{t("send.toChain")}</p>
                 <CustomSelect
@@ -126,31 +127,29 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
                   options={DEST_CHAINS.map((d) => ({ value: d.key, label: d.label }))}
                 />
               </div>
-              <div>
-                <p className="text-[10px] lowercase tracking-wide text-black/40 mb-1.5">{t("send.receive")}</p>
-                <CustomSelect
-                  value={destAsset.symbol}
-                  onChange={setAssetSym}
-                  options={destChain.assets.map((a) => ({ value: a.symbol, label: a.symbol }))}
-                />
-              </div>
+              {/* Cross-chain only: pick what lands on the other network. Same-chain
+                  sends the SAME asset, so there's nothing to choose. */}
+              {!isSolanaDest && (
+                <div>
+                  <p className="text-[10px] lowercase tracking-wide text-black/40 mb-1.5">{t("send.receive")}</p>
+                  <CustomSelect
+                    value={destAsset.symbol}
+                    onChange={setAssetSym}
+                    options={destChain.assets.map((a) => ({ value: a.symbol, label: a.symbol }))}
+                  />
+                </div>
+              )}
             </div>
 
-            {needsAddress ? (
-              <>
-                <p className="text-[10px] lowercase tracking-wide text-black/40 mt-4 mb-1.5">
-                  {t("send.toAddress", { chain: destChain.chain === "ethereum" ? "EVM" : "Solana" })}
-                </p>
-                <input
-                  value={to}
-                  onChange={(e) => setTo(e.target.value)}
-                  placeholder={destChain.chain === "ethereum" ? "0x…" : t("send.addressPlaceholder")}
-                  className="w-full bg-transparent border border-black/15 focus:border-black/40 outline-none rounded-[5px] px-3 py-2 text-xs text-black"
-                />
-              </>
-            ) : (
-              <p className="mt-4 text-[11px] text-black/45">→ {destAsset.symbol} into your wallet</p>
-            )}
+            <p className="text-[10px] lowercase tracking-wide text-black/40 mt-4 mb-1.5">
+              {t("send.toAddress", { chain: destChain.chain === "ethereum" ? "EVM" : "Solana" })}
+            </p>
+            <input
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              placeholder={destChain.chain === "ethereum" ? "0x…" : t("send.addressPlaceholder")}
+              className="w-full bg-transparent border border-black/15 focus:border-black/40 outline-none rounded-[5px] px-3 py-2 text-xs text-black"
+            />
 
             <div className="flex items-center justify-between mt-4 mb-1.5">
               <p className="text-[10px] lowercase tracking-wide text-black/40">
