@@ -14,6 +14,7 @@ import { useFundAndBuy } from "@/hooks/use-fund-and-buy";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
+import { assetUid } from "@/lib/portfolio/assets";
 import { useT, localizeError } from "@/lib/i18n";
 
 /** Apple logo as inline SVG (renders on every platform, unlike the  glyph). */
@@ -62,7 +63,9 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // (USD-denominated) money path below via the asset's unit price. `null` = the
   // field is untouched, so it shows a ≈ $50 default of the current currency.
   const [amount, setAmount] = useState<string | null>(null);
-  const [selectedMint, setSelectedMint] = useState<string | null>(null);
+  // Selection is by asset UID, not mint — native EVM coins share one mint across
+  // networks, so keying by mint would pick the wrong-network ETH to bridge.
+  const [selectedUid, setSelectedUid] = useState<string | null>(null);
   // Show the "no surprises" review before the deposit signs.
   const [confirming, setConfirming] = useState(false);
 
@@ -71,17 +74,17 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const assetsLoading = solLoading || evmLoading;
 
   // Default: the product's own asset if held, else the largest Solana holding, else first.
-  const defaultMint = useMemo(() => {
+  const defaultUid = useMemo(() => {
     if (assets.length === 0) return null;
-    return (
-      assets.find((a) => a.chain === "solana" && a.mint === view.assetMint)?.mint ??
-      solAssets[0]?.mint ??
-      assets[0].mint
-    );
+    const pick =
+      assets.find((a) => a.chain === "solana" && a.mint === view.assetMint) ??
+      solAssets[0] ??
+      assets[0];
+    return assetUid(pick);
   }, [assets, solAssets, view.assetMint]);
 
-  const activeMint = selectedMint ?? defaultMint;
-  const payAsset = assets.find((a) => a.mint === activeMint) ?? null;
+  const activeUid = selectedUid ?? defaultUid;
+  const payAsset = assets.find((a) => assetUid(a) === activeUid) ?? null;
   const isDirect = payAsset?.chain === "solana" && payAsset.mint === view.assetMint;
 
   const unitPrice = payAsset && payAsset.uiAmount > 0 ? payAsset.usdValue / payAsset.uiAmount : 0;
@@ -176,8 +179,8 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         ) : (
           <PayWithField
             assets={assets}
-            activeMint={activeMint}
-            onSelectMint={setSelectedMint}
+            activeUid={activeUid}
+            onSelectUid={setSelectedUid}
             amount={effectiveAmount}
             onAmountChange={setAmount}
             usdAmount={usdAmount}

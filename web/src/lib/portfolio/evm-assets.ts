@@ -16,6 +16,20 @@ const NATIVE_SYMBOL: Record<string, string> = {
   "matic-mainnet": "POL",
 };
 
+/** Human-readable network name from an Alchemy network id (for the pay picker). */
+const NETWORK_LABEL: Record<string, string> = {
+  "eth-mainnet": "Ethereum",
+  "base-mainnet": "Base",
+  "arb-mainnet": "Arbitrum",
+  "opt-mainnet": "Optimism",
+  "matic-mainnet": "Polygon",
+};
+
+/** Display name of an EVM network, or null (Solana / unknown). */
+export function networkLabel(network?: string): string | null {
+  return network ? NETWORK_LABEL[network] ?? null : null;
+}
+
 /** One token entry from Alchemy `assets/tokens/by-address` (fields we read). */
 export interface AlchemyToken {
   address: string;

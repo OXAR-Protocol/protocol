@@ -34,6 +34,14 @@ export interface DasResult {
 /** Jupiter Price v3: `{ [mint]: { usdPrice } }`. */
 export type PriceMap = Record<string, { usdPrice?: number } | undefined>;
 
+/** Stable id unique across chains. Native EVM coins (ETH/POL) share one mint —
+ *  the zero sentinel — on every network, so we key on (chain, network, mint).
+ *  Used for picker keys and pay-asset selection; keying by mint alone collides
+ *  (e.g. ETH on Base vs Arbitrum) and could bridge from the wrong network. */
+export function assetUid(a: WalletAsset): string {
+  return `${a.chain}:${a.network ?? ""}:${a.mint}`;
+}
+
 const DUST_USD = 0.01;
 
 /** Keep this much SOL for tx fees (swap + deposit) when paying with native SOL. */

@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
-import { spendableBase, type WalletAsset } from "@/lib/portfolio/assets";
+import { spendableBase, assetUid, type WalletAsset } from "@/lib/portfolio/assets";
+import { networkLabel } from "@/lib/portfolio/evm-assets";
 
 /** What happens to the funds + roughly how long, per funding route. */
 export const routeTag = (a: WalletAsset, productMint: string) =>
@@ -16,8 +17,10 @@ const fmtAmount = (n: number) =>
 
 interface Props {
   assets: WalletAsset[];
-  activeMint: string | null;
-  onSelectMint: (mint: string) => void;
+  /** Unique id of the selected asset (from `assetUid`) — NOT the mint, which
+   *  collides for native EVM coins across networks. */
+  activeUid: string | null;
+  onSelectUid: (uid: string) => void;
   /** Raw input string, in the selected currency's units. */
   amount: string;
   onAmountChange: (value: string) => void;
@@ -34,8 +37,8 @@ interface Props {
  */
 export function PayWithField({
   assets,
-  activeMint,
-  onSelectMint,
+  activeUid,
+  onSelectUid,
   amount,
   onAmountChange,
   usdAmount,
@@ -43,7 +46,7 @@ export function PayWithField({
 }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const active = assets.find((a) => a.mint === activeMint) ?? null;
+  const active = assets.find((a) => assetUid(a) === activeUid) ?? null;
 
   useEffect(() => {
     if (!open) return;
@@ -77,7 +80,12 @@ export function PayWithField({
           ) : (
             <span className="h-5 w-5 rounded-full bg-black/10" />
           )}
-          <span className="text-[14px] font-medium text-black">{active?.symbol ?? "—"}</span>
+          <span className="flex flex-col items-start leading-tight">
+            <span className="text-[14px] font-medium text-black">{active?.symbol ?? "—"}</span>
+            {active && networkLabel(active.network) && (
+              <span className="text-[9px] lowercase tracking-wide text-black/40">{networkLabel(active.network)}</span>
+            )}
+          </span>
           <ChevronDown
             size={13}
             strokeWidth={1.5}
@@ -120,32 +128,41 @@ export function PayWithField({
       {/* Holdings picker */}
       {open && (
         <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-64 overflow-auto rounded-[12px] border border-black/15 bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
-          {assets.map((a) => (
-            <button
-              key={a.mint}
-              type="button"
-              onClick={() => {
-                onSelectMint(a.mint);
-                setOpen(false);
-              }}
-              className={`flex w-full items-center gap-3 px-3 py-2 text-left transition hover:bg-black/[0.04] ${
-                a.mint === activeMint ? "bg-black/[0.03]" : ""
-              }`}
-            >
-              <TokenIcon asset={a} className="h-6 w-6" />
-              <span className="flex min-w-0 flex-col">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-medium text-black">{a.symbol}</span>
-                  <span className="text-[9px] lowercase tracking-wide text-black/40">
-                    {routeTag(a, productMint)}
+          {assets.map((a) => {
+            const uid = assetUid(a);
+            const net = networkLabel(a.network);
+            return (
+              <button
+                key={uid}
+                type="button"
+                onClick={() => {
+                  onSelectUid(uid);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center gap-3 px-3 py-2 text-left transition hover:bg-black/[0.04] ${
+                  uid === activeUid ? "bg-black/[0.03]" : ""
+                }`}
+              >
+                <TokenIcon asset={a} className="h-6 w-6" />
+                <span className="flex min-w-0 flex-col">
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-[13px] font-medium text-black">{a.symbol}</span>
+                    {net && (
+                      <span className="rounded bg-black/[0.06] px-1.5 py-px text-[9px] tracking-wide text-black/55">
+                        {net}
+                      </span>
+                    )}
+                    <span className="text-[9px] lowercase tracking-wide text-black/40">
+                      {routeTag(a, productMint)}
+                    </span>
+                  </span>
+                  <span className="text-[11px] text-black/45">
+                    ${a.usdValue.toFixed(2)} · {fmtAmount(a.uiAmount)} {a.symbol}
                   </span>
                 </span>
-                <span className="text-[11px] text-black/45">
-                  ${a.usdValue.toFixed(2)} · {fmtAmount(a.uiAmount)} {a.symbol}
-                </span>
-              </span>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
