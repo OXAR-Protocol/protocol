@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import {
   buildWalletAssets,
   spendableBase,
+  assetUid,
   SOL_FEE_RESERVE,
   SOL_MINT,
   type DasResult,
@@ -11,6 +12,30 @@ import {
 } from "./assets";
 
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+describe("assetUid", () => {
+  const nativeEth = (network: string): WalletAsset => ({
+    mint: "0x0000000000000000000000000000000000000000",
+    symbol: "ETH",
+    decimals: 18,
+    amount: BigInt(1),
+    uiAmount: 1,
+    usdValue: 3000,
+    chain: "ethereum",
+    network,
+  });
+
+  it("distinguishes native ETH across networks (same mint, different network)", () => {
+    // The bug: native ETH shares one mint everywhere, so keying by mint collides.
+    expect(assetUid(nativeEth("base-mainnet"))).not.toBe(assetUid(nativeEth("arb-mainnet")));
+  });
+
+  it("is stable, and unique vs an EVM asset", () => {
+    const sol: WalletAsset = { mint: USDC, symbol: "USDC", decimals: 6, amount: BigInt(0), uiAmount: 0, usdValue: 0, chain: "solana" };
+    expect(assetUid(sol)).toBe(assetUid(sol));
+    expect(assetUid(sol)).not.toBe(assetUid(nativeEth("eth-mainnet")));
+  });
+});
 
 describe("buildWalletAssets", () => {
   it("includes native SOL priced by Helius total_price", () => {
