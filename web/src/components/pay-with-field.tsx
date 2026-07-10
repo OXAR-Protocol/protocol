@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
 import { spendableBase, assetUid, type WalletAsset } from "@/lib/portfolio/assets";
-import { networkLabel } from "@/lib/portfolio/evm-assets";
+import { assetNetworkLabel } from "@/lib/portfolio/evm-assets";
 
 /** What happens to the funds + roughly how long, per funding route. */
 export const routeTag = (a: WalletAsset, productMint: string) =>
@@ -82,8 +82,8 @@ export function PayWithField({
           )}
           <span className="flex flex-col items-start leading-tight">
             <span className="text-[14px] font-medium text-black">{active?.symbol ?? "—"}</span>
-            {active && networkLabel(active.network) && (
-              <span className="text-[9px] lowercase tracking-wide text-black/40">{networkLabel(active.network)}</span>
+            {active && (
+              <span className="text-[9px] lowercase tracking-wide text-black/40">{assetNetworkLabel(active)}</span>
             )}
           </span>
           <ChevronDown
@@ -130,7 +130,7 @@ export function PayWithField({
         <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-64 overflow-auto rounded-[12px] border border-black/15 bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
           {assets.map((a) => {
             const uid = assetUid(a);
-            const net = networkLabel(a.network);
+            const net = assetNetworkLabel(a);
             return (
               <button
                 key={uid}
