@@ -6,6 +6,7 @@ import { Plus, CreditCard } from "lucide-react";
 
 import { PayWithField } from "@/components/pay-with-field";
 import { DepositConfirm } from "@/components/deposit-confirm";
+import { useSolanaContext } from "@/providers/solana-provider";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
 import { useDeposit } from "@/hooks/use-deposit";
@@ -47,6 +48,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // Works with no crypto in the wallet (the whole point), so it's independent
   // of the pay-asset picker below.
   const applePay = useFundAndBuy(view.id);
+  // Card on-ramp is offered ONLY to embedded (email) wallets. A user who connected
+  // an external wallet already has crypto (pays with it) AND, in that wallet's
+  // mobile in-app browser, the card widget renders a black screen — so don't offer it.
+  const { isExternal } = useSolanaContext();
 
   // Amount is entered in the selected currency's units; USD is derived for the
   // (USD-denominated) money path below via the asset's unit price. `null` = the
@@ -175,23 +180,29 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         {assetsLoading ? (
           <p className="text-xs text-black/40">{t("deposit.loadingAssets")}</p>
         ) : emptyWallet ? (
-          // Empty wallet → the card on-ramp is the route. Enter how much to buy (USD).
-          <div className="rounded-[12px] border border-black/10 px-3 py-2.5 transition-colors focus-within:border-black/30">
-            <div className="flex items-center gap-1">
-              <span className="text-[20px] text-black/40">$</span>
-              <input
-                type="number"
-                min={APPLE_PAY_MIN_USD}
-                step="any"
-                inputMode="decimal"
-                value={buyUsdInput}
-                onChange={(e) => setBuyUsdInput(e.target.value)}
-                placeholder={String(APPLE_PAY_DEFAULT_USD)}
-                className="w-full bg-transparent text-[20px] text-black outline-none placeholder:text-black/25"
-              />
+          isExternal ? (
+            // Empty external wallet: no crypto to pay with, and no card on-ramp for
+            // external wallets — fund the wallet itself, then come back.
+            <p className="text-xs text-black/40">{t("deposit.noAssets")}</p>
+          ) : (
+            // Empty embedded wallet → the card on-ramp is the route. Enter how much (USD).
+            <div className="rounded-[12px] border border-black/10 px-3 py-2.5 transition-colors focus-within:border-black/30">
+              <div className="flex items-center gap-1">
+                <span className="text-[20px] text-black/40">$</span>
+                <input
+                  type="number"
+                  min={APPLE_PAY_MIN_USD}
+                  step="any"
+                  inputMode="decimal"
+                  value={buyUsdInput}
+                  onChange={(e) => setBuyUsdInput(e.target.value)}
+                  placeholder={String(APPLE_PAY_DEFAULT_USD)}
+                  className="w-full bg-transparent text-[20px] text-black outline-none placeholder:text-black/25"
+                />
+              </div>
+              <p className="mt-0.5 text-[10px] lowercase tracking-wide text-black/40">{t("deposit.buyAmountHint")}</p>
             </div>
-            <p className="mt-0.5 text-[10px] lowercase tracking-wide text-black/40">{t("deposit.buyAmountHint")}</p>
-          </div>
+          )
         ) : (
           <PayWithField
             assets={assets}
@@ -289,42 +300,43 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         </>
       )}
 
-      {/* Card on-ramp (Privy → Stripe / MoonPay, routed by geo/device). Shown for
-          every wallet and platform — funds fresh USDC with a card, then buys, so it
-          works even with no crypto. Note: inside a mobile wallet's in-app browser
-          the card widget may not render; that's being validated in the wild. */}
-      <>
-        {/* Divider only when the crypto path is also shown above. */}
-        {!emptyWallet && (
-          <div className="mt-3 flex items-center gap-3 text-[10px] lowercase tracking-wide text-black/30">
-            <span className="h-px flex-1 bg-black/10" />
-            {t("common.or")}
-            <span className="h-px flex-1 bg-black/10" />
-          </div>
-        )}
-        <button
-          onClick={handleApplePay}
-          disabled={applePay.busy || busy || applePayBelowMin}
-          className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[15px] font-medium tracking-tight hover:bg-black/90 disabled:opacity-40 transition inline-flex items-center justify-center gap-1.5"
-        >
-          {applePay.busy ? (
-            <span className="lowercase">{t(`status.${applePay.status}` as "status.funding")}</span>
-          ) : (
-            <>
-              <CreditCard size={16} strokeWidth={1.75} />
-              <span className="capitalize">{verb}</span>
-              <span>with card</span>
-            </>
+      {/* Card on-ramp (Privy → MoonPay / Coinbase / Stripe, routed by geo) — embedded
+          (email) wallets only. External-wallet users already have crypto AND hit a
+          black screen in their wallet's in-app browser, so they pay with their crypto. */}
+      {!isExternal && (
+        <>
+          {/* Divider only when the crypto path is also shown above. */}
+          {!emptyWallet && (
+            <div className="mt-3 flex items-center gap-3 text-[10px] lowercase tracking-wide text-black/30">
+              <span className="h-px flex-1 bg-black/10" />
+              {t("common.or")}
+              <span className="h-px flex-1 bg-black/10" />
+            </div>
           )}
-        </button>
-        <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/30">
-          {applePayBelowMin
-            ? t("deposit.minAmount", { value: `$${APPLE_PAY_MIN_USD}` })
-            : t("deposit.applePayHint", { value: `$${applePayUsd.toFixed(0)}` })}
-        </p>
+          <button
+            onClick={handleApplePay}
+            disabled={applePay.busy || busy || applePayBelowMin}
+            className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[15px] font-medium tracking-tight hover:bg-black/90 disabled:opacity-40 transition inline-flex items-center justify-center gap-1.5"
+          >
+            {applePay.busy ? (
+              <span className="lowercase">{t(`status.${applePay.status}` as "status.funding")}</span>
+            ) : (
+              <>
+                <CreditCard size={16} strokeWidth={1.75} />
+                <span className="capitalize">{verb}</span>
+                <span>with card</span>
+              </>
+            )}
+          </button>
+          <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/30">
+            {applePayBelowMin
+              ? t("deposit.minAmount", { value: `$${APPLE_PAY_MIN_USD}` })
+              : t("deposit.applePayHint", { value: `$${applePayUsd.toFixed(0)}` })}
+          </p>
 
-        {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}
-      </>
+          {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}
+        </>
+      )}
     </div>
   );
 }
