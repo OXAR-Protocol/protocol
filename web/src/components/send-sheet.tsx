@@ -9,7 +9,6 @@ import { CustomSelect } from "@/components/custom-select";
 import { AssetPicker } from "@/components/asset-picker";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useSend } from "@/hooks/use-send";
-import { useSolanaContext } from "@/providers/solana-provider";
 import { toBaseUnits } from "@/lib/yield";
 import { USDC_MINT } from "@/lib/constants";
 import { isValidAddressForChain, maxSendable } from "@/lib/wallet/transfer";
@@ -20,7 +19,6 @@ import { useT } from "@/lib/i18n";
 export function SendSheet({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   const { assets, loading } = useWalletAssets();
-  const { isExternal } = useSolanaContext();
   const { send, status, error: sendError } = useSend();
 
   const [sourceMint, setSourceMint] = useState<string | null>(null);
@@ -52,7 +50,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
     ? t("send.errNoAssets")
     : amountBase <= BigInt(0)
       ? t("send.errAmount")
-      : amountBase > maxSendable(source, isExternal)
+      : amountBase > maxSendable(source)
         ? t("send.notEnough", { sym: source.symbol })
         : !isValidAddressForChain(to, destChain.chain)
           ? t("send.errAddress", { chain: destChain.chain === "ethereum" ? "EVM" : "Solana" })
@@ -166,7 +164,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
               </p>
               {source && (
                 <button
-                  onClick={() => setAmount((Number(maxSendable(source, isExternal)) / 10 ** source.decimals).toString())}
+                  onClick={() => setAmount((Number(maxSendable(source)) / 10 ** source.decimals).toString())}
                   className="text-[10px] lowercase tracking-wide text-[#3c05c7]/80 hover:text-[#3c05c7]"
                 >
                   {t("rail.max")}

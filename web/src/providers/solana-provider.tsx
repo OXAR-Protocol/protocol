@@ -10,7 +10,6 @@ import {
   useState,
 } from "react";
 import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
-import bs58 from "bs58";
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
 import { RPC_URL } from "@/lib/constants";
@@ -108,35 +107,16 @@ class PrivySolanaAdapter implements WalletSigner {
    * throws "Reached end of buffer". So for them we call `signTransaction` and
    * broadcast the returned signed bytes DIRECTLY — no deserialize round-trip.
    *
-   * The embedded wallet now uses Privy's sponsored `signAndSendTransaction`
-   * ("App pays") so it never needs SOL — see the sponsored branch below.
+   * The embedded wallet keeps the sign-then-we-broadcast path (auto-send is flaky
+   * for embedded — see web/CLAUDE.md). Both wallet types pay their own SOL gas; the
+   * card buy funds native SOL so the wallet always has enough.
    */
-  async signAndSend(tx: Transaction | VersionedTransaction, opts?: { sponsor?: boolean }): Promise<string> {
+  async signAndSend(tx: Transaction | VersionedTransaction, _opts?: { sponsor?: boolean }): Promise<string> {
     if (tx instanceof Transaction) {
       if (!tx.recentBlockhash) {
         tx.recentBlockhash = (await this._connection.getLatestBlockhash()).blockhash;
       }
       if (!tx.feePayer) tx.feePayer = this._publicKey;
-    }
-
-    // ALL embedded-wallet txs are sponsored: Privy broadcasts + pays the fee
-    // (dashboard "App pays"). In the USDC-first world an embedded wallet holds no
-    // SOL, so without this it couldn't deposit, WITHDRAW, or send. External wallets
-    // pay their own gas (their in-app browser also can't do Privy's auto-send), so
-    // they're never sponsored. `opts.sponsor` is now moot for embedded (always on).
-    void opts;
-    if (!this._isExternal) {
-      const txBytes =
-        tx instanceof Transaction
-          ? tx.serialize({ requireAllSignatures: false, verifySignatures: false })
-          : tx.serialize();
-      const { signature } = await this._wallet.signAndSendTransaction({
-        transaction: txBytes,
-        address: this._wallet.address,
-        chain: "solana:mainnet",
-        sponsor: true,
-      });
-      return bs58.encode(signature);
     }
 
     if (this._isExternal) {
