@@ -15,6 +15,7 @@ import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { assetUid } from "@/lib/portfolio/assets";
+import { USDC_MINT } from "@/lib/constants";
 import { useT, localizeError } from "@/lib/i18n";
 
 // On-ramp minimum (MoonPay/Transak floor) and the pre-filled default for the buy.
@@ -83,7 +84,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const defaultUid = useMemo(() => {
     if (assets.length === 0) return null;
     const pick =
+      // Hold the product's own asset already? pay with it (instant, no swap).
       assets.find((a) => a.chain === "solana" && a.mint === view.assetMint) ??
+      // Else default to USDC — the dollar asset, clean sponsored path, no SOL wrap.
+      assets.find((a) => a.chain === "solana" && a.mint === USDC_MINT) ??
       solAssets[0] ??
       assets[0];
     return assetUid(pick);
