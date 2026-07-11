@@ -158,7 +158,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "status.arriving": "Чекаємо на кошти…",
   "status.depositing": "Кладемо…",
   "status.working": "Працюємо…",
-  "status.funding": "Відкриваємо Apple Pay…",
+  "status.funding": "Відкриваємо оплату…",
   "status.buying": "Купуємо…",
 
   "onb.label": "з чого почнеш?",

@@ -26,8 +26,9 @@ import type { WalletAsset } from "@/lib/portfolio/assets";
 
 /** CAIP-2 chain id Privy's on-ramp expects for Solana mainnet (NOT "solana:mainnet"). */
 const SOLANA_MAINNET_CAIP2 = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
-// Flip to "production" once sandbox-validated + gas is solved.
-const ONRAMP_ENV: FiatOnrampEnvironment = "sandbox";
+// Real card + real USDC by default; set NEXT_PUBLIC_ONRAMP_ENV=sandbox to dry-run.
+const ONRAMP_ENV: FiatOnrampEnvironment =
+  process.env.NEXT_PUBLIC_ONRAMP_ENV === "sandbox" ? "sandbox" : "production";
 
 export type CardBuyStatus = "idle" | "funding" | "buying";
 

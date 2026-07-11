@@ -10,7 +10,7 @@ import { useSolanaContext } from "@/providers/solana-provider";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
 import { useDeposit } from "@/hooks/use-deposit";
-import { useFundAndBuy } from "@/hooks/use-fund-and-buy";
+import { useFundAndBuyUsdc } from "@/hooks/use-fund-and-buy-usdc";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
@@ -47,7 +47,9 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // Apple Pay / card path — funds fresh USDC via Privy's on-ramp, then buys.
   // Works with no crypto in the wallet (the whole point), so it's independent
   // of the pay-asset picker below.
-  const applePay = useFundAndBuy(view.id);
+  // USDC-first card buy: Privy aggregator (Stripe/MoonPay/Coinbase) funds USDC, gas
+  // sponsored via "App pays". Replaces the legacy SOL-funding flow.
+  const applePay = useFundAndBuyUsdc(view.id);
   const { isExternal } = useSolanaContext();
   // The card on-ramp widget black-screens ONLY inside a mobile wallet's in-app
   // browser (external wallet + mobile). It's fine for embedded wallets anywhere and
@@ -146,7 +148,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const applePayBelowMin = applePayUsd < APPLE_PAY_MIN_USD;
   const handleApplePay = async () => {
     try {
-      const base = await applePay.buyWithApplePay(applePayUsd);
+      const base = await applePay.buyWithCard(applePayUsd);
       onDeposited(Number(base) / 10 ** view.decimals);
     } catch {
       // surfaced via `applePay.error`
