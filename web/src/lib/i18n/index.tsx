@@ -77,6 +77,12 @@ const ERROR_KEYS: Record<string, TranslationKey> = {
     "err.insufficient",
   "Connect your wallet to continue.": "err.connectWallet",
   "Network's being slow right now. Please try again in a moment.": "err.networkSlow",
+  "The price moved while we were sending it. Please try again.": "err.slippage",
+  "That transaction would fail on-chain. Try a larger amount or a different asset.": "err.wouldFail",
+  "Switch your wallet to the right network and try again.": "err.wrongNetwork",
+  "This didn't go through — most often that's not enough balance for the amount plus the network fee. Please check and try again.":
+    "err.txFailed",
+  "Something went wrong. Please try again.": "err.generic",
 };
 
 /** Localize a user-facing error message if we recognise it; else return as-is. */

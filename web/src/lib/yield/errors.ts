@@ -55,9 +55,9 @@ export function toFriendlyError(e: unknown): string {
   // Our own deliberate messages pass straight through — don't clobber them.
   if (e instanceof UserFacingError) return e.message;
 
-  const rawMsg = rawText(e);
-  const raw = rawMsg.toLowerCase();
-  const detail = rawMsg.trim().replace(/\s+/g, " ").slice(0, 300);
+  // The raw text is used ONLY for pattern-matching below — never shown to the user
+  // (callers already console.error the original, so it stays diagnosable).
+  const raw = rawText(e).toLowerCase();
 
   // User dismissed the wallet popup — not really an error.
   if (
@@ -96,6 +96,16 @@ export function toFriendlyError(e: unknown): string {
     return "Connect your wallet to continue.";
   }
 
+  // Price moved past the slippage limit while the tx was in flight (swap/deposit).
+  // 0x1771 (6001) is the common Jupiter slippage code — match it exactly, not 0x1771a…
+  if (
+    raw.includes("slippage") ||
+    raw.includes("slippagetoleranceexceeded") ||
+    /0x1771(?![0-9a-f])/.test(raw)
+  ) {
+    return "The price moved while we were sending it. Please try again.";
+  }
+
   // Network / RPC trouble.
   if (
     raw.includes("failed to fetch") ||
@@ -126,19 +136,19 @@ export function toFriendlyError(e: unknown): string {
     return "Switch your wallet to the right network and try again.";
   }
 
-  // Generic on-chain failure (simulation, etc.) — after the specific cases above.
-  // Include the raw detail/logs: the on-chain reason (program error, slippage) is
-  // the actionable part and is otherwise invisible in the field.
+  // Generic on-chain failure (simulation / custom program error). We DON'T show the
+  // raw logs — they're scary and unhelpful to users. The most common cause of a
+  // deposit/buy failing here is not enough balance, so nudge toward that.
   if (
     raw.includes("simulation failed") ||
+    raw.includes("custom program error") ||
     raw.includes("transaction") ||
     raw.includes("instruction")
   ) {
-    return `Couldn't complete that transaction. Please try again.${detail ? ` (${detail})` : ""}`;
+    return "This didn't go through — most often that's not enough balance for the amount plus the network fee. Please check and try again.";
   }
 
-  // Unrecognized error — surface a trimmed raw detail so it's diagnosable in the
-  // field (esp. external-wallet signing failures that don't match any pattern
-  // above) instead of being swallowed by a bare generic message.
-  return `Something went wrong. Please try again.${detail ? ` (${detail})` : ""}`;
+  // Unrecognized error — a calm generic message. The raw error is in the console
+  // (callers log it) for diagnosis; the user just sees something reassuring.
+  return "Something went wrong. Please try again.";
 }
