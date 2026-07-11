@@ -46,13 +46,19 @@ const DUST_USD = 0.01;
 
 /** Keep this much SOL for tx fees (swap + deposit) when paying with native SOL. */
 export const SOL_FEE_RESERVE = BigInt(10_000_000); // 0.01 SOL
+/** Even when gas is sponsored, swapping NATIVE SOL needs SOL for the temporary
+ *  wrapped-SOL account rent (~0.002) — so keep a small reserve rather than zero. */
+export const SOL_SPONSORED_RESERVE = BigInt(5_000_000); // 0.005 SOL
 
 /** Base units of an asset that may be spent. Reserves SOL for the network fee ONLY
  *  when `reserveGas` is true — embedded (Privy-sponsored) wallets pay no fee, so
  *  they can spend their full SOL; pass `false` for them. */
 export function spendableBase(asset: WalletAsset, reserveGas = true): bigint {
-  if (asset.mint !== SOL_MINT || !reserveGas) return asset.amount;
-  const max = asset.amount - SOL_FEE_RESERVE;
+  if (asset.mint !== SOL_MINT) return asset.amount;
+  // Sponsored (embedded) wallets pay no fee, but a native-SOL swap still needs the
+  // small wrapped-SOL rent → keep a reduced reserve; external cover the full fee too.
+  const reserve = reserveGas ? SOL_FEE_RESERVE : SOL_SPONSORED_RESERVE;
+  const max = asset.amount - reserve;
   return max > BigInt(0) ? max : BigInt(0);
 }
 
