@@ -47,9 +47,11 @@ const DUST_USD = 0.01;
 /** Keep this much SOL for tx fees (swap + deposit) when paying with native SOL. */
 export const SOL_FEE_RESERVE = BigInt(10_000_000); // 0.01 SOL
 
-/** Base units of an asset that may be spent — reserves SOL for network fees. */
-export function spendableBase(asset: WalletAsset): bigint {
-  if (asset.mint !== SOL_MINT) return asset.amount;
+/** Base units of an asset that may be spent. Reserves SOL for the network fee ONLY
+ *  when `reserveGas` is true — embedded (Privy-sponsored) wallets pay no fee, so
+ *  they can spend their full SOL; pass `false` for them. */
+export function spendableBase(asset: WalletAsset, reserveGas = true): bigint {
+  if (asset.mint !== SOL_MINT || !reserveGas) return asset.amount;
   const max = asset.amount - SOL_FEE_RESERVE;
   return max > BigInt(0) ? max : BigInt(0);
 }

@@ -46,7 +46,8 @@ export function useUniversalDeposit(providerId: string) {
           const price = payAsset.usdValue / payAsset.uiAmount;
           const payUi = usdAmount / price;
           const payBase = toBaseUnits(payUi.toFixed(payAsset.decimals), payAsset.decimals);
-          const maxSpend = spendableBase(payAsset);
+          // Embedded wallets are gas-sponsored → no SOL reserve needed; external pay their own.
+          const maxSpend = spendableBase(payAsset, isExternal);
           if (maxSpend <= BigInt(0)) throw new UserFacingError(`Not enough ${payAsset.symbol} after network fees`);
           if (payBase > maxSpend) throw new UserFacingError(`Not enough ${payAsset.symbol}`);
 

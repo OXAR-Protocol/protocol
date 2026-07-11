@@ -28,6 +28,8 @@ interface Props {
   usdAmount: number;
   /** The product's own asset mint — drives the "instant" route tag. */
   productMint: string;
+  /** Reserve SOL for the network fee in "max" (external wallets); embedded pay no fee. */
+  reserveGas?: boolean;
 }
 
 /**
@@ -43,6 +45,7 @@ export function PayWithField({
   onAmountChange,
   usdAmount,
   productMint,
+  reserveGas = true,
 }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -59,7 +62,7 @@ export function PayWithField({
 
   const setMax = () => {
     if (!active) return;
-    const max = Number(spendableBase(active)) / 10 ** active.decimals;
+    const max = Number(spendableBase(active, reserveGas)) / 10 ** active.decimals;
     onAmountChange(String(Number(max.toPrecision(6))));
   };
 
