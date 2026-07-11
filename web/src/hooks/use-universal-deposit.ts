@@ -24,7 +24,7 @@ export function useUniversalDeposit(providerId: string) {
   const [error, setError] = useState<string | null>(null);
 
   const depositWith = useCallback(
-    async (payAsset: WalletAsset, usdAmount: number): Promise<bigint> => {
+    async (payAsset: WalletAsset, usdAmount: number, opts?: { sponsor?: boolean }): Promise<bigint> => {
       const provider = getProvider(providerId);
       if (!wallet || !walletAddress || !provider) throw new Error("Wallet not connected");
       if (usdAmount <= 0) return BigInt(0);
@@ -37,7 +37,7 @@ export function useUniversalDeposit(providerId: string) {
         if (path === "direct") {
           setStatus("depositing");
           const amount = toBaseUnits(usdAmount, provider.decimals);
-          await deposit(amount);
+          await deposit(amount, opts);
           return amount;
         }
 
@@ -65,7 +65,7 @@ export function useUniversalDeposit(providerId: string) {
 
           const b64 = await buildSwapTx(quote, walletAddress.toBase58(), { asLegacy });
           const tx = deserializeSwapTx(b64, asLegacy);
-          const sig = await wallet.signAndSend(tx);
+          const sig = await wallet.signAndSend(tx, opts);
           await connection.confirmTransaction(sig, "confirmed");
 
           // Deposit the guaranteed-min output (otherAmountThreshold ≤ realized), so the
@@ -74,7 +74,7 @@ export function useUniversalDeposit(providerId: string) {
           const depositAmount = BigInt(quote.otherAmountThreshold);
           setStatus("depositing");
           try {
-            await deposit(depositAmount);
+            await deposit(depositAmount, opts);
           } catch (depositErr) {
             console.error("Deposit failed after swap:", depositErr);
             throw new UserFacingError(

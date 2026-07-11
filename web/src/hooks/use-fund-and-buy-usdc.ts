@@ -68,11 +68,10 @@ export function useFundAndBuyUsdc(providerId: string) {
           defaultAmount: String(Math.max(1, Math.round(usdAmount))),
         });
 
-        // TODO(P2): gas top-up here — POST /api/gas-topup drips ~0.003 SOL so the
-        // deposit below can pay its fee + ATA rent. Without it this throws on a
-        // fresh (SOL-less) wallet.
+        // Gas: sponsor the deposit via Privy "App pays" (embedded wallet has no SOL
+        // after a USDC-only top-up). No relayer/Kora needed — dashboard toggle + this flag.
         setStatus("buying");
-        return await depositWith(usdcAsset(usdAmount), usdAmount);
+        return await depositWith(usdcAsset(usdAmount), usdAmount, { sponsor: true });
       } catch (e) {
         console.error("Card buy (USDC-first) failed:", e);
         setError(toFriendlyError(e));

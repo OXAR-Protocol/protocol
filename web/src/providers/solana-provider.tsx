@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
+import bs58 from "bs58";
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
 import { RPC_URL } from "@/lib/constants";
@@ -24,8 +25,11 @@ export interface WalletSigner {
    * Sign AND broadcast a transaction; returns the signature. External (mobile)
    * wallets can't round-trip a signed tx back through our deserialize (it fails
    * "Reached end of buffer"), so they sign-and-send via the wallet instead.
+   *
+   * `opts.sponsor` (embedded wallets only): let Privy broadcast + pay the fee
+   * (dashboard "App pays"), so a wallet with no SOL can still transact.
    */
-  signAndSend(tx: Transaction | VersionedTransaction): Promise<string>;
+  signAndSend(tx: Transaction | VersionedTransaction, opts?: { sponsor?: boolean }): Promise<string>;
 }
 
 interface SolanaContextValue {
@@ -58,7 +62,7 @@ class ReadOnlyWallet implements WalletSigner {
   async signTransaction<T extends Transaction | VersionedTransaction>(_tx: T): Promise<T> {
     throw new Error("Please connect your wallet to sign transactions.");
   }
-  async signAndSend(_tx: Transaction | VersionedTransaction): Promise<string> {
+  async signAndSend(_tx: Transaction | VersionedTransaction, _opts?: { sponsor?: boolean }): Promise<string> {
     throw new Error("Please connect your wallet to sign transactions.");
   }
 }
@@ -68,6 +72,13 @@ class ReadOnlyWallet implements WalletSigner {
 type SolanaChainId = `${string}:${string}`;
 interface PrivyWalletLike {
   signTransaction(args: { transaction: Uint8Array; chain?: SolanaChainId }): Promise<{ signedTransaction: Uint8Array }>;
+  /** Privy signs + broadcasts; `sponsor` makes Privy pay the fee (App-pays). */
+  signAndSendTransaction(args: {
+    transaction: Uint8Array;
+    address?: string;
+    chain?: SolanaChainId;
+    sponsor?: boolean;
+  }): Promise<{ signature: Uint8Array }>;
   address: string;
 }
 
@@ -100,12 +111,29 @@ class PrivySolanaAdapter implements WalletSigner {
    * The embedded wallet keeps the sign-then-we-broadcast path (auto-send is flaky
    * for embedded — see web/CLAUDE.md).
    */
-  async signAndSend(tx: Transaction | VersionedTransaction): Promise<string> {
+  async signAndSend(tx: Transaction | VersionedTransaction, opts?: { sponsor?: boolean }): Promise<string> {
     if (tx instanceof Transaction) {
       if (!tx.recentBlockhash) {
         tx.recentBlockhash = (await this._connection.getLatestBlockhash()).blockhash;
       }
       if (!tx.feePayer) tx.feePayer = this._publicKey;
+    }
+
+    // Sponsored path (embedded only): Privy broadcasts + pays the fee (dashboard
+    // "App pays"), so a wallet with no SOL can still deposit (USDC-first flow).
+    // External wallets pay their own gas, so they're never sponsored.
+    if (opts?.sponsor && !this._isExternal) {
+      const txBytes =
+        tx instanceof Transaction
+          ? tx.serialize({ requireAllSignatures: false, verifySignatures: false })
+          : tx.serialize();
+      const { signature } = await this._wallet.signAndSendTransaction({
+        transaction: txBytes,
+        address: this._wallet.address,
+        chain: "solana:mainnet",
+        sponsor: true,
+      });
+      return bs58.encode(signature);
     }
 
     if (this._isExternal) {
