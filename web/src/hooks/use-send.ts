@@ -64,7 +64,8 @@ export function useSend() {
         // Defensive guard: validate the destination address (against its chain) and
         // the amount before signing anything — the UI gates this too, but never
         // move funds on an unvalidated request.
-        const problem = validateSend({ asset: source, to: to.trim(), amountBase, chain: destChain.chain });
+        // Embedded wallets are gas-sponsored → no SOL reserve; external pay their own fee.
+        const problem = validateSend({ asset: source, to: to.trim(), amountBase, chain: destChain.chain, reserveGas: isExternal });
         if (problem) throw new UserFacingError(problem);
 
         if (kind === "bridge") {

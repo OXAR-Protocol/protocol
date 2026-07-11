@@ -25,9 +25,10 @@ export function isValidAddressForChain(address: string, chain: "solana" | "ether
   return chain === "ethereum" ? isValidEvmAddress(address) : isValidSolanaAddress(address);
 }
 
-/** Max base units the user can send of an asset — reserves SOL for the fee. */
-export function maxSendable(asset: WalletAsset): bigint {
-  if (asset.mint !== SOL_MINT) return asset.amount;
+/** Max base units the user can send of an asset. Reserves SOL for the fee ONLY when
+ *  `reserveGas` is true — embedded (Privy-sponsored) wallets pay no fee. */
+export function maxSendable(asset: WalletAsset, reserveGas = true): bigint {
+  if (asset.mint !== SOL_MINT || !reserveGas) return asset.amount;
   const max = asset.amount - SOL_SEND_RESERVE;
   return max > BigInt(0) ? max : BigInt(0);
 }
@@ -39,13 +40,14 @@ export function validateSend(params: {
   to: string;
   amountBase: bigint;
   chain?: "solana" | "ethereum";
+  reserveGas?: boolean;
 }): string | null {
-  const { asset, to, amountBase, chain = "solana" } = params;
+  const { asset, to, amountBase, chain = "solana", reserveGas = true } = params;
   if (!asset) return "Pick an asset to send";
   if (!isValidAddressForChain(to, chain))
     return chain === "ethereum" ? "Enter a valid wallet address" : "Enter a valid Solana address";
   if (amountBase <= BigInt(0)) return "Enter an amount";
-  if (amountBase > maxSendable(asset)) {
+  if (amountBase > maxSendable(asset, reserveGas)) {
     return asset.mint === SOL_MINT ? "Not enough SOL (leave a little for the fee)" : `Not enough ${asset.symbol}`;
   }
   return null;

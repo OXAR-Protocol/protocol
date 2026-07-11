@@ -221,6 +221,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             onAmountChange={setAmount}
             usdAmount={usdAmount}
             productMint={view.assetMint}
+            reserveGas={isExternal}
           />
         )}
 
