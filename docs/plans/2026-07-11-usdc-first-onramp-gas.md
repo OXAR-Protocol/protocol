@@ -20,33 +20,42 @@ Stripe account). Wins:
 **Not** a Ukraine fix: no provider serves UA without KYB (Stripe excludes UA entirely;
 Coinbase/Meld need KYB → the OpCo). Ukraine stays crypto-deposit + `send` until the entity exists.
 
-## The gas problem (the one real cost)
+## The gas problem — solved via Kora (Openfort-hosted), user pays fee in USDC
 
 A wallet funded with **only USDC** can't pay its own Solana tx fee (~0.000005 SOL) + the
 Jupiter-Lend position **ATA rent (~0.00204 SOL)**. Fresh wallets have no SOL.
 
-- **Jupiter Ultra gasless is NOT enough** — Ultra covers *swaps*, but the Jupiter Lend
-  **deposit** is a lend tx (via the SDK), not a swap. So the core deposit tx still needs gas.
-- **Chosen solution: a minimal "gas top-up" relayer.** After the user funds USDC, a backend
-  drips a tiny SOL amount (~0.003 SOL) to their wallet, so the **existing deposit path works
-  unchanged**. Non-custodial (relayer only sends gas, never touches user funds). Simpler than
-  fee-payer co-signing (no tx restructuring).
+- **Jupiter Ultra is NOT enough** — Ultra covers *swaps*, not the Jupiter Lend deposit (a lend tx).
+- **Chosen: Kora fee relayer (Solana Foundation standard), hosted by Openfort.** The deposit tx
+  sets Kora as fee-payer; a USDC fee-payment instruction is bundled in; the user signs (Privy);
+  Openfort's Kora co-signs + broadcasts. **The user pays the ~$0.16 fee in USDC** (from the
+  funded amount) — Openfort fronts the SOL and is reimbursed in the same tx.
+- Client SDK: `@solana/kora` (KoraClient) — `getPaymentInstruction` / `estimateTransactionFee` /
+  `signAndSendTransaction`. Config allowlists our programs (System, Token, ATA, **Jupiter Lend**)
+  + USDC as the fee token.
 
-**Cost @ SOL ≈ $78:** ~0.003 SOL ≈ **$0.16–0.23 per new user** (mostly ATA rent, reclaimable).
-**$100 float ≈ 400–600 onboardings** — months at current scale. Returning users (ATA exists)
-cost only the ~$0.002 tx fee.
+**Cost to OXAR: ~$0.**
+- Openfort free tier = **2,000 tx/month** — well above our scale (wallets are created by Privy,
+  not Openfort, so we only spend ops on gasless deposits).
+- Network fee (~$0.16/user, mostly ATA rent) is **paid by the user in USDC**, not sponsored.
+- **No hot-wallet float needed** in the pay-in-USDC model (Openfort fronts, USDC reimburses).
+- Optional: OXAR could *sponsor* the fee (user sees a round $50) → ~$0.16/user; deferred.
 
-**Abuse guard:** drip only for an authenticated Privy user, once per wallet, rate-limited,
-capped daily total. Worst case per abuse ≈ $0.16.
+**Why hosted (Openfort) over self-hosting Kora:** non-custodial in both (relayer only pays gas,
+never touches user funds — worst-case breach = the tiny float, never user money). For a small
+team the likeliest failure is us mismanaging a hot key / unpatched node; Openfort removes that.
+Openfort needs only a dev account (gas relaying isn't regulated → no KYB). Reversible: migrate
+to self-hosted Kora later (same client code) for independence/cost at scale.
 
 ## Phases
 
 - **P0 — Plan** (this doc). ✅
 - **P1 — Sandbox funding prototype:** new `use-fund-and-buy` path using
   `useFiatOnramp({ destination: { asset: USDC_MINT, chain: "solana:mainnet", address }, defaultAmount, environment: 'sandbox' })`. Confirm Stripe routes in EU test-mode. No prod impact.
-- **P2 — Gas top-up relayer:** `POST /api/gas-topup` — validates the authed user + that the
-  wallet is SOL-starved + rate-limit, sends ~0.003 SOL from a hot wallet (the $100). Env:
-  `RELAYER_SECRET_KEY` (server-only). Call it right after `fund()` resolves, before deposit.
+- **P2 — Gasless deposit via Kora/Openfort:** integrate `@solana/kora` client. Build the
+  Jupiter Lend deposit with Kora (Openfort) as fee-payer + a USDC fee-payment instruction; user
+  signs (Privy); `signAndSendTransaction` to Openfort's Kora. User needs no SOL. Setup: a free
+  Openfort dev account + its Kora endpoint/key in env (`NEXT_PUBLIC_OPENFORT_*` / server key).
 - **P3 — Verify:** sandbox end-to-end (Stripe EU) → tiny mainnet smoke ($1–2) → confirm
   non-custodial + guards. Money-path checklist ([[reference_money_path_checklist]]).
 - **P4 — Ship:** flip the buy flow to USDC-first; keep MoonPay + Stripe + Coinbase enabled
