@@ -20,42 +20,37 @@ Stripe account). Wins:
 **Not** a Ukraine fix: no provider serves UA without KYB (Stripe excludes UA entirely;
 Coinbase/Meld need KYB → the OpCo). Ukraine stays crypto-deposit + `send` until the entity exists.
 
-## The gas problem — solved via Kora (Openfort-hosted), user pays fee in USDC
+## The gas problem — solved by Privy's NATIVE "App pays" (no relayer, no infra)
 
 A wallet funded with **only USDC** can't pay its own Solana tx fee (~0.000005 SOL) + the
 Jupiter-Lend position **ATA rent (~0.00204 SOL)**. Fresh wallets have no SOL.
 
-- **Jupiter Ultra is NOT enough** — Ultra covers *swaps*, not the Jupiter Lend deposit (a lend tx).
-- **Chosen: Kora fee relayer (Solana Foundation standard), hosted by Openfort.** The deposit tx
-  sets Kora as fee-payer; a USDC fee-payment instruction is bundled in; the user signs (Privy);
-  Openfort's Kora co-signs + broadcasts. **The user pays the ~$0.16 fee in USDC** (from the
-  funded amount) — Openfort fronts the SOL and is reimbursed in the same tx.
-- Client SDK: `@solana/kora` (KoraClient) — `getPaymentInstruction` / `estimateTransactionFee` /
-  `signAndSendTransaction`. Config allowlists our programs (System, Token, ATA, **Jupiter Lend**)
-  + USDC as the fee token.
+**Discovered (2026-07-11, in the Privy dashboard): Privy has NATIVE Solana gas sponsorship**
+(Wallet infrastructure → Money movement → Gas management, powered by Grid). This makes the
+whole relayer/Kora/Openfort track **moot**:
 
-**Cost to OXAR: ~$0.**
-- Openfort free tier = **2,000 tx/month** — well above our scale (wallets are created by Privy,
-  not Openfort, so we only spend ops on gasless deposits).
-- Network fee (~$0.16/user, mostly ATA rent) is **paid by the user in USDC**, not sponsored.
-- **No hot-wallet float needed** in the pay-in-USDC model (Openfort fronts, USDC reimburses).
-- Optional: OXAR could *sponsor* the fee (user sees a round $50) → ~$0.16/user; deferred.
+- Dashboard **Sponsorship mode = "App pays"** (NOT "User pays" — that's **EVM-only**; Solana
+  can't pay gas in USDC). Set a monthly budget via **Manage credit** (currently "$0 of $0" =
+  off) + payment method (Link already set).
+- Code: pass **`sponsor: true`** on the embedded-wallet Solana send. NOTE: our embedded path
+  today is "Privy signs → *we* broadcast" (`sendRawTransaction`), which BYPASSES sponsorship.
+  Sponsorship requires **Privy** to broadcast — so switch the embedded send to Privy's
+  `signAndSendTransaction({ sponsor: true })`. CLAUDE.md flagged embedded auto-send as flaky
+  (older Privy) — re-verify on 3.33.1. External wallets: no sponsor (they pay their own gas).
 
-**Why hosted (Openfort) over self-hosting Kora:** non-custodial in both (relayer only pays gas,
-never touches user funds — worst-case breach = the tiny float, never user money). For a small
-team the likeliest failure is us mismanaging a hot key / unpatched node; Openfort removes that.
-Openfort needs only a dev account (gas relaying isn't regulated → no KYB). Reversible: migrate
-to self-hosted Kora later (same client code) for independence/cost at scale.
+**Cost:** OXAR sponsors ~$0.16/user (mostly ATA rent), billed by Privy (gas credits). Trivial
+at our scale. **No hot wallet, no server route, no Kora node, no Openfort, no $100 float.**
+(User-pays-in-USDC on Solana is impossible via Privy — EVM-only — so we sponsor; it's cheap.)
 
 ## Phases
 
 - **P0 — Plan** (this doc). ✅
 - **P1 — Sandbox funding prototype:** new `use-fund-and-buy` path using
   `useFiatOnramp({ destination: { asset: USDC_MINT, chain: "solana:mainnet", address }, defaultAmount, environment: 'sandbox' })`. Confirm Stripe routes in EU test-mode. No prod impact.
-- **P2 — Gasless deposit via Kora/Openfort:** integrate `@solana/kora` client. Build the
-  Jupiter Lend deposit with Kora (Openfort) as fee-payer + a USDC fee-payment instruction; user
-  signs (Privy); `signAndSendTransaction` to Openfort's Kora. User needs no SOL. Setup: a free
-  Openfort dev account + its Kora endpoint/key in env (`NEXT_PUBLIC_OPENFORT_*` / server key).
+- **P2 — Gas via Privy native "App pays":** dashboard = App pays + budget (user action). Code =
+  switch the embedded Solana send to Privy `signAndSendTransaction({ sponsor: true })` so Privy
+  broadcasts + sponsors (our current "we broadcast" path bypasses it). Re-verify embedded
+  auto-send reliability on 3.33.1. No relayer / Kora / Openfort / hot wallet.
 - **P3 — Verify:** sandbox end-to-end (Stripe EU) → tiny mainnet smoke ($1–2) → confirm
   non-custodial + guards. Money-path checklist ([[reference_money_path_checklist]]).
 - **P4 — Ship:** flip the buy flow to USDC-first; keep MoonPay + Stripe + Coinbase enabled
