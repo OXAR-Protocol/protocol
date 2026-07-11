@@ -193,7 +193,12 @@ export type OxarProtocol = {
           "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "adapterData",
+          "type": "bytes"
+        }
+      ]
     },
     {
       "name": "createRule",
@@ -1333,6 +1338,139 @@ export type OxarProtocol = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "adapterData",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "routeYieldInit",
+      "discriminator": [
+        8,
+        27,
+        182,
+        25,
+        224,
+        235,
+        2,
+        92
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.authority",
+                "account": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "vault.vault_id",
+                "account": "vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "registry",
+          "docs": [
+            "Adapter registry — seeds enforce this is the canonical registry."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "adapterEntry",
+          "docs": [
+            "Per-adapter entry — PDA-gated on vault.adapter_program."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  97,
+                  112,
+                  116,
+                  101,
+                  114,
+                  95,
+                  101,
+                  110,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.adapter_program",
+                "account": "vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "adapterProgram"
+        },
+        {
+          "name": "adapterState",
+          "docs": [
+            "Adapter-owned state PDA, created by the adapter during the CPI.",
+            ""
+          ],
+          "writable": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "instructionsSysvar",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "adapterData",
+          "type": "bytes"
         }
       ]
     },
@@ -1483,6 +1621,10 @@ export type OxarProtocol = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "adapterData",
+          "type": "bytes"
         }
       ]
     },
@@ -1946,6 +2088,11 @@ export type OxarProtocol = {
       "code": 6023,
       "name": "invalidAdapterProgram",
       "msg": "Adapter program account is not executable"
+    },
+    {
+      "code": 6024,
+      "name": "adapterDataTooLarge",
+      "msg": "adapter_data exceeds 256 bytes"
     }
   ],
   "types": [

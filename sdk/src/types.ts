@@ -193,7 +193,12 @@ export type OxarProtocol = {
           "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "adapterData",
+          "type": "bytes"
+        }
+      ]
     },
     {
       "name": "createRule",
@@ -1333,6 +1338,10 @@ export type OxarProtocol = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "adapterData",
+          "type": "bytes"
         }
       ]
     },
@@ -1483,6 +1492,10 @@ export type OxarProtocol = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "adapterData",
+          "type": "bytes"
         }
       ]
     },
@@ -1946,6 +1959,11 @@ export type OxarProtocol = {
       "code": 6023,
       "name": "invalidAdapterProgram",
       "msg": "Adapter program account is not executable"
+    },
+    {
+      "code": 6024,
+      "name": "adapterDataTooLarge",
+      "msg": "adapter_data exceeds 256 bytes"
     }
   ],
   "types": [
