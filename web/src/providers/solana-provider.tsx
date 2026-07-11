@@ -108,8 +108,8 @@ class PrivySolanaAdapter implements WalletSigner {
    * throws "Reached end of buffer". So for them we call `signTransaction` and
    * broadcast the returned signed bytes DIRECTLY — no deserialize round-trip.
    *
-   * The embedded wallet keeps the sign-then-we-broadcast path (auto-send is flaky
-   * for embedded — see web/CLAUDE.md).
+   * The embedded wallet now uses Privy's sponsored `signAndSendTransaction`
+   * ("App pays") so it never needs SOL — see the sponsored branch below.
    */
   async signAndSend(tx: Transaction | VersionedTransaction, opts?: { sponsor?: boolean }): Promise<string> {
     if (tx instanceof Transaction) {
@@ -119,10 +119,13 @@ class PrivySolanaAdapter implements WalletSigner {
       if (!tx.feePayer) tx.feePayer = this._publicKey;
     }
 
-    // Sponsored path (embedded only): Privy broadcasts + pays the fee (dashboard
-    // "App pays"), so a wallet with no SOL can still deposit (USDC-first flow).
-    // External wallets pay their own gas, so they're never sponsored.
-    if (opts?.sponsor && !this._isExternal) {
+    // ALL embedded-wallet txs are sponsored: Privy broadcasts + pays the fee
+    // (dashboard "App pays"). In the USDC-first world an embedded wallet holds no
+    // SOL, so without this it couldn't deposit, WITHDRAW, or send. External wallets
+    // pay their own gas (their in-app browser also can't do Privy's auto-send), so
+    // they're never sponsored. `opts.sponsor` is now moot for embedded (always on).
+    void opts;
+    if (!this._isExternal) {
       const txBytes =
         tx instanceof Transaction
           ? tx.serialize({ requireAllSignatures: false, verifySignatures: false })
