@@ -145,7 +145,9 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
     : usdAmount > 0
       ? usdAmount
       : APPLE_PAY_DEFAULT_USD;
-  const applePayBelowMin = applePayUsd < APPLE_PAY_MIN_USD;
+  // Small tolerance: USDC isn't priced at exactly $1 (Jupiter ~0.9997), so a typed
+  // "$20" converts to ~$19.99 and would wrongly trip the $20 minimum at the boundary.
+  const applePayBelowMin = applePayUsd < APPLE_PAY_MIN_USD - 0.5;
   const handleApplePay = async () => {
     try {
       const base = await applePay.buyWithCard(applePayUsd);
