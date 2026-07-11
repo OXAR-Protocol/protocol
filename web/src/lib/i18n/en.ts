@@ -174,7 +174,7 @@ export const en = {
   "status.arriving": "Waiting for funds…",
   "status.depositing": "Depositing…",
   "status.working": "Working…",
-  "status.funding": "Opening Apple Pay…",
+  "status.funding": "Opening checkout…",
   "status.buying": "Buying…",
 
   // Onboarding

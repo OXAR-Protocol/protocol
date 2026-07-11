@@ -25,11 +25,11 @@ export function useYieldActions(providerId: string) {
   const [error, setError] = useState<string | null>(null);
 
   const sendIxs = useCallback(
-    async (ixs: TransactionInstruction[]): Promise<string> => {
+    async (ixs: TransactionInstruction[], opts?: { sponsor?: boolean }): Promise<string> => {
       if (!wallet || !walletAddress) throw new Error("Wallet not connected");
       const tx = new Transaction().add(...ixs);
       // signAndSend handles blockhash/feePayer + the embedded-vs-external split.
-      const sig = await wallet.signAndSend(tx);
+      const sig = await wallet.signAndSend(tx, opts);
       await connection.confirmTransaction(sig, "confirmed");
       return sig;
     },
@@ -37,9 +37,9 @@ export function useYieldActions(providerId: string) {
   );
 
   const sendTx = useCallback(
-    async (tx: VersionedTransaction | Transaction): Promise<string> => {
+    async (tx: VersionedTransaction | Transaction, opts?: { sponsor?: boolean }): Promise<string> => {
       if (!wallet) throw new Error("Wallet not connected");
-      const sig = await wallet.signAndSend(tx);
+      const sig = await wallet.signAndSend(tx, opts);
       await connection.confirmTransaction(sig, "confirmed");
       return sig;
     },
@@ -67,12 +67,12 @@ export function useYieldActions(providerId: string) {
   );
 
   const deposit = useCallback(
-    (amount: bigint) => {
+    (amount: bigint, opts?: { sponsor?: boolean }) => {
       if (amount <= BigInt(0)) throw new Error("Amount must be greater than zero");
       return run(async (owner) => {
         const p = yieldProvider!;
-        if (p.buildDepositTx) return sendTx(await p.buildDepositTx({ owner, amount, connection }));
-        if (p.buildDepositIxs) return sendIxs(await p.buildDepositIxs({ owner, amount, connection }));
+        if (p.buildDepositTx) return sendTx(await p.buildDepositTx({ owner, amount, connection }), opts);
+        if (p.buildDepositIxs) return sendIxs(await p.buildDepositIxs({ owner, amount, connection }), opts);
         throw new Error("This source does not support deposits");
       });
     },
