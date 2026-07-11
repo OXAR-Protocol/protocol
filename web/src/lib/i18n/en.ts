@@ -258,6 +258,11 @@ export const en = {
   "err.insufficient": "Not enough balance — check you have enough USDC, plus a little SOL for the network fee.",
   "err.connectWallet": "Connect your wallet to continue.",
   "err.networkSlow": "Network's being slow right now. Please try again in a moment.",
+  "err.slippage": "The price moved while we were sending it. Please try again.",
+  "err.wouldFail": "That transaction would fail on-chain. Try a larger amount or a different asset.",
+  "err.wrongNetwork": "Switch your wallet to the right network and try again.",
+  "err.txFailed": "This didn't go through — most often that's not enough balance for the amount plus the network fee. Please check and try again.",
+  "err.generic": "Something went wrong. Please try again.",
 } as const;
 
 export type TranslationKey = keyof typeof en;

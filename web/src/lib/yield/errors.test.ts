@@ -22,38 +22,37 @@ describe("toFriendlyError", () => {
     expect(toFriendlyError(new Error("Unsupported chain id"))).toMatch(/network/i);
   });
 
-  it("appends the raw detail to the generic fallback (so unknown errors are diagnosable)", () => {
+  it("gives a calm generic message for an unknown error — no scary raw dump", () => {
     const out = toFriendlyError(new Error("kaboom 12345"));
-    expect(out).toMatch(/^Something went wrong\. Please try again\./);
-    expect(out).toContain("kaboom 12345");
+    expect(out).toBe("Something went wrong. Please try again.");
+    expect(out).not.toContain("kaboom");
   });
 
-  it("does not crash on a non-Error value and still surfaces it", () => {
-    expect(toFriendlyError("plain string boom")).toContain("plain string boom");
+  it("does not crash on a non-Error value and never leaks it to the user", () => {
+    const out = toFriendlyError("plain string boom");
+    expect(out).toBe("Something went wrong. Please try again.");
+    expect(out).not.toContain("plain string boom");
   });
 
-  it("extracts a message from a thrown object (not [object Object])", () => {
+  it("recognises a rejection inside a thrown object (not [object Object])", () => {
     const out = toFriendlyError({ code: 4001, message: "user rejected the request" });
     expect(out).not.toContain("[object Object]");
     expect(out).toMatch(/cancelled/i);
   });
 
-  it("JSON-stringifies an object that has no message field", () => {
-    const out = toFriendlyError({ code: -32603, detail: "boom" });
-    expect(out).not.toContain("[object Object]");
-    expect(out).toContain("-32603");
+  it("maps a Solana on-chain failure to a friendly message — no logs shown", () => {
+    const out = toFriendlyError(new Error("Transaction simulation failed: custom program error: 0x1788"));
+    expect(out).toMatch(/didn't go through/i);
+    expect(out).not.toContain("0x1788");
+    expect(out).not.toMatch(/program|instruction|logs/i);
   });
 
-  it("includes the raw detail on a Solana on-chain failure", () => {
-    const out = toFriendlyError(new Error("Transaction simulation failed: custom program error: 0x1771"));
-    expect(out).toMatch(/^Couldn't complete that transaction\./);
-    expect(out).toContain("0x1771");
-  });
-
-  it("surfaces Solana tx logs (where the program error lives)", () => {
-    const err = Object.assign(new Error("Transaction simulation failed"), {
+  it("maps a slippage/price-move error to a clear retry hint", () => {
+    const byCode = toFriendlyError(new Error("Transaction simulation failed: custom program error: 0x1771"));
+    expect(byCode).toMatch(/price moved/i);
+    const byLog = Object.assign(new Error("Transaction simulation failed"), {
       logs: ["Program log: AnchorError: SlippageToleranceExceeded", "Program failed"],
     });
-    expect(toFriendlyError(err)).toContain("SlippageToleranceExceeded");
+    expect(toFriendlyError(byLog)).toMatch(/price moved/i);
   });
 });
