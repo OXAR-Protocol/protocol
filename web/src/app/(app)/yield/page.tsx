@@ -204,6 +204,7 @@ export default function YieldPage() {
         kind="Stock"
         note="tokenized · non-US"
         gated
+        filterable
         layout={layout}
       />
 

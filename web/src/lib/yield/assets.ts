@@ -13,6 +13,8 @@ export interface AssetMeta {
   token: string;
   name: string;
   mint: string;
+  /** Category for the browse filter, e.g. "tech" / "crypto" (stocks). Optional. */
+  sector?: string;
 }
 
 /** True for price-exposure holdings (stocks + commodities) vs yield-bearing sources. */

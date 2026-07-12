@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
@@ -14,6 +14,10 @@ import { useEarnings } from "@/hooks/use-earnings";
 import { useStocksAllowed } from "@/hooks/use-stocks-allowed";
 import type { AssetMeta } from "@/lib/yield/assets";
 import { fromBaseUnits } from "@/lib/yield";
+import { useT } from "@/lib/i18n";
+
+/** Canonical order for the sector filter chips (only those present are shown). */
+const SECTOR_ORDER = ["tech", "crypto", "finance", "consumer", "health", "index"] as const;
 
 interface Props {
   /** Price-exposure catalog (stocks or commodities). */
@@ -30,13 +34,27 @@ interface Props {
   gated?: boolean;
   /** Shares the /yield list/grid toggle. */
   layout?: "list" | "grid";
+  /** Show sector filter chips (uses each asset's `sector`). For big catalogs (stocks). */
+  filterable?: boolean;
 }
 
 /** Buy/sell section for price-exposure assets (tokenized stocks or commodities) —
  *  price-framed cards, list or grid. Gated entries hide where Reg S blocks them. */
-export function AssetSection({ catalog, title, badge, gated = false, layout = "list" }: Props) {
+export function AssetSection({ catalog, title, badge, gated = false, layout = "list", filterable = false }: Props) {
   const router = useRouter();
+  const { t } = useT();
   const allowed = useStocksAllowed();
+  const [sector, setSector] = useState<string>("all");
+
+  // Sectors actually present in this catalog, in canonical order.
+  const sectors = useMemo(
+    () => SECTOR_ORDER.filter((s) => catalog.some((a) => a.sector === s)),
+    [catalog],
+  );
+  const shown = useMemo(
+    () => (filterable && sector !== "all" ? catalog.filter((a) => a.sector === sector) : catalog),
+    [catalog, filterable, sector],
+  );
   const { views } = useYieldPositions();
   const { prices } = useStockPrices(catalog.map((s) => s.mint));
   const charts = useStockCharts();
@@ -146,10 +164,30 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
         <span className="text-[10px] lowercase tracking-wide text-black/40">{badge}</span>
       </div>
 
+      {/* Sector filter chips — browse a big catalog (stocks) by category. */}
+      {filterable && sectors.length > 1 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {["all", ...sectors].map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setSector(s)}
+              className={`rounded-full border px-3 py-1 text-[11px] lowercase tracking-wide transition ${
+                sector === s
+                  ? "border-black bg-black text-white"
+                  : "border-black/15 text-black/55 hover:border-black/40"
+              }`}
+            >
+              {t(`sector.${s}` as "sector.all")}
+            </button>
+          ))}
+        </div>
+      )}
+
       {layout === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{catalog.map(card)}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{shown.map(card)}</div>
       ) : (
-        <div className="space-y-2">{catalog.map(card)}</div>
+        <div className="space-y-2">{shown.map(card)}</div>
       )}
     </motion.section>
   );
