@@ -37,6 +37,7 @@ export interface XStockConfig {
   symbol: string; // ticker, e.g. "AAPL"
   token: string; // on-chain symbol, e.g. "AAPLx"
   name: string; // display name
+  sector?: string; // browse category: tech/crypto/finance/consumer/health/index
   mint: string; // xStock mint (Token-2022)
 }
 export interface XStockMeta extends XStockConfig {
@@ -47,33 +48,33 @@ export interface XStockMeta extends XStockConfig {
 // official Backed "Xs…" tokens; tickers that don't route a small USDC swap are left
 // out). Extend = append a row (P&L follows automatically via /api/earnings).
 export const XSTOCKS: readonly XStockMeta[] = [
-  { id: "xstock-spy", symbol: "SPY", token: "SPYx", name: "S&P 500", mint: "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W" },
-  { id: "xstock-qqq", symbol: "QQQ", token: "QQQx", name: "Nasdaq 100", mint: "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ" },
-  { id: "xstock-nvda", symbol: "NVDA", token: "NVDAx", name: "NVIDIA", mint: "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh" },
-  { id: "xstock-tsla", symbol: "TSLA", token: "TSLAx", name: "Tesla", mint: "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB" },
-  { id: "xstock-aapl", symbol: "AAPL", token: "AAPLx", name: "Apple", mint: "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp" },
-  { id: "xstock-msft", symbol: "MSFT", token: "MSFTx", name: "Microsoft", mint: "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX" },
-  { id: "xstock-googl", symbol: "GOOGL", token: "GOOGLx", name: "Alphabet", mint: "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN" },
-  { id: "xstock-amzn", symbol: "AMZN", token: "AMZNx", name: "Amazon", mint: "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg" },
-  { id: "xstock-meta", symbol: "META", token: "METAx", name: "Meta", mint: "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu" },
-  { id: "xstock-avgo", symbol: "AVGO", token: "AVGOx", name: "Broadcom", mint: "XsgSaSvNSqLTtFuyWPBhK9196Xb9Bbdyjj4fH3cPJGo" },
-  { id: "xstock-lly", symbol: "LLY", token: "LLYx", name: "Eli Lilly", mint: "Xsnuv4omNoHozR6EEW5mXkw8Nrny5rB3jVfLqi6gKMH" },
-  { id: "xstock-jpm", symbol: "JPM", token: "JPMx", name: "JPMorgan Chase", mint: "XsMAqkcKsUewDrzVkait4e5u4y8REgtyS7jWgCpLV2C" },
-  { id: "xstock-v", symbol: "V", token: "Vx", name: "Visa", mint: "XsqgsbXwWogGJsNcVZ3TyVouy2MbTkfCFhCGGGcQZ2p" },
-  { id: "xstock-unh", symbol: "UNH", token: "UNHx", name: "UnitedHealth", mint: "XszvaiXGPwvk2nwb3o9C1CX4K6zH8sez11E6uyup6fe" },
-  { id: "xstock-coin", symbol: "COIN", token: "COINx", name: "Coinbase", mint: "Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu" },
-  { id: "xstock-hood", symbol: "HOOD", token: "HOODx", name: "Robinhood", mint: "XsvNBAYkrDRNhA7wPHQfX3ZUXZyZLdnCQDfHZ56bzpg" },
-  { id: "xstock-mstr", symbol: "MSTR", token: "MSTRx", name: "MicroStrategy", mint: "XsP7xzNPvEHS1m6qfanPUGjNmdnmsLKEoNAnHjdxxyZ" },
-  { id: "xstock-crcl", symbol: "CRCL", token: "CRCLx", name: "Circle", mint: "XsueG8BtpquVJX9LVLLEGuViXUungE6WmK5YZ3p3bd1" },
-  { id: "xstock-pltr", symbol: "PLTR", token: "PLTRx", name: "Palantir", mint: "XsoBhf2ufR8fTyNSjqfU71DYGaE6Z3SUGAidpzriAA4" },
-  { id: "xstock-amd", symbol: "AMD", token: "AMDx", name: "AMD", mint: "XsXcJ6GZ9kVnjqGsjBnktRcuwMBmvKWh8S93RefZ1rF" },
-  { id: "xstock-nflx", symbol: "NFLX", token: "NFLXx", name: "Netflix", mint: "XsEH7wWfJJu2ZT3UCFeVfALnVA6CP5ur7Ee11KmzVpL" },
-  { id: "xstock-orcl", symbol: "ORCL", token: "ORCLx", name: "Oracle", mint: "XsjFwUPiLofddX5cWFHW35GCbXcSu1BCUGfxoQAQjeL" },
-  { id: "xstock-wmt", symbol: "WMT", token: "WMTx", name: "Walmart", mint: "Xs151QeqTCiuKtinzfRATnUESM2xTU6V9Wy8Vy538ci" },
-  { id: "xstock-ko", symbol: "KO", token: "KOx", name: "Coca-Cola", mint: "XsaBXg8dU5cPM6ehmVctMkVqoiRG2ZjMo1cyBJ3AykQ" },
-  { id: "xstock-mcd", symbol: "MCD", token: "MCDx", name: "McDonald's", mint: "XsqE9cRRpzxcGKDXj1BJ7Xmg4GRhZoyY1KpmGSxAWT2" },
-  { id: "xstock-gld", symbol: "GLD", token: "GLDx", name: "Gold", mint: "Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re" },
-  { id: "xstock-spcx", symbol: "SPCX", token: "SPCXx", name: "SpaceX", mint: "Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8" },
+  { id: "xstock-spy", symbol: "SPY", token: "SPYx", name: "S&P 500", sector: "index", mint: "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W" },
+  { id: "xstock-qqq", symbol: "QQQ", token: "QQQx", name: "Nasdaq 100", sector: "index", mint: "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ" },
+  { id: "xstock-nvda", symbol: "NVDA", token: "NVDAx", name: "NVIDIA", sector: "tech", mint: "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh" },
+  { id: "xstock-tsla", symbol: "TSLA", token: "TSLAx", name: "Tesla", sector: "tech", mint: "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB" },
+  { id: "xstock-aapl", symbol: "AAPL", token: "AAPLx", name: "Apple", sector: "tech", mint: "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp" },
+  { id: "xstock-msft", symbol: "MSFT", token: "MSFTx", name: "Microsoft", sector: "tech", mint: "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX" },
+  { id: "xstock-googl", symbol: "GOOGL", token: "GOOGLx", name: "Alphabet", sector: "tech", mint: "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN" },
+  { id: "xstock-amzn", symbol: "AMZN", token: "AMZNx", name: "Amazon", sector: "consumer", mint: "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg" },
+  { id: "xstock-meta", symbol: "META", token: "METAx", name: "Meta", sector: "tech", mint: "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu" },
+  { id: "xstock-avgo", symbol: "AVGO", token: "AVGOx", name: "Broadcom", sector: "tech", mint: "XsgSaSvNSqLTtFuyWPBhK9196Xb9Bbdyjj4fH3cPJGo" },
+  { id: "xstock-lly", symbol: "LLY", token: "LLYx", name: "Eli Lilly", sector: "health", mint: "Xsnuv4omNoHozR6EEW5mXkw8Nrny5rB3jVfLqi6gKMH" },
+  { id: "xstock-jpm", symbol: "JPM", token: "JPMx", name: "JPMorgan Chase", sector: "finance", mint: "XsMAqkcKsUewDrzVkait4e5u4y8REgtyS7jWgCpLV2C" },
+  { id: "xstock-v", symbol: "V", token: "Vx", name: "Visa", sector: "finance", mint: "XsqgsbXwWogGJsNcVZ3TyVouy2MbTkfCFhCGGGcQZ2p" },
+  { id: "xstock-unh", symbol: "UNH", token: "UNHx", name: "UnitedHealth", sector: "health", mint: "XszvaiXGPwvk2nwb3o9C1CX4K6zH8sez11E6uyup6fe" },
+  { id: "xstock-coin", symbol: "COIN", token: "COINx", name: "Coinbase", sector: "crypto", mint: "Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu" },
+  { id: "xstock-hood", symbol: "HOOD", token: "HOODx", name: "Robinhood", sector: "crypto", mint: "XsvNBAYkrDRNhA7wPHQfX3ZUXZyZLdnCQDfHZ56bzpg" },
+  { id: "xstock-mstr", symbol: "MSTR", token: "MSTRx", name: "MicroStrategy", sector: "crypto", mint: "XsP7xzNPvEHS1m6qfanPUGjNmdnmsLKEoNAnHjdxxyZ" },
+  { id: "xstock-crcl", symbol: "CRCL", token: "CRCLx", name: "Circle", sector: "crypto", mint: "XsueG8BtpquVJX9LVLLEGuViXUungE6WmK5YZ3p3bd1" },
+  { id: "xstock-pltr", symbol: "PLTR", token: "PLTRx", name: "Palantir", sector: "tech", mint: "XsoBhf2ufR8fTyNSjqfU71DYGaE6Z3SUGAidpzriAA4" },
+  { id: "xstock-amd", symbol: "AMD", token: "AMDx", name: "AMD", sector: "tech", mint: "XsXcJ6GZ9kVnjqGsjBnktRcuwMBmvKWh8S93RefZ1rF" },
+  { id: "xstock-nflx", symbol: "NFLX", token: "NFLXx", name: "Netflix", sector: "consumer", mint: "XsEH7wWfJJu2ZT3UCFeVfALnVA6CP5ur7Ee11KmzVpL" },
+  { id: "xstock-orcl", symbol: "ORCL", token: "ORCLx", name: "Oracle", sector: "tech", mint: "XsjFwUPiLofddX5cWFHW35GCbXcSu1BCUGfxoQAQjeL" },
+  { id: "xstock-wmt", symbol: "WMT", token: "WMTx", name: "Walmart", sector: "consumer", mint: "Xs151QeqTCiuKtinzfRATnUESM2xTU6V9Wy8Vy538ci" },
+  { id: "xstock-ko", symbol: "KO", token: "KOx", name: "Coca-Cola", sector: "consumer", mint: "XsaBXg8dU5cPM6ehmVctMkVqoiRG2ZjMo1cyBJ3AykQ" },
+  { id: "xstock-mcd", symbol: "MCD", token: "MCDx", name: "McDonald's", sector: "consumer", mint: "XsqE9cRRpzxcGKDXj1BJ7Xmg4GRhZoyY1KpmGSxAWT2" },
+  { id: "xstock-gld", symbol: "GLD", token: "GLDx", name: "Gold", sector: "index", mint: "Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re" },
+  { id: "xstock-spcx", symbol: "SPCX", token: "SPCXx", name: "SpaceX", sector: "tech", mint: "Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8" },
 ];
 
 const STOCK_MINTS = XSTOCKS.map((s) => s.mint);
