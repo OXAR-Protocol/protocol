@@ -1,0 +1,42 @@
+name: Kora fee-payer float alert
+
+# The Kora relayer pays SOL gas + ATA rent from a small float. If it empties, gasless silently
+# falls back to native gas and 0-SOL users can't transact. Check daily; open an issue + fail
+# the run (GitHub notifies) when it drops below the threshold so we top it up in time.
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # daily 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  check-balance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check fee-payer balance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FEE_PAYER: MQwRCwbeRmhpNdAjvkMysLHS92WSXQvw7wJ8hPoYFrL
+          THRESHOLD_LAMPORTS: "30000000" # 0.03 SOL (~15 first-deposit ATA rents)
+        run: |
+          BAL=$(curl -s https://api.mainnet-beta.solana.com -X POST \
+            -H 'content-type: application/json' \
+            -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getBalance\",\"params\":[\"$FEE_PAYER\"]}" \
+            | python3 -c "import sys,json;print(json.load(sys.stdin)['result']['value'])")
+          SOL=$(python3 -c "print(f'{$BAL/1e9:.4f}')")
+          echo "Kora fee-payer balance: $SOL SOL ($BAL lamports); threshold $THRESHOLD_LAMPORTS"
+
+          if [ "$BAL" -lt "$THRESHOLD_LAMPORTS" ]; then
+            TITLE="⚠️ Kora fee-payer low: ${SOL} SOL"
+            OPEN=$(gh issue list --state open --search "in:title Kora fee-payer low" --json number -q 'length')
+            if [ "$OPEN" -eq 0 ]; then
+              gh issue create --title "$TITLE" --body \
+                "Fee-payer \`$FEE_PAYER\` is at **${SOL} SOL**, below the 0.03 SOL alert threshold. Once it empties, gasless falls back to native gas and 0-SOL users can't transact. Top up: send SOL to the address, then close this issue."
+            fi
+            echo "::error::Kora fee-payer low ($SOL SOL) — top up needed"
+            exit 1
+          fi
+          echo "Balance healthy."

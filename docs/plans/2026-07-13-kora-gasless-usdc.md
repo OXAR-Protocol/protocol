@@ -68,32 +68,41 @@ Jupiter API key; then the client appends the USDC payment ix (original flow abov
   `MQwRCwbeRmhpNdAjvkMysLHS92WSXQvw7wJ8hPoYFrL` funded 0.1 SOL. `getConfig` /
   `getPayerSigner` / `/metrics` all green. Config: allowlist (System/Token/Token-2022/ATA/
   ALT/ComputeBudget + Jupiter Lend + Jupiter v6), USDC token, `price=free`, `price_source=Mock`.
-- **P2 — Client integration (next):** server proxy `app/api/kora/route.ts` (holds
-  `KORA_API_KEY`, forwards to `KORA_RPC_URL`) + client `lib/gas/kora.ts`; a "via Kora" path
-  in `solana-provider.signAndSend` for **embedded wallets** — build tx → fee-payer = Kora
-  payer → Privy **partial-sign** (`signTransaction`) → Kora `signAndSendTransaction`. No USDC
-  payment ix while `price=free`. External wallets keep native gas. Web env:
-  `KORA_RPC_URL`, `KORA_API_KEY` (server-side, Vercel `oxar-web` + `web/.env.local`).
-- **P3 — Verify:** on the running node, small real-money smoke — deposit (Jupiter Lend),
-  buy (stock swap), withdraw, send — all from a **SOL-less USDC wallet**. Confirm the fee
-  is taken in USDC and no SOL is needed. Money-path checklist.
-- **P4 — Ship + graceful fallback:** route embedded money actions through Kora. If the node
-  is unreachable AND the wallet has SOL, fall back to native-SOL send so the app degrades
-  gracefully (the money path must not hard-depend on one container). Monitor node uptime +
-  fee-payer SOL balance (alert on low).
+- **P2 — Client integration.** ✅ Server proxy `app/api/kora/route.ts` (holds `KORA_API_KEY`,
+  narrow method allowlist) + client `lib/gas/kora.ts` (raw JSON-RPC over the proxy, no
+  `@solana/kit`). `solana-provider.signAndSend` builds tx → Kora fee-payer → wallet
+  partial-sign → Kora `signAndSendTransaction`. Gated by `NEXT_PUBLIC_KORA_ENABLED`. (#201)
+- **P3 — Verify.** ✅ Real-money smoke on prod from a **0-SOL wallet**: Jupiter Lend deposit,
+  Kamino, stock buy, gold — all gasless. Iterated the node config live from the failures:
+  full Jupiter Lend program suite (`jupeiUmn…` not the stale `jup3YeL8…`), `max_allowed_lamports`
+  0.001 → 0.02 SOL (ATA rent + swap priority), and `transfer_hook_policy = "allow_all"`
+  (xStocks are Token-2022 with a mutable transfer-hook authority).
+- **P4 — Universal, all assets + monitoring.** ✅ (#203, #this) Extended to **every wallet**
+  (embedded + external, native-SOL fallback) and **every asset**: legacy txs (Jupiter Lend)
+  plus **v0** (Kamino, Jupiter swaps for 27 stocks + gold) via decompile-with-lookup-tables →
+  recompile-with-Kora-payer (`lib/gas/kora-tx.ts`). Allowlist = base + protocols + **every AMM
+  Jupiter routes through** (`kora/scripts/refresh-allowlist.mjs`, weekly auto-PR). Fee-payer
+  balance alert (`.github/workflows/kora-float-alert.yml`).
 
-## Risks / open questions
+## What is / isn't gasless
 
-- **Node is now in the money path** → needs uptime monitoring + the native-SOL fallback (P4).
-- **`@solana/kit` version tangle** — build is currently clean with `@solana/kora` added
-  (top-level kit 6.9.0, klend 2.3.0 intact); if the payment-ix conversion pulls a bad kit,
-  switch to raw JSON-RPC (no SDK).
-- **Embedded partial-sign + external broadcast** — Privy embedded wallet must `signTransaction`
-  (not signAndSend) so Kora can co-sign; re-verify on 3.33.1.
-- **Per-program allowlist** — each new RWA/bond program must be added to `kora.toml` (one line).
-- **Minimum fee viability** — tiny buys where the USDC fee is a big % — set a sensible min.
+- **Is:** anything using an allowlisted program — Jupiter Lend, Kamino, any Jupiter-swappable
+  token, stocks, gold. A **partner protocol** (direct Solana access, no Jupiter) = add its
+  program id(s) to `PROTOCOLS` in the refresh script + redeploy — same as Kamino.
+- **Isn't:** gas on **another chain** (Kora only pays Solana; the source-chain leg via Delora
+  is the user's own gas); a swap whose **priority fee** spikes past 0.02 SOL (→ native fallback);
+  a wallet that can't partial-sign (→ native fallback); a program not yet on the allowlist
+  (→ native fallback until added).
+
+## Operational
+
+- **Node in the money path** — native-SOL fallback on any Kora failure; monitor uptime + float.
+- **Float** — ~0.002 SOL ATA rent per first-deposit is the real cost; alert < 0.03 SOL, top up.
+- **Allowlist drift** — Jupiter adds AMMs; weekly refresh workflow opens a PR, human merges +
+  `railway up` (node deploys are manual, decoupled from git).
+- **Economics** — alpha sponsors gas (`price = free`). Flip to user-pays-USDC = `price.type=
+  "margin"` + `price_source="Jupiter"` + a Jupiter API key.
 
 ## Non-goals
 
-- External (connected) wallets — they pay their own gas as today.
 - Ukraine card on-ramp (separate track — [[project_onramp_ukraine]]).
