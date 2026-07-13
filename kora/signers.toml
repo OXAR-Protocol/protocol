@@ -1,0 +1,13 @@
+# OXAR Kora signer — the fee-payer keypair that co-signs + pays SOL gas.
+# MVP: one in-memory signer, base58 secret read from the KORA_SIGNER_KEY env var.
+# NEVER commit the key. On Railway it lives as a service variable (see README).
+# Later we can swap type = "privy"/"turnkey" for custody without touching the flow.
+
+[signer_pool]
+strategy = "round_robin"
+
+[[signers]]
+name = "oxar_fee_payer"
+type = "memory"
+private_key_env = "KORA_SIGNER_KEY"
+weight = 1

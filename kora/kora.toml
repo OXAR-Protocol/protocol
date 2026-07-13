@@ -1,0 +1,128 @@
+# OXAR Kora fee-relayer config — user pays gas in USDC, $0 subsidy to OXAR.
+# See ./README.md for what this does and how to deploy on Railway.
+# Schema ref: github.com/solana-foundation/kora/blob/main/kora.toml
+
+[kora]
+rate_limit = 100
+
+# Auth: set KORA_API_KEY on Railway → uncomment below so only our app can call the node.
+# (The key is passed by the client as an x-api-key header; keep it server-only in the web app.)
+[kora.auth]
+# api_key = "set-via-env"   # ← we template this from $KORA_API_KEY at container start (entrypoint)
+
+# Only the RPC methods our client actually uses. Everything else off = smaller surface.
+[kora.enabled_methods]
+liveness = true
+get_config = true
+get_blockhash = true
+get_supported_tokens = true
+get_payer_signer = true
+estimate_transaction_fee = true
+sign_transaction = true
+sign_and_send_transaction = true
+transfer_transaction = false
+get_version = true
+
+[validation]
+# Cap the SOL a single tx can make us pay (0.001 SOL ≈ well above a normal fee, below abuse).
+max_allowed_lamports = 1000000
+max_signatures = 10
+# Pricing source for fee conversion. "Jupiter" needs a paid JUPITER_API_KEY; while we run
+# the sponsored (free) model below, no live price is used, so "Mock" satisfies validation.
+# To switch to user-pays-USDC: set this to "Jupiter", add JUPITER_API_KEY, price.type="margin".
+price_source = "Mock"
+allow_durable_transactions = false
+
+# Programs Kora will pay fees for. EVERY program in a tx must be here or Kora rejects it.
+# Base set covers the SOL-less DEPOSIT path (USDC → Jupiter Lend, needs 0 SOL from user).
+# Swap/buy paths route through Jupiter v6 + AMMs — see README "Swap routing" before enabling.
+allowed_programs = [
+    "11111111111111111111111111111111",             # System
+    "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",  # SPL Token
+    "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",  # Token-2022
+    "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL", # Associated Token Account
+    "AddressLookupTab1e1111111111111111111111111",  # Address Lookup Table
+    "ComputeBudget111111111111111111111111111111",  # Compute Budget
+    "jup3YeL8QhtSx1e253b2FDvsMNC87fDrgQZivbrndc9",  # Jupiter Lend (deposit/withdraw)
+    "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",  # Jupiter Aggregator v6 (swap/buy)
+    # + each future RWA/bond program = one line here.
+    # + Jupiter-routed AMMs (Raydium/Orca/Meteora/…) if you enable the swap path — see README.
+]
+
+# Token the user is allowed to PAY the fee in. USDC only = dollar-first, no volatility.
+allowed_tokens = [
+    "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", # USDC
+]
+allowed_spl_paid_tokens = []
+disallowed_accounts = []
+
+# Alpha model: OXAR sponsors gas (no USDC fee charged). Sub-cent per tx; 0.1 SOL float lasts
+# thousands of txs. Flip to type = "margin" (+ Jupiter price_source + JUPITER_API_KEY) to
+# charge the user their gas in USDC once volume justifies it.
+[validation.price]
+type = "free"
+
+# Anti-drainage: the fee payer only pays gas + ATA rent. It must NEVER be coaxed into
+# sending its own SOL/tokens away. Deny every "spend from fee payer" action; keep only
+# what deposits/swaps legitimately need (creating + initializing the user's ATAs).
+[validation.fee_payer_policy.system]
+allow_transfer = false
+allow_assign = false
+allow_create_account = true    # ATA rent for first-time token accounts
+allow_allocate = false
+
+[validation.fee_payer_policy.system.nonce]
+allow_initialize = false
+allow_advance = false
+allow_authorize = false
+allow_withdraw = false
+
+[validation.fee_payer_policy.spl_token]
+allow_transfer = false
+allow_burn = false
+allow_close_account = false
+allow_approve = false
+allow_revoke = false
+allow_set_authority = false
+allow_mint_to = false
+allow_initialize_mint = false
+allow_initialize_account = true   # init the user's ATA
+allow_initialize_multisig = false
+allow_freeze_account = false
+allow_thaw_account = false
+allow_withdraw_excess_lamports = false
+allow_unwrap_lamports = false
+
+[validation.fee_payer_policy.token_2022]
+allow_transfer = false
+allow_burn = false
+allow_close_account = false
+allow_approve = false
+allow_revoke = false
+allow_set_authority = false
+allow_mint_to = false
+allow_initialize_mint = false
+allow_initialize_account = true
+allow_initialize_multisig = false
+allow_freeze_account = false
+allow_thaw_account = false
+allow_withdraw_excess_lamports = false
+allow_unwrap_lamports = false
+
+[validation.fee_payer_policy.alt]
+allow_create = false
+allow_extend = false
+allow_freeze = false
+allow_deactivate = false
+allow_close = false
+
+# Prometheus on the same port — Railway can scrape /metrics; alert on low fee-payer balance.
+[metrics]
+enabled = true
+endpoint = "/metrics"
+port = 8080
+scrape_interval = 60
+
+[metrics.fee_payer_balance]
+enabled = true
+expiry_seconds = 30
