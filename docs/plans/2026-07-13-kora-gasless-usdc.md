@@ -48,17 +48,32 @@ over the SDK if the kit-instruction conversion gets messy — the endpoints are 
 - **Fee-payer SOL float:** revolving, **reimbursed** by users' USDC — net-zero. Seed with a
   small amount (the $25 or less); it then sustains itself.
 
+## Alpha economics update (2026-07-13)
+
+Node validation requires a **paid `JUPITER_API_KEY`** for `price_source = "Jupiter"`. Rather
+than block on another signup, alpha ships with **`price.type = "free"` — OXAR sponsors gas**.
+Solana gas is sub-cent; the 0.1 SOL float covers thousands of txs (ATA-creation rent ~0.002
+SOL is the real cost driver). Trade-off: with free pricing the node **would be drainable if
+open**, so the `KORA_API_KEY` gate is now load-bearing (not just nice-to-have) and the client
+must call Kora **through a server proxy** that holds the key (never expose it in the browser).
+Flip to user-pays-USDC later = `price.type="margin"` + `price_source="Jupiter"` + a free
+Jupiter API key; then the client appends the USDC payment ix (original flow above).
+
 ## Phases
 
 - **P0 — Plan** (this doc). ✅
-- **P1 — Stand up the Kora node (user + me):** deploy the Kora container; `kora.toml`
-  (allowlist our programs + USDC as fee token, price source = Jupiter); `signers.toml`
-  (fee-payer key — memory/env for MVP, Privy/Turnkey later); fund the fee-payer with a
-  small SOL seed. Env: `KORA_RPC_URL` (+ any API key/HMAC).
-- **P2 — Client integration:** `lib/gas/kora.ts` (wrap the Kora RPC); a "via Kora" path in
-  `solana-provider.signAndSend` — build tx → Kora fee-payer → append payment ix → Privy
-  partial-sign → Kora signAndSend. Used by embedded wallets (external wallets keep their
-  own gas). Show the USDC fee transparently ("you'll get ≈ $1.84").
+- **P1 — Kora node LIVE.** ✅ Deployed on Railway (project `oxar-kora`, service `kora`) from
+  `kora/` (Dockerfile over prebuilt `ghcr.io/solana-foundation/kora`). Node URL
+  `https://kora-production-c0ff.up.railway.app`, `x-api-key` auth, fee-payer
+  `MQwRCwbeRmhpNdAjvkMysLHS92WSXQvw7wJ8hPoYFrL` funded 0.1 SOL. `getConfig` /
+  `getPayerSigner` / `/metrics` all green. Config: allowlist (System/Token/Token-2022/ATA/
+  ALT/ComputeBudget + Jupiter Lend + Jupiter v6), USDC token, `price=free`, `price_source=Mock`.
+- **P2 — Client integration (next):** server proxy `app/api/kora/route.ts` (holds
+  `KORA_API_KEY`, forwards to `KORA_RPC_URL`) + client `lib/gas/kora.ts`; a "via Kora" path
+  in `solana-provider.signAndSend` for **embedded wallets** — build tx → fee-payer = Kora
+  payer → Privy **partial-sign** (`signTransaction`) → Kora `signAndSendTransaction`. No USDC
+  payment ix while `price=free`. External wallets keep native gas. Web env:
+  `KORA_RPC_URL`, `KORA_API_KEY` (server-side, Vercel `oxar-web` + `web/.env.local`).
 - **P3 — Verify:** on the running node, small real-money smoke — deposit (Jupiter Lend),
   buy (stock swap), withdraw, send — all from a **SOL-less USDC wallet**. Confirm the fee
   is taken in USDC and no SOL is needed. Money-path checklist.
