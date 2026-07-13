@@ -1,0 +1,46 @@
+name: Kora allowlist refresh
+
+# Jupiter adds AMMs over time; if a swap routes through a program not on Kora's allowlist it
+# falls back to native gas (fails for 0-SOL users). Weekly, regenerate the allowlist from
+# Jupiter's live program list and open a PR when the set changed. A human reviews the new
+# programs (we're agreeing to pay their gas), merges, then redeploys the node.
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # weekly, Monday 08:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Regenerate allowlist
+        run: node kora/scripts/refresh-allowlist.mjs
+
+      - name: Open PR if the allowlist changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet kora/kora.toml; then
+            echo "Allowlist already up to date — no PR."
+            exit 0
+          fi
+          BRANCH="chore/kora-allowlist-$(date +%Y%m%d-%H%M)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add kora/kora.toml
+          git commit -m "chore(kora): refresh Jupiter AMM allowlist"
+          git push -u origin "$BRANCH"
+          gh pr create \
+            --title "chore(kora): refresh Jupiter AMM allowlist" \
+            --body "Automated weekly refresh from Jupiter's \`program-id-to-label\`. Review the added/removed programs (we pay their gas), merge, then redeploy the node: \`cd kora && railway up --service kora\`."
