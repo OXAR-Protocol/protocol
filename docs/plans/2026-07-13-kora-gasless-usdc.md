@@ -100,6 +100,10 @@ Jupiter API key; then the client appends the USDC payment ix (original flow abov
 - **Float** — ~0.002 SOL ATA rent per first-deposit is the real cost; alert < 0.03 SOL, top up.
 - **Allowlist drift** — Jupiter adds AMMs; weekly refresh workflow opens a PR, human merges +
   `railway up` (node deploys are manual, decoupled from git).
+- **TODO — direct alert channel** — the float alert currently lands as a GitHub Issue + a
+  failed-Actions email to the workflow author (easy to miss). Add a channel we actually watch
+  (Telegram bot / email to daniel.l@oxar.app / Slack webhook) — a curl step in
+  `kora-float-alert.yml` with the token in GitHub Secrets. Deferred.
 - **Economics** — alpha sponsors gas (`price = free`). Flip to user-pays-USDC = `price.type=
   "margin"` + `price_source="Jupiter"` + a Jupiter API key.
 
