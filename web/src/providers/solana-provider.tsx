@@ -15,6 +15,7 @@ import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWalle
 import { RPC_URL } from "@/lib/constants";
 import { clearCache } from "@/lib/cache";
 import { deriveSolanaWallets, hasExternalSolanaWallet } from "@/lib/wallet/solana-wallets";
+import { koraEnabled, koraPayer, koraBlockhash, koraSignAndSend } from "@/lib/gas/kora";
 
 /** Minimal wallet signer — what yield providers need to sign + send. */
 export interface WalletSigner {
@@ -135,8 +136,41 @@ class PrivySolanaAdapter implements WalletSigner {
       return this._connection.sendRawTransaction(rawSigned);
     }
 
+    // Embedded wallet: pay $0 SOL via Kora, which co-signs as the fee payer and pays the
+    // gas. Only for legacy txs we build ourselves (deposit/withdraw/send); Jupiter v0 swaps
+    // bake in their own payer so they can't be re-fee-payered and stay on native gas.
+    // If Kora is unreachable we fall back to native-SOL gas below (money path must degrade).
+    if (tx instanceof Transaction && koraEnabled()) {
+      try {
+        return await this._signAndSendViaKora(tx);
+      } catch (e) {
+        console.warn("Kora gasless path failed; falling back to native SOL gas:", e);
+      }
+    }
+
     const signed = await this.signTransaction(tx);
     return this._connection.sendRawTransaction(signed.serialize());
+  }
+
+  /**
+   * Gasless send: Kora is the fee payer. We set its pubkey + a node-provided blockhash,
+   * have Privy partial-sign (the user's authority sig only), then hand the tx to Kora to
+   * add its fee-payer signature and broadcast. The user needs no SOL.
+   */
+  private async _signAndSendViaKora(tx: Transaction): Promise<string> {
+    const [payer, blockhash] = await Promise.all([koraPayer(), koraBlockhash()]);
+    tx.feePayer = new PublicKey(payer);
+    tx.recentBlockhash = blockhash;
+
+    const unsigned = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
+    const { signedTransaction } = await this._wallet.signTransaction({
+      transaction: unsigned,
+      chain: "solana:mainnet",
+    });
+    const st = signedTransaction as Uint8Array | string;
+    const signedBytes =
+      typeof st === "string" ? Uint8Array.from(atob(st), (c) => c.charCodeAt(0)) : st;
+    return koraSignAndSend(signedBytes);
   }
 
   async signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T> {
