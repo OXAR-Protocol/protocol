@@ -24,8 +24,10 @@ transfer_transaction = false
 get_version = true
 
 [validation]
-# Cap the SOL a single tx can make us pay (0.001 SOL ≈ well above a normal fee, below abuse).
-max_allowed_lamports = 1000000
+# Cap the SOL a single tx can make us pay. Must cover ATA rent (~0.00204 SOL/account) when
+# Kora funds a 0-SOL user's first token account, plus the base + priority fee. 0.005 SOL
+# fits one ATA + fees comfortably while still capping abuse.
+max_allowed_lamports = 5000000
 max_signatures = 10
 # Pricing source for fee conversion. "Jupiter" needs a paid JUPITER_API_KEY; while we run
 # the sponsored (free) model below, no live price is used, so "Mock" satisfies validation.
