@@ -164,20 +164,25 @@ class PrivySolanaAdapter implements WalletSigner {
   private async _signAndSendViaKora(tx: Transaction): Promise<string> {
     const [payer, blockhash] = await Promise.all([koraPayer(), koraBlockhash()]);
     const koraPk = new PublicKey(payer);
-    tx.feePayer = koraPk;
-    tx.recentBlockhash = blockhash;
 
-    // ATA rent: the Jupiter Lend SDK funds new token accounts from the `owner` (our user),
-    // who may hold 0 SOL — that rent would fail. Kora is allowed to pay account rent, so
-    // reassign the funding account of any ATA-create ix from the user to Kora. Account [0]
-    // of an Associated Token Account create/createIdempotent ix is the funding (payer) slot.
+    // Build a COPY with Kora as fee payer — never mutate the caller's tx, so if the Kora
+    // path throws (e.g. a program not on the node's allowlist) the native-SOL fallback
+    // still gets a clean user-fee-payer transaction.
+    const koraTx = new Transaction();
+    koraTx.feePayer = koraPk;
+    koraTx.recentBlockhash = blockhash;
     for (const ix of tx.instructions) {
-      if (ix.programId.toBase58() === ATA_PROGRAM_ID && ix.keys[0]?.pubkey.equals(this._publicKey)) {
-        ix.keys[0] = { pubkey: koraPk, isSigner: true, isWritable: true };
+      const keys = ix.keys.map((k) => ({ ...k }));
+      // ATA rent: the Jupiter Lend SDK funds new token accounts from the `owner` (our user),
+      // who may hold 0 SOL. Kora is allowed to pay account rent, so reassign the funding
+      // account (index 0 of an ATA create/createIdempotent ix) from the user to Kora.
+      if (ix.programId.toBase58() === ATA_PROGRAM_ID && keys[0]?.pubkey.equals(this._publicKey)) {
+        keys[0] = { pubkey: koraPk, isSigner: true, isWritable: true };
       }
+      koraTx.add({ keys, programId: ix.programId, data: ix.data });
     }
 
-    const unsigned = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
+    const unsigned = koraTx.serialize({ requireAllSignatures: false, verifySignatures: false });
     const { signedTransaction } = await this._wallet.signTransaction({
       transaction: unsigned,
       chain: "solana:mainnet",

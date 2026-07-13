@@ -43,7 +43,15 @@ allowed_programs = [
     "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL", # Associated Token Account
     "AddressLookupTab1e1111111111111111111111111",  # Address Lookup Table
     "ComputeBudget111111111111111111111111111111",  # Compute Budget
-    "jup3YeL8QhtSx1e253b2FDvsMNC87fDrgQZivbrndc9",  # Jupiter Lend (deposit/withdraw)
+    # Jupiter Lend suite — deposit/withdraw/rewards touch several of these programs.
+    "jup3YeL8QhtSx1e253b2FDvsMNC87fDrgQZivbrndc9",  # Jupiter Lend
+    "jup7TthsMgcR9Y3L277b8Eo9uboVSmu1utkuXHNUKar",  # Jupiter Lend
+    "jup8QcdtqecBGw1iXHW3hQAsHQbTgEqbLbNMvvULmeK",  # Jupiter Lend
+    "jup9FB8aPL62L8SHwhZJnxnV263qQvc9tseGT6AFLn6",  # Jupiter Lend
+    "jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC",  # Jupiter Lend (earn deposit)
+    "jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS",  # Jupiter Lend
+    "jupnw4B6Eqs7ft6rxpzYLJZYSnrpRgPcr589n5Kv4oc",  # Jupiter Lend
+    "jupr81YtYssSyPt8jbnGuiWon5f6x9TcDEFxYe3Bdzi",  # Jupiter Lend
     "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",  # Jupiter Aggregator v6 (swap/buy)
     # + each future RWA/bond program = one line here.
     # + Jupiter-routed AMMs (Raydium/Orca/Meteora/…) if you enable the swap path — see README.
