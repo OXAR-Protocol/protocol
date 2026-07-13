@@ -70,3 +70,7 @@ outreach/*.xlsx
 secrets/
 .gstack/
 .vercel
+
+# Kora fee-payer keypairs — NEVER commit (secret)
+fee-payer.json
+**/fee-payer.json
