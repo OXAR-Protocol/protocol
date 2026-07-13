@@ -1,0 +1,4 @@
+# NEVER commit the fee-payer keypair or real env.
+fee-payer.json
+*.json
+.env
