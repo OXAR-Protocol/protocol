@@ -8,6 +8,7 @@ import { getProvider, toBaseUnits, toFriendlyError, UserFacingError } from "@/li
 import { chooseDepositPath } from "@/lib/yield/deposit-path";
 import { getSwapQuote, buildSwapTx, deserializeSwapTx, priceImpactTooHigh } from "@/lib/swap/jupiter-swap";
 import { spendableBase, type WalletAsset } from "@/lib/portfolio/assets";
+import { trackEvent } from "@/lib/track";
 
 export type DepositStatus = "idle" | "swapping" | "depositing";
 
@@ -37,7 +38,8 @@ export function useUniversalDeposit(providerId: string) {
         if (path === "direct") {
           setStatus("depositing");
           const amount = toBaseUnits(usdAmount, provider.decimals);
-          await deposit(amount, opts);
+          const sig = await deposit(amount, opts);
+          trackEvent({ wallet: walletAddress.toBase58(), kind: "deposit", asset: providerId, usd: usdAmount, sig, chain: payAsset.chain });
           return amount;
         }
 
@@ -74,7 +76,8 @@ export function useUniversalDeposit(providerId: string) {
           const depositAmount = BigInt(quote.otherAmountThreshold);
           setStatus("depositing");
           try {
-            await deposit(depositAmount, opts);
+            const depositSig = await deposit(depositAmount, opts);
+            trackEvent({ wallet: walletAddress.toBase58(), kind: "deposit", asset: providerId, usd: usdAmount, sig: depositSig, chain: payAsset.chain });
           } catch (depositErr) {
             console.error("Deposit failed after swap:", depositErr);
             throw new UserFacingError(
