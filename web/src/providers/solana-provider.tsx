@@ -16,10 +16,7 @@ import { RPC_URL } from "@/lib/constants";
 import { clearCache } from "@/lib/cache";
 import { deriveSolanaWallets, hasExternalSolanaWallet } from "@/lib/wallet/solana-wallets";
 import { koraEnabled, koraPayer, koraBlockhash, koraSignAndSend } from "@/lib/gas/kora";
-
-/** Associated Token Account program — used to spot ATA-create ixs whose rent payer we
- * reassign to Kora in the gasless path (so a 0-SOL user isn't the funding account). */
-const ATA_PROGRAM_ID = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+import { buildKoraLegacyTx, rebuildV0WithKora } from "@/lib/gas/kora-tx";
 
 /** Minimal wallet signer — what yield providers need to sign + send. */
 export interface WalletSigner {
@@ -117,6 +114,54 @@ class PrivySolanaAdapter implements WalletSigner {
    * card buy funds native SOL so the wallet always has enough.
    */
   async signAndSend(tx: Transaction | VersionedTransaction, _opts?: { sponsor?: boolean }): Promise<string> {
+    // Gasless first, for EVERY wallet (embedded + external): Kora co-signs as fee payer and
+    // pays the gas, so a wallet with $0 SOL can transact whatever it paid with. Covers both
+    // our legacy txs (Jupiter Lend) and v0 txs (Kamino, Jupiter swaps for stocks/gold).
+    // Any failure — node down, a program off the allowlist, a wallet that can't partial-sign —
+    // falls through to native SOL gas, so the money path degrades gracefully.
+    if (koraEnabled()) {
+      try {
+        return await this._signAndSendViaKora(tx);
+      } catch (e) {
+        console.warn("Kora gasless path failed; falling back to native SOL gas:", e);
+      }
+    }
+    return this._signAndSendNative(tx);
+  }
+
+  /**
+   * Gasless send: Kora is the fee payer. Rebuild the tx with Kora's pubkey + a node blockhash
+   * (legacy → copy instructions; v0 → decompile with its lookup tables and recompile), have
+   * the wallet partial-sign (its authority sig only), then hand it to Kora to add the
+   * fee-payer signature and broadcast. The user needs no SOL.
+   */
+  private async _signAndSendViaKora(tx: Transaction | VersionedTransaction): Promise<string> {
+    const [payer, blockhash] = await Promise.all([koraPayer(), koraBlockhash()]);
+    const koraPk = new PublicKey(payer);
+
+    // Never mutate the caller's tx — a failed Kora attempt must leave a clean tx for the
+    // native fallback (and its own signing prompt).
+    const koraTx =
+      tx instanceof Transaction
+        ? buildKoraLegacyTx(tx, this._publicKey, koraPk, blockhash)
+        : await rebuildV0WithKora(tx, this._publicKey, koraPk, blockhash, this._connection);
+
+    const unsigned =
+      koraTx instanceof Transaction
+        ? koraTx.serialize({ requireAllSignatures: false, verifySignatures: false })
+        : koraTx.serialize();
+    const { signedTransaction } = await this._wallet.signTransaction({
+      transaction: unsigned,
+      chain: "solana:mainnet",
+    });
+    const st = signedTransaction as Uint8Array | string;
+    const signedBytes =
+      typeof st === "string" ? Uint8Array.from(atob(st), (c) => c.charCodeAt(0)) : st;
+    return koraSignAndSend(signedBytes);
+  }
+
+  /** Native path — wallet pays its own SOL gas. Unchanged behavior, used as the Kora fallback. */
+  private async _signAndSendNative(tx: Transaction | VersionedTransaction): Promise<string> {
     if (tx instanceof Transaction) {
       if (!tx.recentBlockhash) {
         tx.recentBlockhash = (await this._connection.getLatestBlockhash()).blockhash;
@@ -140,52 +185,8 @@ class PrivySolanaAdapter implements WalletSigner {
       return this._connection.sendRawTransaction(rawSigned);
     }
 
-    // Embedded wallet: pay $0 SOL via Kora, which co-signs as the fee payer and pays the
-    // gas. Only for legacy txs we build ourselves (deposit/withdraw/send); Jupiter v0 swaps
-    // bake in their own payer so they can't be re-fee-payered and stay on native gas.
-    // If Kora is unreachable we fall back to native-SOL gas below (money path must degrade).
-    if (tx instanceof Transaction && koraEnabled()) {
-      try {
-        return await this._signAndSendViaKora(tx);
-      } catch (e) {
-        console.warn("Kora gasless path failed; falling back to native SOL gas:", e);
-      }
-    }
-
     const signed = await this.signTransaction(tx);
     return this._connection.sendRawTransaction(signed.serialize());
-  }
-
-  /**
-   * Gasless send: Kora is the fee payer. We set its pubkey + a node-provided blockhash,
-   * have Privy partial-sign (the user's authority sig only), then hand the tx to Kora to
-   * add its fee-payer signature and broadcast. The user needs no SOL.
-   */
-  private async _signAndSendViaKora(tx: Transaction): Promise<string> {
-    const [payer, blockhash] = await Promise.all([koraPayer(), koraBlockhash()]);
-    const koraPk = new PublicKey(payer);
-    tx.feePayer = koraPk;
-    tx.recentBlockhash = blockhash;
-
-    // ATA rent: the Jupiter Lend SDK funds new token accounts from the `owner` (our user),
-    // who may hold 0 SOL — that rent would fail. Kora is allowed to pay account rent, so
-    // reassign the funding account of any ATA-create ix from the user to Kora. Account [0]
-    // of an Associated Token Account create/createIdempotent ix is the funding (payer) slot.
-    for (const ix of tx.instructions) {
-      if (ix.programId.toBase58() === ATA_PROGRAM_ID && ix.keys[0]?.pubkey.equals(this._publicKey)) {
-        ix.keys[0] = { pubkey: koraPk, isSigner: true, isWritable: true };
-      }
-    }
-
-    const unsigned = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
-    const { signedTransaction } = await this._wallet.signTransaction({
-      transaction: unsigned,
-      chain: "solana:mainnet",
-    });
-    const st = signedTransaction as Uint8Array | string;
-    const signedBytes =
-      typeof st === "string" ? Uint8Array.from(atob(st), (c) => c.charCodeAt(0)) : st;
-    return koraSignAndSend(signedBytes);
   }
 
   async signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T> {
