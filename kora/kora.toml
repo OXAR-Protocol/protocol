@@ -27,8 +27,10 @@ get_version = true
 # Cap the SOL a single tx can make us pay (0.001 SOL ≈ well above a normal fee, below abuse).
 max_allowed_lamports = 1000000
 max_signatures = 10
-# Real USDC pricing so the fee we charge tracks the SOL we spend. "Mock" is test-only.
-price_source = "Jupiter"
+# Pricing source for fee conversion. "Jupiter" needs a paid JUPITER_API_KEY; while we run
+# the sponsored (free) model below, no live price is used, so "Mock" satisfies validation.
+# To switch to user-pays-USDC: set this to "Jupiter", add JUPITER_API_KEY, price.type="margin".
+price_source = "Mock"
 allow_durable_transactions = false
 
 # Programs Kora will pay fees for. EVERY program in a tx must be here or Kora rejects it.
@@ -54,10 +56,11 @@ allowed_tokens = [
 allowed_spl_paid_tokens = []
 disallowed_accounts = []
 
-# Charge a small margin over the raw SOL cost (covers price slippage on the SOL float top-up).
+# Alpha model: OXAR sponsors gas (no USDC fee charged). Sub-cent per tx; 0.1 SOL float lasts
+# thousands of txs. Flip to type = "margin" (+ Jupiter price_source + JUPITER_API_KEY) to
+# charge the user their gas in USDC once volume justifies it.
 [validation.price]
-type = "margin"
-margin = 0.1  # 10%
+type = "free"
 
 # Anti-drainage: the fee payer only pays gas + ATA rent. It must NEVER be coaxed into
 # sending its own SOL/tokens away. Deny every "spend from fee payer" action; keep only
