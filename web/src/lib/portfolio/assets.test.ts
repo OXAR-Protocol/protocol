@@ -6,10 +6,13 @@ import {
   assetUid,
   SOL_FEE_RESERVE,
   SOL_MINT,
+  EVM_GAS_RESERVE_USD,
   type DasResult,
   type PriceMap,
   type WalletAsset,
 } from "./assets";
+
+const EVM_NATIVE = "0x0000000000000000000000000000000000000000";
 
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
@@ -105,8 +108,41 @@ describe("spendableBase", () => {
     expect(spendableBase(asset({ mint: SOL_MINT, amount: BigInt(5_000_000) }))).toBe(BigInt(0));
   });
 
-  it("spends the full balance for non-SOL assets", () => {
+  it("spends the full balance for SPL (non-SOL) assets", () => {
     const usdc = asset({ mint: "EPjFW", amount: BigInt(50_000_000) });
     expect(spendableBase(usdc)).toBe(BigInt(50_000_000));
+  });
+
+  // --- native EVM gas reserve (fixes the "Insufficient Ethereum (ETH)" bug) ---
+  const nativeEvm = (network: string, amountWei: bigint, uiEth: number, usdValue: number): WalletAsset =>
+    asset({ mint: EVM_NATIVE, amount: amountWei, decimals: 18, uiAmount: uiEth, usdValue, chain: "ethereum", network });
+  const usdOf = (wei: bigint, pricePerEth: number) => (Number(wei) / 1e18) * pricePerEth;
+
+  it("reserves L1 gas for native ETH on Ethereum — the insufficient-ETH bug", () => {
+    // 0.0013 ETH ≈ $2.53 (the screenshot): must NOT spend it all — leave gas for
+    // the ~$0.56 Ethereum fee, or the wallet rejects the bridge tx.
+    const eth = nativeEvm("eth-mainnet", 1_300_000_000_000_000n, 0.0013, 2.53);
+    const spend = spendableBase(eth);
+    expect(spend).toBeGreaterThan(0n);
+    expect(spend).toBeLessThan(eth.amount);
+    const reservedUsd = usdOf(eth.amount - spend, eth.usdValue / eth.uiAmount);
+    expect(reservedUsd).toBeCloseTo(EVM_GAS_RESERVE_USD["eth-mainnet"], 1); // ~$1.50
+  });
+
+  it("reserves a small gas buffer on cheap L2s (Base)", () => {
+    const eth = nativeEvm("base-mainnet", 10_000_000_000_000_000n, 0.01, 19.46); // 0.01 ETH
+    const spend = spendableBase(eth);
+    const reservedUsd = usdOf(eth.amount - spend, eth.usdValue / eth.uiAmount);
+    expect(reservedUsd).toBeCloseTo(EVM_GAS_RESERVE_USD["base-mainnet"], 1); // ~$0.10
+  });
+
+  it("does NOT reserve for ERC-20 tokens (gas is paid in the native coin)", () => {
+    const usdcOnBase = asset({ mint: "0xUSDC", amount: 50_000_000n, decimals: 6, chain: "ethereum", network: "base-mainnet" });
+    expect(spendableBase(usdcOnBase)).toBe(50_000_000n);
+  });
+
+  it("returns 0 when native ETH is below the gas reserve", () => {
+    const eth = nativeEvm("eth-mainnet", 100_000_000_000_000n, 0.0001, 0.19); // $0.19 < $1.50
+    expect(spendableBase(eth)).toBe(0n);
   });
 });
