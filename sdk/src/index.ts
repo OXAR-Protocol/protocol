@@ -32,3 +32,8 @@ export {
   deriveMintPda,
   derivePoolPda,
 } from "./pda";
+
+// ============================================================================
+// Core money-path logic (framework-agnostic — shared by web + mobile)
+// ============================================================================
+export { buildKoraLegacyTx, rebuildV0WithKora } from "./core/kora-tx";

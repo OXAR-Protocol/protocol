@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.derivePoolPda = exports.deriveMintPda = exports.deriveRulePda = exports.deriveGroupMemberPda = exports.deriveGroupVaultPda = exports.derivePersonalVaultPda = exports.IDL = exports.vaultIdForYieldSource = exports.getYieldSourceById = exports.APY_BUCKETS = exports.YIELD_SOURCES = exports.NAV_PRECISION = exports.USDC_DECIMALS = exports.INITIAL_NAV = exports.RPC_URL = exports.PROGRAM_ID = void 0;
+exports.rebuildV0WithKora = exports.buildKoraLegacyTx = exports.derivePoolPda = exports.deriveMintPda = exports.deriveRulePda = exports.deriveGroupMemberPda = exports.deriveGroupVaultPda = exports.derivePersonalVaultPda = exports.IDL = exports.vaultIdForYieldSource = exports.getYieldSourceById = exports.APY_BUCKETS = exports.YIELD_SOURCES = exports.NAV_PRECISION = exports.USDC_DECIMALS = exports.INITIAL_NAV = exports.RPC_URL = exports.PROGRAM_ID = void 0;
 // ============================================================================
 // Constants
 // ============================================================================
@@ -32,3 +32,9 @@ Object.defineProperty(exports, "deriveGroupMemberPda", { enumerable: true, get: 
 Object.defineProperty(exports, "deriveRulePda", { enumerable: true, get: function () { return pda_1.deriveRulePda; } });
 Object.defineProperty(exports, "deriveMintPda", { enumerable: true, get: function () { return pda_1.deriveMintPda; } });
 Object.defineProperty(exports, "derivePoolPda", { enumerable: true, get: function () { return pda_1.derivePoolPda; } });
+// ============================================================================
+// Core money-path logic (framework-agnostic — shared by web + mobile)
+// ============================================================================
+var kora_tx_1 = require("./core/kora-tx");
+Object.defineProperty(exports, "buildKoraLegacyTx", { enumerable: true, get: function () { return kora_tx_1.buildKoraLegacyTx; } });
+Object.defineProperty(exports, "rebuildV0WithKora", { enumerable: true, get: function () { return kora_tx_1.rebuildV0WithKora; } });
