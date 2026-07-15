@@ -16,6 +16,7 @@ exports.INITIAL_NAV = 1000000;
 exports.NAV_PRECISION = 1000000;
 exports.USDC_DECIMALS = 6;
 exports.YIELD_SOURCES = [
+    // The roadmap headline: tokenized Ukrainian government bonds (OVDP).
     {
         id: "ukraine-gov-bonds",
         name: "Ukrainian Gov Bonds",

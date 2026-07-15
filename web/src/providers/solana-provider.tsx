@@ -12,11 +12,11 @@ import {
 import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
+import { buildKoraLegacyTx, rebuildV0WithKora } from "@oxar/sdk";
 import { RPC_URL } from "@/lib/constants";
 import { clearCache } from "@/lib/cache";
 import { deriveSolanaWallets, hasExternalSolanaWallet } from "@/lib/wallet/solana-wallets";
 import { koraEnabled, koraPayer, koraBlockhash, koraSignAndSend } from "@/lib/gas/kora";
-import { buildKoraLegacyTx, rebuildV0WithKora } from "@/lib/gas/kora-tx";
 
 /** Minimal wallet signer — what yield providers need to sign + send. */
 export interface WalletSigner {

@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Transaction,
   TransactionInstruction,
@@ -19,6 +17,8 @@ import {
  *    its lookup tables, then recompile with Kora as payer.
  * Both also reassign ATA-creation rent to Kora so a 0-SOL user isn't the funding account.
  * Inputs are never mutated, so a failed Kora attempt can fall back to the original tx.
+ *
+ * Framework-agnostic (no React/Next/DOM) — shared by web + future mobile.
  */
 
 const ATA_PROGRAM_ID = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";

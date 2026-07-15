@@ -8,7 +8,8 @@ import {
   type Connection,
 } from "@solana/web3.js";
 
-import { buildKoraLegacyTx, rebuildV0WithKora } from "./kora-tx";
+// kora-tx now lives in the shared core package (@oxar/sdk); this test moved with it.
+import { buildKoraLegacyTx, rebuildV0WithKora } from "@oxar/sdk";
 
 const ATA_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 const BLOCKHASH = "EETubP5AKHgjPAhzPAFcb8BAY1hMH639CWCFTqi3teA1";
