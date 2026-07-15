@@ -17,10 +17,17 @@ import { savePending } from "@/lib/bridge/pending";
 import { readUsdcBase } from "@/lib/bridge/arrival";
 import { isNativeEvm, encodeApprove, readAllowance } from "@/lib/evm/erc20";
 import { publicClientFor } from "@/lib/evm/chains";
+import { koraEnabled } from "@/lib/gas/kora";
 
 export type BridgeStatus = "idle" | "quoting" | "approving" | "bridging" | "arriving" | "depositing";
 
-/** Min SOL the receiver needs for the post-bridge deposit (tx fee + jlToken ATA rent). */
+/**
+ * Min SOL the receiver needs for the post-bridge deposit (tx fee + jlToken ATA rent)
+ * ONLY when gas can't be sponsored. With Kora enabled the fee AND the ATA rent are
+ * paid by the relayer (see lib/gas/kora-tx), so a 0-SOL wallet completes the deposit —
+ * this floor is skipped. It stays a safety net for the native-gas fallback, so a
+ * 0-SOL user can't bridge into funds that then can't be deposited (stranded as USDG).
+ */
 const MIN_RECEIVER_LAMPORTS = 5_000_000; // ~0.005 SOL
 
 // SAFETY: Privy ConnectedWallet shape is loosely typed across versions; we use a
@@ -76,17 +83,21 @@ export function useBridgeDeposit(providerId: string) {
 
       setError(null);
       try {
-        // The post-bridge deposit is a Solana tx — the RECEIVING wallet must hold a
-        // little SOL for its fee + the lending-token account rent, or the deposit
-        // can't land and the bridged USDC gets stranded. Block BEFORE moving money.
-        const receiverSol = await connection.getBalance(walletAddress);
-        if (receiverSol < MIN_RECEIVER_LAMPORTS) {
-          const have = (receiverSol / 1e9).toFixed(4);
-          const need = (MIN_RECEIVER_LAMPORTS / 1e9).toFixed(3);
-          throw new UserFacingError(
-            `Your Solana wallet needs a little SOL to finish the deposit after bridging — ` +
-              `you have ${have} SOL but need at least ${need}. Add a bit of SOL and try again.`,
-          );
+        // The post-bridge deposit is a Solana tx. With Kora, the relayer pays its
+        // fee AND the lending-token account rent, so a 0-SOL wallet is fine — this
+        // is the gasless "fund from any chain" path. Only when gas ISN'T sponsored
+        // does the receiver need its own SOL; block BEFORE moving money so bridged
+        // funds can't strand as USDG the user can't deposit.
+        if (!koraEnabled()) {
+          const receiverSol = await connection.getBalance(walletAddress);
+          if (receiverSol < MIN_RECEIVER_LAMPORTS) {
+            const have = (receiverSol / 1e9).toFixed(4);
+            const need = (MIN_RECEIVER_LAMPORTS / 1e9).toFixed(3);
+            throw new UserFacingError(
+              `Your Solana wallet needs a little SOL to finish the deposit after bridging — ` +
+                `you have ${have} SOL but need at least ${need}. Add a bit of SOL and try again.`,
+            );
+          }
         }
 
         // USD → pay-asset base units (cap by balance; reserve handled by spendableBase).
