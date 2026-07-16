@@ -18,7 +18,7 @@ import {
 import { savePending } from "@/lib/bridge/pending";
 import { readUsdcBase } from "@/lib/bridge/arrival";
 import { isNativeEvm, encodeApprove, readAllowance } from "@/lib/evm/erc20";
-import { publicClientFor } from "@/lib/evm/chains";
+import { publicClientFor, viemChainById } from "@/lib/evm/chains";
 import { koraEnabled } from "@/lib/gas/kora";
 
 export type BridgeStatus = "idle" | "quoting" | "approving" | "bridging" | "arriving" | "depositing";
@@ -127,6 +127,14 @@ export function useBridgeDeposit(providerId: string) {
 
         const provider1193 = await evmWallet.getEthereumProvider();
         await evmWallet.switchChain(originChainId);
+        // Some external wallets (Trust) DON'T actually apply the switch, then reject
+        // the send with a cryptic "chainId is not the same as your selected chainId".
+        // Verify the wallet is really on the origin chain and give a clear instruction.
+        const chainHex = (await provider1193.request({ method: "eth_chainId" })) as string;
+        if (parseInt(chainHex, 16) !== originChainId) {
+          const name = viemChainById(originChainId)?.name ?? `chain ${originChainId}`;
+          throw new UserFacingError(`Switch your wallet's network to ${name}, then try again.`);
+        }
         // Read/receipt via the wallet's own RPC (the default public RPC is flaky).
         const client = publicClientFor(originChainId, provider1193);
 
