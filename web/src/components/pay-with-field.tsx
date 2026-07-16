@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ArrowUpDown, ChevronDown } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
 import { spendableBase, assetUid, assetNetworkLabel, type WalletAsset } from "@oxar/sdk";
@@ -20,7 +20,8 @@ interface Props {
    *  collides for native EVM coins across networks. */
   activeUid: string | null;
   onSelectUid: (uid: string) => void;
-  /** Raw input string, in the selected currency's units. */
+  /** Raw input string, always in the pay-currency's TOKEN units (the source of
+   *  truth); the field can present a USD entry that writes back token units. */
   amount: string;
   onAmountChange: (value: string) => void;
   /** USD value of `amount` at the current price (shown under the field). */
@@ -32,9 +33,10 @@ interface Props {
 }
 
 /**
- * One split field: pick the pay-currency on the left, enter the amount in that
- * currency on the right (USD equivalent shown beneath). The currency button
- * opens a list of the wallet's holdings.
+ * One split field: pick the pay-currency on the left, enter the amount on the
+ * right. The ⇅ button toggles the entry between the token amount and USD — the
+ * other unit is shown beneath. `amount` (token units) stays the source of truth,
+ * so the money path is unchanged; USD entry just converts back at the price.
  */
 export function PayWithField({
   assets,
@@ -47,8 +49,12 @@ export function PayWithField({
   reserveGas = true,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"token" | "usd">("token");
+  const [usdStr, setUsdStr] = useState("");
   const ref = useRef<HTMLDivElement>(null);
   const active = assets.find((a) => assetUid(a) === activeUid) ?? null;
+  const price = active && active.uiAmount > 0 ? active.usdValue / active.uiAmount : 0;
+  const tokenAmt = parseFloat(amount) || 0;
 
   useEffect(() => {
     if (!open) return;
@@ -59,11 +65,45 @@ export function PayWithField({
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
+  // Switching the pay-asset while in USD mode: keep the $ amount, re-derive the
+  // token for the new price. Keyed on activeUid only, so typing never re-runs it.
+  useEffect(() => {
+    if (mode !== "usd") return;
+    const usd = parseFloat(usdStr) || 0;
+    onAmountChange(usd > 0 && price ? String(Number((usd / price).toPrecision(8))) : "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeUid]);
+
+  const toTokenStr = (usd: number) => (usd > 0 && price ? String(Number((usd / price).toPrecision(8))) : "");
+  const toUsdStr = (tok: number) => (tok > 0 && price ? String(Number((tok * price).toFixed(2))) : "");
+
+  const toggleMode = () => {
+    if (!active) return;
+    if (mode === "token") {
+      setUsdStr(toUsdStr(tokenAmt));
+      setMode("usd");
+    } else {
+      setMode("token");
+    }
+  };
+
+  const onInput = (v: string) => {
+    if (mode === "usd") {
+      setUsdStr(v);
+      onAmountChange(toTokenStr(parseFloat(v) || 0));
+    } else {
+      onAmountChange(v);
+    }
+  };
+
   const setMax = () => {
     if (!active) return;
-    const max = Number(spendableBase(active, reserveGas)) / 10 ** active.decimals;
-    onAmountChange(String(Number(max.toPrecision(6))));
+    const max = Number((Number(spendableBase(active, reserveGas)) / 10 ** active.decimals).toPrecision(6));
+    onAmountChange(String(max));
+    if (mode === "usd") setUsdStr(toUsdStr(max));
   };
+
+  const inputValue = mode === "usd" ? usdStr : amount;
 
   return (
     <div
@@ -95,19 +135,34 @@ export function PayWithField({
           />
         </button>
 
-        {/* Amount in the selected currency + USD equivalent */}
+        {/* Amount — token or USD, toggled by the ⇅ button. USD equivalent (or token) below. */}
         <div className="flex min-w-0 flex-1 flex-col items-end justify-center px-3 py-1.5">
-          <input
-            type="number"
-            min={0}
-            step="any"
-            inputMode="decimal"
-            value={amount}
-            onChange={(e) => onAmountChange(e.target.value)}
-            placeholder="0.00"
-            className="w-full bg-transparent text-right text-[20px] text-black outline-none placeholder:text-black/25"
-          />
-          <span className="text-[11px] tabular-nums text-black/40">${usdAmount.toFixed(2)}</span>
+          <div className="flex w-full items-center justify-end gap-1">
+            <button
+              type="button"
+              onClick={toggleMode}
+              disabled={!active}
+              title="Switch between $ and token"
+              aria-label="Switch between dollars and token amount"
+              className="shrink-0 text-black/30 transition hover:text-black/70 disabled:opacity-30"
+            >
+              <ArrowUpDown size={14} strokeWidth={1.5} />
+            </button>
+            {mode === "usd" && <span className="text-[20px] text-black/40">$</span>}
+            <input
+              type="number"
+              min={0}
+              step="any"
+              inputMode="decimal"
+              value={inputValue}
+              onChange={(e) => onInput(e.target.value)}
+              placeholder="0.00"
+              className="min-w-0 flex-1 bg-transparent text-right text-[20px] text-black outline-none placeholder:text-black/25"
+            />
+          </div>
+          <span className="text-[11px] tabular-nums text-black/40">
+            {mode === "usd" ? `${fmtAmount(tokenAmt)} ${active?.symbol ?? ""}` : `$${usdAmount.toFixed(2)}`}
+          </span>
         </div>
       </div>
 
