@@ -7,7 +7,7 @@ import type { Connection, PublicKey } from "@solana/web3.js";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useUniversalDeposit } from "@/hooks/use-universal-deposit";
 import { toFriendlyError, UserFacingError } from "@/lib/yield";
-import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
+import { SOL_MINT, type WalletAsset } from "@oxar/sdk";
 
 export type FundBuyStatus = "idle" | "funding" | "arriving" | "buying";
 

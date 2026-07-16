@@ -12,7 +12,7 @@ import {
   buildSwapTx,
   deserializeSwapTx,
   priceImpactTooHigh,
-} from "@/lib/swap/jupiter-swap";
+} from "@oxar/sdk";
 import { UserFacingError } from "./errors";
 import type {
   BuildIxParams,

@@ -6,8 +6,7 @@ import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { getProvider, toBaseUnits, toFriendlyError, UserFacingError } from "@/lib/yield";
 import { chooseDepositPath } from "@/lib/yield/deposit-path";
-import { getSwapQuote, buildSwapTx, deserializeSwapTx, priceImpactTooHigh } from "@/lib/swap/jupiter-swap";
-import { spendableBase, type WalletAsset } from "@/lib/portfolio/assets";
+import { getSwapQuote, buildSwapTx, deserializeSwapTx, priceImpactTooHigh, spendableBase, type WalletAsset } from "@oxar/sdk";
 import { trackEvent } from "@/lib/track";
 
 export type DepositStatus = "idle" | "swapping" | "depositing";

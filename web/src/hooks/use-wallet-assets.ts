@@ -8,7 +8,7 @@ import {
   type WalletAsset,
   type DasResult,
   type PriceMap,
-} from "@/lib/portfolio/assets";
+} from "@oxar/sdk";
 
 const JUP_PRICE_URL = "https://lite-api.jup.ag/price/v3";
 const JUP_TOKEN_URL = "https://lite-api.jup.ag/tokens/v2/search";

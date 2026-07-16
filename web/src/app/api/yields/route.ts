@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { buildApyMap, buildTvlMap, type DefiLlamaPool } from "@/lib/yield/yields-api";
-import { fetchWithRetry } from "@/lib/net/fetch-retry";
+import { fetchWithRetry } from "@oxar/sdk";
 
 // Lightweight DefiLlama proxy — NO protocol SDK here (unlike /api/kamino), so it
 // stays fast and never cold-starts klend. Returns APY for our pools + history.

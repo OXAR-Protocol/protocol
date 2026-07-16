@@ -4,7 +4,7 @@ import { useCallback } from "react";
 
 import { useUniversalDeposit } from "@/hooks/use-universal-deposit";
 import { useBridgeDeposit } from "@/hooks/use-bridge-deposit";
-import type { WalletAsset } from "@/lib/portfolio/assets";
+import type { WalletAsset } from "@oxar/sdk";
 
 const LABELS: Record<string, string> = {
   quoting: "Quoting…",

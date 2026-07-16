@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 
-import { fetchWithRetry, isRetryableStatus } from "./fetch-retry";
+import { fetchWithRetry, isRetryableStatus } from "@oxar/sdk";
 
 const res = (status: number) => new Response("{}", { status });
 

@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { buildEvmAssets } from "@/lib/portfolio/evm-assets";
-import type { WalletAsset } from "@/lib/portfolio/assets";
+import { buildEvmAssets, type WalletAsset } from "@oxar/sdk";
 import { useEvmAddress } from "./use-evm-address";
 
 /**

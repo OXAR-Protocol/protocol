@@ -41,6 +41,11 @@ build/
 *.tsbuildinfo
 next-env.d.ts
 
+# EXCEPTION: web/sdk-local/dist is a COMMITTED copy of the built SDK (keeps the
+# Vercel build self-contained). Track it despite the `dist/` rule above.
+!web/sdk-local/dist
+!web/sdk-local/dist/**
+
 # Rust / Anchor (contracts)
 target/
 .anchor/

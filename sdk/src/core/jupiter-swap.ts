@@ -10,7 +10,7 @@
  */
 import { Transaction, VersionedTransaction } from "@solana/web3.js";
 
-import { fetchWithRetry } from "@/lib/net/fetch-retry";
+import { fetchWithRetry } from "./fetch-retry";
 
 const QUOTE_URL = "https://lite-api.jup.ag/swap/v1/quote";
 const SWAP_URL = "https://lite-api.jup.ag/swap/v1/swap";

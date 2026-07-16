@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
-import type { WalletAsset } from "@/lib/portfolio/assets";
+import type { WalletAsset } from "@oxar/sdk";
 
 const fmt = (n: number) =>
   n >= 1 ? n.toLocaleString("en-US", { maximumFractionDigits: 2 }) : Number(n.toPrecision(4));

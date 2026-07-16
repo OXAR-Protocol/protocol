@@ -1,5 +1,5 @@
 import { USDC_MINT } from "@/lib/constants";
-import { SOL_MINT } from "@/lib/portfolio/assets";
+import { SOL_MINT } from "@oxar/sdk";
 
 const EVM_NATIVE = "0x0000000000000000000000000000000000000000";
 

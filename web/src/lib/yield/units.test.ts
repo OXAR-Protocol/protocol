@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { toBaseUnits, fromBaseUnits } from "./units";
+import { toBaseUnits, fromBaseUnits } from "@oxar/sdk";
 
 describe("toBaseUnits", () => {
   it("converts whole amounts (USDC, 6dp)", () => {

@@ -1,6 +1,6 @@
 import { encodeFunctionData, erc20Abi } from "viem";
 
-import { EVM_NATIVE_SENTINEL } from "@/lib/portfolio/evm-assets";
+import { EVM_NATIVE_SENTINEL } from "@oxar/sdk";
 import { publicClientFor, type Eip1193 } from "./chains";
 
 /** True for the native coin (zero address) — no ERC-20 approval needed. */

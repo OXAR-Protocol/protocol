@@ -10,7 +10,7 @@ import {
   type DasResult,
   type PriceMap,
   type WalletAsset,
-} from "./assets";
+} from "@oxar/sdk";
 
 const EVM_NATIVE = "0x0000000000000000000000000000000000000000";
 
