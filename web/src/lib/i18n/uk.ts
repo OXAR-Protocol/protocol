@@ -76,6 +76,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "deposit.applePayHint": "≈ {value} · apple pay або картка · крипта не потрібна",
   "deposit.buyAmountHint": "скільки купити · apple pay або картка",
   "deposit.minAmount": "мінімум {value}",
+  "deposit.bridgeMinAmount": "мінімум {value} для покупки з іншої мережі — або платіть USDC на Solana",
   "confirm.review": "перевір: {verb}",
   "confirm.youPay": "ти платиш",
   "confirm.youllHold": "отримаєш",

@@ -85,6 +85,7 @@ export const en = {
   "deposit.applePayHint": "≈ {value} · apple pay or card · no crypto needed",
   "deposit.buyAmountHint": "how much to buy · apple pay or card",
   "deposit.minAmount": "minimum {value}",
+  "deposit.bridgeMinAmount": "minimum {value} to buy from another chain — or pay with USDC on Solana",
   "confirm.review": "review your {verb}",
   "confirm.youPay": "you pay",
   "confirm.youllHold": "you'll hold",
