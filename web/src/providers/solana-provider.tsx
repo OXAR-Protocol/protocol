@@ -43,6 +43,9 @@ interface SolanaContextValue {
   /** True when the active wallet is an external one (Phantom/Trust) vs the embedded
    * one — external wallets need legacy (not v0) swap txs. */
   isExternal: boolean;
+  /** True when a real signer is connected (not the read-only fallback). Background
+   *  flows (e.g. the pending-bridge deposit) must wait for this before signing. */
+  canSign: boolean;
 }
 
 const SolanaContext = createContext<SolanaContextValue>({
@@ -52,6 +55,7 @@ const SolanaContext = createContext<SolanaContextValue>({
   walletError: null,
   retryCreateWallet: () => {},
   isExternal: false,
+  canSign: false,
 });
 
 export function useSolanaContext() {
@@ -297,7 +301,7 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
 
   return (
     <SolanaContext.Provider
-      value={{ connection, wallet, walletAddress, walletError, retryCreateWallet, isExternal: isExternalActive }}
+      value={{ connection, wallet, walletAddress, walletError, retryCreateWallet, isExternal: isExternalActive, canSign: !!connectedWallet }}
     >
       {children}
     </SolanaContext.Provider>

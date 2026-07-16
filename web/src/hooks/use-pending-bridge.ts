@@ -21,7 +21,7 @@ import { pollUsdcArrival } from "@/lib/bridge/arrival";
  * token, and can be deposited/swapped manually).
  */
 export function usePendingBridge() {
-  const { connection, walletAddress } = useSolanaContext();
+  const { connection, walletAddress, canSign } = useSolanaContext();
   const [pending, setPending] = useState<PendingBridge | null>(() => loadPending());
   const [resuming, setResuming] = useState(false);
   // originTxHash currently being polled — guards against double-processing.
@@ -44,6 +44,10 @@ export function usePendingBridge() {
 
   useEffect(() => {
     if (!pending || !walletAddress) return;
+    // Wait until the wallet can actually sign — the background watcher can race
+    // wallet load, and depositing against the read-only fallback throws "connect
+    // your wallet". Gating here avoids a spurious failure; it retries when ready.
+    if (!canSign) return;
     // A prior auto-attempt failed → wait for a manual Retry (don't loop a swap that
     // just failed). Funds are safe in the wallet as the bridged token meanwhile.
     if ((pending.attempts ?? 0) > 0) return;
@@ -89,7 +93,7 @@ export function usePendingBridge() {
     return () => {
       cancelled = true;
     };
-  }, [pending, walletAddress, connection, deposit]);
+  }, [pending, walletAddress, canSign, connection, deposit]);
 
   const dismiss = useCallback(() => {
     clearPending();
