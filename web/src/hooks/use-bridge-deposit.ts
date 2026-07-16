@@ -125,13 +125,25 @@ export function useBridgeDeposit(providerId: string) {
           );
         }
 
-        const provider1193 = await evmWallet.getEthereumProvider();
+        // Switch to the origin chain FIRST, then fetch the provider — a stale provider
+        // (fetched before the switch) can send on the old chain.
         await evmWallet.switchChain(originChainId);
-        // Some external wallets (Trust) DON'T actually apply the switch, then reject
-        // the send with a cryptic "chainId is not the same as your selected chainId".
-        // Verify the wallet is really on the origin chain and give a clear instruction.
-        const chainHex = (await provider1193.request({ method: "eth_chainId" })) as string;
-        if (parseInt(chainHex, 16) !== originChainId) {
+        const provider1193 = await evmWallet.getEthereumProvider();
+        // WAIT until the wallet actually reports the switch: some wallets (Trust) apply
+        // it asynchronously and would otherwise reject the send with a cryptic
+        // "chainId is not the same as your selected chainId". Poll briefly, then bail
+        // with a clear instruction if it never lands on the origin chain.
+        const originChainHex = `0x${originChainId.toString(16)}`;
+        let onOriginChain = false;
+        for (let i = 0; i < 6; i++) {
+          const hex = (await provider1193.request({ method: "eth_chainId" })) as string;
+          if (parseInt(hex, 16) === originChainId) {
+            onOriginChain = true;
+            break;
+          }
+          await new Promise((r) => setTimeout(r, 300));
+        }
+        if (!onOriginChain) {
           const name = viemChainById(originChainId)?.name ?? `chain ${originChainId}`;
           throw new UserFacingError(`Switch your wallet's network to ${name}, then try again.`);
         }
