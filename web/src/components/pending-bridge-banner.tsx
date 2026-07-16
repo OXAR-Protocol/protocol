@@ -1,16 +1,62 @@
 "use client";
 
-import { Loader2, X } from "lucide-react";
+import { AlertTriangle, Loader2, X } from "lucide-react";
 
 import { usePendingBridge } from "@/hooks/use-pending-bridge";
+import { viemChainById } from "@/lib/evm/chains";
+import type { PendingBridge } from "@/lib/bridge/pending";
 
 /**
- * Shown when a cross-chain deposit was interrupted (page closed mid-bridge).
- * Resumes polling for the USDC arrival and finishes the deposit automatically.
+ * A reliable "Track" URL: the origin chain's block explorer for our own bridge tx
+ * (always valid). Delora's `bridgeScan` from the quote is unreliable/relative, so we
+ * only fall back to it if it's an absolute http(s) link.
+ */
+function trackUrl(p: PendingBridge): string | null {
+  const explorer = viemChainById(p.originChainId)?.blockExplorers?.default?.url;
+  if (explorer && p.originTxHash) return `${explorer}/tx/${p.originTxHash}`;
+  if (p.bridgeScan && /^https?:\/\//i.test(p.bridgeScan)) return p.bridgeScan;
+  return null;
+}
+
+/**
+ * Cross-chain deposit banner. While bridging: shows progress + a Track link. If the
+ * final deposit/swap fails after the funds arrive, shows a "couldn't finish" state
+ * with Retry — the funds are safe in the wallet as the bridged token, never lost.
  */
 export function PendingBridgeBanner() {
-  const { pending, resuming, dismiss } = usePendingBridge();
+  const { pending, resuming, failed, dismiss, retry } = usePendingBridge();
   if (!pending) return null;
+
+  const track = trackUrl(pending);
+
+  if (failed) {
+    return (
+      <div className="mb-6 p-4 rounded-[8px] border border-[#D4313C]/30 bg-[#D4313C]/[0.05] flex items-start gap-3">
+        <AlertTriangle className="text-[#D4313C] mt-0.5" size={16} strokeWidth={1.5} />
+        <div className="flex-1">
+          <p className="text-sm text-black">Couldn&apos;t finish your deposit</p>
+          <p className="mt-1 text-[11px] text-black/45">
+            Your funds arrived and are safe in your wallet as digital dollars — the final
+            step didn&apos;t complete. Retry, or buy the asset directly.{" "}
+            <button onClick={retry} className="text-[#3c05c7]/80 hover:text-[#3c05c7] underline">
+              Retry
+            </button>
+            {track && (
+              <>
+                {" · "}
+                <a href={track} target="_blank" rel="noreferrer" className="text-[#3c05c7]/80 hover:text-[#3c05c7] underline">
+                  Track
+                </a>
+              </>
+            )}
+          </p>
+        </div>
+        <button onClick={dismiss} aria-label="Dismiss" className="text-black/40 hover:text-black transition" title="Dismiss">
+          <X size={15} strokeWidth={1.5} />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-6 p-4 rounded-[8px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.05] flex items-start gap-3">
@@ -21,15 +67,10 @@ export function PendingBridgeBanner() {
         </p>
         <p className="mt-1 text-[11px] text-black/45">
           Your funds are bridging to Solana and will auto-deposit on arrival.
-          {pending.bridgeScan && (
+          {track && (
             <>
               {" "}
-              <a
-                href={pending.bridgeScan}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[#3c05c7]/80 hover:text-[#3c05c7] underline"
-              >
+              <a href={track} target="_blank" rel="noreferrer" className="text-[#3c05c7]/80 hover:text-[#3c05c7] underline">
                 Track
               </a>
             </>

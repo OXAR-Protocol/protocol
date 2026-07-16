@@ -20,6 +20,10 @@ export interface PendingBridge {
   receiver: string;
   bridgeScan?: string;
   createdAt: number;
+  /** Failed auto-deposit attempts after the bridged funds arrived. >0 = the funds
+   *  are in the wallet but the final deposit/swap didn't complete (surface + retry,
+   *  never silently strand). */
+  attempts?: number;
 }
 
 const KEY = "oxar:pending-bridge";
