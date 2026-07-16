@@ -21,6 +21,9 @@ import { useT, localizeError } from "@/lib/i18n";
 // On-ramp minimum (MoonPay/Transak floor) and the pre-filled default for the buy.
 const APPLE_PAY_MIN_USD = 20;
 const APPLE_PAY_DEFAULT_USD = 50;
+// Cross-chain (bridge) minimum: below this the bridge fee eats the amount and the
+// route often can't quote at all. Same-chain Solana pays have NO minimum.
+const BRIDGE_MIN_USD = 5;
 
 interface Props {
   view: ProviderView;
@@ -152,6 +155,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // Small tolerance: USDC isn't priced at exactly $1 (Jupiter ~0.9997), so a typed
   // "$20" converts to ~$19.99 and would wrongly trip the $20 minimum at the boundary.
   const applePayBelowMin = applePayUsd < APPLE_PAY_MIN_USD - 0.5;
+  // Bridge route = paying with an EVM (cross-chain) asset. Enforce a floor there
+  // ONLY — a same-chain Solana pay (USDC / SPL swap) can be any amount.
+  const bridgeBelowMin =
+    payAsset?.chain === "ethereum" && usdAmount > 0 && usdAmount < BRIDGE_MIN_USD;
   const handleApplePay = async () => {
     try {
       const base = await applePay.buyWithApplePay(applePayUsd);
@@ -304,12 +311,18 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         <>
           <button
             onClick={() => setConfirming(true)}
-            disabled={busy || applePay.busy || !payAsset || usdAmount <= 0}
+            disabled={busy || applePay.busy || !payAsset || usdAmount <= 0 || bridgeBelowMin}
             className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
           >
             {verb}
           </button>
-          {error && <p className="mt-3 text-xs text-red-400 text-center">{localizeError(error, t)}</p>}
+          {bridgeBelowMin ? (
+            <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/40">
+              {t("deposit.bridgeMinAmount", { value: `$${BRIDGE_MIN_USD}` })}
+            </p>
+          ) : error ? (
+            <p className="mt-3 text-xs text-red-400 text-center">{localizeError(error, t)}</p>
+          ) : null}
         </>
       )}
 
