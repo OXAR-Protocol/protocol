@@ -38,7 +38,7 @@ These apply to ALL code in the project, regardless of language:
 
 1. **Small files** -- max 200 lines per file. Split into modules/components when approaching that limit.
 2. **Single responsibility** -- one function, one purpose. One file, one concern.
-3. **No code duplication** -- shared logic lives in `sdk/`. If both web and contracts need a constant, it belongs in `sdk/src/constants.ts` and `contracts/.../constants.rs` and MUST stay in sync.
+3. **No code duplication -- shared logic goes in `@oxar/sdk`, written there FROM THE START.** Any framework-agnostic money-path logic (pure computation, request-building/parsing, tx transforms — anything with ZERO react/next/privy/DOM imports and no relative `/api` coupling) belongs in `sdk/src/core/`, NOT in `web/src/lib`. Write it there directly so web and the future mobile app reuse one implementation — do not put it in `web/` and extract later. Import via `@oxar/sdk`; after editing `sdk/`, run `yarn sync-sdk` and commit the regenerated `sdk-local/dist`. Shared constants both web and contracts need also live in `sdk/` (kept in sync with `contracts/.../constants.rs`).
 4. **Typed everything** -- interfaces/structs for all data structures. No `any` in TypeScript unless documented with a `// SAFETY:` comment explaining why.
 5. **Error handling** -- always handle errors. User-facing code shows friendly messages. Internal code uses typed errors.
 6. **Security first** -- validate all inputs, check authorities, use checked math.
