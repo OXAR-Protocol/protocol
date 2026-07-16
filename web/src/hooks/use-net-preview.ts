@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
-import { getSwapQuote } from "@/lib/swap/jupiter-swap";
-import { buildQuoteRequest, networkToChainId, bridgeFeeUsd } from "@/lib/bridge/delora";
-import { usdToBase, type WalletAsset } from "@/lib/portfolio/assets";
+import { getSwapQuote, buildQuoteRequest, networkToChainId, bridgeFeeUsd, usdToBase, type WalletAsset } from "@oxar/sdk";
 
 export interface NetPreview {
   kind: "direct" | "swap" | "bridge";

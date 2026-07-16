@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import type { NetPreview } from "@/hooks/use-net-preview";
 import type { SwapInPreview } from "@/hooks/use-swap-in-preview";
-import type { WalletAsset } from "@/lib/portfolio/assets";
+import type { WalletAsset } from "@oxar/sdk";
 import { useT, localizeError } from "@/lib/i18n";
 
 interface Props {

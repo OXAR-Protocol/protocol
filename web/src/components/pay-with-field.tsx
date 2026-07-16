@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
-import { spendableBase, assetUid, type WalletAsset } from "@/lib/portfolio/assets";
-import { assetNetworkLabel } from "@/lib/portfolio/evm-assets";
+import { spendableBase, assetUid, assetNetworkLabel, type WalletAsset } from "@oxar/sdk";
 
 /** What happens to the funds + roughly how long, per funding route. */
 export const routeTag = (a: WalletAsset, productMint: string) =>

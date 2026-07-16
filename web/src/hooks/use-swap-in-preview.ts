@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { USDC_MINT } from "@/lib/constants";
 import { toBaseUnits } from "@/lib/yield";
-import { getSwapQuote } from "@/lib/swap/jupiter-swap";
+import { getSwapQuote } from "@oxar/sdk";
 
 export interface SwapInPreview {
   /** Position value you'll hold right after buying (USD), at mid-price. */

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { XSTOCKS } from "@/lib/yield/xstocks";
 import { GOLD } from "@/lib/yield/gold";
-import { fetchWithRetry } from "@/lib/net/fetch-retry";
+import { fetchWithRetry } from "@oxar/sdk";
 
 // Batched price-history for the price-exposure card sparklines (stocks + gold).
 // Fetches ~2 days of hourly closes for every mint from Jupiter's datapi (no key)

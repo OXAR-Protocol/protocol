@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { buildEvmAssets, EVM_NATIVE_SENTINEL, type AlchemyToken } from "./evm-assets";
+import { buildEvmAssets, EVM_NATIVE_SENTINEL, type AlchemyToken } from "@oxar/sdk";
 
 const USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
 

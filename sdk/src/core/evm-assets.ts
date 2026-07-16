@@ -1,4 +1,4 @@
-import { toBaseUnits } from "@/lib/yield";
+import { toBaseUnits } from "./units";
 import type { WalletAsset } from "./assets";
 
 /** Address representing a native EVM coin (ETH/POL/…). The zero address is the

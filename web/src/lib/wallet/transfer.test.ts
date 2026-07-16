@@ -8,7 +8,7 @@ import {
   validateSend,
   SOL_SEND_RESERVE,
 } from "./transfer";
-import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
+import { SOL_MINT, type WalletAsset } from "@oxar/sdk";
 
 const asset = (over: Partial<WalletAsset> & { mint: string; amount: bigint }): WalletAsset => ({
   symbol: "X",

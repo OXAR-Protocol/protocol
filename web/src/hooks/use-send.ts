@@ -10,9 +10,17 @@ import {
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { toFriendlyError, UserFacingError } from "@/lib/yield";
-import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
-import { getSwapQuote, buildSwapTx, deserializeSwapTx, priceImpactTooHigh } from "@/lib/swap/jupiter-swap";
-import { DELORA_SOLANA_CHAIN_ID, bridgeFeeTooHigh, type BridgeQuote } from "@/lib/bridge/delora";
+import {
+  SOL_MINT,
+  getSwapQuote,
+  buildSwapTx,
+  deserializeSwapTx,
+  priceImpactTooHigh,
+  DELORA_SOLANA_CHAIN_ID,
+  bridgeFeeTooHigh,
+  type WalletAsset,
+  type BridgeQuote,
+} from "@oxar/sdk";
 import { outboundKind, type DestChain, type DestAsset } from "@/lib/wallet/outbound-destinations";
 import { validateSend } from "@/lib/wallet/transfer";
 

@@ -5,14 +5,16 @@ import { useWallets } from "@privy-io/react-auth";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { getProvider, toFriendlyError, UserFacingError } from "@/lib/yield";
-import { spendableBase, usdToBase, type WalletAsset } from "@/lib/portfolio/assets";
 import {
+  spendableBase,
+  usdToBase,
   buildQuoteRequest,
   bridgeFeeTooHigh,
   bridgeNetOut,
   networkToChainId,
+  type WalletAsset,
   type BridgeQuote,
-} from "@/lib/bridge/delora";
+} from "@oxar/sdk";
 import { savePending } from "@/lib/bridge/pending";
 import { readUsdcBase } from "@/lib/bridge/arrival";
 import { isNativeEvm, encodeApprove, readAllowance } from "@/lib/evm/erc20";

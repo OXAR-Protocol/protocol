@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 
-import { SOL_MINT, type WalletAsset } from "@/lib/portfolio/assets";
+import { SOL_MINT, type WalletAsset } from "@oxar/sdk";
 
 /** Keep this much SOL back for the transfer fee (+ a small buffer). */
 export const SOL_SEND_RESERVE = BigInt(1_000_000); // 0.001 SOL

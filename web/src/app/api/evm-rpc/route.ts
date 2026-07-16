@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { alchemySubdomainFor } from "@/lib/evm/rpc-proxy";
-import { fetchWithRetry } from "@/lib/net/fetch-retry";
+import { fetchWithRetry } from "@oxar/sdk";
 
 // Server-side EVM JSON-RPC proxy → Alchemy. Keeps the Alchemy key off the client
 // and gives EVM reads (allowance, receipts) a reliable RPC instead of the wallet's

@@ -6,7 +6,7 @@ import {
   getSwapQuote,
   buildSwapTx,
   type SwapQuote,
-} from "./jupiter-swap";
+} from "@oxar/sdk";
 
 const quote = (over: Partial<SwapQuote>): SwapQuote => ({
   inputMint: "SOL",

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { fetchWithRetry } from "@/lib/net/fetch-retry";
+import { fetchWithRetry } from "@oxar/sdk";
 
 // On-demand price history for ONE asset over a selectable range — powers the
 // detail-sheet chart (24h / 7d / 30d / 90d). Uses Jupiter's datapi (no key).

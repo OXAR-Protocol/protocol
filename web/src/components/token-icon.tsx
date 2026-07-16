@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import type { WalletAsset } from "@/lib/portfolio/assets";
+import type { WalletAsset } from "@oxar/sdk";
 
 // Resolve a fallback logo (CoinGecko) at most once per token, shared across all
 // icon instances. `null` means "looked, found nothing" — render the monogram.

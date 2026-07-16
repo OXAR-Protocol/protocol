@@ -11,7 +11,7 @@ import { useUniversalDeposit } from "@/hooks/use-universal-deposit";
 import { toFriendlyError, UserFacingError } from "@/lib/yield";
 import { USDC_MINT } from "@/lib/constants";
 import { toBaseUnits } from "@/lib/yield";
-import type { WalletAsset } from "@/lib/portfolio/assets";
+import type { WalletAsset } from "@oxar/sdk";
 
 /**
  * USDC-first card buy via Privy's aggregator hook `useFiatOnramp` (MoonPay /

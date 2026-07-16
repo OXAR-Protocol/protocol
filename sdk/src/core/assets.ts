@@ -1,4 +1,4 @@
-import { toBaseUnits } from "@/lib/yield/units";
+import { toBaseUnits } from "./units";
 import { EVM_NATIVE_SENTINEL } from "./evm-assets";
 
 /** Native SOL wrapped-mint sentinel (used as the asset id for SOL). */

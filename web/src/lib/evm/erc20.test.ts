@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import { encodeApprove, isNativeEvm } from "./erc20";
-import { EVM_NATIVE_SENTINEL } from "@/lib/portfolio/evm-assets";
+import { EVM_NATIVE_SENTINEL } from "@oxar/sdk";
 
 describe("isNativeEvm", () => {
   it("treats the zero address as native (case-insensitive)", () => {

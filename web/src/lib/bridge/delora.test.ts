@@ -7,9 +7,9 @@ import {
   bridgeNetOut,
   buildQuoteRequest,
   DELORA_SOLANA_CHAIN_ID,
+  EVM_NATIVE_SENTINEL,
   type BridgeQuote,
-} from "./delora";
-import { EVM_NATIVE_SENTINEL } from "@/lib/portfolio/evm-assets";
+} from "@oxar/sdk";
 
 const USDC_SOL = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
