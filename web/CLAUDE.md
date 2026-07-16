@@ -73,6 +73,18 @@ Every file that uses React hooks or browser APIs MUST start with `"use client";`
 ### Component Size Limit
 Max ~200 lines per component file. Split into sub-components / hooks / lib helpers when approaching.
 
+### Shared logic → `@oxar/sdk` (write it there from the start)
+Framework-agnostic money-path logic — pure computation, request-building/parsing, tx
+transforms; **anything with ZERO react/next/privy/DOM imports and no relative `/api`
+coupling** — lives in **`sdk/src/core/`**, NOT `web/src/lib`. Write NEW shared logic
+there directly so web + the future mobile app reuse one implementation; don't put it in
+`web/` and extract later. Import via `@oxar/sdk`. After editing `sdk/`, run `yarn sync-sdk`
+and commit the regenerated `sdk-local/dist` (its `dist/` is un-ignored). Already in core:
+`units, fetch-retry, evm-assets, assets, delora, jupiter-swap, kora-tx`. Keep in `web/`
+only platform-bound code: React hooks/components/providers, Next API routes, and
+`/api`-coupled clients (`evm/chains`, `evm/erc20`, `gas/kora`, `bridge/arrival`, `helius/history`).
+Tests for core logic live in `web/` importing `@oxar/sdk` (sdk has no test runner yet).
+
 ### Separate UI from Logic
 Components are thin — JSX + hook calls. Business logic lives in `hooks/`. Instructions
 are built by the yield provider's SDK (e.g. `YieldProvider.buildDepositIxs`), then
