@@ -8,7 +8,13 @@ import {
   // product promise ("your money, can't be frozen"). It also had the worst APY of the
   // three. Factory kept in ./jupiter for a future re-add if USDG ever ships clean.
 } from "./jupiter";
-import { kaminoUsdcProvider } from "./kamino";
+// kaminoUsdcProvider — delisted 2026-07-18. It's strictly worse than Jupiter Lend for
+// USDC (lower APY ~3.5% vs ~4.5%, ~12x the gasless onboarding cost because klend uses a
+// fat 3344-byte Obligation account, heavier WASM integration) AND it was broken: the
+// server resolved getReservesByMint(USDC)[0], which returns a DEAD reserve (deposit
+// limit 0) instead of the main one, so every deposit failed with DepositLimitExceeded.
+// Provider code kept (./kamino, ./kamino-server, /api/kamino) for a possible future
+// re-add with the correct reserve; just not registered.
 import { ondoUsdyProvider } from "./ondo";
 import { mapleSyrupProvider } from "./maple";
 import { xstockProviders } from "./xstocks";
@@ -22,7 +28,6 @@ import type { YieldProvider } from "./types";
 export const PROVIDERS: readonly YieldProvider[] = [
   jupiterUsdcProvider,
   jupiterUsdtProvider,
-  kaminoUsdcProvider,
   ondoUsdyProvider,
   mapleSyrupProvider,
   ...xstockProviders,
