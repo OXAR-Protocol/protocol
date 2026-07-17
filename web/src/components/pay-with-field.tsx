@@ -98,7 +98,11 @@ export function PayWithField({
 
   const setMax = () => {
     if (!active) return;
-    const max = Number((Number(spendableBase(active, reserveGas)) / 10 ** active.decimals).toPrecision(6));
+    // Floor to the asset's precision — NEVER round up. `toPrecision` rounds to
+    // nearest, so a balance like 1.999999 became "2.00000", pushing the spend above
+    // the real balance → false "Not enough". Flooring keeps MAX ≤ balance.
+    const dec = active.decimals;
+    const max = Math.floor(Number(spendableBase(active, reserveGas)) / 10 ** dec * 10 ** dec) / 10 ** dec;
     onAmountChange(String(max));
     if (mode === "usd") setUsdStr(toUsdStr(max));
   };
