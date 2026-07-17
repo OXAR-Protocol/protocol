@@ -88,7 +88,7 @@ export function toFriendlyError(e: unknown): string {
     // SPL InsufficientFunds is exactly 0x1 — don't match 0x1771 (slippage) etc.
     /0x1(?![0-9a-f])/.test(raw)
   ) {
-    return "Not enough balance — check you have enough USDC, plus a little SOL for the network fee.";
+    return "Not enough balance — check you have enough of the token you're paying with, plus a little SOL for the network fee.";
   }
 
   // Wallet not available.
