@@ -127,13 +127,19 @@ export function toFriendlyError(e: unknown): string {
     return "That transaction would fail on-chain. Try a larger amount or a different asset.";
   }
 
-  // Wrong EVM network selected in the wallet.
+  // Wrong EVM network selected in the wallet. Trust Wallet phrases its own rejection
+  // as "the indicated chainId is not the same as your selected chainId" — it validates
+  // the send against the network the user picked IN the wallet, which a dApp-side
+  // switchChain doesn't reliably change. Tell the user to switch it manually.
   if (
     raw.includes("unsupported chain") ||
     raw.includes("wrong network") ||
-    raw.includes("switch chain")
+    raw.includes("switch chain") ||
+    raw.includes("chainid is not the same") ||
+    raw.includes("selected chainid") ||
+    raw.includes("indicated chainid")
   ) {
-    return "Switch your wallet to the right network and try again.";
+    return "Open your wallet and switch its network to the chain you're paying from (e.g. Ethereum), then try again.";
   }
 
   // Generic on-chain failure (simulation / custom program error). We DON'T show the

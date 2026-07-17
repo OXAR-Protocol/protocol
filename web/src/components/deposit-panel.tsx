@@ -156,9 +156,11 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // "$20" converts to ~$19.99 and would wrongly trip the $20 minimum at the boundary.
   const applePayBelowMin = applePayUsd < APPLE_PAY_MIN_USD - 0.5;
   // Bridge route = paying with an EVM (cross-chain) asset. Enforce a floor there
-  // ONLY — a same-chain Solana pay (USDC / SPL swap) can be any amount.
+  // ONLY — a same-chain Solana pay (USDC / SPL swap) can be any amount. Small
+  // tolerance: entering exactly "$5" round-trips through token units (5/price →
+  // 8-sig-fig round → ×price) to ~$4.9999, which would wrongly trip the boundary.
   const bridgeBelowMin =
-    payAsset?.chain === "ethereum" && usdAmount > 0 && usdAmount < BRIDGE_MIN_USD;
+    payAsset?.chain === "ethereum" && usdAmount > 0 && usdAmount < BRIDGE_MIN_USD - 0.01;
   const handleApplePay = async () => {
     try {
       const base = await applePay.buyWithApplePay(applePayUsd);
