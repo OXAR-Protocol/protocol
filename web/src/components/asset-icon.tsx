@@ -36,12 +36,15 @@ export function AssetIcon({
   return (
     <span style={dim} className={`${tile} ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* Logos are full-bleed app-icon squares (their own background) — fill the tile
+          edge-to-edge so the rounded, overflow-hidden tile clips their corners round.
+          (object-contain + padding left a sharp-cornered square floating in the tile.) */}
       <img
         src={src}
         alt=""
         loading="lazy"
         onError={() => setFailed(true)}
-        className="h-full w-full object-contain p-[14%]"
+        className="h-full w-full object-cover"
       />
     </span>
   );
