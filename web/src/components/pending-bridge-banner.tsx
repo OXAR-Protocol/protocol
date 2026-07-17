@@ -24,10 +24,41 @@ function trackUrl(p: PendingBridge): string | null {
  * with Retry — the funds are safe in the wallet as the bridged token, never lost.
  */
 export function PendingBridgeBanner() {
-  const { pending, resuming, failed, dismiss, retry } = usePendingBridge();
+  const { pending, resuming, failed, arrived, dismiss, finish, retry } = usePendingBridge();
   if (!pending) return null;
 
   const track = trackUrl(pending);
+
+  // External wallet: funds landed, but the buy needs the user's own signature.
+  // Offer a one-tap finish (a background sign wouldn't surface the wallet popup).
+  if (arrived) {
+    return (
+      <div className="mb-6 p-4 rounded-[8px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.05] flex items-start gap-3">
+        <div className="flex-1">
+          <p className="text-sm text-black">Your funds arrived on Solana</p>
+          <p className="mt-1 text-[11px] text-black/45">
+            One tap to finish your purchase — your wallet will ask you to sign it.
+          </p>
+          <button
+            onClick={finish}
+            disabled={resuming}
+            className="mt-2 px-4 py-2 rounded-full bg-black text-white text-[13px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-40 transition inline-flex items-center gap-2"
+          >
+            {resuming ? (
+              <>
+                <Loader2 className="animate-spin" size={14} strokeWidth={1.5} /> finishing…
+              </>
+            ) : (
+              "finish your purchase"
+            )}
+          </button>
+        </div>
+        <button onClick={dismiss} aria-label="Dismiss" className="text-black/40 hover:text-black transition" title="Dismiss">
+          <X size={15} strokeWidth={1.5} />
+        </button>
+      </div>
+    );
+  }
 
   if (failed) {
     return (
