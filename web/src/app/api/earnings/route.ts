@@ -48,7 +48,13 @@ export async function POST(req: Request) {
   }
 
   try {
-    const txs = await fetchEnhancedHistory(owner, key);
+    // Cost basis needs the FULL acquisition history — with the default 8-page window
+    // (800 txs) a heavily-active wallet's older buys fell outside it, so their USDC
+    // cost wasn't counted → "invested" undercounted → a held asset showed a phantom
+    // profit. Page deeper here (the recent-activity feed keeps the small default). The
+    // 5-min server cache means this deeper fetch is paid rarely. (True cost-basis for
+    // >2.5k-tx wallets still needs a durable ledger — out of scope for v1.)
+    const txs = await fetchEnhancedHistory(owner, key, 25);
     const basis: Record<string, number> = {};
     for (const s of SOURCES) {
       basis[s.id] = netInvestedFromSwaps(txs, owner, s.heldMint, s.costMint);

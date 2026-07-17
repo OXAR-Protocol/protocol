@@ -1,14 +1,15 @@
-// Per-asset logo resolution → currently always undefined, so <AssetIcon> renders a
-// clean ticker monogram. Reliable and zero-dependency, which no keyless stock-logo
-// CDN turned out to be:
-//   • Financial Modeling Prep — intermittent 502s + a tiny valid-PNG error body that
-//     DECODES without firing <img> onError → blank tiles (never fell back).
-//   • Parqet — served without an Access-Control-Allow-Origin header (CORS-blocked in
-//     the grid) + 404s on some tickers + WRONG-company matches (SPCX → an "axs" logo).
-// Real per-token logos need self-hosting Backed's official xStock assets (a polish
-// task); until then monograms are correct and on-brand. Keep the signature so callers
-// (and a future self-hosted map) don't change.
-export function assetLogoSrc(_id: string): string | undefined {
+// Per-asset logo resolution. Stock logos are SELF-HOSTED under /public/logos/xstocks/
+// (from the open nvstly/icons set), served same-origin — no CORS, and a missing file
+// returns a real 404 so <AssetIcon>'s onError fires → clean ticker monogram. We host
+// them instead of hotlinking a keyless CDN because none was reliable: FMP 502'd with a
+// valid-PNG error body that decoded WITHOUT firing onError (blank tiles); Parqet was
+// CORS-blocked + 404'd + returned wrong-company logos. Tickers without a bundled file
+// (ETFs like SPY/QQQ/GLD, private SPCX, CRCL) just fall back to a monogram.
+export function assetLogoSrc(id: string): string | undefined {
+  if (id.startsWith("xstock-")) {
+    const ticker = id.slice("xstock-".length).toUpperCase();
+    return `/logos/xstocks/${ticker}.png`;
+  }
   return undefined;
 }
 
