@@ -48,13 +48,18 @@ export function usePendingBridge() {
         const arrived = await pollUsdcArrival({ connection, owner: walletAddress, mint, baseline, expected });
         if (cancelled) return;
         if (arrived) {
-          // Claim before depositing so another tab / reload can't double-deposit.
+          // Still ours to finish? (another tab may have claimed & cleared it)
           if (!loadPending()) {
             setPending(null);
             return;
           }
-          clearPending();
+          // FUND SAFETY: deposit FIRST, clear the pending record only AFTER the
+          // deposit tx lands. If the deposit throws (RPC hiccup, tx expiry, missing
+          // SOL for rent), the outer catch leaves the record intact so the next
+          // focus/visit retries — bridged USDC is never stranded. (Clearing before
+          // the deposit was the bug: any post-arrival failure lost the funds.)
           await deposit(expected);
+          clearPending();
           setPending(null);
         } else {
           // Timed out without arrival — let the next focus/visit retry.

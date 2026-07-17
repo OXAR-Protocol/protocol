@@ -46,6 +46,10 @@ export interface XStockMeta extends XStockConfig {
 // Catalog — the most liquid xStocks (mints verified via the Jupiter token registry,
 // official Backed "Xs…" tokens; tickers that don't route a small USDC swap are left
 // out). Extend = append a row (P&L follows automatically via /api/earnings).
+// JPMx / Vx / NFLXx / AMDx were delisted 2026-07-17: Jupiter liquidity too thin /
+// too volatile — they exceed the 1.5% price-impact cap on small buys (AMDx hit >9%
+// at $5 in QA), so users would only ever see the guard's error. Re-add if liquidity
+// recovers — verify with a USDC→mint quote sweep first.
 export const XSTOCKS: readonly XStockMeta[] = [
   { id: "xstock-spy", symbol: "SPY", token: "SPYx", name: "S&P 500", mint: "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W" },
   { id: "xstock-qqq", symbol: "QQQ", token: "QQQx", name: "Nasdaq 100", mint: "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ" },
@@ -58,16 +62,12 @@ export const XSTOCKS: readonly XStockMeta[] = [
   { id: "xstock-meta", symbol: "META", token: "METAx", name: "Meta", mint: "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu" },
   { id: "xstock-avgo", symbol: "AVGO", token: "AVGOx", name: "Broadcom", mint: "XsgSaSvNSqLTtFuyWPBhK9196Xb9Bbdyjj4fH3cPJGo" },
   { id: "xstock-lly", symbol: "LLY", token: "LLYx", name: "Eli Lilly", mint: "Xsnuv4omNoHozR6EEW5mXkw8Nrny5rB3jVfLqi6gKMH" },
-  { id: "xstock-jpm", symbol: "JPM", token: "JPMx", name: "JPMorgan Chase", mint: "XsMAqkcKsUewDrzVkait4e5u4y8REgtyS7jWgCpLV2C" },
-  { id: "xstock-v", symbol: "V", token: "Vx", name: "Visa", mint: "XsqgsbXwWogGJsNcVZ3TyVouy2MbTkfCFhCGGGcQZ2p" },
   { id: "xstock-unh", symbol: "UNH", token: "UNHx", name: "UnitedHealth", mint: "XszvaiXGPwvk2nwb3o9C1CX4K6zH8sez11E6uyup6fe" },
   { id: "xstock-coin", symbol: "COIN", token: "COINx", name: "Coinbase", mint: "Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu" },
   { id: "xstock-hood", symbol: "HOOD", token: "HOODx", name: "Robinhood", mint: "XsvNBAYkrDRNhA7wPHQfX3ZUXZyZLdnCQDfHZ56bzpg" },
   { id: "xstock-mstr", symbol: "MSTR", token: "MSTRx", name: "MicroStrategy", mint: "XsP7xzNPvEHS1m6qfanPUGjNmdnmsLKEoNAnHjdxxyZ" },
   { id: "xstock-crcl", symbol: "CRCL", token: "CRCLx", name: "Circle", mint: "XsueG8BtpquVJX9LVLLEGuViXUungE6WmK5YZ3p3bd1" },
   { id: "xstock-pltr", symbol: "PLTR", token: "PLTRx", name: "Palantir", mint: "XsoBhf2ufR8fTyNSjqfU71DYGaE6Z3SUGAidpzriAA4" },
-  { id: "xstock-amd", symbol: "AMD", token: "AMDx", name: "AMD", mint: "XsXcJ6GZ9kVnjqGsjBnktRcuwMBmvKWh8S93RefZ1rF" },
-  { id: "xstock-nflx", symbol: "NFLX", token: "NFLXx", name: "Netflix", mint: "XsEH7wWfJJu2ZT3UCFeVfALnVA6CP5ur7Ee11KmzVpL" },
   { id: "xstock-orcl", symbol: "ORCL", token: "ORCLx", name: "Oracle", mint: "XsjFwUPiLofddX5cWFHW35GCbXcSu1BCUGfxoQAQjeL" },
   { id: "xstock-wmt", symbol: "WMT", token: "WMTx", name: "Walmart", mint: "Xs151QeqTCiuKtinzfRATnUESM2xTU6V9Wy8Vy538ci" },
   { id: "xstock-ko", symbol: "KO", token: "KOx", name: "Coca-Cola", mint: "XsaBXg8dU5cPM6ehmVctMkVqoiRG2ZjMo1cyBJ3AykQ" },

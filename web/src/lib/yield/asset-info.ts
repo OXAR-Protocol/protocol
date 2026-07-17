@@ -74,11 +74,6 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
     category: "us stock · semiconductors",
     facts: [{ label: "sector", value: "chips & infrastructure software" }, { label: "hq", value: "Palo Alto, USA" }],
   },
-  "xstock-amd": {
-    about: "AMD makes CPUs and GPUs that compete with Intel and NVIDIA, powering PCs, game consoles and increasingly AI data centres.",
-    category: "us stock · semiconductors",
-    facts: [{ label: "sector", value: "processors & GPUs" }, { label: "hq", value: "Santa Clara, USA" }],
-  },
   "xstock-orcl": {
     about: "Oracle sells databases and enterprise software, and is now a fast-growing cloud provider renting out compute for AI workloads.",
     category: "us stock · technology",
@@ -89,12 +84,6 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
     category: "us stock · software",
     facts: [{ label: "sector", value: "data & AI software" }, { label: "hq", value: "Denver, USA" }],
   },
-  "xstock-nflx": {
-    about: "Netflix is the world's biggest streaming service — films and series in almost every country, now adding ads and live events to keep growing.",
-    category: "us stock · media",
-    facts: [{ label: "sector", value: "streaming & entertainment" }, { label: "hq", value: "Los Gatos, USA" }],
-  },
-
   // ── Crypto-adjacent ─────────────────────────────────────
   "xstock-coin": {
     about: "Coinbase is the largest US crypto exchange — buy/sell, custody, staking and the Base chain. A regulated way to bet on crypto adoption itself.",
@@ -118,16 +107,6 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
   },
 
   // ── Other large-caps ────────────────────────────────────
-  "xstock-jpm": {
-    about: "JPMorgan Chase is the largest US bank — consumer banking, cards, trading and investment banking. A bellwether for the whole financial system.",
-    category: "us stock · financials",
-    facts: [{ label: "sector", value: "banking" }, { label: "hq", value: "New York, USA" }],
-  },
-  "xstock-v": {
-    about: "Visa runs the payment rails behind a huge share of the world's card transactions. It doesn't lend — it takes a tiny cut every time you tap.",
-    category: "us stock · financials",
-    facts: [{ label: "sector", value: "payments network" }, { label: "hq", value: "San Francisco, USA" }],
-  },
   "xstock-unh": {
     about: "UnitedHealth is the biggest US health insurer plus Optum, its health-services arm. Defensive, huge, and tied to US healthcare spending.",
     category: "us stock · healthcare",

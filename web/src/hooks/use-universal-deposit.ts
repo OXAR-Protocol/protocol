@@ -45,10 +45,13 @@ export function useUniversalDeposit(providerId: string) {
           // USD → pay-asset base units, reserving SOL for fees.
           const price = payAsset.usdValue / payAsset.uiAmount;
           const payUi = usdAmount / price;
-          const payBase = toBaseUnits(payUi.toFixed(payAsset.decimals), payAsset.decimals);
+          let payBase = toBaseUnits(payUi.toFixed(payAsset.decimals), payAsset.decimals);
           const maxSpend = spendableBase(payAsset);
           if (maxSpend <= BigInt(0)) throw new UserFacingError(`Not enough ${payAsset.symbol} after network fees`);
-          if (payBase > maxSpend) throw new UserFacingError(`Not enough ${payAsset.symbol}`);
+          // Clamp to the spendable balance instead of failing — the USD→units round-trip
+          // (and a MAX press) can land payBase a sub-unit over the real balance. Mirrors
+          // the bridge path, which already clamps. Spends what's there, never over.
+          if (payBase > maxSpend) payBase = maxSpend;
 
           setStatus("swapping");
           // External wallets need a legacy tx (they mishandle Jupiter's v0); embedded keeps v0.
