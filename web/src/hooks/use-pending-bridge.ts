@@ -69,56 +69,78 @@ export function usePendingBridge() {
     };
   }, []);
 
+  // Read the volatile bits through refs so the arrival poll (below) isn't torn down
+  // and restarted on every render. Privy re-creates the wallet/connection objects
+  // across renders, which would otherwise churn `deposit` → cancel the in-flight
+  // poll mid-way (the arrival is then never caught, and the banner sticks forever).
+  const connRef = useRef(connection);
+  const ownerRef = useRef(walletAddress);
+  const isExternalRef = useRef(isExternal);
+  const runDepositRef = useRef(runDeposit);
+  connRef.current = connection;
+  ownerRef.current = walletAddress;
+  isExternalRef.current = isExternal;
+  runDepositRef.current = runDeposit;
+
   // Background: poll the Solana side (read-only — no signing) until the bridged
   // funds land. On arrival, embedded wallets deposit silently; external wallets
-  // wait for the user's tap (see `arrived` / `finish`).
+  // wait for the user's tap (see `arrived` / `finish`). Deps are primitives only,
+  // so render churn can't restart (and thereby cancel) an in-flight poll.
+  const txHash = pending?.originTxHash ?? null;
+  const hasWallet = !!walletAddress;
+  const attempts = pending?.attempts ?? 0;
   useEffect(() => {
-    if (!pending || !walletAddress) return;
+    if (!txHash || !hasWallet) return;
     // Wait until the wallet can actually sign — the background watcher can race
     // wallet load, and depositing against the read-only fallback throws "connect
     // your wallet". Gating here avoids a spurious failure; it retries when ready.
     if (!canSign) return;
     // A prior auto-attempt failed → wait for a manual Retry (don't loop a swap that
     // just failed). Funds are safe in the wallet as the bridged token meanwhile.
-    if ((pending.attempts ?? 0) > 0) return;
+    if (attempts > 0) return;
     // Already landed and waiting for the user's tap (external) — don't re-poll.
     if (arrived) return;
-    if (processingRef.current === pending.originTxHash) return;
-    processingRef.current = pending.originTxHash;
-    let cancelled = false;
+    if (processingRef.current === txHash) return;
+    processingRef.current = txHash;
+    let stale = false;
     (async () => {
       try {
-        const baseline = BigInt(pending.baselineUsdc);
-        const expected = BigInt(pending.expectedUsdc);
-        const mint = pending.mint ?? USDC_MINT;
-        const ok = await pollUsdcArrival({ connection, owner: walletAddress, mint, baseline, expected });
-        if (cancelled) return;
+        const rec = loadPending();
+        if (!rec) {
+          setPending(null);
+          return;
+        }
+        const baseline = BigInt(rec.baselineUsdc);
+        const expected = BigInt(rec.expectedUsdc);
+        const mint = rec.mint ?? USDC_MINT;
+        const ok = await pollUsdcArrival({ connection: connRef.current, owner: ownerRef.current!, mint, baseline, expected });
+        if (stale) return;
         if (!ok) {
           processingRef.current = null; // timed out without arrival — retry on next visit
           return;
         }
-        const rec = loadPending();
-        if (!rec) {
+        const cur = loadPending();
+        if (!cur) {
           setPending(null);
           return;
         }
         // External wallet: the buy needs the user's own signature, which a background
         // sign can't surface reliably — flip to "arrived" and let the banner offer a
         // one-tap finish. Embedded wallet: deposit right away (sponsored, silent).
-        if (isExternal) {
+        if (isExternalRef.current) {
           setArrived(true);
           return;
         }
-        await runDeposit(rec);
+        await runDepositRef.current(cur);
       } catch (e) {
         console.error("Pending bridge resume failed:", e);
         processingRef.current = null;
       }
     })();
     return () => {
-      cancelled = true;
+      stale = true;
     };
-  }, [pending, walletAddress, canSign, isExternal, arrived, connection, runDeposit]);
+  }, [txHash, hasWallet, canSign, attempts, arrived]);
 
   const dismiss = useCallback(() => {
     clearPending();
