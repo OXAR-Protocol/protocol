@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 
-import { savePending, loadPending, clearPending, type PendingBridge } from "./pending";
+import { savePending, loadPending, loadAllPending, clearPending, type PendingBridge } from "./pending";
 
 class FakeStorage {
   private m = new Map<string, string>();
@@ -41,9 +41,42 @@ describe("pending bridge persistence", () => {
     expect(loadPending(store)).toBeNull();
   });
 
-  it("clears", () => {
+  it("clears the head", () => {
     savePending(sample, store);
-    clearPending(store);
+    clearPending(undefined, store);
     expect(loadPending(store)).toBeNull();
+  });
+
+  it("queues concurrent bridges instead of clobbering (the B7 bug)", () => {
+    const second: PendingBridge = { ...sample, originTxHash: "0xhash2", providerId: "xstock-tsla" };
+    savePending(sample, store);
+    savePending(second, store);
+    // Both survive; head is the first-queued.
+    expect(loadAllPending(store)).toHaveLength(2);
+    expect(loadPending(store)?.originTxHash).toBe("0xhash");
+  });
+
+  it("drains head-first; the next becomes head", () => {
+    const second: PendingBridge = { ...sample, originTxHash: "0xhash2", providerId: "xstock-tsla" };
+    savePending(sample, store);
+    savePending(second, store);
+    clearPending(undefined, store); // finish the head
+    expect(loadAllPending(store)).toHaveLength(1);
+    expect(loadPending(store)?.originTxHash).toBe("0xhash2");
+  });
+
+  it("upserts by originTxHash (attempts bump doesn't duplicate)", () => {
+    savePending(sample, store);
+    savePending({ ...sample, attempts: 1 }, store);
+    expect(loadAllPending(store)).toHaveLength(1);
+    expect(loadPending(store)?.attempts).toBe(1);
+  });
+
+  it("removes a specific bridge by originTxHash", () => {
+    const second: PendingBridge = { ...sample, originTxHash: "0xhash2" };
+    savePending(sample, store);
+    savePending(second, store);
+    clearPending("0xhash", store);
+    expect(loadAllPending(store).map((r) => r.originTxHash)).toEqual(["0xhash2"]);
   });
 });

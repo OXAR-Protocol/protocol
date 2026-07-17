@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { USDC_MINT } from "@/lib/constants";
-import { loadPending, savePending, clearPending, PENDING_EVENT, type PendingBridge } from "@/lib/bridge/pending";
+import { loadPending, loadAllPending, savePending, clearPending, PENDING_EVENT, type PendingBridge } from "@/lib/bridge/pending";
 import { pollUsdcArrival } from "@/lib/bridge/arrival";
 
 /**
@@ -23,6 +23,9 @@ import { pollUsdcArrival } from "@/lib/bridge/arrival";
 export function usePendingBridge() {
   const { connection, walletAddress, canSign, isExternal } = useSolanaContext();
   const [pending, setPending] = useState<PendingBridge | null>(() => loadPending());
+  // How many bridges are queued in total (head + waiting) — surfaced so a user who
+  // fired several concurrent cross-chain deposits sees they're all tracked.
+  const [queued, setQueued] = useState<number>(() => loadAllPending().length);
   const [resuming, setResuming] = useState(false);
   // Bridged funds have LANDED but an external wallet still owes a signature for the
   // buy — surface a tap instead of a background sign (which hangs: the wallet's
@@ -35,39 +38,48 @@ export function usePendingBridge() {
   // Funds arrived but the deposit/swap didn't complete → surface, never strand.
   const failed = (pending?.attempts ?? 0) > 0;
 
+  // Re-read the queue → show the current head (next in-flight bridge) + total count.
+  // Used after every mutation so finishing one bridge advances to the next instead of
+  // hiding the banner (the old single-record code did setPending(null)).
+  const syncFromStore = useCallback(() => {
+    setPending(loadPending());
+    setQueued(loadAllPending().length);
+  }, []);
+
   // Claim the record, then deposit/swap the bridged funds into the chosen asset.
   // Shared by the silent auto-path (embedded) and the tap-to-finish path (external).
   const runDeposit = useCallback(
     async (rec: PendingBridge) => {
       setResuming(true);
-      clearPending(); // claim so a parallel tab can't double-deposit
+      clearPending(rec.originTxHash); // claim THIS bridge so a parallel tab can't double-deposit
       try {
         await deposit(BigInt(rec.expectedUsdc));
-        setPending(null); // done — bought the asset the user picked
         setArrived(false);
+        syncFromStore(); // advance to the next queued bridge (banner hides only when the queue empties)
       } catch (e) {
-        // Signed step failed/rejected AFTER arrival — re-arm as failed so the banner
-        // shows Retry, never silently strand the funds (they sit as the bridged token).
+        // Signed step failed/rejected AFTER arrival — re-queue as failed (goes to the
+        // tail, so it doesn't block other in-flight bridges) so the banner shows Retry,
+        // never silently stranding the funds (they sit as the bridged token).
         console.error("Pending bridge deposit failed; funds are safe in the wallet:", e);
         savePending({ ...rec, attempts: (rec.attempts ?? 0) + 1 });
         setArrived(false);
+        syncFromStore();
       } finally {
         setResuming(false);
       }
     },
-    [deposit],
+    [deposit, syncFromStore],
   );
 
   // Pick up newly-saved / cleared records (same tab) and on tab focus.
   useEffect(() => {
-    const sync = () => setPending(loadPending());
-    window.addEventListener(PENDING_EVENT, sync);
-    window.addEventListener("focus", sync);
+    window.addEventListener(PENDING_EVENT, syncFromStore);
+    window.addEventListener("focus", syncFromStore);
     return () => {
-      window.removeEventListener(PENDING_EVENT, sync);
-      window.removeEventListener("focus", sync);
+      window.removeEventListener(PENDING_EVENT, syncFromStore);
+      window.removeEventListener("focus", syncFromStore);
     };
-  }, []);
+  }, [syncFromStore]);
 
   // Read the volatile bits through refs so the arrival poll (below) isn't torn down
   // and restarted on every render. Privy re-creates the wallet/connection objects
@@ -143,11 +155,11 @@ export function usePendingBridge() {
   }, [txHash, hasWallet, canSign, attempts, arrived]);
 
   const dismiss = useCallback(() => {
-    clearPending();
-    setPending(null);
+    clearPending(pending?.originTxHash); // stop watching THIS bridge; the next (if any) shows
     setArrived(false);
     processingRef.current = null;
-  }, []);
+    syncFromStore();
+  }, [pending, syncFromStore]);
 
   // External wallet: the user taps to sign the buy now that the funds have arrived —
   // this runs in a user gesture, so the wallet's signing popup reliably appears.
@@ -166,5 +178,5 @@ export function usePendingBridge() {
     savePending({ ...rec, attempts: 0 });
   }, []);
 
-  return { pending, resuming, failed, arrived, dismiss, finish, retry };
+  return { pending, queued, resuming, failed, arrived, dismiss, finish, retry };
 }
