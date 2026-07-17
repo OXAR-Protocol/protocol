@@ -62,7 +62,14 @@ export function AssetDetail({
   // Unit label for the quantity input — the ticker in the name, e.g. "SPCXx".
   const unitLabel = view.name.match(/\(([^)]+)\)/)?.[1] ?? "units";
 
-  const settle = () => setTimeout(onDone, 1500);
+  // Refresh the position after an action. The tx is already confirmed here, but the
+  // balance read (RPC / holdings indexer) can lag a beat behind a swap-sell — a single
+  // delayed refresh sometimes caught the STALE balance, so a just-sold asset still
+  // looked sellable ("sell it again"). Refresh now AND again shortly after to catch lag.
+  const settle = () => {
+    onDone();
+    setTimeout(onDone, 3000);
+  };
 
   const handleExit = async () => {
     const plan = planWithdrawal({

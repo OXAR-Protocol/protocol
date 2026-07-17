@@ -1,16 +1,14 @@
-// Per-asset logo resolution. Tokenized stocks get their real ticker logo from
-// Parqet's keyless logo CDN; everything else returns undefined so the <AssetIcon>
-// falls back to a clean monogram.
-//
-// Was Financial Modeling Prep — dropped 2026-07-17: its keyless endpoint went
-// intermittently 502 and served a tiny valid-PNG error body that DECODES without
-// firing <img> onError, so the monogram fallback never triggered → blank icons.
-// Parqet misses return a real 404 (empty body) → onError fires → monogram shows.
-export function assetLogoSrc(id: string): string | undefined {
-  if (id.startsWith("xstock-")) {
-    const ticker = id.slice("xstock-".length).toUpperCase();
-    return `https://assets.parqet.com/logos/symbol/${ticker}?format=png`;
-  }
+// Per-asset logo resolution → currently always undefined, so <AssetIcon> renders a
+// clean ticker monogram. Reliable and zero-dependency, which no keyless stock-logo
+// CDN turned out to be:
+//   • Financial Modeling Prep — intermittent 502s + a tiny valid-PNG error body that
+//     DECODES without firing <img> onError → blank tiles (never fell back).
+//   • Parqet — served without an Access-Control-Allow-Origin header (CORS-blocked in
+//     the grid) + 404s on some tickers + WRONG-company matches (SPCX → an "axs" logo).
+// Real per-token logos need self-hosting Backed's official xStock assets (a polish
+// task); until then monograms are correct and on-brand. Keep the signature so callers
+// (and a future self-hosted map) don't change.
+export function assetLogoSrc(_id: string): string | undefined {
   return undefined;
 }
 

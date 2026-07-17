@@ -58,6 +58,7 @@ allowed_programs = [
     "FarmsPZpWu9i7Kky8tPN37rs2TpmMrAZrC7S7vJa91Hr",  # Kamino farms
     "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f",  # Switchboard oracle
     "st2Kvh82VyY8JskVJi4PebU9vdnR14VsaEy6TWVzD1r",  # Kamino scope/oracle
+    "L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95",  # Jupiter route (unlabeled)
     "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",  # Jupiter Aggregator v6
     "1qbkdrr3z4ryLA7pZykqxvxWPoeifcVKo6ZG9CfkvVE",  # Saros DLMM
     "2DNbzPochEcyCcWMbL4d9S3u9QqQEj5bbe6cSZFvKsbh",  # BisonFi Predict
@@ -104,6 +105,7 @@ allowed_programs = [
     "FUTARELBfJfQ8RDGhg1wdhddq1odMAJUePHFuBYfUxKq",  # MetaDAO
     "FW6zUqn4iKRaeopwwhwsquTY6ABWLLgjxtrC3VPnaWBf",  # WhaleStreet
     "GAMMA7meSFWaBXF25oSUgmGRwaW6sCMFLmBNiMSdbHVT",  # GooseFX GAMMA
+    "gatorLx9aC1e5ZWAXscv5QRKiLXnLPLXjftVc81h1Hr",  # GatorSwap
     "goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE",  # GoonFi V2
     "Gswppe6ERWKpUTXvRPfXdzHhiCyJvLadVvXGfdpBqcE1",  # Guacswap
     "H8W3ctz92svYg6mkn1UtGfu2aQr2fnUFHM1RhScEtQDt",  # Cropper

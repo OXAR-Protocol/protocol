@@ -163,11 +163,6 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
     category: "yield · lending",
     facts: [{ label: "earns from", value: "over-collateralised borrowers" }, { label: "where", value: "Jupiter (Solana)" }, { label: "risk", value: "low" }],
   },
-  "jupiter-lend-usdg": {
-    about: "Same Jupiter Lend market, denominated in USDG — your digital dollars earn the interest borrowers pay. Withdraw any time.",
-    category: "yield · lending",
-    facts: [{ label: "earns from", value: "over-collateralised borrowers" }, { label: "where", value: "Jupiter (Solana)" }, { label: "risk", value: "low" }],
-  },
   "ondo-usdy": {
     about: "USDY is backed by short-term US Treasuries — essentially lending to the US government. The token's price rises as interest accrues; holding it earns. Swap out any time.",
     category: "yield · treasuries",

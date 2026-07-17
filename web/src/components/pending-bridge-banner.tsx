@@ -24,10 +24,12 @@ function trackUrl(p: PendingBridge): string | null {
  * with Retry — the funds are safe in the wallet as the bridged token, never lost.
  */
 export function PendingBridgeBanner() {
-  const { pending, resuming, failed, arrived, dismiss, finish, retry } = usePendingBridge();
+  const { pending, queued, resuming, failed, arrived, dismiss, finish, retry } = usePendingBridge();
   if (!pending) return null;
 
   const track = trackUrl(pending);
+  // >1 bridge in flight (user fired several) — reassure them the rest are queued.
+  const more = queued > 1 ? ` (+${queued - 1} more in flight)` : "";
 
   // External wallet: funds landed, but the buy needs the user's own signature.
   // Offer a one-tap finish (a background sign wouldn't surface the wallet popup).
@@ -94,7 +96,7 @@ export function PendingBridgeBanner() {
       <Loader2 className="text-[#3c05c7] mt-0.5 animate-spin" size={16} strokeWidth={1.5} />
       <div className="flex-1">
         <p className="text-sm text-black">
-          {resuming ? "Finishing your cross-chain deposit…" : "Cross-chain deposit in transit"}
+          {resuming ? "Finishing your cross-chain deposit…" : `Cross-chain deposit in transit${more}`}
         </p>
         <p className="mt-1 text-[11px] text-black/45">
           Your funds are bridging to Solana and will auto-deposit on arrival.
