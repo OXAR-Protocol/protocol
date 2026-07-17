@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { Plus, CreditCard } from "lucide-react";
+import { CreditCard } from "lucide-react";
 
 import { PayWithField } from "@/components/pay-with-field";
 import { DepositConfirm } from "@/components/deposit-confirm";
@@ -183,6 +183,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           swapIn={swapIn}
           busy={busy}
           label={busyLabel}
+          status={status}
           error={error}
           onConfirm={handleDeposit}
           onBack={() => setConfirming(false)}
@@ -255,13 +256,14 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           </div>
         )}
 
-        {/* Pay from another chain: link an external wallet (EVM) as a funding rail. */}
+        {/* Advanced funding rail: pay from another chain (EVM → Delora bridge).
+            Demoted to a quiet link — it's the heaviest path (several wallet
+            confirmations), so the default stays USDC-on-Solana / card above. */}
         {!evmAddress ? (
           <button
             onClick={() => linkWallet()}
-            className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-2.5 text-[13px] lowercase tracking-wide text-black/70 hover:border-black/40 hover:text-black transition"
+            className="mt-2 text-[11px] lowercase tracking-wide text-black/40 underline decoration-black/20 underline-offset-2 hover:text-black/70 transition"
           >
-            <Plus size={15} strokeWidth={1.75} />
             {t("deposit.payFromAnotherChain")}
           </button>
         ) : (
@@ -277,6 +279,13 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
               {t("deposit.disconnect")}
             </button>
           </div>
+        )}
+
+        {/* Selected a cross-chain asset → warn that it confirms several steps. */}
+        {payAsset?.chain === "ethereum" && (
+          <p className="mt-2 text-[10px] lowercase tracking-wide text-amber-700/80">
+            {t("deposit.bridgeConfirmsHint")}
+          </p>
         )}
       </div>
 

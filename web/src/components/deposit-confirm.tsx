@@ -6,6 +6,8 @@ import type { ProviderView } from "@/hooks/use-yield-positions";
 import type { NetPreview } from "@/hooks/use-net-preview";
 import type { SwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { WalletAsset } from "@oxar/sdk";
+import { BridgeSteps, type BridgeStep } from "@/components/bridge-steps";
+import { isNativeEvm } from "@/lib/evm/erc20";
 import { useT, localizeError } from "@/lib/i18n";
 
 interface Props {
@@ -18,6 +20,8 @@ interface Props {
   swapIn: SwapInPreview;
   busy: boolean;
   label: string | null;
+  /** Live deposit status ("idle" before signing) — drives the bridge step tracker. */
+  status: string;
   error: string | null;
   onConfirm: () => void;
   onBack: () => void;
@@ -44,12 +48,23 @@ export function DepositConfirm({
   swapIn,
   busy,
   label,
+  status,
   error,
   onConfirm,
   onBack,
 }: Props) {
   const { t } = useT();
   const held = !!view.heldMint;
+  // Cross-chain confirms several steps in the wallet — show the sequence up front so
+  // the multiple prompts feel guided, not random. Native ETH skips the approve step.
+  const isBridge = payAsset.chain === "ethereum";
+  const bridgeSteps: BridgeStep[] = isBridge
+    ? [
+        ...(isNativeEvm(payAsset.mint) ? [] : [{ key: "approving", label: t("confirm.step.approve") }]),
+        { key: "bridging", label: t("confirm.step.bridge") },
+        { key: "buy", label: t("confirm.step.buy") },
+      ]
+    : [];
   const route = isDirect
     ? t("confirm.route.instant")
     : payAsset.chain === "ethereum"
@@ -83,6 +98,13 @@ export function DepositConfirm({
         <Row k={t("confirm.route")} v={route} />
         <Row k={t("confirm.whereItGoes")} v={held ? t("confirm.ownWallet") : view.name} />
       </div>
+
+      {isBridge && (
+        <div className="mt-3 rounded-[8px] border border-black/10 px-3 py-2.5">
+          <BridgeSteps steps={bridgeSteps} status={busy ? status : "idle"} />
+          <p className="mt-1.5 text-[10px] lowercase tracking-wide text-black/40">{t("confirm.step.hint")}</p>
+        </div>
+      )}
 
       <p className="mt-3 text-[11px] leading-snug text-black/45">
         {t("confirm.footer")}
