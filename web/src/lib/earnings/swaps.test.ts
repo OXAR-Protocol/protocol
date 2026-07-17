@@ -62,4 +62,38 @@ describe("netInvestedFromSwaps", () => {
   it("nets multiple buys", () => {
     expect(netInvestedFromSwaps([buy(1, 0.9), buy(2, 1.8)], OWNER, USDY, USDC)).toBeCloseTo(3, 9);
   });
+
+  // Jupiter Lend: you hold a jlToken receipt; deposit = cost→jlToken, withdraw = jlToken→cost.
+  // Same engine, heldMint = the jlToken, costMint = the deposited dollar.
+  it("attributes a Jupiter-Lend deposit + withdraw (held = jlToken)", () => {
+    const JL_USDC = "9BEcn9aPEmhSPbPQeFGjidRiEKki46fVQDyPpSQXPA2D";
+    const deposit = (usdc: number, jl: number): HeliusTx => ({
+      tokenTransfers: [
+        { mint: USDC, fromUserAccount: OWNER, toUserAccount: "jlprogram", tokenAmount: usdc },
+        { mint: JL_USDC, fromUserAccount: "jlprogram", toUserAccount: OWNER, tokenAmount: jl },
+      ],
+    });
+    const withdraw = (jl: number, usdc: number): HeliusTx => ({
+      tokenTransfers: [
+        { mint: JL_USDC, fromUserAccount: OWNER, toUserAccount: "jlprogram", tokenAmount: jl },
+        { mint: USDC, fromUserAccount: "jlprogram", toUserAccount: OWNER, tokenAmount: usdc },
+      ],
+    });
+    // deposit $5, withdraw $2 back → $3 net invested (earned = current value − 3).
+    expect(netInvestedFromSwaps([deposit(5, 4.75), withdraw(2, 2)], OWNER, JL_USDC, USDC)).toBeCloseTo(3, 9);
+  });
+
+  it("attributes the jlUSDT market against USDT, not USDC", () => {
+    const USDT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
+    const JL_USDT = "Cmn4v2wipYV41dkakDvCgFJpxhtaaKt11NyWV8pjSE8A";
+    const depositUsdt: HeliusTx = {
+      tokenTransfers: [
+        { mint: USDT, fromUserAccount: OWNER, toUserAccount: "jlprogram", tokenAmount: 4 },
+        { mint: JL_USDT, fromUserAccount: "jlprogram", toUserAccount: OWNER, tokenAmount: 3.8 },
+      ],
+    };
+    expect(netInvestedFromSwaps([depositUsdt], OWNER, JL_USDT, USDT)).toBeCloseTo(4, 9);
+    // ...and USDC wasn't touched, so attributing against USDC would (correctly) see nothing.
+    expect(netInvestedFromSwaps([depositUsdt], OWNER, JL_USDT, USDC)).toBe(0);
+  });
 });
