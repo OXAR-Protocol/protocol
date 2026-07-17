@@ -125,23 +125,25 @@ export function useBridgeDeposit(providerId: string) {
           );
         }
 
-        // Switch to the origin chain FIRST, then fetch the provider — a stale provider
-        // (fetched before the switch) can send on the old chain.
-        await evmWallet.switchChain(originChainId);
+        // Fetch the provider first so we can read the CURRENT chain: if the wallet is
+        // already on the origin chain, skip switchChain entirely — one less wallet
+        // prompt (a big deal on the multi-confirmation cross-chain path).
         const provider1193 = await evmWallet.getEthereumProvider();
-        // WAIT until the wallet actually reports the switch: some wallets (Trust) apply
-        // it asynchronously and would otherwise reject the send with a cryptic
-        // "chainId is not the same as your selected chainId". Poll briefly, then bail
-        // with a clear instruction if it never lands on the origin chain.
-        const originChainHex = `0x${originChainId.toString(16)}`;
-        let onOriginChain = false;
-        for (let i = 0; i < 6; i++) {
-          const hex = (await provider1193.request({ method: "eth_chainId" })) as string;
-          if (parseInt(hex, 16) === originChainId) {
-            onOriginChain = true;
-            break;
+        const onChain = async () =>
+          parseInt((await provider1193.request({ method: "eth_chainId" })) as string, 16) === originChainId;
+        let onOriginChain = await onChain();
+        if (!onOriginChain) {
+          await evmWallet.switchChain(originChainId);
+          // WAIT until the wallet actually reports the switch: some wallets (Trust)
+          // apply it asynchronously and would otherwise reject the send with a cryptic
+          // "chainId is not the same as your selected chainId". Poll briefly.
+          for (let i = 0; i < 6; i++) {
+            if (await onChain()) {
+              onOriginChain = true;
+              break;
+            }
+            await new Promise((r) => setTimeout(r, 300));
           }
-          await new Promise((r) => setTimeout(r, 300));
         }
         if (!onOriginChain) {
           const name = viemChainById(originChainId)?.name ?? `chain ${originChainId}`;
