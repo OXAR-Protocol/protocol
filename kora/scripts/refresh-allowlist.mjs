@@ -47,6 +47,11 @@ const PROTOCOLS = [
   ["FarmsPZpWu9i7Kky8tPN37rs2TpmMrAZrC7S7vJa91Hr", "Kamino farms"],
   ["SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f", "Switchboard oracle"],
   ["st2Kvh82VyY8JskVJi4PebU9vdnR14VsaEy6TWVzD1r", "Kamino scope/oracle"],
+  // Jupiter routes through this program but doesn't LABEL it in program-id-to-label,
+  // so the auto-refresh never picks it up. Surfaced in QA 2026-07-17 (Kora rejected
+  // "Program L2TE… is not in the allowed list" buying a stock / Jupiter Lend USDT).
+  // Pin it here so every refresh keeps it. Executable BPF program (verified on-chain).
+  ["L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95", "Jupiter route (unlabeled)"],
 ];
 
 async function fetchJupiterPrograms() {
