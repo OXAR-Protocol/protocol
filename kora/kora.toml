@@ -26,13 +26,10 @@ get_version = true
 [validation]
 # Cap the SOL a single tx can make us pay. Must cover ATA rent (~0.00204 SOL/account) when
 # Kora funds a 0-SOL user's first token accounts, PLUS a swap's priority fee (Jupiter sets
-# these dynamically and they can spike), PLUS the biggest one-off: a first Kamino deposit
-# creates a klend Obligation account (3344 bytes → ~0.02417 SOL rent) that alone exceeds the
-# old 0.02 cap, so Kora refused it → fell back to native gas → 0-SOL deposits failed. 0.04
-# SOL covers the obligation + a companion account/ATA + priority while still capping abuse.
-# NOTE: obligation creation is a per-user one-off (later deposits reuse it) but it's an
-# expensive thing to sponsor (~$5) — keep the fee-payer float topped up if Kamino sees use.
-max_allowed_lamports = 40000000
+# these dynamically and they can spike). 0.02 SOL covers a multi-ATA swap + priority while
+# still capping abuse per tx. (Was briefly raised to 0.04 for Kamino's fat Obligation
+# account, but Kamino was delisted 2026-07-18 — no obligation to sponsor anymore.)
+max_allowed_lamports = 20000000
 max_signatures = 10
 # Pricing source for fee conversion. "Jupiter" needs a paid JUPITER_API_KEY; while we run
 # the sponsored (free) model below, no live price is used, so "Mock" satisfies validation.
