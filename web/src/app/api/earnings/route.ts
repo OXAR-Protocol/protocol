@@ -12,16 +12,29 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+const USDT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
+// Jupiter Lend receipt (jl) tokens — the SPL you HOLD after depositing (value accrues in
+// price). Deposit = costMint → jlToken; withdraw = jlToken → costMint, so the same
+// swap-attribution engine works: net invested = cost spent to acquire the jlToken.
+const JL_USDC = "9BEcn9aPEmhSPbPQeFGjidRiEKki46fVQDyPpSQXPA2D";
+const JL_USDT = "Cmn4v2wipYV41dkakDvCgFJpxhtaaKt11NyWV8pjSE8A";
 
-// Swap-and-hold sources: net invested = USDC spent acquiring `heldMint`. Stocks come
-// straight from the xStocks catalog so the two never drift. (Vault-based sources like
-// Kamino/Jupiter Lend will attribute by vault address next — same shared engine.)
+// Net invested = cost spent acquiring `heldMint`. Stocks come straight from the xStocks
+// catalog so the two never drift.
 const SOURCES: { id: string; heldMint: string; costMint: string }[] = [
   { id: "ondo-usdy", heldMint: "A1KLoBrKBde8Ty9qtNQUtq3C2ortoC3u7twggz7sEto6", costMint: USDC },
   { id: "maple-solana", heldMint: "AvZZF1YaZDziPY2RCK4oJrRVrbN3mTD9NL24hPeaZeUj", costMint: USDC },
+  // Jupiter Lend: hold jlUSDC/jlUSDT, attribute against the deposited dollar (USDC/USDT).
+  { id: "jupiter-lend-usdc", heldMint: JL_USDC, costMint: USDC },
+  { id: "jupiter-lend-usdt", heldMint: JL_USDT, costMint: USDT },
   ...XSTOCKS.map((s) => ({ id: s.id, heldMint: s.mint, costMint: USDC })),
   ...GOLD.map((g) => ({ id: g.id, heldMint: g.mint, costMint: USDC })),
 ];
+// NOTE: Kamino (klend) is NOT here yet — it's obligation-based (no transferable receipt
+// token in the wallet), so the held-mint attribution can't see it. It needs
+// counterparty-address attribution (USDC moved to/from the klend program) — a separate,
+// larger change. Until then a Kamino position simply shows no earned figure (never wrong,
+// just absent), which `allCovered` already accounts for.
 
 const isAddress = (a: unknown): a is string =>
   typeof a === "string" && a.length >= 32 && a.length <= 44;
