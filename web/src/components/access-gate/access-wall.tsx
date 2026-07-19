@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ComingSoon, type Standing } from "./coming-soon";
+import { INVITE_CODE, INVITE_FLAG } from "./invite";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const UNLOCK_KEY = "oxar.access.unlocked.v1";
@@ -36,6 +37,16 @@ export function AccessWall({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
+      // Invite link: a valid `?code` clears the wall for this browser (no email up
+      // front) and marks the arrival so the in-app popup can softly capture an email
+      // later. Privy login (email OR external wallet) then runs untouched.
+      const code = new URLSearchParams(window.location.search).get("code");
+      if (code === INVITE_CODE) {
+        window.localStorage.setItem(UNLOCK_KEY, "invite");
+        window.localStorage.setItem(INVITE_FLAG, "1");
+        setState("unlocked");
+        return;
+      }
       setState(window.localStorage.getItem(UNLOCK_KEY) ? "unlocked" : "locked");
     } catch {
       setState("locked");

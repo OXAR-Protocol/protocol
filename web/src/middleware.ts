@@ -11,6 +11,7 @@ const APP_ROUTES = [
   "/asset",
   "/onboarding",
   "/login",
+  "/join", // invite-link landing (clears the wall via ?code, then → /home)
 ];
 
 const MARKETING_ROUTES = [

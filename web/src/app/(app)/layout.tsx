@@ -5,6 +5,7 @@ import { TopNav } from "@/components/top-nav";
 import { TabBar } from "@/components/tab-bar";
 import { AuthGuard } from "@/components/auth-guard";
 import { AccessWall } from "@/components/access-gate/access-wall";
+import { JoinCapture } from "@/components/access-gate/join-capture";
 import { WarpProvider } from "@/components/warp-transition";
 import { WarpOnEntry } from "@/components/warp-on-entry";
 import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
@@ -25,6 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <div className="mx-auto max-w-[1100px] px-5 pb-28 pt-6 md:pb-16">
                     <PendingBridgeBanner />
                     {children}
+                    <JoinCapture />
                   </div>
                 </div>
                 <TabBar />
