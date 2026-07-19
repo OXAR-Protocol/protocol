@@ -100,9 +100,9 @@ export function JoinCapture() {
             </button>
 
             {/* Hero — the "money resting on a cloud" collage on a soft brand tint. */}
-            <div className="flex justify-center bg-[#3c05c7]/[0.06] pt-6">
+            <div className="flex justify-center bg-[#3c05c7]/[0.06] px-4 pt-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/join-cloud.webp" alt="" className="h-40 w-auto object-contain" />
+              <img src="/join-cloud.webp" alt="" className="h-60 w-auto max-w-full object-contain" />
             </div>
 
             <div className="px-6 pb-6 pt-5">
