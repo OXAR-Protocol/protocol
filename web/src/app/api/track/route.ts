@@ -26,12 +26,35 @@ export async function POST(req: NextRequest) {
 
     const wallet = typeof body.wallet === "string" ? body.wallet.trim() : "";
     const kind = typeof body.kind === "string" ? body.kind : "";
-    if (!wallet || !KINDS.has(kind)) {
+    if (!wallet) {
+      return NextResponse.json({ error: "invalid event" }, { status: 400 });
+    }
+
+    const supabase = getSupabaseServer();
+
+    // Acquisition-channel attribution (the invite code a user arrived through). One row
+    // per wallet: synthetic sig `ch:<wallet>` + ignoreDuplicates = first-touch wins.
+    // `asset` carries the channel slug; usd is null so it never affects money sums.
+    if (kind === "channel") {
+      const src = typeof body.asset === "string" ? body.asset.trim().slice(0, 64) : "";
+      if (!src) return NextResponse.json({ error: "invalid event" }, { status: 400 });
+      const { error } = await supabase
+        .from("events")
+        .upsert(
+          { wallet, kind: "channel", asset: src, usd: null, sig: `ch:${wallet}`, chain: "solana" },
+          { onConflict: "sig", ignoreDuplicates: true },
+        );
+      if (error) {
+        console.error("track channel insert failed:", error.message);
+        return NextResponse.json({ error: "insert failed" }, { status: 500 });
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    if (!KINDS.has(kind)) {
       return NextResponse.json({ error: "invalid event" }, { status: 400 });
     }
     const usd = typeof body.usd === "number" && isFinite(body.usd) && body.usd >= 0 ? body.usd : null;
-
-    const supabase = getSupabaseServer();
     // Dedup on the unique `sig`; ignore if we've already recorded this tx.
     const { error } = await supabase
       .from("events")
