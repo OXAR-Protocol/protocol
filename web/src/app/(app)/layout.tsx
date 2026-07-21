@@ -6,6 +6,7 @@ import { TabBar } from "@/components/tab-bar";
 import { AuthGuard } from "@/components/auth-guard";
 import { AccessWall } from "@/components/access-gate/access-wall";
 import { JoinCapture } from "@/components/access-gate/join-capture";
+import { ChannelReport } from "@/components/channel-tracker";
 import { WarpProvider } from "@/components/warp-transition";
 import { WarpOnEntry } from "@/components/warp-on-entry";
 import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
@@ -27,6 +28,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <PendingBridgeBanner />
                     {children}
                     <JoinCapture />
+                    <ChannelReport />
                   </div>
                 </div>
                 <TabBar />

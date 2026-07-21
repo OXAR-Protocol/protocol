@@ -24,3 +24,22 @@ export function trackEvent(e: TrackEvent): void {
     /* never surface analytics errors */
   }
 }
+
+/**
+ * Attribute a wallet to the acquisition channel it arrived through (the invite code:
+ * "superteam-alpha", "dev3pack-alpha", …). One row per wallet — deduped server-side
+ * on a synthetic key — so channels can later be joined to deposits by wallet.
+ * Fire-and-forget; never throws.
+ */
+export function trackChannel(wallet: string, src: string): void {
+  try {
+    void fetch("/api/track", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ wallet, kind: "channel", asset: src }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    /* never surface analytics errors */
+  }
+}
