@@ -7,7 +7,7 @@
 
 /** Valid invite codes that clear the wall. One per channel, so we can attribute
  *  where a user arrived from (see CHANNEL_KEY). Add a campaign = add a code here. */
-export const INVITE_CODES = ["superteam-alpha", "dev3pack-alpha"] as const;
+export const INVITE_CODES = ["superteam-alpha", "dev3pack-alpha", "bridge-accelerator", "craft-circle"] as const;
 
 /** Back-compat single-code export (first code). Prefer `isValidInviteCode`. */
 export const INVITE_CODE = INVITE_CODES[0];
