@@ -77,9 +77,17 @@ export function TopMoversCarousel() {
                 <Link
                   key={m.id}
                   href={`/asset/${m.id}`}
-                  className={`${CARD_BASIS} group flex shrink-0 grow-0 snap-start flex-col justify-between rounded-[18px] border border-black/10 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-black/25 hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]`}
+                  className={`${CARD_BASIS} group relative flex shrink-0 grow-0 snap-start flex-col justify-between overflow-hidden rounded-[18px] border border-black/10 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-black/25 hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]`}
                 >
-                  <div className="flex items-start justify-between">
+                  {/* faint collage texture, à la Backyard's decorated cards */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/art/coin-collage.webp"
+                    alt=""
+                    aria-hidden
+                    className="pointer-events-none absolute -right-6 -top-6 h-40 w-40 select-none object-cover opacity-[0.06]"
+                  />
+                  <div className="relative flex items-start justify-between">
                     <AssetIcon src={assetLogoSrc(m.id)} label={assetIconLabel(m.id, m.symbol)} size={44} />
                     <span
                       className={`inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-[13px] font-semibold tabular-nums ${
@@ -91,8 +99,8 @@ export function TopMoversCarousel() {
                       {m.change24h.toFixed(2)}%
                     </span>
                   </div>
-                  <div className="mt-5 min-w-0">
-                    <p className="truncate text-[15px] text-black">{m.name}</p>
+                  <div className="relative mt-5 min-w-0">
+                    <p className="truncate font-serif text-[19px] leading-tight text-black">{m.name}</p>
                     <p className="mt-1 text-[22px] font-medium leading-none tabular-nums tracking-[-0.02em] text-black">
                       ${m.price < 1 ? m.price.toFixed(4) : m.price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
