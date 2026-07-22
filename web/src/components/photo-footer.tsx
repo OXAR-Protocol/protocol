@@ -7,7 +7,7 @@ export function PhotoFooter() {
   return (
     <div
       aria-hidden
-      className="relative mt-16 mb-16 h-32 w-full select-none overflow-hidden md:mb-0 md:h-44"
+      className="relative mt-16 mb-16 h-52 w-full select-none overflow-hidden md:mb-0 md:h-80"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
