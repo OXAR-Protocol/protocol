@@ -152,10 +152,11 @@ export default function HomePage() {
               aria-hidden
               className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-right"
             />
-            {/* legibility scrim — solid white on the left, fading to reveal the photo on the right */}
+            {/* legibility scrim — solid white under the copy on the left, fully clearing
+                by the right so the coin photo shows through */}
             <div
               aria-hidden
-              className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/20"
+              className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff_0%,#ffffff_42%,rgba(255,255,255,0.55)_64%,rgba(255,255,255,0)_90%)]"
             />
             <div className="relative p-8 md:p-10">
               <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#3c05c7]/10 border border-[#3c05c7]/30 lowercase text-[10px] tracking-widest text-[#3c05c7]">
