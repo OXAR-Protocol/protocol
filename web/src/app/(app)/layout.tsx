@@ -23,11 +23,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <WarpProvider>
               <WarpOnEntry />
               <AuthGuard>
-                {/* Flex column so the photo footer is pushed to the very bottom even on
-                    short pages (no floating whitespace under it) and spans full width. */}
-                <div className="flex min-h-screen flex-col bg-white">
+                {/* Relative flex column: the photo footer is an absolute background layer
+                    pinned to the bottom (behind content), so the last page elements overlap
+                    onto it. Content column is z-10 so it renders on top. */}
+                <div className="relative flex min-h-screen flex-col bg-white">
                   <TopNav />
-                  <div className="mx-auto w-full max-w-[1100px] flex-1 px-5 pt-6">
+                  <div className="relative z-10 mx-auto w-full max-w-[1100px] flex-1 px-5 pb-28 pt-6 md:pb-16">
                     <PendingBridgeBanner />
                     {children}
                     <JoinCapture />
