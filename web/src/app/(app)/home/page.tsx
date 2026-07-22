@@ -143,8 +143,21 @@ export default function HomePage() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="mb-12"
         >
-          <div className="relative overflow-hidden rounded-[12px] border border-black/10 bg-white p-8 md:p-10">
-            <div className="relative">
+          <div className="relative overflow-hidden rounded-[16px] border border-black/10 bg-white">
+            {/* pitch-collage photo filling the whole block as its background */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/art/coin-stacking.webp"
+              alt=""
+              aria-hidden
+              className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-right"
+            />
+            {/* legibility scrim — solid white on the left, fading to reveal the photo on the right */}
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/20"
+            />
+            <div className="relative p-8 md:p-10">
               <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#3c05c7]/10 border border-[#3c05c7]/30 lowercase text-[10px] tracking-widest text-[#3c05c7]">
                 <Sparkles size={10} strokeWidth={1.5} />
                 {t("home.startHere")}
@@ -154,7 +167,7 @@ export default function HomePage() {
                 <br />
                 <span className="text-black/55">{t("home.napping2")}</span>
               </h2>
-              <p className="mt-3 text-sm text-black/45 max-w-md leading-relaxed">
+              <p className="mt-3 text-sm text-black/55 max-w-md leading-relaxed">
                 {t("home.empty.body")}
               </p>
               <div className="mt-6">
