@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
@@ -9,11 +10,34 @@ import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { useTopMovers } from "@/hooks/use-top-movers";
 import { useT } from "@/lib/i18n";
 
-/** Big, clear horizontal strip of the biggest 24h movers across stocks + gold.
- *  Discovery entry point on Home — each card opens the asset page. */
+// Cards are sized so exactly 3 fit across on desktop (2 on tablet, ~1.3 on mobile).
+const CARD_BASIS =
+  "basis-[78%] sm:basis-[calc((100%-1rem)/2)] md:basis-[calc((100%-2rem)/3)]";
+
+/** Big, clear movers strip — 3 cards at a time, auto-advancing one card every 5s
+ *  (pauses on hover), looping back at the end. Each card opens the asset page. */
 export function TopMoversCarousel() {
   const { movers, loading } = useTopMovers(10);
   const { t } = useT();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const paused = useRef(false);
+
+  useEffect(() => {
+    if (loading || movers.length <= 3) return;
+    const id = setInterval(() => {
+      const el = scrollRef.current;
+      if (!el || paused.current) return;
+      const first = el.firstElementChild as HTMLElement | null;
+      const step = first ? first.getBoundingClientRect().width + 16 : el.clientWidth / 3;
+      // At the end → loop to the start; otherwise advance one card.
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 4) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: step, behavior: "smooth" });
+      }
+    }, 5000);
+    return () => clearInterval(id);
+  }, [loading, movers.length]);
 
   if (!loading && movers.length === 0) return null;
 
@@ -33,12 +57,17 @@ export function TopMoversCarousel() {
         </Link>
       </div>
 
-      <div className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        ref={scrollRef}
+        onMouseEnter={() => (paused.current = true)}
+        onMouseLeave={() => (paused.current = false)}
+        className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {loading
-          ? Array.from({ length: 6 }).map((_, i) => (
+          ? Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="h-[168px] w-[210px] shrink-0 animate-pulse rounded-[18px] border border-black/10 bg-black/[0.03]"
+                className={`${CARD_BASIS} h-[168px] shrink-0 grow-0 animate-pulse rounded-[18px] border border-black/10 bg-black/[0.03]`}
               />
             ))
           : movers.map((m) => {
@@ -48,7 +77,7 @@ export function TopMoversCarousel() {
                 <Link
                   key={m.id}
                   href={`/asset/${m.id}`}
-                  className="group flex w-[210px] shrink-0 snap-start flex-col justify-between rounded-[18px] border border-black/10 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-black/25 hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]"
+                  className={`${CARD_BASIS} group flex shrink-0 grow-0 snap-start flex-col justify-between rounded-[18px] border border-black/10 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-black/25 hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]`}
                 >
                   <div className="flex items-start justify-between">
                     <AssetIcon src={assetLogoSrc(m.id)} label={assetIconLabel(m.id, m.symbol)} size={44} />

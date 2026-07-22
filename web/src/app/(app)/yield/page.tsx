@@ -17,7 +17,6 @@ import { isPriceExposure } from "@/lib/yield/assets";
 import { XSTOCKS } from "@/lib/yield/xstocks";
 import { GOLD } from "@/lib/yield/gold";
 import { AssetSection } from "@/components/asset-section";
-import { ArtBand } from "@/components/art-band";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { useT } from "@/lib/i18n";
 
@@ -274,8 +273,6 @@ export default function YieldPage() {
           {t("yield.nfa.body")}
         </p>
       </div>
-
-      <ArtBand src="/art/coin-stacking.webp" caption="where your money sleeps" />
     </div>
   );
 }
