@@ -25,7 +25,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <AuthGuard>
                 {/* Flex column so the photo footer sits pinned below the content (never
                     overlapping it — text stays legible) and spans the full page width. */}
-                <div className="flex min-h-screen flex-col bg-white">
+                <div className="flex min-h-screen flex-col">
+                  {/* barely-there page texture — shows through the gutters, never over cards */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/art/coin-collage.webp"
+                    alt=""
+                    aria-hidden
+                    className="pointer-events-none fixed inset-0 -z-10 h-full w-full select-none object-cover opacity-[0.035]"
+                  />
                   <TopNav />
                   <div className="mx-auto w-full max-w-[1100px] flex-1 px-5 pt-6">
                     <PendingBridgeBanner />
