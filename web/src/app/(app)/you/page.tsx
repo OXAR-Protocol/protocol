@@ -7,6 +7,7 @@ import { Copy, Check, LogOut } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { LanguagePicker } from "@/components/language-picker";
+import { EarlyRiserBadge } from "@/components/early-riser-badge";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useT } from "@/lib/i18n";
 
@@ -69,6 +70,7 @@ export default function YouPage() {
               {t("you.signedOut")}
             </div>
           )}
+          <EarlyRiserBadge />
         </div>
       </motion.section>
 

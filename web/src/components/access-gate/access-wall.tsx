@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ComingSoon, type Standing } from "./coming-soon";
 import { isValidInviteCode, INVITE_FLAG, CHANNEL_KEY } from "./invite";
+import { markFirstSeen } from "@/lib/badge/early-riser";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const UNLOCK_KEY = "oxar.access.unlocked.v1";
@@ -47,10 +48,13 @@ export function AccessWall({ children }: { children: ReactNode }) {
         // Remember which channel they arrived through (first-touch) so we can later
         // attribute their signup + deposits — recorded to `events` once a wallet exists.
         if (!window.localStorage.getItem(CHANNEL_KEY)) window.localStorage.setItem(CHANNEL_KEY, code);
+        markFirstSeen(); // stamp the closed-alpha "Early Riser" first-visit
         setState("unlocked");
         return;
       }
-      setState(window.localStorage.getItem(UNLOCK_KEY) ? "unlocked" : "locked");
+      const unlocked = !!window.localStorage.getItem(UNLOCK_KEY);
+      if (unlocked) markFirstSeen();
+      setState(unlocked ? "unlocked" : "locked");
     } catch {
       setState("locked");
     }
@@ -76,6 +80,7 @@ export function AccessWall({ children }: { children: ReactNode }) {
         } catch {
           /* ignore */
         }
+        markFirstSeen(); // stamp the closed-alpha "Early Riser" first-visit
         setState("unlocked");
       } else {
         setDenial({
