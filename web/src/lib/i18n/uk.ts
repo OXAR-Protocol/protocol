@@ -135,6 +135,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "you.signOut": "вийти",
   "badge.earlyRiser.title": "early riser",
   "badge.earlyRiser.subtitle": "був тут, поки ринок ще спав",
+  "badge.earlyRiser.tag": "закрита альфа",
 
   "risk.low": "низький ризик",
   "risk.medium": "середній ризик",

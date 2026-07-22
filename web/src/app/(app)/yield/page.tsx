@@ -275,7 +275,7 @@ export default function YieldPage() {
         </p>
       </div>
 
-      <ArtBand src="/art/coin-stacking.webp" />
+      <ArtBand src="/art/coin-stacking.webp" caption="where your money sleeps" />
     </div>
   );
 }
