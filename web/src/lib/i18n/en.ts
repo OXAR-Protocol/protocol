@@ -147,6 +147,7 @@ export const en = {
   "you.signOut": "sign out",
   "badge.earlyRiser.title": "early riser",
   "badge.earlyRiser.subtitle": "here while the market was still asleep",
+  "badge.earlyRiser.tag": "closed alpha",
 
   // Risk labels
   "risk.low": "low risk",
