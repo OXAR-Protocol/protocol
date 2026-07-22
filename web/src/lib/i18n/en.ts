@@ -33,6 +33,8 @@ export const en = {
   "home.whereSleeping": "where it's sleeping",
   "home.manage": "manage →",
   "home.recentActivity": "recent activity",
+  "movers.title": "on the move · 24h",
+  "movers.all": "see all →",
   "home.earned.yield": "yield",
   "home.earned.stocks": "stocks",
   "home.earned.gold": "gold",
