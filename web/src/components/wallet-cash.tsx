@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
+import { PhotoBg } from "@/components/photo-bg";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useT } from "@/lib/i18n";
 
@@ -29,9 +30,10 @@ export function WalletCash() {
   return (
     <Link
       href="/yield"
-      className="group mb-12 block rounded-[12px] border border-black/10 bg-white p-5 transition-colors hover:border-black/30"
+      className="group relative mb-12 block overflow-hidden rounded-[12px] border border-black/10 bg-white p-5 transition-colors hover:border-black/30"
     >
-      <div className="flex items-start justify-between gap-4">
+      <PhotoBg src="/art/dripping-dollar.webp" scrim="left" position="object-[right_top]" />
+      <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">{t("home.wallet.label")}</p>
           <p className="mt-2 text-[clamp(1.5rem,3.5vw,2.25rem)] font-light leading-none text-black tabular-nums">
@@ -45,7 +47,7 @@ export function WalletCash() {
       </div>
 
       {/* What's sitting there — a few asset chips for tangibility. */}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <div className="relative mt-4 flex flex-wrap items-center gap-2">
         {chips.map((a) => (
           <span
             key={`${a.chain}:${a.network ?? ""}:${a.mint}`}

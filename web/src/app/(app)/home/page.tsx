@@ -12,6 +12,7 @@ import { LiveEarned } from "@/components/live-earned";
 import { ActivityFeed } from "@/components/activity-feed";
 import { WalletCash } from "@/components/wallet-cash";
 import { TopMoversCarousel } from "@/components/top-movers-carousel";
+import { PhotoBg } from "@/components/photo-bg";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
 import { useStockPrices } from "@/hooks/use-stock-prices";
@@ -144,19 +145,7 @@ export default function HomePage() {
           className="mb-12"
         >
           <div className="relative overflow-hidden rounded-[16px] border border-black/10 bg-white">
-            {/* pitch-collage photo filling the whole block as its background */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/art/coin-stacking.webp"
-              alt=""
-              aria-hidden
-              className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-right"
-            />
-            {/* legibility scrim — solid white on the left, fading to reveal the photo on the right */}
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/20"
-            />
+            <PhotoBg src="/art/coin-stacking.webp" scrim="left" position="object-right" />
             <div className="relative p-8 md:p-10">
               <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#3c05c7]/10 border border-[#3c05c7]/30 lowercase text-[10px] tracking-widest text-[#3c05c7]">
                 <Sparkles size={10} strokeWidth={1.5} />
