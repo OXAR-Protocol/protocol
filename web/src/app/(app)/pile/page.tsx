@@ -84,7 +84,7 @@ export default function PilePage() {
         transition={{ duration: 0.5, delay: 0.05 }}
         className="relative mt-8 overflow-hidden p-6 rounded-[8px] border border-black/10"
       >
-        <PhotoBg src="/art/torn-eyes.webp" scrim="left" position="object-center" />
+        <PhotoBg src="/art/coin-stacking.webp" scrim="left" position="object-right" />
         <p className="relative text-xs lowercase tracking-[0.2em] text-black/40">
           {t("pile.total")}
         </p>
@@ -136,15 +136,14 @@ export default function PilePage() {
             <Loader2 className="animate-spin text-black/40" size={24} />
           </div>
         ) : held.length === 0 ? (
-          <div className="relative overflow-hidden p-8 rounded-[8px] border border-black/10 text-center">
-            <PhotoBg src="/art/coin-collage.webp" scrim="center" position="object-center" />
-            <p className="relative text-base text-black">{t("pile.empty.title")}</p>
-            <p className="relative mt-1 text-xs text-black/45">
+          <div className="p-8 rounded-[8px] border border-black/10 text-center">
+            <p className="text-base text-black">{t("pile.empty.title")}</p>
+            <p className="mt-1 text-xs text-black/45">
               {t("pile.empty.body")}
             </p>
             <Link
               href="/yield"
-              className="relative mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
             >
               {t("pile.explore")}
               <ArrowUpRight size={14} strokeWidth={1.5} />

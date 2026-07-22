@@ -23,15 +23,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <WarpProvider>
               <WarpOnEntry />
               <AuthGuard>
-                <div className="min-h-screen bg-white">
+                {/* Flex column so the photo footer is pushed to the very bottom even on
+                    short pages (no floating whitespace under it) and spans full width. */}
+                <div className="flex min-h-screen flex-col bg-white">
                   <TopNav />
-                  <div className="mx-auto max-w-[1100px] px-5 pb-28 pt-6 md:pb-16">
+                  <div className="mx-auto w-full max-w-[1100px] flex-1 px-5 pt-6">
                     <PendingBridgeBanner />
                     {children}
-                    <PhotoFooter />
                     <JoinCapture />
                     <ChannelReport />
                   </div>
+                  <PhotoFooter />
                 </div>
                 <TabBar />
               </AuthGuard>
