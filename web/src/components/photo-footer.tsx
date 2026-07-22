@@ -1,14 +1,19 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
 /**
- * Torn-paper dollar-bill eyes as a clean full-width footer at the very bottom of the
- * page — content sits ABOVE it (never overlapping, so text stays legible). The top
- * emerges from the page (white → transparent), the bottom darkens for depth, and the
- * whole thing gently fades/rises into view when the user scrolls down to it.
+ * Torn-paper dollar-bill eyes as a clean full-width footer at the bottom of the page —
+ * content sits ABOVE it (never overlapping, so text stays legible). Dimmed so it reads
+ * as a soft background, not a loud image. Hidden on the asset page (too content-dense).
+ * The top emerges from the page (white → transparent), the bottom darkens for depth,
+ * and the whole thing gently fades/rises into view when scrolled to.
  */
 export function PhotoFooter() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/asset")) return null;
+
   return (
     <motion.div
       aria-hidden
@@ -23,12 +28,12 @@ export function PhotoFooter() {
         src="/art/torn-eyes.webp"
         alt=""
         loading="lazy"
-        className="absolute inset-0 h-full w-full object-cover object-[center_40%]"
+        className="absolute inset-0 h-full w-full object-cover object-[center_40%] opacity-[0.55]"
       />
       {/* emerge from the page: white top melting into the photo */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#ffffff_0%,rgba(255,255,255,0)_45%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#ffffff_0%,rgba(255,255,255,0)_50%)]" />
       {/* subtle darkening at the very bottom for depth */}
-      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-b from-transparent to-black/20" />
+      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-b from-transparent to-black/10" />
     </motion.div>
   );
 }

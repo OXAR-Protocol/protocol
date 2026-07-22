@@ -28,7 +28,7 @@ export function EarlyRiserBadge() {
         <Sunrise size={40} strokeWidth={1.6} />
       </div>
       <div className="relative">
-        <p className="font-serif text-[24px] leading-none text-black">
+        <p className="text-[20px] font-semibold tracking-[-0.01em] text-black">
           {t("badge.earlyRiser.title")}
         </p>
         <span className="mt-2 inline-block rounded-full bg-[#3c05c7]/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-[#3c05c7]">
