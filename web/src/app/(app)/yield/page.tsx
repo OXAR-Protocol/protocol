@@ -17,7 +17,6 @@ import { isPriceExposure } from "@/lib/yield/assets";
 import { XSTOCKS } from "@/lib/yield/xstocks";
 import { GOLD } from "@/lib/yield/gold";
 import { AssetSection } from "@/components/asset-section";
-import { PhotoBg } from "@/components/photo-bg";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { useT } from "@/lib/i18n";
 
@@ -268,10 +267,9 @@ export default function YieldPage() {
         </p>
       )}
 
-      <div className="relative mt-12 overflow-hidden p-5 rounded-[8px] border border-black/10">
-        <PhotoBg src="/art/coin-collage.webp" scrim="left" position="object-right" />
-        <p className="relative text-sm text-black">{t("yield.nfa.title")}</p>
-        <p className="relative mt-1 text-xs text-black/45 leading-relaxed">
+      <div className="mt-12 p-5 rounded-[8px] border border-black/10">
+        <p className="text-sm text-black">{t("yield.nfa.title")}</p>
+        <p className="mt-1 text-xs text-black/45 leading-relaxed">
           {t("yield.nfa.body")}
         </p>
       </div>
