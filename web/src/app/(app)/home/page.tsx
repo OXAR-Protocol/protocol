@@ -12,7 +12,6 @@ import { LiveEarned } from "@/components/live-earned";
 import { ActivityFeed } from "@/components/activity-feed";
 import { WalletCash } from "@/components/wallet-cash";
 import { TopMoversCarousel } from "@/components/top-movers-carousel";
-import { ArtBand } from "@/components/art-band";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
 import { useStockPrices } from "@/hooks/use-stock-prices";
@@ -144,39 +143,29 @@ export default function HomePage() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="mb-12"
         >
-          <div className="overflow-hidden rounded-[16px] border border-black/10 bg-white p-8 md:p-10">
-            <div className="flex flex-col items-center gap-8 md:flex-row md:justify-between md:gap-10">
-              <div className="w-full md:max-w-md">
-                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#3c05c7]/10 border border-[#3c05c7]/30 lowercase text-[10px] tracking-widest text-[#3c05c7]">
-                  <Sparkles size={10} strokeWidth={1.5} />
-                  {t("home.startHere")}
-                </span>
-                <h2 className="mt-4 text-2xl md:text-3xl text-black leading-tight lowercase">
-                  {t("home.napping1")}
-                  <br />
-                  <span className="text-black/55">{t("home.napping2")}</span>
-                </h2>
-                <p className="mt-3 text-sm text-black/45 max-w-md leading-relaxed">
-                  {t("home.empty.body")}
-                </p>
-                <div className="mt-6">
-                  <Link
-                    href="/yield"
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
-                  >
-                    {t("home.wakeUp")}
-                    <ArrowUpRight size={14} strokeWidth={1.5} />
-                  </Link>
-                </div>
+          <div className="relative overflow-hidden rounded-[12px] border border-black/10 bg-white p-8 md:p-10">
+            <div className="relative">
+              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#3c05c7]/10 border border-[#3c05c7]/30 lowercase text-[10px] tracking-widest text-[#3c05c7]">
+                <Sparkles size={10} strokeWidth={1.5} />
+                {t("home.startHere")}
+              </span>
+              <h2 className="mt-4 text-2xl md:text-3xl text-black leading-tight lowercase">
+                {t("home.napping1")}
+                <br />
+                <span className="text-black/55">{t("home.napping2")}</span>
+              </h2>
+              <p className="mt-3 text-sm text-black/45 max-w-md leading-relaxed">
+                {t("home.empty.body")}
+              </p>
+              <div className="mt-6">
+                <Link
+                  href="/yield"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
+                >
+                  {t("home.wakeUp")}
+                  <ArrowUpRight size={14} strokeWidth={1.5} />
+                </Link>
               </div>
-              {/* full pitch-collage art — shown whole, not cropped */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/art/coin-stacking.webp"
-                alt=""
-                aria-hidden
-                className="pointer-events-none w-[200px] shrink-0 select-none md:w-[240px]"
-              />
             </div>
           </div>
         </motion.section>
@@ -256,8 +245,6 @@ export default function HomePage() {
         </p>
         <ActivityFeed />
       </motion.section>
-
-      <ArtBand src="/art/coin-collage.webp" caption="where your money sleeps" />
     </div>
   );
 }
