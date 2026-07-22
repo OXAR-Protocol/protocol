@@ -1,27 +1,34 @@
+"use client";
+
+import { motion } from "framer-motion";
+
 /**
- * Torn-paper dollar-bill eyes as a full-width background layer pinned to the bottom of
- * the page, sitting BEHIND the content (z-0). It starts well above the page bottom so
- * the last page elements overlap onto it; the top fades out of the page (white →
- * transparent) so the transition stays soft. Purely decorative.
- *
- * Place as the last child of a `relative` full-height container; give the content
- * column `relative z-10` so it renders on top.
+ * Torn-paper dollar-bill eyes as a clean full-width footer at the very bottom of the
+ * page — content sits ABOVE it (never overlapping, so text stays legible). The top
+ * emerges from the page (white → transparent), the bottom darkens for depth, and the
+ * whole thing gently fades/rises into view when the user scrolls down to it.
  */
 export function PhotoFooter() {
   return (
-    <div
+    <motion.div
       aria-hidden
-      className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[380px] select-none overflow-hidden md:h-[520px]"
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="relative mt-12 mb-16 h-56 w-full select-none overflow-hidden md:mb-0 md:h-80"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/art/torn-eyes.webp"
         alt=""
         loading="lazy"
-        className="absolute inset-0 h-full w-full object-cover object-center"
+        className="absolute inset-0 h-full w-full object-cover object-[center_40%]"
       />
-      {/* smooth start: the page (white) melts down into the photo over the top third */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#ffffff_0%,rgba(255,255,255,0)_40%)]" />
-    </div>
+      {/* emerge from the page: white top melting into the photo */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#ffffff_0%,rgba(255,255,255,0)_45%)]" />
+      {/* subtle darkening at the very bottom for depth */}
+      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-b from-transparent to-black/20" />
+    </motion.div>
   );
 }
