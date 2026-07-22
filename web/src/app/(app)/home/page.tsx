@@ -11,6 +11,8 @@ import { LiveAmount } from "@/components/live-amount";
 import { LiveEarned } from "@/components/live-earned";
 import { ActivityFeed } from "@/components/activity-feed";
 import { WalletCash } from "@/components/wallet-cash";
+import { TopMoversCarousel } from "@/components/top-movers-carousel";
+import { ArtBand } from "@/components/art-band";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
 import { useStockPrices } from "@/hooks/use-stock-prices";
@@ -131,6 +133,9 @@ export default function HomePage() {
       {/* Money in the wallet, not put to work yet — nudge to invest it. */}
       <WalletCash />
 
+      {/* Top movers — discovery strip across stocks + gold (24h). */}
+      <TopMoversCarousel />
+
       {/* Empty state — first-time hero */}
       {totalUsdc === 0 && !loading && (
         <motion.section
@@ -140,6 +145,14 @@ export default function HomePage() {
           className="mb-12"
         >
           <div className="relative overflow-hidden rounded-[12px] border border-black/10 bg-white p-8 md:p-10">
+            {/* pitch-collage art bleeding in from the right — behind the copy */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/art/coin-stacking.webp"
+              alt=""
+              aria-hidden
+              className="pointer-events-none absolute -right-8 -bottom-10 hidden h-[150%] w-auto select-none opacity-[0.13] [mask-image:linear-gradient(to_left,#000,transparent)] sm:block"
+            />
             <div className="relative">
               <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#3c05c7]/10 border border-[#3c05c7]/30 lowercase text-[10px] tracking-widest text-[#3c05c7]">
                 <Sparkles size={10} strokeWidth={1.5} />
@@ -241,6 +254,8 @@ export default function HomePage() {
         </p>
         <ActivityFeed />
       </motion.section>
+
+      <ArtBand src="/art/coin-collage.webp" />
     </div>
   );
 }

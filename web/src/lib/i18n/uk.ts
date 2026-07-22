@@ -27,6 +27,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "home.whereSleeping": "де вони сплять",
   "home.manage": "керувати →",
   "home.recentActivity": "остання активність",
+  "movers.title": "у русі · 24 год",
+  "movers.all": "усі →",
   "home.earned.yield": "дохід",
   "home.earned.stocks": "акції",
   "home.earned.gold": "золото",
