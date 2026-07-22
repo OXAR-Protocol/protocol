@@ -100,7 +100,7 @@ export function TopMoversCarousel() {
                     </span>
                   </div>
                   <div className="relative mt-5 min-w-0">
-                    <p className="truncate font-serif text-[19px] leading-tight text-black">{m.name}</p>
+                    <p className="truncate text-[15px] text-black">{m.name}</p>
                     <p className="mt-1 text-[22px] font-medium leading-none tabular-nums tracking-[-0.02em] text-black">
                       ${m.price < 1 ? m.price.toFixed(4) : m.price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
