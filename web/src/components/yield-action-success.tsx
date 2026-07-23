@@ -60,7 +60,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         className="relative"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/art/handshake.webp" alt="" className="h-40 w-auto select-none md:h-44" />
+        <img src="/art/handshake-cut.webp" alt="" className="h-40 w-auto select-none md:h-44" />
       </motion.div>
 
       <motion.div
