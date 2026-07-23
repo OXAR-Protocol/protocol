@@ -9,6 +9,7 @@ import { SectionLabel } from "@/components/section-label";
 import { LanguagePicker } from "@/components/language-picker";
 import { EarlyRiserBadge } from "@/components/early-riser-badge";
 import { useSolanaContext } from "@/providers/solana-provider";
+import { useSolanaName } from "@/hooks/use-solana-name";
 import { useT } from "@/lib/i18n";
 
 export default function YouPage() {
@@ -20,6 +21,7 @@ export default function YouPage() {
   const email = user?.email?.address;
   // The OXAR account wallet — your funds & positions live here (yield is on Solana).
   const solana = walletAddress?.toBase58() ?? user?.wallet?.address ?? null;
+  const solName = useSolanaName(solana);
 
   const handleCopy = (address: string) => {
     navigator.clipboard.writeText(address);
@@ -61,6 +63,7 @@ export default function YouPage() {
               label={t("you.wallet")}
               hint={t("you.walletHint")}
               address={solana}
+              name={solName}
               copied={copiedAddr === solana}
               onCopy={() => handleCopy(solana)}
             />
@@ -112,6 +115,7 @@ function WalletCard({
   label,
   hint,
   address,
+  name,
   copied,
   onCopy,
   dim,
@@ -119,11 +123,14 @@ function WalletCard({
   label: string;
   hint: string;
   address: string;
+  /** Primary .sol name (SNS), shown above the address when resolved. */
+  name?: string | null;
   copied: boolean;
   onCopy: () => void;
   dim?: boolean;
 }) {
   const { t } = useT();
+  const short = `${address.slice(0, 6)}…${address.slice(-6)}`;
   return (
     <div
       className={`flex items-center justify-between p-4 rounded-[5px] border ${
@@ -133,9 +140,9 @@ function WalletCard({
       <div className="min-w-0">
         <p className="text-xs lowercase tracking-wide text-black/40">{label}</p>
         <p className={`mt-1 text-sm ${dim ? "text-black/55" : "text-black"}`}>
-          {`${address.slice(0, 6)}…${address.slice(-6)}`}
+          {name ?? short}
         </p>
-        <p className="mt-1 text-[10px] text-black/40">{hint}</p>
+        <p className="mt-1 text-[10px] text-black/40">{name ? short : hint}</p>
       </div>
       <button
         onClick={onCopy}
