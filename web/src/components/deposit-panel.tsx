@@ -101,9 +101,9 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const isDirect = payAsset?.chain === "solana" && payAsset.mint === view.assetMint;
 
   const unitPrice = payAsset && payAsset.uiAmount > 0 ? payAsset.usdValue / payAsset.uiAmount : 0;
-  // Until the user types, default to ≈ $50 of the selected currency.
-  const defaultAmount = unitPrice > 0 ? String(Number((50 / unitPrice).toPrecision(4))) : "";
-  const effectiveAmount = amount ?? defaultAmount;
+  // Start empty (0) — the user types how much; nothing is pre-filled, so the
+  // buy/deposit button stays disabled until they enter an amount.
+  const effectiveAmount = amount ?? "";
   const usdAmount = (parseFloat(effectiveAmount) || 0) * unitPrice;
 
   // Quantity entry: type N units (e.g. shares) → fill the pay amount with the

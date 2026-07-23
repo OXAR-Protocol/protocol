@@ -103,14 +103,14 @@ export default function YieldPage() {
               <button
                 key={bucket.id}
                 onClick={() => setApyBucket(isActive ? null : bucket.id)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs transition ${
+                title={bucket.description}
+                className={`rounded-full border px-3.5 py-1.5 text-xs lowercase tracking-wide transition ${
                   isActive
-                    ? "border-[#3c05c7]/60 bg-[#3c05c7]/[0.06] text-black"
-                    : "border-black/10 hover:border-black/30 text-black/60"
+                    ? "border-[#3c05c7]/50 bg-[#3c05c7]/[0.06] text-black"
+                    : "border-black/10 text-black/55 hover:border-black/30 hover:text-black"
                 }`}
               >
-                <span>{bucket.emoji}</span>
-                <span className="lowercase tracking-wide">{bucket.label}</span>
+                {bucket.label}
               </button>
             );
           })}
