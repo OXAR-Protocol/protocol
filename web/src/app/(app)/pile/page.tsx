@@ -68,7 +68,7 @@ export default function PilePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <SectionLabel>Your pile</SectionLabel>
+        <SectionLabel>portfolio</SectionLabel>
         <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-black leading-[1.04] tracking-[-0.04em] lowercase">
           {t("pile.title")}
         </h1>

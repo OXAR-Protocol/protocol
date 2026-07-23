@@ -76,10 +76,12 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">
           {verb}
         </p>
-        <p className="mt-2 text-3xl text-black tabular-nums">
+        <p className="mt-2 text-[40px] font-medium leading-none tracking-[-0.02em] text-black tabular-nums">
           ${result.amount.toFixed(2)}
         </p>
-        <p className="mt-1 text-xs text-black/45">{result.symbol}</p>
+        <span className="mt-3 inline-block rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-[11px] lowercase tracking-wide text-black/55">
+          {result.symbol}
+        </span>
         {result.pending && (
           <p className="mt-2 max-w-[260px] text-[12px] leading-snug text-black/45">
             {t("success.bridgingBody")}

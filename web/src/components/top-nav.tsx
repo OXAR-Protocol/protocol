@@ -10,7 +10,7 @@ import { WalletMenu } from "@/components/wallet-menu";
 const tabs = [
   { href: "/home", label: "home" },
   { href: "/yield", label: "yield" },
-  { href: "/pile", label: "pile" },
+  { href: "/pile", label: "portfolio" },
   { href: "/you", label: "you" },
 ] as const;
 
