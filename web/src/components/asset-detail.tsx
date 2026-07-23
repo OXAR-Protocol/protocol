@@ -51,7 +51,7 @@ export function AssetDetail({
   const { prices } = useStockPrices(price && view.heldMint ? [view.heldMint] : []);
   const earnings = useEarnings();
 
-  const [amount, setAmount] = useState(10);
+  const [amount, setAmount] = useState(0);
   const [result, setResult] = useState<ActionResult | null>(null);
 
   const positionValue = fromBaseUnits(view.underlyingBalance, view.decimals);
