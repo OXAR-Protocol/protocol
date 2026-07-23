@@ -80,7 +80,7 @@ export function TopMoversCarousel() {
                   href={`/asset/${m.id}`}
                   className={`${CARD_BASIS} group relative isolate flex shrink-0 grow-0 snap-start flex-col justify-between overflow-hidden rounded-[18px] border border-black/10 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-black/25 hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]`}
                 >
-                  <BanknoteBg seed={m.id} />
+                  <BanknoteBg seed={m.id} hover />
                   <div className="relative flex items-start justify-between">
                     <AssetIcon src={assetLogoSrc(m.id)} label={assetIconLabel(m.id, m.symbol)} size={44} />
                     <span
