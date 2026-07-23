@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -23,8 +24,9 @@ interface Props {
 }
 
 /**
- * Confirmation overlay shown after a deposit/withdraw lands on-chain. An animated
- * check + amount so the user has unmistakable feedback that the move happened.
+ * Full-screen confirmation shown after a deposit/withdraw lands on-chain. Fixed and
+ * centred on the viewport (can't scroll away), with the brand handshake art + amount
+ * so the user gets unmistakable feedback that the move happened.
  */
 export function YieldActionSuccess({ result, onDone, address }: Props) {
   const { t } = useT();
@@ -34,14 +36,23 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
       ? t("success.deposited")
       : t("success.withdrew");
 
+  // Lock background scroll while the full-screen confirmation is up.
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="app-texture absolute inset-0 z-10 flex flex-col items-center justify-center gap-5 rounded-[12px] px-6 text-center"
+      className="app-texture fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 px-6 text-center"
     >
-      {/* Brand hero — money resting on a cloud — with a check badge for the success cue. */}
+      {/* Brand hero — a handshake: the move is done (same for deposit and withdraw). */}
       <motion.div
         initial={{ scale: 0.7, opacity: 0, y: 10 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -51,26 +62,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         {/* soft violet glow behind the art */}
         <div className="pointer-events-none absolute inset-0 -z-10 m-auto h-28 w-28 rounded-full bg-[#3c05c7]/15 blur-3xl" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/join-cloud-v3.webp" alt="" className="h-36 w-auto select-none md:h-40" />
-        <motion.span
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", damping: 12, stiffness: 260, delay: 0.25 }}
-          className="absolute bottom-0 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#3c05c7] text-white shadow-[0_6px_18px_rgba(60,5,199,0.4)] ring-4 ring-[#fbfaf8]"
-        >
-          <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
-            <motion.path
-              d="M11 20.5L17 26.5L29 13.5"
-              stroke="currentColor"
-              strokeWidth={3}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.4, delay: 0.4, ease: "easeInOut" }}
-            />
-          </svg>
-        </motion.span>
+        <img src="/art/handshake.webp" alt="" className="h-32 w-auto select-none md:h-36" />
       </motion.div>
 
       <motion.div

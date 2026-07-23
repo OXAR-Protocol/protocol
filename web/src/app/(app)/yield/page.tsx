@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { X, List, LayoutGrid } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
-import { CustomSelect } from "@/components/custom-select";
 import { YIELD_SOURCES, APY_BUCKETS, type ApyBucket } from "@oxar/sdk";
 import { YieldSourceRow } from "@/components/yield-source-row";
 import { YieldProviderRow } from "@/components/yield-provider-row";
@@ -21,8 +20,6 @@ import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { useT } from "@/lib/i18n";
 
 type Layout = "list" | "grid";
-
-type ChainFilter = "all" | "solana" | "ethereum";
 
 function matchesApyBucket(bucket: ApyBucket | null, apyPercent: number): boolean {
   if (!bucket) return true;
@@ -41,7 +38,6 @@ export default function YieldPage() {
   const router = useRouter();
   const { t } = useT();
   const [apyBucket, setApyBucket] = useState<ApyBucket | null>(null);
-  const [chain, setChain] = useState<ChainFilter>("all");
   const [layout, setLayout] = useState<Layout>("list");
 
   useEffect(() => {
@@ -59,10 +55,9 @@ export default function YieldPage() {
   const liveSources = useMemo(() => {
     return views.filter((v) => {
       if (isPriceExposure(v.id)) return false; // stocks & gold show in their own price-framed sections
-      if (chain !== "all" && v.chain !== chain) return false;
       return matchesApyBucket(apyBucket, v.apy * 100);
     });
-  }, [views, apyBucket, chain]);
+  }, [views, apyBucket]);
 
   // Collapse same-protocol stablecoins (Jupiter) into one card; others stay standalone.
   const liveGroups = useMemo(() => groupProviderViews(liveSources), [liveSources]);
@@ -70,10 +65,9 @@ export default function YieldPage() {
   // Roadmap catalog — sources not yet integrated as live providers.
   const roadmap = useMemo(() => {
     return YIELD_SOURCES.filter((s) => {
-      if (chain !== "all" && s.chain !== chain) return false;
       return matchesApyBucket(apyBucket, s.baseApy);
     });
-  }, [apyBucket, chain]);
+  }, [apyBucket]);
 
   const roadmapNative = roadmap.filter((s) => !s.viaDelora);
   const roadmapCrossChain = roadmap.filter((s) => s.viaDelora);
@@ -132,18 +126,6 @@ export default function YieldPage() {
               {t("yield.clear")}
             </button>
           )}
-        </div>
-
-        <div className="ml-auto">
-          <CustomSelect
-            value={chain}
-            onChange={(v) => setChain(v as ChainFilter)}
-            options={[
-              { value: "all", label: t("yield.chain.all") },
-              { value: "solana", label: t("yield.chain.solana") },
-              { value: "ethereum", label: t("yield.chain.cross") },
-            ]}
-          />
         </div>
       </motion.section>
 
