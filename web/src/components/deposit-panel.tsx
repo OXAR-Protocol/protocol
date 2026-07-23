@@ -172,7 +172,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
   if (confirming && payAsset) {
     return (
-      <div className="p-4 rounded-[6px] border border-black/10">
+      <div className="p-4 rounded-[6px] border border-black/10 bg-white">
         <DepositConfirm
           verb={verb}
           usdAmount={usdAmount}
@@ -193,7 +193,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   }
 
   return (
-    <div className="p-4 rounded-[6px] border border-black/10">
+    <div className="p-4 rounded-[6px] border border-black/10 bg-white">
       {/* Label the field as the PAYMENT method — without this the prominent "USDC"
           reads as if the user is buying USDC, not paying with it for the asset. */}
       <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">{t("deposit.payWith")}</p>

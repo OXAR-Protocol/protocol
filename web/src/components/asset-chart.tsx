@@ -54,7 +54,7 @@ export function AssetChart({ mint }: { mint: string }) {
   const hi = closes.length > 1 ? Math.max(...closes) : null;
 
   return (
-    <div className="p-5 rounded-[12px] border border-black/10">
+    <div className="p-5 rounded-[12px] border border-black/10 bg-white">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex flex-col gap-1">
           {changePct !== null && (

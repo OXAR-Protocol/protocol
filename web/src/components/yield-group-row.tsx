@@ -26,7 +26,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group w-full text-left p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition"
+      className="group w-full text-left p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition"
     >
       <div className="flex items-center gap-4">
         <AssetIcon src={assetLogoSrc(group.views[0]?.id ?? "")} label={group.name} size={36} />

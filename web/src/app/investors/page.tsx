@@ -32,7 +32,7 @@ export default function InvestorsPage() {
           <strong>Connect your wallet</strong> (Phantom, Backpack, MetaMask). Apple Pay / Google Pay deposits via Ramp Network are on the way. Pick a risk template: Sleepy (4-6%), Walking (6-9%), Running (9-14%).
         </p>
         <p className="mt-3">
-          Your USDC routes into <strong>curated yield sources</strong>: Jupiter Lend, Kamino USDC, Ondo USDY (US Treasuries) and Maple (institutional credit) live today, with more on the way. Cross-chain access via Delora — no bridges to manage.
+          Your USDC routes into <strong>curated yield sources</strong>: Jupiter Lend, Ondo USDY (US Treasuries) and Maple (institutional credit) live today, with more on the way. Cross-chain access via Delora — no bridges to manage.
         </p>
         <p className="mt-3">
           Beyond yield, buy <strong>tokenized stocks and gold</strong> (Backed xStocks, Tether Gold) and hold them in your own wallet — real price exposure with on-chain P&amp;L. Each asset has its own page explaining what it is. <strong>Tokenized bonds</strong> and new asset classes are next.
@@ -75,7 +75,7 @@ export default function InvestorsPage() {
       <section>
         <h2>7. Status & roadmap</h2>
         <p>
-          <strong>Now:</strong> Live on Solana <strong>mainnet</strong> — a non-custodial UI over audited protocol SDKs (Jupiter Lend, Kamino), with no contract of our own to deploy or audit. USDC yield plus tokenized stocks and gold work end-to-end: deposit → earn, or buy → hold → withdraw, all from your own wallet.
+          <strong>Now:</strong> Live on Solana <strong>mainnet</strong> — a non-custodial UI over audited protocol SDKs (Jupiter Lend, Ondo, Maple), with no contract of our own to deploy or audit. USDC yield plus tokenized stocks and gold work end-to-end: deposit → earn, or buy → hold → withdraw, all from your own wallet.
         </p>
         <p className="mt-3">
           <strong>Aug 2026:</strong> Public launch. Yield + tokenized stocks and gold, Apple Pay deposits, polished onboarding.

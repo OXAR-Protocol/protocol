@@ -44,7 +44,7 @@ export default function OnboardingPage() {
         <button
           onClick={() => login()}
           disabled={!ready}
-          className="rounded-[14px] border border-black/10 p-8 text-left transition-colors hover:border-black/30 disabled:opacity-50"
+          className="rounded-[14px] border border-black/10 bg-white p-8 text-left transition-colors hover:border-black/30 disabled:opacity-50"
         >
           <Wallet className="mb-6 text-black/50" size={30} strokeWidth={1.5} />
           <h2 className="lowercase text-[clamp(20px,2.2vw,26px)] tracking-[-0.02em]">{t("onb.crypto.title")}</h2>
@@ -58,7 +58,7 @@ export default function OnboardingPage() {
         </button>
 
         {/* Apple Pay / Google Pay (coming soon) */}
-        <div className="rounded-[14px] border border-black/10 p-8 text-left opacity-80">
+        <div className="rounded-[14px] border border-black/10 bg-white p-8 text-left opacity-80">
           <Smartphone className="mb-6 text-black/50" size={30} strokeWidth={1.5} />
           <h2 className="lowercase text-[clamp(20px,2.2vw,26px)] tracking-[-0.02em]">{t("onb.phone.title")}</h2>
           <p className="mt-2 lowercase text-[clamp(14px,1.2vw,16px)] leading-snug text-black/50">

@@ -6,7 +6,7 @@ const MILESTONES = [
   {
     phase: "now",
     name: "building",
-    copy: "USDC yield live on Solana mainnet (Jupiter Lend, Kamino). Tokenized stocks and gold you can buy and hold. More sources under construction.",
+    copy: "USDC yield live on Solana mainnet (Jupiter Lend). Tokenized stocks and gold you can buy and hold. More sources under construction.",
     size: "clamp(48px,8.9vw,128px)",
     tint: "text-[#3c05c7]",
     current: true,

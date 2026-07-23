@@ -19,7 +19,7 @@ export default function TermsPage() {
       <section>
         <h2>2. What OXAR is</h2>
         <p>
-          OXAR is a <strong>non-custodial software interface</strong> that routes user-owned USDC into curated third-party yield sources (Ondo, Maple, Kamino, Jupiter LP, Sky, and others) and provides infrastructure for shared savings vaults among groups of users.
+          OXAR is a <strong>non-custodial software interface</strong> that routes user-owned USDC into curated third-party yield sources (Ondo, Maple, Jupiter LP, Sky, and others) and provides infrastructure for shared savings vaults among groups of users.
         </p>
         <p className="mt-3">
           We <strong>are not</strong> a bank, broker, custodian, money transmitter, investment advisor, or securities issuer. We do not hold your funds. We do not make investment decisions on your behalf.
@@ -53,7 +53,7 @@ export default function TermsPage() {
       <section>
         <h2>6. Yield sources are third parties</h2>
         <p>
-          The yield sources we integrate (Ondo Finance, Maple Finance, Sky, Kamino, Jupiter, and others) are <strong>independent protocols and issuers</strong> with their own terms, risks, and compliance. We curate but do not operate them. Yield is paid by them, not us.
+          The yield sources we integrate (Ondo Finance, Maple Finance, Sky, Jupiter, and others) are <strong>independent protocols and issuers</strong> with their own terms, risks, and compliance. We curate but do not operate them. Yield is paid by them, not us.
         </p>
       </section>
 

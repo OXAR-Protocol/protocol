@@ -5,8 +5,8 @@ import { DISPLAY } from "./fonts";
 import { Label, Reveal, Spread } from "./primitives";
 
 const SPEEDS = [
-  { name: "sleepy", apy: "4-6%", tag: "slow but steady — Ondo USDY · Kamino USDC", size: "clamp(48px,7.6vw,110px)" },
-  { name: "walking", apy: "6-9%", tag: "balanced pace — Maple Syrup · Kamino · JLP", size: "clamp(64px,12.5vw,180px)", accent: true },
+  { name: "sleepy", apy: "4-6%", tag: "slow but steady — Ondo USDY · Jupiter Lend", size: "clamp(48px,7.6vw,110px)" },
+  { name: "walking", apy: "6-9%", tag: "balanced pace — Maple Syrup · JLP", size: "clamp(64px,12.5vw,180px)", accent: true },
   { name: "running", apy: "9-14%", tag: "fast and loud — JLP · Drift · Jupiter perps", size: "clamp(80px,18vw,260px)" },
 ];
 
