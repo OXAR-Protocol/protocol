@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { AssetDetail } from "@/components/asset-detail";
+import { noteFor } from "@/components/banknote-bg";
 
 export default function AssetPage() {
   const params = useParams();
@@ -48,6 +49,20 @@ export default function AssetPage() {
           onSelectVariant={setVariantId}
           onDone={refresh}
         />
+      )}
+
+      {/* faint banknote engraving as a page sign-off (matches the asset's card bill) */}
+      {view && (
+        <div aria-hidden className="pointer-events-none relative mt-16 h-48 select-none overflow-hidden md:h-64">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={noteFor(id)}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover object-center opacity-[0.09]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-white via-white/40 to-transparent" />
+        </div>
       )}
     </div>
   );

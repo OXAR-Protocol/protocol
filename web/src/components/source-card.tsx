@@ -7,6 +7,7 @@ import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
 import { useApyHistory } from "@/hooks/use-apy-history";
 import { Sparkline } from "@/components/sparkline";
 import { AssetIcon } from "@/components/asset-icon";
+import { BanknoteBg } from "@/components/banknote-bg";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
 
 interface Props {
@@ -27,8 +28,9 @@ export function SourceCard({ group, onOpen }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group flex flex-col gap-4 p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition text-left"
+      className="group relative isolate overflow-hidden flex flex-col gap-4 p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition text-left"
     >
+      <BanknoteBg seed={group.views[0]?.id ?? group.name} />
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-3 min-w-0">
           <AssetIcon src={assetLogoSrc(group.views[0]?.id ?? "")} label={group.name} size={32} />
