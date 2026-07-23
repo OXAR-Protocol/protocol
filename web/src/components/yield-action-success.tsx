@@ -59,10 +59,8 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         transition={{ type: "spring", damping: 15, stiffness: 220 }}
         className="relative"
       >
-        {/* soft violet glow behind the art */}
-        <div className="pointer-events-none absolute inset-0 -z-10 m-auto h-28 w-28 rounded-full bg-[#3c05c7]/15 blur-3xl" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/art/handshake.webp" alt="" className="h-32 w-auto select-none md:h-36" />
+        <img src="/art/handshake.webp" alt="" className="h-40 w-auto select-none md:h-44" />
       </motion.div>
 
       <motion.div
