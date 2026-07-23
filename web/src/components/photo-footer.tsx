@@ -6,13 +6,14 @@ import { motion } from "framer-motion";
 /**
  * Torn-paper dollar-bill eyes as a clean full-width footer at the bottom of the page —
  * content sits ABOVE it (never overlapping, so text stays legible). Dimmed so it reads
- * as a soft background, not a loud image. Hidden on the asset page (too content-dense).
- * The top emerges from the page (white → transparent), the bottom darkens for depth,
- * and the whole thing gently fades/rises into view when scrolled to.
+ * as a soft background, not a loud image. Shown only on the profile page (/you) as a
+ * brand sign-off. The top emerges from the page (white → transparent), the bottom
+ * darkens for depth, and the whole thing gently fades/rises into view when scrolled to.
  */
 export function PhotoFooter() {
   const pathname = usePathname();
-  if (pathname?.startsWith("/asset")) return null;
+  // Brand sign-off — shown only on the profile page (pairs with the Early Riser medal).
+  if (!pathname?.startsWith("/you")) return null;
 
   return (
     <motion.div
