@@ -39,33 +39,38 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-5 rounded-[12px] bg-white px-6 text-center"
+      className="app-texture absolute inset-0 z-10 flex flex-col items-center justify-center gap-5 rounded-[12px] px-6 text-center"
     >
+      {/* Brand hero — money resting on a cloud — with a check badge for the success cue. */}
       <motion.div
-        initial={{ scale: 0.4, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", damping: 14, stiffness: 240 }}
-        className="relative flex h-20 w-20 items-center justify-center rounded-full border border-[#3c05c7]/40 bg-[#3c05c7]/[0.08]"
+        initial={{ scale: 0.7, opacity: 0, y: 10 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        transition={{ type: "spring", damping: 15, stiffness: 220 }}
+        className="relative"
       >
+        {/* soft violet glow behind the art */}
+        <div className="pointer-events-none absolute inset-0 -z-10 m-auto h-28 w-28 rounded-full bg-[#3c05c7]/15 blur-3xl" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/join-cloud-v3.webp" alt="" className="h-36 w-auto select-none md:h-40" />
         <motion.span
-          className="absolute inset-0 rounded-full border border-[#3c05c7]/40"
-          initial={{ scale: 1, opacity: 0.7 }}
-          animate={{ scale: 1.8, opacity: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-        />
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <motion.path
-            d="M11 20.5L17 26.5L29 13.5"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-[#3c05c7]"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.45, delay: 0.15, ease: "easeInOut" }}
-          />
-        </svg>
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", damping: 12, stiffness: 260, delay: 0.25 }}
+          className="absolute bottom-0 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#3c05c7] text-white shadow-[0_6px_18px_rgba(60,5,199,0.4)] ring-4 ring-[#fbfaf8]"
+        >
+          <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
+            <motion.path
+              d="M11 20.5L17 26.5L29 13.5"
+              stroke="currentColor"
+              strokeWidth={3}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.4, delay: 0.4, ease: "easeInOut" }}
+            />
+          </svg>
+        </motion.span>
       </motion.div>
 
       <motion.div

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowDownLeft, ArrowUpRight, Loader2 } from "lucide-react";
 
 import { useActivity } from "@/hooks/use-activity";
@@ -22,9 +23,12 @@ function timeAgo(unixSec: number): string {
 
 /** Recent on-chain activity, derived from the wallet's history. Replaces the old
  *  static "Nothing yet" placeholder with a real feed (links to Solscan). */
+const PAGE = 10;
+
 export function ActivityFeed() {
   const { events, loading } = useActivity();
   const { t } = useT();
+  const [visible, setVisible] = useState(PAGE);
 
   if (loading) {
     return (
@@ -46,7 +50,7 @@ export function ActivityFeed() {
 
   return (
     <div className="border border-black/10 bg-white rounded-[12px] divide-y divide-black/[0.06]">
-      {events.map((e, i) => {
+      {events.slice(0, visible).map((e, i) => {
         const inflow = INFLOW.includes(e.kind);
         const Icon = inflow ? ArrowDownLeft : ArrowUpRight;
         return (
@@ -78,6 +82,14 @@ export function ActivityFeed() {
           </a>
         );
       })}
+      {events.length > visible && (
+        <button
+          onClick={() => setVisible((v) => v + PAGE)}
+          className="w-full p-3.5 text-center text-xs lowercase tracking-wide text-black/50 transition-colors hover:bg-black/[0.04] hover:text-black"
+        >
+          {t("activity.showMore")}
+        </button>
+      )}
     </div>
   );
 }

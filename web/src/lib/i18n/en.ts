@@ -223,6 +223,7 @@ export const en = {
 
   // Activity
   "activity.empty": "nothing yet — your money is still snoring.",
+  "activity.showMore": "show more",
 
   // Cash-out sheet
   "cashout.label": "cash out · coming soon",

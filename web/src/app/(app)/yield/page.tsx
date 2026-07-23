@@ -30,6 +30,13 @@ function matchesApyBucket(bucket: ApyBucket | null, apyPercent: number): boolean
   return cfg ? cfg.matches(apyPercent) : true;
 }
 
+// APY range each bucket covers (keep in sync with APY_BUCKETS.matches in @oxar/sdk).
+const APY_RANGE: Record<ApyBucket, string> = {
+  sleepy: "<6%",
+  walking: "6–9%",
+  running: "9%+",
+};
+
 export default function YieldPage() {
   const router = useRouter();
   const { t } = useT();
@@ -111,6 +118,7 @@ export default function YieldPage() {
                 }`}
               >
                 {bucket.label}
+                <span className={isActive ? "text-[#3c05c7]/70" : "text-black/35"}> · {APY_RANGE[bucket.id]}</span>
               </button>
             );
           })}

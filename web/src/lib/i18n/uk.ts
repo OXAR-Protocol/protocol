@@ -204,6 +204,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "login.continue": "продовжити",
 
   "activity.empty": "поки нічого — твої гроші ще посапують.",
+  "activity.showMore": "показати ще",
 
   "cashout.label": "виведення · скоро",
   "cashout.title": "Виведи на свою картку",
