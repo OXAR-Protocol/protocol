@@ -9,6 +9,7 @@ import { Copy, Check, LogOut, ChevronDown, ArrowUpRight, KeyRound, CreditCard } 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { SendSheet } from "@/components/send-sheet";
 import { CashOutSheet } from "@/components/cash-out-sheet";
+import { useSolanaName } from "@/hooks/use-solana-name";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -28,6 +29,8 @@ export function WalletMenu() {
 
   const solana = walletAddress?.toBase58() ?? null;
   const shortSolana = solana ? `${solana.slice(0, 4)}…${solana.slice(-4)}` : "";
+  // Prefer the wallet's .sol name (SNS) in the pill; fall back to the short address.
+  const solName = useSolanaName(solana);
   // Export only applies to the built-in (embedded) wallet — externals you already control.
   // SAFETY: linkedAccounts is loosely typed by Privy; we read type/chainType/address/walletClientType.
   const isEmbedded = (user?.linkedAccounts ?? []).some(
@@ -60,7 +63,7 @@ export function WalletMenu() {
         className="inline-flex items-center gap-2 rounded-full border border-black/15 px-4 py-2 lowercase text-[14px] text-black/70 transition-colors hover:border-black/40 hover:text-black"
       >
         <span className="h-1.5 w-1.5 rounded-full bg-[#3c05c7]" />
-        {shortSolana}
+        {solName ?? shortSolana}
         <ChevronDown size={13} strokeWidth={1.5} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
