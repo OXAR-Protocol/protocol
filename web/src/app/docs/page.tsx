@@ -10,7 +10,7 @@ export default function DocsPage() {
       <section>
         <h2>Overview</h2>
         <p>
-          OXAR is a <strong>non-custodial app where your money earns and grows</strong>. Connect a crypto wallet (Phantom, Backpack, MetaMask). Your USDC routes into curated yield sources — Jupiter Lend, Kamino USDC, Ondo Treasuries and Maple credit live today, with more on the way. Beyond yield, buy tokenized stocks and gold to hold. Withdraw anytime, never custodial.
+          OXAR is a <strong>non-custodial app where your money earns and grows</strong>. Connect a crypto wallet (Phantom, Backpack, MetaMask). Your USDC routes into curated yield sources — Jupiter Lend, Ondo Treasuries and Maple credit live today, with more on the way. Beyond yield, buy tokenized stocks and gold to hold. Withdraw anytime, never custodial.
         </p>
       </section>
 
@@ -27,8 +27,8 @@ export default function DocsPage() {
         <h2>Risk templates</h2>
         <p>Three opinionated speeds. Pick one — change anytime.</p>
         <ul className="mt-4 list-none space-y-3">
-          <li>→ <strong>😴 Sleepy (4-6% APY)</strong> — Ondo USDY (US Treasuries) + Kamino USDC. Lowest volatility.</li>
-          <li>→ <strong>🚶 Walking (6-9% APY)</strong> — a mix of Maple Syrup, Kamino, JLP. Balanced.</li>
+          <li>→ <strong>😴 Sleepy (4-6% APY)</strong> — Ondo USDY (US Treasuries) + Jupiter Lend USDC. Lowest volatility.</li>
+          <li>→ <strong>🚶 Walking (6-9% APY)</strong> — a mix of Maple Syrup and JLP. Balanced.</li>
           <li>→ <strong>🏃 Running (9-14% APY)</strong> — Jupiter LP, Drift insurance. Higher volatility, higher upside.</li>
         </ul>
         <p className="mt-4">
@@ -69,7 +69,7 @@ export default function DocsPage() {
           <strong>Auth:</strong> Privy for email + wallet sign-in. Each user gets an embedded Solana wallet they control — no seed phrases to manage unless you bring your own.
         </p>
         <p className="mt-4">
-          <strong>No contract of our own:</strong> OXAR is a non-custodial <strong>interface</strong> over audited third-party protocols (Jupiter Lend, Kamino). There&apos;s no OXAR smart contract holding your funds — your money sits in your wallet and the protocols&apos; own audited contracts.
+          <strong>No contract of our own:</strong> OXAR is a non-custodial <strong>interface</strong> over audited third-party protocols (Jupiter Lend, Ondo, Maple). There&apos;s no OXAR smart contract holding your funds — your money sits in your wallet and the protocols&apos; own audited contracts.
         </p>
         <p className="mt-4">
           <strong>Non-custodial:</strong> OXAR has no keys to move your funds. Every deposit, swap and withdrawal is signed by you.
@@ -79,7 +79,7 @@ export default function DocsPage() {
       <section>
         <h2>Status</h2>
         <p>
-          <strong>Now:</strong> Live on Solana <strong>mainnet</strong>. USDC yield (Jupiter Lend, Kamino) plus tokenized stocks and gold work end-to-end — deposit → earn, or buy → hold → withdraw, all from your own wallet.
+          <strong>Now:</strong> Live on Solana <strong>mainnet</strong>. USDC yield (Jupiter Lend) plus tokenized stocks and gold work end-to-end — deposit → earn, or buy → hold → withdraw, all from your own wallet.
         </p>
         <p className="mt-4">
           <strong>Aug 2026 (target):</strong> Public launch — Apple Pay deposits, more sources, polished onboarding.

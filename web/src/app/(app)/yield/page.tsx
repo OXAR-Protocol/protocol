@@ -267,7 +267,7 @@ export default function YieldPage() {
         </p>
       )}
 
-      <div className="mt-12 p-5 rounded-[8px] border border-black/10">
+      <div className="mt-12 p-5 rounded-[8px] border border-black/10 bg-white">
         <p className="text-sm text-black">{t("yield.nfa.title")}</p>
         <p className="mt-1 text-xs text-black/45 leading-relaxed">
           {t("yield.nfa.body")}

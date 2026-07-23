@@ -6,7 +6,7 @@ import { Label, Reveal, Spread } from "./primitives";
 const STEPS = [
   { n: "01", title: "connect or tap", copy: "Connect a crypto wallet — Apple Pay deposits on the way. No bank account, no broker. Setup takes a minute." },
   { n: "02", title: "choose your pace", copy: "Sleepy, Walking or Running — three risk templates. Pick once, change anytime." },
-  { n: "03", title: "money wakes up", copy: "Your USDC earns on Jupiter Lend, Kamino, Ondo and Maple today, with more on the way." },
+  { n: "03", title: "money wakes up", copy: "Your USDC earns on Jupiter Lend, Ondo and Maple today, with more on the way." },
   { n: "04", title: "own real assets", copy: "Not just yield — buy tokenized stocks and gold, held in your own wallet. Bonds and new assets coming next." },
   { n: "05", title: "wake some up anytime", copy: "Withdraw whenever. No locks, no penalty. Your money sleeps because you let it." },
 ];

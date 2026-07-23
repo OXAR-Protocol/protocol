@@ -82,7 +82,7 @@ export default function PilePage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.05 }}
-        className="relative mt-8 overflow-hidden p-6 rounded-[8px] border border-black/10"
+        className="relative mt-8 overflow-hidden p-6 rounded-[8px] border border-black/10 bg-white"
       >
         <PhotoBg src="/art/coin-stacking.webp" scrim="left" position="object-right" />
         <p className="relative text-xs lowercase tracking-[0.2em] text-black/40">
@@ -136,7 +136,7 @@ export default function PilePage() {
             <Loader2 className="animate-spin text-black/40" size={24} />
           </div>
         ) : held.length === 0 ? (
-          <div className="p-8 rounded-[8px] border border-black/10 text-center">
+          <div className="p-8 rounded-[8px] border border-black/10 bg-white text-center">
             <p className="text-base text-black">{t("pile.empty.title")}</p>
             <p className="mt-1 text-xs text-black/45">
               {t("pile.empty.body")}
@@ -163,7 +163,7 @@ export default function PilePage() {
                 <button
                   key={v.id}
                   onClick={() => router.push(`/asset/${v.id}`)}
-                  className="group w-full text-left p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition"
+                  className="group w-full text-left p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition"
                 >
                   <div className="flex items-center gap-4">
                     <AssetIcon src={assetLogoSrc(v.id)} label={assetIconLabel(v.id, v.assetSymbol)} size={36} />

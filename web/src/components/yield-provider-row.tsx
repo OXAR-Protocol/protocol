@@ -20,7 +20,7 @@ export function YieldProviderRow({ view, onOpen }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group w-full text-left p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition"
+      className="group w-full text-left p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition"
     >
       <div className="flex items-center gap-4">
         <AssetIcon src={assetLogoSrc(view.id)} label={assetIconLabel(view.id, view.assetSymbol)} size={36} />

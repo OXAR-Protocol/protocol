@@ -34,7 +34,7 @@ export function PositionCard({ view, onOpen, change24h }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group relative isolate overflow-hidden flex flex-col gap-4 p-5 rounded-[8px] border border-black/10 hover:border-black/30 transition text-left"
+      className="group relative isolate overflow-hidden flex flex-col gap-4 p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition text-left"
     >
       <BanknoteBg seed={view.id} />
       <div className="flex items-start justify-between gap-2">

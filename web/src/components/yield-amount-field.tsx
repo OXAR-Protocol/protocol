@@ -38,7 +38,7 @@ export function YieldAmountField({
   variant,
 }: Props) {
   return (
-    <div className="p-4 rounded-[6px] border border-black/10">
+    <div className="p-4 rounded-[6px] border border-black/10 bg-white">
       <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">
         {label}
       </p>
