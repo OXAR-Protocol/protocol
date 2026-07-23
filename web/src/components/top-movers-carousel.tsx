@@ -14,6 +14,9 @@ import { useT } from "@/lib/i18n";
 const CARD_BASIS =
   "basis-[78%] sm:basis-[calc((100%-1rem)/2)] md:basis-[calc((100%-2rem)/3)]";
 
+// Faint banknote engravings (dollar/euro/hryvnia) rotated across cards for texture.
+const NOTES = ["/art/note-usd.webp", "/art/note-eur.webp", "/art/note-uah.webp"];
+
 /** Big, clear movers strip — 3 cards at a time, auto-advancing one card every 5s
  *  (pauses on hover), looping back at the end. Each card opens the asset page. */
 export function TopMoversCarousel() {
@@ -70,7 +73,7 @@ export function TopMoversCarousel() {
                 className={`${CARD_BASIS} h-[168px] shrink-0 grow-0 animate-pulse rounded-[18px] border border-black/10 bg-black/[0.03]`}
               />
             ))
-          : movers.map((m) => {
+          : movers.map((m, i) => {
               const up = m.change24h >= 0;
               const Arrow = up ? ArrowUpRight : ArrowDownRight;
               return (
@@ -79,13 +82,13 @@ export function TopMoversCarousel() {
                   href={`/asset/${m.id}`}
                   className={`${CARD_BASIS} group relative flex shrink-0 grow-0 snap-start flex-col justify-between overflow-hidden rounded-[18px] border border-black/10 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-black/25 hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]`}
                 >
-                  {/* faint collage texture, à la Backyard's decorated cards */}
+                  {/* faint banknote engraving as a decorated-card texture (rotated per card) */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/art/coin-collage.webp"
+                    src={NOTES[i % NOTES.length]}
                     alt=""
                     aria-hidden
-                    className="pointer-events-none absolute -right-6 -top-6 h-40 w-40 select-none object-cover opacity-[0.06]"
+                    className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-right opacity-[0.07] [mask-image:linear-gradient(to_left,#000,transparent_75%)]"
                   />
                   <div className="relative flex items-start justify-between">
                     <AssetIcon src={assetLogoSrc(m.id)} label={assetIconLabel(m.id, m.symbol)} size={44} />
