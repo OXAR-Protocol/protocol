@@ -454,3 +454,11 @@ input[type="number"] {
   color: #be123c;
 }
 
+/* App-wide paper texture — a warm near-white base with a barely-there dot grain,
+   à la Backyard. Cards stay white so they lift off it subtly. */
+.app-texture {
+  background-color: #f7f6f2;
+  background-image: radial-gradient(rgba(50, 42, 30, 0.035) 1px, transparent 1px);
+  background-size: 5px 5px;
+}
+
