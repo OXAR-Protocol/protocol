@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 import { AssetIcon } from "@/components/asset-icon";
+import { BanknoteBg } from "@/components/banknote-bg";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { useTopMovers } from "@/hooks/use-top-movers";
 import { useT } from "@/lib/i18n";
@@ -13,9 +14,6 @@ import { useT } from "@/lib/i18n";
 // Cards are sized so exactly 3 fit across on desktop (2 on tablet, ~1.3 on mobile).
 const CARD_BASIS =
   "basis-[78%] sm:basis-[calc((100%-1rem)/2)] md:basis-[calc((100%-2rem)/3)]";
-
-// Faint banknote engravings (dollar/euro/hryvnia) rotated across cards for texture.
-const NOTES = ["/art/note-usd.webp", "/art/note-eur.webp", "/art/note-uah.webp"];
 
 /** Big, clear movers strip — 3 cards at a time, auto-advancing one card every 5s
  *  (pauses on hover), looping back at the end. Each card opens the asset page. */
@@ -64,7 +62,7 @@ export function TopMoversCarousel() {
         ref={scrollRef}
         onMouseEnter={() => (paused.current = true)}
         onMouseLeave={() => (paused.current = false)}
-        className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pt-2 pb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {loading
           ? Array.from({ length: 3 }).map((_, i) => (
@@ -73,23 +71,16 @@ export function TopMoversCarousel() {
                 className={`${CARD_BASIS} h-[168px] shrink-0 grow-0 animate-pulse rounded-[18px] border border-black/10 bg-black/[0.03]`}
               />
             ))
-          : movers.map((m, i) => {
+          : movers.map((m) => {
               const up = m.change24h >= 0;
               const Arrow = up ? ArrowUpRight : ArrowDownRight;
               return (
                 <Link
                   key={m.id}
                   href={`/asset/${m.id}`}
-                  className={`${CARD_BASIS} group relative flex shrink-0 grow-0 snap-start flex-col justify-between overflow-hidden rounded-[18px] border border-black/10 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-black/25 hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]`}
+                  className={`${CARD_BASIS} group relative isolate flex shrink-0 grow-0 snap-start flex-col justify-between overflow-hidden rounded-[18px] border border-black/10 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-black/25 hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]`}
                 >
-                  {/* faint banknote engraving as a decorated-card texture (rotated per card) */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={NOTES[i % NOTES.length]}
-                    alt=""
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-right opacity-[0.07] [mask-image:linear-gradient(to_left,#000,transparent_75%)]"
-                  />
+                  <BanknoteBg seed={m.id} />
                   <div className="relative flex items-start justify-between">
                     <AssetIcon src={assetLogoSrc(m.id)} label={assetIconLabel(m.id, m.symbol)} size={44} />
                     <span
