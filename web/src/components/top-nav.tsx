@@ -27,15 +27,17 @@ export function TopNav() {
 
         <div className="flex items-center gap-[clamp(16px,3vw,40px)]">
           {authenticated && (
-            <div className="hidden items-center gap-[clamp(16px,2.4vw,36px)] md:flex">
+            <div className="hidden items-center gap-1 md:flex">
               {tabs.map((tab) => {
                 const isActive = pathname.startsWith(tab.href);
                 return (
                   <Link
                     key={tab.href}
                     href={tab.href}
-                    className={`lowercase text-[15px] transition-colors ${
-                      isActive ? "text-black" : "text-black/40 hover:text-black"
+                    className={`rounded-full border px-3.5 py-1.5 lowercase text-[15px] transition-colors ${
+                      isActive
+                        ? "border-[#3c05c7]/45 bg-[#3c05c7]/[0.06] text-black"
+                        : "border-transparent text-black/40 hover:border-[#3c05c7]/25 hover:text-black"
                     }`}
                   >
                     {tab.label}
