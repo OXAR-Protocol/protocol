@@ -462,3 +462,15 @@ input[type="number"] {
   background-size: 8px 8px;
 }
 
+/* Safe-area insets, active only inside the Capacitor shell — see mobile/README.md.
+   `data-native` is set by the detect script in layout.tsx, so in a browser these rules
+   never match and layout is unchanged. Put .safe-top on a positioned overlay root and
+   absolutely-positioned children inherit the offset via its padding box. */
+[data-native] .safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+[data-native] .safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+

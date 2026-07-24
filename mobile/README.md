@@ -48,6 +48,30 @@ system browser or adding a native plugin — not by abandoning Capacitor.
 - `appName`: `OXAR`.
 - `server.url`: `https://app.oxar.app` — the shell points at prod. To test a branch/preview,
   temporarily change this URL and re-run `npx cap sync ios`.
+- `appendUserAgent`: `OXARApp` — the marker the web app looks for to switch on safe-area
+  insets (see "Safe area" below). Changing it means changing `web/src/app/layout.tsx` too.
+
+## App icon
+
+`assets/icon.png` (1024×1024, opaque — iOS rejects alpha and applies its own mask) is the
+source of truth: the OXAR mark in purple on black, generated from `oxar-icons/purple.png`.
+
+Native projects are gitignored, so after a fresh `cap add` copy it back in:
+
+```bash
+cp assets/icon.png ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
+```
+
+For the full set (Android adaptive icons, splash screens) use `npx @capacitor/assets generate`.
+
+## Safe area
+
+Capacitor makes the WebView the root view (`view = webView`, and `loadView()` is `final`),
+so the page draws under the status bar and home indicator — a bug you cannot fix natively.
+The web app handles it: the script in `web/src/app/layout.tsx` detects this shell (via
+`window.Capacitor` or the `OXARApp` UA marker), sets `data-native` on `<html>` and adds
+`viewport-fit=cover`; the `.safe-*` rules in `web/src/app/globals.css` then apply the
+insets. In a browser none of it activates, so web layout is unchanged.
 
 ## Android / Seeker (later)
 
@@ -56,3 +80,9 @@ npx cap add android
 npx cap open android   # Android Studio → run on emulator or device
 ```
 Seeker publishing = signed APK → Solana dApp Store via `@solana-mobile/dapp-store-cli`.
+
+**Known blocker for Google Play:** Capacitor 6 generates `targetSdkVersion = 34`; Play has
+required 35 since August 2025. `android/` is gitignored, so editing `variables.gradle` does
+not persist — the durable fix is upgrading to Capacitor 7 (which defaults to 35), and that
+should be done together with an actual Android build, which needs Android Studio + SDK.
+Not a blocker for the Solana dApp Store.

@@ -116,7 +116,7 @@ export function AccessWall({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-white px-6 text-black">
+    <div className="safe-top fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-white px-6 text-black">
       <Link
         href="/"
         className="absolute left-6 top-6 lowercase text-[14px] text-black/40 transition-colors hover:text-black"
@@ -180,10 +180,6 @@ export function AccessWall({ children }: { children: ReactNode }) {
           {error && (
             <span className="lowercase text-[13px] text-[#D4313C]">{error}</span>
           )}
-
-          <span className="lowercase text-[13px] text-black/35">
-            email · phantom · solflare · backpack
-          </span>
         </motion.div>
       </div>
     </div>

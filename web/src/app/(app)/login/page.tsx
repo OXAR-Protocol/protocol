@@ -25,7 +25,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-white px-6 text-black">
+    <div className="safe-top fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-white px-6 text-black">
       <Link
         href="/"
         className="absolute left-6 top-6 lowercase text-[14px] text-black/40 transition-colors hover:text-black"
@@ -74,10 +74,6 @@ export default function LoginPage() {
           >
             {authenticated ? t("login.redirecting") : t("login.continue")}
           </button>
-
-          <span className="lowercase text-[13px] text-black/35">
-            email · phantom · solflare · backpack
-          </span>
         </motion.div>
       </div>
     </div>

@@ -39,7 +39,7 @@ export function ComingSoon({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="fixed inset-0 z-50 overflow-y-auto bg-surface-0 px-6 py-16 text-white"
+      className="safe-top fixed inset-0 z-50 overflow-y-auto bg-surface-0 px-6 py-16 text-white"
     >
       <div
         aria-hidden
