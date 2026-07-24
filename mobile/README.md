@@ -54,7 +54,7 @@ system browser or adding a native plugin — not by abandoning Capacitor.
 ## App icon
 
 `assets/icon.png` (1024×1024, opaque — iOS rejects alpha and applies its own mask) is the
-source of truth: the OXAR mark in purple on black, generated from `oxar-icons/purple.png`.
+source of truth: the OXAR mark in purple on white, generated from `oxar-icons/purple.png`.
 
 Native projects are gitignored, so after a fresh `cap add` copy it back in:
 
