@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>OXAR</title>
+    <style>
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: #fbfaf8;
+        color: #111;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      .wrap {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        text-align: center;
+        padding: 24px;
+      }
+      .brand { font-weight: 700; font-size: 34px; letter-spacing: -0.02em; }
+      .muted { color: rgba(0, 0, 0, 0.45); font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <!-- Offline fallback only. Online, the WebView loads app.oxar.app (see capacitor.config.ts). -->
+    <div class="wrap">
+      <div class="brand">OXAR.</div>
+      <div class="muted">connecting…</div>
+      <div class="muted">check your connection</div>
+    </div>
+  </body>
+</html>
