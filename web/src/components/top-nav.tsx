@@ -19,7 +19,7 @@ export function TopNav() {
   const { authenticated, ready, login } = usePrivy();
 
   return (
-    <nav className="sticky top-0 z-40 bg-[#fbfaf8]/70 backdrop-blur-md">
+    <nav className="safe-top sticky top-0 z-40 bg-[#fbfaf8]/70 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5">
         <Link href="/home" className="shrink-0 text-[22px] font-bold leading-none text-black" style={{ fontFamily: DISPLAY }}>
           OXAR.

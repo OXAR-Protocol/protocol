@@ -15,6 +15,7 @@ export function PhotoFooter() {
   // Brand sign-off — shown only on the profile page (pairs with the Early Riser medal).
   if (!pathname?.startsWith("/you")) return null;
 
+  // safe-bottom: mb-16 clears the TabBar, which is taller by the inset in the shell.
   return (
     <motion.div
       aria-hidden
@@ -22,7 +23,7 @@ export function PhotoFooter() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.25 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="relative mt-12 mb-16 h-56 w-full select-none overflow-hidden md:mb-0 md:h-80"
+      className="safe-bottom relative mt-12 mb-16 h-56 w-full select-none overflow-hidden md:mb-0 md:h-80"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img

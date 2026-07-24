@@ -2,6 +2,7 @@
   "appId": "app.oxar.mobile",
   "appName": "OXAR",
   "webDir": "www",
+  "appendUserAgent": "OXARApp",
   "server": {
     "url": "https://app.oxar.app",
     "cleartext": false
