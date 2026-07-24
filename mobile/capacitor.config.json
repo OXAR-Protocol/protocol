@@ -1,0 +1,12 @@
+{
+  "appId": "app.oxar.mobile",
+  "appName": "OXAR",
+  "webDir": "www",
+  "server": {
+    "url": "https://app.oxar.app",
+    "cleartext": false
+  },
+  "ios": {
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}
