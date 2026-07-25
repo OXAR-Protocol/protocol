@@ -48,8 +48,6 @@ system browser or adding a native plugin — not by abandoning Capacitor.
 - `appName`: `OXAR`.
 - `server.url`: `https://app.oxar.app` — the shell points at prod. To test a branch/preview,
   temporarily change this URL and re-run `npx cap sync ios`.
-- `appendUserAgent`: `OXARApp` — the marker the web app looks for to switch on safe-area
-  insets (see "Safe area" below). Changing it means changing `web/src/app/layout.tsx` too.
 
 ## App icon
 
@@ -67,11 +65,19 @@ For the full set (Android adaptive icons, splash screens) use `npx @capacitor/as
 ## Safe area
 
 Capacitor makes the WebView the root view (`view = webView`, and `loadView()` is `final`),
-so the page draws under the status bar and home indicator — a bug you cannot fix natively.
-The web app handles it: the script in `web/src/app/layout.tsx` detects this shell (via
-`window.Capacitor` or the `OXARApp` UA marker), sets `data-native` on `<html>` and adds
-`viewport-fit=cover`; the `.safe-*` rules in `web/src/app/globals.css` then apply the
-insets. In a browser none of it activates, so web layout is unchanged.
+so the page draws under the status bar and home indicator — you cannot fix it natively.
+There is nothing shell-specific in the fix, and nothing to keep in sync here: the app
+routes opt into `viewport-fit=cover` (`export const viewport` in `web/src/app/(app)/layout.tsx`)
+and the `.safe-*` classes in `web/src/app/globals.css` pad the insets back out. Both are
+plain web behaviour — `env(safe-area-inset-*)` is 0 wherever there are no insets.
+
+Two things that cost hours, so don't undo them:
+
+- **`viewport-fit=cover` must be server-rendered.** WebKit reads it while parsing the
+  document and does *not* re-evaluate the insets if the meta tag is patched later, so a
+  runtime script leaves `env(safe-area-inset-*)` at 0 — measured in this WebView.
+- **`padding` on a parent does not move absolutely-positioned children.** They resolve
+  `top` against the padding *edge*, hence the separate `.safe-top-6` for pinned links.
 
 ## Android / Seeker (later)
 
