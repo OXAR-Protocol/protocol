@@ -474,3 +474,10 @@ input[type="number"] {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Absolutely-positioned children resolve `top` against the padding *edge*, so a
+   parent's .safe-top does not move them — they need the inset in their own offset.
+   Pairs with Tailwind `top-6`; keep the 1.5rem in sync if that changes. */
+[data-native] .safe-top-6 {
+  top: calc(1.5rem + env(safe-area-inset-top));
+}
+

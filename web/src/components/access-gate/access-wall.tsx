@@ -119,7 +119,7 @@ export function AccessWall({ children }: { children: ReactNode }) {
     <div className="safe-top fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-white px-6 text-black">
       <Link
         href="/"
-        className="absolute left-6 top-6 lowercase text-[14px] text-black/40 transition-colors hover:text-black"
+        className="safe-top-6 absolute left-6 top-6 lowercase text-[14px] text-black/40 transition-colors hover:text-black"
       >
         ← back to home
       </Link>
