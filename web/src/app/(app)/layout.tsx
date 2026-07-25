@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import type { Viewport } from "next";
 import { Providers } from "@/providers/providers";
 import { dmSans } from "@/components/landing-v2/fonts";
 import { TopNav } from "@/components/top-nav";
@@ -14,18 +13,6 @@ import { WarpOnEntry } from "@/components/warp-on-entry";
 import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
 
 export const dynamic = "force-dynamic";
-
-// Let the app routes draw into the display's safe areas, which the .safe-* rules in
-// globals.css then pad back out. Needed for the mobile shell, whose WebView is the root
-// view and so renders under the status bar and home indicator; harmless everywhere else,
-// since env(safe-area-inset-*) is 0 without insets. It must be server-rendered — WebKit
-// reads viewport-fit when it parses the document and ignores later mutations of the tag.
-// Scoped to (app) on purpose: the marketing pages keep the default viewport.
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
-};
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
