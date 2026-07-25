@@ -37,16 +37,11 @@ export default function RootLayout({
         suppressHydrationWarning
         className="bg-surface-0 text-white font-sans antialiased overflow-x-hidden"
       >
-        {/* Pre-paint boot: apply the saved theme (avoids a dark→light flash), then flag the
-            Capacitor shell. The shell renders edge-to-edge under the status bar and home
-            indicator, and `env(safe-area-inset-*)` stays 0 until viewport-fit=cover — so
-            this switches on the .safe-* rules in globals.css. A browser matches neither
-            branch, leaving web layout untouched. See mobile/README.md. */}
+        {/* Apply the saved theme before paint to avoid a dark→light flash. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('oxar-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}" +
-              "try{if(window.Capacitor||navigator.userAgent.indexOf('OXARApp')>-1){document.documentElement.setAttribute('data-native','1');var m=document.querySelector('meta[name=viewport]');if(m)m.content+=',viewport-fit=cover'}}catch(e){}",
+              "try{var t=localStorage.getItem('oxar-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}",
           }}
         />
         <ThemeProvider>
