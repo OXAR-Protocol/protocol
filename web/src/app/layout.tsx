@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Instrument_Serif } from "next/font/google";
@@ -13,6 +13,21 @@ const instrumentSerif = Instrument_Serif({
 });
 import { ThemeProvider } from "@/context/theme-context";
 import "./globals.css";
+
+// Draw into the display's safe areas; the .safe-* rules in globals.css pad them back out.
+// Needed for the mobile shell, whose WebView is the root view and so renders under the
+// status bar and home indicator. Two constraints forced this shape:
+//   1. WebKit reads viewport-fit while parsing the document and ignores later mutations,
+//      so this cannot be applied from a script.
+//   2. It has to live in the ROOT layout. A `viewport` export in a nested layout reaches
+//      the browser through the RSC payload rather than the initial head flush on Vercel,
+//      which is just as late as mutating the tag.
+// Safe for the marketing pages too: env(safe-area-inset-*) is 0 without insets.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "OXAR Protocol — Real-World Yields, On-Chain",
