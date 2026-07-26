@@ -79,7 +79,7 @@ export function AssetDetail({
       decimals: view.decimals,
     });
     if (!plan) return;
-    if (plan.mode === "redeemAll") await redeemAll(plan.shares);
+    if (plan.mode === "redeemAll") await redeemAll(plan.shares, positionValue);
     else await withdraw(plan.amount);
     setResult({ kind: "withdraw", amount: plan.mode === "redeemAll" ? positionValue : amount, symbol: price ? "USDC" : view.assetSymbol });
     settle();

@@ -9,7 +9,8 @@ import {
 } from "@solana/web3.js";
 
 import { useSolanaContext } from "@/providers/solana-provider";
-import { getProvider, toFriendlyError } from "@/lib/yield";
+import { getProvider, toFriendlyError, fromBaseUnits } from "@/lib/yield";
+import { recordBasisDelta } from "@/lib/earnings/pending-basis";
 
 /**
  * Deposit / withdraw against a yield provider (Jupiter Lend, Kamino, …). Funds go
@@ -66,17 +67,37 @@ export function useYieldActions(providerId: string) {
     [wallet, walletAddress, yieldProvider, providerId],
   );
 
+  /**
+   * Tell the earnings view what this action did to the net invested, so `earned`
+   * stays honest until the indexer catches up — otherwise a top-up reads as
+   * profit for minutes (see `lib/earnings/pending-basis`). Deposits add, withdraws
+   * subtract; a full redeem needs none, since a zero position is filtered out.
+   */
+  const noteBasis = useCallback(
+    (owner: PublicKey, amount: bigint, sign: 1 | -1) => {
+      const decimals = yieldProvider?.decimals;
+      if (decimals === undefined) return;
+      recordBasisDelta(owner.toBase58(), providerId, sign * fromBaseUnits(amount, decimals));
+    },
+    [yieldProvider, providerId],
+  );
+
   const deposit = useCallback(
     (amount: bigint, opts?: { sponsor?: boolean }) => {
       if (amount <= BigInt(0)) throw new Error("Amount must be greater than zero");
       return run(async (owner) => {
         const p = yieldProvider!;
-        if (p.buildDepositTx) return sendTx(await p.buildDepositTx({ owner, amount, connection }), opts);
-        if (p.buildDepositIxs) return sendIxs(await p.buildDepositIxs({ owner, amount, connection }), opts);
-        throw new Error("This source does not support deposits");
+        if (!p.buildDepositTx && !p.buildDepositIxs) {
+          throw new Error("This source does not support deposits");
+        }
+        const sig = p.buildDepositTx
+          ? await sendTx(await p.buildDepositTx({ owner, amount, connection }), opts)
+          : await sendIxs(await p.buildDepositIxs!({ owner, amount, connection }), opts);
+        noteBasis(owner, amount, 1);
+        return sig;
       });
     },
-    [run, yieldProvider, connection, sendTx, sendIxs],
+    [run, yieldProvider, connection, sendTx, sendIxs, noteBasis],
   );
 
   const withdraw = useCallback(
@@ -84,26 +105,39 @@ export function useYieldActions(providerId: string) {
       if (amount <= BigInt(0)) throw new Error("Amount must be greater than zero");
       return run(async (owner) => {
         const p = yieldProvider!;
-        if (p.buildWithdrawTx) return sendTx(await p.buildWithdrawTx({ owner, amount, connection }));
-        if (p.buildWithdrawIxs) return sendIxs(await p.buildWithdrawIxs({ owner, amount, connection }));
-        throw new Error("This source does not support withdrawals");
+        if (!p.buildWithdrawTx && !p.buildWithdrawIxs) {
+          throw new Error("This source does not support withdrawals");
+        }
+        const sig = p.buildWithdrawTx
+          ? await sendTx(await p.buildWithdrawTx({ owner, amount, connection }))
+          : await sendIxs(await p.buildWithdrawIxs!({ owner, amount, connection }));
+        noteBasis(owner, amount, -1);
+        return sig;
       });
     },
-    [run, yieldProvider, connection, sendTx, sendIxs],
+    [run, yieldProvider, connection, sendTx, sendIxs, noteBasis],
   );
 
   // Full exit: providers with a tx path do a max-withdraw; ixs providers redeem all shares.
+  // `valueUsd` (the position being cashed out) retires its basis: the exited source keeps
+  // an indexed basis until the indexer catches up, and a re-entry measured against THAT
+  // could never settle — the next indexed answer moves the basis down, not up.
   const redeemAll = useCallback(
-    (shares: bigint) => {
+    (shares: bigint, valueUsd?: number) => {
       return run(async (owner) => {
         const p = yieldProvider!;
-        if (p.buildRedeemTx) return sendTx(await p.buildRedeemTx({ owner, connection }));
-        if (shares <= BigInt(0)) throw new Error("Nothing to withdraw");
-        if (p.buildRedeemIxs) return sendIxs(await p.buildRedeemIxs({ owner, shares, connection }));
-        throw new Error("This source does not support withdrawals");
+        if (!p.buildRedeemTx && shares <= BigInt(0)) throw new Error("Nothing to withdraw");
+        if (!p.buildRedeemTx && !p.buildRedeemIxs) {
+          throw new Error("This source does not support withdrawals");
+        }
+        const sig = p.buildRedeemTx
+          ? await sendTx(await p.buildRedeemTx({ owner, connection }))
+          : await sendIxs(await p.buildRedeemIxs!({ owner, shares, connection }));
+        if (valueUsd) recordBasisDelta(owner.toBase58(), providerId, -valueUsd);
+        return sig;
       });
     },
-    [run, yieldProvider, connection, sendTx, sendIxs],
+    [run, yieldProvider, connection, sendTx, sendIxs, providerId],
   );
 
   return { deposit, withdraw, redeemAll, loading, error };
