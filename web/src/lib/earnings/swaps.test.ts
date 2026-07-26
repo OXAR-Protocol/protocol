@@ -83,6 +83,44 @@ describe("netInvestedFromSwaps", () => {
     expect(netInvestedFromSwaps([deposit(5, 4.75), withdraw(2, 2)], OWNER, JL_USDC, USDC)).toBeCloseTo(3, 9);
   });
 
+  // Regression: a wallet that sent part of its position to another address showed a
+  // phantom loss, because the units left but the cost attributed to them stayed.
+  const sendOut = (usdy: number): HeliusTx => ({
+    tokenTransfers: [
+      { mint: USDY, fromUserAccount: OWNER, toUserAccount: "someone-else", tokenAmount: usdy },
+    ],
+  });
+
+  it("retires the basis of units transferred out with no proceeds", () => {
+    // Bought 10 units for $10, then gave half away → $5 still invested in the rest.
+    expect(netInvestedFromSwaps([buy(10, 10), sendOut(5)], OWNER, USDY, USDC)).toBeCloseTo(5, 9);
+  });
+
+  it("zeroes the basis when the whole position is sent away", () => {
+    expect(netInvestedFromSwaps([buy(10, 10), sendOut(10)], OWNER, USDY, USDC)).toBeCloseTo(0, 9);
+  });
+
+  it("never drives the basis negative when more is sent than we saw acquired", () => {
+    // History window can start mid-life, so a disposal may exceed the units we know of.
+    expect(netInvestedFromSwaps([buy(4, 4), sendOut(9)], OWNER, USDY, USDC)).toBeCloseTo(0, 9);
+    expect(netInvestedFromSwaps([sendOut(3)], OWNER, USDY, USDC)).toBe(0);
+  });
+
+  it("keeps a sale and a transfer-out distinct", () => {
+    // Sale returns money (basis −proceeds); a transfer returns nothing (basis pro-rata).
+    expect(netInvestedFromSwaps([buy(10, 10), sell(5, 6)], OWNER, USDY, USDC)).toBeCloseTo(4, 9);
+    expect(netInvestedFromSwaps([buy(10, 10), sendOut(5)], OWNER, USDY, USDC)).toBeCloseTo(5, 9);
+  });
+
+  it("orders by timestamp, since Helius returns newest-first", () => {
+    const newestFirst: HeliusTx[] = [
+      { ...sendOut(5), timestamp: 200 },
+      { ...buy(10, 10), timestamp: 100 },
+    ];
+    // Processed oldest-first the buy funds the units the send then retires → $5.
+    expect(netInvestedFromSwaps(newestFirst, OWNER, USDY, USDC)).toBeCloseTo(5, 9);
+  });
+
   it("attributes the jlUSDT market against USDT, not USDC", () => {
     const USDT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
     const JL_USDT = "Cmn4v2wipYV41dkakDvCgFJpxhtaaKt11NyWV8pjSE8A";
