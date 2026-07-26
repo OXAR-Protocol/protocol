@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Connection, PublicKey } from "@solana/web3.js";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { PROVIDERS, fromBaseUnits } from "@/lib/yield";
 import { getCached, setCache } from "@/lib/cache";
+import { useBetaAssets } from "./use-beta-assets";
 
 export interface ProviderView {
   id: string;
@@ -24,6 +25,8 @@ export interface ProviderView {
   /** Swap-and-hold acquired asset (Ondo/stocks) — for the swap-spread preview. */
   heldMint?: string;
   heldDecimals?: number;
+  /** Gated pilot source — only visible to the beta allowlist. */
+  beta?: boolean;
   /** Supply APY as a fraction (0.06 = 6%). */
   apy: number;
   /** User's principal + accrued yield, in asset base units. 0 if not connected. */
@@ -70,6 +73,7 @@ async function fetchSnapshot(
         defiLlamaPoolId: p.defiLlamaPoolId,
         heldMint: p.heldMint,
         heldDecimals: p.heldDecimals,
+        beta: p.beta,
         apy,
         underlyingBalance: position.underlyingBalance,
         shares: position.shares,
@@ -150,5 +154,24 @@ export function useYieldPositions() {
 
   const refresh = useCallback(() => load(true), [load]);
 
-  return { views: snap.views, totalValue: snap.totalValue, loading, error, refresh };
+  // Gated pilot sources drop out for everyone not on the beta allowlist. Filtering
+  // here — the one place every view is built — keeps them out of the source list,
+  // the home total, the portfolio and the earnings view in a single step. The total
+  // is re-summed from what's left so a hidden source can't leak through the balance.
+  const betaAssets = useBetaAssets();
+  const { views, totalValue } = useMemo(() => {
+    const visible = snap.views.filter((v) => !v.beta || betaAssets.includes(v.id));
+    if (visible.length === snap.views.length) {
+      return { views: snap.views, totalValue: snap.totalValue };
+    }
+    return {
+      views: visible,
+      totalValue: visible.reduce(
+        (acc, v) => acc + fromBaseUnits(v.underlyingBalance, v.decimals),
+        0,
+      ),
+    };
+  }, [snap, betaAssets]);
+
+  return { views, totalValue, loading, error, refresh };
 }

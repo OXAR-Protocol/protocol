@@ -24,6 +24,7 @@ const JL_USDT = "Cmn4v2wipYV41dkakDvCgFJpxhtaaKt11NyWV8pjSE8A";
 const SOURCES: { id: string; heldMint: string; costMint: string }[] = [
   { id: "ondo-usdy", heldMint: "A1KLoBrKBde8Ty9qtNQUtq3C2ortoC3u7twggz7sEto6", costMint: USDC },
   { id: "maple-solana", heldMint: "AvZZF1YaZDziPY2RCK4oJrRVrbN3mTD9NL24hPeaZeUj", costMint: USDC },
+  { id: "onre-onyc", heldMint: "5Y8NV33Vv7WbnLfq3zBcKSdYPrk7g2KoiQoe7M2tcxp5", costMint: USDC },
   // Jupiter Lend: hold jlUSDC/jlUSDT, attribute against the deposited dollar (USDC/USDT).
   { id: "jupiter-lend-usdc", heldMint: JL_USDC, costMint: USDC },
   { id: "jupiter-lend-usdt", heldMint: JL_USDT, costMint: USDT },

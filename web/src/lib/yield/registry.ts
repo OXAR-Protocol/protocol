@@ -17,6 +17,7 @@ import {
 // re-add with the correct reserve; just not registered.
 import { ondoUsdyProvider } from "./ondo";
 import { mapleSyrupProvider } from "./maple";
+import { onreOnycProvider } from "./onre";
 import { xstockProviders } from "./xstocks";
 import { goldProviders } from "./gold";
 import type { YieldProvider } from "./types";
@@ -30,6 +31,9 @@ export const PROVIDERS: readonly YieldProvider[] = [
   jupiterUsdtProvider,
   ondoUsdyProvider,
   mapleSyrupProvider,
+  // Gated to the beta allowlist (see YieldProvider.beta) — registered so it works
+  // end to end for them, filtered out of every view for everyone else.
+  onreOnycProvider,
   ...xstockProviders,
   ...goldProviders,
 ];

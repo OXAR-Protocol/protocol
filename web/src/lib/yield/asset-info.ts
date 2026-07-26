@@ -183,6 +183,16 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
     category: "yield · liquidity",
     facts: [{ label: "earns from", value: "perp trading & borrow fees" }, { label: "where", value: "Jupiter (Solana)" }, { label: "risk", value: "medium" }],
   },
+  "onre-onyc": {
+    about:
+      "OnRe underwrites insurance and reinsurance from a Bermuda-regulated account, and you hold a share of it. You are paid for carrying insurance risk — that's why the rate is higher, and it is a real risk: a severe catastrophe season can cut the value of your share. In exchange, it doesn't move with crypto or the stock market. Sell out any time on the open market.",
+    category: "yield · reinsurance",
+    facts: [
+      { label: "earns from", value: "insurance premiums" },
+      { label: "issuer", value: "OnRe (Bermuda-licensed)" },
+      { label: "risk", value: "medium · catastrophe losses" },
+    ],
+  },
   "maple-solana": {
     about: "Maple lends pooled USDC to vetted institutions (trading firms, market makers) at fixed terms. Higher yield than open lending, with credit risk on the borrowers.",
     category: "yield · private credit",
