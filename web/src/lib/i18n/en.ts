@@ -169,6 +169,8 @@ export const en = {
   "rail.max": "max",
   "rail.actionSell": "Sell",
   "rail.actionWithdraw": "Withdraw",
+  "rail.youReceive": "you receive",
+  "rail.marketCost": "market cost {pct}%",
   "rail.cashOut": "cash out to card",
   "common.soon": "soon",
   "common.or": "or",

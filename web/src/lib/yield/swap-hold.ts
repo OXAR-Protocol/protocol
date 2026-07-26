@@ -12,6 +12,7 @@ import {
   buildSwapTx,
   deserializeSwapTx,
   priceImpactTooHigh,
+  BROKEN_MARKET_IMPACT,
 } from "@oxar/sdk";
 import { getProviderApy } from "./yields-api";
 import { UserFacingError } from "./errors";
@@ -80,8 +81,10 @@ async function buildSwapLegacy(params: {
     amount: params.amount,
     asLegacy: true,
   });
-  if (priceImpactTooHigh(quote)) {
-    throw new UserFacingError("Price impact too high — try a smaller amount");
+  // Cost is shown before signing, so it's the user's call — we only stop a market
+  // that looks broken. See BROKEN_MARKET_IMPACT.
+  if (priceImpactTooHigh(quote, BROKEN_MARKET_IMPACT)) {
+    throw new UserFacingError("This market looks broken right now — try again later");
   }
   const b64 = await buildSwapTx(quote, params.owner.toBase58(), { asLegacy: true });
   return deserializeSwapTx(b64, true) as Transaction;

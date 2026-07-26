@@ -38,6 +38,19 @@ export function priceImpactTooHigh(quote: SwapQuote, maxFraction = 0.015): boole
   return swapPriceImpact(quote) > maxFraction;
 }
 
+/**
+ * Sanity stop for trading a HELD asset (stocks, gold, swap-and-hold yield): at this
+ * level the quote isn't expensive, it's broken — a dried-up pool or a bad route —
+ * and the fill wouldn't resemble the value we showed the user.
+ *
+ * Far above the 1.5% default, and deliberately so. What a trade costs is the user's
+ * call, and the UI now shows it before they sign; blocking on cost instead LOCKED
+ * HOLDERS IN, because on a thin market a sell costs ~2% at every size, so the
+ * "try a smaller amount" advice couldn't work. Relaxing it is cheap: on liquid
+ * tickers impact is ~0.02%, so this never fires for them.
+ */
+export const BROKEN_MARKET_IMPACT = 0.1;
+
 /** Quote an exact-in swap `inputMint → outputMint` for `amount` (base units). */
 export async function getSwapQuote(params: {
   inputMint: string;

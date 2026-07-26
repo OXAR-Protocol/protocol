@@ -8,6 +8,7 @@ import type { ProviderView } from "@/hooks/use-yield-positions";
 import { DepositPanel } from "@/components/deposit-panel";
 import { YieldAmountField } from "@/components/yield-amount-field";
 import { CashOutSheet } from "@/components/cash-out-sheet";
+import { useSwapOutPreview, NOTABLE_SELL_COST } from "@/hooks/use-swap-out-preview";
 import { useT, localizeError } from "@/lib/i18n";
 
 interface Props {
@@ -50,6 +51,18 @@ export function AssetActionRail({
   const [tab, setTab] = useState<"buy" | "sell">("buy");
   const [showCashOut, setShowCashOut] = useState(false);
   const canSell = positionValue > 0;
+
+  // What the sell will actually pay out. We no longer refuse expensive sells (that
+  // locked holders of thin tickers in) — we state the cost and let the user decide.
+  const sellOut = useSwapOutPreview({
+    heldMint: view.heldMint,
+    shares: view.shares,
+    positionValue,
+    usdAmount: amount,
+    enabled: tab === "sell" && canSell && !!view.heldMint,
+  });
+  const sellCostNotable =
+    sellOut.costFraction !== null && sellOut.costFraction >= NOTABLE_SELL_COST;
   const tabClass = (active: boolean) =>
     `rounded-full py-2 text-[13px] lowercase tracking-wide transition ${
       active ? "bg-white text-black shadow-sm" : "text-black/45 hover:text-black/70"
@@ -106,6 +119,27 @@ export function AssetActionRail({
             disabled={loading || amount <= 0 || amount > positionValue}
             variant="primary"
           />
+
+          {/* What you'll actually receive. On a thin market this is a couple of percent
+              below the amount asked for — said plainly here instead of blocking the
+              sell, which used to leave holders with no way out. */}
+          {sellOut.proceedsUsd !== null && (
+            <p
+              className={`mt-2 text-center text-[12px] tabular-nums ${
+                sellCostNotable ? "text-[#a35b00]" : "text-black/45"
+              }`}
+            >
+              {t("rail.youReceive")}: ${sellOut.proceedsUsd.toFixed(2)}
+              {sellCostNotable && (
+                <>
+                  {" · "}
+                  {t("rail.marketCost", {
+                    pct: ((sellOut.costFraction ?? 0) * 100).toFixed(1),
+                  })}
+                </>
+              )}
+            </p>
+          )}
 
           {/* Cash all the way out — sell to USDC here, then off-ramp to a card.
               Secondary button beside the primary "sell" — same shape, lighter weight. */}
