@@ -32,7 +32,14 @@ export function WalletCash() {
       href="/yield"
       className="group relative mb-12 block overflow-hidden rounded-[12px] border border-black/10 bg-white p-5 transition-colors hover:border-black/30"
     >
-      <PhotoBg src="/art/dripping-dollar.webp" scrim="left" position="object-[right_top]" />
+      {/* zoomOnMobile: on a phone this card is nearly square, so the default crop showed
+          the whole bill — drips and all — running under the chips and the CTA. */}
+      <PhotoBg
+        src="/art/dripping-dollar.webp"
+        scrim="left"
+        position="object-[right_top]"
+        zoomOnMobile
+      />
       <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">{t("home.wallet.label")}</p>
