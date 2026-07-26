@@ -20,11 +20,20 @@ export function PhotoBg({
   src,
   scrim = "left",
   position = "object-right",
+  zoomOnMobile = false,
 }: {
   src: string;
   scrim?: keyof typeof SCRIMS;
   /** Tailwind object-position utility, e.g. "object-right", "object-center". */
   position?: string;
+  /**
+   * Crop tighter on narrow screens. `object-cover` crops against the block, so one that
+   * is a wide strip on desktop but nearly square on a phone shows far more of the photo
+   * there — enough to expose what the desktop crop deliberately cut. This widens the
+   * image past the block on mobile (anchored right, so the same edge stays in view) and
+   * reverts at `md`.
+   */
+  zoomOnMobile?: boolean;
 }) {
   return (
     <>
@@ -34,7 +43,9 @@ export function PhotoBg({
         alt=""
         aria-hidden
         loading="lazy"
-        className={`pointer-events-none absolute inset-0 h-full w-full select-none object-cover ${position}`}
+        className={`pointer-events-none absolute inset-0 h-full w-full select-none object-cover ${position} ${
+          zoomOnMobile ? "left-auto right-0 w-[200%] max-w-none md:left-0 md:w-full" : ""
+        }`}
       />
       <div aria-hidden className={`absolute inset-0 ${SCRIMS[scrim]}`} />
     </>
