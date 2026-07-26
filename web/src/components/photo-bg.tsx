@@ -35,6 +35,13 @@ export function PhotoBg({
    */
   zoomOnMobile?: boolean;
 }) {
+  // Emit exactly one width/inset set per branch. Listing `w-full` and `w-[200%]` together
+  // does NOT work: Tailwind resolves that by rule order in the stylesheet, where `w-full`
+  // lands after the arbitrary value and silently wins.
+  const box = zoomOnMobile
+    ? "inset-y-0 right-0 w-[200%] max-w-none md:left-0 md:w-full"
+    : "inset-0 w-full";
+
   return (
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -43,9 +50,7 @@ export function PhotoBg({
         alt=""
         aria-hidden
         loading="lazy"
-        className={`pointer-events-none absolute inset-0 h-full w-full select-none object-cover ${position} ${
-          zoomOnMobile ? "left-auto right-0 w-[200%] max-w-none md:left-0 md:w-full" : ""
-        }`}
+        className={`pointer-events-none absolute h-full select-none object-cover ${position} ${box}`}
       />
       <div aria-hidden className={`absolute inset-0 ${SCRIMS[scrim]}`} />
     </>
