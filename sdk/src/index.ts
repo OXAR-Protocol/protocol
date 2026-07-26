@@ -43,3 +43,4 @@ export * from "./core/evm-assets";
 export * from "./core/assets";
 export * from "./core/delora";
 export * from "./core/jupiter-swap";
+export * from "./core/earnings-basis";

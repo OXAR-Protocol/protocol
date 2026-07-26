@@ -58,3 +58,4 @@ __exportStar(require("./core/evm-assets"), exports);
 __exportStar(require("./core/assets"), exports);
 __exportStar(require("./core/delora"), exports);
 __exportStar(require("./core/jupiter-swap"), exports);
+__exportStar(require("./core/earnings-basis"), exports);
