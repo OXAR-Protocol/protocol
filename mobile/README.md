@@ -52,7 +52,7 @@ system browser or adding a native plugin — not by abandoning Capacitor.
 ## App icon
 
 `assets/icon.png` (1024×1024, opaque — iOS rejects alpha and applies its own mask) is the
-source of truth: the OXAR mark in purple on white, generated from `oxar-icons/purple.png`.
+source of truth: the OXAR mark in white on black, generated from `oxar-icons/white.png`.
 
 Native projects are gitignored, so after a fresh `cap add` copy it back in:
 
@@ -67,8 +67,9 @@ For the full set (Android adaptive icons, splash screens) use `npx @capacitor/as
 Capacitor makes the WebView the root view (`view = webView`, and `loadView()` is `final`),
 so the page draws under the status bar and home indicator — you cannot fix it natively.
 There is nothing shell-specific in the fix, and nothing to keep in sync here: the app
-routes opt into `viewport-fit=cover` (`export const viewport` in `web/src/app/(app)/layout.tsx`)
-and the `.safe-*` classes in `web/src/app/globals.css` pad the insets back out. Both are
+app opts into `viewport-fit=cover` (`export const viewport` in `web/src/app/layout.tsx` —
+the ROOT layout; see below) and the `.safe-*` classes in `web/src/app/globals.css` pad the
+insets back out. Both are
 plain web behaviour — `env(safe-area-inset-*)` is 0 wherever there are no insets.
 
 Two things that cost hours, so don't undo them:
@@ -76,6 +77,9 @@ Two things that cost hours, so don't undo them:
 - **`viewport-fit=cover` must be server-rendered.** WebKit reads it while parsing the
   document and does *not* re-evaluate the insets if the meta tag is patched later, so a
   runtime script leaves `env(safe-area-inset-*)` at 0 — measured in this WebView.
+- **It must sit in the ROOT layout.** A `viewport` export in a nested layout reaches the
+  browser through the RSC payload rather than the initial head flush on Vercel — just as
+  late. It worked in dev and in a local `yarn start`, and failed in production.
 - **`padding` on a parent does not move absolutely-positioned children.** They resolve
   `top` against the padding *edge*, hence the separate `.safe-top-6` for pinned links.
 
