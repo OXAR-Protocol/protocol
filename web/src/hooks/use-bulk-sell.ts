@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { Transaction } from "@solana/web3.js";
 
 import { useSolanaContext } from "@/providers/solana-provider";
-import { getProvider, toFriendlyError, isCancellation } from "@/lib/yield";
+import { getProvider, toFriendlyError, isCancellation, toBaseUnits } from "@/lib/yield";
 import { recordBasisDelta } from "@/lib/earnings/pending-basis";
 
 export type BulkSellState = "idle" | "selling" | "done";
@@ -25,6 +25,8 @@ export interface BulkSellTarget {
   shares: bigint;
   /** Position value in USD — retires its cost basis on success. */
   valueUsd: number;
+  /** USD to take out. Omitted or >= the position means a full exit. */
+  amountUsd?: number;
 }
 
 /**
@@ -54,7 +56,17 @@ export function useBulkSell() {
         const provider = getProvider(target.id);
         try {
           if (!provider) throw new Error(`Unknown source: ${target.id}`);
-          const tx = provider.buildRedeemTx
+          // A partial amount withdraws; anything at or above the position exits it
+          // whole, so share-rounding can't strand the last cents.
+          const partial =
+            target.amountUsd !== undefined && target.amountUsd < target.valueUsd - 0.01;
+          const tx = partial && provider.buildWithdrawTx
+            ? await provider.buildWithdrawTx({
+                owner: walletAddress,
+                amount: toBaseUnits(target.amountUsd!.toFixed(6), provider.decimals),
+                connection,
+              })
+            : provider.buildRedeemTx
             ? await provider.buildRedeemTx({ owner: walletAddress, connection })
             : provider.buildRedeemIxs
               ? new Transaction().add(
@@ -71,8 +83,9 @@ export function useBulkSell() {
           await connection.confirmTransaction(sig, "confirmed");
           // The exited position's basis leaves with it, or a re-entry would be
           // measured against a stale one — see lib/earnings/pending-basis.
-          if (target.valueUsd > 0) {
-            recordBasisDelta(walletAddress.toBase58(), target.id, -target.valueUsd);
+          const soldUsd = partial ? target.amountUsd! : target.valueUsd;
+          if (soldUsd > 0) {
+            recordBasisDelta(walletAddress.toBase58(), target.id, -soldUsd);
           }
           outcomes.push({ id: target.id, ok: true });
         } catch (e) {

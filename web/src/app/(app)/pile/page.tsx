@@ -26,6 +26,7 @@ import { useT } from "@/lib/i18n";
 import { useFeature } from "@/hooks/use-features";
 import { useBulkSell } from "@/hooks/use-bulk-sell";
 import { BulkSellBar } from "@/components/bulk-sell-bar";
+import { AllocationSheet } from "@/components/allocation-sheet";
 import { ActivityFeed } from "@/components/activity-feed";
 import { HoverChart } from "@/components/hover-chart";
 import { Sparkline } from "@/components/sparkline";
@@ -58,19 +59,32 @@ export default function PilePage() {
   const chartMarkers = useMemo(() => {
     const pts = history.points;
     if (pts.length < 2) return [];
-    return events
-      .filter((e) => e.kind === "buy" || e.kind === "sell")
-      .map((e) => {
-        const index = pts.findIndex((p) => p.t >= e.timestamp);
-        return {
-          index: index < 0 ? pts.length - 1 : index,
-          kind: e.kind as "buy" | "sell",
-          label: `${e.label}${e.usd !== null ? ` · $${formatUsdAmount(e.usd)}` : ""}`,
-        };
-      });
+    // Several trades on one day land on ONE index — drawn separately they stack into
+    // a single dot that lies about how many there were. Group them and say the count.
+    const groups = new Map<string, { index: number; kind: "buy" | "sell"; n: number; usd: number }>();
+    for (const e of events) {
+      if (e.kind !== "buy" && e.kind !== "sell") continue;
+      const found = pts.findIndex((p) => p.t >= e.timestamp);
+      const index = found < 0 ? pts.length - 1 : found;
+      const key = `${index}:${e.kind}`;
+      const g = groups.get(key) ?? { index, kind: e.kind, n: 0, usd: 0 };
+      g.n += 1;
+      g.usd += e.usd ?? 0;
+      groups.set(key, g);
+    }
+    return [...groups.values()].map((g) => ({
+      index: g.index,
+      kind: g.kind,
+      label:
+        g.n === 1
+          ? `${g.kind === "buy" ? "bought" : "sold"} · $${formatUsdAmount(g.usd)}`
+          : `${g.n} ${g.kind === "buy" ? "buys" : "sells"} · $${formatUsdAmount(g.usd)}`,
+    }));
   }, [events, history.points]);
   const tradedMints = new Set(events.map((e) => e.mint).filter(Boolean) as string[]);
   const [filter, setFilter] = useState<Filter>("all");
+  // "Sell" now asks HOW MUCH of each, rather than assuming everything.
+  const [allocating, setAllocating] = useState(false);
 
   // Remember the user's preferred layout across visits.
   useEffect(() => {
@@ -118,18 +132,22 @@ export default function PilePage() {
     0,
   );
 
-  const sellSelected = async () => {
+  const sellSelected = async (amounts: Record<string, number>) => {
     // Read the RETURNED outcomes, not `bulk.done` — that's state captured at render
     // and still holds the previous run's value at this point.
     const outcomes = await bulk.sellAll(
-      selectedViews.map((v) => ({
-        id: v.id,
-        shares: v.shares,
-        valueUsd: fromBaseUnits(v.underlyingBalance, v.decimals),
-      })),
+      selectedViews
+        .filter((v) => (amounts[v.id] ?? 0) > 0)
+        .map((v) => ({
+          id: v.id,
+          shares: v.shares,
+          valueUsd: fromBaseUnits(v.underlyingBalance, v.decimals),
+          amountUsd: amounts[v.id],
+        })),
     );
     // Keep the failed ones ticked: they are what the user still has to deal with.
     setSelected(new Set(outcomes.filter((o) => !o.ok).map((o) => o.id)));
+    if (outcomes.every((o) => o.ok)) setAllocating(false);
     refresh();
   };
 
@@ -421,9 +439,32 @@ export default function PilePage() {
             ...d,
             id: allHeld.find((v) => v.id === d.id)?.name ?? d.id,
           }))}
-          onSell={sellSelected}
+          onSell={() => setAllocating(true)}
           onClear={() => {
             setSelected(new Set());
+            bulk.reset();
+          }}
+        />
+      )}
+
+      {allocating && (
+        <AllocationSheet
+          mode="sell"
+          rows={selectedViews.map((v) => ({
+            id: v.id,
+            name: v.name,
+            symbol: v.assetSymbol,
+            maxUsd: fromBaseUnits(v.underlyingBalance, v.decimals),
+          }))}
+          busy={bulk.state === "selling"}
+          progress={
+            bulk.state === "selling"
+              ? t("bulk.progress", { n: String(bulk.done.length), total: String(selectedViews.length) })
+              : null
+          }
+          onConfirm={sellSelected}
+          onClose={() => {
+            setAllocating(false);
             bulk.reset();
           }}
         />
