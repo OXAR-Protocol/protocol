@@ -51,3 +51,38 @@ describe("planWithdrawal", () => {
     ).toBeNull();
   });
 });
+
+describe("MAX prefills a readable amount without stranding dust", () => {
+  // The MAX button offers floorToCents(19.999785) = 19.99. That must still be a full
+  // exit — otherwise rounding the DISPLAY silently leaves the remainder behind.
+  it("treats all-but-a-cent as a full exit", () => {
+    const plan = planWithdrawal({
+      requested: 19.99,
+      positionBaseUnits: BigInt(19_999_785),
+      shares: BigInt(5_000),
+      decimals: 6,
+    });
+    expect(plan).toEqual({ mode: "redeemAll", shares: BigInt(5_000) });
+  });
+
+  it("still treats a genuinely partial amount as partial", () => {
+    const plan = planWithdrawal({
+      requested: 10,
+      positionBaseUnits: BigInt(19_999_785),
+      shares: BigInt(5_000),
+      decimals: 6,
+    });
+    expect(plan).toEqual({ mode: "withdraw", amount: BigInt(10_000_000) });
+  });
+
+  it("keeps the tolerance at one cent, not one percent", () => {
+    // $19.90 out of $19.999785 is 10 cents short — the user asked for less.
+    const plan = planWithdrawal({
+      requested: 19.9,
+      positionBaseUnits: BigInt(19_999_785),
+      shares: BigInt(5_000),
+      decimals: 6,
+    });
+    expect(plan).toEqual({ mode: "withdraw", amount: BigInt(19_900_000) });
+  });
+});

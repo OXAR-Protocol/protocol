@@ -9,6 +9,7 @@ import {
   type DasResult,
   type PriceMap,
 } from "@oxar/sdk";
+import { isPositionMint } from "@/lib/yield/position-mints";
 
 const JUP_PRICE_URL = "https://lite-api.jup.ag/price/v3";
 const JUP_TOKEN_URL = "https://lite-api.jup.ag/tokens/v2/search";
@@ -56,7 +57,9 @@ async function fetchIcons(mints: string[]): Promise<Record<string, string>> {
   }
 }
 
-/** The connected wallet's Solana holdings, valued in USD (fetch-on-mount). */
+/** The connected wallet's IDLE Solana holdings, valued in USD (fetch-on-mount).
+ *  Positions the app counts elsewhere (stocks, gold, Jupiter Lend receipts) are
+ *  excluded — listing them as "not working yet" double-counted the same dollars. */
 export function useWalletAssets() {
   const { connection, walletAddress } = useSolanaContext();
   const [assets, setAssets] = useState<WalletAsset[]>([]);
@@ -78,7 +81,7 @@ export function useWalletAssets() {
         .map((i) => i.id)
         .slice(0, MAX_PRICED_MINTS);
       const prices = await fetchPrices(mints);
-      const built = buildWalletAssets(das, prices);
+      const built = buildWalletAssets(das, prices).filter((a) => !isPositionMint(a.mint));
       // Fill missing logos (e.g. native SOL) from the Jupiter token index.
       const missing = built.filter((a) => !a.logo).map((a) => a.mint).slice(0, MAX_PRICED_MINTS);
       const icons = await fetchIcons(missing);
