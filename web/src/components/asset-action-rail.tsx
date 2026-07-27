@@ -9,6 +9,8 @@ import { DepositPanel } from "@/components/deposit-panel";
 import { YieldAmountField } from "@/components/yield-amount-field";
 import { CashOutSheet } from "@/components/cash-out-sheet";
 import { useSwapOutPreview, NOTABLE_SELL_COST } from "@/hooks/use-swap-out-preview";
+import { useFeature } from "@/hooks/use-features";
+import { SellAmountControls } from "@/components/sell-amount-controls";
 import { floorToCents, formatUsdAmount } from "@oxar/sdk";
 import { useT, localizeError } from "@/lib/i18n";
 
@@ -51,7 +53,13 @@ export function AssetActionRail({
   const { t } = useT();
   const [tab, setTab] = useState<"buy" | "sell">("buy");
   const [showCashOut, setShowCashOut] = useState(false);
+  const [sellInUnits, setSellInUnits] = useState(false);
   const canSell = positionValue > 0;
+  // Fractions, a one-press full exit, and a units view — dark until the key is on.
+  const sellingV2 = useFeature("selling-v2");
+  // Units are only meaningful where a unit has a price (stocks, gold), and only
+  // while the flag is on; everything else stays denominated in dollars.
+  const unitsMode = sellingV2 && sellInUnits && !!sharePriceUsd && sharePriceUsd > 0;
 
   // What the sell will actually pay out. We no longer refuse expensive sells (that
   // locked holders of thin tickers in) — we state the cost and let the user decide.
@@ -98,10 +106,14 @@ export function AssetActionRail({
       ) : (
         <>
           <YieldAmountField
-            label={t(price ? "rail.sellLabel" : "rail.withdrawLabel", { sym: view.assetSymbol })}
-            symbol={price ? "USDC" : view.assetSymbol}
-            value={amount}
-            onChange={onAmountChange}
+            label={
+              unitsMode
+                ? t("rail.sellUnitsLabel", { sym: unitLabel ?? "units" })
+                : t(price ? "rail.sellLabel" : "rail.withdrawLabel", { sym: view.assetSymbol })
+            }
+            symbol={unitsMode ? (unitLabel ?? "units") : price ? "USDC" : view.assetSymbol}
+            value={unitsMode ? amount / sharePriceUsd! : amount}
+            onChange={(v) => onAmountChange(unitsMode ? v * sharePriceUsd! : v)}
             hint={
               <span className="flex items-center gap-2">
                 {price ? t("rail.worth") : t("rail.available")}: ${formatUsdAmount(positionValue)}
@@ -120,6 +132,19 @@ export function AssetActionRail({
             disabled={loading || amount <= 0 || amount > positionValue}
             variant="primary"
           />
+
+          {sellingV2 && (
+            <SellAmountControls
+              positionValue={positionValue}
+              amount={amount}
+              onAmountChange={onAmountChange}
+              unitPriceUsd={sharePriceUsd}
+              unitLabel={unitLabel}
+              inUnits={sellInUnits}
+              onToggleUnits={() => setSellInUnits((v) => !v)}
+              disabled={loading}
+            />
+          )}
 
           {/* What you'll actually receive — a real quote, shown instead of blocking the
               sell (which used to leave holders with no way out). The gap against the
