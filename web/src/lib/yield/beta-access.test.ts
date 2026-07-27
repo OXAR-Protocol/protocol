@@ -51,12 +51,16 @@ describe("beta list parsing", () => {
 });
 
 describe("gated sources", () => {
-  it("keeps ONyc registered so it works end to end for the allowlist", () => {
-    expect(PROVIDERS.some((p) => p.id === "onre-onyc")).toBe(true);
+  // ONyc was the first source piloted this way and is now public. The gate stays —
+  // it is how the next one ships to a few people before everyone. Nothing is gated
+  // today, and this asserts that on purpose: a `beta` flag left on by accident hides
+  // a source from every real user, which is silent and easy to miss.
+  it("has no source gated right now", () => {
+    expect(PROVIDERS.filter((p) => p.beta).map((p) => p.id)).toEqual([]);
+    expect(onreOnycProvider.beta).toBeUndefined();
   });
 
-  it("marks ONyc beta, and leaves every other source ungated", () => {
-    expect(onreOnycProvider.beta).toBe(true);
-    expect(PROVIDERS.filter((p) => p.beta).map((p) => p.id)).toEqual(["onre-onyc"]);
+  it("still serves ONyc to everyone", () => {
+    expect(PROVIDERS.some((p) => p.id === "onre-onyc")).toBe(true);
   });
 });

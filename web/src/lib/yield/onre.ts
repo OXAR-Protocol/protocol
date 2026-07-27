@@ -20,7 +20,8 @@ import { createSwapHoldProvider } from "./swap-hold";
  * redemption is KYC-gated — for our users the exit is the DEX, which is why the
  * liquidity check above is a listing condition, not a nice-to-have.
  *
- * `beta`: piloted with real money by the beta allowlist before the alpha sees it.
+ * Piloted behind the beta allowlist first (deposit + withdraw with real money),
+ * then opened to everyone.
  */
 export const onreOnycProvider = createSwapHoldProvider({
   id: "onre-onyc",
@@ -30,5 +31,4 @@ export const onreOnycProvider = createSwapHoldProvider({
   heldMint: "5Y8NV33Vv7WbnLfq3zBcKSdYPrk7g2KoiQoe7M2tcxp5",
   heldDecimals: 9,
   defiLlamaPoolId: "7083d6a5-e3cb-4eeb-8204-f1b735e4ecbb",
-  beta: true,
 });
