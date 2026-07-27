@@ -75,6 +75,7 @@ export const en = {
   "pile.yourPosition": "your position",
 
   // Deposit / confirm / success
+  "deposit.cardMinimum": "minimum {value} · card",
   "deposit.payWith": "pay with",
   "deposit.loadingAssets": "Loading your assets…",
   "deposit.noAssets": "No assets found in your wallet.",
@@ -85,8 +86,6 @@ export const en = {
   "deposit.swapCost": "swap cost ~{value}",
   "deposit.cantQuote": "couldn't quote — try a different amount",
   "deposit.buyAmountHint": "how much to buy · apple pay or card",
-  "deposit.cardCharge": "charges ≈{value} · minimum {min} · no crypto needed",
-  "deposit.minAmount": "minimum {value}",
   "deposit.bridgeMinAmount": "minimum {value} to buy from another chain — or pay with USDC on Solana",
   "deposit.bridgeConfirmsHint": "paying from another chain — you'll confirm a few steps in your wallet",
   "confirm.review": "review your {verb}",
