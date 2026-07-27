@@ -72,7 +72,6 @@ export const en = {
   "pile.empty.title": "You haven't deposited yet",
   "pile.empty.body": "Your positions show up here once you put money to work.",
   "pile.explore": "Explore yield",
-  "pile.yourPosition": "your position",
 
   // Deposit / confirm / success
   "deposit.cardMinimum": "minimum {value} · card",
