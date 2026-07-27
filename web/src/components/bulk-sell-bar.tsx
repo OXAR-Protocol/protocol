@@ -5,9 +5,13 @@ import { Loader2 } from "lucide-react";
 import { formatUsdAmount } from "@oxar/sdk";
 
 import type { BulkSellOutcome, BulkSellState } from "@/hooks/use-bulk-sell";
+import { AssetIcon } from "@/components/asset-icon";
+import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { useT } from "@/lib/i18n";
 
 interface Props {
+  /** The picked positions, for the stacked icons — a set you can see. */
+  picked: { id: string; symbol: string }[];
   selectedCount: number;
   totalUsd: number;
   state: BulkSellState;
@@ -21,7 +25,7 @@ interface Props {
  * position rather than a spinner, because each one is its own transaction and its
  * own wallet prompt — "3 of 5" is the truth, "selling…" isn't.
  */
-export function BulkSellBar({ selectedCount, totalUsd, state, done, onSell, onClear }: Props) {
+export function BulkSellBar({ picked, selectedCount, totalUsd, state, done, onSell, onClear }: Props) {
   const { t } = useT();
   if (selectedCount === 0 && state === "idle") return null;
 
@@ -29,11 +33,21 @@ export function BulkSellBar({ selectedCount, totalUsd, state, done, onSell, onCl
   const selling = state === "selling";
 
   return (
-    <div className="sticky bottom-20 z-30 mx-auto mt-6 flex max-w-[560px] flex-wrap items-center gap-3 rounded-full border border-black/10 bg-white/95 px-5 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.10)] backdrop-blur">
-      <span className="text-[13px] tabular-nums text-black/70">
+    <div className="sticky bottom-20 z-30 mx-auto mt-6 flex w-fit max-w-full flex-wrap items-center gap-3 rounded-full border border-black/10 bg-white/95 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.10)] backdrop-blur">
+      {/* The set, shown as itself: overlapping marks rather than a count alone. */}
+      {picked.length > 0 && (
+        <span className="flex shrink-0 items-center pl-1">
+          {picked.slice(0, 4).map((p, i) => (
+            <span key={p.id} className={i === 0 ? "" : "-ml-2"}>
+              <AssetIcon src={assetLogoSrc(p.id)} label={assetIconLabel(p.id, p.symbol)} size={22} />
+            </span>
+          ))}
+        </span>
+      )}
+      <span className="whitespace-nowrap text-[13px] tabular-nums text-black/70">
         {selling
           ? t("bulk.progress", { n: String(done.length), total: String(selectedCount) })
-          : t("bulk.selected", { n: String(selectedCount), usd: `$${formatUsdAmount(totalUsd)}` })}
+          : t("bulk.setLabel", { n: String(selectedCount), usd: `$${formatUsdAmount(totalUsd)}` })}
       </span>
 
       {/* Naming the ones that didn't go through, AND why — "some failed" can't be

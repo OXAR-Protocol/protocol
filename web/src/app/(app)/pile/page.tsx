@@ -20,7 +20,6 @@ import { isPriceExposure } from "@/lib/yield/assets";
 import { isXStock } from "@/lib/yield/xstocks";
 import { isGold } from "@/lib/yield/gold";
 import { AssetIcon } from "@/components/asset-icon";
-import { PhotoBg } from "@/components/photo-bg";
 import { BanknoteBg } from "@/components/banknote-bg";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { useT } from "@/lib/i18n";
@@ -132,33 +131,8 @@ export default function PilePage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative"
       >
-        {/* The line lives BEHIND the title and bleeds off to the right, faded into
-            the page so it reads as texture until you look at it. Masked on the left
-            so it dissolves under the words rather than stopping at them, and left
-            interactive — hovering the exposed part scrubs real values. */}
-        {history.points.length > 1 && (
-          <div
-            className="pointer-events-none absolute inset-y-0 right-0 hidden w-[62%] opacity-45 sm:block"
-            style={{
-              maskImage: "linear-gradient(to right, transparent 0%, black 45%)",
-              WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 45%)",
-            }}
-          >
-            <div className="pointer-events-auto h-full">
-              <HoverChart
-                values={history.points.map((p) => p.usd)}
-                format={(v) => `$${formatUsdAmount(v)}`}
-                height={150}
-                className="text-[#3c05c7]"
-                fill
-              />
-            </div>
-          </div>
-        )}
-
-        <div className="relative z-10">
+        <div>
           <SectionLabel>portfolio</SectionLabel>
           <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-black leading-[1.04] tracking-[-0.04em] lowercase">
             {t("pile.title")}
@@ -166,11 +140,6 @@ export default function PilePage() {
           <p className="mt-3 max-w-lg text-sm text-black/45">
             {t("pile.subtitle")}
           </p>
-          {history.points.length > 1 && (
-            <p className="mt-2 text-[10px] lowercase tracking-wide text-black/30">
-              {t("pile.chartRange", { n: String(history.points.length) })}
-            </p>
-          )}
         </div>
       </motion.div>
 
@@ -181,17 +150,34 @@ export default function PilePage() {
         transition={{ duration: 0.5, delay: 0.05 }}
         className="relative mt-8 overflow-hidden p-6 rounded-[8px] border border-black/10 bg-white"
       >
-        <PhotoBg src="/art/coin-stacking.webp" scrim="left" position="object-right" />
-        <p className="relative text-xs lowercase tracking-[0.2em] text-black/40">
+        <p className="text-xs lowercase tracking-[0.2em] text-black/40">
           {t("pile.total")}
         </p>
-        <div className="relative mt-2">
+        <div className="mt-2">
           {loading ? (
             <Loader2 className="animate-spin text-black/40" size={28} />
           ) : (
             <LiveAmount value={totalValue} apy={blendedApy} variant="lg" />
           )}
         </div>
+
+        {/* The line gets the full width of the card and nothing behind it. It is
+            data, not decoration — the photograph it used to sit on was reading as
+            texture over the one thing the card exists to show. */}
+        {history.points.length > 1 && (
+          <div className="-mx-6 mt-5 -mb-6">
+            <HoverChart
+              values={history.points.map((p) => p.usd)}
+              format={(v) => `$${formatUsdAmount(v)}`}
+              height={110}
+              className="text-[#3c05c7]"
+              fill
+            />
+            <p className="px-6 pb-4 pt-2 text-[10px] lowercase tracking-wide text-black/30">
+              {t("pile.chartRange", { n: String(history.points.length) })}
+            </p>
+          </div>
+        )}
 
       </motion.section>
 
@@ -288,37 +274,14 @@ export default function PilePage() {
                 <button
                   key={v.id}
                   onClick={() => router.push(`/asset/${v.id}`)}
-                  className="group relative isolate overflow-hidden w-full text-left p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition-colors"
+                  className={`group relative isolate w-full overflow-hidden rounded-[8px] border bg-white p-5 text-left transition-colors ${
+                    selected.has(v.id)
+                      ? "border-black/40 ring-1 ring-black/10"
+                      : "border-black/10 hover:border-black/30"
+                  }`}
                 >
                   <BanknoteBg seed={v.id} />
                   <div className="flex items-center gap-4">
-                    {sellingV2 && (
-                      <span
-                        role="checkbox"
-                        aria-checked={selected.has(v.id)}
-                        tabIndex={0}
-                        aria-label={t("bulk.select", { name: v.name })}
-                        onClick={(e) => {
-                          // The row navigates; the box must not.
-                          e.stopPropagation();
-                          toggleSelected(v.id);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === " " || e.key === "Enter") {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            toggleSelected(v.id);
-                          }
-                        }}
-                        className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] border transition ${
-                          selected.has(v.id)
-                            ? "border-black bg-black text-white"
-                            : "border-black/25 hover:border-black/50"
-                        }`}
-                      >
-                        {selected.has(v.id) && <span className="text-[11px] leading-none">✓</span>}
-                      </span>
-                    )}
                     {/* Same shape as the browse rows on /yield: ticker leads, name
                         underneath, the chart in the middle, value on the right. */}
                     <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -344,6 +307,36 @@ export default function PilePage() {
                           className={(change24hOf(v) ?? 0) >= 0 ? "text-emerald-600" : "text-red-600"}
                         />
                       </div>
+                    )}
+
+                    {/* Collecting a set, not ticking a table — so it reads as an
+                        action on the right, where the other actions are. */}
+                    {sellingV2 && (
+                      <span
+                        role="checkbox"
+                        aria-checked={selected.has(v.id)}
+                        tabIndex={0}
+                        aria-label={t("bulk.select", { name: v.name })}
+                        onClick={(e) => {
+                          // The row navigates; picking must not.
+                          e.stopPropagation();
+                          toggleSelected(v.id);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === " " || e.key === "Enter") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleSelected(v.id);
+                          }
+                        }}
+                        className={`hidden shrink-0 cursor-pointer rounded-full border px-3 py-1.5 text-[11px] lowercase tracking-wide transition sm:inline-flex ${
+                          selected.has(v.id)
+                            ? "border-black bg-black text-white"
+                            : "border-black/15 text-black/50 hover:border-black/40 hover:text-black"
+                        }`}
+                      >
+                        {selected.has(v.id) ? t("bulk.picked") : t("bulk.pick")}
+                      </span>
                     )}
 
                     <div className="shrink-0 text-right">
@@ -380,6 +373,7 @@ export default function PilePage() {
 
       {sellingV2 && (
         <BulkSellBar
+          picked={selectedViews.map((v) => ({ id: v.id, symbol: v.assetSymbol }))}
           selectedCount={selected.size}
           totalUsd={selectedUsd}
           state={bulk.state}
