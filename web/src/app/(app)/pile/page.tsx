@@ -266,7 +266,7 @@ export default function PilePage() {
             ))}
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className={`space-y-2 ${selected.size > 0 ? "pb-24" : ""}`}>
             {held.map((v) => {
               const value = fromBaseUnits(v.underlyingBalance, v.decimals);
               return (
@@ -368,7 +368,10 @@ export default function PilePage() {
           selectedCount={selected.size}
           totalUsd={selectedUsd}
           state={bulk.state}
-          done={bulk.done}
+          done={bulk.done.map((d) => ({
+            ...d,
+            id: allHeld.find((v) => v.id === d.id)?.name ?? d.id,
+          }))}
           onSell={sellSelected}
           onClear={() => {
             setSelected(new Set());
