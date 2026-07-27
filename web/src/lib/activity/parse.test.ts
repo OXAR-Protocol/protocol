@@ -78,3 +78,54 @@ describe("parseActivity", () => {
     expect(events.map((e) => e.signature)).toEqual(["new", "old"]);
   });
 });
+
+describe("what a trade actually was", () => {
+  // "Bought $50" doesn't tell you what you own. The quantity and the price paid do,
+  // and both are already in the transaction — no self-tracking needed.
+  it("reports units and the price per unit on a buy", () => {
+    const [e] = parseActivity(
+      [tx("b1", 300, [
+        { fromUserAccount: OWNER, mint: USDC, tokenAmount: 3 },
+        { toUserAccount: OWNER, mint: AAPL, tokenAmount: 0.0076252 },
+      ])],
+      OWNER, USDC, NAMES,
+    );
+    expect(e.kind).toBe("buy");
+    expect(e.mint).toBe(AAPL);
+    expect(e.units).toBeCloseTo(0.0076252, 7);
+    expect(e.unitPriceUsd).toBeCloseTo(393.4, 1);
+  });
+
+  it("reports units on a sell too, as a positive quantity", () => {
+    const [e] = parseActivity(
+      [tx("s3", 400, [
+        { fromUserAccount: OWNER, mint: AAPL, tokenAmount: 0.0076252 },
+        { toUserAccount: OWNER, mint: USDC, tokenAmount: 2.94 },
+      ])],
+      OWNER, USDC, NAMES,
+    );
+    expect(e.kind).toBe("sell");
+    expect(e.units).toBeCloseTo(0.0076252, 7);
+    expect(e.unitPriceUsd).toBeCloseTo(385.6, 1);
+  });
+
+  // A plain transfer in has no USDC leg to divide by — quantity yes, price no.
+  it("leaves the unit price out when nothing was paid", () => {
+    const [e] = parseActivity(
+      [tx("r1", 500, [{ toUserAccount: OWNER, mint: AAPL, tokenAmount: 0.5 }])],
+      OWNER, USDC, NAMES,
+    );
+    expect(e.kind).toBe("receive");
+    expect(e.units).toBeCloseTo(0.5, 6);
+    expect(e.unitPriceUsd).toBeUndefined();
+  });
+
+  it("leaves asset fields off a plain USDC movement", () => {
+    const [e] = parseActivity(
+      [tx("u1", 600, [{ toUserAccount: OWNER, mint: USDC, tokenAmount: 25 }])],
+      OWNER, USDC, NAMES,
+    );
+    expect(e.mint).toBeUndefined();
+    expect(e.units).toBeUndefined();
+  });
+});

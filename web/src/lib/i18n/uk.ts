@@ -167,6 +167,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "bulk.failed": "не пройшло: {ids}",
   "bulk.sellSelected": "продати вибрані",
   "bulk.clear": "зняти вибір",
+  "pile.history": "історія",
+  "asset.history": "твоя історія з цим активом",
   "rail.max": "все",
   "rail.actionSell": "Продати",
   "rail.actionWithdraw": "Зняти",
@@ -220,6 +222,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "login.redirecting": "перенаправляємо…",
   "login.continue": "продовжити",
 
+  "activity.each": "за штуку",
   "activity.empty": "поки нічого — твої гроші ще посапують.",
   "activity.showMore": "показати ще",
 

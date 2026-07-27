@@ -21,6 +21,13 @@ export interface ActivityEvent {
   label: string;
   /** USD moved (|USDC delta|), or null when there was no USDC leg. */
   usd: number | null;
+  /** Held asset this row is about, when one moved — lets a view show only its own. */
+  mint?: string;
+  /** How many units of that asset moved (always positive; `kind` carries direction).
+   *  "Bought $50" doesn't tell you what you own — "0.0076 AVGOx" does. */
+  units?: number;
+  /** USD paid or received per unit. Absent when there was no USDC leg to divide. */
+  unitPriceUsd?: number;
 }
 
 const DUST = 0.005; // ignore sub-cent USDC deltas (fees / rounding)
@@ -94,12 +101,19 @@ export function parseActivity(
       continue; // no USDC and no known asset moved — noise
     }
 
+    // Units and the price per unit, so history reads as a trade rather than a
+    // dollar figure. Only when a known asset actually moved; the price needs a
+    // USDC leg to divide by, so a plain transfer has units without one.
+    const units = primaryMint ? Math.abs(primaryVal) : undefined;
     events.push({
       signature: tx.signature ?? "",
       timestamp: tx.timestamp ?? 0,
       kind,
       label,
       usd,
+      ...(primaryMint ? { mint: primaryMint } : {}),
+      ...(units ? { units } : {}),
+      ...(units && usd ? { unitPriceUsd: usd / units } : {}),
     });
   }
 

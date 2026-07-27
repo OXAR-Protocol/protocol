@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { ArrowDownLeft, ArrowUpRight, Loader2 } from "lucide-react";
 
+import { formatUsdAmount, centPrecision, floorTo } from "@oxar/sdk";
+
 import { useActivity } from "@/hooks/use-activity";
 import type { ActivityKind } from "@/lib/activity/parse";
 import { useT } from "@/lib/i18n";
@@ -25,10 +27,18 @@ function timeAgo(unixSec: number): string {
  *  static "Nothing yet" placeholder with a real feed (links to Solscan). */
 const PAGE = 10;
 
-export function ActivityFeed() {
-  const { events, loading } = useActivity();
+interface Props {
+  /** Show only rows about this held asset — used on an asset's own page. */
+  mint?: string;
+  /** Ticker for the quantity line, e.g. "AVGOx". */
+  unitLabel?: string;
+}
+
+export function ActivityFeed({ mint, unitLabel }: Props = {}) {
+  const { events: all, loading } = useActivity();
   const { t } = useT();
   const [visible, setVisible] = useState(PAGE);
+  const events = mint ? all.filter((e) => e.mint === mint) : all;
 
   if (loading) {
     return (
@@ -67,12 +77,24 @@ export function ActivityFeed() {
                 strokeWidth={1.5}
                 className={inflow ? "text-emerald-600" : "text-black/40"}
               />
-              <span className="text-sm text-black truncate">{e.label}</span>
+              <div className="min-w-0">
+                <span className="block truncate text-sm text-black">{e.label}</span>
+                {/* What was actually traded. A dollar figure alone doesn't say what
+                    you now own, or at what price it was bought. */}
+                {e.units !== undefined && (
+                  <span className="block text-[11px] tabular-nums text-black/45">
+                    {floorTo(e.units, e.unitPriceUsd ? centPrecision(e.unitPriceUsd) : 4)}
+                    {unitLabel ? ` ${unitLabel}` : ""}
+                    {e.unitPriceUsd !== undefined &&
+                      ` · $${formatUsdAmount(e.unitPriceUsd)} ${t("activity.each")}`}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="flex items-baseline gap-3 shrink-0">
               {e.usd !== null && (
                 <span className="text-sm text-black/60 tabular-nums">
-                  ${e.usd.toFixed(2)}
+                  ${formatUsdAmount(e.usd)}
                 </span>
               )}
               <span className="text-[10px] lowercase tracking-wide text-black/45">

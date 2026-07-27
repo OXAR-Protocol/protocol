@@ -15,6 +15,7 @@ import {
 } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
+import { floorTo } from "@oxar/sdk";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { AssetIcon } from "@/components/asset-icon";
 import { PhotoBg } from "@/components/photo-bg";
@@ -23,6 +24,7 @@ import { useT } from "@/lib/i18n";
 import { useFeature } from "@/hooks/use-features";
 import { useBulkSell } from "@/hooks/use-bulk-sell";
 import { BulkSellBar } from "@/components/bulk-sell-bar";
+import { ActivityFeed } from "@/components/activity-feed";
 
 type Layout = "list" | "grid";
 
@@ -56,6 +58,8 @@ export default function PilePage() {
     .filter((v) => isPriceExposure(v.id) && v.heldMint)
     .map((v) => v.heldMint as string);
   const { prices } = useStockPrices(priceMints);
+  // Ticker for one unit — the name carries it, e.g. "Broadcom (AVGOx)".
+  const unitOf = (v: ProviderView) => v.name.match(/\(([^)]+)\)/)?.[1] ?? v.assetSymbol;
   const change24hOf = (v: ProviderView) =>
     isPriceExposure(v.id) && v.heldMint ? prices[v.heldMint]?.change24h : undefined;
 
@@ -259,9 +263,17 @@ export default function PilePage() {
                     </div>
                     <div className="text-right shrink-0">
                       <LiveAmount value={value} apy={v.apy} variant="md" />
-                      <p className="text-[10px] lowercase tracking-wide text-black/40">
-                        {t("pile.yourPosition")}
-                      </p>
+                      {/* How much you own, not just what it's worth. A dollar figure
+                          alone can't be checked against anything the user knows. */}
+                      {isPriceExposure(v.id) && v.heldDecimals !== undefined && v.shares > BigInt(0) ? (
+                        <p className="text-[10px] tabular-nums text-black/40">
+                          {floorTo(Number(v.shares) / 10 ** v.heldDecimals, 6)} {unitOf(v)}
+                        </p>
+                      ) : (
+                        <p className="text-[10px] lowercase tracking-wide text-black/40">
+                          {t("pile.yourPosition")}
+                        </p>
+                      )}
                     </div>
                     <ArrowUpRight
                       size={16}
@@ -289,6 +301,19 @@ export default function PilePage() {
           }}
         />
       )}
+
+      {/* History lives where the positions are, not on the home glance. */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 }}
+        className="mt-10"
+      >
+        <p className="mb-3 text-xs lowercase tracking-[0.2em] text-black/40">
+          {t("pile.history")}
+        </p>
+        <ActivityFeed />
+      </motion.section>
     </div>
   );
 }
