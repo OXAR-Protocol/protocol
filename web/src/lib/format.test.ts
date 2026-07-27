@@ -7,6 +7,9 @@ import {
   centPrecision,
   floorTo,
   normalizeDecimalInput,
+  spendableBase,
+  SOL_MINT,
+  type WalletAsset,
 } from "@oxar/sdk";
 
 describe("money a person can read", () => {
@@ -80,5 +83,30 @@ describe("amounts typed on a non-English keyboard", () => {
     // "1 234,5" is how 1234.5 is written in Ukrainian — the comma is the separator.
     expect(normalizeDecimalInput("$1 234,5")).toBe("1234.5");
     expect(normalizeDecimalInput("abc")).toBe("");
+  });
+});
+
+describe("a balance that is entirely reserved", () => {
+  // Reported as "it rounds my SOL to 0": 0.004707 SOL is worth $0.35, but sits
+  // entirely inside the fee reserve, so nothing is spendable. That is a held-back
+  // balance, not a rounding error, and the UI has to say which.
+  const sol = (uiAmount: number): WalletAsset => ({
+    mint: SOL_MINT,
+    symbol: "SOL",
+    decimals: 9,
+    amount: BigInt(Math.round(uiAmount * 1e9)),
+    uiAmount,
+    usdValue: uiAmount * 74,
+    chain: "solana",
+  });
+
+  it("has nothing to spend when the whole balance is under the reserve", () => {
+    expect(spendableBase(sol(0.004707), true)).toBe(BigInt(0));
+    expect(spendableBase(sol(0.004707), false)).toBe(BigInt(0));
+  });
+
+  it("spends the surplus once the balance clears the reserve", () => {
+    // 0.02 SOL, sponsored: keeps 0.005 for wrapped-SOL rent, spends the rest.
+    expect(spendableBase(sol(0.02), false)).toBe(BigInt(15_000_000));
   });
 });
