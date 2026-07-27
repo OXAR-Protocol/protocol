@@ -51,6 +51,14 @@ function rawText(e: unknown): string {
  * Map raw chain / wallet / SDK errors to a short, friendly, non-scary message.
  * The raw error is still logged to the console for debugging.
  */
+const CANCELLED = "Cancelled — nothing left your wallet.";
+
+/** True when the user simply stopped it — no signature, nothing moved. Shares the
+ *  single definition with `toFriendlyError`, so the two can't drift apart. */
+export function isCancellation(e: unknown): boolean {
+  return toFriendlyError(e).startsWith(CANCELLED);
+}
+
 export function toFriendlyError(e: unknown): string {
   // Our own deliberate messages pass straight through — don't clobber them.
   if (e instanceof UserFacingError) return e.message;
@@ -66,9 +74,19 @@ export function toFriendlyError(e: unknown): string {
     raw.includes("user denied") ||
     raw.includes("declined") ||
     raw.includes("cancelled") ||
-    raw.includes("canceled")
+    raw.includes("canceled") ||
+    // Privy and mobile wallets phrase the same gesture their own ways; missing one
+    // turns "I changed my mind" into "Something went wrong", which is alarming and
+    // wrong — nothing was signed and nothing moved.
+    raw.includes("user_rejected") ||
+    raw.includes("user rejection") ||
+    raw.includes("rejected by user") ||
+    raw.includes("denied by user") ||
+    raw.includes("request rejected") ||
+    raw.includes("dismissed") ||
+    raw.includes("aborted")
   ) {
-    return "Cancelled — nothing left your wallet.";
+    return CANCELLED;
   }
 
   // Blockhash expired / transaction took too long before reaching the network.

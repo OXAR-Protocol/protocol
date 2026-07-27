@@ -6,4 +6,4 @@ export { planWithdrawal, type WithdrawPlan } from "./withdraw";
 export { groupProviderViews, type ProviderGroup } from "./group-views";
 export { getApyHistory, getProviderTvl, type ApyHistoryPoint } from "./yields-api";
 export { sparklinePath } from "./sparkline";
-export { toFriendlyError, UserFacingError } from "./errors";
+export { toFriendlyError, isCancellation, UserFacingError } from "./errors";

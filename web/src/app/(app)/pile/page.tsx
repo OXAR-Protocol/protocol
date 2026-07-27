@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Loader2, ArrowUpRight, List, LayoutGrid } from "lucide-react";
+import { Loader2, ArrowUpRight, List, LayoutGrid, Check } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { LiveAmount } from "@/components/live-amount";
@@ -271,7 +271,14 @@ export default function PilePage() {
         ) : layout === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {held.map((v) => (
-              <PositionCard key={v.id} view={v} onOpen={() => router.push(`/asset/${v.id}`)} change24h={change24hOf(v)} />
+              <PositionCard
+                key={v.id}
+                view={v}
+                onOpen={() => router.push(`/asset/${v.id}`)}
+                change24h={change24hOf(v)}
+                picked={selected.has(v.id)}
+                onTogglePick={sellingV2 ? () => toggleSelected(v.id) : undefined}
+              />
             ))}
           </div>
         ) : (
@@ -343,7 +350,14 @@ export default function PilePage() {
                             : "border-black/15 text-black/50 hover:border-black/40 hover:text-black"
                         }`}
                       >
-                        {selected.has(v.id) ? t("bulk.picked") : t("bulk.pick")}
+                        {selected.has(v.id) ? (
+                          <span className="inline-flex items-center gap-1">
+                            <Check size={11} strokeWidth={2.5} />
+                            {t("bulk.picked")}
+                          </span>
+                        ) : (
+                          t("bulk.pick")
+                        )}
                       </span>
                     )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
@@ -30,10 +30,14 @@ export function BulkSellBar({ picked, selectedCount, totalUsd, state, done, onSe
   if (selectedCount === 0 && state === "idle") return null;
 
   const failed = done.filter((d) => !d.ok);
+  // Stopping is not failing: it gets a plain line, not a red one.
+  const cancelled = failed.some((f) => f.cancelled);
+  const realFailures = failed.filter((f) => !f.cancelled);
   const selling = state === "selling";
 
   return (
-    <div className="sticky bottom-20 z-30 mx-auto mt-6 flex w-fit max-w-full flex-wrap items-center gap-3 rounded-full border border-black/10 bg-white/95 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.10)] backdrop-blur">
+    <div className="sticky bottom-20 z-30 mx-auto mt-6 w-fit max-w-full">
+    <div className="flex flex-wrap items-center gap-3 rounded-full border border-black/10 bg-white/95 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.10)] backdrop-blur">
       {/* The set, shown as itself: overlapping marks rather than a count alone. */}
       {picked.length > 0 && (
         <span className="flex shrink-0 items-center pl-1">
@@ -49,14 +53,6 @@ export function BulkSellBar({ picked, selectedCount, totalUsd, state, done, onSe
           ? t("bulk.progress", { n: String(done.length), total: String(selectedCount) })
           : t("bulk.setLabel", { n: String(selectedCount), usd: `$${formatUsdAmount(totalUsd)}` })}
       </span>
-
-      {/* Naming the ones that didn't go through, AND why — "some failed" can't be
-          acted on, and neither can a list of names with no reason. */}
-      {state === "done" && failed.length > 0 && (
-        <span className="w-full text-[12px] text-red-600">
-          {failed.map((f) => `${f.id}${f.error ? ` — ${f.error}` : ""}`).join(" · ")}
-        </span>
-      )}
 
       <div className="ml-auto flex items-center gap-2">
         <button
@@ -77,6 +73,17 @@ export function BulkSellBar({ picked, selectedCount, totalUsd, state, done, onSe
           {t("bulk.sellSelected")}
         </button>
       </div>
+    </div>
+
+    {/* Outside the pill: a message inside a rounded-full container stretched it into
+        a blob. Naming what didn't go through, and why — "some failed" can't be acted on. */}
+    {state === "done" && (cancelled || realFailures.length > 0) && (
+      <p className={`mt-2 px-4 text-center text-[12px] ${realFailures.length ? "text-red-600" : "text-black/50"}`}>
+        {realFailures.length > 0
+          ? realFailures.map((f) => `${f.id}${f.error ? ` — ${f.error}` : ""}`).join(" · ")
+          : t("bulk.stopped")}
+      </p>
+    )}
     </div>
   );
 }
