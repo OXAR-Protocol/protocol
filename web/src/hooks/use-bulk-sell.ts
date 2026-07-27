@@ -1,0 +1,95 @@
+"use client";
+
+import { useCallback, useState } from "react";
+import { Transaction } from "@solana/web3.js";
+
+import { useSolanaContext } from "@/providers/solana-provider";
+import { getProvider, toFriendlyError } from "@/lib/yield";
+import { recordBasisDelta } from "@/lib/earnings/pending-basis";
+
+export type BulkSellState = "idle" | "selling" | "done";
+
+export interface BulkSellOutcome {
+  /** Provider id. */
+  id: string;
+  ok: boolean;
+  /** Friendly reason when it didn't go through. */
+  error?: string;
+}
+
+export interface BulkSellTarget {
+  id: string;
+  /** Provider share balance, burned in full on a complete exit. */
+  shares: bigint;
+  /** Position value in USD — retires its cost basis on success. */
+  valueUsd: number;
+}
+
+/**
+ * Exit several positions in one gesture.
+ *
+ * Each position is its own transaction — there is no batching across protocols,
+ * and pretending otherwise would be a lie in the UI. So they run ONE AT A TIME:
+ * a wallet prompts per signature, and firing them together would stack prompts
+ * and race the same blockhash. A failure stops nothing else — the rest continue
+ * and the caller is told exactly which ones didn't make it, because "some of your
+ * sales failed" without saying which is useless to act on.
+ */
+export function useBulkSell() {
+  const { wallet, connection, walletAddress } = useSolanaContext();
+  const [state, setState] = useState<BulkSellState>("idle");
+  /** Ids already attempted — drives per-row progress. */
+  const [done, setDone] = useState<BulkSellOutcome[]>([]);
+
+  const sellAll = useCallback(
+    async (targets: readonly BulkSellTarget[]): Promise<BulkSellOutcome[]> => {
+      if (!wallet || !walletAddress) throw new Error("Wallet not connected");
+      setState("selling");
+      setDone([]);
+      const outcomes: BulkSellOutcome[] = [];
+
+      for (const target of targets) {
+        const provider = getProvider(target.id);
+        try {
+          if (!provider) throw new Error(`Unknown source: ${target.id}`);
+          const tx = provider.buildRedeemTx
+            ? await provider.buildRedeemTx({ owner: walletAddress, connection })
+            : provider.buildRedeemIxs
+              ? new Transaction().add(
+                  ...(await provider.buildRedeemIxs({
+                    owner: walletAddress,
+                    shares: target.shares,
+                    connection,
+                  })),
+                )
+              : null;
+          if (!tx) throw new Error("This source does not support selling");
+
+          const sig = await wallet.signAndSend(tx);
+          await connection.confirmTransaction(sig, "confirmed");
+          // The exited position's basis leaves with it, or a re-entry would be
+          // measured against a stale one — see lib/earnings/pending-basis.
+          if (target.valueUsd > 0) {
+            recordBasisDelta(walletAddress.toBase58(), target.id, -target.valueUsd);
+          }
+          outcomes.push({ id: target.id, ok: true });
+        } catch (e) {
+          console.error(`Bulk sell failed for ${target.id}:`, e);
+          outcomes.push({ id: target.id, ok: false, error: toFriendlyError(e) });
+        }
+        setDone([...outcomes]);
+      }
+
+      setState("done");
+      return outcomes;
+    },
+    [wallet, walletAddress, connection],
+  );
+
+  const reset = useCallback(() => {
+    setState("idle");
+    setDone([]);
+  }, []);
+
+  return { sellAll, state, done, reset };
+}

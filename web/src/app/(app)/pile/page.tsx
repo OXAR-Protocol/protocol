@@ -20,14 +20,21 @@ import { AssetIcon } from "@/components/asset-icon";
 import { PhotoBg } from "@/components/photo-bg";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { useT } from "@/lib/i18n";
+import { useFeature } from "@/hooks/use-features";
+import { useBulkSell } from "@/hooks/use-bulk-sell";
+import { BulkSellBar } from "@/components/bulk-sell-bar";
 
 type Layout = "list" | "grid";
 
 export default function PilePage() {
   const router = useRouter();
   const { t } = useT();
-  const { views, totalValue, loading } = useYieldPositions();
+  const { views, totalValue, loading, refresh } = useYieldPositions();
   const [layout, setLayout] = useState<Layout>("list");
+  // Ticking several positions and exiting them together — dark until the key is on.
+  const sellingV2 = useFeature("selling-v2");
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+  const bulk = useBulkSell();
 
   // Remember the user's preferred layout across visits.
   useEffect(() => {
@@ -51,6 +58,35 @@ export default function PilePage() {
   const { prices } = useStockPrices(priceMints);
   const change24hOf = (v: ProviderView) =>
     isPriceExposure(v.id) && v.heldMint ? prices[v.heldMint]?.change24h : undefined;
+
+  const toggleSelected = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const selectedViews = held.filter((v) => selected.has(v.id));
+  const selectedUsd = selectedViews.reduce(
+    (sum, v) => sum + fromBaseUnits(v.underlyingBalance, v.decimals),
+    0,
+  );
+
+  const sellSelected = async () => {
+    // Read the RETURNED outcomes, not `bulk.done` — that's state captured at render
+    // and still holds the previous run's value at this point.
+    const outcomes = await bulk.sellAll(
+      selectedViews.map((v) => ({
+        id: v.id,
+        shares: v.shares,
+        valueUsd: fromBaseUnits(v.underlyingBalance, v.decimals),
+      })),
+    );
+    // Keep the failed ones ticked: they are what the user still has to deal with.
+    setSelected(new Set(outcomes.filter((o) => !o.ok).map((o) => o.id)));
+    refresh();
+  };
 
   // Value-weighted APY across held positions — drives the live total ticker.
   const blendedApy =
@@ -166,6 +202,33 @@ export default function PilePage() {
                   className="group w-full text-left p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition"
                 >
                   <div className="flex items-center gap-4">
+                    {sellingV2 && (
+                      <span
+                        role="checkbox"
+                        aria-checked={selected.has(v.id)}
+                        tabIndex={0}
+                        aria-label={t("bulk.select", { name: v.name })}
+                        onClick={(e) => {
+                          // The row navigates; the box must not.
+                          e.stopPropagation();
+                          toggleSelected(v.id);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === " " || e.key === "Enter") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleSelected(v.id);
+                          }
+                        }}
+                        className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] border transition ${
+                          selected.has(v.id)
+                            ? "border-black bg-black text-white"
+                            : "border-black/25 hover:border-black/50"
+                        }`}
+                      >
+                        {selected.has(v.id) && <span className="text-[11px] leading-none">✓</span>}
+                      </span>
+                    )}
                     <AssetIcon src={assetLogoSrc(v.id)} label={assetIconLabel(v.id, v.assetSymbol)} size={36} />
                     <div className="flex-1 min-w-0">
                       <p className="text-base text-black truncate">{v.name}</p>
@@ -212,6 +275,20 @@ export default function PilePage() {
           </div>
         )}
       </motion.section>
+
+      {sellingV2 && (
+        <BulkSellBar
+          selectedCount={selected.size}
+          totalUsd={selectedUsd}
+          state={bulk.state}
+          done={bulk.done}
+          onSell={sellSelected}
+          onClear={() => {
+            setSelected(new Set());
+            bulk.reset();
+          }}
+        />
+      )}
     </div>
   );
 }
