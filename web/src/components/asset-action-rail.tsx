@@ -120,9 +120,12 @@ export function AssetActionRail({
             variant="primary"
           />
 
-          {/* What you'll actually receive. On a thin market this is a couple of percent
-              below the amount asked for — said plainly here instead of blocking the
-              sell, which used to leave holders with no way out. */}
+          {/* What you'll actually receive — a real quote, shown instead of blocking the
+              sell (which used to leave holders with no way out). The gap against the
+              amount asked for is NOT a fee the sell charges: on a thin token the pool
+              simply sits off the reference price the position is valued at, often
+              because the spread was paid on the way IN. So the wording states the
+              difference rather than blaming the exit. */}
           {sellOut.proceedsUsd !== null && (
             <p
               className={`mt-2 text-center text-[12px] tabular-nums ${
@@ -133,7 +136,7 @@ export function AssetActionRail({
               {sellCostNotable && (
                 <>
                   {" · "}
-                  {t("rail.marketCost", {
+                  {t("rail.belowMarketShort", {
                     pct: ((sellOut.costFraction ?? 0) * 100).toFixed(1),
                   })}
                 </>
