@@ -8,6 +8,7 @@ import { useYieldActions } from "@/hooks/use-yield-actions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import { useEarnings } from "@/hooks/use-earnings";
 import { useApyHistory } from "@/hooks/use-apy-history";
+import { useSwapOutPreview } from "@/hooks/use-swap-out-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { fromBaseUnits, planWithdrawal } from "@/lib/yield";
 import { useT } from "@/lib/i18n";
@@ -55,6 +56,15 @@ export function AssetDetail({
   const [result, setResult] = useState<ActionResult | null>(null);
 
   const positionValue = fromBaseUnits(view.underlyingBalance, view.decimals);
+  // What the whole position would actually fetch right now — a real quote, not the
+  // reference price times the balance.
+  const realizable = useSwapOutPreview({
+    heldMint: view.heldMint,
+    shares: view.shares,
+    positionValue,
+    usdAmount: positionValue,
+    enabled: positionValue > 0 && !!view.heldMint,
+  });
   const quote = view.heldMint ? prices[view.heldMint] : undefined;
   const up = (quote?.change24h ?? 0) >= 0;
   const src = earnings.sources.find((s) => s.id === view.id);
@@ -195,6 +205,26 @@ export function AssetDetail({
             <motion.section {...fade(0.15)} className="mt-10 rounded-[12px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.04] p-5">
               <p className="lowercase text-[13px] text-black/55">{t("asset.yourPosition")}</p>
               <p className="mt-1 text-[clamp(24px,3.4vw,34px)] font-bold tabular-nums">${positionValue.toFixed(2)}</p>
+              {/* The figure above is the market reference price. For a thinly traded
+                  token the pool can sit a couple of percent either side of it, so the
+                  amount you could actually walk away with is quoted separately — never
+                  inferred from the reference. */}
+              {realizable.proceedsUsd !== null && (
+                <p className="mt-1 text-[13px] tabular-nums text-black/70">
+                  {t("asset.sellNow")}: ${realizable.proceedsUsd.toFixed(2)}
+                  {Math.abs(realizable.proceedsUsd - positionValue) >= 0.01 && (
+                    <span className="text-black/45">
+                      {" · "}
+                      {t(
+                        realizable.proceedsUsd < positionValue
+                          ? "asset.belowMarket"
+                          : "asset.aboveMarket",
+                        { pct: (Math.abs((realizable.proceedsUsd - positionValue) / positionValue) * 100).toFixed(1) },
+                      )}
+                    </span>
+                  )}
+                </p>
+              )}
               <p className="mt-1 text-[13px] text-black/45">
                 {price && typeof earned === "number"
                   ? <span className={`tabular-nums ${earned >= 0 ? "text-emerald-600" : "text-red-600"}`}>{earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)} {t("asset.sinceYouBought")}</span>
