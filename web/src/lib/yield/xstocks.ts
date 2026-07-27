@@ -11,8 +11,8 @@ import {
   getSwapQuote,
   buildSwapTx,
   deserializeSwapTx,
-  priceImpactTooHigh,
-  BROKEN_MARKET_IMPACT,
+  quoteDeliveryRatio,
+  marketLooksBroken,
 } from "@oxar/sdk";
 import { UserFacingError } from "./errors";
 import type {
@@ -33,6 +33,8 @@ import type {
  */
 const USDC = new PublicKey(USDC_MINT);
 const TOKEN_2022 = new PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
+/** xStocks are Token-2022 with 8 decimals. */
+const STOCK_DECIMALS = 8;
 
 export interface XStockConfig {
   symbol: string; // ticker, e.g. "AAPL"
@@ -160,8 +162,19 @@ export function createXStockProvider(cfg: XStockMeta): YieldProvider {
   async function swap(owner: PublicKey, inputMint: string, outputMint: string, amount: bigint): Promise<Transaction> {
     const quote = await getSwapQuote({ inputMint, outputMint, amount, asLegacy: true, slippageBps: 100 });
     // Cost is shown before signing (buy: DepositPanel, sell: AssetActionRail), so it's
-    // the user's call — we only stop a market that looks broken. See BROKEN_MARKET_IMPACT.
-    if (priceImpactTooHigh(quote, BROKEN_MARKET_IMPACT)) {
+    // the user's call — we only stop a route that loses most of the value. Judged on the
+    // amounts, never on Jupiter's `priceImpactPct`, which misreports thin tokens badly.
+    const stockPrice = (await allPrices())[heldMint] ?? 0;
+    const buying = outputMint === heldMint;
+    const ratio = quoteDeliveryRatio({
+      inAmount: BigInt(quote.inAmount),
+      outAmount: BigInt(quote.outAmount),
+      inDecimals: buying ? USDC_DECIMALS : STOCK_DECIMALS,
+      outDecimals: buying ? STOCK_DECIMALS : USDC_DECIMALS,
+      inPriceUsd: buying ? 1 : stockPrice,
+      outPriceUsd: buying ? stockPrice : 1,
+    });
+    if (marketLooksBroken(ratio)) {
       throw new UserFacingError("This market looks broken right now — try again later");
     }
     const b64 = await buildSwapTx(quote, owner.toBase58(), { asLegacy: true });
@@ -179,7 +192,7 @@ export function createXStockProvider(cfg: XStockMeta): YieldProvider {
     chain: "solana",
     group: "xstocks",
     heldMint,
-    heldDecimals: 8, // xStocks are Token-2022 with 8 decimals
+    heldDecimals: STOCK_DECIMALS,
 
     async buildDepositTx({ owner, amount }: BuildIxParams) {
       return swap(owner, USDC_MINT, heldMint, amount);
