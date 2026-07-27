@@ -9,6 +9,7 @@ import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { Sparkline } from "@/components/sparkline";
 import { LiveAmount } from "@/components/live-amount";
+import { PickButton } from "@/components/pick-button";
 import { useT } from "@/lib/i18n";
 import { AssetIcon } from "@/components/asset-icon";
 import { BanknoteBg } from "@/components/banknote-bg";
@@ -46,31 +47,12 @@ export function PositionCard({ view, onOpen, change24h, picked, onTogglePick }: 
     >
       <BanknoteBg seed={view.id} />
       {onTogglePick && (
-        <span
-          role="checkbox"
-          aria-checked={!!picked}
-          tabIndex={0}
-          onClick={(e) => {
-            // The card navigates; picking must not.
-            e.stopPropagation();
-            onTogglePick();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === " " || e.key === "Enter") {
-              e.preventDefault();
-              e.stopPropagation();
-              onTogglePick();
-            }
-          }}
-          className={`absolute right-3 top-3 z-10 inline-flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] lowercase tracking-wide transition ${
-            picked
-              ? "border-black bg-black text-white"
-              : "border-black/15 bg-white/80 text-black/50 hover:border-black/40 hover:text-black"
-          }`}
-        >
-          {picked && <Check size={10} strokeWidth={2.5} />}
-          {picked ? t("bulk.picked") : t("bulk.pick")}
-        </span>
+        <PickButton
+          picked={!!picked}
+          onToggle={onTogglePick}
+          label={view.name}
+          className="absolute right-3 top-3 z-10"
+        />
       )}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-3 min-w-0">

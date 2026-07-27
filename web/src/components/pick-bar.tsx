@@ -4,7 +4,7 @@ import { Check, Loader2 } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
-import type { BulkSellOutcome, BulkSellState } from "@/hooks/use-bulk-sell";
+import type { BulkTradeOutcome, BulkTradeState } from "@/hooks/use-bulk-trade";
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { useT } from "@/lib/i18n";
@@ -14,18 +14,21 @@ interface Props {
   picked: { id: string; symbol: string }[];
   selectedCount: number;
   totalUsd: number;
-  state: BulkSellState;
-  done: readonly BulkSellOutcome[];
+  state: BulkTradeState;
+  done: readonly BulkTradeOutcome[];
+  /** Drives the button's word — the rest of the bar is identical either way. */
+  mode: "buy" | "sell";
   onSell: () => void;
   onClear: () => void;
 }
 
 /**
- * The bar that appears once positions are ticked. It reports progress per
+ * The bar that appears once things are picked — the same bar for buying and for
+ * selling, because it is the same gesture pointed in two directions. It reports progress per
  * position rather than a spinner, because each one is its own transaction and its
  * own wallet prompt — "3 of 5" is the truth, "selling…" isn't.
  */
-export function BulkSellBar({ picked, selectedCount, totalUsd, state, done, onSell, onClear }: Props) {
+export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, onSell, onClear }: Props) {
   const { t } = useT();
   if (selectedCount === 0 && state === "idle") return null;
 
@@ -33,7 +36,7 @@ export function BulkSellBar({ picked, selectedCount, totalUsd, state, done, onSe
   // Stopping is not failing: it gets a plain line, not a red one.
   const cancelled = failed.some((f) => f.cancelled);
   const realFailures = failed.filter((f) => !f.cancelled);
-  const selling = state === "selling";
+  const selling = state === "running";
 
   return (
     <div className="fixed bottom-24 left-1/2 z-40 w-fit max-w-[calc(100vw-2rem)] -translate-x-1/2">
@@ -70,7 +73,7 @@ export function BulkSellBar({ picked, selectedCount, totalUsd, state, done, onSe
           className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-[13px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-40"
         >
           {selling && <Loader2 size={13} className="animate-spin" />}
-          {t("bulk.sellSelected")}
+          {t(mode === "sell" ? "bulk.sellSelected" : "bulk.buySelected")}
         </button>
       </div>
     </div>

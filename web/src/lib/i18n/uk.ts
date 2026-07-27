@@ -191,6 +191,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "alloc.confirmSell": "продати {usd}",
   "alloc.confirmBuy": "купити {usd}",
   "alloc.note": "{n} активів = {n} транзакцій",
+  "bulk.buySelected": "купити обрані",
   "rail.max": "все",
   "rail.actionSell": "Продати",
   "rail.actionWithdraw": "Зняти",
