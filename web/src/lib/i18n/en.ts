@@ -205,6 +205,7 @@ export const en = {
   "alloc.confirmSell": "sell {usd}",
   "alloc.confirmBuy": "buy {usd}",
   "alloc.note": "{n} assets = {n} transactions",
+  "bulk.buySelected": "buy picked",
   "rail.max": "max",
   "rail.actionSell": "Sell",
   "rail.actionWithdraw": "Withdraw",

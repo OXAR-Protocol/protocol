@@ -16,6 +16,13 @@ import { useStocksAllowed } from "@/hooks/use-stocks-allowed";
 import type { AssetMeta } from "@/lib/yield/assets";
 import { fromBaseUnits } from "@/lib/yield";
 import { useT } from "@/lib/i18n";
+import { useFeature } from "@/hooks/use-features";
+import { useBulkTrade } from "@/hooks/use-bulk-trade";
+import { useWalletAssets } from "@/hooks/use-wallet-assets";
+import { USDC_MINT } from "@/lib/constants";
+import { PickButton } from "@/components/pick-button";
+import { PickBar } from "@/components/pick-bar";
+import { AllocationSheet } from "@/components/allocation-sheet";
 
 /** Canonical order for the sector filter chips (only those present are shown). */
 const SECTOR_ORDER = ["tech", "crypto", "finance", "consumer", "health", "index"] as const;
@@ -46,6 +53,33 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
   const { t } = useT();
   const allowed = useStocksAllowed();
   const [sector, setSector] = useState<string>("all");
+
+  // Buying several at once — the same pick control, bar and sheet the portfolio
+  // uses for selling. One budget split across what you picked.
+  const canPickMany = useFeature("selling-v2");
+  const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
+  const [allocating, setAllocating] = useState(false);
+  const bulk = useBulkTrade();
+  const { assets } = useWalletAssets();
+  const usdcBudget = assets.find((a) => a.mint === USDC_MINT)?.usdValue ?? 0;
+  const togglePick = (id: string) =>
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const pickedRows = catalog.filter((a) => picked.has(a.id));
+
+  const buyPicked = async (amounts: Record<string, number>) => {
+    const outcomes = await bulk.run(
+      pickedRows
+        .filter((a) => (amounts[a.id] ?? 0) > 0)
+        .map((a) => ({ kind: "buy" as const, id: a.id, amountUsd: amounts[a.id]! })),
+    );
+    setPicked(new Set(outcomes.filter((o) => !o.ok).map((o) => o.id)));
+    if (outcomes.every((o) => o.ok)) setAllocating(false);
+  };
 
   // Sectors actually present in this catalog, in canonical order.
   const sectors = useMemo(
@@ -103,6 +137,9 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
         )}
       </p>
     ) : null;
+    const pick = canPickMany && view ? (
+      <PickButton picked={picked.has(s.id)} onToggle={() => togglePick(s.id)} label={s.name} />
+    ) : null;
     const head = (
       <div className="flex items-center gap-3 min-w-0">
         <AssetIcon src={assetLogoSrc(s.id)} label={s.symbol || s.token} size={36} />
@@ -123,6 +160,7 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
           className="group relative isolate overflow-hidden p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition-colors text-left disabled:opacity-50 min-h-[120px] flex flex-col justify-between"
         >
           <BanknoteBg seed={s.id} />
+          {pick && <span className="absolute right-3 top-3 z-10">{pick}</span>}
           {head}
           {spark && <div className="my-2">{spark}</div>}
           <div className={spark ? "mt-1" : "mt-3"}>
@@ -147,7 +185,8 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
           {owned}
         </div>
         {spark && <div className="hidden sm:block flex-1 mx-4 max-w-[140px]">{spark}</div>}
-        <div className="text-right">
+        {pick}
+        <div className="ml-3 text-right">
           {price}
           {change}
         </div>
@@ -191,6 +230,41 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{shown.map(card)}</div>
       ) : (
         <div className="space-y-2">{shown.map(card)}</div>
+      )}
+
+      {canPickMany && (
+        <PickBar
+          mode="buy"
+          picked={pickedRows.map((a) => ({ id: a.id, symbol: a.symbol }))}
+          selectedCount={picked.size}
+          totalUsd={usdcBudget}
+          state={bulk.state}
+          done={bulk.done}
+          onSell={() => setAllocating(true)}
+          onClear={() => {
+            setPicked(new Set());
+            bulk.reset();
+          }}
+        />
+      )}
+
+      {allocating && (
+        <AllocationSheet
+          mode="buy"
+          rows={pickedRows.map((a) => ({ id: a.id, name: a.name, symbol: a.symbol }))}
+          budgetUsd={usdcBudget}
+          busy={bulk.state === "running"}
+          progress={
+            bulk.state === "running"
+              ? t("bulk.progress", { n: String(bulk.done.length), total: String(pickedRows.length) })
+              : null
+          }
+          onConfirm={buyPicked}
+          onClose={() => {
+            setAllocating(false);
+            bulk.reset();
+          }}
+        />
       )}
     </motion.section>
   );

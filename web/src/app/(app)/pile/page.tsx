@@ -24,8 +24,9 @@ import { BanknoteBg } from "@/components/banknote-bg";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { useT } from "@/lib/i18n";
 import { useFeature } from "@/hooks/use-features";
-import { useBulkSell } from "@/hooks/use-bulk-sell";
-import { BulkSellBar } from "@/components/bulk-sell-bar";
+import { useBulkTrade } from "@/hooks/use-bulk-trade";
+import { PickBar } from "@/components/pick-bar";
+import { PickButton } from "@/components/pick-button";
 import { AllocationSheet } from "@/components/allocation-sheet";
 import { ActivityFeed } from "@/components/activity-feed";
 import { HoverChart } from "@/components/hover-chart";
@@ -46,7 +47,7 @@ export default function PilePage() {
   // Ticking several positions and exiting them together — dark until the key is on.
   const sellingV2 = useFeature("selling-v2");
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
-  const bulk = useBulkSell();
+  const bulk = useBulkTrade();
   // Reconstructed from on-chain history + daily prices — see /api/portfolio-history.
   const history = usePortfolioHistory(90);
   // One batched request covers every card's sparkline (see /api/stock-charts).
@@ -135,10 +136,11 @@ export default function PilePage() {
   const sellSelected = async (amounts: Record<string, number>) => {
     // Read the RETURNED outcomes, not `bulk.done` — that's state captured at render
     // and still holds the previous run's value at this point.
-    const outcomes = await bulk.sellAll(
+    const outcomes = await bulk.run(
       selectedViews
         .filter((v) => (amounts[v.id] ?? 0) > 0)
         .map((v) => ({
+          kind: "sell" as const,
           id: v.id,
           shares: v.shares,
           valueUsd: fromBaseUnits(v.underlyingBalance, v.decimals),
@@ -363,38 +365,11 @@ export default function PilePage() {
                     {/* Collecting a set, not ticking a table — so it reads as an
                         action on the right, where the other actions are. */}
                     {sellingV2 && (
-                      <span
-                        role="checkbox"
-                        aria-checked={selected.has(v.id)}
-                        tabIndex={0}
-                        aria-label={t("bulk.select", { name: v.name })}
-                        onClick={(e) => {
-                          // The row navigates; picking must not.
-                          e.stopPropagation();
-                          toggleSelected(v.id);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === " " || e.key === "Enter") {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            toggleSelected(v.id);
-                          }
-                        }}
-                        className={`inline-flex shrink-0 cursor-pointer rounded-full border px-3 py-1.5 text-[11px] lowercase tracking-wide transition ${
-                          selected.has(v.id)
-                            ? "border-black bg-black text-white"
-                            : "border-black/15 text-black/50 hover:border-black/40 hover:text-black"
-                        }`}
-                      >
-                        {selected.has(v.id) ? (
-                          <span className="inline-flex items-center gap-1">
-                            <Check size={11} strokeWidth={2.5} />
-                            {t("bulk.picked")}
-                          </span>
-                        ) : (
-                          t("bulk.pick")
-                        )}
-                      </span>
+                      <PickButton
+                        picked={selected.has(v.id)}
+                        onToggle={() => toggleSelected(v.id)}
+                        label={t("bulk.select", { name: v.name })}
+                      />
                     )}
 
                     <div className="shrink-0 text-right">
@@ -430,7 +405,8 @@ export default function PilePage() {
       </motion.section>
 
       {sellingV2 && (
-        <BulkSellBar
+        <PickBar
+          mode="sell"
           picked={selectedViews.map((v) => ({ id: v.id, symbol: v.assetSymbol }))}
           selectedCount={selected.size}
           totalUsd={selectedUsd}
@@ -456,9 +432,9 @@ export default function PilePage() {
             symbol: v.assetSymbol,
             maxUsd: fromBaseUnits(v.underlyingBalance, v.decimals),
           }))}
-          busy={bulk.state === "selling"}
+          busy={bulk.state === "running"}
           progress={
-            bulk.state === "selling"
+            bulk.state === "running"
               ? t("bulk.progress", { n: String(bulk.done.length), total: String(selectedViews.length) })
               : null
           }
