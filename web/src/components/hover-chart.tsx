@@ -83,7 +83,8 @@ export function HoverChart({ values, format, height = 220, className, fill, mark
       {n > 1 &&
         markers?.map((m) => {
           const i = Math.min(n - 1, Math.max(0, m.index));
-          const left = (i / (n - 1)) * 100;
+          // Keep the first/last dot inside the box instead of half-clipped by it.
+          const left = Math.min(99, Math.max(1, (i / (n - 1)) * 100));
           const top = span === 0 ? 50 : (1 - (values[i]! - min) / span) * 100;
           return (
             <span
