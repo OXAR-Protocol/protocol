@@ -183,6 +183,7 @@ export const en = {
   "bulk.clear": "clear",
   "pile.history": "history",
   "asset.history": "your history with this",
+  "pile.chartRange": "last {n} days · reconstructed from your on-chain history",
   "rail.max": "max",
   "rail.actionSell": "Sell",
   "rail.actionWithdraw": "Withdraw",

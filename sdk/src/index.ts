@@ -48,3 +48,4 @@ export * from "./core/features";
 export * from "./core/quote-value";
 export * from "./core/tx-delta";
 export * from "./core/format";
+export * from "./core/portfolio-history";
