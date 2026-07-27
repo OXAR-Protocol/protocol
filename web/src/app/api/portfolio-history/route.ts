@@ -7,6 +7,8 @@ import {
   type PriceSeries,
 } from "@oxar/sdk";
 
+import { fetchWithRetry } from "@oxar/sdk";
+
 import { heliusApiKey, fetchEnhancedHistory } from "@/lib/helius/history";
 import { POSITION_MINTS } from "@/lib/yield/position-mints";
 
@@ -37,19 +39,58 @@ interface LlamaChart {
   coins?: Record<string, { prices?: { timestamp: number; price: number }[] }>;
 }
 
-/** Daily price series per mint, in ONE request. Missing mints simply value at 0. */
-async function fetchPrices(mints: string[], days: number): Promise<PriceSeries> {
-  if (!mints.length) return {};
-  const ids = mints.map((m) => `solana:${m}`).join(",");
-  const res = await fetch(`${PRICES_URL}/${ids}?period=1d&span=${days}`);
-  if (!res.ok) return {};
+/** Parse one DefiLlama chart response into our shape. */
+async function readChart(res: Response, into: PriceSeries): Promise<void> {
   const json = (await res.json()) as LlamaChart;
-  const out: PriceSeries = {};
   for (const [id, coin] of Object.entries(json.coins ?? {})) {
-    const mint = id.replace(/^solana:/, "");
-    out[mint] = (coin.prices ?? []).map((p) => ({ t: p.timestamp, price: p.price }));
+    const series = (coin.prices ?? []).map((p) => ({ t: p.timestamp, price: p.price }));
+    if (series.length) into[id.replace(/^solana:/, "")] = series;
   }
-  return out;
+}
+
+/**
+ * Daily prices per mint. One request for all of them normally — but a single
+ * failure there used to zero the ENTIRE chart, which is exactly what happened in
+ * production while the same call succeeded by hand: no retry, and any non-200 fell
+ * silently back to "no prices", so every day valued at 0 and the chart vanished.
+ *
+ * Now it retries, and if the batch still fails it asks per mint, so one unpriceable
+ * asset costs its own line rather than the whole picture. `status` is reported in
+ * the response's debug counts so a failure is visible instead of inferred.
+ */
+async function fetchPrices(
+  mints: string[],
+  days: number,
+): Promise<{ series: PriceSeries; status: string }> {
+  const series: PriceSeries = {};
+  if (!mints.length) return { series, status: "no-mints" };
+
+  const ids = mints.map((m) => `solana:${m}`).join(",");
+  let status = "ok";
+  try {
+    const res = await fetchWithRetry(`${PRICES_URL}/${ids}?period=1d&span=${days}`);
+    if (res.ok) await readChart(res, series);
+    else status = `batch-${res.status}`;
+  } catch (e) {
+    status = `batch-threw:${e instanceof Error ? e.name : "unknown"}`;
+  }
+
+  const missing = mints.filter((m) => !series[m]);
+  if (missing.length) {
+    status = status === "ok" ? `partial-${missing.length}` : `${status}+per-mint`;
+    await Promise.all(
+      missing.map(async (m) => {
+        try {
+          const res = await fetchWithRetry(`${PRICES_URL}/solana:${m}?period=1d&span=${days}`);
+          if (res.ok) await readChart(res, series);
+        } catch {
+          // A mint nobody prices simply doesn't contribute — see dailyPortfolioValue.
+        }
+      }),
+    );
+  }
+
+  return { series, status };
 }
 
 export async function POST(req: Request) {
@@ -96,7 +137,7 @@ export async function POST(req: Request) {
     }
 
     const mints = Object.keys(balancesNow);
-    const prices = await fetchPrices(mints, days);
+    const { series: prices, status: priceStatus } = await fetchPrices(mints, days);
     const points = trimLeadingEmpty(
       dailyPortfolioValue({
         now: Math.floor(Date.now() / 1000),
