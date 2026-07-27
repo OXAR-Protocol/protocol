@@ -181,6 +181,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "bulk.pick": "+ обрати",
   "bulk.picked": "✓ обрано",
   "bulk.setLabel": "обрано {n} · {usd}",
+  "bulk.hint": "обери кілька, щоб продати разом",
   "rail.max": "все",
   "rail.actionSell": "Продати",
   "rail.actionWithdraw": "Зняти",

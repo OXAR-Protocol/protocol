@@ -195,6 +195,7 @@ export const en = {
   "bulk.pick": "+ pick",
   "bulk.picked": "✓ picked",
   "bulk.setLabel": "{n} picked · {usd}",
+  "bulk.hint": "pick several to sell them together",
   "rail.max": "max",
   "rail.actionSell": "Sell",
   "rail.actionWithdraw": "Withdraw",

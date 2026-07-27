@@ -174,6 +174,54 @@ export function AssetDetail({
       {/* Trust strip: TVL social-proof + non-custodial guarantees */}
       <AssetTrustStrip view={view} />
 
+      {/* Your position first. On a page you opened BECAUSE you hold it, how you're
+          doing outranks what the thing is — it used to sit below the chart and the essay. */}
+      {positionValue > 0 && (
+        <motion.section
+          {...fade(0.08)}
+          className="mt-6 rounded-[12px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.04] p-5"
+        >
+          <p className="lowercase text-[13px] text-black/55">{t("asset.yourPosition")}</p>
+          <p className="mt-1 text-[clamp(24px,3.4vw,34px)] font-bold tabular-nums">
+            ${positionValue.toFixed(2)}
+          </p>
+          {/* The figure above is the market reference price. For a thinly traded token
+              the pool can sit a couple of percent either side of it, so what you could
+              actually walk away with is quoted separately — never inferred. */}
+          {realizable.proceedsUsd !== null && (
+            <p className="mt-1 text-[13px] tabular-nums text-black/70">
+              {t("asset.sellNow")}: ${realizable.proceedsUsd.toFixed(2)}
+              {Math.abs(realizable.proceedsUsd - positionValue) >= 0.01 && (
+                <span className="text-black/45">
+                  {" · "}
+                  {t(
+                    realizable.proceedsUsd < positionValue
+                      ? "asset.belowMarket"
+                      : "asset.aboveMarket",
+                    {
+                      pct: (
+                        Math.abs((realizable.proceedsUsd - positionValue) / positionValue) * 100
+                      ).toFixed(1),
+                    },
+                  )}
+                </span>
+              )}
+            </p>
+          )}
+          <p className="mt-1 text-[13px] text-black/45">
+            {price && typeof earned === "number" ? (
+              <span className={`tabular-nums ${earned >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                {earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)} {t("asset.sinceYouBought")}
+              </span>
+            ) : price ? (
+              t("asset.marketValue")
+            ) : (
+              t("asset.principalYield")
+            )}
+          </p>
+        </motion.section>
+      )}
+
       {/* Two columns: content + sticky action rail */}
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px]">
         {/* Left: chart + about + position */}
@@ -226,38 +274,6 @@ export function AssetDetail({
               <p className="mb-3 lowercase text-[13px] text-black/45">{t("asset.history")}</p>
               {/* Only this asset's rows — a ledger of everything belongs in the portfolio. */}
               <ActivityFeed mint={view.heldMint} unitLabel={unitLabel} />
-            </motion.section>
-          )}
-
-          {positionValue > 0 && (
-            <motion.section {...fade(0.15)} className="mt-10 rounded-[12px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.04] p-5">
-              <p className="lowercase text-[13px] text-black/55">{t("asset.yourPosition")}</p>
-              <p className="mt-1 text-[clamp(24px,3.4vw,34px)] font-bold tabular-nums">${positionValue.toFixed(2)}</p>
-              {/* The figure above is the market reference price. For a thinly traded
-                  token the pool can sit a couple of percent either side of it, so the
-                  amount you could actually walk away with is quoted separately — never
-                  inferred from the reference. */}
-              {realizable.proceedsUsd !== null && (
-                <p className="mt-1 text-[13px] tabular-nums text-black/70">
-                  {t("asset.sellNow")}: ${realizable.proceedsUsd.toFixed(2)}
-                  {Math.abs(realizable.proceedsUsd - positionValue) >= 0.01 && (
-                    <span className="text-black/45">
-                      {" · "}
-                      {t(
-                        realizable.proceedsUsd < positionValue
-                          ? "asset.belowMarket"
-                          : "asset.aboveMarket",
-                        { pct: (Math.abs((realizable.proceedsUsd - positionValue) / positionValue) * 100).toFixed(1) },
-                      )}
-                    </span>
-                  )}
-                </p>
-              )}
-              <p className="mt-1 text-[13px] text-black/45">
-                {price && typeof earned === "number"
-                  ? <span className={`tabular-nums ${earned >= 0 ? "text-emerald-600" : "text-red-600"}`}>{earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)} {t("asset.sinceYouBought")}</span>
-                  : price ? t("asset.marketValue") : t("asset.principalYield")}
-              </p>
             </motion.section>
           )}
         </div>

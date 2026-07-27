@@ -215,6 +215,14 @@ export default function PilePage() {
           )}
         </div>
 
+        {/* Say the feature exists. It was discoverable only by noticing a small
+            button on hover, which is the same as not existing. */}
+        {sellingV2 && held.length > 1 && selected.size === 0 && (
+          <p className="mb-2 text-[11px] lowercase tracking-wide text-black/35">
+            {t("bulk.hint")}
+          </p>
+        )}
+
         {/* Narrow the list. Only offered where there's something to narrow. */}
         {allHeld.length > 1 && (
           <div className="mb-3 flex flex-wrap gap-1.5">
@@ -329,7 +337,7 @@ export default function PilePage() {
                             toggleSelected(v.id);
                           }
                         }}
-                        className={`hidden shrink-0 cursor-pointer rounded-full border px-3 py-1.5 text-[11px] lowercase tracking-wide transition sm:inline-flex ${
+                        className={`inline-flex shrink-0 cursor-pointer rounded-full border px-3 py-1.5 text-[11px] lowercase tracking-wide transition ${
                           selected.has(v.id)
                             ? "border-black bg-black text-white"
                             : "border-black/15 text-black/50 hover:border-black/40 hover:text-black"
