@@ -169,6 +169,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "bulk.clear": "зняти вибір",
   "pile.history": "історія",
   "asset.history": "твоя історія з цим активом",
+  "pile.chartRange": "останні {n} днів · відновлено з твоєї історії в блокчейні",
   "rail.max": "все",
   "rail.actionSell": "Продати",
   "rail.actionWithdraw": "Зняти",

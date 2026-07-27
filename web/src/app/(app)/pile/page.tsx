@@ -15,7 +15,7 @@ import {
 } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
-import { floorTo } from "@oxar/sdk";
+import { floorTo, formatUsdAmount } from "@oxar/sdk";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { AssetIcon } from "@/components/asset-icon";
 import { PhotoBg } from "@/components/photo-bg";
@@ -25,6 +25,8 @@ import { useFeature } from "@/hooks/use-features";
 import { useBulkSell } from "@/hooks/use-bulk-sell";
 import { BulkSellBar } from "@/components/bulk-sell-bar";
 import { ActivityFeed } from "@/components/activity-feed";
+import { HoverChart } from "@/components/hover-chart";
+import { usePortfolioHistory } from "@/hooks/use-portfolio-history";
 
 type Layout = "list" | "grid";
 
@@ -37,6 +39,8 @@ export default function PilePage() {
   const sellingV2 = useFeature("selling-v2");
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const bulk = useBulkSell();
+  // Reconstructed from on-chain history + daily prices — see /api/portfolio-history.
+  const history = usePortfolioHistory(90);
 
   // Remember the user's preferred layout across visits.
   useEffect(() => {
@@ -135,6 +139,24 @@ export default function PilePage() {
             <LiveAmount value={totalValue} apy={blendedApy} variant="lg" />
           )}
         </div>
+
+        {/* One line for everything held. Hidden until there are at least two points
+            — a single dot is not a history, and drawing one implies more than we
+            know. */}
+        {history.points.length > 1 && (
+          <div className="relative mt-4">
+            <HoverChart
+              values={history.points.map((p) => p.usd)}
+              format={(v) => `$${formatUsdAmount(v)}`}
+              height={120}
+              className="text-[#3c05c7]"
+              fill
+            />
+            <p className="mt-1 text-[10px] lowercase tracking-wide text-black/35">
+              {t("pile.chartRange", { n: String(history.points.length) })}
+            </p>
+          </div>
+        )}
       </motion.section>
 
       {/* Per-source positions */}
