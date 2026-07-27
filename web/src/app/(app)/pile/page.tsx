@@ -21,6 +21,7 @@ import { isXStock } from "@/lib/yield/xstocks";
 import { isGold } from "@/lib/yield/gold";
 import { AssetIcon } from "@/components/asset-icon";
 import { PhotoBg } from "@/components/photo-bg";
+import { BanknoteBg } from "@/components/banknote-bg";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { useT } from "@/lib/i18n";
 import { useFeature } from "@/hooks/use-features";
@@ -272,8 +273,9 @@ export default function PilePage() {
                 <button
                   key={v.id}
                   onClick={() => router.push(`/asset/${v.id}`)}
-                  className="group w-full text-left p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition"
+                  className="group relative isolate overflow-hidden w-full text-left p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition-colors"
                 >
+                  <BanknoteBg seed={v.id} />
                   <div className="flex items-center gap-4">
                     {sellingV2 && (
                       <span
@@ -302,59 +304,51 @@ export default function PilePage() {
                         {selected.has(v.id) && <span className="text-[11px] leading-none">✓</span>}
                       </span>
                     )}
-                    <AssetIcon src={assetLogoSrc(v.id)} label={assetIconLabel(v.id, v.assetSymbol)} size={36} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base text-black truncate">{v.name}</p>
+                    {/* Same shape as the browse rows on /yield: ticker leads, name
+                        underneath, the chart in the middle, value on the right. */}
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <AssetIcon src={assetLogoSrc(v.id)} label={assetIconLabel(v.id, v.assetSymbol)} size={36} />
+                      <div className="min-w-0">
+                        <p className="text-base text-black">{unitOf(v)}</p>
+                        <p className="mt-0.5 truncate text-xs text-black/45">{v.name.replace(/\s*\([^)]*\)$/, "")}</p>
+                        {/* How much you own, not only what it's worth. */}
+                        {isPriceExposure(v.id) && v.heldDecimals !== undefined && v.shares > BigInt(0) && (
+                          <p className="mt-1 text-[11px] tabular-nums text-[#3c05c7]/80">
+                            {floorTo(Number(v.shares) / 10 ** v.heldDecimals, 6)} {unitOf(v)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* The same batched series the grid cards use — one request for
+                        every row, so a chart per position costs nothing extra. */}
+                    {isPriceExposure(v.id) && v.heldMint && (charts[v.heldMint]?.length ?? 0) > 1 && (
+                      <div className="mx-4 hidden max-w-[140px] flex-1 sm:block">
+                        <Sparkline
+                          values={charts[v.heldMint]!}
+                          className={(change24hOf(v) ?? 0) >= 0 ? "text-emerald-600" : "text-red-600"}
+                        />
+                      </div>
+                    )}
+
+                    <div className="shrink-0 text-right">
+                      <LiveAmount value={value} apy={v.apy} variant="md" />
                       {(() => {
                         const ch = change24hOf(v);
                         if (typeof ch === "number") {
-                          const up = ch >= 0;
                           return (
-                            <p className="mt-1 text-[10px] lowercase tracking-wide">
-                              <span className={up ? "text-emerald-600" : "text-red-600"}>
-                                {up ? "+" : ""}
-                                {ch.toFixed(2)}% 24h
-                              </span>
-                              <span className="text-black/45"> · {v.assetSymbol}</span>
+                            <p className={`text-[11px] tabular-nums ${ch >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                              {ch >= 0 ? "+" : ""}
+                              {ch.toFixed(2)}% 24h
                             </p>
                           );
                         }
                         return (
-                          <p
-                            className={`mt-1 text-[10px] lowercase tracking-wide ${
-                              RISK_TONE[v.riskLevel] ?? "text-black/45"
-                            }`}
-                          >
-                            {(v.apy * 100).toFixed(2)}% APY · {v.assetSymbol}
+                          <p className={`text-[11px] lowercase tracking-wide ${RISK_TONE[v.riskLevel] ?? "text-black/45"}`}>
+                            {(v.apy * 100).toFixed(2)}% APY
                           </p>
                         );
                       })()}
-                    </div>
-                    {/* The same batched series the grid cards use — one request for
-                        every row, so a sparkline per position costs nothing extra. */}
-                    {isPriceExposure(v.id) && v.heldMint && (charts[v.heldMint]?.length ?? 0) > 1 && (
-                      <div className="hidden w-24 shrink-0 sm:block">
-                        <Sparkline
-                          values={charts[v.heldMint]!}
-                          className={
-                            (change24hOf(v) ?? 0) >= 0 ? "text-emerald-600" : "text-red-600"
-                          }
-                        />
-                      </div>
-                    )}
-                    <div className="text-right shrink-0">
-                      <LiveAmount value={value} apy={v.apy} variant="md" />
-                      {/* How much you own, not just what it's worth. A dollar figure
-                          alone can't be checked against anything the user knows. */}
-                      {isPriceExposure(v.id) && v.heldDecimals !== undefined && v.shares > BigInt(0) ? (
-                        <p className="text-[10px] tabular-nums text-black/40">
-                          {floorTo(Number(v.shares) / 10 ** v.heldDecimals, 6)} {unitOf(v)}
-                        </p>
-                      ) : (
-                        <p className="text-[10px] lowercase tracking-wide text-black/40">
-                          {t("pile.yourPosition")}
-                        </p>
-                      )}
                     </div>
                     <ArrowUpRight
                       size={16}

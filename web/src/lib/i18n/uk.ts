@@ -64,7 +64,6 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "pile.empty.title": "Ти ще нічого не поклав",
   "pile.empty.body": "Твої позиції з'являться тут, щойно гроші почнуть працювати.",
   "pile.explore": "Подивитися джерела",
-  "pile.yourPosition": "твоя позиція",
 
   "deposit.cardMinimum": "мінімум {value} · картка",
   "deposit.payWith": "оплата з",
