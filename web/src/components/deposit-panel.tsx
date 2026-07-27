@@ -14,13 +14,14 @@ import { useFundAndBuy } from "@/hooks/use-fund-and-buy";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
-import { assetUid } from "@oxar/sdk";
+import { assetUid, normalizeDecimalInput } from "@oxar/sdk";
 import { USDC_MINT } from "@/lib/constants";
 import { useT, localizeError } from "@/lib/i18n";
 
-// On-ramp minimum (MoonPay/Transak floor) and the pre-filled default for the buy.
+// On-ramp minimum (MoonPay/Transak floor). There is no default amount: the card
+// charges exactly what the user typed, and below the floor the button is disabled.
+// A default meant a button that would charge $50 nobody asked for.
 const APPLE_PAY_MIN_USD = 20;
-const APPLE_PAY_DEFAULT_USD = 50;
 // Cross-chain (bridge) minimum: below this the bridge fee eats the amount and the
 // route often can't quote at all. Same-chain Solana pays have NO minimum.
 const BRIDGE_MIN_USD = 5;
@@ -75,7 +76,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const [confirming, setConfirming] = useState(false);
   // USD to buy via Apple Pay when the wallet is empty — there's no pay-asset to
   // size the amount from, so the user enters it directly. Pre-filled, editable.
-  const [buyUsdInput, setBuyUsdInput] = useState(String(APPLE_PAY_DEFAULT_USD));
+  const [buyUsdInput, setBuyUsdInput] = useState("");
 
   // Solana first (instant/swap), then EVM (bridge).
   const assets = useMemo(() => [...solAssets, ...evmAssets], [solAssets, evmAssets]);
@@ -144,14 +145,12 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
     }
   };
 
-  // USD the Apple Pay buy will charge. With crypto in the wallet it mirrors the
-  // typed pay amount; with an empty wallet the user enters it directly above. No
-  // pay-asset needed — the on-ramp delivers fresh USDC, then we buy.
+  // USD the card buy will charge — always what the user typed. With crypto in the
+  // wallet that's the pay amount; with an empty wallet it's the field above. Nothing
+  // typed means nothing charged, which disables the button rather than assuming.
   const applePayUsd = emptyWallet
-    ? Math.max(0, parseFloat(buyUsdInput) || 0)
-    : usdAmount > 0
-      ? usdAmount
-      : APPLE_PAY_DEFAULT_USD;
+    ? Math.max(0, parseFloat(normalizeDecimalInput(buyUsdInput)) || 0)
+    : usdAmount;
   // Small tolerance: USDC isn't priced at exactly $1 (Jupiter ~0.9997), so a typed
   // "$20" converts to ~$19.99 and would wrongly trip the $20 minimum at the boundary.
   const applePayBelowMin = applePayUsd < APPLE_PAY_MIN_USD - 0.5;
@@ -213,13 +212,11 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
               <div className="flex items-center gap-1">
                 <span className="text-[20px] text-black/40">$</span>
                 <input
-                  type="number"
-                  min={APPLE_PAY_MIN_USD}
-                  step="any"
+                  type="text"
                   inputMode="decimal"
                   value={buyUsdInput}
-                  onChange={(e) => setBuyUsdInput(e.target.value)}
-                  placeholder={String(APPLE_PAY_DEFAULT_USD)}
+                  onChange={(e) => setBuyUsdInput(normalizeDecimalInput(e.target.value))}
+                  placeholder={String(APPLE_PAY_MIN_USD)}
                   className="w-full bg-transparent text-[20px] text-black outline-none placeholder:text-black/25"
                 />
               </div>
@@ -243,12 +240,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           <div className="mt-2 flex items-center justify-between gap-2 rounded-[10px] border border-black/10 px-3 py-2">
             <span className="text-[11px] lowercase tracking-wide text-black/40">{lower}</span>
             <input
-              type="number"
-              min={0}
-              step="any"
+              type="text"
               inputMode="decimal"
               value={sharesValue ? Number(sharesValue.toPrecision(4)) : ""}
-              onChange={(e) => onSharesChange(e.target.value)}
+              onChange={(e) => onSharesChange(normalizeDecimalInput(e.target.value))}
               placeholder="0"
               className="min-w-0 flex-1 bg-transparent text-right text-[15px] text-black outline-none placeholder:text-black/25"
             />
@@ -366,11 +361,16 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             )}
           </button>
           <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/30">
-            {/* The floor is stated ALWAYS. At the default amount the button was just
-                grey with no reason given, which reads as broken rather than as a rule. */}
-            {t("deposit.minAmount", { value: `$${APPLE_PAY_MIN_USD}` })}
-            {!applePayBelowMin &&
-              ` · ${t("deposit.applePayHint", { value: `$${applePayUsd.toFixed(0)}` })}`}
+            {/* Say what pressing this does. The amount is the typed one, or a default
+                when nothing is typed — and an unlabelled "≈ $50" next to "minimum $20"
+                read as two mystery numbers rather than a charge and a floor. The floor
+                is stated even when the button is disabled, or it looks broken. */}
+            {applePayBelowMin
+              ? t("deposit.minAmount", { value: `$${APPLE_PAY_MIN_USD}` })
+              : t("deposit.cardCharge", {
+                  value: `$${applePayUsd.toFixed(0)}`,
+                  min: `$${APPLE_PAY_MIN_USD}`,
+                })}
           </p>
 
           {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}
