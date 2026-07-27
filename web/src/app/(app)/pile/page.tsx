@@ -17,6 +17,8 @@ import { useStockPrices } from "@/hooks/use-stock-prices";
 import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
 import { floorTo, formatUsdAmount } from "@oxar/sdk";
 import { isPriceExposure } from "@/lib/yield/assets";
+import { isXStock } from "@/lib/yield/xstocks";
+import { isGold } from "@/lib/yield/gold";
 import { AssetIcon } from "@/components/asset-icon";
 import { PhotoBg } from "@/components/photo-bg";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
@@ -26,9 +28,14 @@ import { useBulkSell } from "@/hooks/use-bulk-sell";
 import { BulkSellBar } from "@/components/bulk-sell-bar";
 import { ActivityFeed } from "@/components/activity-feed";
 import { HoverChart } from "@/components/hover-chart";
+import { Sparkline } from "@/components/sparkline";
+import { useStockCharts } from "@/hooks/use-stock-charts";
+import { useActivity } from "@/hooks/use-activity";
 import { usePortfolioHistory } from "@/hooks/use-portfolio-history";
 
 type Layout = "list" | "grid";
+/** Narrow the position list. "traded" = you've bought or sold it, not merely hold it. */
+type Filter = "all" | "yield" | "stocks" | "gold" | "traded";
 
 export default function PilePage() {
   const router = useRouter();
@@ -41,6 +48,12 @@ export default function PilePage() {
   const bulk = useBulkSell();
   // Reconstructed from on-chain history + daily prices — see /api/portfolio-history.
   const history = usePortfolioHistory(90);
+  // One batched request covers every card's sparkline (see /api/stock-charts).
+  const charts = useStockCharts();
+  // Which assets this wallet has actually traded — drives the "traded" filter.
+  const { events } = useActivity();
+  const tradedMints = new Set(events.map((e) => e.mint).filter(Boolean) as string[]);
+  const [filter, setFilter] = useState<Filter>("all");
 
   // Remember the user's preferred layout across visits.
   useEffect(() => {
@@ -54,7 +67,14 @@ export default function PilePage() {
 
   // Pile is the portfolio: only sources where you actually hold a position.
   // (Browse/deposit lives on /yield.)
-  const held = views.filter((v) => v.underlyingBalance > BigInt(0));
+  const allHeld = views.filter((v) => v.underlyingBalance > BigInt(0));
+  const held = allHeld.filter((v) => {
+    if (filter === "all") return true;
+    if (filter === "stocks") return isXStock(v.id);
+    if (filter === "gold") return isGold(v.id);
+    if (filter === "yield") return !isPriceExposure(v.id);
+    return !!v.heldMint && tradedMints.has(v.heldMint);
+  });
 
   // 24h price change for price-exposure positions (stocks/gold) — shown instead
   // of "0.00% APY" on those cards.
@@ -170,7 +190,7 @@ export default function PilePage() {
           <p className="text-xs lowercase tracking-[0.2em] text-black/40">
             {t("pile.positions")}
           </p>
-          {held.length > 0 && (
+          {allHeld.length > 0 && (
             <div className="flex gap-1">
               {([
                 ["list", List],
@@ -192,6 +212,33 @@ export default function PilePage() {
             </div>
           )}
         </div>
+
+        {/* Narrow the list. Only offered where there's something to narrow. */}
+        {allHeld.length > 1 && (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {(["all", "yield", "stocks", "gold", "traded"] as const)
+              .filter((f) => {
+                if (f === "all" || f === "traded") return true;
+                if (f === "stocks") return allHeld.some((v) => isXStock(v.id));
+                if (f === "gold") return allHeld.some((v) => isGold(v.id));
+                return allHeld.some((v) => !isPriceExposure(v.id));
+              })
+              .map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFilter(f)}
+                  className={`rounded-full px-3 py-1 text-[11px] lowercase tracking-wide transition ${
+                    filter === f
+                      ? "bg-black text-white"
+                      : "bg-black/[0.05] text-black/55 hover:text-black"
+                  }`}
+                >
+                  {t(`pile.filter.${f}` as "pile.filter.all")}
+                </button>
+              ))}
+          </div>
+        )}
 
         {loading ? (
           <div className="p-8 flex justify-center">
@@ -283,6 +330,18 @@ export default function PilePage() {
                         );
                       })()}
                     </div>
+                    {/* The same batched series the grid cards use — one request for
+                        every row, so a sparkline per position costs nothing extra. */}
+                    {isPriceExposure(v.id) && v.heldMint && (charts[v.heldMint]?.length ?? 0) > 1 && (
+                      <div className="hidden w-24 shrink-0 sm:block">
+                        <Sparkline
+                          values={charts[v.heldMint]!}
+                          className={
+                            (change24hOf(v) ?? 0) >= 0 ? "text-emerald-600" : "text-red-600"
+                          }
+                        />
+                      </div>
+                    )}
                     <div className="text-right shrink-0">
                       <LiveAmount value={value} apy={v.apy} variant="md" />
                       {/* How much you own, not just what it's worth. A dollar figure
