@@ -44,51 +44,8 @@ export default function PilePage() {
   const { t } = useT();
   const { views, totalValue, loading, refresh } = useYieldPositions();
   const [layout, setLayout] = useState<Layout>("list");
-  // Ticking several positions and exiting them together — dark until the key is on.
-  const sellingV2 = useFeature("selling-v2");
-  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
-  const bulk = useBulkTrade();
-  // Reconstructed from on-chain history + daily prices — see /api/portfolio-history.
-  const history = usePortfolioHistory(90);
-  // One batched request covers every card's sparkline (see /api/stock-charts).
-  const charts = useStockCharts();
-  // Which assets this wallet has actually traded — drives the "traded" filter.
-  const { events } = useActivity();
-  // Your own buys and sells, placed on the line they explain. The chart is daily,
-  // so an event maps to the day-end it falls before — the same boundary the
-  // reconstruction values, or the dot would sit on the wrong side of its own jump.
-  const chartMarkers = useMemo(() => {
-    const pts = history.points;
-    if (pts.length < 2) return [];
-    // Several trades on one day land on ONE index — drawn separately they stack into
-    // a single dot that lies about how many there were. Group them and say the count.
-    const groups = new Map<string, { index: number; kind: "buy" | "sell"; n: number; usd: number }>();
-    for (const e of events) {
-      if (e.kind !== "buy" && e.kind !== "sell") continue;
-      const found = pts.findIndex((p) => p.t >= e.timestamp);
-      const index = found < 0 ? pts.length - 1 : found;
-      const key = `${index}:${e.kind}`;
-      const g = groups.get(key) ?? { index, kind: e.kind, n: 0, usd: 0 };
-      g.n += 1;
-      g.usd += e.usd ?? 0;
-      groups.set(key, g);
-    }
-    return [...groups.values()].map((g) => ({
-      index: g.index,
-      kind: g.kind,
-      count: g.n,
-      label:
-        g.n === 1
-          ? `${g.kind === "buy" ? "bought" : "sold"} · $${formatUsdAmount(g.usd)}`
-          : `${g.n} ${g.kind === "buy" ? "buys" : "sells"} · $${formatUsdAmount(g.usd)}`,
-    }));
-  }, [events, history.points]);
-  const tradedMints = new Set(events.map((e) => e.mint).filter(Boolean) as string[]);
-  const [filter, setFilter] = useState<Filter>("all");
-  // "Sell" now asks HOW MUCH of each, rather than assuming everything.
-  const [allocating, setAllocating] = useState(false);
 
-  // Remember the user's preferred layout across visits.
+  // Remember the preferred layout across visits.
   useEffect(() => {
     const saved = localStorage.getItem("oxar:pile-layout");
     if (saved === "grid" || saved === "list") setLayout(saved);
@@ -98,8 +55,22 @@ export default function PilePage() {
     localStorage.setItem("oxar:pile-layout", next);
   };
 
+  // Ticking several positions and exiting them together — dark until the key is on.
+  const sellingV2 = useFeature("selling-v2");
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+  const bulk = useBulkTrade();
+  const [filter, setFilter] = useState<Filter>("all");
+  // "Sell" asks HOW MUCH of each, rather than assuming everything.
+  const [allocating, setAllocating] = useState(false);
+  // Reconstructed from on-chain history + daily prices — see /api/portfolio-history.
+  const history = usePortfolioHistory(90);
+  // One batched request covers every card's sparkline (see /api/stock-charts).
+  const charts = useStockCharts();
+  // Which assets this wallet has actually traded — drives the "traded" filter.
+  const { events } = useActivity();
+  const tradedMints = new Set(events.map((e) => e.mint).filter(Boolean) as string[]);
+
   // Pile is the portfolio: only sources where you actually hold a position.
-  // (Browse/deposit lives on /yield.)
   const allHeld = views.filter((v) => v.underlyingBalance > BigInt(0));
   const held = allHeld.filter((v) => {
     if (filter === "all") return true;
@@ -108,18 +79,6 @@ export default function PilePage() {
     if (filter === "yield") return !isPriceExposure(v.id);
     return !!v.heldMint && tradedMints.has(v.heldMint);
   });
-
-  // 24h price change for price-exposure positions (stocks/gold) — shown instead
-  // of "0.00% APY" on those cards.
-  const priceMints = held
-    .filter((v) => isPriceExposure(v.id) && v.heldMint)
-    .map((v) => v.heldMint as string);
-  const { prices } = useStockPrices(priceMints);
-  // Ticker for one unit — the name carries it, e.g. "Broadcom (AVGOx)".
-  const unitOf = (v: ProviderView) => v.name.match(/\(([^)]+)\)/)?.[1] ?? v.assetSymbol;
-  const change24hOf = (v: ProviderView) =>
-    isPriceExposure(v.id) && v.heldMint ? prices[v.heldMint]?.change24h : undefined;
-
   const toggleSelected = (id: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
@@ -127,6 +86,16 @@ export default function PilePage() {
       else next.add(id);
       return next;
     });
+
+  // 24h change for price-exposure rows — shown instead of a meaningless APY.
+  const priceMints = held
+    .filter((v) => isPriceExposure(v.id) && v.heldMint)
+    .map((v) => v.heldMint as string);
+  const { prices } = useStockPrices(priceMints);
+  const change24hOf = (v: ProviderView) =>
+    isPriceExposure(v.id) && v.heldMint ? prices[v.heldMint]?.change24h : undefined;
+  // Ticker for one unit — the name carries it, e.g. "Broadcom (AVGOx)".
+  const unitOf = (v: ProviderView) => v.name.match(/\(([^)]+)\)/)?.[1] ?? v.assetSymbol;
 
   const selectedViews = held.filter((v) => selected.has(v.id));
   const selectedUsd = selectedViews.reduce(
@@ -207,7 +176,6 @@ export default function PilePage() {
             <HoverChart
               values={history.points.map((p) => p.usd)}
               format={(v) => `$${formatUsdAmount(v)}`}
-              markers={chartMarkers}
               height={110}
               className="text-[#3c05c7]"
               fill

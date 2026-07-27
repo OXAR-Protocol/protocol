@@ -12,8 +12,6 @@ interface Props {
   /** Tailwind text-color class — drives the line, fill, and the marker dot. */
   className?: string;
   fill?: boolean;
-  /** Days that had trades. Drawn on the AXIS, not the line — see below. */
-  markers?: readonly { index: number; kind: "buy" | "sell"; count: number; label: string }[];
 }
 
 /**
@@ -28,7 +26,7 @@ interface Props {
  * scrubs the chart (touch-action pan-y keeps vertical page scroll working). On
  * touch the read-out stays after lifting; for mouse it clears on leave.
  */
-export function HoverChart({ values, format, height = 220, className, fill, markers }: Props) {
+export function HoverChart({ values, format, height = 220, className, fill }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   // Cursor x as a 0..1 fraction of the width. null = no active read-out.
   const [frac, setFrac] = useState<number | null>(null);
@@ -77,40 +75,6 @@ export function HoverChart({ values, format, height = 220, className, fill, mark
       }}
     >
       <Sparkline values={values} height={height} fill={fill} className="h-full w-full" />
-
-      {/* Trades go on the AXIS, not on the line.
-          On the line they sat at (day, value-of-that-day), so a buy and a sell on
-          the same day drew at the identical point — one dot hiding the others, which
-          is worse than no dot. Down here they can't collide with the curve, several
-          on one day read as a count, and nothing implies a precision the daily
-          series doesn't have. */}
-      {n > 1 && !!markers?.length && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-4">
-          {markers.map((m) => {
-            const i = Math.min(n - 1, Math.max(0, m.index));
-            const left = Math.min(99, Math.max(1, (i / (n - 1)) * 100));
-            return (
-              <span
-                key={`${m.kind}-${m.index}`}
-                title={m.label}
-                className="pointer-events-auto absolute -translate-x-1/2 whitespace-nowrap"
-                style={{ left: `${left}%` }}
-              >
-                <span
-                  className={`inline-block h-1.5 w-1.5 rounded-full ${
-                    m.kind === "buy" ? "bg-emerald-600" : "bg-[#a35b00]"
-                  }`}
-                />
-                {m.count > 1 && (
-                  <span className="ml-0.5 align-top text-[9px] tabular-nums text-black/40">
-                    {m.count}
-                  </span>
-                )}
-              </span>
-            );
-          })}
-        </div>
-      )}
 
       {frac !== null && (
         <>
