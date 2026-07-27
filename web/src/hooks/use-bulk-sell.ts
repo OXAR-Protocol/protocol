@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { Transaction } from "@solana/web3.js";
 
 import { useSolanaContext } from "@/providers/solana-provider";
-import { getProvider, toFriendlyError } from "@/lib/yield";
+import { getProvider, toFriendlyError, isCancellation } from "@/lib/yield";
 import { recordBasisDelta } from "@/lib/earnings/pending-basis";
 
 export type BulkSellState = "idle" | "selling" | "done";
@@ -13,6 +13,8 @@ export interface BulkSellOutcome {
   /** Provider id. */
   id: string;
   ok: boolean;
+  /** The user stopped it — not a failure, and it halts the rest of the run. */
+  cancelled?: boolean;
   /** Friendly reason when it didn't go through. */
   error?: string;
 }
@@ -75,7 +77,12 @@ export function useBulkSell() {
           outcomes.push({ id: target.id, ok: true });
         } catch (e) {
           console.error(`Bulk sell failed for ${target.id}:`, e);
-          outcomes.push({ id: target.id, ok: false, error: toFriendlyError(e) });
+          const cancelled = isCancellation(e);
+          outcomes.push({ id: target.id, ok: false, cancelled, error: toFriendlyError(e) });
+          setDone([...outcomes]);
+          // Turning one "no" into a prompt for every remaining position is nagging.
+          if (cancelled) break;
+          continue;
         }
         setDone([...outcomes]);
       }
