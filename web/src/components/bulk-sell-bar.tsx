@@ -36,10 +36,11 @@ export function BulkSellBar({ selectedCount, totalUsd, state, done, onSell, onCl
           : t("bulk.selected", { n: String(selectedCount), usd: `$${formatUsdAmount(totalUsd)}` })}
       </span>
 
-      {/* Naming the ones that didn't go through — "some failed" can't be acted on. */}
+      {/* Naming the ones that didn't go through, AND why — "some failed" can't be
+          acted on, and neither can a list of names with no reason. */}
       {state === "done" && failed.length > 0 && (
         <span className="w-full text-[12px] text-red-600">
-          {t("bulk.failed", { ids: failed.map((f) => f.id).join(", ") })}
+          {failed.map((f) => `${f.id}${f.error ? ` — ${f.error}` : ""}`).join(" · ")}
         </span>
       )}
 

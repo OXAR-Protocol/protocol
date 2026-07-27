@@ -107,8 +107,19 @@ export async function POST(req: Request) {
       }),
     );
 
+    // Counts, not contents: an empty chart has several possible causes (no history
+    // read, no tracked mint moved, no price found) and they are indistinguishable
+    // from the outside. Cheap to keep, and it turns "it doesn't work" into a fact.
+    const debug = {
+      txs: txs.length,
+      trackedMints: POSITION_MINTS.size,
+      movedMints: mints.length,
+      pricedMints: Object.keys(prices).length,
+      deltas: deltas.length,
+      points: points.length,
+    };
     cache.set(cacheKey, { at: Date.now(), points });
-    return NextResponse.json({ points });
+    return NextResponse.json({ points, debug });
   } catch (e) {
     console.error("Portfolio history error:", e);
     return NextResponse.json({ error: "History request failed" }, { status: 502 });
