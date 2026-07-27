@@ -131,20 +131,21 @@ export function AssetActionRail({
             loading={loading}
             disabled={loading || amount <= 0 || amount > positionValue}
             variant="primary"
+            controls={
+              sellingV2 ? (
+                <SellAmountControls
+                  positionValue={positionValue}
+                  amount={amount}
+                  onAmountChange={onAmountChange}
+                  unitPriceUsd={sharePriceUsd}
+                  unitLabel={unitLabel}
+                  inUnits={sellInUnits}
+                  onToggleUnits={() => setSellInUnits((v) => !v)}
+                  disabled={loading}
+                />
+              ) : null
+            }
           />
-
-          {sellingV2 && (
-            <SellAmountControls
-              positionValue={positionValue}
-              amount={amount}
-              onAmountChange={onAmountChange}
-              unitPriceUsd={sharePriceUsd}
-              unitLabel={unitLabel}
-              inUnits={sellInUnits}
-              onToggleUnits={() => setSellInUnits((v) => !v)}
-              disabled={loading}
-            />
-          )}
 
           {/* What you'll actually receive — a real quote, shown instead of blocking the
               sell (which used to leave holders with no way out). The gap against the

@@ -23,6 +23,7 @@ import { AssetChart } from "@/components/asset-chart";
 import { HoverChart } from "@/components/hover-chart";
 import { YieldActionSuccess, type ActionResult } from "@/components/yield-action-success";
 import { ActivityFeed } from "@/components/activity-feed";
+import { AssetProof } from "@/components/asset-proof";
 
 const fade = (delay: number) => ({
   initial: { opacity: 0, y: 16 },
@@ -215,6 +216,10 @@ export function AssetDetail({
               )}
             </motion.section>
           )}
+
+          <motion.section {...fade(0.18)}>
+            <AssetProof id={view.id} />
+          </motion.section>
 
           {view.heldMint && (
             <motion.section {...fade(0.2)} className="mt-10">

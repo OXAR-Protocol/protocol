@@ -19,6 +19,9 @@ interface Props {
   disabled: boolean;
   /** Filled (deposit) vs outlined (withdraw) button treatment. */
   variant: "primary" | "secondary";
+  /** Extra controls (quick fractions, denomination switch) rendered between the hint
+   *  and the action — inside the card, beside the amount they change. */
+  controls?: ReactNode;
 }
 
 const BUTTON_VARIANT = {
@@ -38,6 +41,7 @@ export function YieldAmountField({
   loading,
   disabled,
   variant,
+  controls,
 }: Props) {
   return (
     <div className="p-4 rounded-[6px] border border-black/10 bg-white">
@@ -56,6 +60,7 @@ export function YieldAmountField({
         <span className="text-sm text-black/45">{symbol}</span>
       </div>
       <div className="mt-2 text-[11px] text-black/40">{hint}</div>
+      {controls}
       <button
         onClick={onAction}
         disabled={disabled}
