@@ -66,6 +66,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "pile.explore": "Подивитися джерела",
   "pile.yourPosition": "твоя позиція",
 
+  "deposit.cardMinimum": "мінімум {value} · картка",
   "deposit.payWith": "оплата з",
   "deposit.loadingAssets": "Завантажуємо твої активи…",
   "deposit.noAssets": "У гаманці поки нічого немає.",
@@ -76,8 +77,6 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "deposit.swapCost": "вартість обміну ~{value}",
   "deposit.cantQuote": "не вдалося порахувати — спробуй іншу суму",
   "deposit.buyAmountHint": "скільки купити · apple pay або картка",
-  "deposit.cardCharge": "спишеться ≈{value} · мінімум {min} · крипта не потрібна",
-  "deposit.minAmount": "мінімум {value}",
   "deposit.bridgeMinAmount": "мінімум {value} для покупки з іншої мережі — або платіть USDC на Solana",
   "deposit.bridgeConfirmsHint": "оплата з іншої мережі — доведеться підтвердити кілька кроків у гаманці",
   "confirm.review": "перевір: {verb}",

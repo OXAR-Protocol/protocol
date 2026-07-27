@@ -361,16 +361,9 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             )}
           </button>
           <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/30">
-            {/* Say what pressing this does. The amount is the typed one, or a default
-                when nothing is typed — and an unlabelled "≈ $50" next to "minimum $20"
-                read as two mystery numbers rather than a charge and a floor. The floor
-                is stated even when the button is disabled, or it looks broken. */}
-            {applePayBelowMin
-              ? t("deposit.minAmount", { value: `$${APPLE_PAY_MIN_USD}` })
-              : t("deposit.cardCharge", {
-                  value: `$${applePayUsd.toFixed(0)}`,
-                  min: `$${APPLE_PAY_MIN_USD}`,
-                })}
+            {/* Just the floor. The amount charged is the one in the field above, so
+                repeating it here only added a number to read. */}
+            {t("deposit.cardMinimum", { value: `$${APPLE_PAY_MIN_USD}` })}
           </p>
 
           {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}
