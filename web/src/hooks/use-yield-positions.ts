@@ -6,7 +6,7 @@ import type { Connection, PublicKey } from "@solana/web3.js";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { PROVIDERS, fromBaseUnits } from "@/lib/yield";
 import { getCached, setCache } from "@/lib/cache";
-import { useBetaAssets } from "./use-beta-assets";
+import { useFeatures } from "./use-features";
 
 export interface ProviderView {
   id: string;
@@ -25,8 +25,8 @@ export interface ProviderView {
   /** Swap-and-hold acquired asset (Ondo/stocks) — for the swap-spread preview. */
   heldMint?: string;
   heldDecimals?: number;
-  /** Gated pilot source — only visible to the beta allowlist. */
-  beta?: boolean;
+  /** Feature key gating this source; absent = visible to everyone. */
+  feature?: string;
   /** Supply APY as a fraction (0.06 = 6%). */
   apy: number;
   /** User's principal + accrued yield, in asset base units. 0 if not connected. */
@@ -73,7 +73,7 @@ async function fetchSnapshot(
         defiLlamaPoolId: p.defiLlamaPoolId,
         heldMint: p.heldMint,
         heldDecimals: p.heldDecimals,
-        beta: p.beta,
+        feature: p.feature,
         apy,
         underlyingBalance: position.underlyingBalance,
         shares: position.shares,
@@ -154,13 +154,13 @@ export function useYieldPositions() {
 
   const refresh = useCallback(() => load(true), [load]);
 
-  // Gated pilot sources drop out for everyone not on the beta allowlist. Filtering
-  // here — the one place every view is built — keeps them out of the source list,
-  // the home total, the portfolio and the earnings view in a single step. The total
-  // is re-summed from what's left so a hidden source can't leak through the balance.
-  const betaAssets = useBetaAssets();
+  // A source gated behind a feature key drops out until that key is on. Filtering
+  // here — the one place every view is built — keeps it out of the source list, the
+  // home total, the portfolio and the earnings view in a single step. The total is
+  // re-summed from what's left so a hidden source can't leak through the balance.
+  const features = useFeatures();
   const { views, totalValue } = useMemo(() => {
-    const visible = snap.views.filter((v) => !v.beta || betaAssets.includes(v.id));
+    const visible = snap.views.filter((v) => !v.feature || features.includes(v.feature));
     if (visible.length === snap.views.length) {
       return { views: snap.views, totalValue: snap.totalValue };
     }
@@ -171,7 +171,7 @@ export function useYieldPositions() {
         0,
       ),
     };
-  }, [snap, betaAssets]);
+  }, [snap, features]);
 
   return { views, totalValue, loading, error, refresh };
 }

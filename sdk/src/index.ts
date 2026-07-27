@@ -44,6 +44,6 @@ export * from "./core/assets";
 export * from "./core/delora";
 export * from "./core/jupiter-swap";
 export * from "./core/earnings-basis";
-export * from "./core/beta-access";
+export * from "./core/features";
 export * from "./core/quote-value";
 export * from "./core/tx-delta";

@@ -31,8 +31,6 @@ export const PROVIDERS: readonly YieldProvider[] = [
   jupiterUsdtProvider,
   ondoUsdyProvider,
   mapleSyrupProvider,
-  // Gated to the beta allowlist (see YieldProvider.beta) — registered so it works
-  // end to end for them, filtered out of every view for everyone else.
   onreOnycProvider,
   ...xstockProviders,
   ...goldProviders,
