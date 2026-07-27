@@ -76,6 +76,7 @@ export default function PilePage() {
     return [...groups.values()].map((g) => ({
       index: g.index,
       kind: g.kind,
+      count: g.n,
       label:
         g.n === 1
           ? `${g.kind === "buy" ? "bought" : "sold"} · $${formatUsdAmount(g.usd)}`
