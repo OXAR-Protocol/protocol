@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpDown, ChevronDown } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
+import { useT } from "@/lib/i18n";
 import {
   spendableBase,
   assetUid,
@@ -56,6 +57,7 @@ export function PayWithField({
   productMint,
   reserveGas = true,
 }: Props) {
+  const { t } = useT();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"token" | "usd">("token");
   const [usdStr, setUsdStr] = useState("");
@@ -104,6 +106,16 @@ export function PayWithField({
     }
   };
 
+  // What's actually spendable, in display units — the balance minus whatever must
+  // stay behind for network fees (native SOL keeps rent for the temporary wrapped-SOL
+  // account even when gas is sponsored).
+  const spendableUi = active
+    ? Number(spendableBase(active, reserveGas)) / 10 ** active.decimals
+    : 0;
+  // A balance entirely inside the reserve isn't zero — it's held back. Saying "0"
+  // reads as a rounding bug, which is exactly how it was reported.
+  const allReserved = !!active && active.uiAmount > 0 && spendableUi <= 0;
+
   const setMax = () => {
     if (!active) return;
     // Always FLOOR, never round up: rounding a balance of 1.999999 to "2.00000"
@@ -111,9 +123,8 @@ export function PayWithField({
     // How many digits to keep is a readability-vs-waste trade: the token's full
     // precision put `4,84121` in the field, while a flat 2 decimals would strand
     // ~$2 of SOL. `centPrecision` keeps the fewest digits that leave under a cent.
-    const spendable = Number(spendableBase(active, reserveGas)) / 10 ** active.decimals;
     const price = active.uiAmount > 0 ? active.usdValue / active.uiAmount : 1;
-    const max = floorTo(spendable, Math.min(active.decimals, centPrecision(price)));
+    const max = floorTo(spendableUi, Math.min(active.decimals, centPrecision(price)));
     onAmountChange(String(max));
     if (mode === "usd") setUsdStr(toUsdStr(max));
   };
@@ -190,7 +201,9 @@ export function PayWithField({
             onClick={setMax}
             className="text-[10px] lowercase tracking-wide text-black/40 transition hover:text-black/70"
           >
-            balance {fmtAmount(active.uiAmount)} · max
+            {allReserved
+              ? t("pay.keptForFees", { sym: active.symbol })
+              : `balance ${fmtAmount(spendableUi)} · max`}
           </button>
         )}
       </div>

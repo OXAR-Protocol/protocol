@@ -169,6 +169,7 @@ export const en = {
   "rail.withdrawLabel": "Withdraw {sym}",
   "rail.worth": "worth",
   "rail.available": "available",
+  "pay.keptForFees": "all {sym} kept for network fees",
   "rail.max": "max",
   "rail.actionSell": "Sell",
   "rail.actionWithdraw": "Withdraw",

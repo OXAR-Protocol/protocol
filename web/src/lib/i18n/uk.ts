@@ -155,6 +155,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "rail.withdrawLabel": "Зняти {sym}",
   "rail.worth": "вартість",
   "rail.available": "доступно",
+  "pay.keptForFees": "весь {sym} лишається на комісію мережі",
   "rail.max": "все",
   "rail.actionSell": "Продати",
   "rail.actionWithdraw": "Зняти",
