@@ -17,7 +17,10 @@ export interface DefiLlamaPool {
   tvlUsd?: number | null;
 }
 
-const PROJECTS = new Set(["kamino-lend", "jupiter-lend", "ondo-yield-assets"]);
+// DefiLlama project slugs whose Solana pools are ours. A source whose project is
+// missing here still charts (history is fetched per-pool, unfiltered) but its APY
+// silently reads 0% — see `yields-coverage.test.ts`, which fails if one is forgotten.
+const PROJECTS = new Set(["kamino-lend", "jupiter-lend", "ondo-yield-assets", "onre"]);
 
 // Pools we want by exact id regardless of chain. Maple's protocol-wide USDC rate
 // lives on its Ethereum pool, but it's the same Syrup yield that syrupUSDC accrues
