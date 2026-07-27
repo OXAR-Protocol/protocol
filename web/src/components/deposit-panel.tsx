@@ -366,9 +366,11 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             )}
           </button>
           <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/30">
-            {applePayBelowMin
-              ? t("deposit.minAmount", { value: `$${APPLE_PAY_MIN_USD}` })
-              : t("deposit.applePayHint", { value: `$${applePayUsd.toFixed(0)}` })}
+            {/* The floor is stated ALWAYS. At the default amount the button was just
+                grey with no reason given, which reads as broken rather than as a rule. */}
+            {t("deposit.minAmount", { value: `$${APPLE_PAY_MIN_USD}` })}
+            {!applePayBelowMin &&
+              ` · ${t("deposit.applePayHint", { value: `$${applePayUsd.toFixed(0)}` })}`}
           </p>
 
           {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}

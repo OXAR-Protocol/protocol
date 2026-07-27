@@ -36,8 +36,8 @@ export const en = {
   "movers.title": "on the move · 24h",
   "movers.all": "see all →",
   "home.earned.yield": "yield",
-  "home.earned.stocks": "stocks",
-  "home.earned.gold": "gold",
+  "home.earned.stocks": "stocks P&L",
+  "home.earned.gold": "gold P&L",
 
   // Yield list
   "yield.title": "Where your money can sleep",

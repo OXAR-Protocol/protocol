@@ -62,3 +62,4 @@ __exportStar(require("./core/earnings-basis"), exports);
 __exportStar(require("./core/features"), exports);
 __exportStar(require("./core/quote-value"), exports);
 __exportStar(require("./core/tx-delta"), exports);
+__exportStar(require("./core/format"), exports);

@@ -4,6 +4,7 @@ import { netInvestedFromSwaps } from "@/lib/earnings/swaps";
 import { heliusApiKey, fetchEnhancedHistory } from "@/lib/helius/history";
 import { XSTOCKS } from "@/lib/yield/xstocks";
 import { GOLD } from "@/lib/yield/gold";
+import { JL_USDC, JL_USDT } from "@/lib/yield/position-mints";
 
 // On-chain cost-basis proxy. Reads the wallet's parsed transaction history from
 // Helius (key stays server-side) and derives net USD invested per swap-and-hold
@@ -16,8 +17,7 @@ const USDT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
 // Jupiter Lend receipt (jl) tokens — the SPL you HOLD after depositing (value accrues in
 // price). Deposit = costMint → jlToken; withdraw = jlToken → costMint, so the same
 // swap-attribution engine works: net invested = cost spent to acquire the jlToken.
-const JL_USDC = "9BEcn9aPEmhSPbPQeFGjidRiEKki46fVQDyPpSQXPA2D";
-const JL_USDT = "Cmn4v2wipYV41dkakDvCgFJpxhtaaKt11NyWV8pjSE8A";
+// Shared with the wallet card, which must not list them as idle cash.
 
 // Net invested = cost spent acquiring `heldMint`. Stocks come straight from the xStocks
 // catalog so the two never drift.

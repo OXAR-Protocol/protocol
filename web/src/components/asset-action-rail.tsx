@@ -9,6 +9,7 @@ import { DepositPanel } from "@/components/deposit-panel";
 import { YieldAmountField } from "@/components/yield-amount-field";
 import { CashOutSheet } from "@/components/cash-out-sheet";
 import { useSwapOutPreview, NOTABLE_SELL_COST } from "@/hooks/use-swap-out-preview";
+import { floorToCents, formatUsdAmount } from "@oxar/sdk";
 import { useT, localizeError } from "@/lib/i18n";
 
 interface Props {
@@ -103,10 +104,10 @@ export function AssetActionRail({
             onChange={onAmountChange}
             hint={
               <span className="flex items-center gap-2">
-                {price ? t("rail.worth") : t("rail.available")}: ${positionValue.toFixed(2)}
+                {price ? t("rail.worth") : t("rail.available")}: ${formatUsdAmount(positionValue)}
                 <button
                   type="button"
-                  onClick={() => onAmountChange(positionValue)}
+                  onClick={() => onAmountChange(floorToCents(positionValue))}
                   className="lowercase tracking-wide text-[#3c05c7]/80 transition hover:text-[#3c05c7]"
                 >
                   {t("rail.max")}
@@ -132,7 +133,7 @@ export function AssetActionRail({
                 sellCostNotable ? "text-[#a35b00]" : "text-black/45"
               }`}
             >
-              {t("rail.youReceive")}: ${sellOut.proceedsUsd.toFixed(2)}
+              {t("rail.youReceive")}: ${formatUsdAmount(sellOut.proceedsUsd)}
               {sellCostNotable && (
                 <>
                   {" · "}

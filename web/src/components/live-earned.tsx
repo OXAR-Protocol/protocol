@@ -1,5 +1,7 @@
 "use client";
 
+import { formatSignedUsd } from "@oxar/sdk";
+
 import { useLiveValue } from "@/hooks/use-live-value";
 
 interface Props {
@@ -9,7 +11,8 @@ interface Props {
   invested: number;
   /** Blended APY (fraction) driving the live tick. */
   apy: number;
-  /** Sub-cent precision so real accrual is visibly moving. */
+  /** Digits shown. Cents by default; the yield line asks for more so the live
+   *  accrual is visibly moving. */
   precision?: number;
   className?: string;
 }
@@ -19,14 +22,11 @@ interface Props {
  * time at high precision so the actual profit is visible to the kopeck. This is a
  * REAL number (cost basis is read on-chain), not a projection.
  */
-export function LiveEarned({ currentValue, invested, apy, precision = 6, className }: Props) {
+export function LiveEarned({ currentValue, invested, apy, precision = 2, className }: Props) {
   const live = useLiveValue(currentValue, apy);
-  const earned = live - invested;
-  const sign = earned < 0 ? "-" : "+";
-  const text = Math.abs(earned).toFixed(precision);
   return (
     <span className={`tabular-nums ${className ?? ""}`}>
-      {sign}${text}
+      {formatSignedUsd(live - invested, precision)}
     </span>
   );
 }

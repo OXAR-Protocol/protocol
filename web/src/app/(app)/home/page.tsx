@@ -105,17 +105,17 @@ export default function HomePage() {
               {yieldEarn.value > 0 && (
                 <span title="Earned from yield — current value minus what you put in, on-chain.">
                   <span className="text-black/45">{t("home.earned.yield")}</span>{" "}
-                  <LiveEarned currentValue={yieldEarn.value} invested={yieldEarn.invested} apy={yieldEarn.apy} />
+                  <LiveEarned currentValue={yieldEarn.value} invested={yieldEarn.invested} apy={yieldEarn.apy} precision={6} />
                 </span>
               )}
               {stockEarn.value > 0 && (
-                <span title="Earned from stocks — current value minus cost basis, on-chain.">
+                <span title="Profit and loss on stocks: what they are worth now minus what you paid. Buying and selling on the market costs a spread, so a fresh position starts slightly negative.">
                   <span className="text-black/45">{t("home.earned.stocks")}</span>{" "}
                   <LiveEarned currentValue={stockEarn.value} invested={stockEarn.invested} apy={stockEarn.apy} />
                 </span>
               )}
               {goldEarn.value > 0 && (
-                <span title="Earned from gold — current value minus cost basis, on-chain.">
+                <span title="Profit and loss on gold: what it is worth now minus what you paid. Buying and selling on the market costs a spread, so a fresh position starts slightly negative.">
                   <span className="text-black/45">{t("home.earned.gold")}</span>{" "}
                   <LiveEarned currentValue={goldEarn.value} invested={goldEarn.invested} apy={goldEarn.apy} />
                 </span>
