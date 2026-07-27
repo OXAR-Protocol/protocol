@@ -11,8 +11,8 @@ import {
   getSwapQuote,
   buildSwapTx,
   deserializeSwapTx,
-  priceImpactTooHigh,
-  BROKEN_MARKET_IMPACT,
+  quoteDeliveryRatio,
+  marketLooksBroken,
 } from "@oxar/sdk";
 import { getProviderApy } from "./yields-api";
 import { UserFacingError } from "./errors";
@@ -74,6 +74,10 @@ async function buildSwapLegacy(params: {
   inputMint: string;
   outputMint: string;
   amount: bigint;
+  /** The held token's decimals + reference price, to judge what the quote delivers. */
+  heldDecimals: number;
+  heldPriceUsd: number;
+  heldMint: string;
 }): Promise<Transaction> {
   const quote = await getSwapQuote({
     inputMint: params.inputMint,
@@ -81,9 +85,19 @@ async function buildSwapLegacy(params: {
     amount: params.amount,
     asLegacy: true,
   });
-  // Cost is shown before signing, so it's the user's call — we only stop a market
-  // that looks broken. See BROKEN_MARKET_IMPACT.
-  if (priceImpactTooHigh(quote, BROKEN_MARKET_IMPACT)) {
+  // Cost is shown before signing, so it's the user's call — we only stop a route that
+  // loses most of the value. Judged on the amounts, never on `priceImpactPct`, which
+  // misreports thin tokens badly.
+  const buying = params.outputMint === params.heldMint;
+  const ratio = quoteDeliveryRatio({
+    inAmount: BigInt(quote.inAmount),
+    outAmount: BigInt(quote.outAmount),
+    inDecimals: buying ? USDC_DECIMALS : params.heldDecimals,
+    outDecimals: buying ? params.heldDecimals : USDC_DECIMALS,
+    inPriceUsd: buying ? 1 : params.heldPriceUsd,
+    outPriceUsd: buying ? params.heldPriceUsd : 1,
+  });
+  if (marketLooksBroken(ratio)) {
     throw new UserFacingError("This market looks broken right now — try again later");
   }
   const b64 = await buildSwapTx(quote, params.owner.toBase58(), { asLegacy: true });
@@ -146,7 +160,10 @@ export function createSwapHoldProvider(cfg: SwapHoldConfig): YieldProvider {
 
     // Deposit: swap `amount` USDC (base units) → held token, into the user's wallet.
     async buildDepositTx({ owner, amount }: BuildIxParams) {
-      return buildSwapLegacy({ owner, inputMint: USDC_MINT, outputMint: cfg.heldMint, amount });
+      return buildSwapLegacy({
+        owner, inputMint: USDC_MINT, outputMint: cfg.heldMint, amount,
+        heldMint: cfg.heldMint, heldDecimals: cfg.heldDecimals, heldPriceUsd: await getPriceUsd(),
+      });
     },
 
     // Partial withdraw: swap the held token worth ~`amount` USDC back to USDC.
@@ -160,14 +177,20 @@ export function createSwapHoldProvider(cfg: SwapHoldConfig): YieldProvider {
       const toSwap = amountToSwapForWithdraw(held, valueUsdc, amount);
       if (toSwap <= BigInt(0)) throw new UserFacingError("Amount too small to withdraw");
 
-      return buildSwapLegacy({ owner, inputMint: cfg.heldMint, outputMint: USDC_MINT, amount: toSwap });
+      return buildSwapLegacy({
+        owner, inputMint: cfg.heldMint, outputMint: USDC_MINT, amount: toSwap,
+        heldMint: cfg.heldMint, heldDecimals: cfg.heldDecimals, heldPriceUsd: price,
+      });
     },
 
     // Full exit: swap the entire held balance back to USDC.
     async buildRedeemTx({ owner, connection }: RedeemTxParams) {
       const held = await readBalance(owner, connection);
       if (held <= BigInt(0)) throw new UserFacingError("Nothing to withdraw");
-      return buildSwapLegacy({ owner, inputMint: cfg.heldMint, outputMint: USDC_MINT, amount: held });
+      return buildSwapLegacy({
+        owner, inputMint: cfg.heldMint, outputMint: USDC_MINT, amount: held,
+        heldMint: cfg.heldMint, heldDecimals: cfg.heldDecimals, heldPriceUsd: await getPriceUsd(),
+      });
     },
 
     async getPosition(owner: PublicKey, connection: Connection): Promise<YieldPosition> {

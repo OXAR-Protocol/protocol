@@ -11,8 +11,8 @@ import {
   getSwapQuote,
   buildSwapTx,
   deserializeSwapTx,
-  priceImpactTooHigh,
-  BROKEN_MARKET_IMPACT,
+  quoteDeliveryRatio,
+  marketLooksBroken,
 } from "@oxar/sdk";
 import { UserFacingError } from "./errors";
 import type {
@@ -140,9 +140,20 @@ export function createGoldProvider(cfg: GoldMeta): YieldProvider {
 
   async function swap(owner: PublicKey, inputMint: string, outputMint: string, amount: bigint): Promise<Transaction> {
     const quote = await getSwapQuote({ inputMint, outputMint, amount, asLegacy: true, slippageBps: 100 });
-    // Cost is shown before signing, so it's the user's call — we only stop a market
-    // that looks broken. See BROKEN_MARKET_IMPACT.
-    if (priceImpactTooHigh(quote, BROKEN_MARKET_IMPACT)) {
+    // Cost is shown before signing, so it's the user's call — we only stop a route that
+    // loses most of the value. Judged on the amounts, never on `priceImpactPct`, which
+    // misreports thin tokens badly.
+    const goldPrice = (await allPrices())[heldMint] ?? 0;
+    const buying = outputMint === heldMint;
+    const ratio = quoteDeliveryRatio({
+      inAmount: BigInt(quote.inAmount),
+      outAmount: BigInt(quote.outAmount),
+      inDecimals: buying ? USDC_DECIMALS : cfg.decimals,
+      outDecimals: buying ? cfg.decimals : USDC_DECIMALS,
+      inPriceUsd: buying ? 1 : goldPrice,
+      outPriceUsd: buying ? goldPrice : 1,
+    });
+    if (marketLooksBroken(ratio)) {
       throw new UserFacingError("This market looks broken right now — try again later");
     }
     const b64 = await buildSwapTx(quote, owner.toBase58(), { asLegacy: true });

@@ -12,3 +12,4 @@ export * from "./core/delora";
 export * from "./core/jupiter-swap";
 export * from "./core/earnings-basis";
 export * from "./core/beta-access";
+export * from "./core/quote-value";
