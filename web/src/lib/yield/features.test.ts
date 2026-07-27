@@ -68,6 +68,15 @@ describe("env parsing", () => {
   });
 });
 
+describe("what ships on by default", () => {
+  // Switching a key on lives in code because a Vercel env change only reaches the
+  // NEXT deployment — so env is not a live switch, and code at least explains itself.
+  it("serves selling-v2 to everyone", async () => {
+    const { DEFAULT_PUBLIC_FEATURES } = await import("./default-features");
+    expect(DEFAULT_PUBLIC_FEATURES).toContain("selling-v2");
+  });
+});
+
 describe("gated sources", () => {
   // Nothing is gated today (ONyc was the first pilot and is now public). Asserted on
   // purpose: a `feature` key left on by accident hides a source from every real
