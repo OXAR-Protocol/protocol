@@ -18,3 +18,21 @@ export declare function formatSignedUsd(value: number, maxDigits?: number): stri
  * showing `19.999785` is alarming, and rounding UP would offer more than is there.
  */
 export declare function floorToCents(value: number): number;
+/**
+ * How many decimals a token amount needs so that flooring it strands less than a
+ * cent. USDC (≈$1) needs 2; SOL (≈$180) needs 5, where 2 would abandon ~$2 of it.
+ *
+ * Prefilling MAX with a token's full precision is what put `4,84121` in a deposit
+ * field — true, and unreadable. Cutting everything to two decimals would be
+ * readable and would quietly leave value behind. This is the smallest number of
+ * digits that is both.
+ */
+export declare function centPrecision(priceUsd: number, maxDecimals?: number): number;
+/** Floor to `decimals` — never up, so a prefilled MAX can't exceed the balance. */
+export declare function floorTo(value: number, decimals: number): number;
+/**
+ * A typed amount, cleaned. Browsers render `<input type="number">` with the OS
+ * locale's separator, so a Ukrainian keyboard shows — and produces — `4,84121`;
+ * `Number("4,84")` is NaN. Accepts either separator, keeps one, drops the rest.
+ */
+export declare function normalizeDecimalInput(raw: string): string;

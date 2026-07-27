@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 
+import { normalizeDecimalInput } from "@oxar/sdk";
+
 interface Props {
   /** Section label, e.g. "Deposit USDC". */
   label: string;
@@ -44,11 +46,11 @@ export function YieldAmountField({
       </p>
       <div className="flex items-baseline gap-3">
         <input
-          type="number"
+          type="text"
           min={0}
           step="any"
           value={value}
-          onChange={(e) => onChange(Math.max(0, Number(e.target.value)))}
+          onChange={(e) => onChange(Math.max(0, Number(normalizeDecimalInput(e.target.value)) || 0))}
           className="flex-1 bg-transparent border-b border-black/15 focus:border-black/40 outline-none text-2xl text-black py-1"
         />
         <span className="text-sm text-black/45">{symbol}</span>
