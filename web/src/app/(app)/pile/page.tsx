@@ -132,14 +132,46 @@ export default function PilePage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="relative"
       >
-        <SectionLabel>portfolio</SectionLabel>
-        <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-black leading-[1.04] tracking-[-0.04em] lowercase">
-          {t("pile.title")}
-        </h1>
-        <p className="mt-3 text-sm text-black/45 max-w-lg">
-          {t("pile.subtitle")}
-        </p>
+        {/* The line lives BEHIND the title and bleeds off to the right, faded into
+            the page so it reads as texture until you look at it. Masked on the left
+            so it dissolves under the words rather than stopping at them, and left
+            interactive — hovering the exposed part scrubs real values. */}
+        {history.points.length > 1 && (
+          <div
+            className="pointer-events-none absolute inset-y-0 right-0 hidden w-[62%] opacity-45 sm:block"
+            style={{
+              maskImage: "linear-gradient(to right, transparent 0%, black 45%)",
+              WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 45%)",
+            }}
+          >
+            <div className="pointer-events-auto h-full">
+              <HoverChart
+                values={history.points.map((p) => p.usd)}
+                format={(v) => `$${formatUsdAmount(v)}`}
+                height={150}
+                className="text-[#3c05c7]"
+                fill
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="relative z-10">
+          <SectionLabel>portfolio</SectionLabel>
+          <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-black leading-[1.04] tracking-[-0.04em] lowercase">
+            {t("pile.title")}
+          </h1>
+          <p className="mt-3 max-w-lg text-sm text-black/45">
+            {t("pile.subtitle")}
+          </p>
+          {history.points.length > 1 && (
+            <p className="mt-2 text-[10px] lowercase tracking-wide text-black/30">
+              {t("pile.chartRange", { n: String(history.points.length) })}
+            </p>
+          )}
+        </div>
       </motion.div>
 
       {/* Total */}
@@ -161,23 +193,6 @@ export default function PilePage() {
           )}
         </div>
 
-        {/* One line for everything held. Hidden until there are at least two points
-            — a single dot is not a history, and drawing one implies more than we
-            know. */}
-        {history.points.length > 1 && (
-          <div className="relative mt-4">
-            <HoverChart
-              values={history.points.map((p) => p.usd)}
-              format={(v) => `$${formatUsdAmount(v)}`}
-              height={120}
-              className="text-[#3c05c7]"
-              fill
-            />
-            <p className="mt-1 text-[10px] lowercase tracking-wide text-black/35">
-              {t("pile.chartRange", { n: String(history.points.length) })}
-            </p>
-          </div>
-        )}
       </motion.section>
 
       {/* Per-source positions */}
