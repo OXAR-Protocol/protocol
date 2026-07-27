@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -52,6 +52,23 @@ export default function PilePage() {
   const charts = useStockCharts();
   // Which assets this wallet has actually traded — drives the "traded" filter.
   const { events } = useActivity();
+  // Your own buys and sells, placed on the line they explain. The chart is daily,
+  // so an event maps to the day-end it falls before — the same boundary the
+  // reconstruction values, or the dot would sit on the wrong side of its own jump.
+  const chartMarkers = useMemo(() => {
+    const pts = history.points;
+    if (pts.length < 2) return [];
+    return events
+      .filter((e) => e.kind === "buy" || e.kind === "sell")
+      .map((e) => {
+        const index = pts.findIndex((p) => p.t >= e.timestamp);
+        return {
+          index: index < 0 ? pts.length - 1 : index,
+          kind: e.kind as "buy" | "sell",
+          label: `${e.label}${e.usd !== null ? ` · $${formatUsdAmount(e.usd)}` : ""}`,
+        };
+      });
+  }, [events, history.points]);
   const tradedMints = new Set(events.map((e) => e.mint).filter(Boolean) as string[]);
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -169,6 +186,7 @@ export default function PilePage() {
             <HoverChart
               values={history.points.map((p) => p.usd)}
               format={(v) => `$${formatUsdAmount(v)}`}
+              markers={chartMarkers}
               height={110}
               className="text-[#3c05c7]"
               fill

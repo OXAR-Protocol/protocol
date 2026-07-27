@@ -36,7 +36,7 @@ export function BulkSellBar({ picked, selectedCount, totalUsd, state, done, onSe
   const selling = state === "selling";
 
   return (
-    <div className="sticky bottom-20 z-30 mx-auto mt-6 w-fit max-w-full">
+    <div className="fixed bottom-24 left-1/2 z-40 w-fit max-w-[calc(100vw-2rem)] -translate-x-1/2">
     <div className="flex flex-wrap items-center gap-3 rounded-full border border-black/10 bg-white/95 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.10)] backdrop-blur">
       {/* The set, shown as itself: overlapping marks rather than a count alone. */}
       {picked.length > 0 && (

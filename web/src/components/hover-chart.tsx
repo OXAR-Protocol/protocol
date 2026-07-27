@@ -12,6 +12,8 @@ interface Props {
   /** Tailwind text-color class — drives the line, fill, and the marker dot. */
   className?: string;
   fill?: boolean;
+  /** Moments worth seeing on the line — a buy or a sell, at a data index. */
+  markers?: readonly { index: number; kind: "buy" | "sell"; label: string }[];
 }
 
 /**
@@ -26,7 +28,7 @@ interface Props {
  * scrubs the chart (touch-action pan-y keeps vertical page scroll working). On
  * touch the read-out stays after lifting; for mouse it clears on leave.
  */
-export function HoverChart({ values, format, height = 220, className, fill }: Props) {
+export function HoverChart({ values, format, height = 220, className, fill, markers }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   // Cursor x as a 0..1 fraction of the width. null = no active read-out.
   const [frac, setFrac] = useState<number | null>(null);
@@ -75,6 +77,25 @@ export function HoverChart({ values, format, height = 220, className, fill }: Pr
       }}
     >
       <Sparkline values={values} height={height} fill={fill} className="h-full w-full" />
+
+      {/* Your own moves on your own line. A portfolio chart without them shows a
+          shape and hides the reason for it — the jumps ARE the buys and sells. */}
+      {n > 1 &&
+        markers?.map((m) => {
+          const i = Math.min(n - 1, Math.max(0, m.index));
+          const left = (i / (n - 1)) * 100;
+          const top = span === 0 ? 50 : (1 - (values[i]! - min) / span) * 100;
+          return (
+            <span
+              key={`${m.kind}-${m.index}-${m.label}`}
+              title={m.label}
+              className={`pointer-events-auto absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white ${
+                m.kind === "buy" ? "bg-emerald-600" : "bg-[#a35b00]"
+              }`}
+              style={{ left: `${left}%`, top: `${top}%` }}
+            />
+          );
+        })}
 
       {frac !== null && (
         <>
