@@ -100,13 +100,20 @@ describe("a balance that is entirely reserved", () => {
     chain: "solana",
   });
 
-  it("has nothing to spend when the whole balance is under the reserve", () => {
-    expect(spendableBase(sol(0.004707), true)).toBe(BigInt(0));
-    expect(spendableBase(sol(0.004707), false)).toBe(BigInt(0));
+  it("keeps only the wrapped-SOL rent when a relayer pays the fee", () => {
+    // 0.004707 SOL used to read as nothing spendable against a 0.005 guess. The real
+    // requirement is the rent-exempt minimum for a token account (0.00203928) — so
+    // most of this balance is spendable after all.
+    expect(spendableBase(sol(0.004707), false)).toBe(BigInt(2_407_000));
   });
 
-  it("spends the surplus once the balance clears the reserve", () => {
-    // 0.02 SOL, sponsored: keeps 0.005 for wrapped-SOL rent, spends the rest.
-    expect(spendableBase(sol(0.02), false)).toBe(BigInt(15_000_000));
+  it("still keeps a full fee budget when the user pays their own fee", () => {
+    expect(spendableBase(sol(0.004707), true)).toBe(BigInt(0));
+    expect(spendableBase(sol(0.02), true)).toBe(BigInt(10_000_000));
+  });
+
+  // Below the rent there is genuinely nothing to spend — wrapping would fail.
+  it("has nothing to spend below the rent itself", () => {
+    expect(spendableBase(sol(0.002), false)).toBe(BigInt(0));
   });
 });

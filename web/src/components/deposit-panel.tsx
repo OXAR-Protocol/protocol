@@ -5,6 +5,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { CreditCard } from "lucide-react";
 
 import { PayWithField } from "@/components/pay-with-field";
+import { koraEnabled } from "@/lib/gas/kora";
 import { DepositConfirm } from "@/components/deposit-confirm";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
@@ -232,6 +233,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             onAmountChange={setAmount}
             usdAmount={usdAmount}
             productMint={view.assetMint}
+            // With the relayer paying fees, the only SOL that must stay behind is the
+            // wrapped-SOL rent — not a whole fee budget. External wallets still pay
+            // their own fee, so they keep the larger reserve.
+            reserveGas={!koraEnabled() || isExternal}
           />
         )}
 
