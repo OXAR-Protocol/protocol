@@ -19,9 +19,19 @@ function assetUid(a) {
 const DUST_USD = 0.01;
 /** Keep this much SOL for tx fees (swap + deposit) when paying with native SOL. */
 exports.SOL_FEE_RESERVE = BigInt(10000000); // 0.01 SOL
-/** Even when gas is sponsored, swapping NATIVE SOL needs SOL for the temporary
- *  wrapped-SOL account rent (~0.002) — so keep a small reserve rather than zero. */
-exports.SOL_SPONSORED_RESERVE = BigInt(5000000); // 0.005 SOL
+/**
+ * Reserve on the SPONSORED path. The fee is not the reason — a relayer pays that.
+ * Spending native SOL means WRAPPING it, and the temporary wrapped-SOL account must
+ * be rent-exempt for the moment it exists. That rent is charged to the user's own
+ * account by the instruction, so a relayer being fee payer doesn't cover it, and
+ * wrapping the entire balance leaves nothing to fund it — the transaction fails.
+ *
+ * The figure is the measured rent-exempt minimum for a 165-byte token account
+ * (2,039,280 lamports, `getMinimumBalanceForRentExemption(165)`) plus ~13% for the
+ * priority fee and rounding. It was 0.005 — a round guess at 2.5× the requirement,
+ * which stranded small balances: 0.0047 SOL (~$0.35) read as nothing spendable.
+ */
+exports.SOL_SPONSORED_RESERVE = BigInt(2300000); // 0.0023 SOL
 /** USD of native coin to keep for the ORIGIN-CHAIN network fee when paying with a
  *  native EVM coin (ETH/POL). Without it the bridge tx spends the whole balance and
  *  the wallet rejects it ("insufficient ETH"). Heuristic per network — L1 gas is
