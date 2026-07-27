@@ -4,7 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpDown, ChevronDown } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
-import { spendableBase, assetUid, assetNetworkLabel, type WalletAsset } from "@oxar/sdk";
+import {
+  spendableBase,
+  assetUid,
+  assetNetworkLabel,
+  centPrecision,
+  floorTo,
+  normalizeDecimalInput,
+  type WalletAsset,
+} from "@oxar/sdk";
 
 /** What happens to the funds + roughly how long, per funding route. */
 export const routeTag = (a: WalletAsset, productMint: string) =>
@@ -98,11 +106,14 @@ export function PayWithField({
 
   const setMax = () => {
     if (!active) return;
-    // Floor to the asset's precision — NEVER round up. `toPrecision` rounds to
-    // nearest, so a balance like 1.999999 became "2.00000", pushing the spend above
-    // the real balance → false "Not enough". Flooring keeps MAX ≤ balance.
-    const dec = active.decimals;
-    const max = Math.floor(Number(spendableBase(active, reserveGas)) / 10 ** dec * 10 ** dec) / 10 ** dec;
+    // Always FLOOR, never round up: rounding a balance of 1.999999 to "2.00000"
+    // pushes the spend above what's there → a false "Not enough".
+    // How many digits to keep is a readability-vs-waste trade: the token's full
+    // precision put `4,84121` in the field, while a flat 2 decimals would strand
+    // ~$2 of SOL. `centPrecision` keeps the fewest digits that leave under a cent.
+    const spendable = Number(spendableBase(active, reserveGas)) / 10 ** active.decimals;
+    const price = active.uiAmount > 0 ? active.usdValue / active.uiAmount : 1;
+    const max = floorTo(spendable, Math.min(active.decimals, centPrecision(price)));
     onAmountChange(String(max));
     if (mode === "usd") setUsdStr(toUsdStr(max));
   };
@@ -154,12 +165,10 @@ export function PayWithField({
             </button>
             {mode === "usd" && <span className="text-[20px] text-black/40">$</span>}
             <input
-              type="number"
-              min={0}
-              step="any"
+              type="text"
               inputMode="decimal"
               value={inputValue}
-              onChange={(e) => onInput(e.target.value)}
+              onChange={(e) => onInput(normalizeDecimalInput(e.target.value))}
               placeholder="0.00"
               className="min-w-0 flex-1 bg-transparent text-right text-[20px] text-black outline-none placeholder:text-black/25"
             />
