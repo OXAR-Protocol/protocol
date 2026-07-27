@@ -9,7 +9,6 @@ import { ArrowUpRight, Sparkles, Loader2 } from "lucide-react";
 import { SectionLabel } from "@/components/section-label";
 import { LiveAmount } from "@/components/live-amount";
 import { LiveEarned } from "@/components/live-earned";
-import { ActivityFeed } from "@/components/activity-feed";
 import { WalletCash } from "@/components/wallet-cash";
 import { TopMoversCarousel } from "@/components/top-movers-carousel";
 import { PhotoBg } from "@/components/photo-bg";
@@ -236,17 +235,6 @@ export default function HomePage() {
         </motion.section>
       )}
 
-      {/* Activity placeholder */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.35 }}
-      >
-        <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45 mb-4">
-          {t("home.recentActivity")}
-        </p>
-        <ActivityFeed />
-      </motion.section>
     </div>
   );
 }

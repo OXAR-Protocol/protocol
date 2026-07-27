@@ -181,6 +181,8 @@ export const en = {
   "bulk.failed": "didn't go through: {ids}",
   "bulk.sellSelected": "sell selected",
   "bulk.clear": "clear",
+  "pile.history": "history",
+  "asset.history": "your history with this",
   "rail.max": "max",
   "rail.actionSell": "Sell",
   "rail.actionWithdraw": "Withdraw",
@@ -239,6 +241,7 @@ export const en = {
   "login.continue": "continue",
 
   // Activity
+  "activity.each": "each",
   "activity.empty": "nothing yet — your money is still snoring.",
   "activity.showMore": "show more",
 

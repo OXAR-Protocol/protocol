@@ -22,6 +22,7 @@ import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { AssetChart } from "@/components/asset-chart";
 import { HoverChart } from "@/components/hover-chart";
 import { YieldActionSuccess, type ActionResult } from "@/components/yield-action-success";
+import { ActivityFeed } from "@/components/activity-feed";
 
 const fade = (delay: number) => ({
   initial: { opacity: 0, y: 16 },
@@ -212,6 +213,14 @@ export function AssetDetail({
                   })}
                 </div>
               )}
+            </motion.section>
+          )}
+
+          {view.heldMint && (
+            <motion.section {...fade(0.2)} className="mt-10">
+              <p className="mb-3 lowercase text-[13px] text-black/45">{t("asset.history")}</p>
+              {/* Only this asset's rows — a ledger of everything belongs in the portfolio. */}
+              <ActivityFeed mint={view.heldMint} unitLabel={unitLabel} />
             </motion.section>
           )}
 
