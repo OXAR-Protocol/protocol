@@ -59,3 +59,4 @@ __exportStar(require("./core/assets"), exports);
 __exportStar(require("./core/delora"), exports);
 __exportStar(require("./core/jupiter-swap"), exports);
 __exportStar(require("./core/earnings-basis"), exports);
+__exportStar(require("./core/beta-access"), exports);

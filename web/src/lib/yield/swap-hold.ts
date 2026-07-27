@@ -46,6 +46,9 @@ export interface SwapHoldConfig {
   heldDecimals: number;
   /** DefiLlama pool id for the APY. */
   defiLlamaPoolId: string;
+  /** Pilot a source with real money before the whole alpha sees it — see
+   *  `YieldProvider.beta`. */
+  beta?: boolean;
 }
 
 /**
@@ -132,6 +135,7 @@ export function createSwapHoldProvider(cfg: SwapHoldConfig): YieldProvider {
     decimals: USDC_DECIMALS,
     description: cfg.description,
     riskLevel: cfg.riskLevel,
+    beta: cfg.beta,
     chain: "solana",
     defiLlamaPoolId: cfg.defiLlamaPoolId,
     heldMint: cfg.heldMint,
