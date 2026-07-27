@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   swapPriceImpact,
   priceImpactTooHigh,
+  BROKEN_MARKET_IMPACT,
   getSwapQuote,
   buildSwapTx,
   type SwapQuote,
@@ -30,6 +31,20 @@ describe("jupiter-swap helpers", () => {
     expect(priceImpactTooHigh(quote({ priceImpactPct: "0.02" }))).toBe(true);
     expect(priceImpactTooHigh(quote({ priceImpactPct: "0.005" }))).toBe(false);
     expect(priceImpactTooHigh(quote({ priceImpactPct: "0.05" }), 0.1)).toBe(false);
+  });
+
+  // Held-asset trades (stocks/gold/swap-and-hold) now show the cost and let the user
+  // decide; only a broken market is refused. A 2% sell on a thin ticker MUST pass —
+  // blocking it left holders with no way out, at any size.
+  it("BROKEN_MARKET_IMPACT lets a real-but-expensive trade through", () => {
+    for (const pct of ["0.0140", "0.0153", "0.0237", "0.0533"]) {
+      expect(priceImpactTooHigh(quote({ priceImpactPct: pct }), BROKEN_MARKET_IMPACT)).toBe(false);
+    }
+  });
+
+  it("BROKEN_MARKET_IMPACT still refuses a route that can't be real", () => {
+    expect(priceImpactTooHigh(quote({ priceImpactPct: "0.76" }), BROKEN_MARKET_IMPACT)).toBe(true);
+    expect(priceImpactTooHigh(quote({ priceImpactPct: "0.11" }), BROKEN_MARKET_IMPACT)).toBe(true);
   });
 });
 

@@ -155,6 +155,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "rail.max": "все",
   "rail.actionSell": "Продати",
   "rail.actionWithdraw": "Зняти",
+  "rail.youReceive": "ти отримаєш",
+  "rail.marketCost": "ринок бере {pct}%",
   "rail.cashOut": "вивести на картку",
   "common.soon": "скоро",
   "common.or": "або",

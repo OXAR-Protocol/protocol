@@ -12,6 +12,7 @@ import {
   buildSwapTx,
   deserializeSwapTx,
   priceImpactTooHigh,
+  BROKEN_MARKET_IMPACT,
 } from "@oxar/sdk";
 import { UserFacingError } from "./errors";
 import type {
@@ -139,8 +140,10 @@ export function createGoldProvider(cfg: GoldMeta): YieldProvider {
 
   async function swap(owner: PublicKey, inputMint: string, outputMint: string, amount: bigint): Promise<Transaction> {
     const quote = await getSwapQuote({ inputMint, outputMint, amount, asLegacy: true, slippageBps: 100 });
-    if (priceImpactTooHigh(quote)) {
-      throw new UserFacingError("Price impact too high — try a smaller amount");
+    // Cost is shown before signing, so it's the user's call — we only stop a market
+    // that looks broken. See BROKEN_MARKET_IMPACT.
+    if (priceImpactTooHigh(quote, BROKEN_MARKET_IMPACT)) {
+      throw new UserFacingError("This market looks broken right now — try again later");
     }
     const b64 = await buildSwapTx(quote, owner.toBase58(), { asLegacy: true });
     return deserializeSwapTx(b64, true) as Transaction;
