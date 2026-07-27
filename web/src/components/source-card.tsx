@@ -2,6 +2,8 @@
 
 import { ArrowUpRight } from "lucide-react";
 
+import { PickButton } from "@/components/pick-button";
+import { usePickSet } from "@/components/pick-set";
 import type { ProviderGroup } from "@/lib/yield";
 import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
 import { useApyHistory } from "@/hooks/use-apy-history";
@@ -17,6 +19,7 @@ interface Props {
 
 /** Grid ("квадратик") card for a marketplace source — one provider or a group. */
 export function SourceCard({ group, onOpen }: Props) {
+  const pickSet = usePickSet();
   const top = group.views.reduce((a, b) => (b.apy > a.apy ? b : a), group.views[0]);
   const history = useApyHistory(top.defiLlamaPoolId);
   const positionTotal = group.views.reduce(
@@ -30,6 +33,14 @@ export function SourceCard({ group, onOpen }: Props) {
       onClick={onOpen}
       className="group relative isolate overflow-hidden flex flex-col gap-4 p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition text-left"
     >
+      {pickSet?.enabled && (
+        <PickButton
+          picked={pickSet.picked.has(group.views[0].id)}
+          onToggle={() => pickSet.toggle(group.views[0].id)}
+          label={group.views[0].name}
+          className="absolute right-3 top-3 z-10"
+        />
+      )}
       <BanknoteBg seed={group.views[0]?.id ?? group.name} />
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-3 min-w-0">

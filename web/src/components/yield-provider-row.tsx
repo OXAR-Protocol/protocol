@@ -2,6 +2,8 @@
 
 import { ArrowUpRight } from "lucide-react";
 
+import { PickButton } from "@/components/pick-button";
+import { usePickSet } from "@/components/pick-set";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
 import { AssetIcon } from "@/components/asset-icon";
@@ -14,6 +16,7 @@ interface Props {
 
 /** Live, openable marketplace row backed by a real yield provider. */
 export function YieldProviderRow({ view, onOpen }: Props) {
+  const pickSet = usePickSet();
   const positionValue = fromBaseUnits(view.underlyingBalance, view.decimals);
   const inPosition = positionValue > 0;
 
@@ -22,6 +25,14 @@ export function YieldProviderRow({ view, onOpen }: Props) {
       onClick={onOpen}
       className="group w-full text-left p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition"
     >
+      {pickSet?.enabled && (
+        <PickButton
+          picked={pickSet.picked.has(view.id)}
+          onToggle={() => pickSet.toggle(view.id)}
+          label={view.name}
+          className="absolute right-3 top-3 z-10"
+        />
+      )}
       <div className="flex items-center gap-4">
         <AssetIcon src={assetLogoSrc(view.id)} label={assetIconLabel(view.id, view.assetSymbol)} size={36} />
         <div className="flex-1 min-w-0">

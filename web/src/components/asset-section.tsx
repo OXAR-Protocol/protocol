@@ -16,13 +16,8 @@ import { useStocksAllowed } from "@/hooks/use-stocks-allowed";
 import type { AssetMeta } from "@/lib/yield/assets";
 import { fromBaseUnits } from "@/lib/yield";
 import { useT } from "@/lib/i18n";
-import { useFeature } from "@/hooks/use-features";
-import { useBulkTrade } from "@/hooks/use-bulk-trade";
-import { useWalletAssets } from "@/hooks/use-wallet-assets";
-import { USDC_MINT } from "@/lib/constants";
 import { PickButton } from "@/components/pick-button";
-import { PickBar } from "@/components/pick-bar";
-import { AllocationSheet } from "@/components/allocation-sheet";
+import { usePickSet } from "@/components/pick-set";
 
 /** Canonical order for the sector filter chips (only those present are shown). */
 const SECTOR_ORDER = ["tech", "crypto", "finance", "consumer", "health", "index"] as const;
@@ -54,32 +49,10 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
   const allowed = useStocksAllowed();
   const [sector, setSector] = useState<string>("all");
 
-  // Buying several at once — the same pick control, bar and sheet the portfolio
-  // uses for selling. One budget split across what you picked.
-  const canPickMany = useFeature("selling-v2");
-  const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
-  const [allocating, setAllocating] = useState(false);
-  const bulk = useBulkTrade();
-  const { assets } = useWalletAssets();
-  const usdcBudget = assets.find((a) => a.mint === USDC_MINT)?.usdValue ?? 0;
-  const togglePick = (id: string) =>
-    setPicked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  const pickedRows = catalog.filter((a) => picked.has(a.id));
-
-  const buyPicked = async (amounts: Record<string, number>) => {
-    const outcomes = await bulk.run(
-      pickedRows
-        .filter((a) => (amounts[a.id] ?? 0) > 0)
-        .map((a) => ({ kind: "buy" as const, id: a.id, amountUsd: amounts[a.id]! })),
-    );
-    setPicked(new Set(outcomes.filter((o) => !o.ok).map((o) => o.id)));
-    if (outcomes.every((o) => o.ok)) setAllocating(false);
-  };
+  // The picked set belongs to the PAGE (see PickSetProvider): this section only
+  // offers its own ids to it, so yield, stocks and gold share one bar and one sheet.
+  const pickSet = usePickSet();
+  const canPickMany = !!pickSet?.enabled;
 
   // Sectors actually present in this catalog, in canonical order.
   const sectors = useMemo(
@@ -138,7 +111,7 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
       </p>
     ) : null;
     const pick = canPickMany && view ? (
-      <PickButton picked={picked.has(s.id)} onToggle={() => togglePick(s.id)} label={s.name} />
+      <PickButton picked={!!pickSet?.picked.has(s.id)} onToggle={() => pickSet?.toggle(s.id)} label={s.name} />
     ) : null;
     const head = (
       <div className="flex items-center gap-3 min-w-0">
@@ -232,40 +205,6 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
         <div className="space-y-2">{shown.map(card)}</div>
       )}
 
-      {canPickMany && (
-        <PickBar
-          mode="buy"
-          picked={pickedRows.map((a) => ({ id: a.id, symbol: a.symbol }))}
-          selectedCount={picked.size}
-          totalUsd={usdcBudget}
-          state={bulk.state}
-          done={bulk.done}
-          onSell={() => setAllocating(true)}
-          onClear={() => {
-            setPicked(new Set());
-            bulk.reset();
-          }}
-        />
-      )}
-
-      {allocating && (
-        <AllocationSheet
-          mode="buy"
-          rows={pickedRows.map((a) => ({ id: a.id, name: a.name, symbol: a.symbol }))}
-          budgetUsd={usdcBudget}
-          busy={bulk.state === "running"}
-          progress={
-            bulk.state === "running"
-              ? t("bulk.progress", { n: String(bulk.done.length), total: String(pickedRows.length) })
-              : null
-          }
-          onConfirm={buyPicked}
-          onClose={() => {
-            setAllocating(false);
-            bulk.reset();
-          }}
-        />
-      )}
     </motion.section>
   );
 }
