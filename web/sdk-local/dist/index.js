@@ -59,6 +59,6 @@ __exportStar(require("./core/assets"), exports);
 __exportStar(require("./core/delora"), exports);
 __exportStar(require("./core/jupiter-swap"), exports);
 __exportStar(require("./core/earnings-basis"), exports);
-__exportStar(require("./core/beta-access"), exports);
+__exportStar(require("./core/features"), exports);
 __exportStar(require("./core/quote-value"), exports);
 __exportStar(require("./core/tx-delta"), exports);

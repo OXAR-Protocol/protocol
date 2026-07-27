@@ -73,11 +73,11 @@ export interface YieldProvider {
   /** DefiLlama pool id — for accurate APY + historical chart series. */
   readonly defiLlamaPoolId?: string;
   /**
-   * Hidden from everyone except identities on the server-side beta allowlist
-   * (`/api/access/beta`). For piloting a new source with real money before the
-   * whole alpha sees it. Fails closed — hidden while the check is unresolved.
+   * Feature key gating this source. Set it and the source is DARK until that key
+   * is switched on (`/api/access/features`) — for piloting with real money before
+   * the whole alpha sees it. Fails closed while the check is unresolved.
    */
-  readonly beta?: boolean;
+  readonly feature?: string;
 
   // --- Instruction-based path (Jupiter Lend) ---
   /** Instructions to deposit `amount` of the underlying asset. */
