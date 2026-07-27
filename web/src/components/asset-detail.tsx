@@ -11,6 +11,7 @@ import { useApyHistory } from "@/hooks/use-apy-history";
 import { useSwapOutPreview } from "@/hooks/use-swap-out-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { fromBaseUnits, planWithdrawal } from "@/lib/yield";
+import { settledAmount } from "@/lib/yield/settled";
 import { useT } from "@/lib/i18n";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { getAssetInfo } from "@/lib/yield/asset-info";
@@ -46,7 +47,7 @@ export function AssetDetail({
   const price = isPriceExposure(view.id);
   const { t, locale } = useT();
   const info = getAssetInfo(view.id, locale);
-  const { walletAddress } = useSolanaContext();
+  const { walletAddress, connection } = useSolanaContext();
   const { withdraw, redeemAll, loading, error } = useYieldActions(view.id);
   const apyHistory = useApyHistory(view.defiLlamaPoolId);
   const { prices } = useStockPrices(price && view.heldMint ? [view.heldMint] : []);
@@ -89,9 +90,22 @@ export function AssetDetail({
       decimals: view.decimals,
     });
     if (!plan) return;
-    if (plan.mode === "redeemAll") await redeemAll(plan.shares, positionValue);
-    else await withdraw(plan.amount);
-    setResult({ kind: "withdraw", amount: plan.mode === "redeemAll" ? positionValue : amount, symbol: price ? "USDC" : view.assetSymbol });
+    const sig =
+      plan.mode === "redeemAll"
+        ? await redeemAll(plan.shares, positionValue)
+        : await withdraw(plan.amount);
+    // Report what SETTLED, not what was asked for: a sell quoted at $4.94 landed
+    // $4.84, and echoing the request turned the receipt into a guess. Falls back to
+    // the requested figure only if the transaction can't be read yet.
+    const requested = plan.mode === "redeemAll" ? positionValue : amount;
+    const landed = walletAddress
+      ? await settledAmount(connection, sig, walletAddress, view.assetMint)
+      : null;
+    setResult({
+      kind: "withdraw",
+      amount: landed !== null && landed > BigInt(0) ? fromBaseUnits(landed, view.decimals) : requested,
+      symbol: price ? "USDC" : view.assetSymbol,
+    });
     settle();
   };
 
