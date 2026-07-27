@@ -45,7 +45,13 @@ export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, on
       {picked.length > 0 && (
         <span className="flex shrink-0 items-center pl-1">
           {picked.slice(0, 4).map((p, i) => (
-            <span key={p.id} className={i === 0 ? "" : "-ml-2"}>
+            // Inline spans align on the TEXT BASELINE, so a picture icon and a
+            // letter-fallback icon sat at different heights. A fixed box each,
+            // centred, makes them line up whatever they contain.
+            <span
+              key={p.id}
+              className={`flex h-[22px] w-[22px] items-center justify-center ${i === 0 ? "" : "-ml-2"}`}
+            >
               <AssetIcon src={assetLogoSrc(p.id)} label={assetIconLabel(p.id, p.symbol)} size={22} />
             </span>
           ))}
