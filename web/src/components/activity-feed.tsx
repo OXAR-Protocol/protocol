@@ -59,7 +59,7 @@ export function ActivityFeed({ mint, unitLabel }: Props = {}) {
   }
 
   return (
-    <div className="border border-black/10 bg-white rounded-[12px] divide-y divide-black/[0.06]">
+    <div className="divide-y divide-black/[0.06] overflow-hidden rounded-[12px] border border-black/10 bg-white">
       {events.slice(0, visible).map((e, i) => {
         const inflow = INFLOW.includes(e.kind);
         const Icon = inflow ? ArrowDownLeft : ArrowUpRight;

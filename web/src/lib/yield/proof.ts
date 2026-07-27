@@ -35,8 +35,10 @@ const ISSUER: Record<string, { issuer?: string; backing?: string }> = {
   "jupiter-lend-usdt": { issuer: "https://jup.ag/lend" },
 };
 
-/** Backed Finance publishes the reserves behind every xStock. */
-const XSTOCK_BACKING = "https://backed.fi/product-tokens";
+/** Backed's prospectus and final terms for xStocks — the document that says what
+ *  each token is a claim on. (An earlier guess at this URL 404'd: every link here
+ *  is now one that was actually opened.) */
+const XSTOCK_BACKING = "https://assets.backed.fi/legal-documentation";
 /** Tether publishes gold-bar attestations for XAUt. */
 const GOLD_BACKING = "https://gold.tether.to/transparency";
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowUpDown } from "lucide-react";
+
 import { floorToCents, centPrecision, floorTo } from "@oxar/sdk";
 
 import { useT } from "@/lib/i18n";
@@ -81,12 +83,12 @@ export function SellAmountControls({
           type="button"
           disabled={disabled}
           onClick={onToggleUnits}
-          className="ml-auto text-[11px] lowercase tracking-wide text-black/40 transition hover:text-black/70"
+          className="ml-auto inline-flex items-center gap-1.5 text-[11px] lowercase tracking-wide text-black/40 transition hover:text-black/70"
           title={t("rail.switchUnits")}
+          aria-label={t("rail.switchUnits")}
         >
-          {inUnits
-            ? t("rail.showDollars")
-            : t("rail.showUnits", { sym: unitLabel! })}
+          <ArrowUpDown size={12} strokeWidth={1.5} />
+          {inUnits ? "USDC" : unitLabel}
         </button>
       )}
 
