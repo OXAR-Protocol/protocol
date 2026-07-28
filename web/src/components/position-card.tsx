@@ -5,7 +5,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { useApyHistory } from "@/hooks/use-apy-history";
 import { useStockCharts } from "@/hooks/use-stock-charts";
-import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
+import { RISK_TONE, fromBaseUnits, unitLabelOf } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { Sparkline } from "@/components/sparkline";
 import { trendUp, trendLineTone, trendTextTone } from "@/lib/yield/trend";
@@ -87,7 +87,7 @@ export function PositionCard({ view, onOpen, change24h, picked, onTogglePick }: 
               the cards didn't, so switching layout lost the number. */}
           {isPrice && view.heldDecimals !== undefined && view.shares > BigInt(0) ? (
             <p className="text-[11px] tabular-nums text-[#3c05c7]/80">
-              {floorTo(Number(view.shares) / 10 ** view.heldDecimals, 6)} {view.assetSymbol}
+              {floorTo(Number(view.shares) / 10 ** view.heldDecimals, 6)} {unitLabelOf(view)}
             </p>
           ) : (
             <p className="text-[10px] lowercase tracking-wide text-black/40">

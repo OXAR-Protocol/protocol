@@ -12,7 +12,7 @@ import { Sparkline } from "@/components/sparkline";
 import { PickButton } from "@/components/pick-button";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { isPriceExposure } from "@/lib/yield/assets";
-import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
+import { RISK_TONE, fromBaseUnits, unitLabelOf } from "@/lib/yield";
 import { useT } from "@/lib/i18n";
 
 interface Props {
@@ -26,9 +26,6 @@ interface Props {
   /** Absent when picking is off — the row then renders no pick control at all. */
   onTogglePick?: () => void;
 }
-
-/** Ticker for one unit — the name carries it, e.g. "Broadcom (AVGOx)". */
-export const unitOf = (v: ProviderView) => v.name.match(/\(([^)]+)\)/)?.[1] ?? v.assetSymbol;
 
 /**
  * One held position, as a row: ticker leads, name underneath, the chart in the
@@ -51,12 +48,12 @@ export function PositionRow({ view, onOpen, change24h, chart, picked, onTogglePi
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <AssetIcon src={assetLogoSrc(view.id)} label={assetIconLabel(view.id, view.assetSymbol)} size={36} />
           <div className="min-w-0">
-            <p className="text-base text-black">{unitOf(view)}</p>
+            <p className="text-base text-black">{unitLabelOf(view)}</p>
             <p className="mt-0.5 truncate text-xs text-black/45">{view.name.replace(/\s*\([^)]*\)$/, "")}</p>
             {/* How much you own, not only what it's worth. */}
             {isPriceExposure(view.id) && view.heldDecimals !== undefined && view.shares > BigInt(0) && (
               <p className="mt-1 text-[11px] tabular-nums text-[#3c05c7]/80">
-                {floorTo(Number(view.shares) / 10 ** view.heldDecimals, 6)} {unitOf(view)}
+                {floorTo(Number(view.shares) / 10 ** view.heldDecimals, 6)} {unitLabelOf(view)}
               </p>
             )}
           </div>
