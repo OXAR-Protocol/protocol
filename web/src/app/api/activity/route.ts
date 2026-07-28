@@ -20,6 +20,13 @@ const HISTORY_PAGES = 25;
 // Mint → display name, taken from the provider registry rather than a hand-kept list:
 // the old list covered stocks, gold and USDY only, so deposits into Jupiter Lend,
 // Maple and OnRe were classified as an anonymous "Deposited" with no asset name.
+const ASSET_DECIMALS: Record<string, number> = Object.fromEntries(
+  PROVIDERS.filter((p) => p.heldMint && p.heldDecimals !== undefined).map((p) => [
+    p.heldMint as string,
+    p.heldDecimals as number,
+  ]),
+);
+
 const ASSET_NAMES: Record<string, string> = {
   ...Object.fromEntries(
     PROVIDERS.filter((p) => p.heldMint).map((p) => [p.heldMint as string, p.name]),
@@ -62,7 +69,7 @@ export async function POST(req: Request) {
 
   try {
     const txs = await fetchEnhancedHistory(owner, key, want > DEFAULT_EVENTS ? HISTORY_PAGES : FEED_PAGES);
-    const events = parseActivity(txs, owner, USDC, ASSET_NAMES).slice(0, want);
+    const events = parseActivity(txs, owner, USDC, ASSET_NAMES, ASSET_DECIMALS).slice(0, want);
     cache.set(cacheKey, { at: Date.now(), events });
     return NextResponse.json({ events });
   } catch (e) {

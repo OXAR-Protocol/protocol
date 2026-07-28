@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 
 import {
   groupByDay,
+  activeDays,
+  takeByEventCount,
   summarizeDays,
   utcDayStart,
   isSameUtcDay,
@@ -141,5 +143,67 @@ describe("date formatting", () => {
     expect(formatDay(at(DAY, 23))).toBe("12 Mar 2026");
     expect(formatDayShort(at(DAY, 23))).toBe("12 Mar");
     expect(formatTimeOfDay(at(DAY, 23))).toBe("23:00");
+  });
+});
+
+describe("activeDays", () => {
+  it("keeps only the days something happened on", () => {
+    const days = groupByDay(
+      [ev(at(DAY, 9), "buy", 10)],
+      [
+        { t: at(DAY, 23), usd: 100 },
+        { t: at(DAY + SECONDS_PER_DAY, 23), usd: 105 },
+        { t: at(DAY + 2 * SECONDS_PER_DAY, 23), usd: 110 },
+      ],
+    );
+    expect(days).toHaveLength(3);
+    expect(activeDays(days).map((d) => d.day)).toEqual([DAY]);
+  });
+
+  // The filtering must not reach the arithmetic: a quiet stretch still moved the
+  // value, and the range summary has to account for it.
+  it("does not change what the range summary measures", () => {
+    const days = groupByDay(
+      [ev(at(DAY, 9), "buy", 10)],
+      [
+        { t: at(DAY, 23), usd: 100 },
+        { t: at(DAY + 2 * SECONDS_PER_DAY, 23), usd: 130 },
+      ],
+    );
+    expect(summarizeDays(days).changeUsd).toBe(30);
+    expect(summarizeDays(activeDays(days)).changeUsd).not.toBe(30);
+  });
+});
+
+describe("takeByEventCount", () => {
+  // Minutes, not hours: 25 events an hour apart would spill into the next day and
+  // the helper would silently build TWO days instead of one busy one.
+  const busy = (day: number, n: number) =>
+    groupByDay(Array.from({ length: n }, (_, i) => ev(day + i * 60, "buy", 1)))[0]!;
+
+  it("counts transactions, not days", () => {
+    const days = [busy(DAY + 2 * SECONDS_PER_DAY, 12), busy(DAY + SECONDS_PER_DAY, 5), busy(DAY, 9)];
+    const { shown, remaining } = takeByEventCount(days, 20);
+    // 12 + 5 = 17 is under the limit, so the third day is pulled in whole (26 total).
+    expect(shown).toHaveLength(3);
+    expect(remaining).toBe(0);
+  });
+
+  it("never splits a day", () => {
+    const days = [busy(DAY + SECONDS_PER_DAY, 25), busy(DAY, 4)];
+    const { shown, remaining } = takeByEventCount(days, 20);
+    expect(shown).toHaveLength(1);
+    expect(shown[0]!.events).toHaveLength(25); // shown whole, not truncated at 20
+    expect(remaining).toBe(4);
+  });
+
+  it("reports what is left to show", () => {
+    const days = [busy(DAY + SECONDS_PER_DAY, 20), busy(DAY, 7)];
+    expect(takeByEventCount(days, 20).remaining).toBe(7);
+    expect(takeByEventCount(days, 40).remaining).toBe(0);
+  });
+
+  it("handles an empty list", () => {
+    expect(takeByEventCount([], 20)).toEqual({ shown: [], remaining: 0 });
   });
 });

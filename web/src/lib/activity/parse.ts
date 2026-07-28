@@ -31,6 +31,22 @@ export interface ActivityEvent {
 }
 
 const DUST = 0.005; // ignore sub-cent USDC deltas (fees / rounding)
+
+/**
+ * A per-unit price is only worth printing if the unit count is precise enough to
+ * carry one. Token amounts are quantised at 10^-decimals, so a trade of 63 base
+ * units of a 6-decimal token knows its own size to ±0.8% — on gold that is ±$32 an
+ * ounce, and a buy and a sell straddling it look ~$65 apart for no reason. Above
+ * this error we print no price rather than a confident wrong one.
+ */
+const MAX_UNIT_PRICE_ERROR = 0.005;
+
+/** Can `units` of a token with `decimals` support quoting a price per unit? */
+export function unitPriceIsMeaningful(units: number, decimals?: number): boolean {
+  if (units <= 0) return false;
+  if (decimals === undefined) return true; // nothing to judge with — unchanged
+  return 10 ** -decimals / 2 / units <= MAX_UNIT_PRICE_ERROR;
+}
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /**
@@ -43,6 +59,9 @@ export function parseActivity(
   owner: string,
   usdcMint: string,
   assetNames: Record<string, string>,
+  /** Held mint → token decimals. Used only to decide whether a per-unit price can
+   *  be quoted at all; omit and one is always quoted (the previous behaviour). */
+  assetDecimals: Record<string, number> = {},
 ): ActivityEvent[] {
   const events: ActivityEvent[] = [];
 
@@ -119,7 +138,9 @@ export function parseActivity(
       usd,
       ...(primaryMint ? { mint: primaryMint } : {}),
       ...(units ? { units } : {}),
-      ...(units && usdRaw ? { unitPriceUsd: usdRaw / units } : {}),
+      ...(units && usdRaw && unitPriceIsMeaningful(units, assetDecimals[primaryMint ?? ""])
+        ? { unitPriceUsd: usdRaw / units }
+        : {}),
     });
   }
 

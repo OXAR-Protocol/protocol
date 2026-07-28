@@ -150,3 +150,39 @@ export function summarizeDays(days: readonly DayActivity[]): RangeStats {
 
   return { startUsd, endUsd, changeUsd, changePct, inUsd, outUsd, trades, activeDays };
 }
+
+/**
+ * The days worth listing. A day with a value but nothing done to it says only what
+ * the chart above already draws, and there is one of those for every quiet day —
+ * pages of "$0.00" rows burying the handful that record an actual decision.
+ *
+ * Kept separate from `groupByDay` on purpose: the change-against-the-previous-day
+ * figure and the range summary must be computed over EVERY day, or a quiet stretch
+ * would vanish from the arithmetic as well as from the screen.
+ */
+export function activeDays<T extends DatedFlow>(days: readonly DayActivity<T>[]): DayActivity<T>[] {
+  return days.filter((d) => d.events.length > 0);
+}
+
+/**
+ * The first `limit` transactions' worth of days, plus whether more remain.
+ *
+ * Counted in TRANSACTIONS rather than days: a day is not a unit of reading, and one
+ * busy day can hold more rows than a fortnight of quiet ones. Days are never split —
+ * the day that crosses the limit is shown whole, because half a day's trades is a
+ * misleading picture of that day.
+ */
+export function takeByEventCount<T extends DatedFlow>(
+  days: readonly DayActivity<T>[],
+  limit: number,
+): { shown: DayActivity<T>[]; remaining: number } {
+  const shown: DayActivity<T>[] = [];
+  let counted = 0;
+  for (const d of days) {
+    if (counted >= limit) break;
+    shown.push(d);
+    counted += d.events.length;
+  }
+  const total = days.reduce((n, d) => n + d.events.length, 0);
+  return { shown, remaining: total - counted };
+}

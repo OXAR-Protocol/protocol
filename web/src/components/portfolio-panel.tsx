@@ -15,7 +15,7 @@ import {
   type ProviderView,
 } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
-import { groupByDay, summarizeDays, utcDayStart } from "@oxar/sdk";
+import { groupByDay, summarizeDays, activeDays, utcDayStart } from "@oxar/sdk";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { isXStock } from "@/lib/yield/xstocks";
 import { isGold } from "@/lib/yield/gold";
@@ -71,6 +71,10 @@ export function PortfolioPanel() {
     return groupByDay(events.filter((e) => e.timestamp >= cutoff), history.points);
   }, [events, history.points]);
   const rangeStats = useMemo(() => summarizeDays(days), [days]);
+  // The summary reads EVERY day; the list shows only the ones something happened on.
+  // A quiet day repeats what the chart already draws, and there is one per calendar
+  // day — pages of "$0.00" rows burying the few that record a decision.
+  const listedDays = useMemo(() => activeDays(days), [days]);
   // One batched request covers every card's sparkline (see /api/stock-charts).
   const charts = useStockCharts();
   // Which assets this wallet has actually traded — drives the "traded" filter.
@@ -215,7 +219,7 @@ export function PortfolioPanel() {
             <Loader2 size={16} className="animate-spin" />
           </div>
         ) : (
-          <DayHistory days={days} locale={locale} />
+          <DayHistory days={listedDays} locale={locale} />
         )}
       </motion.section>
     </>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 
 import {
+  takeByEventCount,
   formatDay,
   formatTimeOfDay,
   formatUsdAmount,
@@ -29,8 +30,12 @@ const INFLOW = new Set(["sell", "withdraw", "receive"]);
  * reading the timestamps in the viewer's zone would put a late-evening trade on a
  * different row than the day it was counted in.
  */
+/** How many transactions to show before asking. A history is skimmed, not read. */
+const PAGE = 20;
+
 export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[]; locale: string }) {
   const { t } = useT();
+  const [limit, setLimit] = useState(PAGE);
   // Read the clock after mount, not during render: the date is cosmetic (it only
   // decides whether the newest row says "today" or its date), and reading it in
   // render makes this component impure for no benefit.
@@ -45,9 +50,11 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
     );
   }
 
+  const { shown, remaining } = takeByEventCount(days, limit);
+
   return (
     <div className="space-y-3">
-      {days.map((d) => (
+      {shown.map((d) => (
         <div key={d.day} className="rounded-[12px] border border-black/10 bg-white">
           {/* The day itself: what it closed at, and how that moved. */}
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-black/[0.06] px-4 py-3">
@@ -112,6 +119,16 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
           )}
         </div>
       ))}
+
+      {remaining > 0 && (
+        <button
+          type="button"
+          onClick={() => setLimit((n) => n + PAGE)}
+          className="w-full rounded-[12px] border border-black/10 bg-white py-3 text-[12px] lowercase tracking-wide text-black/55 transition hover:border-black/30 hover:text-black"
+        >
+          {t("activity.showMore")}
+        </button>
+      )}
     </div>
   );
 }
