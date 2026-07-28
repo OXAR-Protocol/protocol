@@ -91,6 +91,9 @@ export function PickedBuyBar() {
     if (outcomes.every((o) => o.ok)) {
       setAllocating(false);
       pickSet.clear();
+      // Clear the run too: otherwise the next selection appears alongside the last
+      // run's outcomes, which have nothing to do with it.
+      bulk.reset();
     }
   };
 
