@@ -1,0 +1,186 @@
+"use client";
+
+import { useState } from "react";
+import { CreditCard, Loader2 } from "lucide-react";
+
+import { assetUid, spendableBase, rescaleAllocations, type WalletAsset } from "@oxar/sdk";
+
+import { usePickSet } from "@/components/pick-set";
+import { PickBar } from "@/components/pick-bar";
+import { AllocationSheet } from "@/components/allocation-sheet";
+import { PayWithField } from "@/components/pay-with-field";
+import { useBulkTrade } from "@/hooks/use-bulk-trade";
+import { useBulkFunding } from "@/hooks/use-bulk-funding";
+import { useCardTopUp } from "@/hooks/use-card-topup";
+import { useWalletAssets } from "@/hooks/use-wallet-assets";
+import { USDC_MINT } from "@/lib/constants";
+import { getProvider, toFriendlyError } from "@/lib/yield";
+import { useT } from "@/lib/i18n";
+
+/** What the card form opens on — the on-ramps won't sell less than this. */
+const CARD_MINIMUM_USD = 20;
+
+/** USD the asset can actually put towards a purchase, net of any fee reserve. */
+function spendableUsd(a: WalletAsset): number {
+  if (a.uiAmount <= 0) return 0;
+  const price = a.usdValue / a.uiAmount;
+  return (Number(spendableBase(a)) / 10 ** a.decimals) * price;
+}
+
+/**
+ * The bar and the sheet for everything picked on a page — yield sources, stocks and
+ * gold alike. Mounted once, inside the set, so the sections can't each grow their own.
+ *
+ * The basket can be paid for with anything on Solana, not only USDC. Because the
+ * purchases settle in USDC, a different pay-asset is converted ONCE for the whole
+ * basket rather than per asset: one prompt, one slippage hit, not N of each.
+ */
+export function PickedBuyBar() {
+  const { t } = useT();
+  const pickSet = usePickSet();
+  const bulk = useBulkTrade();
+  const { fundUsdc, converting } = useBulkFunding();
+  const { topUp, busy: toppingUp } = useCardTopUp();
+  const { assets, refresh: refreshAssets } = useWalletAssets();
+  const [allocating, setAllocating] = useState(false);
+  const [payUid, setPayUid] = useState<string | null>(null);
+  const [fundError, setFundError] = useState<string | null>(null);
+  if (!pickSet?.enabled) return null;
+
+  const rows = [...pickSet.picked]
+    .map((id) => {
+      const p = getProvider(id);
+      return p ? { id, name: p.name, symbol: p.assetSymbol } : null;
+    })
+    .filter((r): r is { id: string; name: string; symbol: string } => !!r);
+
+  // Only what's on Solana: a cross-chain payment arrives minutes later, and the
+  // watcher that catches it makes a single deposit, not a basket of them.
+  const payable = assets.filter((a) => a.chain === "solana" && a.usdValue > 0);
+  const payAsset =
+    payable.find((a) => assetUid(a) === payUid) ??
+    payable.find((a) => a.mint === USDC_MINT) ??
+    payable[0] ??
+    null;
+  const budget = payAsset ? spendableUsd(payAsset) : 0;
+
+  const buy = async (amounts: Record<string, number>) => {
+    if (!payAsset) return;
+    setFundError(null);
+    let spendable = amounts;
+    if (payAsset.mint !== USDC_MINT) {
+      const asked = Object.values(amounts).reduce((sum, v) => sum + v, 0);
+      let realized: number;
+      try {
+        realized = await fundUsdc(payAsset, asked);
+      } catch (e) {
+        console.error("Funding the basket failed:", e);
+        setFundError(toFriendlyError(e));
+        return;
+      }
+      // The conversion lands at or below what was quoted. Spending the original
+      // amounts against the smaller balance would starve the LAST purchase.
+      spendable = rescaleAllocations(amounts, realized);
+    }
+
+    const outcomes = await bulk.run(
+      rows
+        .filter((r) => (spendable[r.id] ?? 0) > 0)
+        .map((r) => ({ kind: "buy" as const, id: r.id, amountUsd: spendable[r.id]! })),
+    );
+    if (outcomes.every((o) => o.ok)) {
+      setAllocating(false);
+      pickSet.clear();
+    }
+  };
+
+  // Card money is a TOP-UP, not a payment method: the on-ramp delivers dollars to the
+  // wallet minutes later, so it can't be a leg of a run that signs transactions now.
+  // It raises the budget, then the user splits it and buys — same as any other balance.
+  const addWithCard = async () => {
+    setFundError(null);
+    try {
+      await topUp(CARD_MINIMUM_USD);
+      await refreshAssets();
+      // Back to the default choice, which prefers USDC — the money just added.
+      setPayUid(null);
+    } catch (e) {
+      console.error("Card top-up failed:", e);
+      setFundError(toFriendlyError(e));
+    }
+  };
+
+  const busy = bulk.state === "running" || converting || toppingUp;
+
+  return (
+    <>
+      <PickBar
+        mode="buy"
+        picked={rows.map((r) => ({ id: r.id, symbol: r.symbol }))}
+        selectedCount={rows.length}
+        totalUsd={budget}
+        state={bulk.state}
+        done={bulk.done}
+        onSell={() => setAllocating(true)}
+        onClear={() => {
+          pickSet.clear();
+          bulk.reset();
+        }}
+      />
+      {allocating && (
+        <AllocationSheet
+          mode="buy"
+          rows={rows}
+          budgetUsd={budget}
+          busy={busy}
+          results={bulk.results}
+          payWith={
+            <>
+              {payAsset && (
+                <PayWithField
+                  assets={payable}
+                  activeUid={assetUid(payAsset)}
+                  onSelectUid={setPayUid}
+                  // The amounts are set per row below, so the field is a CHOICE of
+                  // currency, not a second place to type a number.
+                  amount=""
+                  onAmountChange={() => {}}
+                  usdAmount={budget}
+                  productMint={USDC_MINT}
+                  readOnlyAmount
+                />
+              )}
+              <button
+                type="button"
+                onClick={addWithCard}
+                disabled={busy}
+                className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-2.5 text-[13px] lowercase tracking-wide text-black/70 transition hover:border-black/40 hover:text-black disabled:opacity-40"
+              >
+                {toppingUp ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <CreditCard size={14} strokeWidth={1.5} />
+                )}
+                {t("alloc.addWithCard")}
+              </button>
+            </>
+          }
+          progress={
+            converting
+              ? t("bulk.converting")
+              : bulk.state === "running"
+                ? t("bulk.progress", { n: String(bulk.done.length), total: String(rows.length) })
+                : null
+          }
+          error={fundError}
+          onConfirm={buy}
+          onClose={() => {
+            setAllocating(false);
+            setFundError(null);
+            bulk.reset();
+          }}
+        />
+      )}
+    </>
+  );
+}

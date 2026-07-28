@@ -16,14 +16,9 @@ import { isPriceExposure } from "@/lib/yield/assets";
 import { XSTOCKS } from "@/lib/yield/xstocks";
 import { GOLD } from "@/lib/yield/gold";
 import { AssetSection } from "@/components/asset-section";
-import { PickSetProvider, usePickSet } from "@/components/pick-set";
-import { PickBar } from "@/components/pick-bar";
-import { AllocationSheet } from "@/components/allocation-sheet";
+import { PickSetProvider } from "@/components/pick-set";
+import { PickedBuyBar } from "@/components/picked-buy-bar";
 import { useFeature } from "@/hooks/use-features";
-import { useBulkTrade } from "@/hooks/use-bulk-trade";
-import { useWalletAssets } from "@/hooks/use-wallet-assets";
-import { USDC_MINT } from "@/lib/constants";
-import { getProvider } from "@/lib/yield";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { useT } from "@/lib/i18n";
 
@@ -41,76 +36,6 @@ const APY_RANGE: Record<ApyBucket, string> = {
   walking: "6–9%",
   running: "9%+",
 };
-
-/** The bar and the sheet for everything picked on this page — yield sources,
- *  stocks and gold alike. Mounted once, inside the set, so the three sections
- *  can't each grow their own. */
-function PickedBuyBar() {
-  const { t } = useT();
-  const pickSet = usePickSet();
-  const bulk = useBulkTrade();
-  const { assets } = useWalletAssets();
-  const [allocating, setAllocating] = useState(false);
-  if (!pickSet?.enabled) return null;
-
-  const ids = [...pickSet.picked];
-  const rows = ids
-    .map((id) => {
-      const p = getProvider(id);
-      return p ? { id, name: p.name, symbol: p.assetSymbol } : null;
-    })
-    .filter((r): r is { id: string; name: string; symbol: string } => !!r);
-  const budget = assets.find((a) => a.mint === USDC_MINT)?.usdValue ?? 0;
-
-  const buy = async (amounts: Record<string, number>) => {
-    const outcomes = await bulk.run(
-      rows
-        .filter((r) => (amounts[r.id] ?? 0) > 0)
-        .map((r) => ({ kind: "buy" as const, id: r.id, amountUsd: amounts[r.id]! })),
-    );
-    if (outcomes.every((o) => o.ok)) {
-      setAllocating(false);
-      pickSet.clear();
-    }
-  };
-
-  return (
-    <>
-      <PickBar
-        mode="buy"
-        picked={rows.map((r) => ({ id: r.id, symbol: r.symbol }))}
-        selectedCount={rows.length}
-        totalUsd={budget}
-        state={bulk.state}
-        done={bulk.done}
-        onSell={() => setAllocating(true)}
-        onClear={() => {
-          pickSet.clear();
-          bulk.reset();
-        }}
-      />
-      {allocating && (
-        <AllocationSheet
-          mode="buy"
-          rows={rows}
-          budgetUsd={budget}
-          busy={bulk.state === "running"}
-          results={bulk.results}
-          progress={
-            bulk.state === "running"
-              ? t("bulk.progress", { n: String(bulk.done.length), total: String(rows.length) })
-              : null
-          }
-          onConfirm={buy}
-          onClose={() => {
-            setAllocating(false);
-            bulk.reset();
-          }}
-        />
-      )}
-    </>
-  );
-}
 
 export default function YieldPage() {
   const canPickMany = useFeature("selling-v2");

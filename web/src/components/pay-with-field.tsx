@@ -39,6 +39,9 @@ interface Props {
   productMint: string;
   /** Reserve SOL for the network fee in "max" (external wallets); embedded pay no fee. */
   reserveGas?: boolean;
+  /** Currency picker only — the amount lives elsewhere (multi-buy sets it per asset,
+   *  so a second number here would be a second answer to "how much"). */
+  readOnlyAmount?: boolean;
 }
 
 /**
@@ -56,6 +59,7 @@ export function PayWithField({
   usdAmount,
   productMint,
   reserveGas = true,
+  readOnlyAmount = false,
 }: Props) {
   const { t } = useT();
   const [open, setOpen] = useState(false);
@@ -161,7 +165,16 @@ export function PayWithField({
           />
         </button>
 
-        {/* Amount — token or USD, toggled by the ⇅ button. USD equivalent (or token) below. */}
+        {/* Amount — token or USD, toggled by the ⇅ button. USD equivalent (or token) below.
+            In picker-only mode this side just states what the chosen currency is worth. */}
+        {readOnlyAmount ? (
+          <div className="flex min-w-0 flex-1 flex-col items-end justify-center px-3 py-1.5">
+            <span className="text-[20px] tabular-nums text-black">${usdAmount.toFixed(2)}</span>
+            <span className="text-[11px] tabular-nums text-black/40">
+              {fmtAmount(spendableUi)} {active?.symbol ?? ""}
+            </span>
+          </div>
+        ) : (
         <div className="flex min-w-0 flex-1 flex-col items-end justify-center px-3 py-1.5">
           <div className="flex w-full items-center justify-end gap-1">
             <button
@@ -188,6 +201,7 @@ export function PayWithField({
             {mode === "usd" ? `${fmtAmount(tokenAmt)} ${active?.symbol ?? ""}` : `$${usdAmount.toFixed(2)}`}
           </span>
         </div>
+        )}
       </div>
 
       {/* Route + balance/max */}
@@ -195,7 +209,7 @@ export function PayWithField({
         <span className="text-[9px] lowercase tracking-wide text-black/40">
           {active ? routeTag(active, productMint) : ""}
         </span>
-        {active && (
+        {active && !readOnlyAmount && (
           <button
             type="button"
             onClick={setMax}
