@@ -27,6 +27,11 @@ interface Props {
 export function YieldProviderRow({ view, onOpen }: Props) {
   const pickSet = usePickSet();
   const history = useApyHistory(view.defiLlamaPoolId);
+  // Same rule the stock rows use, applied to the thing this chart actually plots:
+  // the rate at the end of the window against the rate at its start. A rising rate
+  // is good news for someone entering AND for someone already in, so green means
+  // the same thing here as it does on a price.
+  const up = history.length > 1 && history[history.length - 1]! >= history[0]!;
   const positionValue = fromBaseUnits(view.underlyingBalance, view.decimals);
   const inPosition = positionValue > 0;
 
@@ -60,7 +65,7 @@ export function YieldProviderRow({ view, onOpen }: Props) {
 
       {history.length > 1 && (
         <div className="mx-4 hidden max-w-[140px] flex-1 sm:block">
-          <Sparkline values={history} height={32} className="h-8 w-full text-[#3c05c7]/40" />
+          <Sparkline values={history} height={32} className={`h-8 w-full ${up ? "text-emerald-400/40" : "text-red-400/40"}`} />
         </div>
       )}
 
