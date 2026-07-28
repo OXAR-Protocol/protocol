@@ -294,6 +294,7 @@ export const en = {
   "intro.next": "next",
   "intro.skip": "skip",
   "intro.start": "let's go",
+  "bulk.setLabelBuy": "{n} in multi",
   "activity.each": "each",
   "activity.empty": "nothing yet — your money is still snoring.",
   "activity.showMore": "show more",

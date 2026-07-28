@@ -108,12 +108,15 @@ export function AllocationSheet({
     setAmount(row.id, String(floorToCents(base * f)));
   };
 
+  // z-[60], above the tab bar: that is also fixed at z-50 and, being later in the
+  // document, painted straight over the confirm button. Scrolling couldn't rescue it
+  // — the button wasn't past the sheet's edge, it was under the nav.
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/25 p-0 backdrop-blur-sm sm:items-center sm:p-6">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/25 p-0 backdrop-blur-sm sm:items-center sm:p-6">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-h-[88vh] w-full max-w-[520px] overflow-auto rounded-t-[16px] border border-black/10 bg-white p-5 sm:rounded-[16px]"
+        className="max-h-[88vh] w-full max-w-[520px] overflow-auto rounded-t-[16px] border border-black/10 bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-[16px]"
       >
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
@@ -195,13 +198,16 @@ export function AllocationSheet({
 
         {error && <p className="mt-3 text-center text-[12px] text-red-600">{error}</p>}
 
+        {/* Sticky: with several assets the list is taller than the sheet, and a
+            confirm you have to go looking for is a confirm people don't find. */}
+        <div className="sticky bottom-0 -mx-5 mt-4 bg-gradient-to-t from-white via-white to-white/0 px-5 pb-1 pt-3">
         <button
           type="button"
           disabled={busy || nothing || overBudget}
           onClick={() =>
             onConfirm(Object.fromEntries(rows.map((r) => [r.id, valueOf(r.id)]).filter(([, v]) => (v as number) > 0)))
           }
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3 text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-30"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3 text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-30"
         >
           {busy && <Loader2 size={14} className="animate-spin" />}
           {busy && progress
@@ -215,6 +221,7 @@ export function AllocationSheet({
         <p className="mt-2 text-center text-[11px] text-black/35">
           {t("alloc.note", { n: String(rows.length) })}
         </p>
+        </div>
       </motion.div>
     </div>
   );

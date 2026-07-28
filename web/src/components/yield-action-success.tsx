@@ -50,7 +50,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="app-texture fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 px-6 text-center"
+      className="app-texture fixed inset-0 z-[60] flex flex-col items-center justify-center gap-5 px-6 text-center"
     >
       {/* Brand hero — a handshake: the move is done (same for deposit and withdraw). */}
       <motion.div

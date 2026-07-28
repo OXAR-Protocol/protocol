@@ -43,11 +43,14 @@ export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, on
   const selling = state === "running";
 
   return (
-    <div className="fixed bottom-24 left-1/2 z-40 w-fit max-w-[calc(100vw-2rem)] -translate-x-1/2">
-    <div className="flex flex-wrap items-center gap-3 rounded-full border border-black/10 bg-white/95 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.10)] backdrop-blur">
+    <div className="fixed bottom-24 left-1/2 z-40 w-fit max-w-[calc(100vw-1.5rem)] -translate-x-1/2">
+    {/* One row, always. It used to wrap on a phone, which turns a pill into a blob
+        and stacked the icons on top of each other. Nothing here may grow the bar:
+        the label truncates, the icons stand down on narrow screens. */}
+    <div className="flex flex-nowrap items-center gap-2 rounded-full border border-black/10 bg-white/95 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.10)] backdrop-blur sm:gap-3">
       {/* The set, shown as itself: overlapping marks rather than a count alone. */}
       {picked.length > 0 && (
-        <span className="flex shrink-0 items-center pl-1">
+        <span className="hidden shrink-0 items-center pl-1 sm:flex">
           {picked.slice(0, 4).map((p, i) => (
             // Inline spans align on the TEXT BASELINE, so a picture icon and a
             // letter-fallback icon sat at different heights. A fixed box each,
@@ -61,13 +64,20 @@ export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, on
           ))}
         </span>
       )}
-      <span className="whitespace-nowrap text-[13px] tabular-nums text-black/70">
+      <span className="min-w-0 flex-1 truncate text-[13px] tabular-nums text-black/70">
         {selling
           ? t("bulk.progress", { n: String(done.length), total: String(selectedCount) })
-          : t("bulk.setLabel", { n: String(selectedCount), usd: `$${formatUsdAmount(totalUsd)}` })}
+          : mode === "sell"
+            ? // Selling: the figure is what the picked positions are worth — a fact
+              // about the selection.
+              t("bulk.setLabel", { n: String(selectedCount), usd: `$${formatUsdAmount(totalUsd)}` })
+            : // Buying: the figure was the BUDGET, which read as "the things you picked
+              // are worth $0.00". Two different quantities were sharing one slot; the
+              // budget belongs in the sheet, where it's labelled.
+              t("bulk.setLabelBuy", { n: String(selectedCount) })}
       </span>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <button
           type="button"
           onClick={onClear}
