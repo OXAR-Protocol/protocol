@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Check, Loader2, X } from "lucide-react";
 
@@ -36,6 +36,9 @@ interface Props {
   progress?: string | null;
   /** Per-row outcome, keyed by row id — see the note on the results line below. */
   results?: Record<string, AllocationResult>;
+  /** Buy only: what the budget is paid with. Rendered above the rows, ONCE, because
+   *  the conversion happens once for the whole basket — see `useBulkFunding`. */
+  payWith?: ReactNode;
   error?: string | null;
   onConfirm: (amounts: Record<string, number>) => void;
   onClose: () => void;
@@ -64,6 +67,7 @@ export function AllocationSheet({
   busy,
   progress,
   results,
+  payWith,
   error,
   onConfirm,
   onClose,
@@ -117,6 +121,8 @@ export function AllocationSheet({
             <X size={18} strokeWidth={1.5} />
           </button>
         </div>
+
+        {payWith && <div className="mb-3">{payWith}</div>}
 
         <div className="space-y-2">
           {rows.map((r) => {
