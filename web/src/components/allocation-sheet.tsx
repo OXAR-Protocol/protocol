@@ -89,12 +89,22 @@ export function AllocationSheet({
   const setAmount = (id: string, v: string) =>
     setAmounts((prev) => ({ ...prev, [id]: normalizeDecimalInput(v) }));
 
-  /** Sell: a fraction of THIS position. Buy: a fraction of what's still unspent. */
+  /**
+   * Sell: a fraction of THIS position — the rows are independent, so the position is
+   * the only base that means anything.
+   *
+   * Buy: a fraction of the WHOLE budget, not of what's left of it. Measuring against
+   * the remainder made 25% a different amount on every row — a quarter, then a
+   * quarter of the surviving three quarters — so four taps of "25%" spent an odd
+   * fraction and the numbers read as accidents rather than choices. A percentage has
+   * to mean one thing.
+   *
+   * The cost is that the buttons can now overshoot the budget. That's a trade worth
+   * making because overshooting is already a visible, fixable state: the header turns
+   * red, says what's over, and the confirm button won't fire.
+   */
   const applyFraction = (row: AllocationRow, f: number) => {
-    const base =
-      mode === "sell"
-        ? row.maxUsd ?? 0
-        : Math.max(0, (budgetUsd ?? 0) - (allocated - valueOf(row.id)));
+    const base = mode === "sell" ? row.maxUsd ?? 0 : budgetUsd ?? 0;
     setAmount(row.id, String(floorToCents(base * f)));
   };
 
