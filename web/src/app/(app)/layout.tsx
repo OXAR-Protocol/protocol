@@ -10,6 +10,7 @@ import { ChannelReport } from "@/components/channel-tracker";
 import { WarpProvider } from "@/components/warp-transition";
 import { WarpOnEntry } from "@/components/warp-on-entry";
 import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
+import { IntroModal } from "@/components/intro-modal";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
                 <TabBar />
+                {/* First visit only, and skippable from any slide. */}
+                <IntroModal />
               </AuthGuard>
             </WarpProvider>
           </Providers>
