@@ -14,6 +14,7 @@ import { useBulkFunding } from "@/hooks/use-bulk-funding";
 import { useCardTopUp } from "@/hooks/use-card-topup";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
+import { usePrivy } from "@privy-io/react-auth";
 import { useBridgeDeposit } from "@/hooks/use-bridge-deposit";
 import { USDC_MINT } from "@/lib/constants";
 
@@ -46,9 +47,10 @@ export function PickedBuyBar() {
   const pickSet = usePickSet();
   const bulk = useBulkTrade();
   const { fundUsdc, converting } = useBulkFunding();
-  const { topUp, busy: toppingUp } = useCardTopUp();
+  const { topUp, cancel: cancelTopUp, busy: toppingUp } = useCardTopUp();
   const { assets, refresh: refreshAssets } = useWalletAssets();
-  const { assets: evmAssets } = useEvmAssets();
+  const { assets: evmAssets, evmAddress } = useEvmAssets();
+  const { linkWallet, unlinkWallet } = usePrivy();
   // Any provider id works here — the bridge only needs the destination mint, and
   // every basket settles in the same one.
   const bridge = useBridgeDeposit(USDC_PROVIDER_ID);
@@ -145,7 +147,10 @@ export function PickedBuyBar() {
     }
   };
 
-  const busy = bulk.state === "running" || converting || toppingUp || bridge.status !== "idle";
+  // A card top-up is a SIDE errand — it adds to the budget, it doesn't buy anything.
+  // Including it here froze every input behind a spinner with no way out, which is
+  // exactly what an abandoned provider window looked like.
+  const busy = bulk.state === "running" || converting || bridge.status !== "idle";
 
   return (
     <>
@@ -185,6 +190,29 @@ export function PickedBuyBar() {
                   readOnlyAmount
                 />
               )}
+              {/* Without this the picker only ever lists what's ALREADY connected, so
+                  "pay from another chain" was invisible to anyone who hadn't linked a
+                  wallet — the single-asset panel offers the same link, and the basket
+                  sheet was the only place missing it. */}
+              {!evmAddress ? (
+                <button
+                  type="button"
+                  onClick={() => linkWallet()}
+                  className="mt-2 text-[11px] lowercase tracking-wide text-black/40 underline decoration-black/20 underline-offset-2 transition hover:text-black/70"
+                >
+                  {t("deposit.payFromAnotherChain")}
+                </button>
+              ) : (
+                <div className="mt-2 flex items-center gap-2 text-[10px] lowercase tracking-wide text-black/45">
+                  <span>
+                    EVM {evmAddress.slice(0, 6)}…{evmAddress.slice(-4)}
+                  </span>
+                  <button type="button" onClick={() => unlinkWallet(evmAddress)} className="underline transition hover:text-black/70">
+                    {t("deposit.disconnect")}
+                  </button>
+                </div>
+              )}
+
               {payAsset?.chain === "ethereum" && (
                 <p className="mt-2 text-[11px] leading-snug text-black/45">
                   {t("alloc.bridgeNote")}
@@ -192,7 +220,7 @@ export function PickedBuyBar() {
               )}
               <button
                 type="button"
-                onClick={addWithCard}
+                onClick={toppingUp ? cancelTopUp : addWithCard}
                 disabled={busy}
                 className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-2.5 text-[13px] lowercase tracking-wide text-black/70 transition hover:border-black/40 hover:text-black disabled:opacity-40"
               >
@@ -201,7 +229,9 @@ export function PickedBuyBar() {
                 ) : (
                   <CreditCard size={14} strokeWidth={1.5} />
                 )}
-                {t("alloc.addWithCard")}
+                {/* While waiting, the same button stops waiting. A spinner with no
+                    way out is how an abandoned card window looked. */}
+                {toppingUp ? t("alloc.stopWaiting") : t("alloc.addWithCard")}
               </button>
             </>
           }

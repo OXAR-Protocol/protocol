@@ -266,6 +266,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "market.filterScope": "фільтрують лише ставки нижче — акції та золото не фільтруються",
   "alloc.bridgeNote": "оплата з іншої мережі займає кілька хвилин — надішлемо гроші зараз і купимо, щойно вони прийдуть, навіть якщо ти закриєш вкладку.",
   "bulk.bridging": "надсилаю твої гроші…",
+  "alloc.stopWaiting": "чекаю на твої гроші — натисни, щоб зупинити",
   "activity.each": "за штуку",
   "activity.empty": "поки нічого — твої гроші ще посапують.",
   "activity.showMore": "показати ще",
