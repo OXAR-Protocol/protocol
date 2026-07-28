@@ -6,7 +6,6 @@ import { TabBar } from "@/components/tab-bar";
 import { AuthGuard } from "@/components/auth-guard";
 import { AccessWall } from "@/components/access-gate/access-wall";
 import { JoinCapture } from "@/components/access-gate/join-capture";
-import { PhotoFooter } from "@/components/photo-footer";
 import { ChannelReport } from "@/components/channel-tracker";
 import { WarpProvider } from "@/components/warp-transition";
 import { WarpOnEntry } from "@/components/warp-on-entry";
@@ -33,7 +32,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <JoinCapture />
                     <ChannelReport />
                   </div>
-                  <PhotoFooter />
                 </div>
                 <TabBar />
               </AuthGuard>

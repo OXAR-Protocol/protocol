@@ -107,6 +107,9 @@ export default function YieldPage() {
         transition={{ duration: 0.5, delay: 0.05 }}
         className="mt-8 flex flex-wrap items-center gap-3"
       >
+        <p className="w-full text-[11px] lowercase tracking-wide text-black/40">
+          {t("market.filterScope")}
+        </p>
         <div className="flex flex-wrap gap-2">
           {APY_BUCKETS.map((bucket) => {
             const isActive = apyBucket === bucket.id;
