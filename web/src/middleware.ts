@@ -29,7 +29,7 @@ function isAppRoute(pathname: string): boolean {
 
 function isMarketingRoute(pathname: string): boolean {
   // "/" is handled separately per-host — on the marketing domain it's the
-  // landing page; on the app domain bare "/" routes to /home (the AccessWall
+  // landing page; on the app domain bare "/" routes to /portfolio (the AccessWall
   // wrapper in (app)/layout then gates entry behind the email allowlist).
   return MARKETING_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
 }
@@ -52,9 +52,10 @@ export function middleware(req: NextRequest) {
   const isApp = host === APP_DOMAIN;
   const isMarketing = host === MARKETING_DOMAIN;
 
-  // Bare app.oxar.app/ → send users to home.
+  // Bare app.oxar.app/ → the portfolio. It pointed at /home, which since the rename
+  // is itself a redirect — so every visit to the bare domain took two hops.
   if (isApp && pathname === "/") {
-    const url = new URL(`https://${APP_DOMAIN}/home${search}`);
+    const url = new URL(`https://${APP_DOMAIN}/portfolio${search}`);
     return NextResponse.redirect(url, 307);
   }
 
