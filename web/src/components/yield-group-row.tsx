@@ -1,5 +1,7 @@
 "use client";
 
+import { PickButton } from "@/components/pick-button";
+import { usePickSet } from "@/components/pick-set";
 import type { ProviderGroup } from "@/lib/yield";
 import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
 import { AssetIcon } from "@/components/asset-icon";
@@ -17,11 +19,16 @@ interface Props {
  * One marketplace row for a collapsed protocol (e.g. Jupiter Lend USDC/USDT).
  * Shows the asset chips + "up to" the best APY; opening it reveals the asset picker.
  *
- * Same shape as the single-provider and stock rows — see `YieldProviderRow`. There's
- * no pick control here on purpose: a group is several sources, and "add to multi"
- * would have to guess which of them the user meant.
+ * Same shape as the single-provider and stock rows — see `YieldProviderRow`.
+ *
+ * Picking one adds the source behind the headline rate. That isn't a guess: the row
+ * already promises "up to X%", and X comes from exactly that source — so adding it is
+ * what the row says it does. The allocation sheet then lists it by its full name
+ * before anything is signed, so the choice is visible and undoable. Wanting the other
+ * currency is still one tap away: opening the group shows each on its own.
  */
 export function YieldGroupRow({ group, onOpen }: Props) {
+  const pickSet = usePickSet();
   const top = group.views.reduce((a, b) => (b.apy > a.apy ? b : a), group.views[0]);
   const history = useApyHistory(top.defiLlamaPoolId);
   // Coloured by direction, same as the stock rows — see YieldProviderRow.
@@ -77,6 +84,16 @@ export function YieldGroupRow({ group, onOpen }: Props) {
           {RISK_LABEL[top.riskLevel] ?? top.riskLevel}
         </p>
       </div>
+
+      {pickSet?.enabled && (
+        <span className="ml-3">
+          <PickButton
+            picked={pickSet.picked.has(top.id)}
+            onToggle={() => pickSet.toggle(top.id)}
+            label={top.name}
+          />
+        </span>
+      )}
     </button>
   );
 }
