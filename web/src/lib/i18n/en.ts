@@ -286,6 +286,7 @@ export const en = {
   "alloc.bridgeNote": "paying from another chain takes a couple of minutes — we'll send the money now and buy as soon as it lands, even if you close this.",
   "bulk.bridging": "sending your money…",
   "alloc.stopWaiting": "waiting for your money — tap to stop",
+  "err.gaslessDown": "free network fees are briefly unavailable and your wallet has no SOL to cover one. your money is safe where it is — try again in a moment.",
   "activity.each": "each",
   "activity.empty": "nothing yet — your money is still snoring.",
   "activity.showMore": "show more",

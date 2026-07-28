@@ -12,6 +12,7 @@ import { useSwapOutPreview } from "@/hooks/use-swap-out-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { fromBaseUnits, planWithdrawal } from "@/lib/yield";
 import { settledAmount } from "@/lib/yield/settled";
+import { BanknoteBg } from "@/components/banknote-bg";
 import { useT } from "@/lib/i18n";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { getAssetInfo } from "@/lib/yield/asset-info";
@@ -179,8 +180,11 @@ export function AssetDetail({
       {positionValue > 0 && (
         <motion.section
           {...fade(0.08)}
-          className="mt-6 rounded-[12px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.04] p-5"
+          className="relative isolate mt-6 overflow-hidden rounded-[12px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.04] p-5"
         >
+          {/* The same banknote engraving the asset cards carry, rather than a flat
+              violet panel. Keyed to the asset so this page keeps one bill. */}
+          <BanknoteBg seed={view.id} />
           <p className="lowercase text-[13px] text-black/55">{t("asset.yourPosition")}</p>
           <p className="mt-1 text-[clamp(24px,3.4vw,34px)] font-bold tabular-nums">
             ${positionValue.toFixed(2)}

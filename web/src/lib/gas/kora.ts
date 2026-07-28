@@ -4,8 +4,9 @@
  * Client helpers for the Kora gasless relayer, called through our same-origin `/api/kora`
  * proxy (which holds the api-key — never exposed here). Embedded wallets use this so a
  * user with $0 SOL can still transact: Kora co-signs as the fee payer and pays the gas.
- * Only legacy transactions we build ourselves (deposit/withdraw/send) go through Kora;
- * Jupiter v0 swaps bake in their own payer and stay on native gas.
+ * EVERY transaction goes through Kora — legacy ones we build ourselves and v0 ones
+ * from Jupiter/Kamino alike (see `rebuildV0WithKora`). This comment used to say v0
+ * swaps stayed on native gas; they haven't for a while.
  */
 const PROXY_URL = "/api/kora";
 
