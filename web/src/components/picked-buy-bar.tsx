@@ -13,7 +13,13 @@ import { useBulkTrade } from "@/hooks/use-bulk-trade";
 import { useBulkFunding } from "@/hooks/use-bulk-funding";
 import { useCardTopUp } from "@/hooks/use-card-topup";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
+import { useEvmAssets } from "@/hooks/use-evm-assets";
+import { useBridgeDeposit } from "@/hooks/use-bridge-deposit";
 import { USDC_MINT } from "@/lib/constants";
+
+/** The bridge needs a provider only to read the destination mint; every basket
+ *  settles in the same dollar asset, so any USDC source answers that. */
+const USDC_PROVIDER_ID = "jupiter-lend-usdc";
 import { getProvider, toFriendlyError } from "@/lib/yield";
 import { useT } from "@/lib/i18n";
 
@@ -42,6 +48,10 @@ export function PickedBuyBar() {
   const { fundUsdc, converting } = useBulkFunding();
   const { topUp, busy: toppingUp } = useCardTopUp();
   const { assets, refresh: refreshAssets } = useWalletAssets();
+  const { assets: evmAssets } = useEvmAssets();
+  // Any provider id works here — the bridge only needs the destination mint, and
+  // every basket settles in the same one.
+  const bridge = useBridgeDeposit(USDC_PROVIDER_ID);
   const [allocating, setAllocating] = useState(false);
   const [payUid, setPayUid] = useState<string | null>(null);
   const [fundError, setFundError] = useState<string | null>(null);
@@ -54,9 +64,9 @@ export function PickedBuyBar() {
     })
     .filter((r): r is { id: string; name: string; symbol: string } => !!r);
 
-  // Only what's on Solana: a cross-chain payment arrives minutes later, and the
-  // watcher that catches it makes a single deposit, not a basket of them.
-  const payable = assets.filter((a) => a.chain === "solana" && a.usdValue > 0);
+  // Solana first (instant or a quick swap), then the other chains. A cross-chain
+  // basket doesn't complete here: it bridges now and buys when the money lands.
+  const payable = [...assets, ...evmAssets].filter((a) => a.usdValue > 0);
   const payAsset =
     payable.find((a) => assetUid(a) === payUid) ??
     payable.find((a) => a.mint === USDC_MINT) ??
@@ -67,6 +77,28 @@ export function PickedBuyBar() {
   const buy = async (amounts: Record<string, number>) => {
     if (!payAsset) return;
     setFundError(null);
+
+    // Paying from another chain: send the money once and hand the watcher the whole
+    // plan. It buys on arrival, minutes later, shrinking the plan as each leg lands —
+    // so nothing here waits, and nothing is bought twice if the page is closed.
+    if (payAsset.chain === "ethereum") {
+      const total = Object.values(amounts).reduce((sum, v) => sum + v, 0);
+      const plan = Object.entries(amounts)
+        .filter(([, v]) => v > 0)
+        .map(([providerId, amountUsd]) => ({ providerId, amountUsd }));
+      if (!plan.length) return;
+      try {
+        await bridge.bridgeAndDeposit(payAsset, total, plan);
+        setAllocating(false);
+        pickSet.clear();
+        bulk.reset();
+      } catch (e) {
+        console.error("Bridging the basket failed:", e);
+        setFundError(toFriendlyError(e));
+      }
+      return;
+    }
+
     let spendable = amounts;
     if (payAsset.mint !== USDC_MINT) {
       const asked = Object.values(amounts).reduce((sum, v) => sum + v, 0);
@@ -113,7 +145,7 @@ export function PickedBuyBar() {
     }
   };
 
-  const busy = bulk.state === "running" || converting || toppingUp;
+  const busy = bulk.state === "running" || converting || toppingUp || bridge.status !== "idle";
 
   return (
     <>
@@ -153,6 +185,11 @@ export function PickedBuyBar() {
                   readOnlyAmount
                 />
               )}
+              {payAsset?.chain === "ethereum" && (
+                <p className="mt-2 text-[11px] leading-snug text-black/45">
+                  {t("alloc.bridgeNote")}
+                </p>
+              )}
               <button
                 type="button"
                 onClick={addWithCard}
@@ -169,13 +206,15 @@ export function PickedBuyBar() {
             </>
           }
           progress={
-            converting
+            bridge.status !== "idle"
+              ? t("bulk.bridging")
+              : converting
               ? t("bulk.converting")
               : bulk.state === "running"
                 ? t("bulk.progress", { n: String(bulk.done.length), total: String(rows.length) })
                 : null
           }
-          error={fundError}
+          error={fundError ?? bridge.error}
           onConfirm={buy}
           onClose={() => {
             setAllocating(false);

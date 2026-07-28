@@ -5,8 +5,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { USDC_MINT } from "@/lib/constants";
+import { rescaleAllocations } from "@oxar/sdk";
+
+import { useBulkTrade } from "@/hooks/use-bulk-trade";
 import {
   loadActivePending,
+  loadAllPending,
+  narrowPlan,
   loadStuckPending,
   countPending,
   savePending,
@@ -50,6 +55,9 @@ export function usePendingBridge() {
   // effect's deps would otherwise change and it would never poll again.
   const [rearm, setRearm] = useState(0);
   const { deposit } = useYieldActions(pending?.providerId ?? "");
+  // A bridged BASKET buys several assets from one arrival; each is its own
+  // transaction, which is exactly what this already does for an on-page basket.
+  const bulk = useBulkTrade();
 
   // Re-read the queue → the bridge to work, the one that needs a hand, and the counts.
   // Used after every mutation so finishing one bridge advances to the next instead of
@@ -62,12 +70,54 @@ export function usePendingBridge() {
 
   // Claim the record, then deposit/swap the bridged funds into the chosen asset.
   // Shared by the silent auto-path (embedded) and the tap-to-finish path (external).
+  /**
+   * Buy a bridged basket, one asset at a time, shrinking the stored plan as each
+   * one lands.
+   *
+   * The record is NOT claimed up front the way a single deposit is. Clearing it
+   * first would mean a basket that dies halfway leaves nothing behind, and the
+   * bridged dollars sit in the wallet with no record of what they were for. So the
+   * plan survives and loses a leg only once that leg has actually gone through —
+   * a reload, a crash or a retry can then only ever buy what is still owed.
+   *
+   * Each leg re-reads the record before spending, so a second tab working the same
+   * basket skips what this one already did.
+   */
+  const runBasket = useCallback(
+    async (rec: PendingBridge) => {
+      // What actually arrived, in dollars. The plan was written against what was
+      // ASKED for, and a bridge delivers a little less — see `rescaleAllocations`.
+      const arrivedUsd = Number(BigInt(rec.expectedUsdc)) / 1e6;
+      const asked = Object.fromEntries((rec.plan ?? []).map((l) => [l.providerId, l.amountUsd]));
+      const scaled = rescaleAllocations(asked, arrivedUsd);
+
+      for (const leg of rec.plan ?? []) {
+        const amountUsd = scaled[leg.providerId];
+        if (!amountUsd || amountUsd <= 0) continue;
+        const current = loadAllPending().find((r) => r.originTxHash === rec.originTxHash);
+        const stillOwed = current?.plan ?? [];
+        if (!stillOwed.some((l) => l.providerId === leg.providerId)) continue;
+
+        const [outcome] = await bulk.run([{ kind: "buy", id: leg.providerId, amountUsd }]);
+        if (!outcome?.ok) throw new Error(outcome?.error ?? "Purchase failed");
+        narrowPlan(
+          rec.originTxHash,
+          stillOwed.filter((l) => l.providerId !== leg.providerId),
+        );
+      }
+    },
+    [bulk],
+  );
+
   const runDeposit = useCallback(
     async (rec: PendingBridge) => {
       setResuming(true);
-      clearPending(rec.originTxHash); // claim THIS bridge so a parallel tab can't double-deposit
+      // A basket keeps its record until its legs are done (see runBasket); a single
+      // deposit claims it up front so a parallel tab can't repeat it.
+      if (!rec.plan?.length) clearPending(rec.originTxHash);
       try {
-        await deposit(BigInt(rec.expectedUsdc));
+        if (rec.plan?.length) await runBasket(rec);
+        else await deposit(BigInt(rec.expectedUsdc));
         setArrived(false);
         syncFromStore(); // advance to the next queued bridge (banner hides only when the queue empties)
       } catch (e) {
@@ -75,14 +125,17 @@ export function usePendingBridge() {
         // tail, so it doesn't block other in-flight bridges) so the banner shows Retry,
         // never silently stranding the funds (they sit as the bridged token).
         console.error("Pending bridge deposit failed; funds are safe in the wallet:", e);
-        savePending({ ...rec, attempts: (rec.attempts ?? 0) + 1 });
+        // Re-read before re-queueing: a basket may have completed some legs, and
+        // writing back the record we started with would resurrect them.
+        const latest = loadAllPending().find((r) => r.originTxHash === rec.originTxHash) ?? rec;
+        savePending({ ...latest, attempts: (latest.attempts ?? 0) + 1 });
         setArrived(false);
         syncFromStore();
       } finally {
         setResuming(false);
       }
     },
-    [deposit, syncFromStore],
+    [deposit, runBasket, syncFromStore],
   );
 
   // Pick up newly-saved / cleared records (same tab) and on tab focus.

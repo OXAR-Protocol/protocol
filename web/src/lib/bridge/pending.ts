@@ -4,9 +4,27 @@
  * baseline USDC balance, then poll until the USDC lands and deposit it. Survives
  * reloads so funds are never "lost" mid-bridge.
  */
+/** One purchase a bridged basket still owes. */
+export interface BasketLeg {
+  providerId: string;
+  /** USD asked for. Rescaled against what actually lands — see `rescaleAllocations`. */
+  amountUsd: number;
+}
+
 export interface PendingBridge {
   /** Yield provider to deposit into once USDC arrives. */
   providerId: string;
+  /**
+   * A basket, when the bridge is funding several purchases rather than one.
+   *
+   * It SHRINKS as legs complete. That is the whole point: a basket that fails
+   * halfway leaves a record, and replaying the original plan on retry would buy
+   * again what already went through. Only what is still owed survives here.
+   *
+   * Absent on a single-asset bridge, and on records written before baskets existed —
+   * `providerId` remains the fallback for both.
+   */
+  plan?: BasketLeg[];
   originChainId: number;
   /** Origin-chain tx hash — shown to the user as proof of "funds in transit". */
   originTxHash: string;
@@ -119,6 +137,21 @@ export function promotePending(originTxHash: string, store = defaultStore()): vo
 /** The whole queue (for surfacing "N deposits in flight"). */
 export function loadAllPending(store = defaultStore()): PendingBridge[] {
   return readAll(store);
+}
+
+/** Record that part of a basket went through: keep only the legs still owed, and
+ *  drop the record entirely once nothing is. Called after EVERY successful leg, so
+ *  a reload or a crash mid-basket can't resurrect a purchase already made. */
+export function narrowPlan(originTxHash: string, remaining: BasketLeg[], store = defaultStore()): void {
+  const list = readAll(store);
+  const i = list.findIndex((r) => r.originTxHash === originTxHash);
+  if (i < 0) return;
+  if (remaining.length === 0) {
+    writeAll(list.filter((r) => r.originTxHash !== originTxHash), store);
+    return;
+  }
+  list[i] = { ...list[i]!, plan: remaining };
+  writeAll(list, store);
 }
 
 /** Drop a bridge from the queue. With an `originTxHash`, removes that one; without,

@@ -15,7 +15,7 @@ import {
   type WalletAsset,
   type BridgeQuote,
 } from "@oxar/sdk";
-import { savePending } from "@/lib/bridge/pending";
+import { savePending, type BasketLeg } from "@/lib/bridge/pending";
 import { readUsdcBase } from "@/lib/bridge/arrival";
 import { isNativeEvm, encodeApprove, readAllowance } from "@/lib/evm/erc20";
 import { publicClientFor, viemChainById } from "@/lib/evm/chains";
@@ -71,7 +71,13 @@ export function useBridgeDeposit(providerId: string) {
   );
 
   const bridgeAndDeposit = useCallback(
-    async (payAsset: WalletAsset, usdAmount: number): Promise<bigint> => {
+    async (
+      payAsset: WalletAsset,
+      usdAmount: number,
+      /** Several purchases funded by this one bridge. The watcher runs them on
+       *  arrival and shrinks the plan as each lands — see `usePendingBridge`. */
+      plan?: BasketLeg[],
+    ): Promise<bigint> => {
       const provider = getProvider(providerId);
       if (!walletAddress || !provider) throw new Error("Wallet not connected");
       if (usdAmount <= 0) return BigInt(0);
@@ -205,6 +211,7 @@ export function useBridgeDeposit(providerId: string) {
 
         savePending({
           providerId,
+          ...(plan?.length ? { plan } : {}),
           originChainId,
           originTxHash: txHash,
           mint: destinationMint,
