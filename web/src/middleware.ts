@@ -7,6 +7,7 @@ const APP_ROUTES = [
   "/home",
   "/yield",
   "/pile",
+  "/activity",
   "/you",
   "/asset",
   "/onboarding",

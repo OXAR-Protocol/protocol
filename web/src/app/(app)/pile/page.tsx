@@ -423,9 +423,17 @@ export default function PilePage() {
         transition={{ duration: 0.5, delay: 0.15 }}
         className="mt-10"
       >
-        <p className="mb-3 text-xs lowercase tracking-[0.2em] text-black/40">
-          {t("pile.history")}
-        </p>
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <p className="text-xs lowercase tracking-[0.2em] text-black/40">{t("pile.history")}</p>
+          {/* The feed shows the latest few; the full ledger with day-by-day stats
+              lives on its own page, because that's a different question. */}
+          <Link
+            href="/activity"
+            className="text-[11px] lowercase tracking-wide text-[#3c05c7]/80 transition hover:text-[#3c05c7]"
+          >
+            {t("history.seeAll")}
+          </Link>
+        </div>
         <ActivityFeed />
       </motion.section>
     </div>
