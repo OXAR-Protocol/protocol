@@ -2,7 +2,7 @@ import type { TranslationKey } from "./en";
 
 /** Ukrainian. Simple-mode voice: гроші/долари, не токени. */
 export const uk: Partial<Record<TranslationKey, string>> = {
-  "nav.home": "головна",
+  "nav.portfolio": "портфель",
   "nav.market": "ринок",
   "nav.pile": "мої гроші",
   "nav.you": "профіль",

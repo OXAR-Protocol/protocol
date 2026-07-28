@@ -92,7 +92,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         className="flex items-center gap-4 text-[12px] lowercase tracking-wide text-black/50"
       >
         {!result.pending && (
-          <Link href="/home" className="underline-offset-2 hover:text-black hover:underline transition">
+          <Link href="/portfolio" className="underline-offset-2 hover:text-black hover:underline transition">
             {t("success.viewPosition")}
           </Link>
         )}

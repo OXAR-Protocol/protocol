@@ -15,7 +15,7 @@ export default function OnboardingPage() {
   const { t } = useT();
 
   useEffect(() => {
-    if (ready && authenticated) router.replace("/home");
+    if (ready && authenticated) router.replace("/portfolio");
   }, [ready, authenticated, router]);
 
   return (

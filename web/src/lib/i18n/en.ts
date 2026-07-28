@@ -6,7 +6,7 @@
  */
 export const en = {
   // Navigation
-  "nav.home": "home",
+  "nav.portfolio": "portfolio",
   "nav.market": "market",
   "nav.pile": "portfolio",
   "nav.you": "you",

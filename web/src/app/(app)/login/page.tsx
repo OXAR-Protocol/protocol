@@ -14,7 +14,7 @@ export default function LoginPage() {
   const { t } = useT();
 
   useEffect(() => {
-    if (ready && authenticated) router.replace("/home");
+    if (ready && authenticated) router.replace("/portfolio");
   }, [ready, authenticated, router]);
 
   // The access wall already approved this browser. Here we just authenticate —
