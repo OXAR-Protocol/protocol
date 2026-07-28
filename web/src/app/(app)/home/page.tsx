@@ -10,7 +10,6 @@ import { SectionLabel } from "@/components/section-label";
 import { LiveAmount } from "@/components/live-amount";
 import { LiveEarned } from "@/components/live-earned";
 import { WalletCash } from "@/components/wallet-cash";
-import { TopMoversCarousel } from "@/components/top-movers-carousel";
 import { PhotoBg } from "@/components/photo-bg";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
@@ -132,9 +131,6 @@ export default function HomePage() {
       {/* Money in the wallet, not put to work yet — nudge to invest it. */}
       <WalletCash />
 
-      {/* Top movers — discovery strip across stocks + gold (24h). */}
-      <TopMoversCarousel />
-
       {/* Empty state — first-time hero */}
       {totalUsdc === 0 && !loading && (
         <motion.section
@@ -160,7 +156,7 @@ export default function HomePage() {
               </p>
               <div className="mt-6">
                 <Link
-                  href="/yield"
+                  href="/market"
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
                 >
                   {t("home.wakeUp")}

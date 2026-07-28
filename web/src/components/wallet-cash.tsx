@@ -29,7 +29,7 @@ export function WalletCash() {
 
   return (
     <Link
-      href="/yield"
+      href="/market"
       className="group relative mb-12 block overflow-hidden rounded-[12px] border border-black/10 bg-white p-5 transition-colors hover:border-black/30"
     >
       {/* zoomOnMobile: on a phone this card is nearly square, so the default crop showed

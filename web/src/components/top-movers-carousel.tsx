@@ -53,9 +53,6 @@ export function TopMoversCarousel() {
         <p className="lowercase text-[clamp(15px,1.4vw,20px)] tracking-[-0.02em] text-black">
           {t("movers.title")}
         </p>
-        <Link href="/yield" className="text-xs text-black/45 transition-colors hover:text-black">
-          {t("movers.all")}
-        </Link>
       </div>
 
       <div

@@ -7,7 +7,7 @@
 export const en = {
   // Navigation
   "nav.home": "home",
-  "nav.yield": "yield",
+  "nav.market": "market",
   "nav.pile": "portfolio",
   "nav.you": "you",
 

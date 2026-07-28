@@ -9,7 +9,7 @@ import { useT } from "@/lib/i18n";
 
 const tabs = [
   { href: "/home", key: "nav.home", icon: Home },
-  { href: "/yield", key: "nav.yield", icon: TrendingUp },
+  { href: "/market", key: "nav.market", icon: TrendingUp },
   { href: "/pile", key: "nav.pile", icon: Users },
   { href: "/you", key: "nav.you", icon: User },
 ] as const;
