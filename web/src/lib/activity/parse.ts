@@ -62,6 +62,10 @@ export function parseActivity(
   /** Held mint → token decimals. Used only to decide whether a per-unit price can
    *  be quoted at all; omit and one is always quoted (the previous behaviour). */
   assetDecimals: Record<string, number> = {},
+  /** Held mint → whether it's something you BUY (a stock, gold) or somewhere you
+   *  PUT money (a savings source). Without it every entry reads as a purchase, and
+   *  a Jupiter Lend deposit says "Bought Jupiter Lend USDC" — which isn't a thing. */
+  assetIsPrice: Record<string, boolean> = {},
 ): ActivityEvent[] {
   const events: ActivityEvent[] = [];
 
@@ -109,19 +113,37 @@ export function parseActivity(
 
     if (primaryMint) {
       const name = assetNames[primaryMint];
+      // A stock is bought and sold; a savings source is put into and taken out of.
+      // Same on-chain shape, different thing to a person — and the whole point of a
+      // history is that it explains itself.
+      const isPrice = assetIsPrice[primaryMint] ?? true;
       if (primaryVal > 0) {
-        kind = usdcDelta < -DUST ? "buy" : "receive";
-        label = `${kind === "buy" ? "Bought" : "Received"} ${name}`;
+        if (usdcDelta < -DUST) {
+          kind = isPrice ? "buy" : "deposit";
+          label = isPrice ? `Bought ${name}` : `Deposited to ${name}`;
+        } else {
+          kind = "receive";
+          label = `Received ${name}`;
+        }
       } else {
-        kind = usdcDelta > DUST ? "sell" : "send";
-        label = `${kind === "sell" ? "Sold" : "Sent"} ${name}`;
+        if (usdcDelta > DUST) {
+          kind = isPrice ? "sell" : "withdraw";
+          label = isPrice ? `Sold ${name}` : `Withdrew from ${name}`;
+        } else {
+          kind = "send";
+          label = `Sent ${name}`;
+        }
       }
     } else if (usdcDelta < -DUST) {
+      // USDC left and something we don't recognise came back. That's a swap, not a
+      // deposit — calling it "Deposited" claimed knowledge of a destination we don't
+      // have.
       kind = receivedOther ? "deposit" : "send";
-      label = receivedOther ? "Deposited" : "Sent USDC";
+      label = receivedOther ? "Swapped from USDC" : "Sent USDC";
     } else if (usdcDelta > DUST) {
+      // The mirror: something unrecognised left, USDC came back.
       kind = sentOther ? "withdraw" : "receive";
-      label = sentOther ? "Withdrew" : "Received USDC";
+      label = sentOther ? "Swapped to USDC" : "USDC arrived";
     } else {
       continue; // no USDC and no known asset moved — noise
     }
