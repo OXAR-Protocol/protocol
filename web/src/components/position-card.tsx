@@ -8,6 +8,7 @@ import { useStockCharts } from "@/hooks/use-stock-charts";
 import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { Sparkline } from "@/components/sparkline";
+import { floorTo } from "@oxar/sdk";
 import { LiveAmount } from "@/components/live-amount";
 import { PickButton } from "@/components/pick-button";
 import { useT } from "@/lib/i18n";
@@ -81,9 +82,17 @@ export function PositionCard({ view, onOpen, change24h, picked, onTogglePick }: 
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
           <LiveAmount value={value} apy={view.apy} variant="md" />
-          <p className="text-[10px] lowercase tracking-wide text-black/40">
-            {value > 0 ? "your position" : "tap to deposit"}
-          </p>
+          {/* How much you own, not only what it's worth. The list rows say this;
+              the cards didn't, so switching layout lost the number. */}
+          {isPrice && view.heldDecimals !== undefined && view.shares > BigInt(0) ? (
+            <p className="text-[11px] tabular-nums text-[#3c05c7]/80">
+              {floorTo(Number(view.shares) / 10 ** view.heldDecimals, 6)} {view.assetSymbol}
+            </p>
+          ) : (
+            <p className="text-[10px] lowercase tracking-wide text-black/40">
+              {value > 0 ? "your position" : "tap to deposit"}
+            </p>
+          )}
         </div>
         {isPrice && typeof change24h === "number" ? (
           <p
