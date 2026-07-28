@@ -158,11 +158,13 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
           {owned}
         </div>
         {spark && <div className="hidden sm:block flex-1 mx-4 max-w-[140px]">{spark}</div>}
-        {pick}
+        {/* Price first, then the control: the number is what the row is read for,
+            and a button between the chart and the price split them apart. */}
         <div className="ml-3 text-right">
           {price}
           {change}
         </div>
+        {pick && <span className="ml-3">{pick}</span>}
       </button>
     );
   };
