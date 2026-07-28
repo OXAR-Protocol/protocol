@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 import { Sparkline } from "@/components/sparkline";
+import { trendLineTone, trendTextTone } from "@/lib/yield/trend";
 import { AssetIcon } from "@/components/asset-icon";
 import { BanknoteBg } from "@/components/banknote-bg";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
@@ -85,7 +86,7 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
     const chart = charts[s.mint];
     const spark =
       chart && chart.length > 1 ? (
-        <Sparkline values={chart} height={32} className={`w-full h-8 ${up ? "text-emerald-400/40" : "text-red-400/40"}`} />
+        <Sparkline values={chart} height={32} className={`h-8 w-full ${trendLineTone(up)}`} />
       ) : null;
 
     const price = (
@@ -94,7 +95,7 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
       </p>
     );
     const change = px ? (
-      <p className={`mt-0.5 text-xs tabular-nums ${up ? "text-emerald-600" : "text-red-600"}`}>
+      <p className={`mt-0.5 text-xs tabular-nums ${trendTextTone(up)}`}>
         {up ? "+" : ""}
         {px.change24h.toFixed(2)}% 24h
       </p>

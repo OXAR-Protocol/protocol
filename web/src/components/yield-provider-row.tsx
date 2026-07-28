@@ -3,6 +3,7 @@
 import { PickButton } from "@/components/pick-button";
 import { usePickSet } from "@/components/pick-set";
 import { Sparkline } from "@/components/sparkline";
+import { trendUp, trendLineTone } from "@/lib/yield/trend";
 import { BanknoteBg } from "@/components/banknote-bg";
 import { useApyHistory } from "@/hooks/use-apy-history";
 import type { ProviderView } from "@/hooks/use-yield-positions";
@@ -27,11 +28,7 @@ interface Props {
 export function YieldProviderRow({ view, onOpen }: Props) {
   const pickSet = usePickSet();
   const history = useApyHistory(view.defiLlamaPoolId);
-  // Same rule the stock rows use, applied to the thing this chart actually plots:
-  // the rate at the end of the window against the rate at its start. A rising rate
-  // is good news for someone entering AND for someone already in, so green means
-  // the same thing here as it does on a price.
-  const up = history.length > 1 && history[history.length - 1]! >= history[0]!;
+  const up = trendUp(history);
   const positionValue = fromBaseUnits(view.underlyingBalance, view.decimals);
   const inPosition = positionValue > 0;
 
@@ -53,7 +50,6 @@ export function YieldProviderRow({ view, onOpen }: Props) {
               </span>
               <span className="text-[10px] lowercase tracking-wide text-emerald-600">● live</span>
             </div>
-            <p className="mt-0.5 truncate text-xs text-black/45">{view.description}</p>
           </div>
         </div>
         {inPosition && (
@@ -69,7 +65,7 @@ export function YieldProviderRow({ view, onOpen }: Props) {
           series, so a source without history doesn't shift the whole row either. */}
       <div className="hidden w-[140px] shrink-0 sm:block">
         {history.length > 1 && (
-          <Sparkline values={history} height={32} className={`h-8 w-full ${up ? "text-emerald-400/40" : "text-red-400/40"}`} />
+          <Sparkline values={history} height={32} className={`h-8 w-full ${trendLineTone(up)}`} />
         )}
       </div>
 

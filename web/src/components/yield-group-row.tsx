@@ -7,6 +7,7 @@ import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { Sparkline } from "@/components/sparkline";
+import { trendUp, trendLineTone } from "@/lib/yield/trend";
 import { BanknoteBg } from "@/components/banknote-bg";
 import { useApyHistory } from "@/hooks/use-apy-history";
 
@@ -31,8 +32,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
   const pickSet = usePickSet();
   const top = group.views.reduce((a, b) => (b.apy > a.apy ? b : a), group.views[0]);
   const history = useApyHistory(top.defiLlamaPoolId);
-  // Coloured by direction, same as the stock rows — see YieldProviderRow.
-  const up = history.length > 1 && history[history.length - 1]! >= history[0]!;
+  const up = trendUp(history);
   const positionTotal = group.views.reduce(
     (sum, v) => sum + fromBaseUnits(v.underlyingBalance, v.decimals),
     0,
@@ -75,7 +75,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
       {/* Same fixed columns as YieldProviderRow — see the note there. */}
       <div className="hidden w-[140px] shrink-0 sm:block">
         {history.length > 1 && (
-          <Sparkline values={history} height={32} className={`h-8 w-full ${up ? "text-emerald-400/40" : "text-red-400/40"}`} />
+          <Sparkline values={history} height={32} className={`h-8 w-full ${trendLineTone(up)}`} />
         )}
       </div>
 
