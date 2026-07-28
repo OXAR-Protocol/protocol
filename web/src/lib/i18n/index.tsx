@@ -45,7 +45,11 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const t = useCallback(
     (key: TranslationKey, vars?: Record<string, string | number>) => {
       let s: string = DICTS[locale][key] ?? en[key] ?? key;
-      if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, String(v));
+      // split/join, not replace: `replace` swaps only the FIRST match, so a string
+      // that uses the same placeholder twice ("{n} assets = {n} transactions")
+      // rendered the second one literally, braces and all.
+      if (vars)
+        for (const [k, v] of Object.entries(vars)) s = s.split(`{${k}}`).join(String(v));
       return s;
     },
     [locale],
