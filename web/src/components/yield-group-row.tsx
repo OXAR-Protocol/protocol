@@ -6,6 +6,8 @@ import type { ProviderGroup } from "@/lib/yield";
 import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
+import { Sparkline } from "@/components/sparkline";
+import { useApyHistory } from "@/hooks/use-apy-history";
 
 interface Props {
   group: ProviderGroup;
@@ -18,6 +20,8 @@ interface Props {
  */
 export function YieldGroupRow({ group, onOpen }: Props) {
   const top = group.views.reduce((a, b) => (b.apy > a.apy ? b : a), group.views[0]);
+  // Same trend the grid card draws — the list row was the only place without it.
+  const history = useApyHistory(top.defiLlamaPoolId);
   const positionTotal = group.views.reduce(
     (sum, v) => sum + fromBaseUnits(v.underlyingBalance, v.decimals),
     0,
@@ -58,6 +62,12 @@ export function YieldGroupRow({ group, onOpen }: Props) {
             </p>
           )}
         </div>
+
+        {history.length > 1 && (
+          <div className="mx-4 hidden max-w-[140px] flex-1 sm:block">
+            <Sparkline values={history} className="h-8 w-full text-[#3c05c7]/60" />
+          </div>
+        )}
 
         <div className="text-right shrink-0">
           <p className="text-xl text-black tabular-nums">
