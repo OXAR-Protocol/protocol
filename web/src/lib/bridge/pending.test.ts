@@ -9,6 +9,7 @@ import {
   countPending,
   promotePending,
   clearPending,
+  narrowPlan,
   type PendingBridge,
 } from "./pending";
 
@@ -123,6 +124,55 @@ describe("pending bridge persistence", () => {
     savePending({ ...sample, originTxHash: "0xhash3" }, store);
     promotePending("0xhash3", store);
     expect(loadAllPending(store).map((r) => r.originTxHash)).toEqual(["0xhash3", "0xhash", "0xhash2"]);
+  });
+
+  // A bridged BASKET buys several assets from one arrival. If a leg goes through and
+  // the record still lists it, a retry — or simply a reload — buys it a second time.
+  describe("narrowPlan", () => {
+    const basket: PendingBridge = {
+      ...sample,
+      plan: [
+        { providerId: "a", amountUsd: 10 },
+        { providerId: "b", amountUsd: 20 },
+        { providerId: "c", amountUsd: 30 },
+      ],
+    };
+
+    it("keeps only what is still owed", () => {
+      savePending(basket, store);
+      narrowPlan("0xhash", [{ providerId: "c", amountUsd: 30 }], store);
+      expect(loadPending(store)?.plan).toEqual([{ providerId: "c", amountUsd: 30 }]);
+    });
+
+    it("drops the record once the basket is fully bought", () => {
+      savePending(basket, store);
+      narrowPlan("0xhash", [], store);
+      expect(loadAllPending(store)).toHaveLength(0);
+    });
+
+    it("touches only the named bridge", () => {
+      savePending(basket, store);
+      savePending({ ...basket, originTxHash: "0xhash2" }, store);
+      narrowPlan("0xhash", [], store);
+      const left = loadAllPending(store);
+      expect(left).toHaveLength(1);
+      expect(left[0]!.originTxHash).toBe("0xhash2");
+      expect(left[0]!.plan).toHaveLength(3);
+    });
+
+    it("does nothing for a hash that isn't queued", () => {
+      savePending(basket, store);
+      narrowPlan("0xnope", [], store);
+      expect(loadAllPending(store)).toHaveLength(1);
+    });
+
+    it("preserves the rest of the record, including a failure count", () => {
+      savePending({ ...basket, attempts: 2 }, store);
+      narrowPlan("0xhash", [{ providerId: "b", amountUsd: 20 }], store);
+      const rec = loadPending(store)!;
+      expect(rec.attempts).toBe(2);
+      expect(rec.expectedUsdc).toBe(sample.expectedUsdc);
+    });
   });
 
   it("leaves the order alone when promoting the head or an unknown hash", () => {
