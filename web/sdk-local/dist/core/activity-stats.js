@@ -16,6 +16,8 @@ exports.utcDayStart = utcDayStart;
 exports.isSameUtcDay = isSameUtcDay;
 exports.groupByDay = groupByDay;
 exports.summarizeDays = summarizeDays;
+exports.activeDays = activeDays;
+exports.takeByEventCount = takeByEventCount;
 exports.SECONDS_PER_DAY = 86400;
 /** Money going into positions. */
 const INFLOW = new Set(["buy", "deposit", "receive"]);
@@ -101,4 +103,36 @@ function summarizeDays(days) {
             activeDays += 1;
     }
     return { startUsd, endUsd, changeUsd, changePct, inUsd, outUsd, trades, activeDays };
+}
+/**
+ * The days worth listing. A day with a value but nothing done to it says only what
+ * the chart above already draws, and there is one of those for every quiet day —
+ * pages of "$0.00" rows burying the handful that record an actual decision.
+ *
+ * Kept separate from `groupByDay` on purpose: the change-against-the-previous-day
+ * figure and the range summary must be computed over EVERY day, or a quiet stretch
+ * would vanish from the arithmetic as well as from the screen.
+ */
+function activeDays(days) {
+    return days.filter((d) => d.events.length > 0);
+}
+/**
+ * The first `limit` transactions' worth of days, plus whether more remain.
+ *
+ * Counted in TRANSACTIONS rather than days: a day is not a unit of reading, and one
+ * busy day can hold more rows than a fortnight of quiet ones. Days are never split —
+ * the day that crosses the limit is shown whole, because half a day's trades is a
+ * misleading picture of that day.
+ */
+function takeByEventCount(days, limit) {
+    const shown = [];
+    let counted = 0;
+    for (const d of days) {
+        if (counted >= limit)
+            break;
+        shown.push(d);
+        counted += d.events.length;
+    }
+    const total = days.reduce((n, d) => n + d.events.length, 0);
+    return { shown, remaining: total - counted };
 }
