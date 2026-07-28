@@ -24,6 +24,8 @@ interface Props {
 export function YieldGroupRow({ group, onOpen }: Props) {
   const top = group.views.reduce((a, b) => (b.apy > a.apy ? b : a), group.views[0]);
   const history = useApyHistory(top.defiLlamaPoolId);
+  // Coloured by direction, same as the stock rows — see YieldProviderRow.
+  const up = history.length > 1 && history[history.length - 1]! >= history[0]!;
   const positionTotal = group.views.reduce(
     (sum, v) => sum + fromBaseUnits(v.underlyingBalance, v.decimals),
     0,
@@ -65,7 +67,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
 
       {history.length > 1 && (
         <div className="mx-4 hidden max-w-[140px] flex-1 sm:block">
-          <Sparkline values={history} height={32} className="h-8 w-full text-[#3c05c7]/40" />
+          <Sparkline values={history} height={32} className={`h-8 w-full ${up ? "text-emerald-400/40" : "text-red-400/40"}`} />
         </div>
       )}
 
