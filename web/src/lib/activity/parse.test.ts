@@ -129,3 +129,44 @@ describe("what a trade actually was", () => {
     expect(e.units).toBeUndefined();
   });
 });
+
+// The per-unit price used to divide a CENT-ROUNDED amount by a tiny unit count, which
+// turned half a cent into ~$80/oz on gold. A $0.25 buy and a $0.25 sell came out
+// $158/oz apart on rounding alone — a spread the user never paid.
+describe("per-unit price precision", () => {
+  const tx = (usdc: number, gold: number) => ({
+    signature: "sig",
+    timestamp: 1_773_273_600,
+    tokenTransfers: [
+      {
+        mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        tokenAmount: Math.abs(usdc),
+        fromUserAccount: usdc < 0 ? "OWNER" : "POOL",
+        toUserAccount: usdc < 0 ? "POOL" : "OWNER",
+      },
+      {
+        mint: "GOLDMINT",
+        tokenAmount: Math.abs(gold),
+        fromUserAccount: gold < 0 ? "OWNER" : "POOL",
+        toUserAccount: gold < 0 ? "POOL" : "OWNER",
+      },
+    ],
+  });
+
+  const NAMES = { GOLDMINT: "Tether Gold (XAUt0)" };
+  const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+  it("prices from the raw amount, not the displayed cents", () => {
+    // 0.2599 paid for 0.000063 units → 4125.4/oz. Rounding usd to $0.26 first would
+    // have reported 4126.98 — a difference of more than a dollar an ounce.
+    const [e] = parseActivity([tx(-0.2599, 0.000063)], "OWNER", USDC, NAMES);
+    expect(e!.usd).toBe(0.26); // still rounded for display
+    expect(e!.unitPriceUsd).toBeCloseTo(0.2599 / 0.000063, 6);
+  });
+
+  it("a matched buy and sell at the same real price no longer look far apart", () => {
+    const [buy] = parseActivity([tx(-0.26, 0.000063)], "OWNER", USDC, NAMES);
+    const [sell] = parseActivity([tx(0.26, -0.000063)], "OWNER", USDC, NAMES);
+    expect(buy!.unitPriceUsd).toBeCloseTo(sell!.unitPriceUsd!, 6);
+  });
+});

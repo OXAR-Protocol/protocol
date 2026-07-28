@@ -77,7 +77,13 @@ export function parseActivity(
       }
     }
 
-    const usd = Math.abs(usdcDelta) >= DUST ? round2(Math.abs(usdcDelta)) : null;
+    // Rounded for display. The per-unit price below divides the RAW figure instead:
+    // on a small trade, cents are a large share of the total, and dividing a
+    // cent-rounded amount by a tiny unit count turns that rounding into hundreds of
+    // dollars per ounce. A $0.25 buy and a $0.25 sell of gold came out $158/oz apart
+    // on rounding alone — a spread the user never paid.
+    const usdRaw = Math.abs(usdcDelta) >= DUST ? Math.abs(usdcDelta) : null;
+    const usd = usdRaw !== null ? round2(usdRaw) : null;
 
     let kind: ActivityKind;
     let label: string;
@@ -113,7 +119,7 @@ export function parseActivity(
       usd,
       ...(primaryMint ? { mint: primaryMint } : {}),
       ...(units ? { units } : {}),
-      ...(units && usd ? { unitPriceUsd: usd / units } : {}),
+      ...(units && usdRaw ? { unitPriceUsd: usdRaw / units } : {}),
     });
   }
 

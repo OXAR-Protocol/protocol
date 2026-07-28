@@ -282,6 +282,7 @@ export const en = {
   "gas.missing": "paying from {chain} needs a little {sym} on {chain} for the network fee — about {usd}. That fee is charged by the network in {sym}, so dollars can't cover it. The Solana side is on us.",
   "gas.low": "you have {have} of {sym} on {chain} — the network fee there usually costs about {usd}. It may not go through. The Solana side is on us.",
   "gas.split": "network fee on {chain} is paid in that chain's own coin, from your wallet. The Solana side is on us.",
+  "market.filterScope": "these narrow the savings rates below — stocks and gold aren't filtered",
   "activity.each": "each",
   "activity.empty": "nothing yet — your money is still snoring.",
   "activity.showMore": "show more",
