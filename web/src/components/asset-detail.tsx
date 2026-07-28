@@ -12,7 +12,7 @@ import { useSwapOutPreview } from "@/hooks/use-swap-out-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { fromBaseUnits, planWithdrawal } from "@/lib/yield";
 import { settledAmount } from "@/lib/yield/settled";
-import { BanknoteBg } from "@/components/banknote-bg";
+import { PhotoBg } from "@/components/photo-bg";
 import { useT } from "@/lib/i18n";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { getAssetInfo } from "@/lib/yield/asset-info";
@@ -180,11 +180,13 @@ export function AssetDetail({
       {positionValue > 0 && (
         <motion.section
           {...fade(0.08)}
-          className="relative isolate mt-6 overflow-hidden rounded-[12px] border border-[#3c05c7]/30 bg-[#3c05c7]/[0.04] p-5"
+          className="relative mt-6 overflow-hidden rounded-[12px] border border-black/10 bg-white p-5"
         >
-          {/* The same banknote engraving the asset cards carry, rather than a flat
-              violet panel. Keyed to the asset so this page keeps one bill. */}
-          <BanknoteBg seed={view.id} />
+          {/* The wallet card's treatment, not a violet wash: a white card and a real
+              photograph. The engraving at 6% behind a purple tint read as a smudge —
+              a picture you can't quite see is worse than no picture. */}
+          <PhotoBg src="/art/dripping-dollar.webp" scrim="left" position="object-[right_top]" zoomOnMobile />
+          <div className="relative">
           <p className="lowercase text-[13px] text-black/55">{t("asset.yourPosition")}</p>
           <p className="mt-1 text-[clamp(24px,3.4vw,34px)] font-bold tabular-nums">
             ${positionValue.toFixed(2)}
@@ -223,6 +225,7 @@ export function AssetDetail({
               t("asset.principalYield")
             )}
           </p>
+          </div>
         </motion.section>
       )}
 
