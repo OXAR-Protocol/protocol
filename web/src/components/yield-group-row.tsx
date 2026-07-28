@@ -1,12 +1,11 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
-
 import type { ProviderGroup } from "@/lib/yield";
 import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { Sparkline } from "@/components/sparkline";
+import { BanknoteBg } from "@/components/banknote-bg";
 import { useApyHistory } from "@/hooks/use-apy-history";
 
 interface Props {
@@ -15,12 +14,15 @@ interface Props {
 }
 
 /**
- * One marketplace card for a collapsed protocol (e.g. Jupiter Lend USDC/USDT/USDG).
+ * One marketplace row for a collapsed protocol (e.g. Jupiter Lend USDC/USDT).
  * Shows the asset chips + "up to" the best APY; opening it reveals the asset picker.
+ *
+ * Same shape as the single-provider and stock rows — see `YieldProviderRow`. There's
+ * no pick control here on purpose: a group is several sources, and "add to multi"
+ * would have to guess which of them the user meant.
  */
 export function YieldGroupRow({ group, onOpen }: Props) {
   const top = group.views.reduce((a, b) => (b.apy > a.apy ? b : a), group.views[0]);
-  // Same trend the grid card draws — the list row was the only place without it.
   const history = useApyHistory(top.defiLlamaPoolId);
   const positionTotal = group.views.reduce(
     (sum, v) => sum + fromBaseUnits(v.underlyingBalance, v.decimals),
@@ -30,63 +32,48 @@ export function YieldGroupRow({ group, onOpen }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group w-full text-left p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition"
+      className="group relative isolate flex w-full items-center justify-between overflow-hidden rounded-[8px] border border-black/10 bg-white p-5 text-left transition-colors hover:border-black/30"
     >
-      <div className="flex items-center gap-4">
-        <AssetIcon src={assetLogoSrc(group.views[0]?.id ?? "")} label={group.name} size={36} />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-base text-black truncate">{group.name}</p>
-            <span className="text-[10px] lowercase tracking-wide text-emerald-600">
-              ● live
-            </span>
-            {positionTotal > 0 && (
-              <span className="text-[10px] lowercase tracking-wide text-[#3c05c7]">
-                · you&apos;re in
-              </span>
-            )}
-          </div>
-          <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-            {group.views.map((v) => (
-              <span
-                key={v.id}
-                className="text-[10px] lowercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15"
-              >
-                {v.assetSymbol}
-              </span>
-            ))}
-          </div>
-          {positionTotal > 0 && (
-            <p className="mt-2 text-[11px] text-black/55">
-              your position: ${positionTotal.toFixed(2)}
-            </p>
-          )}
-        </div>
+      <BanknoteBg seed={group.views[0]?.id ?? group.name} />
 
-        {history.length > 1 && (
-          <div className="mx-4 hidden max-w-[140px] flex-1 sm:block">
-            <Sparkline values={history} className="h-8 w-full text-[#3c05c7]/60" />
+      <div className="min-w-0">
+        <div className="flex items-center gap-3">
+          <AssetIcon src={assetLogoSrc(group.views[0]?.id ?? "")} label={group.name} size={36} />
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-2">
+              <p className="truncate text-base text-black">{group.name}</p>
+              <span className="text-[10px] lowercase tracking-wide text-emerald-600">● live</span>
+            </div>
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+              {group.views.map((v) => (
+                <span
+                  key={v.id}
+                  className="rounded border border-black/15 px-1.5 py-0.5 text-[10px] lowercase tracking-wide text-black/55"
+                >
+                  {v.assetSymbol}
+                </span>
+              ))}
+            </div>
           </div>
+        </div>
+        {positionTotal > 0 && (
+          <p className="mt-1 text-[11px] tabular-nums text-[#3c05c7]/80">
+            you own ${positionTotal.toFixed(2)}
+          </p>
         )}
+      </div>
 
-        <div className="text-right shrink-0">
-          <p className="text-xl text-black tabular-nums">
-            up to {(group.maxApy * 100).toFixed(2)}%
-          </p>
-          <p
-            className={`text-[10px] lowercase tracking-wide ${
-              RISK_TONE[top.riskLevel] ?? "text-black/55"
-            }`}
-          >
-            {RISK_LABEL[top.riskLevel] ?? top.riskLevel}
-          </p>
+      {history.length > 1 && (
+        <div className="mx-4 hidden max-w-[140px] flex-1 sm:block">
+          <Sparkline values={history} height={32} className="h-8 w-full text-[#3c05c7]/40" />
         </div>
+      )}
 
-        <ArrowUpRight
-          size={16}
-          strokeWidth={1.5}
-          className="text-black/40 group-hover:text-black transition shrink-0"
-        />
+      <div className="ml-3 text-right">
+        <p className="text-xl tabular-nums text-black">up to {(group.maxApy * 100).toFixed(2)}%</p>
+        <p className={`text-[10px] lowercase tracking-wide ${RISK_TONE[top.riskLevel] ?? "text-black/55"}`}>
+          {RISK_LABEL[top.riskLevel] ?? top.riskLevel}
+        </p>
       </div>
     </button>
   );
