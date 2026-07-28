@@ -21,3 +21,15 @@ export const CHAIN_LABEL: Record<string, string> = {
   base: "Base",
   arbitrum: "Arbitrum",
 };
+
+/**
+ * What ONE unit of a position is called.
+ *
+ * `assetSymbol` is the currency a source settles in — USDC for a tokenised stock —
+ * so using it to label a share count says "0.005868 USDC" for something that is
+ * neither USDC nor that amount of it. The ticker is carried in the name, e.g.
+ * "Apple (AAPLx)"; for sources that hold their own asset the two coincide.
+ */
+export function unitLabelOf(v: { name: string; assetSymbol: string }): string {
+  return v.name.match(/\(([^)]+)\)/)?.[1] ?? v.assetSymbol;
+}
