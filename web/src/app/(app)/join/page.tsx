@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 export default function JoinPage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/home");
+    router.replace("/portfolio");
   }, [router]);
   return <div className="fixed inset-0 bg-white" />;
 }

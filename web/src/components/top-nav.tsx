@@ -8,7 +8,7 @@ import { DISPLAY } from "@/components/landing-v2/fonts";
 import { WalletMenu } from "@/components/wallet-menu";
 
 const tabs = [
-  { href: "/home", label: "home" },
+  { href: "/portfolio", label: "portfolio" },
   { href: "/market", label: "market" },
   { href: "/you", label: "you" },
 ] as const;
@@ -20,7 +20,7 @@ export function TopNav() {
   return (
     <nav className="safe-top sticky top-0 z-40 bg-[#fbfaf8]/70 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5">
-        <Link href="/home" className="shrink-0 text-[22px] font-bold leading-none text-black" style={{ fontFamily: DISPLAY }}>
+        <Link href="/portfolio" className="shrink-0 text-[22px] font-bold leading-none text-black" style={{ fontFamily: DISPLAY }}>
           OXAR.
         </Link>
 
