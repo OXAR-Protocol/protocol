@@ -285,6 +285,7 @@ export const en = {
   "market.filterScope": "these narrow the savings rates below — stocks and gold aren't filtered",
   "alloc.bridgeNote": "paying from another chain takes a couple of minutes — we'll send the money now and buy as soon as it lands, even if you close this.",
   "bulk.bridging": "sending your money…",
+  "alloc.stopWaiting": "waiting for your money — tap to stop",
   "activity.each": "each",
   "activity.empty": "nothing yet — your money is still snoring.",
   "activity.showMore": "show more",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useFiatOnramp } from "@privy-io/react-auth";
 import type { FiatOnrampEnvironment } from "@privy-io/api-types";
 import { PublicKey, type Connection } from "@solana/web3.js";
@@ -47,10 +47,13 @@ async function pollUsdcArrival(
   owner: PublicKey,
   baseline: number,
   minDelta: number,
+  /** Checked each round so a cancelled top-up stops polling instead of running the
+   *  full timeout in the background. */
+  stopped: () => boolean,
   timeoutMs = 10 * 60 * 1000,
 ): Promise<number> {
   const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
+  while (Date.now() < deadline && !stopped()) {
     const current = await getUsdcUi(connection, owner);
     if (current - baseline >= minDelta) return current - baseline;
     await sleep(4000);
@@ -63,6 +66,19 @@ export function useCardTopUp() {
   const { walletAddress, connection } = useSolanaContext();
   const { fund } = useFiatOnramp();
   const [status, setStatus] = useState<CardTopUpStatus>("idle");
+  // Closing the provider's window doesn't resolve `fund()` as "cancelled" — the
+  // result type only knows 'submitted' and 'confirmed' — so a user who backs out
+  // leaves us awaiting a promise that may never settle, and then waiting ten
+  // minutes for money that isn't coming. This is the way out of both.
+  const cancelRef = useRef<((reason: Error) => void) | null>(null);
+  const stoppedRef = useRef(false);
+
+  /** Stop waiting. Nothing was charged if the provider flow was abandoned; if it
+   *  wasn't, the money still arrives and simply shows up as balance. */
+  const cancel = useCallback(() => {
+    stoppedRef.current = true;
+    cancelRef.current?.(new UserFacingError("Stopped waiting — nothing was charged."));
+  }, []);
 
   /** Returns the USDC that actually landed, in dollars — net of the provider's fees,
    *  which is always less than what the user typed into the card form. */
@@ -71,6 +87,11 @@ export function useCardTopUp() {
       if (!walletAddress) throw new Error("Wallet not connected");
       if (usdAmount <= 0) return 0;
       const owner = walletAddress;
+
+      stoppedRef.current = false;
+      const abandoned = new Promise<never>((_, reject) => {
+        cancelRef.current = reject;
+      });
 
       try {
         setStatus("funding");
@@ -84,12 +105,15 @@ export function useCardTopUp() {
           defaultAmount: String(Math.max(1, Math.round(usdAmount))),
         });
         const baseline = await getUsdcUi(connection, owner);
-        await funding;
+        await Promise.race([funding, abandoned]);
 
         // The provider confirms before the USDC settles on-chain — wait for it to
         // actually land, then report the REALIZED amount.
         setStatus("arriving");
-        const arrived = await pollUsdcArrival(connection, owner, baseline, Math.max(1, usdAmount * 0.5));
+        const arrived = await Promise.race([
+          pollUsdcArrival(connection, owner, baseline, Math.max(1, usdAmount * 0.5), () => stoppedRef.current),
+          abandoned,
+        ]);
         if (arrived <= 0) {
           throw new UserFacingError(
             "We didn't see your funds arrive yet — card top-ups can take a few minutes. " +
@@ -99,10 +123,11 @@ export function useCardTopUp() {
         return arrived;
       } finally {
         setStatus("idle");
+        cancelRef.current = null;
       }
     },
     [walletAddress, connection, fund],
   );
 
-  return { topUp, status, busy: status !== "idle" };
+  return { topUp, cancel, status, busy: status !== "idle" };
 }

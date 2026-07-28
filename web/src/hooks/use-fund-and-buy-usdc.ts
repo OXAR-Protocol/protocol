@@ -33,7 +33,7 @@ function usdcAsset(usdAmount: number): WalletAsset {
 
 export function useFundAndBuyUsdc(providerId: string) {
   const { walletAddress } = useSolanaContext();
-  const { topUp, status: topUpStatus } = useCardTopUp();
+  const { topUp, cancel, status: topUpStatus } = useCardTopUp();
   const { depositWith } = useUniversalDeposit(providerId);
   const [buying, setBuying] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,5 +61,7 @@ export function useFundAndBuyUsdc(providerId: string) {
   );
 
   const status: CardBuyStatus = buying ? "buying" : topUpStatus;
-  return { buyWithCard, status, busy: status !== "idle", error };
+  // `cancel` stops the wait — an abandoned provider window leaves `fund()` in a
+  // state that never resolves, so there has to be a way out. See useCardTopUp.
+  return { buyWithCard, cancel, status, busy: status !== "idle", error };
 }
