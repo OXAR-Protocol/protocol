@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 
 import { useT } from "@/lib/i18n";
 
@@ -46,7 +46,7 @@ export function PickButton({
           : "border-black/15 bg-white/80 text-black/50 hover:border-black/40 hover:text-black"
       } ${className ?? ""}`}
     >
-      {picked && <Check size={11} strokeWidth={2.5} />}
+      {picked ? <Check size={11} strokeWidth={2.5} /> : <Plus size={11} strokeWidth={2.5} />}
       {picked ? t("bulk.picked") : t("bulk.pick")}
     </span>
   );

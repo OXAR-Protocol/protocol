@@ -10,17 +10,12 @@ import { SectionLabel } from "@/components/section-label";
 import { LiveAmount } from "@/components/live-amount";
 import { LiveEarned } from "@/components/live-earned";
 import { WalletCash } from "@/components/wallet-cash";
-import { TopMoversCarousel } from "@/components/top-movers-carousel";
 import { PhotoBg } from "@/components/photo-bg";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
-import { useStockPrices } from "@/hooks/use-stock-prices";
-import { fromBaseUnits } from "@/lib/yield";
+import { PortfolioPanel } from "@/components/portfolio-panel";
 import { isXStock } from "@/lib/yield/xstocks";
 import { isGold } from "@/lib/yield/gold";
-import { isPriceExposure } from "@/lib/yield/assets";
-import { AssetIcon } from "@/components/asset-icon";
-import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { useT } from "@/lib/i18n";
 
 /** Sum a set of earning sources into the inputs LiveEarned needs. */
@@ -63,15 +58,9 @@ export default function HomePage() {
     (v) => Number(v.underlyingBalance) > 0,
   );
 
-  // 24h price change for price-exposure positions (stocks/gold) — shown instead
-  // of a meaningless "0.00% APY" on those cards.
-  const priceMints = activePositions
-    .filter((v) => isPriceExposure(v.id) && v.heldMint)
-    .map((v) => v.heldMint as string);
-  const { prices } = useStockPrices(priceMints);
 
   return (
-    <div className="max-w-[1100px] mx-auto pt-8 pb-32">
+    <div className="mx-auto max-w-[900px] pt-8 pb-32">
       {/* Greeting */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -132,9 +121,6 @@ export default function HomePage() {
       {/* Money in the wallet, not put to work yet — nudge to invest it. */}
       <WalletCash />
 
-      {/* Top movers — discovery strip across stocks + gold (24h). */}
-      <TopMoversCarousel />
-
       {/* Empty state — first-time hero */}
       {totalUsdc === 0 && !loading && (
         <motion.section
@@ -160,7 +146,7 @@ export default function HomePage() {
               </p>
               <div className="mt-6">
                 <Link
-                  href="/yield"
+                  href="/market"
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
                 >
                   {t("home.wakeUp")}
@@ -172,68 +158,10 @@ export default function HomePage() {
         </motion.section>
       )}
 
-      {/* Where it's sleeping — live positions */}
-      {activePositions.length > 0 && (
-        <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.25 }}
-          className="mb-12"
-        >
-          <div className="flex items-baseline justify-between mb-4">
-            <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
-              {t("home.whereSleeping")}
-            </p>
-            <Link
-              href="/pile"
-              className="text-xs text-black/45 hover:text-black transition-colors"
-            >
-              {t("home.manage")}
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {activePositions.map((v) => {
-              const value = fromBaseUnits(v.underlyingBalance, v.decimals);
-              return (
-                <Link
-                  key={v.id}
-                  href={`/asset/${v.id}`}
-                  className="p-5 rounded-[12px] border border-black/10 bg-white hover:border-black/30 transition-colors min-h-[120px] flex flex-col justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <AssetIcon src={assetLogoSrc(v.id)} label={assetIconLabel(v.id, v.assetSymbol)} size={32} />
-                    <div className="min-w-0">
-                    <p className="text-base text-black">{v.name}</p>
-                    {(() => {
-                      const ch = v.heldMint ? prices[v.heldMint]?.change24h : undefined;
-                      if (isPriceExposure(v.id) && typeof ch === "number") {
-                        const up = ch >= 0;
-                        return (
-                          <p className="mt-1 text-xs">
-                            <span className={up ? "text-emerald-600" : "text-red-600"}>
-                              {up ? "+" : ""}
-                              {ch.toFixed(2)}% 24h
-                            </span>
-                            <span className="text-black/45"> · {v.assetSymbol}</span>
-                          </p>
-                        );
-                      }
-                      return (
-                        <p className="mt-1 text-xs text-black/45">
-                          {(v.apy * 100).toFixed(2)}% APY · {v.assetSymbol}
-                        </p>
-                      );
-                    })()}
-                    </div>
-                  </div>
-                  <LiveAmount value={value} apy={v.apy} variant="md" />
-                </Link>
-              );
-            })}
-          </div>
-        </motion.section>
-      )}
+      {/* Everything about the money you already have. Home used to carry a second,
+          thinner copy of this list with a "manage" link to the page that held the
+          real one — the same object shown twice, which is why home read as filler. */}
+      {activePositions.length > 0 && <PortfolioPanel />}
 
     </div>
   );

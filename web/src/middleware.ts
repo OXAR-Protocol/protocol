@@ -5,8 +5,9 @@ const MARKETING_DOMAIN = "oxar.app";
 
 const APP_ROUTES = [
   "/home",
-  "/yield",
-  "/pile",
+  "/market",
+  "/yield", // renamed → /market; kept so the redirect page is reachable
+  "/pile", // moved onto /home; kept so the redirect page is reachable
   "/you",
   "/asset",
   "/onboarding",
