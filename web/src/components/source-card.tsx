@@ -8,6 +8,7 @@ import type { ProviderGroup } from "@/lib/yield";
 import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
 import { useApyHistory } from "@/hooks/use-apy-history";
 import { Sparkline } from "@/components/sparkline";
+import { trendUp, trendLineTone } from "@/lib/yield/trend";
 import { AssetIcon } from "@/components/asset-icon";
 import { BanknoteBg } from "@/components/banknote-bg";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
@@ -22,6 +23,7 @@ export function SourceCard({ group, onOpen }: Props) {
   const pickSet = usePickSet();
   const top = group.views.reduce((a, b) => (b.apy > a.apy ? b : a), group.views[0]);
   const history = useApyHistory(top.defiLlamaPoolId);
+  const up = trendUp(history);
   const positionTotal = group.views.reduce(
     (sum, v) => sum + fromBaseUnits(v.underlyingBalance, v.decimals),
     0,
@@ -66,7 +68,7 @@ export function SourceCard({ group, onOpen }: Props) {
         />
       </div>
 
-      <Sparkline values={history} className="w-full h-9 text-[#3c05c7]/60" />
+      <Sparkline values={history} className={`h-9 w-full ${trendLineTone(up)}`} />
 
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">

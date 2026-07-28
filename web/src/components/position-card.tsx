@@ -8,6 +8,7 @@ import { useStockCharts } from "@/hooks/use-stock-charts";
 import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { Sparkline } from "@/components/sparkline";
+import { trendUp, trendLineTone, trendTextTone } from "@/lib/yield/trend";
 import { floorTo } from "@oxar/sdk";
 import { LiveAmount } from "@/components/live-amount";
 import { PickButton } from "@/components/pick-button";
@@ -36,8 +37,10 @@ export function PositionCard({ view, onOpen, change24h, picked, onTogglePick }: 
   const charts = useStockCharts();
 
   const isPrice = isPriceExposure(view.id);
-  const priceUp = (change24h ?? 0) >= 0;
   const history = isPrice ? (view.heldMint ? charts[view.heldMint] ?? [] : []) : apyHistory;
+  // Price assets know their direction from the 24h move; a yield source reads it
+  // off the series it draws.
+  const priceUp = isPrice ? (change24h ?? 0) >= 0 : trendUp(history);
 
   return (
     <button
@@ -74,9 +77,7 @@ export function PositionCard({ view, onOpen, change24h, picked, onTogglePick }: 
 
       <Sparkline
         values={history}
-        className={`w-full h-9 ${
-          isPrice ? (priceUp ? "text-emerald-400/50" : "text-red-400/50") : "text-[#3c05c7]/60"
-        }`}
+        className={`h-9 w-full ${trendLineTone(priceUp)}`}
       />
 
       <div className="flex items-end justify-between gap-2">
@@ -97,7 +98,7 @@ export function PositionCard({ view, onOpen, change24h, picked, onTogglePick }: 
         {isPrice && typeof change24h === "number" ? (
           <p
             className={`text-xs tabular-nums shrink-0 ${
-              priceUp ? "text-emerald-600" : "text-red-600"
+              trendTextTone(priceUp)
             }`}
           >
             {priceUp ? "+" : ""}
