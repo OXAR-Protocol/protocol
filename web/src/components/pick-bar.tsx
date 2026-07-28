@@ -30,9 +30,13 @@ interface Props {
  */
 export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, onSell, onClear }: Props) {
   const { t } = useT();
-  if (selectedCount === 0 && state === "idle") return null;
 
   const failed = done.filter((d) => !d.ok);
+  // The bar exists to hold a selection or to report on one. After a run where
+  // everything went through, it has neither — the set is cleared and there is
+  // nothing left to say, so it should leave rather than sit there reading
+  // "0 in multi".
+  if (selectedCount === 0 && failed.length === 0) return null;
   // Stopping is not failing: it gets a plain line, not a red one.
   const cancelled = failed.some((f) => f.cancelled);
   const realFailures = failed.filter((f) => !f.cancelled);

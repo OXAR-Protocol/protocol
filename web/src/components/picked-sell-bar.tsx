@@ -51,7 +51,11 @@ export function PickedSellBar({ views, allHeld, onOutcome, onDone }: Props) {
     );
     // Keep the failed ones ticked: they are what the user still has to deal with.
     onOutcome(new Set(outcomes.filter((o) => !o.ok).map((o) => o.id)));
-    if (outcomes.every((o) => o.ok)) setAllocating(false);
+    if (outcomes.every((o) => o.ok)) {
+      setAllocating(false);
+      // See PickedBuyBar: a finished run must not colour the next selection.
+      bulk.reset();
+    }
     onDone();
   };
 
