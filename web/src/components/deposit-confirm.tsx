@@ -8,6 +8,8 @@ import type { SwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { WalletAsset } from "@oxar/sdk";
 import { BridgeSteps, type BridgeStep } from "@/components/bridge-steps";
 import { isNativeEvm } from "@/lib/evm/erc20";
+import { OriginGasNote, OriginGasSplit } from "@/components/origin-gas-note";
+import type { OriginGasStatus } from "@oxar/sdk";
 import { useT, localizeError } from "@/lib/i18n";
 
 interface Props {
@@ -24,6 +26,9 @@ interface Props {
   status: string;
   /** Cross-chain step that failed, kept after `status` resets — marks it red. */
   failedAt?: string | null;
+  /** Whether the origin chain's own coin is there to pay its network fee. Computed
+   *  upstream, where the full holdings list lives. */
+  gas: OriginGasStatus;
   error: string | null;
   onConfirm: () => void;
   onBack: () => void;
@@ -52,6 +57,7 @@ export function DepositConfirm({
   label,
   status,
   failedAt,
+  gas,
   error,
   onConfirm,
   onBack,
@@ -106,6 +112,13 @@ export function DepositConfirm({
         <div className="mt-3 rounded-[8px] border border-black/10 px-3 py-2.5">
           <BridgeSteps steps={bridgeSteps} status={busy ? status : "idle"} failedAt={busy ? null : failedAt} />
           <p className="mt-1.5 text-[10px] lowercase tracking-wide text-black/40">{t("confirm.step.hint")}</p>
+          {/* Which side pays which fee, stated plainly — and a warning instead if the
+              origin chain's coin isn't there to pay it. */}
+          {gas.kind === "ok" ? (
+            <OriginGasSplit payAsset={payAsset} />
+          ) : (
+            <OriginGasNote status={gas} payAsset={payAsset} />
+          )}
         </div>
       )}
 

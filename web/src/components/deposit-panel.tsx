@@ -15,7 +15,7 @@ import { useFundAndBuy } from "@/hooks/use-fund-and-buy";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
-import { assetUid, normalizeDecimalInput } from "@oxar/sdk";
+import { assetUid, checkOriginGas, normalizeDecimalInput } from "@oxar/sdk";
 import { USDC_MINT } from "@/lib/constants";
 import { useT, localizeError } from "@/lib/i18n";
 
@@ -185,6 +185,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           label={busyLabel}
           status={status}
           failedAt={failedAt}
+          gas={checkOriginGas(payAsset, assets)}
           error={error}
           onConfirm={handleDeposit}
           onBack={() => setConfirming(false)}

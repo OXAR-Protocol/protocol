@@ -73,7 +73,7 @@ export const EVM_GAS_RESERVE_USD: Record<string, number> = {
   "arb-mainnet": 0.1,
   "opt-mainnet": 0.1,
 };
-const DEFAULT_EVM_GAS_RESERVE_USD = 0.5;
+export const DEFAULT_EVM_GAS_RESERVE_USD = 0.5;
 
 /** True for a native EVM coin (ETH/POL) — pays its own origin-chain gas. */
 function isNativeEvmCoin(asset: WalletAsset): boolean {

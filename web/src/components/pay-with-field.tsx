@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpDown, ChevronDown } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
+import { OriginGasNote } from "@/components/origin-gas-note";
 import { useT } from "@/lib/i18n";
 import {
+  checkOriginGas,
   spendableBase,
   assetUid,
   assetNetworkLabel,
@@ -221,6 +223,10 @@ export function PayWithField({
           </button>
         )}
       </div>
+
+      {/* Paying from another chain costs that chain's own coin — say so here, where
+          the choice is made, not after the wallet rejects the transaction. */}
+      <OriginGasNote status={checkOriginGas(active, assets)} payAsset={active} />
 
       {/* Holdings picker */}
       {open && (
