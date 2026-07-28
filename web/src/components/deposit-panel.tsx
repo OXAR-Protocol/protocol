@@ -48,7 +48,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const { linkWallet, unlinkWallet } = usePrivy();
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
   const { assets: evmAssets, evmAddress, loading: evmLoading } = useEvmAssets();
-  const { depositWith, busy, status, error } = useDeposit(view.id);
+  const { depositWith, busy, status, failedAt, error } = useDeposit(view.id);
   const busyLabel = busy ? t(`status.${status}` as "status.working") : null;
   // Apple Pay / card path — funds fresh USDC via Privy's on-ramp, then buys.
   // Works with no crypto in the wallet (the whole point), so it's independent
@@ -184,6 +184,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           busy={busy}
           label={busyLabel}
           status={status}
+          failedAt={failedAt}
           error={error}
           onConfirm={handleDeposit}
           onBack={() => setConfirming(false)}

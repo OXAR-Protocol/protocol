@@ -50,6 +50,10 @@ export function useBridgeDeposit(providerId: string) {
   const { connection, walletAddress } = useSolanaContext();
   const { wallets } = useWallets();
   const [status, setStatus] = useState<BridgeStatus>("idle");
+  // Which step it died on. `status` is reset to "idle" in the `finally`, so without
+  // this the step tracker forgot everything the moment something failed — every step,
+  // finished or not, went back to plain grey and the user couldn't see where it stopped.
+  const [failedAt, setFailedAt] = useState<BridgeStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fetchQuote = useCallback(
@@ -84,6 +88,14 @@ export function useBridgeDeposit(providerId: string) {
       if (!evmWallet) throw new UserFacingError("Connect an EVM wallet (MetaMask) to pay from another chain");
 
       setError(null);
+      setFailedAt(null);
+      // Mirrors `status` inside this run — the state setter's value isn't readable
+      // from here, and the catch block needs to know which step was in progress.
+      let step: BridgeStatus = "idle";
+      const goTo = (s: BridgeStatus) => {
+        step = s;
+        setStatus(s);
+      };
       try {
         // The post-bridge deposit is a Solana tx. With Kora, the relayer pays its
         // fee AND the lending-token account rent, so a 0-SOL wallet is fine — this
@@ -108,7 +120,7 @@ export function useBridgeDeposit(providerId: string) {
         if (payBase > max) payBase = max;
         if (payBase <= BigInt(0)) throw new UserFacingError(`Not enough ${payAsset.symbol}`);
 
-        setStatus("quoting");
+        goTo("quoting");
         const req = buildQuoteRequest({
           senderAddress: evmWallet.address,
           originChainId,
@@ -163,7 +175,7 @@ export function useBridgeDeposit(providerId: string) {
             provider: provider1193,
           });
           if (allowance < payBase) {
-            setStatus("approving");
+            goTo("approving");
             const approve = async (amount: bigint) => {
               const hash = (await provider1193.request({
                 method: "eth_sendTransaction",
@@ -183,7 +195,7 @@ export function useBridgeDeposit(providerId: string) {
         const baseline = await readUsdcBase(connection, walletAddress, destinationMint);
         const expected = bridgeNetOut(quote);
 
-        setStatus("bridging");
+        goTo("bridging");
         // EIP-1193 wants a hex value; normalize whether Delora returns hex ("0x00") or decimal.
         const valueHex = `0x${BigInt(quote.calldata.value || "0").toString(16)}`;
         const txHash = (await provider1193.request({
@@ -210,6 +222,7 @@ export function useBridgeDeposit(providerId: string) {
       } catch (e) {
         console.error("Bridge deposit failed:", e);
         setError(toFriendlyError(e));
+        setFailedAt(step);
         throw e;
       } finally {
         setStatus("idle");
@@ -218,5 +231,5 @@ export function useBridgeDeposit(providerId: string) {
     [providerId, walletAddress, wallets, connection, fetchQuote],
   );
 
-  return { bridgeAndDeposit, status, error };
+  return { bridgeAndDeposit, status, failedAt, error };
 }

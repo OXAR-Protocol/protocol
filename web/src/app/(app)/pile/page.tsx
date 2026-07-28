@@ -402,6 +402,7 @@ export default function PilePage() {
             maxUsd: fromBaseUnits(v.underlyingBalance, v.decimals),
           }))}
           busy={bulk.state === "running"}
+          results={bulk.results}
           progress={
             bulk.state === "running"
               ? t("bulk.progress", { n: String(bulk.done.length), total: String(selectedViews.length) })

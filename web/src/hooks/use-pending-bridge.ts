@@ -5,7 +5,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { USDC_MINT } from "@/lib/constants";
-import { loadPending, loadAllPending, savePending, clearPending, PENDING_EVENT, type PendingBridge } from "@/lib/bridge/pending";
+import {
+  loadActivePending,
+  loadStuckPending,
+  countPending,
+  savePending,
+  clearPending,
+  promotePending,
+  PENDING_EVENT,
+  type PendingBridge,
+} from "@/lib/bridge/pending";
 import { pollUsdcArrival } from "@/lib/bridge/arrival";
 
 /**
@@ -22,10 +31,14 @@ import { pollUsdcArrival } from "@/lib/bridge/arrival";
  */
 export function usePendingBridge() {
   const { connection, walletAddress, canSign, isExternal } = useSolanaContext();
-  const [pending, setPending] = useState<PendingBridge | null>(() => loadPending());
-  // How many bridges are queued in total (head + waiting) — surfaced so a user who
-  // fired several concurrent cross-chain deposits sees they're all tracked.
-  const [queued, setQueued] = useState<number>(() => loadAllPending().length);
+  // The bridge being polled/deposited right now — the first one that hasn't failed.
+  const [pending, setPending] = useState<PendingBridge | null>(() => loadActivePending());
+  // A bridge whose funds landed but whose deposit failed. Tracked SEPARATELY from
+  // `pending` on purpose: it's waiting for a human, and it used to hide every bridge
+  // behind it (nothing polled, nothing shown) simply by sitting at the head.
+  const [stuck, setStuck] = useState<PendingBridge | null>(() => loadStuckPending());
+  // Moving vs. waiting-for-a-human, so the banner can name both instead of one.
+  const [counts, setCounts] = useState(() => countPending());
   const [resuming, setResuming] = useState(false);
   // Bridged funds have LANDED but an external wallet still owes a signature for the
   // buy — surface a tap instead of a background sign (which hangs: the wallet's
@@ -33,17 +46,18 @@ export function usePendingBridge() {
   const [arrived, setArrived] = useState(false);
   // originTxHash currently being polled — guards against double-processing.
   const processingRef = useRef<string | null>(null);
+  // Re-arms the watcher after a Retry: the record keeps its hash, so nothing in the
+  // effect's deps would otherwise change and it would never poll again.
+  const [rearm, setRearm] = useState(0);
   const { deposit } = useYieldActions(pending?.providerId ?? "");
 
-  // Funds arrived but the deposit/swap didn't complete → surface, never strand.
-  const failed = (pending?.attempts ?? 0) > 0;
-
-  // Re-read the queue → show the current head (next in-flight bridge) + total count.
+  // Re-read the queue → the bridge to work, the one that needs a hand, and the counts.
   // Used after every mutation so finishing one bridge advances to the next instead of
   // hiding the banner (the old single-record code did setPending(null)).
   const syncFromStore = useCallback(() => {
-    setPending(loadPending());
-    setQueued(loadAllPending().length);
+    setPending(loadActivePending());
+    setStuck(loadStuckPending());
+    setCounts(countPending());
   }, []);
 
   // Claim the record, then deposit/swap the bridged funds into the chosen asset.
@@ -100,16 +114,12 @@ export function usePendingBridge() {
   // so render churn can't restart (and thereby cancel) an in-flight poll.
   const txHash = pending?.originTxHash ?? null;
   const hasWallet = !!walletAddress;
-  const attempts = pending?.attempts ?? 0;
   useEffect(() => {
     if (!txHash || !hasWallet) return;
     // Wait until the wallet can actually sign — the background watcher can race
     // wallet load, and depositing against the read-only fallback throws "connect
     // your wallet". Gating here avoids a spurious failure; it retries when ready.
     if (!canSign) return;
-    // A prior auto-attempt failed → wait for a manual Retry (don't loop a swap that
-    // just failed). Funds are safe in the wallet as the bridged token meanwhile.
-    if (attempts > 0) return;
     // Already landed and waiting for the user's tap (external) — don't re-poll.
     if (arrived) return;
     if (processingRef.current === txHash) return;
@@ -117,7 +127,9 @@ export function usePendingBridge() {
     let stale = false;
     (async () => {
       try {
-        const rec = loadPending();
+        // Re-read rather than closing over `pending`: a failed record that just went
+        // to the tail must not be picked up again here.
+        const rec = loadActivePending();
         if (!rec) {
           setPending(null);
           return;
@@ -131,7 +143,7 @@ export function usePendingBridge() {
           processingRef.current = null; // timed out without arrival — retry on next visit
           return;
         }
-        const cur = loadPending();
+        const cur = loadActivePending();
         if (!cur) {
           setPending(null);
           return;
@@ -152,31 +164,39 @@ export function usePendingBridge() {
     return () => {
       stale = true;
     };
-  }, [txHash, hasWallet, canSign, attempts, arrived]);
+  }, [txHash, hasWallet, canSign, arrived, rearm]);
 
-  const dismiss = useCallback(() => {
-    clearPending(pending?.originTxHash); // stop watching THIS bridge; the next (if any) shows
-    setArrived(false);
-    processingRef.current = null;
-    syncFromStore();
-  }, [pending, syncFromStore]);
+  /** Stop watching one bridge (by hash). The rest of the queue keeps going. */
+  const dismiss = useCallback(
+    (originTxHash?: string) => {
+      clearPending(originTxHash);
+      setArrived(false);
+      processingRef.current = null;
+      syncFromStore();
+    },
+    [syncFromStore],
+  );
 
   // External wallet: the user taps to sign the buy now that the funds have arrived —
   // this runs in a user gesture, so the wallet's signing popup reliably appears.
   const finish = useCallback(() => {
-    const rec = loadPending();
+    const rec = loadActivePending();
     if (!rec) return;
     void runDeposit(rec);
   }, [runDeposit]);
 
-  // Re-arm a failed deposit for another try (funds already sit in the wallet).
+  // Re-arm a failed deposit for another try (funds already sit in the wallet). It's
+  // promoted to the head so "Retry" means now, not after the others drain.
   const retry = useCallback(() => {
-    const rec = loadPending();
+    const rec = loadStuckPending();
     if (!rec) return;
     processingRef.current = null;
     setArrived(false);
     savePending({ ...rec, attempts: 0 });
-  }, []);
+    promotePending(rec.originTxHash);
+    setRearm((n) => n + 1);
+    syncFromStore();
+  }, [syncFromStore]);
 
-  return { pending, queued, resuming, failed, arrived, dismiss, finish, retry };
+  return { pending, stuck, counts, resuming, arrived, dismiss, finish, retry };
 }

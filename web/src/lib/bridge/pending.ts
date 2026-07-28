@@ -76,9 +76,44 @@ export function savePending(p: PendingBridge, store = defaultStore()): void {
   writeAll(list, store);
 }
 
+/** Its auto-deposit failed after arrival — it needs a human, not another poll. */
+const isStuck = (r: PendingBridge) => (r.attempts ?? 0) > 0;
+
 /** The head of the queue — the bridge currently being worked. */
 export function loadPending(store = defaultStore()): PendingBridge | null {
   return readAll(store)[0] ?? null;
+}
+
+/**
+ * The bridge the watcher should work next: the first one that has NOT failed.
+ * Deliberately not the head — a stuck record waits for a manual Retry, and if the
+ * watcher read the head it would sit on that record and poll nothing, so a second,
+ * perfectly healthy bridge queued behind it never arrived and never deposited.
+ */
+export function loadActivePending(store = defaultStore()): PendingBridge | null {
+  return readAll(store).find((r) => !isStuck(r)) ?? null;
+}
+
+/** The first bridge whose funds landed but whose deposit failed — Retry material. */
+export function loadStuckPending(store = defaultStore()): PendingBridge | null {
+  return readAll(store).find(isStuck) ?? null;
+}
+
+/** How many are still moving vs. waiting for a human — both are worth showing. */
+export function countPending(store = defaultStore()): { active: number; stuck: number } {
+  const list = readAll(store);
+  const stuck = list.filter(isStuck).length;
+  return { active: list.length - stuck, stuck };
+}
+
+/** Move a bridge to the head so it's worked next — a Retry has to act now, not
+ *  after every other queued bridge finishes. No-op if it's already there. */
+export function promotePending(originTxHash: string, store = defaultStore()): void {
+  const list = readAll(store);
+  const i = list.findIndex((r) => r.originTxHash === originTxHash);
+  if (i <= 0) return;
+  const [rec] = list.splice(i, 1);
+  writeAll([rec, ...list], store);
 }
 
 /** The whole queue (for surfacing "N deposits in flight"). */
