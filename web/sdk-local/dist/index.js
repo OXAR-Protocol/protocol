@@ -64,6 +64,7 @@ __exportStar(require("./core/quote-value"), exports);
 __exportStar(require("./core/tx-delta"), exports);
 __exportStar(require("./core/format"), exports);
 __exportStar(require("./core/allocations"), exports);
+__exportStar(require("./core/origin-gas"), exports);
 __exportStar(require("./core/activity-stats"), exports);
 __exportStar(require("./core/format-date"), exports);
 __exportStar(require("./core/portfolio-history"), exports);

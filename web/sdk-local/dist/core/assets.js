@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EVM_GAS_RESERVE_USD = exports.SOL_SPONSORED_RESERVE = exports.SOL_FEE_RESERVE = exports.SOL_MINT = void 0;
+exports.DEFAULT_EVM_GAS_RESERVE_USD = exports.EVM_GAS_RESERVE_USD = exports.SOL_SPONSORED_RESERVE = exports.SOL_FEE_RESERVE = exports.SOL_MINT = void 0;
 exports.assetUid = assetUid;
 exports.spendableBase = spendableBase;
 exports.usdToBase = usdToBase;
@@ -44,7 +44,7 @@ exports.EVM_GAS_RESERVE_USD = {
     "arb-mainnet": 0.1,
     "opt-mainnet": 0.1,
 };
-const DEFAULT_EVM_GAS_RESERVE_USD = 0.5;
+exports.DEFAULT_EVM_GAS_RESERVE_USD = 0.5;
 /** True for a native EVM coin (ETH/POL) — pays its own origin-chain gas. */
 function isNativeEvmCoin(asset) {
     return asset.chain === "ethereum" && asset.mint === evm_assets_1.EVM_NATIVE_SENTINEL;
@@ -64,7 +64,7 @@ function spendableBase(asset, reserveGas = true) {
         return max > BigInt(0) ? max : BigInt(0);
     }
     if (isNativeEvmCoin(asset)) {
-        const usd = exports.EVM_GAS_RESERVE_USD[asset.network ?? ""] ?? DEFAULT_EVM_GAS_RESERVE_USD;
+        const usd = exports.EVM_GAS_RESERVE_USD[asset.network ?? ""] ?? exports.DEFAULT_EVM_GAS_RESERVE_USD;
         const max = asset.amount - usdToBase(asset, usd);
         return max > BigInt(0) ? max : BigInt(0);
     }

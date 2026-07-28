@@ -68,6 +68,7 @@ export declare const SOL_SPONSORED_RESERVE: bigint;
  *  dear and volatile, L2s are cheap. (Precise per-tx gas estimation is a follow-up.)
  *  Keys are Alchemy network ids (see bridge/delora `NETWORK_CHAIN_ID`). */
 export declare const EVM_GAS_RESERVE_USD: Record<string, number>;
+export declare const DEFAULT_EVM_GAS_RESERVE_USD = 0.5;
 /** Base units of an asset that may be spent, leaving gas for the network fee.
  *  - Native SOL: reserve SOL for the tx fee (skipped for Privy-sponsored wallets
  *    via `reserveGas = false`, which keep only the wrapped-SOL rent).
