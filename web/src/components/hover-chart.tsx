@@ -12,6 +12,9 @@ interface Props {
   /** Tailwind text-color class — drives the line, fill, and the marker dot. */
   className?: string;
   fill?: boolean;
+  /** One label per value — shown under the read-out. Without it a scrub says what
+   *  the money was worth but not WHEN, which is half an answer. */
+  labels?: string[];
 }
 
 /**
@@ -26,7 +29,7 @@ interface Props {
  * scrubs the chart (touch-action pan-y keeps vertical page scroll working). On
  * touch the read-out stays after lifting; for mouse it clears on leave.
  */
-export function HoverChart({ values, format, height = 220, className, fill }: Props) {
+export function HoverChart({ values, format, height = 220, className, fill, labels }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   // Cursor x as a 0..1 fraction of the width. null = no active read-out.
   const [frac, setFrac] = useState<number | null>(null);
@@ -46,11 +49,15 @@ export function HoverChart({ values, format, height = 220, className, fill }: Pr
   let leftPct = 0;
   let topPct = 0;
   let value = 0;
+  let label: string | null = null;
   if (frac !== null && n > 1) {
     const pos = frac * (n - 1);
     const idx = Math.min(n - 2, Math.floor(pos));
     const t = pos - idx;
     value = values[idx] + (values[idx + 1] - values[idx]) * t; // interpolated
+    // The label is a real point's, never interpolated — half-way between two days
+    // is not a date, and inventing one would be worse than showing the nearer day.
+    label = labels?.[t < 0.5 ? idx : idx + 1] ?? null;
     leftPct = frac * 100;
     topPct = span === 0 ? 50 : (1 - (value - min) / span) * 100;
   }
@@ -91,6 +98,7 @@ export function HoverChart({ values, format, height = 220, className, fill }: Pr
             style={{ left: `${leftPct}%`, top: `${topPct}%`, transform: `translate(${tx}, ${ty})` }}
           >
             {format(value)}
+            {label && <span className="ml-1.5 text-white/50">{label}</span>}
           </div>
         </>
       )}

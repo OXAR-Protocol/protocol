@@ -15,7 +15,7 @@ import {
 } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import { RISK_TONE, fromBaseUnits } from "@/lib/yield";
-import { floorTo, formatUsdAmount } from "@oxar/sdk";
+import { floorTo, formatUsdAmount, groupByDay, summarizeDays, utcDayStart } from "@oxar/sdk";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { isXStock } from "@/lib/yield/xstocks";
 import { isGold } from "@/lib/yield/gold";
@@ -28,8 +28,8 @@ import { useBulkTrade } from "@/hooks/use-bulk-trade";
 import { PickBar } from "@/components/pick-bar";
 import { PickButton } from "@/components/pick-button";
 import { AllocationSheet } from "@/components/allocation-sheet";
-import { ActivityFeed } from "@/components/activity-feed";
-import { HoverChart } from "@/components/hover-chart";
+import { PortfolioChart, type Range } from "@/components/portfolio-chart";
+import { DayHistory } from "@/components/day-history";
 import { Sparkline } from "@/components/sparkline";
 import { useStockCharts } from "@/hooks/use-stock-charts";
 import { useActivity } from "@/hooks/use-activity";
@@ -41,7 +41,7 @@ type Filter = "all" | "yield" | "stocks" | "gold" | "traded";
 
 export default function PilePage() {
   const router = useRouter();
-  const { t } = useT();
+  const { t, locale } = useT();
   const { views, totalValue, loading, refresh } = useYieldPositions();
   const [layout, setLayout] = useState<Layout>("list");
 
@@ -63,11 +63,23 @@ export default function PilePage() {
   // "Sell" asks HOW MUCH of each, rather than assuming everything.
   const [allocating, setAllocating] = useState(false);
   // Reconstructed from on-chain history + daily prices — see /api/portfolio-history.
-  const history = usePortfolioHistory(90);
+  const [range, setRange] = useState<Range>(30);
+  const history = usePortfolioHistory(range);
+  // Deep enough for a year of ordinary use; the route caps it.
+  const { events, loading: loadingEvents } = useActivity(500);
+
+  // The day list's window comes from the value series, not the clock: it is by
+  // definition the stretch the chart is drawing, so the two can't disagree about
+  // what "30 days" means.
+  const days = useMemo(() => {
+    const cutoff = history.points.length ? utcDayStart(history.points[0]!.t) : 0;
+    return groupByDay(events.filter((e) => e.timestamp >= cutoff), history.points);
+  }, [events, history.points]);
+  const rangeStats = useMemo(() => summarizeDays(days), [days]);
   // One batched request covers every card's sparkline (see /api/stock-charts).
   const charts = useStockCharts();
   // Which assets this wallet has actually traded — drives the "traded" filter.
-  const { events } = useActivity();
+  // Same events the history below reads: one request, two uses.
   const tradedMints = new Set(events.map((e) => e.mint).filter(Boolean) as string[]);
 
   // Pile is the portfolio: only sources where you actually hold a position.
@@ -171,20 +183,16 @@ export default function PilePage() {
         {/* The line gets the full width of the card and nothing behind it. It is
             data, not decoration — the photograph it used to sit on was reading as
             texture over the one thing the card exists to show. */}
-        {history.points.length > 1 && (
-          <div className="-mx-6 mt-5 -mb-6">
-            <HoverChart
-              values={history.points.map((p) => p.usd)}
-              format={(v) => `$${formatUsdAmount(v)}`}
-              height={110}
-              className="text-[#3c05c7]"
-              fill
-            />
-            <p className="px-6 pb-4 pt-2 text-[10px] lowercase tracking-wide text-black/30">
-              {t("pile.chartRange", { n: String(history.points.length) })}
-            </p>
-          </div>
-        )}
+        <div className="mt-5">
+          <PortfolioChart
+            points={history.points}
+            stats={rangeStats}
+            range={range}
+            onRangeChange={setRange}
+            loading={history.loading}
+            locale={locale}
+          />
+        </div>
 
       </motion.section>
 
@@ -423,18 +431,17 @@ export default function PilePage() {
         transition={{ duration: 0.5, delay: 0.15 }}
         className="mt-10"
       >
-        <div className="mb-3 flex items-baseline justify-between gap-3">
-          <p className="text-xs lowercase tracking-[0.2em] text-black/40">{t("pile.history")}</p>
-          {/* The feed shows the latest few; the full ledger with day-by-day stats
-              lives on its own page, because that's a different question. */}
-          <Link
-            href="/activity"
-            className="text-[11px] lowercase tracking-wide text-[#3c05c7]/80 transition hover:text-[#3c05c7]"
-          >
-            {t("history.seeAll")}
-          </Link>
-        </div>
-        <ActivityFeed />
+        <p className="mb-3 text-xs lowercase tracking-[0.2em] text-black/40">{t("pile.history")}</p>
+        {/* Read as days, not as a stream, and over the SAME range as the chart above —
+            the history is the portfolio over time, so it belongs beside it rather than
+            on a page of its own. */}
+        {loadingEvents ? (
+          <div className="flex justify-center py-10 text-black/25">
+            <Loader2 size={16} className="animate-spin" />
+          </div>
+        ) : (
+          <DayHistory days={days} locale={locale} />
+        )}
       </motion.section>
     </div>
   );
