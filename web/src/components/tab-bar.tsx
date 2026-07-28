@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, TrendingUp, Users, User } from "lucide-react";
+import { Home, TrendingUp, User } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 
 import { useT } from "@/lib/i18n";
@@ -10,7 +10,6 @@ import { useT } from "@/lib/i18n";
 const tabs = [
   { href: "/home", key: "nav.home", icon: Home },
   { href: "/market", key: "nav.market", icon: TrendingUp },
-  { href: "/pile", key: "nav.pile", icon: Users },
   { href: "/you", key: "nav.you", icon: User },
 ] as const;
 

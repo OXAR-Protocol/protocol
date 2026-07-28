@@ -7,7 +7,7 @@ const APP_ROUTES = [
   "/home",
   "/market",
   "/yield", // renamed → /market; kept so the redirect page is reachable
-  "/pile",
+  "/pile", // moved onto /home; kept so the redirect page is reachable
   "/you",
   "/asset",
   "/onboarding",
