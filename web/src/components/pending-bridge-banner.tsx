@@ -24,12 +24,61 @@ function trackUrl(p: PendingBridge): string | null {
  * with Retry — the funds are safe in the wallet as the bridged token, never lost.
  */
 export function PendingBridgeBanner() {
-  const { pending, queued, resuming, failed, arrived, dismiss, finish, retry } = usePendingBridge();
-  if (!pending) return null;
+  const { pending, stuck, counts, resuming, arrived, dismiss, finish, retry } = usePendingBridge();
+  if (!pending && !stuck) return null;
 
+  // A stuck bridge and the ones still moving are DIFFERENT facts, so they get their
+  // own line each. Previously one failure replaced the whole banner and the healthy
+  // bridges behind it disappeared from the screen entirely.
+  const inFlight = (n: number) =>
+    n > 0 ? `${n} more cross-chain deposit${n > 1 ? "s" : ""} still in transit` : null;
+
+  if (stuck) {
+    const track = trackUrl(stuck);
+    const rest = inFlight(counts.active);
+    return (
+      <div className="mb-6 p-4 rounded-[8px] border border-[#D4313C]/30 bg-[#D4313C]/[0.05] flex items-start gap-3">
+        <AlertTriangle className="text-[#D4313C] mt-0.5" size={16} strokeWidth={1.5} />
+        <div className="flex-1">
+          <p className="text-sm text-black">Couldn&apos;t finish your deposit</p>
+          <p className="mt-1 text-[11px] text-black/45">
+            Your funds arrived and are safe in your wallet as digital dollars — the final
+            step didn&apos;t complete. Retry, or buy the asset directly.{" "}
+            <button onClick={retry} className="text-[#3c05c7]/80 hover:text-[#3c05c7] underline">
+              Retry
+            </button>
+            {track && (
+              <>
+                {" · "}
+                <a href={track} target="_blank" rel="noreferrer" className="text-[#3c05c7]/80 hover:text-[#3c05c7] underline">
+                  Track
+                </a>
+              </>
+            )}
+          </p>
+          {rest && (
+            <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-black/45">
+              <Loader2 className="text-[#3c05c7] animate-spin" size={11} strokeWidth={1.5} />
+              {rest} — they&apos;ll deposit on arrival.
+            </p>
+          )}
+        </div>
+        <button
+          onClick={() => dismiss(stuck.originTxHash)}
+          aria-label="Dismiss"
+          className="text-black/40 hover:text-black transition"
+          title="Dismiss"
+        >
+          <X size={15} strokeWidth={1.5} />
+        </button>
+      </div>
+    );
+  }
+
+  if (!pending) return null;
   const track = trackUrl(pending);
   // >1 bridge in flight (user fired several) — reassure them the rest are queued.
-  const more = queued > 1 ? ` (+${queued - 1} more in flight)` : "";
+  const more = counts.active > 1 ? ` (+${counts.active - 1} more in flight)` : "";
 
   // External wallet: funds landed, but the buy needs the user's own signature.
   // Offer a one-tap finish (a background sign wouldn't surface the wallet popup).
@@ -55,36 +104,7 @@ export function PendingBridgeBanner() {
             )}
           </button>
         </div>
-        <button onClick={dismiss} aria-label="Dismiss" className="text-black/40 hover:text-black transition" title="Dismiss">
-          <X size={15} strokeWidth={1.5} />
-        </button>
-      </div>
-    );
-  }
-
-  if (failed) {
-    return (
-      <div className="mb-6 p-4 rounded-[8px] border border-[#D4313C]/30 bg-[#D4313C]/[0.05] flex items-start gap-3">
-        <AlertTriangle className="text-[#D4313C] mt-0.5" size={16} strokeWidth={1.5} />
-        <div className="flex-1">
-          <p className="text-sm text-black">Couldn&apos;t finish your deposit</p>
-          <p className="mt-1 text-[11px] text-black/45">
-            Your funds arrived and are safe in your wallet as digital dollars — the final
-            step didn&apos;t complete. Retry, or buy the asset directly.{" "}
-            <button onClick={retry} className="text-[#3c05c7]/80 hover:text-[#3c05c7] underline">
-              Retry
-            </button>
-            {track && (
-              <>
-                {" · "}
-                <a href={track} target="_blank" rel="noreferrer" className="text-[#3c05c7]/80 hover:text-[#3c05c7] underline">
-                  Track
-                </a>
-              </>
-            )}
-          </p>
-        </div>
-        <button onClick={dismiss} aria-label="Dismiss" className="text-black/40 hover:text-black transition" title="Dismiss">
+        <button onClick={() => dismiss(pending.originTxHash)} aria-label="Dismiss" className="text-black/40 hover:text-black transition" title="Dismiss">
           <X size={15} strokeWidth={1.5} />
         </button>
       </div>
@@ -111,7 +131,7 @@ export function PendingBridgeBanner() {
         </p>
       </div>
       <button
-        onClick={dismiss}
+        onClick={() => dismiss(pending.originTxHash)}
         aria-label="Dismiss"
         className="text-black/40 hover:text-black transition"
         title="Stop watching (funds still arrive in your wallet)"

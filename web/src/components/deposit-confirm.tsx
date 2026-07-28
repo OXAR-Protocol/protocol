@@ -22,6 +22,8 @@ interface Props {
   label: string | null;
   /** Live deposit status ("idle" before signing) — drives the bridge step tracker. */
   status: string;
+  /** Cross-chain step that failed, kept after `status` resets — marks it red. */
+  failedAt?: string | null;
   error: string | null;
   onConfirm: () => void;
   onBack: () => void;
@@ -49,6 +51,7 @@ export function DepositConfirm({
   busy,
   label,
   status,
+  failedAt,
   error,
   onConfirm,
   onBack,
@@ -101,7 +104,7 @@ export function DepositConfirm({
 
       {isBridge && (
         <div className="mt-3 rounded-[8px] border border-black/10 px-3 py-2.5">
-          <BridgeSteps steps={bridgeSteps} status={busy ? status : "idle"} />
+          <BridgeSteps steps={bridgeSteps} status={busy ? status : "idle"} failedAt={busy ? null : failedAt} />
           <p className="mt-1.5 text-[10px] lowercase tracking-wide text-black/40">{t("confirm.step.hint")}</p>
         </div>
       )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Transaction } from "@solana/web3.js";
 
 import { useSolanaContext } from "@/providers/solana-provider";
@@ -131,5 +131,12 @@ export function useBulkTrade() {
     setDone([]);
   }, []);
 
-  return { run, state, done, reset };
+  // The same outcomes keyed by id, so a per-asset view can show each result beside
+  // its own row instead of everyone reading one shared line at the bottom.
+  const results = useMemo(
+    () => Object.fromEntries(done.map((d) => [d.id, d])) as Record<string, BulkTradeOutcome>,
+    [done],
+  );
+
+  return { run, state, done, results, reset };
 }

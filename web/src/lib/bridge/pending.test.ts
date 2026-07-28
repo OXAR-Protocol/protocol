@@ -1,6 +1,16 @@
 import { describe, it, expect, beforeEach } from "vitest";
 
-import { savePending, loadPending, loadAllPending, clearPending, type PendingBridge } from "./pending";
+import {
+  savePending,
+  loadPending,
+  loadAllPending,
+  loadActivePending,
+  loadStuckPending,
+  countPending,
+  promotePending,
+  clearPending,
+  type PendingBridge,
+} from "./pending";
 
 class FakeStorage {
   private m = new Map<string, string>();
@@ -78,5 +88,48 @@ describe("pending bridge persistence", () => {
     savePending(second, store);
     clearPending("0xhash", store);
     expect(loadAllPending(store).map((r) => r.originTxHash)).toEqual(["0xhash2"]);
+  });
+
+  // The bug this all exists for: a bridge whose deposit failed waits for a human, and
+  // while it sat at the head the watcher polled nothing — a healthy bridge behind it
+  // never arrived and never deposited, and the banner never mentioned it either.
+  it("skips a stuck bridge at the head when picking what to work next", () => {
+    savePending({ ...sample, attempts: 1 }, store);
+    savePending({ ...sample, originTxHash: "0xhash2" }, store);
+    expect(loadPending(store)?.originTxHash).toBe("0xhash");
+    expect(loadActivePending(store)?.originTxHash).toBe("0xhash2");
+    expect(loadStuckPending(store)?.originTxHash).toBe("0xhash");
+  });
+
+  it("has nothing to work when every bridge is stuck", () => {
+    savePending({ ...sample, attempts: 1 }, store);
+    savePending({ ...sample, originTxHash: "0xhash2", attempts: 2 }, store);
+    expect(loadActivePending(store)).toBeNull();
+    expect(countPending(store)).toEqual({ active: 0, stuck: 2 });
+  });
+
+  it("counts moving and stuck bridges apart", () => {
+    savePending(sample, store);
+    savePending({ ...sample, originTxHash: "0xhash2", attempts: 1 }, store);
+    savePending({ ...sample, originTxHash: "0xhash3" }, store);
+    expect(countPending(store)).toEqual({ active: 2, stuck: 1 });
+  });
+
+  // Retry has to mean "now": the record is re-armed AND moved to the head, otherwise
+  // it would queue behind bridges that may take minutes to land.
+  it("promotes a bridge to the head", () => {
+    savePending(sample, store);
+    savePending({ ...sample, originTxHash: "0xhash2" }, store);
+    savePending({ ...sample, originTxHash: "0xhash3" }, store);
+    promotePending("0xhash3", store);
+    expect(loadAllPending(store).map((r) => r.originTxHash)).toEqual(["0xhash3", "0xhash", "0xhash2"]);
+  });
+
+  it("leaves the order alone when promoting the head or an unknown hash", () => {
+    savePending(sample, store);
+    savePending({ ...sample, originTxHash: "0xhash2" }, store);
+    promotePending("0xhash", store);
+    promotePending("0xnope", store);
+    expect(loadAllPending(store).map((r) => r.originTxHash)).toEqual(["0xhash", "0xhash2"]);
   });
 });

@@ -95,6 +95,7 @@ function PickedBuyBar() {
           rows={rows}
           budgetUsd={budget}
           busy={bulk.state === "running"}
+          results={bulk.results}
           progress={
             bulk.state === "running"
               ? t("bulk.progress", { n: String(bulk.done.length), total: String(rows.length) })

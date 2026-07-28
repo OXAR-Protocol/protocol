@@ -36,5 +36,14 @@ export function useDeposit(providerId: string) {
   const busy = status !== "idle";
   const error = bridge.error ?? solana.error;
 
-  return { depositWith, busy, status, label: busy ? LABELS[status] ?? "Working…" : null, error };
+  return {
+    depositWith,
+    busy,
+    status,
+    // Which cross-chain step broke — the step tracker keeps showing it after `status`
+    // has already fallen back to "idle".
+    failedAt: bridge.failedAt,
+    label: busy ? LABELS[status] ?? "Working…" : null,
+    error,
+  };
 }
