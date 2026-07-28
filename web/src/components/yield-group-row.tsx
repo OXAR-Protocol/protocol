@@ -41,11 +41,11 @@ export function YieldGroupRow({ group, onOpen }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group relative isolate flex w-full items-center justify-between overflow-hidden rounded-[8px] border border-black/10 bg-white p-5 text-left transition-colors hover:border-black/30"
+      className="group relative isolate flex w-full items-center gap-3 overflow-hidden rounded-[8px] border border-black/10 bg-white p-5 text-left transition-colors hover:border-black/30"
     >
       <BanknoteBg seed={group.views[0]?.id ?? group.name} />
 
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-3">
           <AssetIcon src={assetLogoSrc(group.views[0]?.id ?? "")} label={group.name} size={36} />
           <div className="min-w-0">
@@ -72,21 +72,27 @@ export function YieldGroupRow({ group, onOpen }: Props) {
         )}
       </div>
 
-      {history.length > 1 && (
-        <div className="mx-4 hidden max-w-[140px] flex-1 sm:block">
+      {/* Same fixed columns as YieldProviderRow — see the note there. */}
+      <div className="hidden w-[140px] shrink-0 sm:block">
+        {history.length > 1 && (
           <Sparkline values={history} height={32} className={`h-8 w-full ${up ? "text-emerald-400/40" : "text-red-400/40"}`} />
-        </div>
-      )}
+        )}
+      </div>
 
-      <div className="ml-3 text-right">
-        <p className="text-xl tabular-nums text-black">up to {(group.maxApy * 100).toFixed(2)}%</p>
+      <div className="w-[112px] shrink-0 text-right">
+        {/* "up to" is set small so the RATE lines up with the plain rates above and
+            below it, rather than pushing the whole figure left. */}
+        <p className="text-xl tabular-nums text-black">
+          <span className="text-[11px] lowercase tracking-wide text-black/40">up to </span>
+          {(group.maxApy * 100).toFixed(2)}%
+        </p>
         <p className={`text-[10px] lowercase tracking-wide ${RISK_TONE[top.riskLevel] ?? "text-black/55"}`}>
           {RISK_LABEL[top.riskLevel] ?? top.riskLevel}
         </p>
       </div>
 
       {pickSet?.enabled && (
-        <span className="ml-3">
+        <span className="shrink-0">
           <PickButton
             picked={pickSet.picked.has(top.id)}
             onToggle={() => pickSet.toggle(top.id)}

@@ -38,11 +38,11 @@ export function YieldProviderRow({ view, onOpen }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group relative isolate flex w-full items-center justify-between overflow-hidden rounded-[8px] border border-black/10 bg-white p-5 text-left transition-colors hover:border-black/30"
+      className="group relative isolate flex w-full items-center gap-3 overflow-hidden rounded-[8px] border border-black/10 bg-white p-5 text-left transition-colors hover:border-black/30"
     >
       <BanknoteBg seed={view.id} />
 
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-3">
           <AssetIcon src={assetLogoSrc(view.id)} label={assetIconLabel(view.id, view.assetSymbol)} size={36} />
           <div className="min-w-0">
@@ -63,13 +63,17 @@ export function YieldProviderRow({ view, onOpen }: Props) {
         )}
       </div>
 
-      {history.length > 1 && (
-        <div className="mx-4 hidden max-w-[140px] flex-1 sm:block">
+      {/* Fixed-width columns, not content-width ones: with the figure sized to its
+          own text, "up to 4.99%" is wider than "3.55%" and drags the chart beside it
+          out of line with the row above. The slot is rendered even when there's no
+          series, so a source without history doesn't shift the whole row either. */}
+      <div className="hidden w-[140px] shrink-0 sm:block">
+        {history.length > 1 && (
           <Sparkline values={history} height={32} className={`h-8 w-full ${up ? "text-emerald-400/40" : "text-red-400/40"}`} />
-        </div>
-      )}
+        )}
+      </div>
 
-      <div className="ml-3 text-right">
+      <div className="w-[112px] shrink-0 text-right">
         <p className="text-xl tabular-nums text-black">{(view.apy * 100).toFixed(2)}%</p>
         <p className={`text-[10px] lowercase tracking-wide ${RISK_TONE[view.riskLevel] ?? "text-black/55"}`}>
           {RISK_LABEL[view.riskLevel] ?? view.riskLevel}
@@ -77,7 +81,7 @@ export function YieldProviderRow({ view, onOpen }: Props) {
       </div>
 
       {pickSet?.enabled && (
-        <span className="ml-3">
+        <span className="shrink-0">
           <PickButton
             picked={pickSet.picked.has(view.id)}
             onToggle={() => pickSet.toggle(view.id)}

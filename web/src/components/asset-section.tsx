@@ -150,21 +150,24 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
         type="button"
         disabled={!view}
         onClick={() => view && router.push(`/asset/${s.id}`)}
-        className="group relative isolate overflow-hidden w-full flex items-center justify-between p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition-colors text-left disabled:opacity-50"
+        className="group relative isolate flex w-full items-center gap-3 overflow-hidden rounded-[8px] border border-black/10 bg-white p-5 text-left transition-colors hover:border-black/30 disabled:opacity-50"
       >
         <BanknoteBg seed={s.id} />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           {head}
           {owned}
         </div>
-        {spark && <div className="hidden sm:block flex-1 mx-4 max-w-[140px]">{spark}</div>}
+        {/* Fixed-width columns so the charts and the figures line up down the list
+            instead of drifting with the width of the text beside them. The slots are
+            rendered even when empty, or a row without a chart would shift. */}
+        <div className="hidden w-[140px] shrink-0 sm:block">{spark}</div>
         {/* Price first, then the control: the number is what the row is read for,
             and a button between the chart and the price split them apart. */}
-        <div className="ml-3 text-right">
+        <div className="w-[112px] shrink-0 text-right">
           {price}
           {change}
         </div>
-        {pick && <span className="ml-3">{pick}</span>}
+        {pick && <span className="shrink-0">{pick}</span>}
       </button>
     );
   };
