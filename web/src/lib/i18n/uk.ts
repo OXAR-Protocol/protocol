@@ -275,6 +275,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "intro.next": "далі",
   "intro.skip": "пропустити",
   "intro.start": "поїхали",
+  "bulk.setLabelBuy": "{n} у мульти",
   "activity.each": "за штуку",
   "activity.empty": "поки нічого — твої гроші ще посапують.",
   "activity.showMore": "показати ще",
