@@ -4,6 +4,7 @@ import { heliusApiKey, fetchEnhancedHistory } from "@/lib/helius/history";
 import { parseActivity, type ActivityEvent } from "@/lib/activity/parse";
 import { PROVIDERS } from "@/lib/yield/registry";
 import { JL_USDC, JL_USDT } from "@/lib/yield/position-mints";
+import { isPriceExposure } from "@/lib/yield/assets";
 
 // Recent-activity feed from the wallet's on-chain history (Helius, key server-side).
 export const runtime = "nodejs";
@@ -26,6 +27,17 @@ const ASSET_DECIMALS: Record<string, number> = Object.fromEntries(
     p.heldDecimals as number,
   ]),
 );
+
+// Which held mints are a THING YOU BUY (stock, gold) versus somewhere you PUT money
+// (a savings source). Jupiter Lend's receipt tokens aren't in PROVIDERS' heldMint, so
+// they're named explicitly below and belong here too.
+const ASSET_IS_PRICE: Record<string, boolean> = {
+  ...Object.fromEntries(
+    PROVIDERS.filter((p) => p.heldMint).map((p) => [p.heldMint as string, isPriceExposure(p.id)]),
+  ),
+  [JL_USDC]: false,
+  [JL_USDT]: false,
+};
 
 const ASSET_NAMES: Record<string, string> = {
   ...Object.fromEntries(
@@ -69,7 +81,7 @@ export async function POST(req: Request) {
 
   try {
     const txs = await fetchEnhancedHistory(owner, key, want > DEFAULT_EVENTS ? HISTORY_PAGES : FEED_PAGES);
-    const events = parseActivity(txs, owner, USDC, ASSET_NAMES, ASSET_DECIMALS).slice(0, want);
+    const events = parseActivity(txs, owner, USDC, ASSET_NAMES, ASSET_DECIMALS, ASSET_IS_PRICE).slice(0, want);
     cache.set(cacheKey, { at: Date.now(), events });
     return NextResponse.json({ events });
   } catch (e) {

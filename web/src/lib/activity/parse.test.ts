@@ -40,7 +40,9 @@ describe("parseActivity", () => {
     expect(e).toMatchObject({ kind: "sell", label: "Sold Tether Gold", usd: 1.99 });
   });
 
-  it("labels a USDC-out + vault-receipt-in tx as Deposited", () => {
+  // Renamed with the labels: USDC out and an UNRECOGNISED token back is a swap. It
+  // used to say "Deposited", which claimed a destination we don't actually know.
+  it("labels a USDC-out + unknown-token-in tx as a swap", () => {
     const [e] = parseActivity(
       [tx("s3", 300, [
         { fromUserAccount: OWNER, mint: USDC, tokenAmount: 1 },
@@ -48,15 +50,15 @@ describe("parseActivity", () => {
       ])],
       OWNER, USDC, NAMES,
     );
-    expect(e).toMatchObject({ kind: "deposit", label: "Deposited", usd: 1 });
+    expect(e).toMatchObject({ kind: "deposit", label: "Swapped from USDC", usd: 1 });
   });
 
-  it("labels a bare USDC arrival (no other leg) as Received USDC", () => {
+  it("labels a bare USDC arrival (no other leg) as USDC arrived", () => {
     const [e] = parseActivity(
       [tx("s4", 400, [{ toUserAccount: OWNER, mint: USDC, tokenAmount: 5 }])],
       OWNER, USDC, NAMES,
     );
-    expect(e).toMatchObject({ kind: "receive", label: "Received USDC", usd: 5 });
+    expect(e).toMatchObject({ kind: "receive", label: "USDC arrived", usd: 5 });
   });
 
   it("drops transactions that touch neither USDC nor a known asset", () => {
@@ -168,5 +170,70 @@ describe("per-unit price precision", () => {
     const [buy] = parseActivity([tx(-0.26, 0.000063)], "OWNER", USDC, NAMES);
     const [sell] = parseActivity([tx(0.26, -0.000063)], "OWNER", USDC, NAMES);
     expect(buy!.unitPriceUsd).toBeCloseTo(sell!.unitPriceUsd!, 6);
+  });
+});
+
+// Labels have to say what the PERSON did, not which token moved. The old set read
+// "Bought Jupiter Lend USDC" (you don't buy a savings pool), and used one branch —
+// "Withdrew" — for both leaving a pool and swapping something into USDC.
+describe("labels explain the action", () => {
+  const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+  const NAMES = { JLUSDC: "Jupiter Lend USDC", AAPLX: "Apple (AAPLx)" };
+  const KINDS = { JLUSDC: false, AAPLX: true };
+
+  const tx = (usdc: number, other: number, mint: string) => ({
+    signature: "sig",
+    timestamp: 1_773_273_600,
+    tokenTransfers: [
+      {
+        mint: USDC,
+        tokenAmount: Math.abs(usdc),
+        fromUserAccount: usdc < 0 ? "OWNER" : "POOL",
+        toUserAccount: usdc < 0 ? "POOL" : "OWNER",
+      },
+      {
+        mint,
+        tokenAmount: Math.abs(other),
+        fromUserAccount: other < 0 ? "OWNER" : "POOL",
+        toUserAccount: other < 0 ? "POOL" : "OWNER",
+      },
+    ],
+  });
+
+  const label = (usdc: number, other: number, mint: string) =>
+    parseActivity([tx(usdc, other, mint)], "OWNER", USDC, NAMES, {}, KINDS)[0]?.label;
+
+  it("puts money INTO a savings source rather than buying it", () => {
+    expect(label(-50, 50, "JLUSDC")).toBe("Deposited to Jupiter Lend USDC");
+    expect(label(50, -50, "JLUSDC")).toBe("Withdrew from Jupiter Lend USDC");
+  });
+
+  it("still buys and sells the things that are bought and sold", () => {
+    expect(label(-50, 0.15, "AAPLX")).toBe("Bought Apple (AAPLx)");
+    expect(label(50, -0.15, "AAPLX")).toBe("Sold Apple (AAPLx)");
+  });
+
+  it("calls an unrecognised token moving against USDC a swap, in both directions", () => {
+    expect(label(50, -2, "SOMETHINGELSE")).toBe("Swapped to USDC");
+    expect(label(-50, 2, "SOMETHINGELSE")).toBe("Swapped from USDC");
+  });
+
+  it("says USDC arrived only when nothing was given for it", () => {
+    const arrival = {
+      signature: "sig",
+      timestamp: 1_773_273_600,
+      tokenTransfers: [
+        { mint: USDC, tokenAmount: 50, fromUserAccount: "BRIDGE", toUserAccount: "OWNER" },
+      ],
+    };
+    expect(parseActivity([arrival], "OWNER", USDC, NAMES, {}, KINDS)[0]?.label).toBe("USDC arrived");
+  });
+
+  it("treats an unclassified asset as something bought, as before", () => {
+    expect(label(-50, 1, "AAPLX")).toBe("Bought Apple (AAPLx)");
+    // No kind supplied at all → the old behaviour, not a crash.
+    expect(parseActivity([tx(-50, 1, "AAPLX")], "OWNER", USDC, NAMES)[0]?.label).toBe(
+      "Bought Apple (AAPLx)",
+    );
   });
 });
