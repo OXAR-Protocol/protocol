@@ -12,7 +12,8 @@ import {
 import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
-import { buildKoraLegacyTx, rebuildV0WithKora } from "@oxar/sdk";
+import { buildKoraLegacyTx, rebuildV0WithKora, SOL_SPONSORED_RESERVE } from "@oxar/sdk";
+import { UserFacingError } from "@/lib/yield";
 import { RPC_URL } from "@/lib/constants";
 import { clearCache } from "@/lib/cache";
 import { deriveSolanaWallets, hasExternalSolanaWallet } from "@/lib/wallet/solana-wallets";
@@ -128,6 +129,20 @@ class PrivySolanaAdapter implements WalletSigner {
         return await this._signAndSendViaKora(tx);
       } catch (e) {
         console.warn("Kora gasless path failed; falling back to native SOL gas:", e);
+        // Falling back only helps a wallet that can actually pay the fee. For one
+        // holding no SOL — the whole point of gasless — native gas is a guaranteed
+        // failure wearing the words "insufficient funds", which is both wrong and
+        // unactionable. It bit hardest after a bridge: the money is already on
+        // Solana, so the user is stranded holding USDC and told the wrong thing.
+        // Say what actually happened instead, so the Retry that already exists means
+        // something.
+        const lamports = await this._connection.getBalance(this._publicKey).catch(() => 0);
+        if (lamports < Number(SOL_SPONSORED_RESERVE)) {
+          throw new UserFacingError(
+            "Free network fees are briefly unavailable and your wallet has no SOL to " +
+              "cover one. Your money is safe where it is — try again in a moment.",
+          );
+        }
       }
     }
     return this._signAndSendNative(tx);

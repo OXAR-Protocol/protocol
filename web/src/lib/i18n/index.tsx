@@ -66,6 +66,9 @@ export function useT(): I18n {
 // Thrown user-facing error messages are English constants (lib code can't call
 // hooks). Map the known ones to keys at display time; unknown text passes through.
 const ERROR_KEYS: Record<string, TranslationKey> = {
+  "Free network fees are briefly unavailable and your wallet has no SOL to cover one. Your money is safe where it is — try again in a moment.":
+    "err.gaslessDown",
+
   "Price impact too high — try a smaller amount": "err.priceImpact",
   "Nothing to withdraw": "err.nothingToWithdraw",
   "Price unavailable — try again": "err.priceUnavailable",
