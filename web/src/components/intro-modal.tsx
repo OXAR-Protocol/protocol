@@ -4,10 +4,15 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 
+import { useSolanaContext } from "@/providers/solana-provider";
 import { useT } from "@/lib/i18n";
 
-/** Shown once per browser. A tour you can't dismiss is an obstacle, not a welcome. */
-const SEEN_KEY = "oxar:intro-seen";
+/**
+ * Once per WALLET, not once per browser. The old single key meant a second person on
+ * the same device never saw it, and — the reported bug — it could show before there
+ * was a wallet at all, so it reappeared once one existed.
+ */
+const seenKey = (owner: string) => `oxar:intro-seen:${owner}`;
 
 /**
  * The collage the pitch deck is built from, rather than screenshots of our own
@@ -25,23 +30,37 @@ const SLIDES = [
   { img: "/art/intro/grasping-hands.webp", key: "intro.4" },
 ] as const;
 
-/** True the first time this browser opens the app. */
+/**
+ * True the first time a given wallet opens the app.
+ *
+ * Deliberately waits for the wallet: a welcome shown before someone has an account
+ * explains a product they can't yet use, and it was then shown AGAIN once the wallet
+ * appeared — which is the duplicate that got reported.
+ */
 export function useIntro(): { show: boolean; dismiss: () => void } {
+  const { walletAddress } = useSolanaContext();
+  const owner = walletAddress?.toBase58() ?? null;
   // Never during render: reading storage there makes the component impure and
   // flashes the modal on every navigation before hydration settles.
   const [show, setShow] = useState(false);
+
   useEffect(() => {
+    if (!owner) {
+      setShow(false);
+      return;
+    }
     try {
-      if (!localStorage.getItem(SEEN_KEY)) setShow(true);
+      if (!localStorage.getItem(seenKey(owner))) setShow(true);
     } catch {
       // Private mode / storage blocked — skip the intro rather than loop it.
     }
-  }, []);
+  }, [owner]);
 
   const dismiss = () => {
     setShow(false);
+    if (!owner) return;
     try {
-      localStorage.setItem(SEEN_KEY, "1");
+      localStorage.setItem(seenKey(owner), "1");
     } catch {
       // Can't remember it? Then it shows again — annoying, never broken.
     }
