@@ -134,15 +134,18 @@ export function useYieldPositions() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(
-    async (force: boolean) => {
-      setLoading(true);
+    /** `silent` = a background refresh (a live update). It must NOT raise `loading`:
+     *  the numbers on screen are still valid, and swapping them for a spinner on
+     *  every transaction is worse than showing a value one second stale. */
+    async (force: boolean, silent = false) => {
+      if (!silent) setLoading(true);
       setError(null);
       try {
         setSnap(await loadSnapshot(connection, walletAddress, force));
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     },
     [connection, walletAddress],
@@ -153,6 +156,8 @@ export function useYieldPositions() {
   }, [load]);
 
   const refresh = useCallback(() => load(true), [load]);
+  /** Re-read without disturbing what's on screen — see `load`'s `silent`. */
+  const refreshSilently = useCallback(() => load(true, true), [load]);
 
   // A source gated behind a feature key drops out until that key is on. Filtering
   // here — the one place every view is built — keeps it out of the source list, the
@@ -173,5 +178,5 @@ export function useYieldPositions() {
     };
   }, [snap, features]);
 
-  return { views, totalValue, loading, error, refresh };
+  return { views, totalValue, loading, error, refresh, refreshSilently };
 }

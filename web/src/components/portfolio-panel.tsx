@@ -25,6 +25,7 @@ import { PortfolioChart, type Range } from "@/components/portfolio-chart";
 import { DayHistory } from "@/components/day-history";
 import { useStockCharts } from "@/hooks/use-stock-charts";
 import { useActivity } from "@/hooks/use-activity";
+import { useLiveBalances } from "@/hooks/use-live-balances";
 import { usePortfolioHistory } from "@/hooks/use-portfolio-history";
 
 
@@ -40,7 +41,11 @@ import { usePortfolioHistory } from "@/hooks/use-portfolio-history";
 export function PortfolioPanel() {
   const router = useRouter();
   const { t, locale } = useT();
-  const { views, loading, refresh } = useYieldPositions();
+  const { views, loading, refresh, refreshSilently } = useYieldPositions();
+  // Money that moves shows up here without a reload. The socket only triggers the
+  // loaders the page already uses, so nothing on screen is computed twice — and it
+  // re-reads SILENTLY, so a live update never replaces good numbers with a spinner.
+  useLiveBalances(refreshSilently);
   const [layout, setLayout] = useState<Layout>("list");
 
   // Remember the preferred layout across visits.
