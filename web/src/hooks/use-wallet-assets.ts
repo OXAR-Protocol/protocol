@@ -66,13 +66,16 @@ export function useWalletAssets() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (silent = false) => {
     if (!walletAddress) {
       setAssets([]);
       setLoading(false);
       return;
     }
-    setLoading(true);
+    // A live update must not raise `loading` — this card renders nothing while
+    // loading, so a background refresh would make it disappear and come back on
+    // every transaction.
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const das = await fetchDasAssets(connection.rpcEndpoint, walletAddress.toBase58());
@@ -94,7 +97,7 @@ export function useWalletAssets() {
       setError(e instanceof Error ? e.message : String(e));
       setAssets([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [connection, walletAddress]);
 
@@ -102,5 +105,12 @@ export function useWalletAssets() {
     void load();
   }, [load]);
 
-  return { assets, loading, error, refresh: load };
+  return {
+    assets,
+    loading,
+    error,
+    refresh: () => load(),
+    /** Re-read without blanking the card — see `load`'s `silent`. */
+    refreshSilently: () => load(true),
+  };
 }

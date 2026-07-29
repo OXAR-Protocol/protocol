@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import { TokenIcon } from "@/components/token-icon";
 import { PhotoBg } from "@/components/photo-bg";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
+import { useLiveBalances } from "@/hooks/use-live-balances";
 import { useT } from "@/lib/i18n";
 
 /** Below this we treat wallet cash as dust and don't nag the user about it. */
@@ -19,7 +20,11 @@ const MAX_CHIPS = 4;
  */
 export function WalletCash() {
   const { t } = useT();
-  const { assets, loading } = useWalletAssets();
+  const { assets, loading, refreshSilently } = useWalletAssets();
+  // The figure someone stares at right after topping up, so it gets the same live
+  // trigger. A second subscription on the same socket costs nothing worth counting,
+  // and it keeps each component the owner of its own data.
+  useLiveBalances(refreshSilently);
 
   const total = assets.reduce((sum, a) => sum + a.usdValue, 0);
   if (loading || total < MIN_SHOWN_USD) return null;
