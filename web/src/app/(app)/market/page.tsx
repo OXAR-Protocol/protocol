@@ -149,6 +149,7 @@ export default function YieldPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mt-10"
+          data-tour="catalog"
         >
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs lowercase tracking-[0.2em] text-emerald-600">

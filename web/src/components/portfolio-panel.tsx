@@ -214,6 +214,7 @@ export function PortfolioPanel() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.15 }}
         className="mt-10"
+        data-tour="history"
       >
         <p className="mb-3 text-xs lowercase tracking-[0.2em] text-black/40">{t("pile.history")}</p>
         {/* Read as days, not as a stream, and over the SAME range as the chart above —

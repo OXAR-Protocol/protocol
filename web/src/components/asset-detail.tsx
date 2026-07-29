@@ -237,7 +237,7 @@ export function AssetDetail({
             {view.heldMint ? (
               <AssetChart mint={view.heldMint} />
             ) : apyHistory.length > 1 ? (
-              <div className="rounded-[12px] border border-black/10 p-5">
+              <div className="rounded-[12px] border border-black/10 p-5" data-tour="chart">
                 <p className="lowercase text-[13px] text-black/45 mb-3">{t("asset.apyLastDays", { n: apyHistory.length })}</p>
                 <HoverChart
                   values={apyHistory}

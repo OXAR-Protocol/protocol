@@ -76,6 +76,7 @@ export default function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.05 }}
         className="mt-6 mb-12"
+        data-tour="balance"
       >
         <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
           {t("home.sleepingMoney")}
