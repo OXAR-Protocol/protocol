@@ -27,6 +27,7 @@ export function PickButton({
       role="checkbox"
       aria-checked={picked}
       aria-label={label}
+      data-tour="multi-add"
       tabIndex={0}
       onClick={(e) => {
         // The row or card navigates; picking must not.
