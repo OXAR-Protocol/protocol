@@ -55,6 +55,7 @@ export const en = {
   "sector.finance": "finance",
   "sector.consumer": "consumer",
   "sector.health": "health",
+  "sector.energy": "energy",
   "sector.index": "index funds",
   "yield.goldTitle": "Commodities · gold",
   "yield.soonSolana": "On Solana · soon",

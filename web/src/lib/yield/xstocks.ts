@@ -87,6 +87,30 @@ export const XSTOCKS: readonly XStockMeta[] = [
   { id: "xstock-mcd", symbol: "MCD", token: "MCDx", name: "McDonald's", sector: "consumer", mint: "XsqE9cRRpzxcGKDXj1BJ7Xmg4GRhZoyY1KpmGSxAWT2" },
   { id: "xstock-gld", symbol: "GLD", token: "GLDx", name: "Gold", sector: "index", mint: "Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re" },
   { id: "xstock-spcx", symbol: "SPCX", token: "SPCXx", name: "SpaceX", sector: "tech", mint: "Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8" },
+
+  // Added 2026-07-30. Admitted by QUOTING a full ROUND TRIP at $100 — buy then sell
+  // back — not by appearing in anyone's catalog, and not by a one-way quote: Visa
+  // looked fine selling (−0.9%) and cost −4.70% on the round trip, because the
+  // expense was all on the buy side. One direction hides half the cost.
+  //
+  // The bar is what we already ship rather than a number picked out of the air.
+  // Round trips on the existing shelf: SPYx −0.01%, MCDx −0.45%, AAPLx −0.49%,
+  // MSFTx −0.51% … and at the bottom KOx −3.35%, WMTx −3.55%. So ~3.5% is the
+  // worst a holder can already meet here, and nothing worse gets added.
+  //
+  // Left out on that basis: Vx (−4.70%) — plus TSMx (−57% on exit), BMNRx (−20%),
+  // AMDx (−15%), SNDKx and MUx (−8%). Those are precisely the tickers people ask
+  // for by name, which is why the measurement has to outrank the name: otherwise we
+  // hand someone a position they can't leave.
+  //
+  // Mints are the ones Jupiter reports under the xStocks issuer wallet
+  // (S7vYFFWH6BjJyEsdrPQpqpYTqLTrPRK6KW3VwsJuRaS), so a lookalike mint carrying a
+  // familiar ticker can't slip in.
+  { id: "xstock-brkb", symbol: "BRK.B", token: "BRK.Bx", name: "Berkshire Hathaway", sector: "finance", mint: "Xs6B6zawENwAbWVi7w92rjazLuAr5Az59qgWKcNb45x" },
+  { id: "xstock-mrvl", symbol: "MRVL", token: "MRVLx", name: "Marvell", sector: "tech", mint: "XsuxRGDzbLjnJ72v74b7p9VY6N66uYgTCyfwwRjVCJA" },
+  { id: "xstock-intc", symbol: "INTC", token: "INTCx", name: "Intel", sector: "tech", mint: "XshPgPdXFRWB8tP1j82rebb2Q9rPgGX37RuqzohmArM" },
+  { id: "xstock-pg", symbol: "PG", token: "PGx", name: "Procter & Gamble", sector: "consumer", mint: "XsYdjDjNUygZ7yGKfQaB6TxLh2gC6RRjzLtLAGJrhzV" },
+  { id: "xstock-xom", symbol: "XOM", token: "XOMx", name: "Exxon Mobil", sector: "energy", mint: "XsaHND8sHyfMfsWPj6kSdd5VwvCayZvjYgKmmcNL5qh" },
   // Ondo-rail pilot (2026-07-29, insider-gated): same swap-and-hold model, but the
   // swap goes through Delora/DFlow RFQ instead of the Jupiter AMM — Ondo GM mints
   // aren't routable on Jupiter, and the AMM pools are too thin for size (AAPLx pool
