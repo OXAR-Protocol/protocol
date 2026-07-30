@@ -6,6 +6,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Copy, Check, LogOut } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
+import { forgetIntro } from "@/components/intro-modal";
 import { LanguagePicker } from "@/components/language-picker";
 import { EarlyRiserBadge } from "@/components/early-riser-badge";
 import { useSolanaContext } from "@/providers/solana-provider";
@@ -102,12 +103,29 @@ export default function YouPage() {
          *  oxar.app, not app.oxar.app — an absolute URL + hard navigation, not
          *  next/link, so it actually lands instead of hitting the domain-split
          *  redirect mid client-side transition. */}
-        <a
-          href="https://oxar.app/terms"
-          className="text-xs lowercase tracking-wide text-black/40 hover:text-black/60 transition"
-        >
-          {t("you.terms")}
-        </a>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <a
+            href="https://oxar.app/terms"
+            className="text-xs lowercase tracking-wide text-black/40 hover:text-black/60 transition"
+          >
+            {t("you.terms")}
+          </a>
+          {solana && (
+            <button
+              type="button"
+              onClick={() => {
+                forgetIntro(solana);
+                // A reload rather than local state: the welcome is mounted up in
+                // the app layout, so this page can't re-trigger it directly, and
+                // landing on the portfolio is where the walkthrough starts anyway.
+                window.location.href = "/portfolio";
+              }}
+              className="text-xs lowercase tracking-wide text-black/40 hover:text-black/60 transition"
+            >
+              {t("you.replayTour")}
+            </button>
+          )}
+        </div>
       </motion.section>
 
       {/* Sign out */}

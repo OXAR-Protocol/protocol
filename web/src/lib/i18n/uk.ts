@@ -138,6 +138,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "you.signedOut": "ти вийшов з акаунта",
   "you.language": "мова",
   "you.terms": "умови використання",
+  "you.replayTour": "пройти екскурсію ще раз",
   "you.signOut": "вийти",
   "badge.earlyRiser.title": "early riser",
   "badge.earlyRiser.subtitle": "був тут, поки ринок ще спав",
