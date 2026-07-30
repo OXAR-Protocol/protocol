@@ -6,7 +6,6 @@ import { X } from "lucide-react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useT } from "@/lib/i18n";
-import { acceptTerms } from "@/lib/terms";
 import { AppTour } from "@/components/tour/app-tour";
 
 /**
@@ -38,7 +37,7 @@ export function forgetIntro(owner: string): void {
  * explains a product they can't yet use, and it was then shown AGAIN once the wallet
  * appeared — which is the duplicate that got reported.
  */
-export function useIntro(): { show: boolean; dismiss: () => void; acknowledgeTerms: () => void } {
+export function useIntro(): { show: boolean; dismiss: () => void } {
   const { walletAddress } = useSolanaContext();
   const owner = walletAddress?.toBase58() ?? null;
   // Never during render: reading storage there makes the component impure and
@@ -57,16 +56,8 @@ export function useIntro(): { show: boolean; dismiss: () => void; acknowledgeTer
     }
   }, [owner]);
 
-  // Explicit notice (the terms line + link on the card) + this affirmative act
-  // is the acceptance record — fire-and-forget, and never blocks either action
-  // it's attached to. See `lib/terms.ts` for what this is and isn't.
-  const acknowledgeTerms = () => {
-    if (owner) acceptTerms(owner);
-  };
-
   const dismiss = () => {
     setShow(false);
-    acknowledgeTerms();
     if (!owner) return;
     try {
       localStorage.setItem(seenKey(owner), "1");
@@ -75,7 +66,7 @@ export function useIntro(): { show: boolean; dismiss: () => void; acknowledgeTer
     }
   };
 
-  return { show, dismiss, acknowledgeTerms };
+  return { show, dismiss };
 }
 
 /**
@@ -86,14 +77,14 @@ export function useIntro(): { show: boolean; dismiss: () => void; acknowledgeTer
  * way a screenshot does the moment a button moves.
  *
  * Dismissing the welcome card OR finishing/skipping the tour both mark the
- * wallet as seen — either way, the user has been shown the app. The card also
- * carries the only notice of /terms a new wallet gets, and either action here
- * (skip or start the tour) fires the best-effort acceptance record — see
- * `useIntro`'s `acknowledgeTerms` and `lib/terms.ts`.
+ * wallet as seen — either way, the user has been shown the app. Terms
+ * acceptance is a separate, earlier gate (`TermsAndIntroGate` mounts it
+ * before this component ever runs) — this card no longer carries any terms
+ * notice of its own.
  */
 export function IntroModal() {
   const { t } = useT();
-  const { show, dismiss, acknowledgeTerms } = useIntro();
+  const { show, dismiss } = useIntro();
   const [touring, setTouring] = useState(false);
 
   const finishTour = () => {
@@ -101,13 +92,7 @@ export function IntroModal() {
     dismiss();
   };
 
-  // Starting the tour is itself the affirmative act — record it now rather
-  // than waiting for the tour to finish (dismiss() there would also cover it,
-  // but someone can navigate away mid-tour without ever calling it).
-  const startTour = () => {
-    acknowledgeTerms();
-    setTouring(true);
-  };
+  const startTour = () => setTouring(true);
 
   if (touring) return <AppTour onDone={finishTour} />;
 
@@ -149,22 +134,6 @@ export function IntroModal() {
             <div className="px-6 pb-6 pt-2">
               <p className="text-[19px] leading-snug text-black">{t("intro.headline")}</p>
               <p className="mt-2 text-[14px] leading-relaxed text-black/55">{t("intro.body")}</p>
-              <p className="mt-3 text-[11px] leading-relaxed text-black/35">
-                {t("intro.termsPrefix")}{" "}
-                {/* /terms is a marketing route (see middleware.ts) that only resolves on
-                 *  oxar.app, not app.oxar.app — an absolute URL + hard navigation, not
-                 *  next/link, so it actually lands instead of hitting the domain-split
-                 *  redirect mid client-side transition. Opens in a new tab so reading it
-                 *  doesn't blow away the welcome card / tour state in this one. */}
-                <a
-                  href="https://oxar.app/terms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline decoration-black/20 underline-offset-2 hover:text-black/60"
-                >
-                  {t("intro.termsLink")}
-                </a>
-              </p>
 
               <div className="mt-5 flex items-center justify-end gap-3">
                 <button

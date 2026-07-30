@@ -10,7 +10,7 @@ import { ChannelReport } from "@/components/channel-tracker";
 import { WarpProvider } from "@/components/warp-transition";
 import { WarpOnEntry } from "@/components/warp-on-entry";
 import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
-import { IntroModal } from "@/components/intro-modal";
+import { TermsAndIntroGate } from "@/components/terms/terms-and-intro-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +35,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
                 <TabBar />
-                {/* First visit only, and skippable from any slide. */}
-                <IntroModal />
+                {/* Terms gate first (blocking, per-wallet), THEN the first-run
+                    welcome/tour — never both on screen. See `TermsAndIntroGate`. */}
+                <TermsAndIntroGate />
               </AuthGuard>
             </WarpProvider>
           </Providers>

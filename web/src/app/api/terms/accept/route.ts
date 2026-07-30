@@ -7,20 +7,20 @@ import { parseTermsWallet } from "@/lib/terms";
 
 export const runtime = "nodejs";
 
-// Records that a wallet was shown /terms (at TERMS_VERSION) and took an
-// affirmative action afterward — dismissed the welcome card, or started/
-// skipped the tour (see `components/intro-modal.tsx`, called via
-// `lib/terms.ts#acceptTerms`, fire-and-forget from the client).
+// Records that a wallet was shown the in-app terms gate (at TERMS_VERSION)
+// and ticked the checkbox + tapped "agree" — see `hooks/use-terms-gate.ts`
+// and `components/terms/terms-gate-modal.tsx`, called via
+// `lib/terms.ts#acceptTerms`, fire-and-forget from the client.
 //
 // This is NOT a signature, and OXAR has no operating company to be the
 // counterparty for one. It evidences notice + act, at a version and a time,
 // nothing more. The version is always the server's own TERMS_VERSION, never
 // client-supplied — the client can't backdate or spoof which revision was live.
 //
-// Failure here must never surface to the user: the welcome card and tour
-// already ran client-side before this fires, and every error path below
-// returns a JSON error response rather than throwing — the caller ignores it
-// either way (see `acceptTerms`).
+// Failure here must never surface to the user: the gate already recorded
+// local acceptance and let them through before this fires, and every error
+// path below returns a JSON error response rather than throwing — the caller
+// ignores it either way (see `acceptTerms`).
 
 const rateBuckets = new Map<string, { count: number; resetAt: number }>();
 const RATE_WINDOW_MS = 15 * 60 * 1000;

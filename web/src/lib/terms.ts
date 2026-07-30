@@ -1,11 +1,12 @@
 import { isValidSolanaAddress } from "@/lib/wallet/transfer";
 
 /**
- * Fire-and-forget acceptance record for /terms. Called when a wallet takes an
- * affirmative action on the welcome card (dismiss / skip / X, or starting the
- * tour) — see `components/intro-modal.tsx`. NEVER blocks or throws: a legal
- * record is not worth a broken front door, so the welcome card must dismiss
- * and the tour must start whether or not this call ever lands.
+ * Fire-and-forget acceptance record for /terms. Called when a wallet ticks
+ * the checkbox and taps "agree" on the in-app terms gate — see
+ * `hooks/use-terms-gate.ts` (`agree()`) and `components/terms/terms-gate-modal.tsx`.
+ * NEVER blocks or throws: the local acceptance already stands by the time this
+ * fires, so a broken record must not undo it — a failure here can never
+ * re-lock someone who just agreed.
  *
  * This does not evidence a signature, and OXAR has no operating company to be
  * the counterparty for one — it only records that the wallet was shown
