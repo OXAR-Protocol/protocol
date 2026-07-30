@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 
 import { TERMS_VERSION } from "@oxar/sdk";
 import { useT } from "@/lib/i18n";
-import { PhotoBg } from "@/components/photo-bg";
 import { TERMS_SECTIONS } from "@/components/terms/terms-sections";
 
 const TERMS_DATE = new Date(`${TERMS_VERSION}T00:00:00Z`).toLocaleDateString("en-US", {
@@ -49,18 +48,33 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
         transition={{ duration: 0.3, ease: "easeOut" }}
         className="flex max-h-[92vh] w-full max-w-[560px] flex-col overflow-hidden rounded-t-[20px] border border-black/10 bg-white sm:rounded-[20px]"
       >
-        {/* The eyes sit behind the HEADER only, never behind the legal text. A photo
-            under body copy is the same contrast problem a tester just reported on the
-            banknote cards — and this is the one screen where every line has to be
-            readable. Brand at the top, plain white where it's actually read. */}
-        <div className="relative overflow-hidden border-b border-black/10 px-5 pb-3 pt-5">
-          <PhotoBg src="/art/torn-eyes.webp" scrim="left" position="object-right" />
-          <p className="relative text-[15px] text-black">{t("terms.gate.title")}</p>
-          <p className="relative mt-1 break-all font-mono text-[11px] leading-relaxed text-black/45">
+        {/* The eyes get a band of their own rather than sitting behind the header.
+            First attempt put the photo behind the header text: at ~100px tall and 560
+            wide, object-cover sliced a 2400x1643 image into a strip too thin to read
+            anything in, and the white scrim finished the job — it looked like nothing
+            had changed at all. A photo needs height to be a photo.
+
+            Still nowhere near the legal text. That's the same contrast problem a
+            tester reported on the banknote cards, and this is the one screen where
+            every line has to survive being read. */}
+        <div className="relative h-[132px] shrink-0 overflow-hidden bg-[#faf9f7]">
+          <img
+            src="/art/torn-eyes.webp"
+            alt=""
+            aria-hidden
+            className="h-full w-full select-none object-cover object-center"
+          />
+          {/* Melts into the header below instead of ending on a hard seam. */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-b from-transparent to-white" />
+        </div>
+
+        <div className="border-b border-black/10 px-5 pb-3 pt-3">
+          <p className="text-[15px] text-black">{t("terms.gate.title")}</p>
+          <p className="mt-1 break-all font-mono text-[11px] leading-relaxed text-black/45">
             {t("terms.gate.forWallet", { addr: walletAddress })}
           </p>
 
-          <div className="relative -mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-1">
+          <div className="-mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-1">
             {TERMS_SECTIONS.map((s) => (
               <button
                 key={s.id}
