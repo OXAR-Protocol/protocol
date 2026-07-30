@@ -97,7 +97,14 @@ export async function buildDeloraStockSwapTx(params: {
     outPriceUsd: buying ? price : 1,
   });
   if (marketLooksBroken(ratio)) {
-    throw new UserFacingError("This market looks broken right now — try again later");
+    // "Broken" reads as OUR fault. On this rail it almost never is: the Ondo
+    // mints have very little on-chain depth (AAPLon: ~$500, against ~$87k for the
+    // xStocks Apple), and DFlow only quotes during US market hours — so a quote
+    // far below the reference price means there's no market to sell into yet,
+    // not that we failed. Say the thing that's actually true.
+    throw new UserFacingError(
+      "That quote came back far below the price — this one is thinly traded and follows US market hours",
+    );
   }
 
   return deserializeSwapTx(quote.calldata.data, false) as VersionedTransaction;
