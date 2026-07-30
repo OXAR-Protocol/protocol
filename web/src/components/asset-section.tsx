@@ -22,7 +22,7 @@ import { PickButton } from "@/components/pick-button";
 import { usePickSet } from "@/components/pick-set";
 
 /** Canonical order for the sector filter chips (only those present are shown). */
-const SECTOR_ORDER = ["tech", "crypto", "finance", "consumer", "health", "index"] as const;
+const SECTOR_ORDER = ["tech", "crypto", "finance", "consumer", "health", "energy", "index"] as const;
 
 interface Props {
   /** Price-exposure catalog (stocks or commodities). */

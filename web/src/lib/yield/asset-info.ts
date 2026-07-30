@@ -223,6 +223,32 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
     category: "yield · savings rate",
     facts: [{ label: "earns from", value: "Sky savings rate" }, { label: "where", value: "Sky / Ethereum" }, { label: "risk", value: "low" }],
   },
+  // Added 2026-07-30 alongside six more xStocks.
+  "xstock-brkb": {
+    about: "Berkshire Hathaway is Warren Buffett's holding company: insurance, a railway, energy, and big stakes in other listed firms. Buying it is buying a spread of businesses at once.",
+    category: "us stock · holding company",
+    facts: [{ label: "sector", value: "insurance & holdings" }, { label: "hq", value: "Omaha, USA" }],
+  },
+  "xstock-mrvl": {
+    about: "Marvell designs the chips that move data inside data centres — the plumbing behind AI, rather than the brains. Less famous than Nvidia, sold to the same customers.",
+    category: "us stock · semiconductors",
+    facts: [{ label: "sector", value: "data-centre chips" }, { label: "hq", value: "Santa Clara, USA" }],
+  },
+  "xstock-intc": {
+    about: "Intel built the processors most computers ran on for decades, and is now spending heavily to win back ground it lost in chip manufacturing. A turnaround story, not a steady one.",
+    category: "us stock · semiconductors",
+    facts: [{ label: "sector", value: "processors & foundry" }, { label: "hq", value: "Santa Clara, USA" }],
+  },
+  "xstock-pg": {
+    about: "Procter & Gamble makes the things people buy whatever the economy does — detergent, razors, nappies, toothpaste. Slow, dull, and unusually steady.",
+    category: "us stock · consumer goods",
+    facts: [{ label: "sector", value: "household brands" }, { label: "hq", value: "Cincinnati, USA" }],
+  },
+  "xstock-xom": {
+    about: "Exxon Mobil finds, refines and sells oil and gas. Its earnings rise and fall with the price of a barrel, which makes it a bet on energy prices as much as on the company.",
+    category: "us stock · energy",
+    facts: [{ label: "sector", value: "oil & gas" }, { label: "hq", value: "Spring, USA" }],
+  },
 };
 
 /** Look up curated info for an asset/source id, in the requested language

@@ -48,6 +48,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "sector.finance": "фінанси",
   "sector.consumer": "споживчі",
   "sector.health": "здоровʼя",
+  "sector.energy": "енергетика",
   "sector.index": "індексні фонди",
   "yield.goldTitle": "Сировина · золото",
   "yield.soonSolana": "На Solana · скоро",
