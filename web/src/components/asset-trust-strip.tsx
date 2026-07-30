@@ -31,8 +31,12 @@ export function AssetTrustStrip({ view }: { view: ProviderView }) {
   const price = isPriceExposure(view.id);
   const platform = getPlatform(view.id);
 
+  // Price assets used to claim "sell anytime" unconditionally — a promise about
+  // getting a good result, not just permission. On a thin ticker the honest
+  // answer is "you can always try, the market sets what you get" (see the
+  // exit-cost line on the buy panel), so the chip states that instead.
   const chips = price
-    ? [t("trust.sellAnytime"), t("trust.noLock"), t("trust.selfCustody")]
+    ? [t("trust.marketPriced"), t("trust.noLock"), t("trust.selfCustody")]
     : view.heldMint
       ? [t("trust.withdrawAnytime"), t("trust.noLock"), t("trust.selfCustody")]
       : [t("trust.withdrawAnytime"), t("trust.noLock"), t("trust.noFees")];
