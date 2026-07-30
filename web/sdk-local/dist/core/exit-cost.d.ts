@@ -59,5 +59,14 @@ export interface ExitCeilingResult {
  * unit-tests with a plain function and no mocking. Bounded on both axes — at
  * most `maxProbes` calls, resolution never finer than `resolutionUsd` — so it
  * is safe to run on a debounced input path.
+ *
+ * NOT retried: Jupiter's free tier returns spurious `NO_ROUTES_FOUND` under
+ * load, so any single `probe` failure here could be a flake, not a true depth
+ * wall — but a 6-probe binary search has no spare budget to re-check a result
+ * without either doubling the cost per keystroke or giving up a step of
+ * precision. Rather than pretend the result is exact, we accept that a
+ * probe's "no" is trusted as-is and push the hedge to the caller: report the
+ * ceiling as an approximate, rounded figure ("about $200", never "$212.37")
+ * so a wrong-by-one-flake step reads as the estimate it is, not a promise.
  */
 export declare function findExitCeiling(params: FindExitCeilingParams): Promise<ExitCeilingResult>;
