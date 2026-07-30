@@ -28,3 +28,36 @@ export declare function exitCostFraction(usdIn: number, usdOut: number | null): 
  * not read a missing quote as "cheap".
  */
 export declare function exitCostBand(fraction: number | null): ExitCostBand;
+export interface FindExitCeilingParams {
+    /**
+     * Size known (or assumed) NOT to quote — typically the amount the user just
+     * tried, whose SELL quote already came back with no route. The search never
+     * re-probes this value; it only looks strictly below it.
+     */
+    upperBoundUsd: number;
+    /** Does a sell of `usd` quote right now? Injected so this is unit-testable
+     * without a network call — the caller wraps whatever quoting client it uses. */
+    probe: (usd: number) => Promise<boolean>;
+    /** Don't bother distinguishing sizes closer together than this. */
+    resolutionUsd?: number;
+    /** Stop after this many probe calls, whatever precision that lands on. */
+    maxProbes?: number;
+}
+export interface ExitCeilingResult {
+    /** Largest size (to `resolutionUsd` precision) the probe confirmed sellable,
+     * or `null` if nothing below `upperBoundUsd` sold — not even the smallest step. */
+    ceilingUsd: number | null;
+    /** How many probe calls this search actually made (always ≤ `maxProbes`). */
+    probesUsed: number;
+}
+/**
+ * Bounded binary search for the largest sellable size below a known-failing
+ * amount. Assumes sellability is monotonic in size — true of a real order
+ * book/AMM: if $225 has no route, smaller sizes are the ones that might.
+ *
+ * Pure and dependency-injected: the network lives entirely in `probe`, so this
+ * unit-tests with a plain function and no mocking. Bounded on both axes — at
+ * most `maxProbes` calls, resolution never finer than `resolutionUsd` — so it
+ * is safe to run on a debounced input path.
+ */
+export declare function findExitCeiling(params: FindExitCeilingParams): Promise<ExitCeilingResult>;

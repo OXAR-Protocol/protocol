@@ -54,3 +54,83 @@ export function exitCostBand(fraction: number | null): ExitCostBand {
   if (fraction <= NORMAL_MAX) return "normal";
   return "expensive";
 }
+
+/**
+ * Sizes below this aren't worth telling apart — the point is to answer "about
+ * how much can I take out", not to find the exact last dollar. $25 is already
+ * finer than anyone will act on.
+ */
+const DEFAULT_RESOLUTION_USD = 25;
+
+/** Hard cap on probe calls. This runs off a debounced keystroke path against a
+ * real Jupiter endpoint — an unbounded search would hammer it on every retype. */
+const DEFAULT_MAX_PROBES = 6;
+
+export interface FindExitCeilingParams {
+  /**
+   * Size known (or assumed) NOT to quote — typically the amount the user just
+   * tried, whose SELL quote already came back with no route. The search never
+   * re-probes this value; it only looks strictly below it.
+   */
+  upperBoundUsd: number;
+  /** Does a sell of `usd` quote right now? Injected so this is unit-testable
+   * without a network call — the caller wraps whatever quoting client it uses. */
+  probe: (usd: number) => Promise<boolean>;
+  /** Don't bother distinguishing sizes closer together than this. */
+  resolutionUsd?: number;
+  /** Stop after this many probe calls, whatever precision that lands on. */
+  maxProbes?: number;
+}
+
+export interface ExitCeilingResult {
+  /** Largest size (to `resolutionUsd` precision) the probe confirmed sellable,
+   * or `null` if nothing below `upperBoundUsd` sold — not even the smallest step. */
+  ceilingUsd: number | null;
+  /** How many probe calls this search actually made (always ≤ `maxProbes`). */
+  probesUsed: number;
+}
+
+/**
+ * Bounded binary search for the largest sellable size below a known-failing
+ * amount. Assumes sellability is monotonic in size — true of a real order
+ * book/AMM: if $225 has no route, smaller sizes are the ones that might.
+ *
+ * Pure and dependency-injected: the network lives entirely in `probe`, so this
+ * unit-tests with a plain function and no mocking. Bounded on both axes — at
+ * most `maxProbes` calls, resolution never finer than `resolutionUsd` — so it
+ * is safe to run on a debounced input path.
+ */
+export async function findExitCeiling(params: FindExitCeilingParams): Promise<ExitCeilingResult> {
+  const {
+    upperBoundUsd,
+    probe,
+    resolutionUsd = DEFAULT_RESOLUTION_USD,
+    maxProbes = DEFAULT_MAX_PROBES,
+  } = params;
+
+  if (!Number.isFinite(upperBoundUsd) || upperBoundUsd <= 0 || !Number.isFinite(resolutionUsd) || resolutionUsd <= 0 || maxProbes < 1) {
+    return { ceilingUsd: null, probesUsed: 0 };
+  }
+
+  let low = 0; // "sell nothing" trivially succeeds — not itself a useful answer.
+  let high = upperBoundUsd; // known (or assumed) to fail; never re-probed.
+  let ceilingUsd: number | null = null;
+  let probesUsed = 0;
+
+  while (probesUsed < maxProbes && high - low > resolutionUsd) {
+    const mid = Math.round((low + high) / 2 / resolutionUsd) * resolutionUsd;
+    if (mid <= low || mid >= high) break; // rounding collapsed the interval — done
+    probesUsed++;
+    // eslint-disable-next-line no-await-in-loop -- inherently sequential: each
+    // probe narrows the range the next one searches, so they can't run in parallel.
+    const ok = await probe(mid);
+    if (ok) {
+      low = mid;
+      ceilingUsd = mid;
+    } else {
+      high = mid;
+    }
+  }
+
+  return { ceilingUsd, probesUsed };
+}
