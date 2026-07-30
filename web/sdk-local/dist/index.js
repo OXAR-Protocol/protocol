@@ -61,6 +61,7 @@ __exportStar(require("./core/jupiter-swap"), exports);
 __exportStar(require("./core/earnings-basis"), exports);
 __exportStar(require("./core/features"), exports);
 __exportStar(require("./core/quote-value"), exports);
+__exportStar(require("./core/exit-cost"), exports);
 __exportStar(require("./core/tx-delta"), exports);
 __exportStar(require("./core/format"), exports);
 __exportStar(require("./core/allocations"), exports);

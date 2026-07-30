@@ -46,6 +46,7 @@ export * from "./core/jupiter-swap";
 export * from "./core/earnings-basis";
 export * from "./core/features";
 export * from "./core/quote-value";
+export * from "./core/exit-cost";
 export * from "./core/tx-delta";
 export * from "./core/format";
 export * from "./core/allocations";

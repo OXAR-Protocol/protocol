@@ -7,6 +7,7 @@ import { CreditCard } from "lucide-react";
 import { PayWithField } from "@/components/pay-with-field";
 import { koraEnabled } from "@/lib/gas/kora";
 import { DepositConfirm } from "@/components/deposit-confirm";
+import { ExitCostNotice } from "@/components/exit-cost-notice";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
@@ -15,6 +16,7 @@ import { useFundAndBuy } from "@/hooks/use-fund-and-buy";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
+import { isPriceExposure } from "@/lib/yield/assets";
 import { assetUid, checkOriginGas, normalizeDecimalInput } from "@oxar/sdk";
 import { USDC_MINT } from "@/lib/constants";
 import { useT, localizeError } from "@/lib/i18n";
@@ -133,6 +135,8 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
     usdAmount,
     enabled: !!view.heldMint && !!payAsset,
   });
+  // Price-exposure only (stocks/gold) — yield sources don't carry this framing.
+  const price = isPriceExposure(view.id);
 
   const handleDeposit = async () => {
     if (!payAsset || usdAmount <= 0) return;
@@ -317,6 +321,17 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             t("deposit.cantQuote")
           )}
         </p>
+      )}
+
+      {/* What leaving would cost, quoted live — stocks/gold only, once an amount
+          is entered. Not a gate: the sell itself is never blocked on this. */}
+      {price && (
+        <ExitCostNotice
+          heldMint={view.heldMint}
+          heldDecimals={view.heldDecimals}
+          usdAmount={usdAmount}
+          priceUsd={sharePriceUsd}
+        />
       )}
 
       {/* Crypto deposit — hidden on an empty wallet (nothing to pay with). */}
