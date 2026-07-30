@@ -4,6 +4,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { motion } from "framer-motion";
 
 import { useT } from "@/lib/i18n";
+import { LanguageChips } from "@/components/language-picker";
 
 /**
  * Where a decline lands. Deliberately a dead end for the app itself — the
@@ -22,6 +23,9 @@ export function TermsBlocked({ onReviewTerms }: { onReviewTerms: () => void }) {
         animate={{ opacity: 1, y: 0 }}
         className="flex max-w-[380px] flex-col items-center"
       >
+        <div className="mb-6">
+          <LanguageChips />
+        </div>
         <p className="text-[17px] leading-snug text-black">{t("terms.gate.blockedTitle")}</p>
         <p className="mt-3 text-[13px] leading-relaxed text-black/50">{t("terms.gate.blockedBody")}</p>
 

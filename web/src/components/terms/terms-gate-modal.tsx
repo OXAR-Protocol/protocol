@@ -5,14 +5,17 @@ import { motion } from "framer-motion";
 
 import { TERMS_VERSION } from "@oxar/sdk";
 import { useT } from "@/lib/i18n";
+import { LanguageChips } from "@/components/language-picker";
 import { TERMS_SECTIONS } from "@/components/terms/terms-sections";
+import { TERMS_SECTIONS_UK } from "@/components/terms/terms-sections-uk";
 
-const TERMS_DATE = new Date(`${TERMS_VERSION}T00:00:00Z`).toLocaleDateString("en-US", {
-  month: "long",
-  day: "numeric",
-  year: "numeric",
-  timeZone: "UTC",
-});
+const termsDate = (locale: string) =>
+  new Date(`${TERMS_VERSION}T00:00:00Z`).toLocaleDateString(locale === "uk" ? "uk-UA" : "en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 
 interface Props {
   walletAddress: string;
@@ -32,9 +35,12 @@ interface Props {
  * indicator eating the bottom of the screen on a phone), same fix.
  */
 export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [agreed, setAgreed] = useState(false);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  // Same sections, same ids — only the prose language switches. The English
+  // text is the binding one; the note below the header says so in Ukrainian.
+  const sections = locale === "uk" ? TERMS_SECTIONS_UK : TERMS_SECTIONS;
 
   const scrollTo = (id: string) => {
     sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -69,13 +75,19 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
         </div>
 
         <div className="border-b border-black/10 px-5 pb-3 pt-3">
-          <p className="text-[15px] text-black">{t("terms.gate.title")}</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[15px] text-black">{t("terms.gate.title")}</p>
+            <LanguageChips />
+          </div>
           <p className="mt-1 break-all font-mono text-[11px] leading-relaxed text-black/45">
             {t("terms.gate.forWallet", { addr: walletAddress })}
           </p>
+          {locale === "uk" && (
+            <p className="mt-1 text-[10px] text-black/35">{t("terms.gate.translationNote")}</p>
+          )}
 
           <div className="-mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-1">
-            {TERMS_SECTIONS.map((s) => (
+            {sections.map((s) => (
               <button
                 key={s.id}
                 type="button"
@@ -89,7 +101,7 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
         </div>
 
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-4 text-[13px] leading-relaxed text-black/60 [&_a]:text-[#3c05c7] [&_a]:underline [&_h3]:mb-1.5 [&_h3]:text-[14px] [&_h3]:font-medium [&_h3]:text-black [&_strong]:font-medium [&_strong]:text-black">
-          {TERMS_SECTIONS.map((s) => (
+          {sections.map((s) => (
             <div key={s.id} ref={(el) => { sectionRefs.current[s.id] = el; }}>
               <h3>{s.heading}</h3>
               {s.body}
@@ -127,7 +139,7 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
           </div>
 
           <p className="mt-3 text-center text-[10px] text-black/35">
-            {t("terms.gate.footer", { version: TERMS_VERSION, date: TERMS_DATE, email: "support@oxar.app" })}
+            {t("terms.gate.footer", { version: TERMS_VERSION, date: termsDate(locale), email: "support@oxar.app" })}
           </p>
         </div>
       </motion.div>

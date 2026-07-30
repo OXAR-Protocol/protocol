@@ -308,6 +308,8 @@ export const en = {
   "terms.gate.decline": "decline",
   "terms.gate.agree": "agree & continue",
   "terms.gate.footer": "v{version} · updated {date} · {email}",
+  // Shown only when the Ukrainian translation of the prose is displayed.
+  "terms.gate.translationNote": "courtesy translation — the English version governs.",
   "terms.gate.blockedTitle": "you need to agree to continue",
   "terms.gate.blockedBody":
     "oxar only works once you've read and agreed to the terms of use — until then, this account stays paused.",
