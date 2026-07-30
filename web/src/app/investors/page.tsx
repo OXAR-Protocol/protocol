@@ -68,7 +68,7 @@ export default function InvestorsPage() {
           <strong>Today OXAR earns nothing, deliberately.</strong> There is no performance fee, no deposit or withdrawal fee, and no spread of our own — a cross-chain integrator markup of ~0.1% existed until 2026-07-30 and was turned off after it earned $0.16 in total. Our terms of use say the same thing, and they are the version that binds us.
         </p>
         <p className="mt-3">
-          <strong>The intended model</strong> is a 10% performance fee on yield earned — on growth, never on principal. At $10M TVL and 8% average APY that is ~$80k a year; at $100M TVL, ~$800k; profitability lands around $26M TVL. None of it is implemented, and switching it on is a product decision we have not made: at this stage &ldquo;we take nothing&rdquo; is worth more than the revenue would be.
+          <strong>The intended model</strong> is a 10% performance fee on yield earned — on growth, never on principal. At $10M TVL and 8% average APY that is ~$80k a year; at $100M TVL, ~$800k; profitability lands around $26M TVL. None of it is implemented, and switching it on is a product decision we have not made: at this stage “we take nothing” is worth more than the revenue would be.
         </p>
         <p className="mt-3">
           <strong>Later, optionally:</strong> a spread on tokenized-asset swaps and premium features. Stated as intent, not as income.

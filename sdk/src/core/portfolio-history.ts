@@ -31,6 +31,18 @@ export interface PortfolioPoint {
 
 const DAY = 86_400;
 
+/** Below half a cent a portfolio is worth nothing that survives display rounding.
+ *  The backward replay leaves float residue (~1e-13 dollars) on the days before the
+ *  first trade; letting it through reads as "held almost nothing" instead of
+ *  "held nothing", and a range that starts there divides by it. One predicate rather
+ *  than an exported constant, so every "is this worth anything" guard agrees by
+ *  construction instead of by hand-kept-in-sync inequalities. */
+const DUST_USD = 0.005;
+
+export function isDustUsd(usd: number): boolean {
+  return usd < DUST_USD;
+}
+
 /** Price at or before `t`; the earliest known price before the series starts, so a
  *  position that predates our price data is valued rather than silently dropped. */
 export function priceAt(series: readonly { t: number; price: number }[], t: number): number {
@@ -77,7 +89,9 @@ export function dailyPortfolioValue(params: {
       if (amount <= 0) continue;
       usd += amount * priceAt(prices[mint] ?? [], dayEnd);
     }
-    points.push({ t: dayEnd, usd });
+    // Positive residue slips past the per-mint guard above; a day worth less than
+    // rounding error is a day worth zero.
+    points.push({ t: dayEnd, usd: isDustUsd(usd) ? 0 : usd });
   }
 
   return points;
@@ -89,7 +103,7 @@ export function dailyPortfolioValue(params: {
  * does. Keeps one zero so the first deposit still reads as a rise from nothing.
  */
 export function trimLeadingEmpty(points: readonly PortfolioPoint[]): PortfolioPoint[] {
-  const firstHeld = points.findIndex((p) => p.usd > 0);
+  const firstHeld = points.findIndex((p) => !isDustUsd(p.usd));
   if (firstHeld < 0) return [];
   return points.slice(Math.max(0, firstHeld - 1));
 }

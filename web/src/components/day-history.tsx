@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 
 import {
+  isDustUsd,
   takeByEventCount,
   formatDay,
   formatTimeOfDay,
@@ -65,7 +66,7 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
               {d.usd !== null && (
                 <span className="text-[13px] text-black/70">${formatUsdAmount(d.usd)}</span>
               )}
-              {d.changeUsd !== null && Math.abs(d.changeUsd) >= 0.005 && (
+              {d.changeUsd !== null && !isDustUsd(Math.abs(d.changeUsd)) && (
                 <span className={`text-[12px] ${d.changeUsd >= 0 ? "text-black/45" : "text-red-600"}`}>
                   {formatSignedUsd(d.changeUsd)}
                 </span>
