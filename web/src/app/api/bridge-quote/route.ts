@@ -11,9 +11,25 @@ const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFin
 export async function POST(req: Request) {
   const key = process.env.DELORA_API_KEY;
   const base = process.env.NEXT_PUBLIC_DELORA_BASE_URL || "https://api.delora.build/v1";
+  // Kept: Delora's analytics (volume, transactions, unique users) hang off the
+  // integrator, not off the fee — so zeroing the markup below costs us no
+  // measurement.
   const integrator = process.env.DELORA_INTEGRATOR || "oxarforoxar";
-  // Delora `fee` is a FRACTION (0–0.1), not basis points: 0.001 = 0.1% markup.
-  const fee = process.env.DELORA_FEE_BPS || "0.001";
+  /**
+   * Delora's `fee` is a FRACTION (0–0.1), not basis points. It was 0.001 — a 0.1%
+   * markup on every cross-chain bridge, and it really was ours: the partner
+   * portal shows it accruing to our payout wallets. All-time it earned $0.16, on
+   * $162.81 of volume, from one user who was us testing.
+   *
+   * Sixteen cents is not a monetisation strategy, and it was bought with the one
+   * claim a trust product can't easily re-earn — that we take nothing — charged on
+   * the very path we built to make arriving easy. So: zero.
+   *
+   * Deliberately NOT read from an env var. A charge on someone else's money should
+   * not be flippable by a dashboard field nobody reviews; turning it back on
+   * should cost a commit and a read.
+   */
+  const fee = "0";
   if (!key) return NextResponse.json({ error: "Bridge unavailable" }, { status: 503 });
 
   let body: Record<string, unknown>;

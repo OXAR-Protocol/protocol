@@ -84,7 +84,7 @@ export default function TermsPage() {
       <section>
         <h2>9. Fees</h2>
         <p>
-          <strong>OXAR charges no fee of its own</strong> on deposits, withdrawals, or yield earned — there is no performance fee, no deposit fee, and no withdrawal penalty. Two costs come from elsewhere: cross-chain swaps routed through Delora (bridging to Ethereum-based yields) carry a small integrator markup (~0.1%), configured by OXAR and collected by Delora as part of the quote. We disclose it here rather than characterise who ultimately receives it, because that depends on Delora&rsquo;s integrator terms. And buying or selling a swap-and-hold asset — tokenized stocks, gold, or Ondo USDY — has a one-time swap cost set by the market at the time of the trade, same as any on-chain swap; it is not collected by OXAR.
+          <strong>OXAR charges no fee of its own</strong> on deposits, withdrawals, or yield earned — there is no performance fee, no deposit fee, and no withdrawal penalty. One cost comes from elsewhere: buying or selling a swap-and-hold asset — tokenized stocks, gold, or Ondo USDY — has a one-time swap cost set by the market at the time of the trade, same as any on-chain swap; it is not collected by OXAR.
         </p>
       </section>
 
