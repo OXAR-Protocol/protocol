@@ -381,6 +381,7 @@ export const en = {
   "err.wrongNetwork": "Switch your wallet to the right network and try again.",
   "err.txFailed": "This didn't go through — most often that's not enough balance for the amount plus the network fee. Please check and try again.",
   "err.generic": "Something went wrong. Please try again.",
+  "err.stoppedWaiting": "Stopped waiting — nothing was charged.",
 } as const;
 
 export type TranslationKey = keyof typeof en;

@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFundWallet } from "@privy-io/react-auth/solana";
-import type { Connection, PublicKey } from "@solana/web3.js";
 
+import { SOL_MINT, pollArrival, type WalletAsset } from "@oxar/sdk";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useUniversalDeposit } from "@/hooks/use-universal-deposit";
 import { toFriendlyError, UserFacingError } from "@/lib/yield";
-import { SOL_MINT, type WalletAsset } from "@oxar/sdk";
 
 export type FundBuyStatus = "idle" | "funding" | "arriving" | "buying";
 
@@ -23,8 +22,6 @@ const LAMPORTS_PER_SOL = 1_000_000_000;
 const APPLE_PAY_GAS_RESERVE = 25_000_000; // ~0.025 SOL
 // "Real funds landed" floor for arrival detection (well below any real purchase).
 const MIN_ARRIVAL_LAMPORTS = 15_000_000; // ~0.015 SOL
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 /** Current SOL price (USD) via Jupiter Price v3. 0 if unavailable. */
 async function getSolPrice(): Promise<number> {
   try {
@@ -35,23 +32,6 @@ async function getSolPrice(): Promise<number> {
   } catch {
     return 0;
   }
-}
-
-/** Poll the wallet's SOL balance until it rises by ≥ `expected` lamports, or timeout. */
-async function pollSolArrival(
-  connection: Connection,
-  owner: PublicKey,
-  baseline: number,
-  expected: number,
-  timeoutMs = 10 * 60 * 1000,
-): Promise<boolean> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    const current = await connection.getBalance(owner);
-    if (current - baseline >= expected) return true;
-    await sleep(4000);
-  }
-  return false;
 }
 
 /**
@@ -91,6 +71,20 @@ export function useFundAndBuy(providerId: string) {
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
+  // `fundWallet()` resolves only once the flow completes — there is no "cancelled"
+  // result. A user who backs out of the provider window leaves us awaiting a promise
+  // that may never settle, then facing a ten-minute arrival poll with no way out.
+  // Same defect as `useCardTopUp`, same fix: a manual way to abandon both waits.
+  const cancelRef = useRef<((reason: Error) => void) | null>(null);
+  const stoppedRef = useRef(false);
+
+  /** Stop waiting. Nothing was charged if the provider flow was abandoned; if it
+   *  wasn't, the SOL still arrives and simply shows up as balance. */
+  const cancel = useCallback(() => {
+    stoppedRef.current = true;
+    cancelRef.current?.(new UserFacingError("Stopped waiting — nothing was charged."));
+  }, []);
+
   const buyWithApplePay = useCallback(
     async (usdAmount: number): Promise<bigint> => {
       if (!walletAddress) throw new Error("Wallet not connected");
@@ -98,6 +92,11 @@ export function useFundAndBuy(providerId: string) {
       const owner = walletAddress;
 
       setError(null);
+      stoppedRef.current = false;
+      const abandoned = new Promise<never>((_, reject) => {
+        cancelRef.current = reject;
+      });
+
       try {
         // CRITICAL (mobile): fundWallet MUST be called synchronously inside the click.
         // Any `await` before it drops the user-activation, and iOS/Android then BLOCK the
@@ -120,22 +119,30 @@ export function useFundAndBuy(providerId: string) {
         });
 
         const baseline = await connection.getBalance(owner);
-        await funding;
+        await Promise.race([funding, abandoned]);
 
         // Past the user gesture now — awaiting is safe. We need the price for the swap math.
         const price = solPriceRef.current || (await getSolPrice());
         if (price <= 0) throw new UserFacingError("Couldn't price SOL — try again");
 
         setStatus("arriving");
-        const arrived = await pollSolArrival(connection, owner, baseline, MIN_ARRIVAL_LAMPORTS);
-        if (!arrived) {
+        const arrived = await Promise.race([
+          pollArrival(() => connection.getBalance(owner), baseline, MIN_ARRIVAL_LAMPORTS, () => stoppedRef.current),
+          abandoned,
+        ]);
+        if (arrived <= 0) {
           throw new UserFacingError(
             "We didn't see your funds arrive yet — card top-ups can take a few minutes. " +
               "Once your SOL lands you can buy straight from your wallet balance.",
           );
         }
+        // No cancelling past this point — the wait is over and the buy is about to
+        // sign a transaction, not sit on a promise that could hang.
+        cancelRef.current = null;
 
         // Keep the gas reserve; swap the rest of what just arrived into the asset.
+        // Re-fetched rather than derived from `arrived` — the live balance is the
+        // source of truth for what's actually spendable.
         const current = await connection.getBalance(owner);
         const reserve = APPLE_PAY_GAS_RESERVE;
         const fundedDelta = Math.max(0, current - baseline);
@@ -164,6 +171,7 @@ export function useFundAndBuy(providerId: string) {
         throw e;
       } finally {
         setStatus("idle");
+        cancelRef.current = null;
       }
     },
     [connection, walletAddress, fundWallet, depositWith],
@@ -171,6 +179,7 @@ export function useFundAndBuy(providerId: string) {
 
   return {
     buyWithApplePay,
+    cancel,
     status,
     busy: status !== "idle",
     label: status === "idle" ? null : LABELS[status],

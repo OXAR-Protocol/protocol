@@ -173,6 +173,11 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
       // surfaced via `applePay.error`
     }
   };
+  // Once the on-ramp resolves, funds are still landing on-chain and can take a
+  // few minutes — Privy has no "cancelled" result for a backed-out card flow, so
+  // this is the only way out of that wait. Not offered mid-buy: the swap+deposit
+  // tx is already signing by then.
+  const canCancelApplePay = applePay.status === "funding" || applePay.status === "arriving";
 
   if (confirming && payAsset) {
     return (
@@ -339,7 +344,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         <>
           <button
             onClick={() => setConfirming(true)}
-            disabled={busy || applePay.busy || !payAsset || usdAmount <= 0 || bridgeBelowMin}
+            // A card top-up that's still funding/arriving hasn't touched the wallet
+            // yet — no reason to freeze this unrelated path. Once it's actually
+            // buying (signing+sending), the two shouldn't race the same wallet.
+            disabled={busy || (applePay.busy && !canCancelApplePay) || !payAsset || usdAmount <= 0 || bridgeBelowMin}
             className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
           >
             {verb}
@@ -368,12 +376,17 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             </div>
           )}
           <button
-            onClick={handleApplePay}
-            disabled={applePay.busy || busy || applePayBelowMin}
+            onClick={canCancelApplePay ? applePay.cancel : handleApplePay}
+            disabled={(applePay.busy && !canCancelApplePay) || busy || applePayBelowMin}
             className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[15px] font-medium tracking-tight hover:bg-black/90 disabled:opacity-40 transition inline-flex items-center justify-center gap-1.5"
           >
             {applePay.busy ? (
-              <span className="lowercase">{t(`status.${applePay.status}` as "status.funding")}</span>
+              // While funding/arriving, the same button stops waiting — a card
+              // window the user backed out of never resolves on its own. Once
+              // buying, there's nothing left to cancel (see canCancelApplePay).
+              <span className="lowercase">
+                {canCancelApplePay ? t("alloc.stopWaiting") : t(`status.${applePay.status}` as "status.buying")}
+              </span>
             ) : (
               <>
                 <CreditCard size={16} strokeWidth={1.75} />

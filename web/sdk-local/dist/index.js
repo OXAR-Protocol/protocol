@@ -69,3 +69,4 @@ __exportStar(require("./core/origin-gas"), exports);
 __exportStar(require("./core/activity-stats"), exports);
 __exportStar(require("./core/format-date"), exports);
 __exportStar(require("./core/portfolio-history"), exports);
+__exportStar(require("./core/poll-arrival"), exports);

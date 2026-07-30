@@ -90,6 +90,7 @@ const ERROR_KEYS: Record<string, TranslationKey> = {
   "This didn't go through — most often that's not enough balance for the amount plus the network fee. Please check and try again.":
     "err.txFailed",
   "Something went wrong. Please try again.": "err.generic",
+  "Stopped waiting — nothing was charged.": "err.stoppedWaiting",
 };
 
 /** Localize a user-facing error message if we recognise it; else return as-is. */
