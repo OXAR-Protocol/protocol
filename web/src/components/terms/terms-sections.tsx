@@ -60,7 +60,7 @@ export const TERMS_SECTIONS: TermsSection[] = [
     short: "non-custodial",
     body: (
       <p>
-        OXAR is <strong>fully non-custodial</strong>. Your USDC and any yield-bearing or price-exposure tokens (USDY, syrupUSDC, tokenized stocks, gold, etc.) sit in your own wallet (Phantom, Backpack, MetaMask, or a Privy-issued embedded wallet under your control). OXAR smart contracts have <strong>no administrative withdrawal keys</strong> over user funds.
+        OXAR is <strong>fully non-custodial</strong>. Your USDC and any yield-bearing or price-exposure tokens (USDY, syrupUSDC, tokenized stocks, gold, etc.) sit in your own wallet (Phantom, Backpack, MetaMask, or a Privy-issued embedded wallet under your control). OXAR runs <strong>no smart contract of its own</strong> — there is no admin key over your funds because there is no OXAR contract for one to exist in. The app builds transactions; your wallet signs them.
       </p>
     ),
   },
@@ -108,15 +108,15 @@ export const TERMS_SECTIONS: TermsSection[] = [
     short: "risks",
     body: (
       <>
-        <p>By using OXAR you acknowledge:</p>
+        <p>
+          Two things can lose you money here, and neither of them is OXAR taking it. Everything below follows from them.
+        </p>
         <ul className="mt-3 list-none space-y-2">
-          <li>→ <strong>Smart contract risk</strong> — bugs in OXAR or integrated protocols may result in loss of funds. We audit but cannot guarantee.</li>
-          <li>→ <strong>Yield source risk</strong> — third-party protocols may depeg, default (e.g. Maple pools), or shut down. We disclose risk levels but do not insure.</li>
-          <li>→ <strong>Market / liquidity risk</strong> — tokenized stocks and gold track real-market prices and real-market depth; you may not be able to exit a large position in one transaction, and the price can move against you between quotes.</li>
-          <li>→ <strong>Stablecoin risk</strong> — USDC, USDT, and similar may de-peg from $1.</li>
-          <li>→ <strong>Blockchain risk</strong> — network outages, transaction failures, fee spikes.</li>
-          <li>→ <strong>Regulatory risk</strong> — the legal status of crypto, stablecoins, tokenized securities, and DeFi protocols may change in your jurisdiction.</li>
-          <li>→ <strong>Cross-chain bridge risk</strong> — when routing through Delora to Ethereum-based yields, bridge failures could cause loss.</li>
+          <li>→ <strong>The yield is someone else&rsquo;s business</strong> — your money goes into third-party protocols (Jupiter Lend, Maple, OnRe and others). They can pay less than advertised, pause, default, or fail outright, and their code can contain bugs. OXAR runs no contract of its own, but that also means we cannot fix theirs. We show what we know about each; we insure nothing.</li>
+          <li>→ <strong>The stocks and gold are real markets</strong> — they track real prices and real depth. The price moves against you between the quote and the trade, and a large position may not be sellable in one go; how much can be sold at once varies by asset and can stay low for months. The app shows you what leaving would cost before you buy, but it cannot make a market deeper than it is.</li>
+          <li>→ <strong>Dollars on a blockchain are not bank dollars</strong> — USDC, USDT and similar can de-peg from $1, networks stall, transactions fail, fees spike.</li>
+          <li>→ <strong>Paying from another chain adds a bridge</strong> — a cross-chain deposit routes through Delora, and a bridge that stalls or fails mid-transfer can delay or lose funds.</li>
+          <li>→ <strong>The rules can change</strong> — the legal status of crypto, stablecoins and tokenized securities may change where you live, including in ways that cut off access to what you already hold.</li>
         </ul>
       </>
     ),
