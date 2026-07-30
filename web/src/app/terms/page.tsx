@@ -1,13 +1,26 @@
+import { TERMS_VERSION } from "@oxar/sdk";
 import { DocPage } from "@/components/landing-v2/doc-page";
 
 export const metadata = {
   title: "OXAR — Terms of Use",
 };
 
+// Single source of truth for "which revision is live": TERMS_VERSION also
+// gates the acceptance record taken from the welcome card (see
+// components/intro-modal.tsx + api/terms/accept). Keep this display in sync
+// with that constant rather than hand-editing a date here — bump both
+// together when the terms materially change.
+const lastUpdated = new Date(`${TERMS_VERSION}T00:00:00Z`).toLocaleDateString("en-US", {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
 export default function TermsPage() {
   return (
     <DocPage label="legal" title="terms of use">
-      <p><strong>Last updated:</strong> July 30, 2026</p>
+      <p><strong>Last updated:</strong> {lastUpdated}</p>
 
       <section>
         <h2>1. Acceptance</h2>

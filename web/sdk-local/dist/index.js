@@ -70,3 +70,4 @@ __exportStar(require("./core/activity-stats"), exports);
 __exportStar(require("./core/format-date"), exports);
 __exportStar(require("./core/portfolio-history"), exports);
 __exportStar(require("./core/poll-arrival"), exports);
+__exportStar(require("./core/terms"), exports);

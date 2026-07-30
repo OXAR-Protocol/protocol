@@ -280,6 +280,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "intro.body": "твої гроші не мають лежати без діла. тут вони сплять там, де платять.",
   "intro.showMeAround": "покажи мені",
   "intro.skip": "пропустити",
+  "intro.termsPrefix": "продовжуючи, ти погоджуєшся з",
+  "intro.termsLink": "умовами",
 
   // Guided tour — шість реальних зупинок у застосунку, не скріншоти
   "tour.balance.title": "ось усе, що в тебе працює",

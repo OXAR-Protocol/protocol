@@ -299,6 +299,8 @@ export const en = {
   "intro.body": "your money shouldn't sit still. here it sleeps somewhere that pays.",
   "intro.showMeAround": "show me around",
   "intro.skip": "skip",
+  "intro.termsPrefix": "continuing means accepting the",
+  "intro.termsLink": "terms",
 
   // Guided tour — six real stops across the app, not screenshots of it
   "tour.balance.title": "this is everything you have, working",
