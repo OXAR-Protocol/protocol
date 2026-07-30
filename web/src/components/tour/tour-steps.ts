@@ -3,8 +3,13 @@ import type { TranslationKey } from "@/lib/i18n/en";
 export interface TourStep {
   /** Route the step lives on — the driver navigates here before looking for the anchor. */
   route: string;
-  /** Matches the `data-tour="<anchor>"` attribute on the real element being introduced. */
-  anchor: string;
+  /**
+   * Matches the `data-tour="<anchor>"` attribute on the real element(s) being
+   * introduced. Several are allowed: the catalog stop covers savings, stocks and
+   * gold, and lighting only the first made the copy promise three things the
+   * screen showed one of. Each gets its OWN hole rather than one blanket rect.
+   */
+  anchor: string | readonly string[];
   titleKey: TranslationKey;
   bodyKey: TranslationKey;
 }
@@ -36,7 +41,10 @@ export const TOUR_STEPS: readonly TourStep[] = [
   },
   {
     route: "/market",
-    anchor: "catalog",
+    // The three section headings, not the three full lists — a hole per compact
+    // label reads as "there are these kinds here"; holes around the lists would
+    // just be the page again, undimmed.
+    anchor: ["catalog", "catalog-stocks", "catalog-gold"],
     titleKey: "tour.catalog.title",
     bodyKey: "tour.catalog.body",
   },
@@ -65,3 +73,8 @@ export const TOUR_STEPS: readonly TourStep[] = [
     bodyKey: "tour.account.body",
   },
 ] as const;
+
+/** A step's anchors, however it spelled them. */
+export function anchorsOf(step: TourStep): readonly string[] {
+  return Array.isArray(step.anchor) ? step.anchor : [step.anchor as string];
+}
