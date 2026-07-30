@@ -18,7 +18,6 @@ exports.groupByDay = groupByDay;
 exports.summarizeDays = summarizeDays;
 exports.activeDays = activeDays;
 exports.takeByEventCount = takeByEventCount;
-const portfolio_history_1 = require("./portfolio-history");
 exports.SECONDS_PER_DAY = 86400;
 /** Money going into positions. */
 const INFLOW = new Set(["buy", "deposit", "receive"]);
@@ -91,7 +90,6 @@ function summarizeDays(days) {
     const startUsd = withValue.length ? withValue[0].usd : null;
     const endUsd = withValue.length ? withValue[withValue.length - 1].usd : null;
     const changeUsd = startUsd !== null && endUsd !== null ? endUsd - startUsd : null;
-    const changePct = changeUsd !== null && startUsd !== null && !(0, portfolio_history_1.isDustUsd)(startUsd) ? changeUsd / startUsd : null;
     let inUsd = 0;
     let outUsd = 0;
     let trades = 0;
@@ -103,7 +101,7 @@ function summarizeDays(days) {
         if (d.events.length)
             activeDays += 1;
     }
-    return { startUsd, endUsd, changeUsd, changePct, inUsd, outUsd, trades, activeDays };
+    return { startUsd, endUsd, changeUsd, inUsd, outUsd, trades, activeDays };
 }
 /**
  * The days worth listing. A day with a value but nothing done to it says only what

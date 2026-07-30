@@ -10,8 +10,6 @@
  * already built on UTC day boundaries.
  */
 
-import { isDustUsd } from "./portfolio-history";
-
 export const SECONDS_PER_DAY = 86_400;
 
 /** The least an event has to be to be counted here. */
@@ -111,11 +109,17 @@ export interface RangeStats {
   /** Value at the start / end of the range; null when the series doesn't reach. */
   startUsd: number | null;
   endUsd: number | null;
-  /** End minus start, and the same as a fraction of the start. Null when either end
-   *  is missing, or when the start was zero or dust — there is no "percent up from
-   *  nothing", and dividing by float residue prints quintillions. */
+  /** End minus start. Null when either end is missing.
+   *
+   *  Deliberately NOT offered as a percentage. On a portfolio someone is actively
+   *  funding, (end − start) / start measures the deposits, not the performance: a
+   *  wallet that went from $2 to $85 by moving its own cash in reads as "+4181%".
+   *  The percentage is only meaningful once it excludes flows — i.e. once it's a
+   *  real return — and the flow figures below can't yet support one (a trade
+   *  settled in anything but USDC prices as null and is dropped). Until then no
+   *  number is better than a flattering one. A single asset's PRICE chart is a
+   *  different thing and does show a percentage — see `asset-chart.tsx`. */
   changeUsd: number | null;
-  changePct: number | null;
   inUsd: number;
   outUsd: number;
   trades: number;
@@ -137,8 +141,6 @@ export function summarizeDays(days: readonly DayActivity[]): RangeStats {
   const endUsd = withValue.length ? withValue[withValue.length - 1]!.usd : null;
 
   const changeUsd = startUsd !== null && endUsd !== null ? endUsd - startUsd : null;
-  const changePct =
-    changeUsd !== null && startUsd !== null && !isDustUsd(startUsd) ? changeUsd / startUsd : null;
 
   let inUsd = 0;
   let outUsd = 0;
@@ -151,7 +153,7 @@ export function summarizeDays(days: readonly DayActivity[]): RangeStats {
     if (d.events.length) activeDays += 1;
   }
 
-  return { startUsd, endUsd, changeUsd, changePct, inUsd, outUsd, trades, activeDays };
+  return { startUsd, endUsd, changeUsd, inUsd, outUsd, trades, activeDays };
 }
 
 /**

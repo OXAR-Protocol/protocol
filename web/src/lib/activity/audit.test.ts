@@ -42,9 +42,11 @@ describe("numbers agree between the chart, the summary and the day list", () => 
 });
 
 // Backward replay subtracts float deltas from a float balance, so the days before
-// the first trade come out as residue (~1e-13 dollars), not exact zero. Residue that
-// leaks through reads as "the portfolio started at almost nothing" and turns the
-// range percent into quintillions.
+// the first trade come out as residue (~1e-13 dollars), not exact zero. Left alone,
+// that residue is a day the chart draws as "held almost nothing" and the trim keeps
+// as real. (It also used to be divided into, which printed a range change of
+// 966516508454537984.0%; there is no percentage to divide any more — see
+// `RangeStats.changeUsd` — but the line itself still has to be honest.)
 describe("float residue does not pass for a held portfolio", () => {
   it("clamps residue days to zero so the leading run is trimmed", () => {
     const pts = dailyPortfolioValue({
@@ -65,7 +67,7 @@ describe("float residue does not pass for a held portfolio", () => {
     expect(trimLeadingEmpty(pts)).toHaveLength(3);
   });
 
-  it("reports no percent when the range starts from dust", () => {
+  it("summarises a range that opens on dust in dollars, with no ratio to explode", () => {
     const days = groupByDay(
       [],
       [
@@ -75,7 +77,7 @@ describe("float residue does not pass for a held portfolio", () => {
     );
     const stats = summarizeDays(days);
     expect(stats.changeUsd).toBeCloseTo(85.63, 6);
-    expect(stats.changePct).toBeNull();
+    expect(stats).not.toHaveProperty("changePct");
   });
 });
 
