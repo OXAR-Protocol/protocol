@@ -21,3 +21,4 @@ export * from "./core/origin-gas";
 export * from "./core/activity-stats";
 export * from "./core/format-date";
 export * from "./core/portfolio-history";
+export * from "./core/poll-arrival";

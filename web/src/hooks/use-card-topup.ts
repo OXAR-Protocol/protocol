@@ -6,6 +6,7 @@ import type { FiatOnrampEnvironment } from "@privy-io/api-types";
 import { PublicKey, type Connection } from "@solana/web3.js";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 
+import { pollArrival } from "@oxar/sdk";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { UserFacingError } from "@/lib/yield";
 import { USDC_MINT } from "@/lib/constants";
@@ -25,8 +26,6 @@ const SOLANA_MAINNET_CAIP2 = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
 const ONRAMP_ENV: FiatOnrampEnvironment =
   process.env.NEXT_PUBLIC_ONRAMP_ENV === "sandbox" ? "sandbox" : "production";
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 export type CardTopUpStatus = "idle" | "funding" | "arriving";
 
 /** The wallet's USDC balance in UI units (0 if the ATA doesn't exist yet). */
@@ -41,25 +40,17 @@ export async function getUsdcUi(connection: Connection, owner: PublicKey): Promi
 }
 
 /** Poll until the USDC balance rises by ≥ `minDelta` (funds landed), or timeout.
- *  Returns the realized delta in UI units (what actually arrived). */
-async function pollUsdcArrival(
+ *  Returns the realized delta in UI units (what actually arrived). Thin wrapper
+ *  around the shared `pollArrival` — see its doc for why `stopped()` exists. */
+function pollUsdcArrival(
   connection: Connection,
   owner: PublicKey,
   baseline: number,
   minDelta: number,
-  /** Checked each round so a cancelled top-up stops polling instead of running the
-   *  full timeout in the background. */
   stopped: () => boolean,
   timeoutMs = 10 * 60 * 1000,
 ): Promise<number> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline && !stopped()) {
-    const current = await getUsdcUi(connection, owner);
-    if (current - baseline >= minDelta) return current - baseline;
-    await sleep(4000);
-  }
-  const current = await getUsdcUi(connection, owner);
-  return Math.max(0, current - baseline);
+  return pollArrival(() => getUsdcUi(connection, owner), baseline, minDelta, stopped, timeoutMs);
 }
 
 export function useCardTopUp() {
