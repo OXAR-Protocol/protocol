@@ -12,6 +12,10 @@ export const runtime = "nodejs";
 /** Insiders when nothing is configured — so a pilot works right after deploy. */
 const DEFAULT_INSIDER_EMAILS = ["daniel.l@oxar.app"];
 
+/** Keys on for insiders, in code so the switch carries a commit (see below).
+ *  ondo-stocks: Delora/DFlow stock rail pilot (AAPLon) — real-money pass pending. */
+const DEFAULT_INSIDER_FEATURES = ["ondo-stocks"];
+
 
 
 /**
@@ -43,7 +47,7 @@ export async function POST(req: Request) {
     {
       insiderEmails: [...DEFAULT_INSIDER_EMAILS, ...parseList(process.env.INSIDER_EMAILS)],
       insiderWallets: parseList(process.env.INSIDER_WALLETS),
-      insiderFeatures: parseList(process.env.INSIDER_FEATURES),
+      insiderFeatures: [...DEFAULT_INSIDER_FEATURES, ...parseList(process.env.INSIDER_FEATURES)],
       publicFeatures: [...DEFAULT_PUBLIC_FEATURES, ...parseList(process.env.PUBLIC_FEATURES)],
     },
   );

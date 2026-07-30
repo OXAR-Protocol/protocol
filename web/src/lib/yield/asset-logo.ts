@@ -5,10 +5,15 @@
 // valid-PNG error body that decoded WITHOUT firing onError (blank tiles); Parqet was
 // CORS-blocked + 404'd + returned wrong-company logos. Tickers without a bundled file
 // (ETFs like SPY/QQQ/GLD, private SPCX, CRCL) just fall back to a monogram.
+/** Ticker from a stock id — an Ondo-rail variant ("xstock-aapl-ondo") shares the
+ *  underlying company's ticker, logo and monogram. */
+function stockTicker(id: string): string {
+  return id.slice("xstock-".length).replace(/-ondo$/, "").toUpperCase();
+}
+
 export function assetLogoSrc(id: string): string | undefined {
   if (id.startsWith("xstock-")) {
-    const ticker = id.slice("xstock-".length).toUpperCase();
-    return `/logos/xstocks/${ticker}.png`;
+    return `/logos/xstocks/${stockTicker(id)}.png`;
   }
   return undefined;
 }
@@ -16,6 +21,6 @@ export function assetLogoSrc(id: string): string | undefined {
 /** Monogram text for the <AssetIcon> fallback: a stock's ticker, else the
  *  asset symbol (e.g. USDC) for yield sources. */
 export function assetIconLabel(id: string, assetSymbol: string): string {
-  if (id.startsWith("xstock-")) return id.slice("xstock-".length).toUpperCase();
+  if (id.startsWith("xstock-")) return stockTicker(id);
   return assetSymbol;
 }
