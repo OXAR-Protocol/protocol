@@ -3,6 +3,7 @@ import {
   PublicKey,
   Transaction,
   type ParsedAccountData,
+  type VersionedTransaction,
 } from "@solana/web3.js";
 
 import { USDC_MINT, USDC_DECIMALS } from "@/lib/constants";
@@ -15,6 +16,7 @@ import {
   marketLooksBroken,
 } from "@oxar/sdk";
 import { UserFacingError } from "./errors";
+import { buildDeloraStockSwapTx } from "./delora-stock-swap";
 import type {
   BuildIxParams,
   RedeemTxParams,
@@ -42,6 +44,13 @@ export interface XStockConfig {
   name: string; // display name
   sector?: string; // browse category: tech/crypto/finance/consumer/health/index
   mint: string; // xStock mint (Token-2022)
+  /** Swap rail. Default = Jupiter AMM (Backed xStocks). "delora" = Delora/DFlow
+   *  RFQ (Ondo Global Markets tokens — Jupiter does not route them at all). */
+  rail?: "delora";
+  /** Token decimals (Backed xStocks = 8, Ondo = 9). */
+  decimals?: number;
+  /** Feature key gating this ticker — see `YieldProvider.feature`. */
+  feature?: string;
 }
 export interface XStockMeta extends XStockConfig {
   id: string; // matches `xstock-${symbol.toLowerCase()}`
@@ -78,6 +87,13 @@ export const XSTOCKS: readonly XStockMeta[] = [
   { id: "xstock-mcd", symbol: "MCD", token: "MCDx", name: "McDonald's", sector: "consumer", mint: "XsqE9cRRpzxcGKDXj1BJ7Xmg4GRhZoyY1KpmGSxAWT2" },
   { id: "xstock-gld", symbol: "GLD", token: "GLDx", name: "Gold", sector: "index", mint: "Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re" },
   { id: "xstock-spcx", symbol: "SPCX", token: "SPCXx", name: "SpaceX", sector: "tech", mint: "Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8" },
+  // Ondo-rail pilot (2026-07-29, insider-gated): same swap-and-hold model, but the
+  // swap goes through Delora/DFlow RFQ instead of the Jupiter AMM — Ondo GM mints
+  // aren't routable on Jupiter, and the AMM pools are too thin for size (AAPLx pool
+  // ~$87k → 8.7% impact on a $5k buy). DFlow quotes follow US market hours; off-hours
+  // buys fail with a friendly "market closed". Un-gate only after a real-money pass
+  // + Kora allowlisting of the DFlow program (see PR).
+  { id: "xstock-aapl-ondo", symbol: "AAPL", token: "AAPLon", name: "Apple · Ondo", sector: "tech", mint: "123mYEnRLM2LLYsJW3K6oyYh8uP1fngj732iG638ondo", rail: "delora", decimals: 9, feature: "ondo-stocks" },
 ];
 
 const STOCK_MINTS = XSTOCKS.map((s) => s.mint);
@@ -154,12 +170,16 @@ async function allPrices(): Promise<Record<string, number>> {
 
 export function createXStockProvider(cfg: XStockMeta): YieldProvider {
   const heldMint = cfg.mint;
+  const stockDecimals = cfg.decimals ?? STOCK_DECIMALS;
 
   function valueUsdcBase(ui: number, price: number): bigint {
     return price > 0 ? BigInt(Math.round(ui * price * 10 ** USDC_DECIMALS)) : BigInt(0);
   }
 
-  async function swap(owner: PublicKey, inputMint: string, outputMint: string, amount: bigint): Promise<Transaction> {
+  async function swap(owner: PublicKey, inputMint: string, outputMint: string, amount: bigint): Promise<Transaction | VersionedTransaction> {
+    if (cfg.rail === "delora") {
+      return buildDeloraStockSwapTx({ owner, inputMint, outputMint, amount, stockMint: heldMint, stockDecimals });
+    }
     const quote = await getSwapQuote({ inputMint, outputMint, amount, asLegacy: true, slippageBps: 100 });
     // Cost is shown before signing (buy: DepositPanel, sell: AssetActionRail), so it's
     // the user's call — we only stop a route that loses most of the value. Judged on the
@@ -169,8 +189,8 @@ export function createXStockProvider(cfg: XStockMeta): YieldProvider {
     const ratio = quoteDeliveryRatio({
       inAmount: BigInt(quote.inAmount),
       outAmount: BigInt(quote.outAmount),
-      inDecimals: buying ? USDC_DECIMALS : STOCK_DECIMALS,
-      outDecimals: buying ? STOCK_DECIMALS : USDC_DECIMALS,
+      inDecimals: buying ? USDC_DECIMALS : stockDecimals,
+      outDecimals: buying ? stockDecimals : USDC_DECIMALS,
       inPriceUsd: buying ? 1 : stockPrice,
       outPriceUsd: buying ? stockPrice : 1,
     });
@@ -191,8 +211,9 @@ export function createXStockProvider(cfg: XStockMeta): YieldProvider {
     riskLevel: "medium",
     chain: "solana",
     group: "xstocks",
+    feature: cfg.feature,
     heldMint,
-    heldDecimals: STOCK_DECIMALS,
+    heldDecimals: stockDecimals,
 
     async buildDepositTx({ owner, amount }: BuildIxParams) {
       return swap(owner, USDC_MINT, heldMint, amount);

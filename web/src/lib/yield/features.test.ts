@@ -78,11 +78,11 @@ describe("what ships on by default", () => {
 });
 
 describe("gated sources", () => {
-  // Nothing is gated today (ONyc was the first pilot and is now public). Asserted on
-  // purpose: a `feature` key left on by accident hides a source from every real
-  // user, and that failure is silent.
-  it("has no source gated right now", () => {
-    expect(PROVIDERS.filter((p) => p.feature).map((p) => p.id)).toEqual([]);
+  // Asserted on purpose: a `feature` key left on by accident hides a source from
+  // every real user, and that failure is silent. Currently gated: the Ondo-rail
+  // stock pilot (AAPLon via Delora/DFlow) — un-gate after its real-money pass.
+  it("gates exactly the Ondo stock pilot", () => {
+    expect(PROVIDERS.filter((p) => p.feature).map((p) => p.id)).toEqual(["xstock-aapl-ondo"]);
   });
 
   it("still serves ONyc to everyone", () => {

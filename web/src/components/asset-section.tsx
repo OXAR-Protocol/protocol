@@ -10,12 +10,13 @@ import { AssetIcon } from "@/components/asset-icon";
 import { BanknoteBg } from "@/components/banknote-bg";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
+import { useFeatures } from "@/hooks/use-features";
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import { useStockCharts } from "@/hooks/use-stock-charts";
 import { useEarnings } from "@/hooks/use-earnings";
 import { useStocksAllowed } from "@/hooks/use-stocks-allowed";
 import type { AssetMeta } from "@/lib/yield/assets";
-import { fromBaseUnits } from "@/lib/yield";
+import { fromBaseUnits, getProvider } from "@/lib/yield";
 import { useT } from "@/lib/i18n";
 import { PickButton } from "@/components/pick-button";
 import { usePickSet } from "@/components/pick-set";
@@ -48,6 +49,7 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
   const router = useRouter();
   const { t } = useT();
   const allowed = useStocksAllowed();
+  const features = useFeatures();
   const [sector, setSector] = useState<string>("all");
 
   // The picked set belongs to the PAGE (see PickSetProvider): this section only
@@ -60,10 +62,15 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
     () => SECTOR_ORDER.filter((s) => catalog.some((a) => a.sector === s)),
     [catalog],
   );
-  const shown = useMemo(
-    () => (filterable && sector !== "all" ? catalog.filter((a) => a.sector === sector) : catalog),
-    [catalog, filterable, sector],
-  );
+  const shown = useMemo(() => {
+    // A feature-gated pilot stays fully dark: hide the card (a disabled ghost row
+    // would leak the ticker) until the key is on for this visitor.
+    const visible = catalog.filter((a) => {
+      const feature = getProvider(a.id)?.feature;
+      return !feature || features.includes(feature);
+    });
+    return filterable && sector !== "all" ? visible.filter((a) => a.sector === sector) : visible;
+  }, [catalog, filterable, sector, features]);
   const { views } = useYieldPositions();
   const { prices } = useStockPrices(catalog.map((s) => s.mint));
   const charts = useStockCharts();
