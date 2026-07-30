@@ -17,6 +17,18 @@ const HOME_ROUTE = "/portfolio";
 /** Only to pick the card's side before it has measured itself — see `cardArea`. */
 const CARD_HEIGHT_GUESS = 190;
 const GAP = 12;
+/**
+ * How long after a step opens we keep re-asserting the highlight's position.
+ *
+ * One scroll isn't enough: the router resets scroll to the top of a new route
+ * AFTER the page renders — the same moment we find the anchor — so a
+ * fire-and-forget scroll silently loses that race and the step points
+ * off-screen. Data and images landing shift the page under us too. So the
+ * position is an invariant held briefly, not an action taken once.
+ */
+const SETTLE_WINDOW_MS = 1200;
+/** Close enough. Without it, sub-pixel deltas would re-scroll every frame. */
+const SETTLE_EPSILON = 2;
 
 /**
  * Drives the walkthrough: pushes each step's route, waits for its real
@@ -37,10 +49,10 @@ export function AppTour({ onDone }: { onDone: () => void }) {
   const boxes = useTrackedRects(targets);
   const step = TOUR_STEPS[stepIndex];
 
-  // Both decided once per step: the side must not flip under the user, and the
-  // scroll must not fight the rAF that keeps the boxes fresh.
+  // Decided once per step: the side must not flip under the user mid-step.
   const sideRef = useRef<CardSide>("bottom");
-  const settledFor = useRef(-1);
+  const decidedFor = useRef(-1);
+  const settleUntil = useRef(0);
 
   const finish = useCallback(() => {
     onDone();
@@ -65,7 +77,7 @@ export function AppTour({ onDone }: { onDone: () => void }) {
     if (!step || pathname !== step.route) return;
     const wanted = anchorsOf(step);
     setTargets([]);
-    settledFor.current = -1;
+    decidedFor.current = -1;
 
     let cancelled = false;
     const deadline = Date.now() + ANCHOR_TIMEOUT_MS;
@@ -100,17 +112,30 @@ export function AppTour({ onDone }: { onDone: () => void }) {
   // Doing it the other way round is how the card ended up sitting on top of the
   // section it was describing.
   useEffect(() => {
-    if (settledFor.current === stepIndex) return;
+    // Only once we're actually on the step's route: while the router catches up,
+    // `boxes` still describes the PREVIOUS step's element, and acting on it spent
+    // the single correction we used to allow on the wrong thing entirely.
+    if (!step || pathname !== step.route) return;
     if (boxes.length === 0 || bandHeight(band) === 0) return;
 
     const union = unionBox(boxes);
     if (!union) return;
 
-    sideRef.current = placeCard(union, band, cardHeight, GAP).side;
+    if (decidedFor.current !== stepIndex) {
+      sideRef.current = placeCard(union, band, cardHeight, GAP).side;
+      decidedFor.current = stepIndex;
+      settleUntil.current = Date.now() + SETTLE_WINDOW_MS;
+    }
+
     const delta = scrollDelta(union, cardArea(sideRef.current, band, cardHeight, GAP), GAP);
-    settledFor.current = stepIndex;
-    if (Math.abs(delta) > 1) window.scrollBy({ top: delta, behavior: "smooth" });
-  }, [boxes, band, cardHeight, stepIndex]);
+    if (Math.abs(delta) <= SETTLE_EPSILON) return;
+    // Past the window we stop correcting, so the page stays scrollable by hand
+    // instead of snapping back at anyone trying to look around.
+    if (Date.now() > settleUntil.current) return;
+    // Instant, not smooth: the router's scroll reset cancels a smooth scroll, and
+    // re-asserting on top of a running animation fights it.
+    window.scrollBy({ top: delta, behavior: "auto" });
+  }, [step, pathname, boxes, band, cardHeight, stepIndex]);
 
   if (!step || bandHeight(band) === 0) return null;
 
