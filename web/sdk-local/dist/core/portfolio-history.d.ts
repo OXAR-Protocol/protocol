@@ -28,6 +28,7 @@ export interface PortfolioPoint {
     t: number;
     usd: number;
 }
+export declare function isDustUsd(usd: number): boolean;
 /** Price at or before `t`; the earliest known price before the series starts, so a
  *  position that predates our price data is valued rather than silently dropped. */
 export declare function priceAt(series: readonly {

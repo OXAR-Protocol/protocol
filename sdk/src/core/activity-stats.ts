@@ -10,6 +10,8 @@
  * already built on UTC day boundaries.
  */
 
+import { isDustUsd } from "./portfolio-history";
+
 export const SECONDS_PER_DAY = 86_400;
 
 /** The least an event has to be to be counted here. */
@@ -110,7 +112,8 @@ export interface RangeStats {
   startUsd: number | null;
   endUsd: number | null;
   /** End minus start, and the same as a fraction of the start. Null when either end
-   *  is missing, or when the start was zero — there is no "percent up from nothing". */
+   *  is missing, or when the start was zero or dust — there is no "percent up from
+   *  nothing", and dividing by float residue prints quintillions. */
   changeUsd: number | null;
   changePct: number | null;
   inUsd: number;
@@ -135,7 +138,7 @@ export function summarizeDays(days: readonly DayActivity[]): RangeStats {
 
   const changeUsd = startUsd !== null && endUsd !== null ? endUsd - startUsd : null;
   const changePct =
-    changeUsd !== null && startUsd !== null && startUsd > 0 ? changeUsd / startUsd : null;
+    changeUsd !== null && startUsd !== null && !isDustUsd(startUsd) ? changeUsd / startUsd : null;
 
   let inUsd = 0;
   let outUsd = 0;

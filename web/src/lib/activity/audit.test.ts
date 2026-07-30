@@ -41,6 +41,44 @@ describe("numbers agree between the chart, the summary and the day list", () => 
   });
 });
 
+// Backward replay subtracts float deltas from a float balance, so the days before
+// the first trade come out as residue (~1e-13 dollars), not exact zero. Residue that
+// leaks through reads as "the portfolio started at almost nothing" and turns the
+// range percent into quintillions.
+describe("float residue does not pass for a held portfolio", () => {
+  it("clamps residue days to zero so the leading run is trimmed", () => {
+    const pts = dailyPortfolioValue({
+      now: DAY + 4 * D,
+      days: 4,
+      // The route sums the balance from the same deltas, so mirror that here:
+      // (0.1 + 0.2) − 0.1 − 0.2 replays to +4.2e-17, which is > 0.
+      balancesNow: { GOLD: 0.1 + 0.2 },
+      deltas: [
+        { mint: "GOLD", timestamp: DAY + 2 * D + 10, delta: 0.1 },
+        { mint: "GOLD", timestamp: DAY + 3 * D + 10, delta: 0.2 },
+      ],
+      prices: { GOLD: [{ t: DAY, price: 3000 }] },
+    });
+    expect(pts[0]!.usd).toBe(0);
+    expect(pts[1]!.usd).toBe(0);
+    // With the dust days true zeros, the trim drops all but one "from nothing" point.
+    expect(trimLeadingEmpty(pts)).toHaveLength(3);
+  });
+
+  it("reports no percent when the range starts from dust", () => {
+    const days = groupByDay(
+      [],
+      [
+        { t: DAY + D - 1, usd: 8.9e-15 },
+        { t: DAY + 2 * D - 1, usd: 85.63 },
+      ],
+    );
+    const stats = summarizeDays(days);
+    expect(stats.changeUsd).toBeCloseTo(85.63, 6);
+    expect(stats.changePct).toBeNull();
+  });
+});
+
 // The chart's own reconstruction: value = holdings that day × that day's price.
 describe("portfolio value replay", () => {
   it("prices holdings as of each day and ends at today's balance", () => {

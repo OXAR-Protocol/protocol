@@ -56,7 +56,8 @@ export interface RangeStats {
     startUsd: number | null;
     endUsd: number | null;
     /** End minus start, and the same as a fraction of the start. Null when either end
-     *  is missing, or when the start was zero — there is no "percent up from nothing". */
+     *  is missing, or when the start was zero or dust — there is no "percent up from
+     *  nothing", and dividing by float residue prints quintillions. */
     changeUsd: number | null;
     changePct: number | null;
     inUsd: number;
