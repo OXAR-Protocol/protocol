@@ -91,6 +91,25 @@ export default function YouPage() {
         <LanguagePicker />
       </motion.section>
 
+      {/* Legal */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="mt-10"
+      >
+        {/* /terms is a marketing route (see middleware.ts) that only resolves on
+         *  oxar.app, not app.oxar.app — an absolute URL + hard navigation, not
+         *  next/link, so it actually lands instead of hitting the domain-split
+         *  redirect mid client-side transition. */}
+        <a
+          href="https://oxar.app/terms"
+          className="text-xs lowercase tracking-wide text-black/40 hover:text-black/60 transition"
+        >
+          {t("you.terms")}
+        </a>
+      </motion.section>
+
       {/* Sign out */}
       {authenticated && (
         <motion.section
