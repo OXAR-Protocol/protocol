@@ -149,6 +149,7 @@ export const en = {
   "you.walletHint": "your money & positions live here",
   "you.signedOut": "you're signed out",
   "you.language": "language",
+  "you.terms": "terms of use",
   "you.signOut": "sign out",
   "badge.earlyRiser.title": "early riser",
   "badge.earlyRiser.subtitle": "here while the market was still asleep",
