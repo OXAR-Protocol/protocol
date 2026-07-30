@@ -109,7 +109,6 @@ describe("summarizeDays", () => {
     expect(s.startUsd).toBe(200);
     expect(s.endUsd).toBe(250);
     expect(s.changeUsd).toBe(50);
-    expect(s.changePct).toBeCloseTo(0.25);
   });
 
   it("counts the flows and the days they happened on", () => {
@@ -120,14 +119,16 @@ describe("summarizeDays", () => {
     expect(s.activeDays).toBe(2);
   });
 
-  it("refuses a percentage when there was nothing to grow from", () => {
+  // Starting from nothing is the ordinary case for a new wallet, and it used to be
+  // the one that produced a percentage of the form "divide by almost zero".
+  it("measures a range that starts from nothing in dollars, and offers no ratio", () => {
     const fromZero = groupByDay([], [
       { t: at(DAY, 23), usd: 0 },
       { t: at(DAY + SECONDS_PER_DAY, 23), usd: 50 },
     ]);
     const s = summarizeDays(fromZero);
     expect(s.changeUsd).toBe(50);
-    expect(s.changePct).toBeNull();
+    expect(s).not.toHaveProperty("changePct");
   });
 
   it("reports nothing rather than zero when there are no values", () => {

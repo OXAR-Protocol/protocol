@@ -73,10 +73,14 @@ export function PortfolioChart({ points, stats, range, onRangeChange, loading, l
       )}
 
       <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/[0.06] pt-4 sm:grid-cols-4">
+        {/* Dollars only. The percentage under this figure divided the change by the
+            range's opening value, so a wallet that grew by moving its own cash into
+            positions read as "+4181.7%" on 7 days and showed nothing at all on 90 —
+            where the range opens before there was anything to grow from. Neither was
+            information. See `RangeStats.changeUsd`. */}
         <Stat
           label={t("history.change")}
           value={stats.changeUsd === null ? "—" : formatSignedUsd(stats.changeUsd)}
-          hint={stats.changePct === null ? undefined : `${(stats.changePct * 100).toFixed(1)}%`}
           negative={stats.changeUsd !== null && stats.changeUsd < 0}
         />
         <Stat label={t("history.putIn")} value={`$${formatUsdAmount(stats.inUsd)}`} />
