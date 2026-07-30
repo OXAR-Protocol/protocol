@@ -300,8 +300,19 @@ export const en = {
   "intro.body": "your money shouldn't sit still. here it sleeps somewhere that pays.",
   "intro.showMeAround": "show me around",
   "intro.skip": "skip",
-  "intro.termsPrefix": "continuing means accepting the",
-  "intro.termsLink": "terms",
+
+  // Terms gate — in-app, before the welcome/tour (see terms/terms-gate-modal.tsx)
+  "terms.gate.title": "before you continue",
+  "terms.gate.forWallet": "for wallet {addr}",
+  "terms.gate.checkbox": "i've read these terms and agree — my funds, my own risk.",
+  "terms.gate.decline": "decline",
+  "terms.gate.agree": "agree & continue",
+  "terms.gate.footer": "v{version} · updated {date} · {email}",
+  "terms.gate.blockedTitle": "you need to agree to continue",
+  "terms.gate.blockedBody":
+    "oxar only works once you've read and agreed to the terms of use — until then, this account stays paused.",
+  "terms.gate.reviewTerms": "review terms",
+  "terms.gate.signOut": "sign out instead",
 
   // Guided tour — six real stops across the app, not screenshots of it
   "tour.balance.title": "this is everything you have, working",

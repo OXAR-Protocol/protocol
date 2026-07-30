@@ -281,8 +281,19 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "intro.body": "твої гроші не мають лежати без діла. тут вони сплять там, де платять.",
   "intro.showMeAround": "покажи мені",
   "intro.skip": "пропустити",
-  "intro.termsPrefix": "продовжуючи, ти погоджуєшся з",
-  "intro.termsLink": "умовами",
+
+  // Terms gate — в застосунку, перед привітанням/туром
+  "terms.gate.title": "перш ніж продовжити",
+  "terms.gate.forWallet": "для гаманця {addr}",
+  "terms.gate.checkbox": "я прочитав(-ла) умови і погоджуюсь — мої гроші, мій власний ризик.",
+  "terms.gate.decline": "відхилити",
+  "terms.gate.agree": "погодитись і продовжити",
+  "terms.gate.footer": "v{version} · оновлено {date} · {email}",
+  "terms.gate.blockedTitle": "потрібно погодитись, щоб продовжити",
+  "terms.gate.blockedBody":
+    "oxar працює лише після того, як ти прочитав(-ла) і погодився(-лась) з умовами використання — доти цей акаунт на паузі.",
+  "terms.gate.reviewTerms": "переглянути умови",
+  "terms.gate.signOut": "вийти з акаунту",
 
   // Guided tour — шість реальних зупинок у застосунку, не скріншоти
   "tour.balance.title": "ось усе, що в тебе працює",
