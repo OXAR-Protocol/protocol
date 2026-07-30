@@ -149,9 +149,8 @@ export default function YieldPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mt-10"
-          data-tour="catalog"
         >
-          <div className="flex items-center justify-between mb-3">
+          <div data-tour="catalog" className="flex items-center justify-between mb-3">
             <p className="text-xs lowercase tracking-[0.2em] text-emerald-600">
               {t("yield.liveNow")}
             </p>
@@ -209,6 +208,7 @@ export default function YieldPage() {
         note="tokenized · non-US"
         gated
         filterable
+        tourAnchor="catalog-stocks"
         layout={layout}
       />
 
@@ -219,6 +219,7 @@ export default function YieldPage() {
         badge="physical"
         kind="Commodity"
         note="physical gold · tokenized"
+        tourAnchor="catalog-gold"
         layout={layout}
       />
 

@@ -1,43 +1,77 @@
 "use client";
 
-import { useEffect } from "react";
+import { clampToBand, type Band, type Box } from "@/lib/tour/geometry";
 
-import { useTrackedRect } from "@/hooks/use-tracked-rect";
-
-/** Breathing room between the cut-out and the target it's framing. */
+/** Breathing room between a cut-out and the target it's framing. */
 const PAD = 8;
+const RADIUS = 10;
 
 /**
- * Full-screen dim with a cut-out over the target's rect — the box-shadow trick:
- * a div sized exactly to the target casts a huge shadow that reads as a dark
- * overlay everywhere else, no SVG mask needed. Purely visual (pointer-events
- * disabled): the tour is driven by the card's own back/next/skip, never by
- * clicking through to the app underneath.
+ * The dim, with a hole punched over each thing this step is pointing at.
+ *
+ * An SVG mask rather than the usual `box-shadow: 0 0 0 9999px` trick, because
+ * that trick only works for ONE hole: a second element casting its own huge
+ * shadow would darken the first one's hole and double the dim everywhere else.
+ * A mask composes any number of holes correctly.
+ *
+ * The overlay deliberately CAPTURES pointer events, including over the holes —
+ * the holes are purely visual. During the walkthrough the tour is the thing
+ * driving navigation, so letting taps reach the app underneath meant the two
+ * fought each other for the router. Progress comes from the card's own
+ * back/next/skip, and a stray tap on the dim does nothing rather than ending the
+ * tour by accident.
  */
-export function TourSpotlight({ target }: { target: HTMLElement | null }) {
-  const rect = useTrackedRect(target);
-
-  // Bring the new target on screen the moment a step picks it — otherwise the
-  // cut-out can land off-screen with nothing visible to explain.
-  useEffect(() => {
-    target?.scrollIntoView({ block: "center", behavior: "smooth" });
-  }, [target]);
-
-  if (!rect) return null;
+export function TourSpotlight({ holes, band }: { holes: readonly Box[]; band: Band }) {
+  const visible = holes
+    .map((h) =>
+      clampToBand(
+        { top: h.top - PAD, left: h.left - PAD, width: h.width + PAD * 2, height: h.height + PAD * 2 },
+        band,
+      ),
+    )
+    .filter((h): h is Box => h !== null);
 
   return (
-    <div
+    <svg
       aria-hidden
-      className="pointer-events-none fixed z-[59] rounded-[10px] transition-[top,left,width,height] duration-200 ease-out"
-      style={{
-        top: rect.top - PAD,
-        left: rect.left - PAD,
-        width: rect.width + PAD * 2,
-        height: rect.height + PAD * 2,
-        boxShadow: "0 0 0 9999px rgba(0,0,0,0.6)",
-        outline: "2px solid rgba(255,255,255,0.85)",
-        outlineOffset: 2,
-      }}
-    />
+      className="fixed inset-0 z-[58] h-full w-full"
+      // Swallows the tap without doing anything — see the note above.
+      onPointerDown={(e) => e.preventDefault()}
+    >
+      <defs>
+        <mask id="tour-cutout">
+          <rect x={0} y={0} width="100%" height="100%" fill="white" />
+          {visible.map((h, i) => (
+            <rect
+              key={i}
+              x={h.left}
+              y={h.top}
+              width={h.width}
+              height={h.height}
+              rx={RADIUS}
+              fill="black"
+            />
+          ))}
+        </mask>
+      </defs>
+
+      <rect x={0} y={0} width="100%" height="100%" fill="rgba(0,0,0,0.6)" mask="url(#tour-cutout)" />
+
+      {/* A hairline around each hole, so a lit area still reads as deliberate
+          against a pale page rather than as the dim having failed. */}
+      {visible.map((h, i) => (
+        <rect
+          key={i}
+          x={h.left + 1}
+          y={h.top + 1}
+          width={Math.max(0, h.width - 2)}
+          height={Math.max(0, h.height - 2)}
+          rx={RADIUS}
+          fill="none"
+          stroke="rgba(255,255,255,0.85)"
+          strokeWidth={2}
+        />
+      ))}
+    </svg>
   );
 }

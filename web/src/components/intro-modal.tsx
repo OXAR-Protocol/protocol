@@ -57,7 +57,7 @@ export function useIntro(): { show: boolean; dismiss: () => void } {
 /**
  * First-run welcome: one photo, the pitch, and a choice — walk through the real
  * app or skip straight in. Replaces the old 4-slide carousel of pitch-deck
- * photos: a real, six-stop tour of the actual screens (see `AppTour`) teaches
+ * photos: a real tour of the actual screens (see `AppTour`) teaches
  * the product better than photos of money ever did, and it can't go stale the
  * way a screenshot does the moment a button moves.
  *

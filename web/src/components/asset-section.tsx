@@ -40,11 +40,13 @@ interface Props {
   layout?: "list" | "grid";
   /** Show sector filter chips (uses each asset's `sector`). For big catalogs (stocks). */
   filterable?: boolean;
+  /** `data-tour` value for the guided walkthrough, placed on the heading row. */
+  tourAnchor?: string;
 }
 
 /** Buy/sell section for price-exposure assets (tokenized stocks or commodities) —
  *  price-framed cards, list or grid. Gated entries hide where Reg S blocks them. */
-export function AssetSection({ catalog, title, badge, gated = false, layout = "list", filterable = false }: Props) {
+export function AssetSection({ catalog, title, badge, gated = false, layout = "list", filterable = false, tourAnchor }: Props) {
   const router = useRouter();
   const { t } = useT();
   const allowed = useStocksAllowed();
@@ -180,7 +182,7 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
       transition={{ duration: 0.5, delay: 0.18 }}
       className="mt-10"
     >
-      <div className="flex items-baseline justify-between mb-3">
+      <div data-tour={tourAnchor} className="flex items-baseline justify-between mb-3">
         <p className="text-xs lowercase tracking-[0.2em] text-black/40">{title}</p>
         <span className="text-[10px] lowercase tracking-wide text-black/40">{badge}</span>
       </div>
