@@ -197,8 +197,10 @@ export function createSwapHoldProvider(cfg: SwapHoldConfig): YieldProvider {
         const held = await readBalance(owner, connection);
         if (held <= BigInt(0)) return { underlyingBalance: BigInt(0), shares: BigInt(0) };
         const price = await getPriceUsd();
-        const valueUsdc = price > 0 ? valueInUsdc(held, price) : held;
-        return { underlyingBalance: valueUsdc, shares: held };
+        // No price → no value, same as gold/xstocks. Passing raw held units off as
+        // USDC would print a made-up dollar figure whenever the feed hiccups.
+        if (price <= 0) return { underlyingBalance: BigInt(0), shares: held };
+        return { underlyingBalance: valueInUsdc(held, price), shares: held };
       } catch {
         return { underlyingBalance: BigInt(0), shares: BigInt(0) };
       }
