@@ -4,11 +4,6 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
-import { Sparkline } from "@/components/sparkline";
-import { trendLineTone, trendTextTone } from "@/lib/yield/trend";
-import { AssetIcon } from "@/components/asset-icon";
-import { BanknoteBg } from "@/components/banknote-bg";
-import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { useFeatures } from "@/hooks/use-features";
 import { useStockPrices } from "@/hooks/use-stock-prices";
@@ -18,11 +13,17 @@ import { useStocksAllowed } from "@/hooks/use-stocks-allowed";
 import type { AssetMeta } from "@/lib/yield/assets";
 import { fromBaseUnits, getProvider } from "@/lib/yield";
 import { useT } from "@/lib/i18n";
-import { PickButton } from "@/components/pick-button";
 import { usePickSet } from "@/components/pick-set";
+import { AssetCard } from "@/components/asset-card";
+import { AssetSearchInput } from "@/components/asset-search-input";
+import { LoadMoreButton } from "@/components/load-more-button";
 
 /** Canonical order for the sector filter chips (only those present are shown). */
 const SECTOR_ORDER = ["tech", "crypto", "finance", "consumer", "health", "energy", "index"] as const;
+
+/** Entries shown per page before "load more" — a catalog of dozens should be
+ *  offered a screen at a time, not dumped. */
+const PAGE_SIZE = 20;
 
 interface Props {
   /** Price-exposure catalog (stocks or commodities). */
@@ -53,6 +54,8 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
   const allowed = useStocksAllowed();
   const features = useFeatures();
   const [sector, setSector] = useState<string>("all");
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
 
   // The picked set belongs to the PAGE (see PickSetProvider): this section only
   // offers its own ids to it, so yield, stocks and gold share one bar and one sheet.
@@ -64,7 +67,7 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
     () => SECTOR_ORDER.filter((s) => catalog.some((a) => a.sector === s)),
     [catalog],
   );
-  const shown = useMemo(() => {
+  const bySector = useMemo(() => {
     // A feature-gated pilot stays fully dark: hide the card (a disabled ghost row
     // would leak the ticker) until the key is on for this visitor.
     const visible = catalog.filter((a) => {
@@ -73,6 +76,38 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
     });
     return filterable && sector !== "all" ? visible.filter((a) => a.sector === sector) : visible;
   }, [catalog, filterable, sector, features]);
+
+  const trimmedQuery = query.trim().toLowerCase();
+  const searching = filterable && trimmedQuery.length > 0;
+
+  // Search runs over the whole (sector-filtered) catalog, not just the current
+  // page — narrowing by name is the point, so it can't be limited by paging.
+  const matched = useMemo(() => {
+    if (!searching) return bySector;
+    return bySector.filter(
+      (a) =>
+        a.symbol.toLowerCase().includes(trimmedQuery) ||
+        a.name.toLowerCase().includes(trimmedQuery) ||
+        a.token.toLowerCase().includes(trimmedQuery),
+    );
+  }, [bySector, searching, trimmedQuery]);
+
+  // Changing sector or search resets to the first page of the new set. Adjusted
+  // during render — React's documented alternative to an Effect for "reset state
+  // when an input changes" — rather than a useEffect, which costs an extra
+  // render-then-reset round trip.
+  const filterKey = `${sector}::${trimmedQuery}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(1);
+  }
+
+  // While searching, show every match (already a narrow set); otherwise page
+  // through the curated catalog order 20 at a time.
+  const shown = searching ? matched : matched.slice(0, page * PAGE_SIZE);
+  const remaining = searching ? 0 : matched.length - shown.length;
+
   const { views } = useYieldPositions();
   const { prices } = useStockPrices(catalog.map((s) => s.mint));
   const charts = useStockCharts();
@@ -88,97 +123,21 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
 
   const card = (s: AssetMeta) => {
     const view = viewById[s.id];
-    const px = prices[s.mint];
-    const holdings = view ? fromBaseUnits(view.underlyingBalance, view.decimals) : 0;
-    const earned = earnedById[s.id];
-    const up = (px?.change24h ?? 0) >= 0;
-    const chart = charts[s.mint];
-    const spark =
-      chart && chart.length > 1 ? (
-        <Sparkline values={chart} height={32} className={`h-8 w-full ${trendLineTone(up)}`} />
-      ) : null;
-
-    const price = (
-      <p className="text-lg text-black tabular-nums">
-        {px ? `$${px.price.toFixed(2)}` : "—"}
-      </p>
-    );
-    const change = px ? (
-      <p className={`mt-0.5 text-xs tabular-nums ${trendTextTone(up)}`}>
-        {up ? "+" : ""}
-        {px.change24h.toFixed(2)}% 24h
-      </p>
-    ) : null;
-    const owned = holdings > 0 ? (
-      <p className="mt-1 text-[11px] text-[#3c05c7]/80 tabular-nums">
-        you own ${holdings.toFixed(2)}
-        {typeof earned === "number" && (
-          <span className={earned >= 0 ? "text-emerald-400/70" : "text-red-400/70"}>
-            {" · "}
-            {earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)}
-          </span>
-        )}
-      </p>
-    ) : null;
-    const pick = canPickMany && view ? (
-      <PickButton picked={!!pickSet?.picked.has(s.id)} onToggle={() => pickSet?.toggle(s.id)} label={s.name} />
-    ) : null;
-    const head = (
-      <div className="flex items-center gap-3 min-w-0">
-        <AssetIcon src={assetLogoSrc(s.id)} label={s.symbol || s.token} size={36} />
-        <div className="min-w-0">
-          <p className="text-base text-black">{s.token}</p>
-          <p className="mt-0.5 text-xs text-black/45 truncate">{s.name}</p>
-        </div>
-      </div>
-    );
-
-    if (layout === "grid") {
-      return (
-        <button
-          key={s.id}
-          type="button"
-          disabled={!view}
-          onClick={() => view && router.push(`/asset/${s.id}`)}
-          className="group relative isolate overflow-hidden p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition-colors text-left disabled:opacity-50 min-h-[120px] flex flex-col justify-between"
-        >
-          <BanknoteBg seed={s.id} />
-          {pick && <span className="absolute right-3 top-3 z-10">{pick}</span>}
-          {head}
-          {spark && <div className="my-2">{spark}</div>}
-          <div className={spark ? "mt-1" : "mt-3"}>
-            {price}
-            {change}
-            {owned}
-          </div>
-        </button>
-      );
-    }
     return (
-      <button
+      <AssetCard
         key={s.id}
-        type="button"
-        disabled={!view}
-        onClick={() => view && router.push(`/asset/${s.id}`)}
-        className="group relative isolate flex w-full items-center gap-3 overflow-hidden rounded-[8px] border border-black/10 bg-white p-5 text-left transition-colors hover:border-black/30 disabled:opacity-50"
-      >
-        <BanknoteBg seed={s.id} />
-        <div className="min-w-0 flex-1">
-          {head}
-          {owned}
-        </div>
-        {/* Fixed-width columns so the charts and the figures line up down the list
-            instead of drifting with the width of the text beside them. The slots are
-            rendered even when empty, or a row without a chart would shift. */}
-        <div className="hidden w-[140px] shrink-0 sm:block">{spark}</div>
-        {/* Price first, then the control: the number is what the row is read for,
-            and a button between the chart and the price split them apart. */}
-        <div className="w-[112px] shrink-0 text-right">
-          {price}
-          {change}
-        </div>
-        {pick && <span className="shrink-0">{pick}</span>}
-      </button>
+        asset={s}
+        layout={layout}
+        openable={!!view}
+        price={prices[s.mint]}
+        chart={charts[s.mint]}
+        holdings={view ? fromBaseUnits(view.underlyingBalance, view.decimals) : 0}
+        earned={earnedById[s.id]}
+        showPick={canPickMany && !!view}
+        picked={!!pickSet?.picked.has(s.id)}
+        onTogglePick={() => pickSet?.toggle(s.id)}
+        onOpen={() => router.push(`/asset/${s.id}`)}
+      />
     );
   };
 
@@ -193,6 +152,13 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
         <p className="text-xs lowercase tracking-[0.2em] text-black/40">{title}</p>
         <span className="text-[10px] lowercase tracking-wide text-black/40">{badge}</span>
       </div>
+
+      {/* Search — matches against the whole catalog, not just the current page. */}
+      {filterable && (
+        <div className="mb-3">
+          <AssetSearchInput value={query} onChange={setQuery} placeholder={t("asset.search.placeholder")} />
+        </div>
+      )}
 
       {/* Sector filter chips — browse a big catalog (stocks) by category. */}
       {filterable && sectors.length > 1 && (
@@ -214,12 +180,19 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
         </div>
       )}
 
-      {layout === "grid" ? (
+      {shown.length === 0 ? (
+        <p className="py-6 text-center text-sm text-black/40">{t("asset.search.empty")}</p>
+      ) : layout === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{shown.map(card)}</div>
       ) : (
         <div className="space-y-2">{shown.map(card)}</div>
       )}
 
+      <LoadMoreButton
+        remaining={remaining}
+        label={t("asset.loadMore", { n: remaining })}
+        onClick={() => setPage((p) => p + 1)}
+      />
     </motion.section>
   );
 }

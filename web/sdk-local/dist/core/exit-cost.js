@@ -12,6 +12,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.exitCostFraction = exitCostFraction;
 exports.exitCostBand = exitCostBand;
+exports.findExitCeiling = findExitCeiling;
 /**
  * Fraction of value lost between what went in and what would come back out on
  * an immediate exit (0.021 = 2.1%). `usdOut` is the SELL quote's proceeds for
@@ -54,4 +55,50 @@ function exitCostBand(fraction) {
     if (fraction <= NORMAL_MAX)
         return "normal";
     return "expensive";
+}
+/**
+ * Sizes below this aren't worth telling apart — the point is to answer "about
+ * how much can I take out", not to find the exact last dollar. $25 is already
+ * finer than anyone will act on.
+ */
+const DEFAULT_RESOLUTION_USD = 25;
+/** Hard cap on probe calls. This runs off a debounced keystroke path against a
+ * real Jupiter endpoint — an unbounded search would hammer it on every retype. */
+const DEFAULT_MAX_PROBES = 6;
+/**
+ * Bounded binary search for the largest sellable size below a known-failing
+ * amount. Assumes sellability is monotonic in size — true of a real order
+ * book/AMM: if $225 has no route, smaller sizes are the ones that might.
+ *
+ * Pure and dependency-injected: the network lives entirely in `probe`, so this
+ * unit-tests with a plain function and no mocking. Bounded on both axes — at
+ * most `maxProbes` calls, resolution never finer than `resolutionUsd` — so it
+ * is safe to run on a debounced input path.
+ */
+async function findExitCeiling(params) {
+    const { upperBoundUsd, probe, resolutionUsd = DEFAULT_RESOLUTION_USD, maxProbes = DEFAULT_MAX_PROBES, } = params;
+    if (!Number.isFinite(upperBoundUsd) || upperBoundUsd <= 0 || !Number.isFinite(resolutionUsd) || resolutionUsd <= 0 || maxProbes < 1) {
+        return { ceilingUsd: null, probesUsed: 0 };
+    }
+    let low = 0; // "sell nothing" trivially succeeds — not itself a useful answer.
+    let high = upperBoundUsd; // known (or assumed) to fail; never re-probed.
+    let ceilingUsd = null;
+    let probesUsed = 0;
+    while (probesUsed < maxProbes && high - low > resolutionUsd) {
+        const mid = Math.round((low + high) / 2 / resolutionUsd) * resolutionUsd;
+        if (mid <= low || mid >= high)
+            break; // rounding collapsed the interval — done
+        probesUsed++;
+        // eslint-disable-next-line no-await-in-loop -- inherently sequential: each
+        // probe narrows the range the next one searches, so they can't run in parallel.
+        const ok = await probe(mid);
+        if (ok) {
+            low = mid;
+            ceilingUsd = mid;
+        }
+        else {
+            high = mid;
+        }
+    }
+    return { ceilingUsd, probesUsed };
 }

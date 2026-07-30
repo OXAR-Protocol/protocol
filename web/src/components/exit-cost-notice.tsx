@@ -1,5 +1,7 @@
 "use client";
 
+import { formatUsdAmount } from "@oxar/sdk";
+
 import { useExitCost } from "@/hooks/use-exit-cost";
 import { useT } from "@/lib/i18n";
 
@@ -38,7 +40,9 @@ export function ExitCostNotice({ heldMint, heldDecimals, usdAmount, priceUsd }: 
   return (
     <p className={`mt-1 text-[11px] lowercase tracking-wide ${warn ? "text-[#a35b00]" : "text-black/45"}`}>
       {exit.unavailable
-        ? t("rail.exitCostUnavailable")
+        ? exit.ceilingUsd !== null
+          ? t("rail.exitCostCeiling", { usd: `$${formatUsdAmount(exit.ceilingUsd, 0)}` })
+          : t("rail.exitCostUnavailable")
         : t("rail.exitCostNow", { pct: ((exit.fraction ?? 0) * 100).toFixed(1) })}
     </p>
   );

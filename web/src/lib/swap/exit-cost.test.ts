@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { exitCostFraction, exitCostBand } from "@oxar/sdk";
+import { exitCostFraction, exitCostBand, findExitCeiling } from "@oxar/sdk";
 
 describe("exitCostFraction", () => {
   it("reads the gap between what went in and what would come back", () => {
@@ -55,5 +55,61 @@ describe("exitCostBand", () => {
     expect(exitCostBand(0.021)).toBe("expensive");
     expect(exitCostBand(0.0355)).toBe("expensive");
     expect(exitCostBand(0.047)).toBe("expensive");
+  });
+});
+
+// Reproduces the WMTx finding: $200 quotes, $225 doesn't, and pool depth doesn't
+// recover on its own — a user who bought $1000 needs to know the real ceiling,
+// not just that "it's thin right now".
+describe("findExitCeiling", () => {
+  /** A probe that succeeds only at or below `maxSellableUsd` — models a pool
+   * with a hard depth limit, like the real WMTx measurement. */
+  function poolWithCeiling(maxSellableUsd: number) {
+    const calls: number[] = [];
+    const probe = async (usd: number) => {
+      calls.push(usd);
+      return usd <= maxSellableUsd;
+    };
+    return { probe, calls };
+  }
+
+  it("finds a ceiling below the requested amount", async () => {
+    const { probe, calls } = poolWithCeiling(200); // matches the WMTx measurement
+    const result = await findExitCeiling({ upperBoundUsd: 1000, probe });
+    expect(result.ceilingUsd).not.toBeNull();
+    expect(result.ceilingUsd!).toBeGreaterThan(0);
+    expect(result.ceilingUsd!).toBeLessThanOrEqual(200);
+    expect(result.ceilingUsd!).toBeGreaterThan(150); // within resolution of the real ceiling
+    expect(calls.length).toBeGreaterThan(0);
+  });
+
+  it("reports a ceiling close to the bound when nothing below it ever fails", async () => {
+    // The pool can absorb far more than what's being searched for — the search
+    // never gets to test the bound itself, so it converges just under it.
+    const { probe } = poolWithCeiling(1_000_000);
+    const result = await findExitCeiling({ upperBoundUsd: 250, probe });
+    expect(result.ceilingUsd).not.toBeNull();
+    expect(result.ceilingUsd!).toBeGreaterThanOrEqual(250 - 25 * 2);
+    expect(result.ceilingUsd!).toBeLessThan(250);
+  });
+
+  it("returns null when even the smallest probed size fails", async () => {
+    const probe = async () => false; // nothing sells at any size
+    const result = await findExitCeiling({ upperBoundUsd: 500, probe });
+    expect(result.ceilingUsd).toBeNull();
+  });
+
+  it("never exceeds the probe budget, however wide the search range", async () => {
+    const { probe, calls } = poolWithCeiling(37); // an awkward, non-round ceiling
+    const result = await findExitCeiling({ upperBoundUsd: 100_000, probe, maxProbes: 6 });
+    expect(calls.length).toBeLessThanOrEqual(6);
+    expect(result.probesUsed).toBeLessThanOrEqual(6);
+    expect(result.probesUsed).toBe(calls.length);
+  });
+
+  it("degrades to null cleanly for a degenerate bound", async () => {
+    const probe = async () => true;
+    expect((await findExitCeiling({ upperBoundUsd: 0, probe })).ceilingUsd).toBeNull();
+    expect((await findExitCeiling({ upperBoundUsd: -50, probe })).ceilingUsd).toBeNull();
   });
 });
