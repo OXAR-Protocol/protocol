@@ -17,6 +17,21 @@ import { AppTour } from "@/components/tour/app-tour";
 const seenKey = (owner: string) => `oxar:intro-seen:${owner}`;
 
 /**
+ * Forget that this wallet has seen the welcome, so it runs again.
+ *
+ * Exposed because "watch it again" is a fair thing to want — the walkthrough is
+ * the only place several features are explained, and someone who skipped it on
+ * day one shouldn't have to clear browser storage by hand to get it back.
+ */
+export function forgetIntro(owner: string): void {
+  try {
+    localStorage.removeItem(seenKey(owner));
+  } catch {
+    // Storage blocked: nothing was remembered, so there is nothing to forget.
+  }
+}
+
+/**
  * True the first time a given wallet opens the app.
  *
  * Deliberately waits for the wallet: a welcome shown before someone has an account

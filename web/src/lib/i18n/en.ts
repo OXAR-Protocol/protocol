@@ -150,6 +150,7 @@ export const en = {
   "you.signedOut": "you're signed out",
   "you.language": "language",
   "you.terms": "terms of use",
+  "you.replayTour": "watch the walkthrough again",
   "you.signOut": "sign out",
   "badge.earlyRiser.title": "early riser",
   "badge.earlyRiser.subtitle": "here while the market was still asleep",
