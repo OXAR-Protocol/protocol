@@ -289,6 +289,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "terms.gate.decline": "відхилити",
   "terms.gate.agree": "погодитись і продовжити",
   "terms.gate.footer": "v{version} · оновлено {date} · {email}",
+  "terms.gate.translationNote": "переклад для зручності — юридично обов’язковою є англійська версія.",
   "terms.gate.blockedTitle": "потрібно погодитись, щоб продовжити",
   "terms.gate.blockedBody":
     "oxar працює лише після того, як ти прочитав(-ла) і погодився(-лась) з умовами використання — доти цей акаунт на паузі.",

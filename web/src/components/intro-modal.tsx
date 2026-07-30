@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useT } from "@/lib/i18n";
+import { LanguageChips } from "@/components/language-picker";
 import { AppTour } from "@/components/tour/app-tour";
 
 /**
@@ -119,6 +120,11 @@ export function IntroModal() {
             >
               <X size={16} strokeWidth={1.5} />
             </button>
+
+            {/* Language is choosable up to here; the tour itself just follows it. */}
+            <div className="absolute left-3 top-3 z-10 rounded-full bg-white/70 p-1 backdrop-blur">
+              <LanguageChips />
+            </div>
 
             <div className="relative h-[240px] w-full overflow-hidden bg-[#faf9f7]">
               <img
