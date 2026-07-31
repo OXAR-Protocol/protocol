@@ -133,6 +133,7 @@ export function PortfolioPanel() {
         <PortfolioChart
           points={history.days}
           performance={history.performance}
+          heldMints={history.heldMints}
           counts={counts}
           range={range}
           onRangeChange={setRange}

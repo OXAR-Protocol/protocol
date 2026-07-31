@@ -172,6 +172,11 @@ export async function POST(req: Request) {
     const body = {
       days: series,
       performance,
+      // What the wallet still holds. The breakdown covers everything that MOVED money
+      // in the window, which rightly includes positions closed inside it — but a list
+      // that mixes them with no mark reads as "these are your positions", and the
+      // reply to that is "I don't own half of these".
+      heldMints: Object.keys(balancesNow).filter((m) => (balancesNow[m] ?? 0) > 0),
       debug: {
         txs: history.length,
         trackedMints: TRACKED_MINTS.size,

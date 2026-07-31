@@ -290,6 +290,7 @@ export const en = {
   "history.tradingCost": "cost to trade",
   "history.byAsset": "show what earned it",
   "history.cash": "dollars",
+  "history.closed": "closed",
   "history.other": "everything else",
   "history.putIn": "put in",
   "history.tookOut": "took out",
