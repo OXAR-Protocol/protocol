@@ -4,7 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import { PickButton } from "@/components/pick-button";
 import { usePickSet } from "@/components/pick-set";
-import type { ProviderGroup } from "@/lib/yield";
+import { pickTarget, type ProviderGroup } from "@/lib/yield";
 import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
 import { useApyHistory } from "@/hooks/use-apy-history";
 import { Sparkline } from "@/components/sparkline";
@@ -21,7 +21,7 @@ interface Props {
 /** Grid ("квадратик") card for a marketplace source — one provider or a group. */
 export function SourceCard({ group, onOpen }: Props) {
   const pickSet = usePickSet();
-  const top = group.views.reduce((a, b) => (b.apy > a.apy ? b : a), group.views[0]);
+  const top = pickTarget(group);
   const history = useApyHistory(top.defiLlamaPoolId);
   const up = trendUp(history);
   const positionTotal = group.views.reduce(
@@ -37,9 +37,9 @@ export function SourceCard({ group, onOpen }: Props) {
     >
       {pickSet?.enabled && (
         <PickButton
-          picked={pickSet.picked.has(group.views[0].id)}
-          onToggle={() => pickSet.toggle(group.views[0].id)}
-          label={group.views[0].name}
+          picked={pickSet.picked.has(top.id)}
+          onToggle={() => pickSet.toggle(top.id)}
+          label={top.name}
           className="absolute right-3 top-3 z-10"
         />
       )}

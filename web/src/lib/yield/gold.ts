@@ -56,6 +56,22 @@ export const GOLD: readonly GoldMeta[] = [
     mint: "AymATz4TCL9sWNEEV9Kvyz45CHVhDZ6kUgjTJPzLpU9P",
     decimals: 6,
   },
+  {
+    // ORO. Same ounce, different promise: this mint has NO freeze authority, where
+    // Tether Gold's issuer can freeze a holder's balance. That is the reason it is
+    // here — it is the only gold on Solana that matches what this app says about
+    // whose money it is. Costs more to enter (~0.25% vs ~0.03% on a $200 buy,
+    // measured 2026-07-31) and the book is thinner: 0.24% at $5k, 0.36% at $20k.
+    //
+    // Their 3–4% staking yield is deliberately NOT offered: it locks the gold for
+    // 12 months, and "withdraw anytime" is a promise we keep. Price exposure only.
+    id: "gold-oro",
+    symbol: "ORO",
+    token: "ORO",
+    name: "ORO Gold",
+    mint: "GoLDppdjB1vDTPSGxyMJFqdnj134yH6Prg9eqsGDiw6A",
+    decimals: 6,
+  },
 ];
 
 const GOLD_MINTS = GOLD.map((g) => g.mint);

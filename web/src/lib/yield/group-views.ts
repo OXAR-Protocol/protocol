@@ -15,6 +15,19 @@ export interface ProviderGroup {
 }
 
 /**
+ * Which member a collapsed card adds when it is picked.
+ *
+ * The headline promises "up to X%", and X comes from exactly one member — so that is
+ * the one adding it must add, or the card says one thing and does another. This lived
+ * twice, once per layout, and the two had drifted: the row added the best rate, the
+ * grid card added whichever happened to be first in the catalog. Same group, same
+ * gesture, different asset bought.
+ */
+export function pickTarget(group: ProviderGroup): ProviderView {
+  return group.views.reduce((best, v) => (v.apy > best.apy ? v : best), group.views[0]!);
+}
+
+/**
  * Collapse providers that share a `group` into one card; leave others standalone.
  * Order follows each group's first appearance.
  */
