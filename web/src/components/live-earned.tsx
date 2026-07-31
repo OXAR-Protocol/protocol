@@ -24,9 +24,12 @@ interface Props {
  */
 export function LiveEarned({ currentValue, invested, apy, precision = 2, className }: Props) {
   const live = useLiveValue(currentValue, apy);
+  const earned = live - invested;
+  // A loss inherits the brand accent otherwise, so "−$0.49" arrives in the same
+  // confident purple as a gain and reads as decoration rather than a minus.
   return (
-    <span className={`tabular-nums ${className ?? ""}`}>
-      {formatSignedUsd(live - invested, precision)}
+    <span className={`tabular-nums ${earned < 0 ? "text-red-600" : className ?? ""}`}>
+      {formatSignedUsd(earned, precision)}
     </span>
   );
 }
