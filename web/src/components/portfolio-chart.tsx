@@ -1,17 +1,20 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Loader2 } from "lucide-react";
 
 import {
   formatUsdAmount,
   formatSignedUsd,
   formatDayShort,
+  isDustUsd,
   type PerformanceDay,
   type RangePerformance,
   type ActivityCount,
 } from "@oxar/sdk";
 
 import { HoverChart } from "@/components/hover-chart";
+import { EarnedBreakdown } from "@/components/earned-breakdown";
 import { useT } from "@/lib/i18n";
 
 /** How far back to look. */
@@ -50,6 +53,13 @@ export function PortfolioChart({
   locale,
 }: Props) {
   const { t } = useT();
+  const [showBreakdown, setShowBreakdown] = useState(false);
+  // Nothing to open when the range earned nothing anyone can attribute.
+  const explainable = !!performance && performance.earnedUsd !== null;
+  // The cost of trading is shown beside the figure only when there IS one — on a
+  // wallet that only ever deposited it would be a row of zeros, and on one that
+  // traded it is usually the whole story behind a small negative.
+  const traded = !!performance && !isDustUsd(Math.abs(performance.costUsd));
 
   return (
     <div>
@@ -98,7 +108,29 @@ export function PortfolioChart({
               ? undefined
               : `${performance.returnPct >= 0 ? "+" : ""}${(performance.returnPct * 100).toFixed(2)}%`
           }
+          note={
+            traded && performance
+              ? `${t("history.tradingCost")} ${formatSignedUsd(performance.costUsd)}`
+              : undefined
+          }
           negative={performance?.earnedUsd != null && performance.earnedUsd < 0}
+          action={
+            explainable ? (
+              <button
+                type="button"
+                onClick={() => setShowBreakdown((open) => !open)}
+                aria-expanded={showBreakdown}
+                aria-label={t("history.byAsset")}
+                className="flex h-4 w-4 items-center justify-center rounded-full bg-black/[0.05] text-black/40 transition hover:text-black"
+              >
+                <ChevronDown
+                  size={10}
+                  strokeWidth={2}
+                  className={`transition-transform ${showBreakdown ? "rotate-180" : ""}`}
+                />
+              </button>
+            ) : undefined
+          }
         />
         <Stat label={t("history.putIn")} value={`$${formatUsdAmount(performance?.inUsd ?? 0)}`} />
         <Stat label={t("history.tookOut")} value={`$${formatUsdAmount(performance?.outUsd ?? 0)}`} />
@@ -108,6 +140,8 @@ export function PortfolioChart({
           hint={counts.activeDays > 0 ? t("history.onDays", { n: String(counts.activeDays) }) : undefined}
         />
       </div>
+
+      {showBreakdown && performance && <EarnedBreakdown performance={performance} />}
     </div>
   );
 }
@@ -116,18 +150,26 @@ function Stat({
   label,
   value,
   hint,
+  note,
   negative,
+  action,
 }: {
   label: string;
   value: string;
   hint?: string;
+  note?: string;
   negative?: boolean;
+  action?: React.ReactNode;
 }) {
   return (
     <div>
-      <p className="text-[10px] lowercase tracking-wide text-black/40">{label}</p>
+      <p className="flex items-center gap-1.5 text-[10px] lowercase tracking-wide text-black/40">
+        {label}
+        {action}
+      </p>
       <p className={`mt-0.5 text-[15px] tabular-nums ${negative ? "text-red-600" : "text-black"}`}>{value}</p>
       {hint && <p className="text-[11px] tabular-nums text-black/35">{hint}</p>}
+      {note && <p className="text-[10px] lowercase tabular-nums text-black/30">{note}</p>}
     </div>
   );
 }

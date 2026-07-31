@@ -60,6 +60,22 @@ describe("a deposit, a swap that costs a spread, and a price rise", () => {
     expect(stats.endUsd).toBeCloseTo(103.95, 6);
     expect(identityHolds(days)).toBe(true);
   });
+
+  // A bare "−$0.03" is unanswerable: a holding that fell and a trade that cost look
+  // identical. These two are the answer, and they must add back to the total.
+  it("says which half of the figure is the market and which is the cost of trading", () => {
+    expect(stats.marketUsd).toBeCloseTo(4.95, 6);
+    expect(stats.costUsd).toBeCloseTo(-1, 6);
+    expect(stats.marketUsd + stats.costUsd).toBeCloseTo(stats.earnedUsd!, 6);
+  });
+
+  it("names the holding responsible, and the names add up to the total", () => {
+    // The dollar the swap cost belongs to what it bought, not to the cash it left.
+    expect(stats.perMint.AAPL).toBeCloseTo(3.95, 6);
+    expect(stats.perMint.USDC ?? 0).toBeCloseTo(0, 6);
+    const summed = Object.values(stats.perMint).reduce((n, v) => n + v, 0);
+    expect(summed).toBeCloseTo(stats.earnedUsd!, 6);
+  });
 });
 
 describe("a percentage that survives every range", () => {

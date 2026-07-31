@@ -24,8 +24,6 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.portfolioSeries = portfolioSeries;
-exports.trimLeadingEmpty = trimLeadingEmpty;
-exports.summarizePerformance = summarizePerformance;
 const portfolio_history_1 = require("./portfolio-history");
 const DAY = 86400;
 /** A balance this far below zero means the replay ran past the history we were given —
@@ -77,34 +75,57 @@ function portfolioSeries(params) {
         const closedAt = bounds[k - 1];
         const opening = balances[k];
         const closing = balances[k - 1];
-        let earnedUsd = 0;
+        // Priced once per mint per day; the loops below all read the same two numbers.
+        const before = {};
+        const after = {};
+        for (const mint of mints) {
+            before[mint] = (0, portfolio_history_1.priceAt)(prices[mint] ?? [], openedAt);
+            after[mint] = (0, portfolio_history_1.priceAt)(prices[mint] ?? [], closedAt);
+        }
+        const perMint = {};
+        const credit = (mint, amount) => {
+            if (amount !== 0)
+                perMint[mint] = (perMint[mint] ?? 0) + amount;
+        };
+        let marketUsd = 0;
         let usd = 0;
         let capitalUsd = 0;
         for (const mint of mints) {
-            const before = (0, portfolio_history_1.priceAt)(prices[mint] ?? [], openedAt);
-            const after = (0, portfolio_history_1.priceAt)(prices[mint] ?? [], closedAt);
             const held = opening[mint] ?? 0;
-            earnedUsd += held * (after - before);
-            capitalUsd += held * before;
-            usd += (closing[mint] ?? 0) * after;
+            const moved = held * (after[mint] - before[mint]);
+            marketUsd += moved;
+            credit(mint, moved);
+            capitalUsd += held * before[mint];
+            usd += (closing[mint] ?? 0) * after[mint];
         }
+        let costUsd = 0;
         let inUsd = 0;
         let outUsd = 0;
         for (const tx of perInterval[k] ?? []) {
             let value = 0;
-            let received = false;
+            let acquired = 0;
             let sent = false;
             for (const [mint, delta] of Object.entries(tx.legs)) {
+                const legValue = delta * (after[mint] ?? 0);
+                value += legValue;
                 if (delta > 0)
-                    received = true;
+                    acquired += legValue;
                 else if (delta < 0)
                     sent = true;
-                value += delta * (0, portfolio_history_1.priceAt)(prices[mint] ?? [], closedAt);
             }
-            if (received && sent) {
-                // One thing you own became another. Nothing entered or left; what the exchange
-                // cost — spread, fee, a bad fill — is the whole of its value change.
-                earnedUsd += value;
+            // Both directions AND something we can price on the receiving end: one thing you
+            // own became another. If we can't price what came back, this falls through to a
+            // flow instead — money going somewhere we can't see reads as leaving, which is
+            // true, rather than as a loss the size of the whole trade, which isn't.
+            if (acquired > 0 && sent) {
+                // Nothing entered or left; what the exchange cost is the whole of its value
+                // change — and it belongs to the holding it bought, because that is what the
+                // money was spent getting into.
+                costUsd += value;
+                for (const [mint, delta] of Object.entries(tx.legs)) {
+                    if (delta > 0)
+                        credit(mint, value * ((delta * (after[mint] ?? 0)) / acquired));
+                }
             }
             else {
                 if (value > 0)
@@ -114,52 +135,17 @@ function portfolioSeries(params) {
                 capitalUsd += value * ((closedAt - tx.timestamp) / DAY);
             }
         }
-        out.push({ t: closedAt, usd: (0, portfolio_history_1.isDustUsd)(usd) ? 0 : usd, earnedUsd, inUsd, outUsd, capitalUsd });
+        out.push({
+            t: closedAt,
+            usd: (0, portfolio_history_1.isDustUsd)(usd) ? 0 : usd,
+            earnedUsd: marketUsd + costUsd,
+            marketUsd,
+            costUsd,
+            perMint,
+            inUsd,
+            outUsd,
+            capitalUsd,
+        });
     }
     return out;
-}
-/**
- * Drop the flat run before this wallet held anything — a chart that opens with a month
- * of zeros says nothing and squashes the part that does. Keeps one zero so the first
- * deposit still reads as a rise from nothing, and only ever drops days where nothing
- * whatsoever happened, so the summary is the same either way.
- */
-function trimLeadingEmpty(days) {
-    const first = days.findIndex((d) => d.usd > 0 || d.earnedUsd !== 0 || d.inUsd !== 0 || d.outUsd !== 0);
-    if (first < 0)
-        return [];
-    return days.slice(Math.max(0, first - 1));
-}
-/** Roll a stretch of days into the figures shown under the chart. */
-function summarizePerformance(days) {
-    if (!days.length) {
-        return { startUsd: null, endUsd: null, earnedUsd: null, returnPct: null, inUsd: 0, outUsd: 0 };
-    }
-    let earnedUsd = 0;
-    let inUsd = 0;
-    let outUsd = 0;
-    let growth = 1;
-    let measured = false;
-    for (const d of days) {
-        earnedUsd += d.earnedUsd;
-        inUsd += d.inUsd;
-        outUsd += d.outUsd;
-        // A day that opened with nothing at work earns no return, whatever happened later
-        // in it — there was no capital for a percentage to be a percentage OF.
-        if (d.capitalUsd > 0 && !(0, portfolio_history_1.isDustUsd)(d.capitalUsd)) {
-            growth *= 1 + d.earnedUsd / d.capitalUsd;
-            measured = true;
-        }
-    }
-    const opening = days[0];
-    return {
-        // What it was worth before the first day we report — by the identity above, the
-        // day's close less everything that happened during it.
-        startUsd: opening.usd - opening.earnedUsd - (opening.inUsd - opening.outUsd),
-        endUsd: days[days.length - 1].usd,
-        earnedUsd,
-        returnPct: measured ? growth - 1 : null,
-        inUsd,
-        outUsd,
-    };
 }

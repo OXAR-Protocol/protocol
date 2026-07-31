@@ -283,6 +283,13 @@ export const en = {
   // Earned = what the money made, flows excluded. The percentage beside it is
   // time-weighted, so a deposit inside the range cannot inflate it.
   "history.earned": "earned",
+  // The two halves of "earned", and the per-holding breakdown behind the chevron. A
+  // bare negative total can't say whether one holding fell or a trade cost money.
+  "history.market": "the market",
+  "history.tradingCost": "cost to trade",
+  "history.byAsset": "show what earned it",
+  "history.cash": "dollars",
+  "history.other": "everything else",
   "history.putIn": "put in",
   "history.tookOut": "took out",
   "history.trades": "trades",

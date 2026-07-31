@@ -33,8 +33,19 @@ export interface PerformanceDay {
     /** Unix seconds at the day's close. */
     t: number;
     usd: number;
-    /** Market moves on what was already held, plus what exchanges cost to execute. */
+    /** `marketUsd + costUsd` — the whole of what the day was worth to you. */
     earnedUsd: number;
+    /** What the market did to what was already held. */
+    marketUsd: number;
+    /** What exchanging one holding for another cost to execute — spread, fee, a bad
+     *  fill. Negative in the ordinary case. Kept apart from the market because a
+     *  person seeing "−$0.03" needs to know which of the two it was, and on a savings
+     *  app most small losses are this one, not a holding that fell. */
+    costUsd: number;
+    /** Earned per mint, market and execution cost together, so a breakdown can name
+     *  the holding responsible. Sums to `earnedUsd` — a breakdown that doesn't
+     *  reconcile with the figure above it is worse than none. */
+    perMint: Record<string, number>;
     /** External only — money entering or leaving the wallet itself. */
     inUsd: number;
     outUsd: number;
@@ -42,17 +53,6 @@ export interface PerformanceDay {
      *  by how much of the day was left when they landed. The denominator of the return —
      *  cash that arrived at 23:50 did not have a day to earn anything. */
     capitalUsd: number;
-}
-export interface RangePerformance {
-    startUsd: number | null;
-    endUsd: number | null;
-    earnedUsd: number | null;
-    /** Time-weighted return over the range, or null when no day had money at work.
-     *  Chained daily, so a range that opens on an empty wallet still reports one and a
-     *  deposit inside the range cannot inflate it. */
-    returnPct: number | null;
-    inUsd: number;
-    outUsd: number;
 }
 /**
  * Daily performance for the last `days`, oldest first.
@@ -71,12 +71,3 @@ export declare function portfolioSeries(params: {
     txs: readonly WalletTx[];
     prices: PriceSeries;
 }): PerformanceDay[];
-/**
- * Drop the flat run before this wallet held anything — a chart that opens with a month
- * of zeros says nothing and squashes the part that does. Keeps one zero so the first
- * deposit still reads as a rise from nothing, and only ever drops days where nothing
- * whatsoever happened, so the summary is the same either way.
- */
-export declare function trimLeadingEmpty(days: readonly PerformanceDay[]): PerformanceDay[];
-/** Roll a stretch of days into the figures shown under the chart. */
-export declare function summarizePerformance(days: readonly PerformanceDay[]): RangePerformance;
