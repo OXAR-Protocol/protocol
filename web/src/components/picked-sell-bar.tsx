@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-import { fromBaseUnits, positionTitle } from "@/lib/yield";
+import { fromBaseUnits, positionTitle, unitLabelOf } from "@/lib/yield";
+import { isPriceExposure } from "@/lib/yield/assets";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { PickBar } from "@/components/pick-bar";
 import { AllocationSheet } from "@/components/allocation-sheet";
@@ -81,12 +82,23 @@ export function PickedSellBar({ views, allHeld, onOutcome, onDone }: Props) {
       {allocating && (
         <AllocationSheet
           mode="sell"
-          rows={views.map((v) => ({
-            id: v.id,
-            name: positionTitle(v),
-            symbol: v.assetSymbol,
-            maxUsd: fromBaseUnits(v.underlyingBalance, v.decimals),
-          }))}
+          rows={views.map((v) => {
+            const usd = fromBaseUnits(v.underlyingBalance, v.decimals);
+            // What one unit is worth, read off the position itself — no price call:
+            // we already know what it's worth and how many of it there are. Only for
+            // things counted in shares or grams; a lending market is dollars.
+            const units =
+              isPriceExposure(v.id) && v.heldDecimals !== undefined
+                ? Number(v.shares) / 10 ** v.heldDecimals
+                : 0;
+            return {
+              id: v.id,
+              name: positionTitle(v),
+              symbol: v.assetSymbol,
+              maxUsd: usd,
+              ...(units > 0 ? { unitPriceUsd: usd / units, unitLabel: unitLabelOf(v) } : {}),
+            };
+          })}
           busy={bulk.state === "running"}
           results={bulk.results}
           progress={

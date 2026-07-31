@@ -171,6 +171,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "bulk.converting": "конвертую ваші гроші…",
   "alloc.addWithCard": "поповнити карткою",
   "alloc.switchTo": "вкласти в {name} замість цього",
+  "alloc.switchUnits": "перемкнути долари та штуки",
   "bulk.failed": "не пройшло: {ids}",
   "bulk.sellSelected": "продати все",
   "bulk.clear": "зняти вибір",

@@ -21,7 +21,9 @@ import { USDC_MINT } from "@/lib/constants";
 /** The bridge needs a provider only to read the destination mint; every basket
  *  settles in the same dollar asset, so any USDC source answers that. */
 const USDC_PROVIDER_ID = "jupiter-lend-usdc";
-import { getProvider, toFriendlyError, positionTitle } from "@/lib/yield";
+import { getProvider, toFriendlyError, positionTitle, unitLabelOf } from "@/lib/yield";
+import { isPriceExposure } from "@/lib/yield/assets";
+import { useStockPrices } from "@/hooks/use-stock-prices";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { useT } from "@/lib/i18n";
 
@@ -58,6 +60,11 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
   const [allocating, setAllocating] = useState(false);
   const [payUid, setPayUid] = useState<string | null>(null);
   const [fundError, setFundError] = useState<string | null>(null);
+  // Prices for the picked price-exposure assets, so a row can be typed in shares.
+  const pickedMints = views
+    .filter((v) => pickSet?.picked.has(v.id) && isPriceExposure(v.id) && v.heldMint)
+    .map((v) => v.heldMint as string);
+  const { prices } = useStockPrices(pickedMints);
   if (!pickSet?.enabled) return null;
 
   const rows = [...pickSet.picked]
@@ -69,7 +76,11 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
       const alternatives = views
         .filter((o) => !!p.group && o.group === p.group && o.id !== p.id && !pickSet.picked.has(o.id))
         .map((o) => ({ id: o.id, label: o.assetSymbol, apy: o.apy }));
-      return { id, name: positionTitle(p), symbol: p.assetSymbol, alternatives };
+      // Buying is priced by the market, so the unit price has to be asked for —
+      // unlike selling, where the position already knows what it's worth.
+      const price = p.heldMint ? prices[p.heldMint]?.price : undefined;
+      const unit = isPriceExposure(p.id) && price ? { unitPriceUsd: price, unitLabel: unitLabelOf(p) } : {};
+      return { id, name: positionTitle(p), symbol: p.assetSymbol, alternatives, ...unit };
     })
     .filter((r): r is NonNullable<typeof r> => !!r);
 
