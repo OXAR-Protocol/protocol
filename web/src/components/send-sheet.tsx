@@ -71,6 +71,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      data-no-pull
       className="fixed inset-0 z-[60] bg-white/70 backdrop-blur-sm flex items-center justify-center px-4"
       onClick={onClose}
     >

@@ -11,6 +11,7 @@ import { WarpProvider } from "@/components/warp-transition";
 import { WarpOnEntry } from "@/components/warp-on-entry";
 import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
 import { TermsAndIntroGate } from "@/components/terms/terms-and-intro-gate";
+import { PullToRefresh } from "@/components/pull-to-refresh";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <WarpProvider>
               <WarpOnEntry />
               <AuthGuard>
+                <PullToRefresh />
                 {/* Flex column so the photo footer sits pinned below the content (never
                     overlapping it — text stays legible) and spans the full page width. */}
                 <div className="flex min-h-screen flex-col">
