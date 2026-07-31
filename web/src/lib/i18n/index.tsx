@@ -74,6 +74,8 @@ const ERROR_KEYS: Record<string, TranslationKey> = {
   "Price unavailable — try again": "err.priceUnavailable",
   "Amount too small to withdraw": "err.amountTooSmall",
   "Wallet not connected": "err.walletNotConnected",
+  "We couldn't reach your wallet to sign. Reconnect it and try again — your money hasn't moved.":
+    "err.walletUnreachable",
   "That's too small after the gas reserve — try a bit more.": "err.tooSmallAfterGas",
   "We didn't see your funds arrive yet — card top-ups can take a few minutes. Once your SOL lands you can buy straight from your wallet balance.":
     "err.fundsNotArrived",

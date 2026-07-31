@@ -63,6 +63,17 @@ export function useSolanaContext() {
   return useContext(SolanaContext);
 }
 
+/** How Privy reports a wallet provider it can't reach — there is no error code, only
+ *  this sentence, so match on it and keep the match narrow. */
+function walletUnreachable(e: unknown): boolean {
+  const m = (e instanceof Error ? e.message : String(e)).toLowerCase();
+  return (
+    m.includes("failed to connect to wallet") ||
+    m.includes("wallet not connected") ||
+    m.includes("no wallet connected")
+  );
+}
+
 class ReadOnlyWallet implements WalletSigner {
   constructor(public readonly publicKey: PublicKey) {}
   async signTransaction<T extends Transaction | VersionedTransaction>(_tx: T): Promise<T> {
@@ -133,6 +144,16 @@ class PrivySolanaAdapter implements WalletSigner {
         // relayer refused the transaction, wallet couldn't partial-sign — used to
         // reach the user as one sentence and reach us not at all.
         reportGaslessFailure(this._publicKey.toBase58(), "signAndSend", e);
+        // A wallet we could not reach is not a relayer problem. Native gas asks the
+        // same wallet for the same signature, so it fails identically — and meanwhile
+        // the user is told free fees are down and to wait, when what they need is to
+        // reconnect. Measured, not guessed: the first report this logging produced
+        // was exactly this, on a swap with nothing else wrong with it.
+        if (walletUnreachable(e)) {
+          throw new UserFacingError(
+            "We couldn't reach your wallet to sign. Reconnect it and try again — your money hasn't moved.",
+          );
+        }
         // Falling back only helps a wallet that can actually pay the fee. For one
         // holding no SOL — the whole point of gasless — native gas is a guaranteed
         // failure wearing the words "insufficient funds", which is both wrong and
