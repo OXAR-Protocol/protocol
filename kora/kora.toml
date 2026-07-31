@@ -47,6 +47,11 @@ allowed_programs = [
     "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",  # Associated Token Account
     "AddressLookupTab1e1111111111111111111111111",  # Address Lookup Table
     "ComputeBudget111111111111111111111111111111",  # Compute Budget
+    # SPL Memo. Jupiter attaches one to some routes; it moves nothing and can spend
+    # nothing, but its absence here made the relayer refuse the whole transaction —
+    # observed in production as "Program MemoSq4… is not in the allowed list", which
+    # reached the user as "free network fees are temporarily unavailable".
+    "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",  # SPL Memo
     "jup3YeL8QhtSx1e253b2FDvsMNC87fDrgQZivbrndc9",  # Jupiter Lend
     "jup7TthsMgcR9Y3L277b8Eo9uboVSmu1utkuXHNUKar",  # Jupiter Lend
     "jup8QcdtqecBGw1iXHW3hQAsHQbTgEqbLbNMvvULmeK",  # Jupiter Lend

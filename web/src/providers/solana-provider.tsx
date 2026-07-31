@@ -63,6 +63,24 @@ export function useSolanaContext() {
   return useContext(SolanaContext);
 }
 
+/**
+ * The relayer REFUSED this transaction, as opposed to being unreachable.
+ *
+ * The difference is everything the user needs: a refusal is deterministic — the same
+ * transaction will be refused every time — so "try again in a moment" is a lie that
+ * costs them a minute per attempt. Seen in production: an unlisted memo program, and
+ * a Token-2022 `transferCheckedWithFee` the validator can't read (that one is USDG,
+ * whose transfer-fee extension is set to zero but still uses the instruction).
+ */
+function relayerRefused(e: unknown): boolean {
+  const m = (e instanceof Error ? e.message : String(e)).toLowerCase();
+  return (
+    m.includes("invalid transaction") ||
+    m.includes("not in the allowed list") ||
+    m.includes("cannot validate")
+  );
+}
+
 /** How Privy reports a wallet provider it can't reach — there is no error code, only
  *  this sentence, so match on it and keep the match narrow. */
 function walletUnreachable(e: unknown): boolean {
@@ -163,9 +181,14 @@ class PrivySolanaAdapter implements WalletSigner {
         // something.
         const lamports = await this._connection.getBalance(this._publicKey).catch(() => 0);
         if (lamports < Number(SOL_SPONSORED_RESERVE)) {
+          // A refusal will happen again on the next tap and the one after. Saying
+          // "try again in a moment" to that is how a user spends ten minutes
+          // re-tapping a button that cannot work.
           throw new UserFacingError(
-            "Free network fees are briefly unavailable and your wallet has no SOL to " +
-              "cover one. Your money is safe where it is — try again in a moment.",
+            relayerRefused(e)
+              ? "Free network fees don't cover this particular payment. Add a little SOL for the network fee, or pay with a different token — your money hasn't moved."
+              : "Free network fees are briefly unavailable and your wallet has no SOL to " +
+                "cover one. Your money is safe where it is — try again in a moment.",
           );
         }
       }

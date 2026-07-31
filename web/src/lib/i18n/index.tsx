@@ -69,6 +69,8 @@ const ERROR_KEYS: Record<string, TranslationKey> = {
   "Free network fees are briefly unavailable and your wallet has no SOL to cover one. Your money is safe where it is — try again in a moment.":
     "err.gaslessDown",
 
+  "Free network fees don't cover this particular payment. Add a little SOL for the network fee, or pay with a different token — your money hasn't moved.":
+    "err.gaslessRefused",
   "Price impact too high — try a smaller amount": "err.priceImpact",
   "Nothing to withdraw": "err.nothingToWithdraw",
   "Price unavailable — try again": "err.priceUnavailable",
