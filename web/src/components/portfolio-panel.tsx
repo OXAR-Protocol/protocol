@@ -87,9 +87,6 @@ export function PortfolioPanel() {
   // Profit per position since it was bought — the card above says what the whole
   // portfolio did; this is what says WHICH holding is dragging.
   const earnedById = useEarnedById();
-  // Which assets this wallet has actually traded — drives the "traded" filter.
-  // Same events the history below reads: one request, two uses.
-  const tradedMints = new Set(events.map((e) => e.mint).filter(Boolean) as string[]);
 
   // Pile is the portfolio: only sources where you actually hold a position.
   const allHeld = views.filter((v) => v.underlyingBalance > BigInt(0));
@@ -97,8 +94,7 @@ export function PortfolioPanel() {
     if (filter === "all") return true;
     if (filter === "stocks") return isXStock(v.id);
     if (filter === "gold") return isGold(v.id);
-    if (filter === "yield") return !isPriceExposure(v.id);
-    return !!v.heldMint && tradedMints.has(v.heldMint);
+    return !isPriceExposure(v.id);
   });
   const toggleSelected = (id: string) =>
     setSelected((prev) => {

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import {
   portfolioSeries,
   summarizePerformance,
+  trackedMints,
   trimLeadingEmpty,
   type PriceSeries,
   type WalletTx,
@@ -130,24 +131,39 @@ export async function POST(req: Request) {
     // on a quiet one needs one page.
     const now = Math.floor(Date.now() / 1000);
     const windowStart = now - days * 86_400;
-    const [history, balancesNow] = await Promise.all([
+    const [history, allBalances] = await Promise.all([
       fetchEnhancedHistory(owner, key, MAX_PAGES, windowStart),
-      readWalletBalances(owner, TRACKED_MINTS),
+      readWalletBalances(owner),
     ]);
 
-    // One transaction, one entry: the direction of its legs is what separates money
-    // crossing the wallet's edge from one thing you own becoming another.
-    const txs: WalletTx[] = [];
-    for (const tx of history) {
+    // Everything the owner moved, transaction by transaction.
+    const moved = history.map((tx) => {
       const legs: Record<string, number> = {};
       for (const t of tx.tokenTransfers ?? []) {
         if (!t.mint || typeof t.tokenAmount !== "number") continue;
-        if (!TRACKED_MINTS.has(t.mint)) continue;
         const sign = t.toUserAccount === owner ? 1 : t.fromUserAccount === owner ? -1 : 0;
         if (sign === 0) continue;
         legs[t.mint] = (legs[t.mint] ?? 0) + sign * t.tokenAmount;
       }
-      if (Object.keys(legs).length) txs.push({ timestamp: tx.timestamp ?? 0, legs });
+      return { timestamp: tx.timestamp ?? 0, legs };
+    });
+
+    const tracked = trackedMints(moved, TRACKED_MINTS);
+
+    const balancesNow: Record<string, number> = {};
+    for (const [mint, amount] of Object.entries(allBalances)) {
+      if (tracked.has(mint)) balancesNow[mint] = amount;
+    }
+
+    // One transaction, one entry: the direction of its legs is what separates money
+    // crossing the wallet's edge from one thing you own becoming another.
+    const txs: WalletTx[] = [];
+    for (const tx of moved) {
+      const legs: Record<string, number> = {};
+      for (const [mint, delta] of Object.entries(tx.legs)) {
+        if (tracked.has(mint)) legs[mint] = delta;
+      }
+      if (Object.keys(legs).length) txs.push({ timestamp: tx.timestamp, legs });
     }
 
     const mints = new Set(Object.keys(balancesNow));
@@ -179,7 +195,7 @@ export async function POST(req: Request) {
       heldMints: Object.keys(balancesNow).filter((m) => (balancesNow[m] ?? 0) > 0),
       debug: {
         txs: history.length,
-        trackedMints: TRACKED_MINTS.size,
+        trackedMints: tracked.size,
         heldMints: Object.keys(balancesNow).length,
         movedMints: mints.size,
         pricedMints: Object.keys(prices).length,

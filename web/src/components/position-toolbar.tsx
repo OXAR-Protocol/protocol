@@ -9,10 +9,15 @@ import { isGold } from "@/lib/yield/gold";
 import { useT } from "@/lib/i18n";
 
 export type Layout = "list" | "grid";
-/** Narrow the position list. "traded" = you've bought or sold it, not merely hold it. */
-export type Filter = "all" | "yield" | "stocks" | "gold" | "traded";
+/**
+ * Narrow the position list — by what a thing IS, which is the only axis a person can
+ * act on here. There was a "traded" chip too; it meant "you have an event on this in
+ * the recent feed", which is not a property of the asset, not a question anyone asks
+ * of their own positions, and — reported by a user — not guessable from the word.
+ */
+export type Filter = "all" | "yield" | "stocks" | "gold";
 
-const FILTERS = ["all", "yield", "stocks", "gold", "traded"] as const;
+const FILTERS = ["all", "yield", "stocks", "gold"] as const;
 
 interface Props {
   /** Every held position — decides which controls are worth offering at all. */
@@ -33,7 +38,7 @@ export function PositionToolbar({ allHeld, filter, onFilter, layout, onLayout, s
   const { t } = useT();
 
   const offered = FILTERS.filter((f) => {
-    if (f === "all" || f === "traded") return true;
+    if (f === "all") return true;
     if (f === "stocks") return allHeld.some((v) => isXStock(v.id));
     if (f === "gold") return allHeld.some((v) => isGold(v.id));
     return allHeld.some((v) => !isPriceExposure(v.id));
