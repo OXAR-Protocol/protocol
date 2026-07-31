@@ -109,6 +109,13 @@ export default function HomePage() {
                   <LiveEarned currentValue={goldEarn.value} invested={goldEarn.invested} apy={goldEarn.apy} />
                 </span>
               )}
+              {/* These are per-position and count from the day each was bought. The
+                  card below answers a different question — the whole wallet over a
+                  chosen window, including what has since been sold and what trading
+                  cost — so without this the two read as one figure disagreeing. */}
+              <span className="w-full text-[11px] lowercase text-black/35">
+                {t("home.earned.scope")}
+              </span>
             </span>
           )}
         </div>

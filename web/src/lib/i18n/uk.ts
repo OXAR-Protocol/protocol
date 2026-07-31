@@ -32,6 +32,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "home.earned.yield": "дохід",
   "home.earned.stocks": "акції · прибуток",
   "home.earned.gold": "золото · прибуток",
+  "home.earned.scope": "з моменту купівлі · те, що ще тримаєш",
 
   "yield.title": "Де твої гроші можуть спати",
   "yield.subtitle":
