@@ -21,7 +21,8 @@ import { USDC_MINT } from "@/lib/constants";
 /** The bridge needs a provider only to read the destination mint; every basket
  *  settles in the same dollar asset, so any USDC source answers that. */
 const USDC_PROVIDER_ID = "jupiter-lend-usdc";
-import { getProvider, toFriendlyError } from "@/lib/yield";
+import { getProvider, toFriendlyError, positionTitle } from "@/lib/yield";
+import type { ProviderView } from "@/hooks/use-yield-positions";
 import { useT } from "@/lib/i18n";
 
 /** What the card form opens on — the on-ramps won't sell less than this. */
@@ -42,7 +43,7 @@ function spendableUsd(a: WalletAsset): number {
  * purchases settle in USDC, a different pay-asset is converted ONCE for the whole
  * basket rather than per asset: one prompt, one slippage hit, not N of each.
  */
-export function PickedBuyBar() {
+export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
   const { t } = useT();
   const pickSet = usePickSet();
   const bulk = useBulkTrade();
@@ -62,9 +63,15 @@ export function PickedBuyBar() {
   const rows = [...pickSet.picked]
     .map((id) => {
       const p = getProvider(id);
-      return p ? { id, name: p.name, symbol: p.assetSymbol } : null;
+      if (!p) return null;
+      // Siblings of a collapsed source, so the market chosen for you is changeable
+      // here rather than only back on the card it came from.
+      const alternatives = views
+        .filter((o) => !!p.group && o.group === p.group && o.id !== p.id && !pickSet.picked.has(o.id))
+        .map((o) => ({ id: o.id, label: o.assetSymbol, apy: o.apy }));
+      return { id, name: positionTitle(p), symbol: p.assetSymbol, alternatives };
     })
-    .filter((r): r is { id: string; name: string; symbol: string } => !!r);
+    .filter((r): r is NonNullable<typeof r> => !!r);
 
   // Solana first (instant or a quick swap), then the other chains. A cross-chain
   // basket doesn't complete here: it bridges now and buys when the money lands.
@@ -169,6 +176,7 @@ export function PickedBuyBar() {
       />
       {allocating && (
         <AllocationSheet
+          onSwap={(from, to) => pickSet.swap(from, to)}
           mode="buy"
           rows={rows}
           budgetUsd={budget}

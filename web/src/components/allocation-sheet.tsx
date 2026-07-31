@@ -16,6 +16,10 @@ export interface AllocationRow {
   symbol: string;
   /** Sell: what this position is worth. Buy: unused — the budget is shared. */
   maxUsd?: number;
+  /** The other markets of the same source — Jupiter Lend's USDC beside its USDT.
+   *  A collapsed card had to choose one for you to get here; this is where you say
+   *  otherwise, instead of backing out and starting the basket again. */
+  alternatives?: { id: string; label: string; apy: number }[];
 }
 
 /** How one row's transaction ended. Absent = not attempted yet. */
@@ -41,6 +45,8 @@ interface Props {
   payWith?: ReactNode;
   error?: string | null;
   onConfirm: (amounts: Record<string, number>) => void;
+  /** Swap one row for a sibling market, carrying its amount across. */
+  onSwap?: (fromId: string, toId: string) => void;
   onClose: () => void;
 }
 
@@ -70,6 +76,7 @@ export function AllocationSheet({
   payWith,
   error,
   onConfirm,
+  onSwap,
   onClose,
 }: Props) {
   const { t } = useT();
@@ -88,6 +95,15 @@ export function AllocationSheet({
 
   const setAmount = (id: string, v: string) =>
     setAmounts((prev) => ({ ...prev, [id]: normalizeDecimalInput(v) }));
+
+  // The row keeps whatever was typed into it; only the market underneath changes.
+  const swapRow = (from: string, to: string) => {
+    setAmounts((prev) => {
+      const { [from]: carried, ...rest } = prev;
+      return carried === undefined ? rest : { ...rest, [to]: carried };
+    });
+    onSwap?.(from, to);
+  };
 
   /**
    * Sell: a fraction of THIS position — the rows are independent, so the position is
@@ -152,6 +168,20 @@ export function AllocationSheet({
                 <AssetIcon src={assetLogoSrc(r.id)} label={assetIconLabel(r.id, r.symbol)} size={28} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[14px] text-black">{r.name}</p>
+                  {!busy && !result && (r.alternatives?.length ?? 0) > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {r.alternatives!.map((alt) => (
+                        <button
+                          key={alt.id}
+                          type="button"
+                          onClick={() => swapRow(r.id, alt.id)}
+                          className="rounded-full border border-black/10 px-2 py-0.5 text-[10px] lowercase tracking-wide text-black/45 transition hover:border-black/40 hover:text-black"
+                        >
+                          {alt.label} {(alt.apy * 100).toFixed(2)}%
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   {mode === "sell" && r.maxUsd !== undefined && (
                     <p className="text-[11px] tabular-nums text-black/40">
                       {t("alloc.youHave", { usd: `$${formatUsdAmount(r.maxUsd)}` })}

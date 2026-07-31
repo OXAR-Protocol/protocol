@@ -40,6 +40,22 @@ describe("positionTitle", () => {
     );
   });
 
+  // The regression this caught: every Jupiter Lend market is NAMED "Jupiter Lend" —
+  // the market lives only in the symbol. Falling back to the name alone turned two
+  // positions in two different markets into one word, printed twice.
+  it("names the market when several sources share one name", () => {
+    expect(
+      positionTitle({ name: "Jupiter Lend", assetSymbol: "USDC", group: "jupiter-lend" }),
+    ).toBe("Jupiter Lend USDC");
+    expect(
+      positionTitle({ name: "Jupiter Lend", assetSymbol: "USDT", group: "jupiter-lend" }),
+    ).toBe("Jupiter Lend USDT");
+  });
+
+  it("leaves a standalone source alone — there is nothing to disambiguate", () => {
+    expect(positionTitle({ name: "OnRe ONyc", assetSymbol: "USDC" })).toBe("OnRe ONyc");
+  });
+
   it("tells two sources apart even when both are paid for in the same currency", () => {
     const paidInUsdc = [
       { name: "OnRe ONyc", assetSymbol: "USDC" },
