@@ -2,8 +2,8 @@
 
 import { PickButton } from "@/components/pick-button";
 import { usePickSet } from "@/components/pick-set";
-import type { ProviderGroup } from "@/lib/yield";
-import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
+import { pickTarget, type ProviderGroup } from "@/lib/yield";
+import { RISK_TONE, RISK_LABEL, fromBaseUnits, unitLabelOf } from "@/lib/yield";
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { Sparkline } from "@/components/sparkline";
@@ -30,7 +30,7 @@ interface Props {
  */
 export function YieldGroupRow({ group, onOpen }: Props) {
   const pickSet = usePickSet();
-  const top = group.views.reduce((a, b) => (b.apy > a.apy ? b : a), group.views[0]);
+  const top = pickTarget(group);
   const history = useApyHistory(top.defiLlamaPoolId);
   const up = trendUp(history);
   const positionTotal = group.views.reduce(
@@ -59,7 +59,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
                   key={v.id}
                   className="rounded border border-black/15 px-1.5 py-0.5 text-[10px] lowercase tracking-wide text-black/55"
                 >
-                  {v.assetSymbol}
+                  {unitLabelOf(v)}
                 </span>
               ))}
             </div>

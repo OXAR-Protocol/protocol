@@ -151,6 +151,16 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
     category: "private company · aerospace",
     facts: [{ label: "sector", value: "rockets & satellite internet" }, { label: "note", value: "privately held — pre-IPO exposure" }],
   },
+  "gold-oro": {
+    about: "ORO — one troy ounce of physical gold per token, issued on Solana. Unlike most tokenized gold, this one has no freeze authority: no issuer can lock your balance. Gold pays no interest, so what you hold is the metal's price.",
+    category: "commodity · gold",
+    facts: [
+      { label: "backed by", value: "physical gold (1 token ≈ 1 oz)" },
+      { label: "issuer", value: "ORO Labs" },
+      { label: "can be frozen", value: "no — the mint has no freeze authority" },
+    ],
+  },
+
   "gold-xaut": {
     about: "Tether Gold (XAUt) — each token is backed by one troy ounce of real, physical gold held in a Swiss vault. Hold gold without a safe or a bank.",
     category: "commodity · gold",

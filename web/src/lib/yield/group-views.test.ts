@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { groupProviderViews } from "./group-views";
+import { groupProviderViews, pickTarget } from "./group-views";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 
 function view(p: Partial<ProviderView> & { id: string }): ProviderView {
@@ -58,5 +58,50 @@ describe("groupProviderViews", () => {
       view({ id: "j1", group: "jupiter-lend" }),
     ]);
     expect(groups.map((g) => g.key)).toEqual(["kamino", "jupiter-lend"]);
+  });
+});
+
+/**
+ * Picking a collapsed card is the one gesture where "which member?" is decided FOR
+ * the user, so the two layouts had better decide it the same way. They didn't: the
+ * row added the best rate the card advertises, the grid card added whichever was
+ * first in the catalog. Same group, same tap, different asset bought.
+ */
+describe("pickTarget", () => {
+  const view = (id: string, apy: number) =>
+    ({ id, apy, name: id, underlyingBalance: BigInt(0), decimals: 6 }) as never;
+
+  it("adds the source behind the rate the card advertises", () => {
+    const group = {
+      key: "jupiter-lend",
+      name: "Jupiter Lend",
+      views: [view("usdc", 0.052), view("usdt", 0.081), view("usdg", 0.061)],
+      maxApy: 0.081,
+      hasPosition: false,
+    };
+    expect(pickTarget(group).id).toBe("usdt");
+    expect(pickTarget(group).apy).toBe(group.maxApy);
+  });
+
+  it("keeps catalog order when nothing yields — gold pays no interest", () => {
+    const group = {
+      key: "gold",
+      name: "Gold",
+      views: [view("gold-xaut", 0), view("gold-oro", 0)],
+      maxApy: 0,
+      hasPosition: false,
+    };
+    expect(pickTarget(group).id).toBe("gold-xaut");
+  });
+
+  it("is the member itself when nothing was collapsed", () => {
+    const group = {
+      key: "solo",
+      name: "Solo",
+      views: [view("solo", 0.04)],
+      maxApy: 0.04,
+      hasPosition: false,
+    };
+    expect(pickTarget(group).id).toBe("solo");
   });
 });
