@@ -43,7 +43,11 @@ export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, on
   const selling = state === "running";
 
   return (
-    <div className="fixed bottom-24 left-1/2 z-40 w-fit max-w-[calc(100vw-1.5rem)] -translate-x-1/2">
+    // Above the tab bar, INCLUDING the home indicator it sits on. The tab bar is
+    // 4rem of content plus `env(safe-area-inset-bottom)`, so a fixed 6rem cleared it
+    // on a laptop and landed exactly on it on a phone — which is where this lives.
+    // Written as one expression so both get the same 2rem of air.
+    <div className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] left-1/2 z-40 w-fit max-w-[calc(100vw-1.5rem)] -translate-x-1/2">
     {/* One row, always. It used to wrap on a phone, which turns a pill into a blob
         and stacked the icons on top of each other. Nothing here may grow the bar:
         the label truncates, the icons stand down on narrow screens. */}

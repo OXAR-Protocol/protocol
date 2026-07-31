@@ -187,7 +187,7 @@ export function PortfolioPanel() {
             ))}
           </div>
         ) : (
-          <div className={`space-y-2 ${selected.size > 0 ? "pb-24" : ""}`}>
+          <div className={`space-y-2 ${selected.size > 0 ? "pb-[calc(9rem+env(safe-area-inset-bottom))]" : ""}`}>
             {held.map((v) => (
               <PositionRow
                 key={v.id}
