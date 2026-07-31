@@ -72,9 +72,9 @@ export function PortfolioPanel() {
   // definition the stretch the chart is drawing, so the two can't disagree about
   // what "30 days" means.
   const days = useMemo(() => {
-    const cutoff = history.points.length ? utcDayStart(history.points[0]!.t) : 0;
-    return groupByDay(events.filter((e) => e.timestamp >= cutoff), history.points);
-  }, [events, history.points]);
+    const cutoff = history.days.length ? utcDayStart(history.days[0]!.t) : 0;
+    return groupByDay(events.filter((e) => e.timestamp >= cutoff), history.days);
+  }, [events, history.days]);
   const rangeStats = useMemo(() => summarizeDays(days), [days]);
   // The summary reads EVERY day; the list shows only the ones something happened on.
   // A quiet day repeats what the chart already draws, and there is one per calendar
@@ -126,7 +126,8 @@ export function PortfolioPanel() {
         className="relative mt-8 overflow-hidden rounded-[8px] border border-black/10 bg-white p-6"
       >
         <PortfolioChart
-          points={history.points}
+          points={history.days}
+          performance={history.performance}
           stats={rangeStats}
           range={range}
           onRangeChange={setRange}

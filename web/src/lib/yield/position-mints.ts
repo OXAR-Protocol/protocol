@@ -1,3 +1,5 @@
+import { USDC_MINT } from "@/lib/constants";
+
 import { PROVIDERS } from "./registry";
 
 /**
@@ -27,4 +29,29 @@ export const POSITION_MINTS: ReadonlySet<string> = new Set<string>([
   ...PROVIDERS.map((p) => p.heldMint).filter((m): m is string => !!m),
   JL_USDC,
   JL_USDT,
+]);
+
+/** Dollars sitting in the wallet, not yet at work. */
+export const CASH_MINTS: ReadonlySet<string> = new Set<string>([
+  USDC_MINT,
+  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // USDT
+  "2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH", // USDG (Token-2022)
+]);
+
+/**
+ * Everything performance is measured over: positions AND the cash beside them.
+ *
+ * Cash belongs in it for a reason that only shows up in the arithmetic. If the
+ * portfolio were the positions alone, buying a stock with wallet dollars would count
+ * as money ARRIVING, and paying $100 for $99 of stock would be recorded as "$99 came
+ * in" — the dollar it cost to get in simply vanishing. With cash inside the boundary
+ * that same purchase is internal, and the dollar reads as the loss it is. It also
+ * ends the split where the chart drew a different portfolio than the balance above it.
+ *
+ * SOL is deliberately absent: it is a reserve kept for network fees, and letting its
+ * price swing move "what you earned" would be noise rather than performance.
+ */
+export const TRACKED_MINTS: ReadonlySet<string> = new Set<string>([
+  ...POSITION_MINTS,
+  ...CASH_MINTS,
 ]);

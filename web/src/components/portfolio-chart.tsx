@@ -6,7 +6,8 @@ import {
   formatUsdAmount,
   formatSignedUsd,
   formatDayShort,
-  type PortfolioPoint,
+  type PerformanceDay,
+  type RangePerformance,
   type RangeStats,
 } from "@oxar/sdk";
 
@@ -18,7 +19,11 @@ export const RANGES = [7, 30, 90, 365] as const;
 export type Range = (typeof RANGES)[number];
 
 interface Props {
-  points: PortfolioPoint[];
+  points: PerformanceDay[];
+  /** Earned, return and flows — from the value series itself. */
+  performance: RangePerformance | null;
+  /** Only the trade COUNT comes from the activity feed; every figure that is money
+   *  comes from `performance`, so the two can't describe different periods. */
   stats: RangeStats;
   range: Range;
   onRangeChange: (r: Range) => void;
@@ -35,7 +40,15 @@ interface Props {
  * The numbers under it are the same range summed up, so the picture and the figures
  * can't be describing different periods.
  */
-export function PortfolioChart({ points, stats, range, onRangeChange, loading, locale }: Props) {
+export function PortfolioChart({
+  points,
+  performance,
+  stats,
+  range,
+  onRangeChange,
+  loading,
+  locale,
+}: Props) {
   const { t } = useT();
 
   return (
@@ -73,18 +86,22 @@ export function PortfolioChart({ points, stats, range, onRangeChange, loading, l
       )}
 
       <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/[0.06] pt-4 sm:grid-cols-4">
-        {/* Dollars only. The percentage under this figure divided the change by the
-            range's opening value, so a wallet that grew by moving its own cash into
-            positions read as "+4181.7%" on 7 days and showed nothing at all on 90 —
-            where the range opens before there was anything to grow from. Neither was
-            information. See `RangeStats.changeUsd`. */}
+        {/* What you made, not what you moved. The figure this replaced was end-minus-
+            start, which a deposit inflates and a withdrawal erases — it read as profit
+            and wasn't. The percentage beside it is time-weighted, so it survives a
+            range that opens before the wallet held anything and a deposit inside one. */}
         <Stat
-          label={t("history.change")}
-          value={stats.changeUsd === null ? "—" : formatSignedUsd(stats.changeUsd)}
-          negative={stats.changeUsd !== null && stats.changeUsd < 0}
+          label={t("history.earned")}
+          value={performance?.earnedUsd == null ? "—" : formatSignedUsd(performance.earnedUsd)}
+          hint={
+            performance?.returnPct == null
+              ? undefined
+              : `${performance.returnPct >= 0 ? "+" : ""}${(performance.returnPct * 100).toFixed(2)}%`
+          }
+          negative={performance?.earnedUsd != null && performance.earnedUsd < 0}
         />
-        <Stat label={t("history.putIn")} value={`$${formatUsdAmount(stats.inUsd)}`} />
-        <Stat label={t("history.tookOut")} value={`$${formatUsdAmount(stats.outUsd)}`} />
+        <Stat label={t("history.putIn")} value={`$${formatUsdAmount(performance?.inUsd ?? 0)}`} />
+        <Stat label={t("history.tookOut")} value={`$${formatUsdAmount(performance?.outUsd ?? 0)}`} />
         <Stat
           label={t("history.trades")}
           value={String(stats.trades)}

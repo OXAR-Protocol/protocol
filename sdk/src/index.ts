@@ -54,5 +54,6 @@ export * from "./core/origin-gas";
 export * from "./core/activity-stats";
 export * from "./core/format-date";
 export * from "./core/portfolio-history";
+export * from "./core/portfolio-performance";
 export * from "./core/poll-arrival";
 export * from "./core/terms";

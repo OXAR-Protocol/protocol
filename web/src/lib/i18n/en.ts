@@ -280,7 +280,9 @@ export const en = {
   "history.range.30": "30 days",
   "history.range.90": "90 days",
   "history.range.365": "1 year",
-  "history.change": "change",
+  // Earned = what the money made, flows excluded. The percentage beside it is
+  // time-weighted, so a deposit inside the range cannot inflate it.
+  "history.earned": "earned",
   "history.putIn": "put in",
   "history.tookOut": "took out",
   "history.trades": "trades",
