@@ -398,6 +398,7 @@ export const en = {
   "err.priceUnavailable": "Price unavailable — try again",
   "err.amountTooSmall": "Amount too small to withdraw",
   "err.walletNotConnected": "Wallet not connected",
+  "err.walletUnreachable": "we couldn’t reach your wallet to sign. reconnect it and try again — your money hasn’t moved.",
   "err.tooSmallAfterGas": "That's too small after the gas reserve — try a bit more.",
   "err.fundsNotArrived":
     "We didn't see your funds arrive yet — card top-ups can take a few minutes. Once your SOL lands you can buy straight from your wallet balance.",
