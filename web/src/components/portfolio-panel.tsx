@@ -27,6 +27,7 @@ import { useStockCharts } from "@/hooks/use-stock-charts";
 import { useActivity } from "@/hooks/use-activity";
 import { useLiveBalances } from "@/hooks/use-live-balances";
 import { usePortfolioHistory } from "@/hooks/use-portfolio-history";
+import { useEarnedById } from "@/hooks/use-earnings";
 
 
 
@@ -83,6 +84,9 @@ export function PortfolioPanel() {
   const listedDays = useMemo(() => activeDays(days), [days]);
   // One batched request covers every card's sparkline (see /api/stock-charts).
   const charts = useStockCharts();
+  // Profit per position since it was bought — the card above says what the whole
+  // portfolio did; this is what says WHICH holding is dragging.
+  const earnedById = useEarnedById();
   // Which assets this wallet has actually traded — drives the "traded" filter.
   // Same events the history below reads: one request, two uses.
   const tradedMints = new Set(events.map((e) => e.mint).filter(Boolean) as string[]);
@@ -179,6 +183,7 @@ export function PortfolioPanel() {
                 view={v}
                 onOpen={() => router.push(`/asset/${v.id}`)}
                 change24h={change24hOf(v)}
+                earned={earnedById[v.id]}
                 picked={selected.has(v.id)}
                 onTogglePick={sellingV2 ? () => toggleSelected(v.id) : undefined}
               />
@@ -193,6 +198,7 @@ export function PortfolioPanel() {
                 onOpen={() => router.push(`/asset/${v.id}`)}
                 change24h={change24hOf(v)}
                 chart={v.heldMint ? charts[v.heldMint] : undefined}
+                earned={earnedById[v.id]}
                 picked={selected.has(v.id)}
                 onTogglePick={sellingV2 ? () => toggleSelected(v.id) : undefined}
               />
