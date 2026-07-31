@@ -71,5 +71,6 @@ __exportStar(require("./core/format-date"), exports);
 __exportStar(require("./core/portfolio-history"), exports);
 __exportStar(require("./core/portfolio-performance"), exports);
 __exportStar(require("./core/portfolio-summary"), exports);
+__exportStar(require("./core/tracked-mints"), exports);
 __exportStar(require("./core/poll-arrival"), exports);
 __exportStar(require("./core/terms"), exports);

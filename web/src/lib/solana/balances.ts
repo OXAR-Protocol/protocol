@@ -15,11 +15,11 @@ import { RPC_URL } from "@/lib/constants";
 const TOKEN_PROGRAM = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 const TOKEN_2022 = new PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 
-/** UI units by mint, for the mints in `keep`. Both token programs — USDG and the
- *  tokenized stocks are Token-2022, everything older is not. */
+/** UI units by mint — every SPL balance, or only those in `keep`. Both token programs:
+ *  USDG and the tokenized stocks are Token-2022, everything older is not. */
 export async function readWalletBalances(
   owner: string,
-  keep: ReadonlySet<string>,
+  keep?: ReadonlySet<string>,
 ): Promise<Record<string, number>> {
   const connection = new Connection(RPC_URL, "confirmed");
   const pk = new PublicKey(owner);
@@ -36,7 +36,8 @@ export async function readWalletBalances(
       const info = (account.data as ParsedAccountData).parsed?.info;
       const mint: unknown = info?.mint;
       const amount: unknown = info?.tokenAmount?.uiAmount;
-      if (typeof mint !== "string" || typeof amount !== "number" || !keep.has(mint)) continue;
+      if (typeof mint !== "string" || typeof amount !== "number") continue;
+      if (keep && !keep.has(mint)) continue;
       // A mint can sit in more than one token account; the wallet holds the sum.
       balances[mint] = (balances[mint] ?? 0) + amount;
     }

@@ -23,5 +23,6 @@ export * from "./core/format-date";
 export * from "./core/portfolio-history";
 export * from "./core/portfolio-performance";
 export * from "./core/portfolio-summary";
+export * from "./core/tracked-mints";
 export * from "./core/poll-arrival";
 export * from "./core/terms";
