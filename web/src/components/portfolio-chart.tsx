@@ -104,7 +104,7 @@ export function PortfolioChart({
             and wasn't. The percentage beside it is time-weighted, so it survives a
             range that opens before the wallet held anything and a deposit inside one. */}
         <Stat
-          label={t("history.earned")}
+          label={`${t("history.earned")} · ${t(`history.range.${range}` as "history.range.7")}`}
           value={performance?.earnedUsd == null ? "—" : formatSignedUsd(performance.earnedUsd)}
           hint={
             performance?.returnPct == null

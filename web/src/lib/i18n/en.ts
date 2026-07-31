@@ -38,6 +38,7 @@ export const en = {
   "home.earned.yield": "yield",
   "home.earned.stocks": "stocks P&L",
   "home.earned.gold": "gold P&L",
+  "home.earned.scope": "since you bought · what you still hold",
 
   // Yield list
   "yield.title": "Where your money can sleep",
