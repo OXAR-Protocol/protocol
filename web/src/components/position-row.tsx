@@ -12,7 +12,7 @@ import { Sparkline } from "@/components/sparkline";
 import { PickButton } from "@/components/pick-button";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { isPriceExposure } from "@/lib/yield/assets";
-import { RISK_TONE, fromBaseUnits, unitLabelOf } from "@/lib/yield";
+import { RISK_TONE, fromBaseUnits, positionTitle, unitLabelOf } from "@/lib/yield";
 import { useT } from "@/lib/i18n";
 
 interface Props {
@@ -38,6 +38,10 @@ interface Props {
 export function PositionRow({ view, onOpen, change24h, chart, earned, picked, onTogglePick }: Props) {
   const { t } = useT();
   const value = fromBaseUnits(view.underlyingBalance, view.decimals);
+  const title = positionTitle(view);
+  // The full name, unless it would just say the title twice.
+  const full = view.name.replace(/\s*\([^)]*\)$/, "");
+  const subtitle = full === title ? null : full;
 
   return (
     <button
@@ -51,8 +55,10 @@ export function PositionRow({ view, onOpen, change24h, chart, earned, picked, on
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <AssetIcon src={assetLogoSrc(view.id)} label={assetIconLabel(view.id, view.assetSymbol)} size={36} />
           <div className="min-w-0">
-            <p className="text-base text-black">{unitLabelOf(view)}</p>
-            <p className="mt-0.5 truncate text-xs text-black/45">{view.name.replace(/\s*\([^)]*\)$/, "")}</p>
+            {/* Truncate, don't spill: without this the title ran out of its squeezed
+                column and under the pick pill on a phone. */}
+            <p className="truncate text-base text-black">{title}</p>
+            {subtitle && <p className="mt-0.5 truncate text-xs text-black/45">{subtitle}</p>}
             {/* How much you own, not only what it's worth. */}
             {isPriceExposure(view.id) && view.heldDecimals !== undefined && view.shares > BigInt(0) && (
               <p className="mt-1 text-[11px] tabular-nums text-[#3c05c7]/80">
@@ -76,7 +82,12 @@ export function PositionRow({ view, onOpen, change24h, chart, earned, picked, on
         {/* Collecting a set, not ticking a table — so it reads as an action on the
             right, where the other actions are. */}
         {onTogglePick && (
-          <PickButton picked={picked} onToggle={onTogglePick} label={t("bulk.select", { name: view.name })} />
+          <PickButton
+            picked={picked}
+            onToggle={onTogglePick}
+            label={t("bulk.select", { name: view.name })}
+            compact
+          />
         )}
 
         <div className="shrink-0 text-right">

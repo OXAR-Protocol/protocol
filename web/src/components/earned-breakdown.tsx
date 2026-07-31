@@ -2,7 +2,9 @@
 
 import { formatSignedUsd, isDustUsd, type RangePerformance } from "@oxar/sdk";
 
-import { isCashMint, nameOfMint } from "@/lib/yield/mint-names";
+import { AssetIcon } from "@/components/asset-icon";
+import { assetIconLabel, assetLogoSrc } from "@/lib/yield/asset-logo";
+import { isCashMint, nameOfMint, sourceIdOfMint } from "@/lib/yield/mint-names";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -27,7 +29,7 @@ export function EarnedBreakdown({ performance }: { performance: RangePerformance
       {rows.length > 0 && (
         <div className="mt-2 space-y-0 border-t border-black/[0.06] pt-2">
           {rows.map((r) => (
-            <Line key={r.label} label={r.label} amount={r.amount} />
+            <Line key={r.label} label={r.label} amount={r.amount} sourceId={r.sourceId} />
           ))}
         </div>
       )}
@@ -35,10 +37,30 @@ export function EarnedBreakdown({ performance }: { performance: RangePerformance
   );
 }
 
-function Line({ label, amount }: { label: string; amount: number }) {
+function Line({
+  label,
+  amount,
+  sourceId,
+}: {
+  label: string;
+  amount: number;
+  /** Present for a real holding — it then wears the same mark as its row in the
+   *  positions list, which is what makes a list of names scannable. */
+  sourceId?: string | null;
+}) {
   return (
-    <div className="flex items-baseline justify-between gap-3 py-0.5">
-      <span className="truncate text-[11px] lowercase text-black/45">{label}</span>
+    <div className="flex items-center justify-between gap-3 py-0.5">
+      <span className="flex min-w-0 items-center gap-1.5">
+        {sourceId && (
+          <AssetIcon
+            src={assetLogoSrc(sourceId)}
+            label={assetIconLabel(sourceId, label)}
+            size={14}
+            className="shrink-0"
+          />
+        )}
+        <span className="truncate text-[11px] lowercase text-black/45">{label}</span>
+      </span>
       <span
         className={`shrink-0 text-[11px] tabular-nums ${amount < 0 ? "text-red-600" : "text-black/70"}`}
       >
@@ -46,6 +68,12 @@ function Line({ label, amount }: { label: string; amount: number }) {
       </span>
     </div>
   );
+}
+
+interface Row {
+  label: string;
+  amount: number;
+  sourceId: string | null;
 }
 
 /**
@@ -60,23 +88,31 @@ function byHolding(
   perMint: Record<string, number>,
   cashLabel: string,
   otherLabel: string,
-): { label: string; amount: number }[] {
-  const named = new Map<string, number>();
+): Row[] {
+  const named = new Map<string, { amount: number; sourceId: string | null }>();
   let unnamed = 0;
 
   for (const [mint, amount] of Object.entries(perMint)) {
-    const label = isCashMint(mint) ? cashLabel : nameOfMint(mint);
-    if (label === null) unnamed += amount;
-    else named.set(label, (named.get(label) ?? 0) + amount);
+    const cash = isCashMint(mint);
+    const label = cash ? cashLabel : nameOfMint(mint);
+    if (label === null) {
+      unnamed += amount;
+      continue;
+    }
+    const at = named.get(label);
+    named.set(label, {
+      amount: (at?.amount ?? 0) + amount,
+      sourceId: at?.sourceId ?? (cash ? null : sourceIdOfMint(mint)),
+    });
   }
 
-  const rows: { label: string; amount: number }[] = [];
-  for (const [label, amount] of named) {
+  const rows: Row[] = [];
+  for (const [label, { amount, sourceId }] of named) {
     if (isDustUsd(Math.abs(amount))) unnamed += amount;
-    else rows.push({ label, amount });
+    else rows.push({ label, amount, sourceId });
   }
   rows.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
 
-  if (!isDustUsd(Math.abs(unnamed))) rows.push({ label: otherLabel, amount: unnamed });
+  if (!isDustUsd(Math.abs(unnamed))) rows.push({ label: otherLabel, amount: unnamed, sourceId: null });
   return rows;
 }

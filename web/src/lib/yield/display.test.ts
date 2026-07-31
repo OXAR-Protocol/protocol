@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { unitLabelOf } from "./display";
+import { positionTitle, unitLabelOf } from "./display";
 
 describe("unitLabelOf", () => {
   // The bug: a tokenised stock settles in USDC, so `assetSymbol` is "USDC" — using
@@ -20,5 +20,32 @@ describe("unitLabelOf", () => {
     // Worth knowing rather than assuming: a name with an earlier aside would give
     // that aside, not the ticker. No such name exists today.
     expect(unitLabelOf({ name: "Thing (note) (TICKx)", assetSymbol: "USDC" })).toBe("note");
+  });
+});
+
+/**
+ * A row that can't say which holding it is isn't a row. Two sources — Jupiter Lend
+ * USDC and OnRe ONyc — both titled "USDC", so a position funded days earlier looked
+ * to its owner like it had never arrived.
+ */
+describe("positionTitle", () => {
+  it("uses the ticker when the name carries one", () => {
+    expect(positionTitle({ name: "Apple (AAPLx)", assetSymbol: "USDC" })).toBe("AAPLx");
+  });
+
+  it("falls back to the source's own name, never to what it was bought with", () => {
+    expect(positionTitle({ name: "OnRe ONyc", assetSymbol: "USDC" })).toBe("OnRe ONyc");
+    expect(positionTitle({ name: "Jupiter Lend USDC", assetSymbol: "USDC" })).toBe(
+      "Jupiter Lend USDC",
+    );
+  });
+
+  it("tells two sources apart even when both are paid for in the same currency", () => {
+    const paidInUsdc = [
+      { name: "OnRe ONyc", assetSymbol: "USDC" },
+      { name: "Maple syrupUSDC", assetSymbol: "USDC" },
+      { name: "Jupiter Lend USDC", assetSymbol: "USDC" },
+    ];
+    expect(new Set(paidInUsdc.map(positionTitle)).size).toBe(3);
   });
 });

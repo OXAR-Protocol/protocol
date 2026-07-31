@@ -57,6 +57,7 @@ export function PositionCard({ view, onOpen, change24h, earned, picked, onToggle
           picked={!!picked}
           onToggle={onTogglePick}
           label={view.name}
+          compact
           className="absolute right-3 top-3 z-10"
         />
       )}

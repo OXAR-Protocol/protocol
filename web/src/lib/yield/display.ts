@@ -33,3 +33,16 @@ export const CHAIN_LABEL: Record<string, string> = {
 export function unitLabelOf(v: { name: string; assetSymbol: string }): string {
   return v.name.match(/\(([^)]+)\)/)?.[1] ?? v.assetSymbol;
 }
+
+/**
+ * What to call a held position at the top of its row.
+ *
+ * `unitLabelOf` answers "what are these units called", and for a source with no
+ * ticker it falls back to `assetSymbol` — which is the currency you PAY WITH, "USDC"
+ * on every one of them. Two different holdings then both read "USDC", which is how a
+ * position someone had funded days earlier looked to them like it wasn't there at all.
+ * Falling back to the source's own name costs nothing and says which is which.
+ */
+export function positionTitle(v: { name: string; assetSymbol: string }): string {
+  return v.name.match(/\(([^)]+)\)/)?.[1] ?? v.name;
+}
