@@ -110,7 +110,8 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
           </div>
         ) : (
           <>
-            <p className="text-[10px] lowercase tracking-wide text-black/40 mb-1.5">{t("send.youSend")}</p>
+            {/* What is leaving. The picker already shows the icon, the symbol and the
+                balance, so a label above it would only repeat itself. */}
             {loading ? (
               <p className="text-xs text-black/40">{t("send.loading")}</p>
             ) : assets.length === 0 ? (
@@ -159,35 +160,51 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
               </p>
             )}
 
-            <div className="flex items-center justify-between mt-4 mb-1.5">
-              <p className="text-[10px] lowercase tracking-wide text-black/40">
-                {t("send.amount")}{source ? ` (${source.symbol})` : ""}
-              </p>
+            {/* How much — the one number in here worth looking at, so it gets the
+                size. `max` sits inside the row rather than floating above it as a
+                link, and the balance sits under it as one quiet line instead of a
+                label of its own. */}
+            <p className="mt-5 text-[10px] lowercase tracking-wide text-black/40">{t("send.amount")}</p>
+            <div className="mt-1 flex items-baseline gap-3 border-b border-black/15 py-1 focus-within:border-black/40">
+              <input
+                type="number"
+                min={0}
+                step="any"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                className="min-w-0 flex-1 bg-transparent text-[2rem] font-light leading-none tracking-[-0.02em] text-black tabular-nums outline-none"
+              />
               {source && (
-                <button
-                  onClick={() => setAmount((Number(maxSendable(source)) / 10 ** source.decimals).toString())}
-                  className="text-[10px] lowercase tracking-wide text-[#3c05c7]/80 hover:text-[#3c05c7]"
-                >
-                  {t("rail.max")}
-                </button>
+                <>
+                  <span className="shrink-0 text-sm text-black/45">{source.symbol}</span>
+                  <button
+                    onClick={() => setAmount((Number(maxSendable(source)) / 10 ** source.decimals).toString())}
+                    className="shrink-0 rounded-full border border-black/15 px-2.5 py-1 text-[10px] lowercase tracking-wide text-black/55 transition hover:border-black/40 hover:text-black"
+                  >
+                    {t("rail.max")}
+                  </button>
+                </>
               )}
             </div>
-            <input
-              type="number"
-              min={0}
-              step="any"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              className="w-full bg-transparent border-b border-black/15 focus:border-black/40 outline-none text-xl text-black py-1"
-            />
+            {source && (
+              <p className="mt-1.5 text-[11px] tabular-nums text-black/40">
+                {t("rail.available")} {(Number(maxSendable(source)) / 10 ** source.decimals).toLocaleString(undefined, { maximumFractionDigits: 6 })} {source.symbol}
+              </p>
+            )}
 
+            {/* The reason it can't go yet belongs beside the form, not inside the
+                button: a control that names the action and then names the problem
+                instead is doing two jobs, and the action is the one it forgets. */}
+            {!busy && validation && (
+              <p className="mt-4 text-[11px] leading-snug text-black/45">{validation}</p>
+            )}
             <button
               onClick={handleSend}
               disabled={busy || !!validation}
-              className="mt-5 w-full px-4 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
+              className="mt-3 w-full px-4 py-3.5 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-25 transition inline-flex items-center justify-center gap-2"
             >
-              {busy ? <><Loader2 className="animate-spin" size={14} /> {t("send.sending")}</> : validation ?? t("send.action", { asset: destAsset.symbol, chain: destChain.label })}
+              {busy ? <><Loader2 className="animate-spin" size={14} /> {t("send.sending")}</> : t("send.action", { asset: destAsset.symbol, chain: destChain.label })}
             </button>
 
             {sendError && <p className="mt-3 text-xs text-red-400 text-center">{sendError}</p>}
