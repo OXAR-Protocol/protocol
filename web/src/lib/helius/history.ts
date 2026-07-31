@@ -29,11 +29,22 @@ export function heliusApiKey(): string | null {
   return m?.[1] ?? process.env.HELIUS_API_KEY ?? null;
 }
 
-/** Page through `owner`'s enhanced transactions (newest first), bounded by `maxPages`. */
+/**
+ * Page through `owner`'s enhanced transactions, newest first.
+ *
+ * `maxPages` is a ceiling, not a target. Pass `since` (unix seconds) and paging stops
+ * as soon as it has reached back past that moment — which is what the caller actually
+ * wants: enough history to cover the window being asked about. A fixed page count is
+ * wrong in both directions at once. It fetches 25 pages to draw a 7-day chart for a
+ * wallet whose whole life fits in one, and it stops at 2500 transactions for the
+ * wallet that needed 4000 to reach the start of the year — the first is slow, the
+ * second quietly incomplete.
+ */
 export async function fetchEnhancedHistory(
   owner: string,
   key: string,
   maxPages = 8,
+  since?: number,
 ): Promise<EnhancedTx[]> {
   const out: EnhancedTx[] = [];
   let before = "";
@@ -46,9 +57,13 @@ export async function fetchEnhancedHistory(
     const page = (await res.json()) as EnhancedTx[];
     if (!Array.isArray(page) || page.length === 0) break;
     out.push(...page);
-    const last = page[page.length - 1]?.signature;
-    if (!last || page.length < 100) break;
-    before = last;
+    const oldest = page[page.length - 1];
+    if (!oldest?.signature || page.length < 100) break;
+    // Reached back past the window — everything older belongs to a question nobody
+    // asked. A page whose last entry carries no timestamp is not evidence of that, so
+    // it keeps paging: too much history is harmless, too little is a wrong number.
+    if (since !== undefined && oldest.timestamp !== undefined && oldest.timestamp < since) break;
+    before = oldest.signature;
   }
   return out;
 }

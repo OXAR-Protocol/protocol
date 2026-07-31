@@ -15,7 +15,7 @@ exports.SECONDS_PER_DAY = void 0;
 exports.utcDayStart = utcDayStart;
 exports.isSameUtcDay = isSameUtcDay;
 exports.groupByDay = groupByDay;
-exports.summarizeDays = summarizeDays;
+exports.countActivity = countActivity;
 exports.activeDays = activeDays;
 exports.takeByEventCount = takeByEventCount;
 exports.SECONDS_PER_DAY = 86400;
@@ -33,7 +33,7 @@ function isSameUtcDay(a, b) {
 /**
  * Group events into days and attach each day's portfolio value.
  *
- * `points` is the daily value series (`PortfolioPoint`); a day with no point keeps a
+ * `points` is the daily value series (`PerformanceDay`); a day with no point keeps a
  * null value rather than borrowing a neighbour's, because a made-up number here would
  * read as a real one. Days are returned NEWEST FIRST — the order a history is read in.
  *
@@ -45,13 +45,16 @@ function groupByDay(events, points = []) {
     const dayOf = (day) => {
         let d = byDay.get(day);
         if (!d) {
-            d = { day, usd: null, changeUsd: null, inUsd: 0, outUsd: 0, events: [] };
+            d = { day, usd: null, earnedUsd: null, inUsd: 0, outUsd: 0, events: [] };
             byDay.set(day, d);
         }
         return d;
     };
     for (const p of points) {
-        dayOf(utcDayStart(p.t)).usd = p.usd;
+        const d = dayOf(utcDayStart(p.t));
+        d.usd = p.usd;
+        if (p.earnedUsd !== undefined)
+            d.earnedUsd = p.earnedUsd;
     }
     for (const e of events) {
         const d = dayOf(utcDayStart(e.timestamp));
@@ -64,53 +67,29 @@ function groupByDay(events, points = []) {
                 d.outUsd += usd;
         }
     }
-    // Oldest first so each day can look back at the last one that had a value.
     const ascending = [...byDay.values()].sort((a, b) => a.day - b.day);
-    let previous = null;
-    for (const d of ascending) {
-        if (d.usd !== null) {
-            if (previous !== null)
-                d.changeUsd = d.usd - previous;
-            previous = d.usd;
-        }
+    for (const d of ascending)
         d.events.sort((a, b) => b.timestamp - a.timestamp);
-    }
     return ascending.reverse();
 }
-/**
- * Summarise the days a view is showing. `days` is expected newest-first, as
- * `groupByDay` returns it.
- *
- * The change is measured between the first and last days that actually HAVE a value,
- * not the first and last days in the list — otherwise a range that opens on a day the
- * price series doesn't cover reports no change at all.
- */
-function summarizeDays(days) {
-    const withValue = [...days].reverse().filter((d) => d.usd !== null);
-    const startUsd = withValue.length ? withValue[0].usd : null;
-    const endUsd = withValue.length ? withValue[withValue.length - 1].usd : null;
-    const changeUsd = startUsd !== null && endUsd !== null ? endUsd - startUsd : null;
-    let inUsd = 0;
-    let outUsd = 0;
+function countActivity(days) {
     let trades = 0;
     let activeDays = 0;
     for (const d of days) {
-        inUsd += d.inUsd;
-        outUsd += d.outUsd;
         trades += d.events.length;
         if (d.events.length)
             activeDays += 1;
     }
-    return { startUsd, endUsd, changeUsd, inUsd, outUsd, trades, activeDays };
+    return { trades, activeDays };
 }
 /**
  * The days worth listing. A day with a value but nothing done to it says only what
  * the chart above already draws, and there is one of those for every quiet day —
  * pages of "$0.00" rows burying the handful that record an actual decision.
  *
- * Kept separate from `groupByDay` on purpose: the change-against-the-previous-day
- * figure and the range summary must be computed over EVERY day, or a quiet stretch
- * would vanish from the arithmetic as well as from the screen.
+ * Kept separate from `groupByDay` on purpose: filtering is a VIEW concern. The
+ * arithmetic runs over every day, or a quiet stretch would vanish from the numbers
+ * as well as from the screen.
  */
 function activeDays(days) {
     return days.filter((d) => d.events.length > 0);

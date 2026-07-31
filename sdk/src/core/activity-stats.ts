@@ -27,9 +27,12 @@ export interface DayActivity<T extends DatedFlow = DatedFlow> {
   day: number;
   /** Portfolio value at that day's close; null when the series doesn't cover it. */
   usd: number | null;
-  /** Against the previous day that HAS a value — not simply the day before, or a
-   *  gap in the series would read as a crash to zero and back. */
-  changeUsd: number | null;
+  /** What that day EARNED — the market on what was held, plus what any exchange cost
+   *  to execute. Comes straight from the value series (`PerformanceDay`), never from
+   *  the day-on-day value move: on a day money was added, those two differ by the
+   *  deposit, and only one of them is what the day was worth to you. Null when the
+   *  series doesn't cover the day. */
+  earnedUsd: number | null;
   /** Money put in / taken out that day, from the events themselves. */
   inUsd: number;
   outUsd: number;
@@ -54,7 +57,7 @@ export function isSameUtcDay(a: number, b: number): boolean {
 /**
  * Group events into days and attach each day's portfolio value.
  *
- * `points` is the daily value series (`PortfolioPoint`); a day with no point keeps a
+ * `points` is the daily value series (`PerformanceDay`); a day with no point keeps a
  * null value rather than borrowing a neighbour's, because a made-up number here would
  * read as a real one. Days are returned NEWEST FIRST — the order a history is read in.
  *
@@ -63,21 +66,23 @@ export function isSameUtcDay(a: number, b: number): boolean {
  */
 export function groupByDay<T extends DatedFlow>(
   events: readonly T[],
-  points: readonly { t: number; usd: number }[] = [],
+  points: readonly { t: number; usd: number; earnedUsd?: number }[] = [],
 ): DayActivity<T>[] {
   const byDay = new Map<number, DayActivity<T>>();
 
   const dayOf = (day: number): DayActivity<T> => {
     let d = byDay.get(day);
     if (!d) {
-      d = { day, usd: null, changeUsd: null, inUsd: 0, outUsd: 0, events: [] };
+      d = { day, usd: null, earnedUsd: null, inUsd: 0, outUsd: 0, events: [] };
       byDay.set(day, d);
     }
     return d;
   };
 
   for (const p of points) {
-    dayOf(utcDayStart(p.t)).usd = p.usd;
+    const d = dayOf(utcDayStart(p.t));
+    d.usd = p.usd;
+    if (p.earnedUsd !== undefined) d.earnedUsd = p.earnedUsd;
   }
 
   for (const e of events) {
@@ -90,70 +95,30 @@ export function groupByDay<T extends DatedFlow>(
     }
   }
 
-  // Oldest first so each day can look back at the last one that had a value.
   const ascending = [...byDay.values()].sort((a, b) => a.day - b.day);
-  let previous: number | null = null;
-  for (const d of ascending) {
-    if (d.usd !== null) {
-      if (previous !== null) d.changeUsd = d.usd - previous;
-      previous = d.usd;
-    }
-    d.events.sort((a, b) => b.timestamp - a.timestamp);
-  }
-
+  for (const d of ascending) d.events.sort((a, b) => b.timestamp - a.timestamp);
   return ascending.reverse();
 }
 
-/** Headline numbers for a stretch of days. */
-export interface RangeStats {
-  /** Value at the start / end of the range; null when the series doesn't reach. */
-  startUsd: number | null;
-  endUsd: number | null;
-  /** End minus start. Null when either end is missing.
-   *
-   *  Deliberately NOT offered as a percentage. On a portfolio someone is actively
-   *  funding, (end − start) / start measures the deposits, not the performance: a
-   *  wallet that went from $2 to $85 by moving its own cash in reads as "+4181%".
-   *  The percentage is only meaningful once it excludes flows — i.e. once it's a
-   *  real return — and the flow figures below can't yet support one (a trade
-   *  settled in anything but USDC prices as null and is dropped). Until then no
-   *  number is better than a flattering one. A single asset's PRICE chart is a
-   *  different thing and does show a percentage — see `asset-chart.tsx`. */
-  changeUsd: number | null;
-  inUsd: number;
-  outUsd: number;
+/** How busy a stretch was. Every figure that is MONEY now comes from the value
+ *  series (`summarizePerformance`), which knows what each day earned and what
+ *  actually crossed the wallet's edge; the event feed is left doing the one thing it
+ *  is the better source for — counting what the person did. Two summaries of the same
+ *  range from two datasets is how a card ends up disagreeing with itself. */
+export interface ActivityCount {
   trades: number;
   /** Days that had at least one event. */
   activeDays: number;
 }
 
-/**
- * Summarise the days a view is showing. `days` is expected newest-first, as
- * `groupByDay` returns it.
- *
- * The change is measured between the first and last days that actually HAVE a value,
- * not the first and last days in the list — otherwise a range that opens on a day the
- * price series doesn't cover reports no change at all.
- */
-export function summarizeDays(days: readonly DayActivity[]): RangeStats {
-  const withValue = [...days].reverse().filter((d) => d.usd !== null);
-  const startUsd = withValue.length ? withValue[0]!.usd : null;
-  const endUsd = withValue.length ? withValue[withValue.length - 1]!.usd : null;
-
-  const changeUsd = startUsd !== null && endUsd !== null ? endUsd - startUsd : null;
-
-  let inUsd = 0;
-  let outUsd = 0;
+export function countActivity(days: readonly DayActivity[]): ActivityCount {
   let trades = 0;
   let activeDays = 0;
   for (const d of days) {
-    inUsd += d.inUsd;
-    outUsd += d.outUsd;
     trades += d.events.length;
     if (d.events.length) activeDays += 1;
   }
-
-  return { startUsd, endUsd, changeUsd, inUsd, outUsd, trades, activeDays };
+  return { trades, activeDays };
 }
 
 /**
@@ -161,9 +126,9 @@ export function summarizeDays(days: readonly DayActivity[]): RangeStats {
  * the chart above already draws, and there is one of those for every quiet day —
  * pages of "$0.00" rows burying the handful that record an actual decision.
  *
- * Kept separate from `groupByDay` on purpose: the change-against-the-previous-day
- * figure and the range summary must be computed over EVERY day, or a quiet stretch
- * would vanish from the arithmetic as well as from the screen.
+ * Kept separate from `groupByDay` on purpose: filtering is a VIEW concern. The
+ * arithmetic runs over every day, or a quiet stretch would vanish from the numbers
+ * as well as from the screen.
  */
 export function activeDays<T extends DatedFlow>(days: readonly DayActivity<T>[]): DayActivity<T>[] {
   return days.filter((d) => d.events.length > 0);

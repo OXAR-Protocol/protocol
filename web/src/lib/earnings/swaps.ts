@@ -8,8 +8,8 @@
  *   netInvested = Σ(USDC spent buying heldMint) − Σ(USDC received selling heldMint)
  *
  * We read it straight from the chain (the wallet's parsed transfers), so it's true
- * to the cent and survives device changes — no self-tracking. `costMint` is assumed
- * to be ~$1 (USDC), so its UI amount IS the dollar cost.
+ * to the cent and survives device changes — no self-tracking. Every cost mint is a
+ * dollar stablecoin (~$1), so its UI amount IS the dollar cost.
  *
  * Sending the asset OUT with nothing coming back (a plain transfer to another wallet)
  * is not a sale: it has no proceeds to subtract, but the units are gone, so the cost
@@ -37,14 +37,19 @@ export interface HeliusTx {
 /**
  * Net USD the `owner` has put into acquiring `heldMint`, derived from swap legs.
  * Counts only transactions where the owner's `heldMint` balance actually moved
- * (i.e. a real acquire/dispose), attributing the same-tx `costMint` delta as the
+ * (i.e. a real acquire/dispose), attributing the same-tx cash delta as the
  * cost/proceeds. Receiving the held asset for free (no cost leg) adds 0 — honest.
+ *
+ * `costMints` is the whole set of dollars the app deals in, not one of them. Reading
+ * a single settlement token meant a purchase paid in USDT looked free: no cost leg,
+ * so nothing was invested, so the entire position read as profit. Every mint in the
+ * set is a dollar stablecoin, so its UI amount IS its dollar amount.
  */
 export function netInvestedFromSwaps(
   txs: HeliusTx[],
   owner: string,
   heldMint: string,
-  costMint: string,
+  costMints: ReadonlySet<string>,
 ): number {
   // Oldest first: a disposal can only be attributed against units acquired before it.
   // Sort is stable, so txs without a timestamp keep their given order.
@@ -62,7 +67,7 @@ export function netInvestedFromSwaps(
         t.toUserAccount === owner ? 1 : t.fromUserAccount === owner ? -1 : 0;
       if (sign === 0) continue;
       if (t.mint === heldMint) heldDelta += sign * t.tokenAmount;
-      else if (t.mint === costMint) costDelta += sign * t.tokenAmount;
+      else if (costMints.has(t.mint)) costDelta += sign * t.tokenAmount;
     }
     // Only when the held asset moved for the owner is this an acquire/dispose.
     if (heldDelta === 0) continue;

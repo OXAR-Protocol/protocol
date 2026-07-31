@@ -4,7 +4,7 @@ import {
   groupByDay,
   activeDays,
   takeByEventCount,
-  summarizeDays,
+  countActivity,
   utcDayStart,
   isSameUtcDay,
   formatDay,
@@ -61,33 +61,35 @@ describe("groupByDay", () => {
     expect(days[0]!.events).toHaveLength(2);
   });
 
-  it("attaches the value series and measures the day-on-day change", () => {
+  // What a day earned is carried BY the series, not derived from it here: a day that
+  // took in $100 and earned nothing moved its total by $100, and only one of those
+  // two numbers is worth showing a person.
+  it("attaches the value series and what each day earned", () => {
     const days = groupByDay(
       [],
       [
-        { t: at(DAY, 23), usd: 100 },
-        { t: at(DAY + SECONDS_PER_DAY, 23), usd: 130 },
+        { t: at(DAY, 23), usd: 100, earnedUsd: 0 },
+        { t: at(DAY + SECONDS_PER_DAY, 23), usd: 130, earnedUsd: 4 },
       ],
     );
     expect(days[0]!.usd).toBe(130);
-    expect(days[0]!.changeUsd).toBe(30);
-    // The first day has nothing to compare against — not a 100-dollar gain.
-    expect(days[1]!.changeUsd).toBeNull();
+    expect(days[0]!.earnedUsd).toBe(4);
+    // Rose $30 on the day, earned $4 of it — the rest was money added.
+    expect(days[1]!.earnedUsd).toBe(0);
   });
 
-  // A hole in the price series must not read as a crash to zero and a recovery.
-  it("compares against the last day that HAD a value, not the calendar day before", () => {
+  it("leaves a day the series doesn't reach saying nothing at all", () => {
     const days = groupByDay(
       [ev(at(DAY + SECONDS_PER_DAY), "buy", 1)],
       [
-        { t: at(DAY, 23), usd: 100 },
-        { t: at(DAY + 2 * SECONDS_PER_DAY, 23), usd: 120 },
+        { t: at(DAY, 23), usd: 100, earnedUsd: 1 },
+        { t: at(DAY + 2 * SECONDS_PER_DAY, 23), usd: 120, earnedUsd: 2 },
       ],
     );
     const gap = days.find((d) => d.day === DAY + SECONDS_PER_DAY)!;
     expect(gap.usd).toBeNull();
-    expect(gap.changeUsd).toBeNull();
-    expect(days[0]!.changeUsd).toBe(20);
+    expect(gap.earnedUsd).toBeNull();
+    expect(days[0]!.earnedUsd).toBe(2);
   });
 
   it("has no rows at all when there is nothing to say", () => {
@@ -95,47 +97,29 @@ describe("groupByDay", () => {
   });
 });
 
-describe("summarizeDays", () => {
+describe("countActivity", () => {
   const days = groupByDay(
     [ev(at(DAY, 9), "buy", 40), ev(at(DAY + SECONDS_PER_DAY, 9), "sell", 10)],
     [
-      { t: at(DAY, 23), usd: 200 },
-      { t: at(DAY + SECONDS_PER_DAY, 23), usd: 250 },
+      { t: at(DAY, 23), usd: 200, earnedUsd: 1 },
+      { t: at(DAY + SECONDS_PER_DAY, 23), usd: 250, earnedUsd: 2 },
     ],
   );
 
-  it("measures the range end to end", () => {
-    const s = summarizeDays(days);
-    expect(s.startUsd).toBe(200);
-    expect(s.endUsd).toBe(250);
-    expect(s.changeUsd).toBe(50);
+  it("counts what was done and the days it was done on", () => {
+    expect(countActivity(days)).toEqual({ trades: 2, activeDays: 2 });
   });
 
-  it("counts the flows and the days they happened on", () => {
-    const s = summarizeDays(days);
-    expect(s.inUsd).toBe(40);
-    expect(s.outUsd).toBe(10);
-    expect(s.trades).toBe(2);
-    expect(s.activeDays).toBe(2);
+  // The feed is the right source for "how many times did I trade" and the wrong one
+  // for "how much is that in dollars" — it prices an event by its USDC leg, so a
+  // USDT-settled trade counts here and would have priced as nothing there.
+  it("counts a trade it could not have priced", () => {
+    const unpriced = groupByDay([{ timestamp: at(DAY, 9), kind: "buy", usd: null }], []);
+    expect(countActivity(unpriced).trades).toBe(1);
   });
 
-  // Starting from nothing is the ordinary case for a new wallet, and it used to be
-  // the one that produced a percentage of the form "divide by almost zero".
-  it("measures a range that starts from nothing in dollars, and offers no ratio", () => {
-    const fromZero = groupByDay([], [
-      { t: at(DAY, 23), usd: 0 },
-      { t: at(DAY + SECONDS_PER_DAY, 23), usd: 50 },
-    ]);
-    const s = summarizeDays(fromZero);
-    expect(s.changeUsd).toBe(50);
-    expect(s).not.toHaveProperty("changePct");
-  });
-
-  it("reports nothing rather than zero when there are no values", () => {
-    const s = summarizeDays(groupByDay([ev(at(DAY), "buy", 5)], []));
-    expect(s.startUsd).toBeNull();
-    expect(s.changeUsd).toBeNull();
-    expect(s.trades).toBe(1);
+  it("counts nothing out of nothing", () => {
+    expect(countActivity([])).toEqual({ trades: 0, activeDays: 0 });
   });
 });
 
@@ -161,18 +145,18 @@ describe("activeDays", () => {
     expect(activeDays(days).map((d) => d.day)).toEqual([DAY]);
   });
 
-  // The filtering must not reach the arithmetic: a quiet stretch still moved the
-  // value, and the range summary has to account for it.
-  it("does not change what the range summary measures", () => {
+  // Filtering is a VIEW concern and must not reach the arithmetic: a quiet stretch
+  // still had trades on the days around it.
+  it("does not change what was counted", () => {
     const days = groupByDay(
       [ev(at(DAY, 9), "buy", 10)],
       [
-        { t: at(DAY, 23), usd: 100 },
-        { t: at(DAY + 2 * SECONDS_PER_DAY, 23), usd: 130 },
+        { t: at(DAY, 23), usd: 100, earnedUsd: 0 },
+        { t: at(DAY + 2 * SECONDS_PER_DAY, 23), usd: 130, earnedUsd: 5 },
       ],
     );
-    expect(summarizeDays(days).changeUsd).toBe(30);
-    expect(summarizeDays(activeDays(days)).changeUsd).not.toBe(30);
+    expect(days).toHaveLength(2);
+    expect(countActivity(days).trades).toBe(1);
   });
 });
 
