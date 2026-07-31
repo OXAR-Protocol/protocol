@@ -185,6 +185,7 @@ export const en = {
   "bulk.converting": "converting your money…",
   "alloc.addWithCard": "add money with a card",
   "alloc.switchTo": "put it in {name} instead",
+  "alloc.switchUnits": "switch between dollars and units",
   "bulk.failed": "didn't go through: {ids}",
   "bulk.sellSelected": "sell all",
   "bulk.clear": "clear",
