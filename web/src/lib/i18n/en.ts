@@ -282,6 +282,7 @@ export const en = {
   "history.range.365": "1 year",
   // Earned = what the money made, flows excluded. The percentage beside it is
   // time-weighted, so a deposit inside the range cannot inflate it.
+  "position.sinceBuy": "since you bought",
   "history.earned": "earned",
   // The two halves of "earned", and the per-holding breakdown behind the chevron. A
   // bare negative total can't say whether one holding fell or a trade cost money.

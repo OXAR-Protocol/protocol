@@ -22,6 +22,9 @@ interface Props {
   change24h?: number;
   /** Batched price series for the inline sparkline. */
   chart?: number[];
+  /** Profit since this was bought (on-chain cost basis). Absent when the engine
+   *  can't attribute the position — nothing shown beats a confident zero. */
+  earned?: number;
   picked: boolean;
   /** Absent when picking is off — the row then renders no pick control at all. */
   onTogglePick?: () => void;
@@ -32,7 +35,7 @@ interface Props {
  * middle, value on the right — the same shape as the browse rows on /market, so a
  * thing you own and a thing you could own don't look like different species.
  */
-export function PositionRow({ view, onOpen, change24h, chart, picked, onTogglePick }: Props) {
+export function PositionRow({ view, onOpen, change24h, chart, earned, picked, onTogglePick }: Props) {
   const { t } = useT();
   const value = fromBaseUnits(view.underlyingBalance, view.decimals);
 
@@ -86,6 +89,13 @@ export function PositionRow({ view, onOpen, change24h, chart, picked, onTogglePi
           ) : (
             <p className={`text-[11px] lowercase tracking-wide ${RISK_TONE[view.riskLevel] ?? "text-black/45"}`}>
               {(view.apy * 100).toFixed(2)}% APY
+            </p>
+          )}
+          {/* Which of your holdings is actually down. The card above says what the
+              whole portfolio did; only a per-position figure answers "which one". */}
+          {typeof earned === "number" && Math.abs(earned) >= 0.005 && (
+            <p className={`text-[11px] tabular-nums ${earned >= 0 ? "text-black/40" : "text-red-600"}`}>
+              {earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)} {t("position.sinceBuy")}
             </p>
           )}
         </div>

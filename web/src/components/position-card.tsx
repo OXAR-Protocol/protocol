@@ -26,11 +26,13 @@ interface Props {
   onTogglePick?: () => void;
   /** 24h price change (%) for price-exposure assets — shown instead of APY. */
   change24h?: number;
+  /** Profit since this was bought (on-chain cost basis), when we can attribute it. */
+  earned?: number;
 }
 
 /** Grid ("квадратик") card for one source — APY trend for yield, price trend
  *  + 24h change for price-exposure assets (stocks/gold). */
-export function PositionCard({ view, onOpen, change24h, picked, onTogglePick }: Props) {
+export function PositionCard({ view, onOpen, change24h, earned, picked, onTogglePick }: Props) {
   const { t } = useT();
   const value = fromBaseUnits(view.underlyingBalance, view.decimals);
   const apyHistory = useApyHistory(view.defiLlamaPoolId);
@@ -92,6 +94,13 @@ export function PositionCard({ view, onOpen, change24h, picked, onTogglePick }: 
           ) : (
             <p className="text-[10px] lowercase tracking-wide text-black/40">
               {value > 0 ? "your position" : "tap to deposit"}
+            </p>
+          )}
+          {/* Which of your holdings is actually down — the same line the list rows
+              carry, so switching layout doesn't lose the answer. */}
+          {typeof earned === "number" && Math.abs(earned) >= 0.005 && (
+            <p className={`text-[11px] tabular-nums ${earned >= 0 ? "text-black/40" : "text-red-600"}`}>
+              {earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)} {t("position.sinceBuy")}
             </p>
           )}
         </div>

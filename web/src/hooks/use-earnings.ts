@@ -123,3 +123,16 @@ export function useEarnings() {
     loading,
   };
 }
+
+/**
+ * Per-source profit since it was bought, keyed by source id — what a list needs to
+ * show which holding is in the red. A source the cost-basis engine can't cover is
+ * simply absent rather than reported as zero.
+ */
+export function useEarnedById(): Record<string, number> {
+  const { sources } = useEarnings();
+  return useMemo(
+    () => Object.fromEntries(sources.map((s) => [s.id, s.earned])),
+    [sources],
+  );
+}

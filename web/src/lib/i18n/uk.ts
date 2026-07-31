@@ -261,6 +261,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "history.range.30": "30 днів",
   "history.range.90": "90 днів",
   "history.range.365": "1 рік",
+  "position.sinceBuy": "з покупки",
   "history.earned": "зароблено",
   "history.market": "ринок",
   "history.tradingCost": "вартість обміну",
