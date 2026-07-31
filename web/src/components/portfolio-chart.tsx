@@ -25,6 +25,8 @@ interface Props {
   points: PerformanceDay[];
   /** Earned, return and flows — from the value series itself. */
   performance: RangePerformance | null;
+  /** Still held today; anything else in the breakdown was closed inside the range. */
+  heldMints: string[];
   /** Only the trade COUNT comes from the activity feed; every figure that is money
    *  comes from `performance`, so the two can't describe different periods. */
   counts: ActivityCount;
@@ -46,6 +48,7 @@ interface Props {
 export function PortfolioChart({
   points,
   performance,
+  heldMints,
   counts,
   range,
   onRangeChange,
@@ -141,7 +144,9 @@ export function PortfolioChart({
         />
       </div>
 
-      {showBreakdown && performance && <EarnedBreakdown performance={performance} />}
+      {showBreakdown && performance && (
+        <EarnedBreakdown performance={performance} heldMints={heldMints} />
+      )}
     </div>
   );
 }

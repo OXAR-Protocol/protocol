@@ -267,6 +267,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "history.tradingCost": "вартість обміну",
   "history.byAsset": "показати, що заробило",
   "history.cash": "долари",
+  "history.closed": "продано",
   "history.other": "усе інше",
   "history.putIn": "внесено",
   "history.tookOut": "виведено",

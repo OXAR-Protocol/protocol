@@ -13,10 +13,12 @@ interface History {
   /** Earned, return, and flows over exactly the days above — computed in the same
    *  pass, so the figures under the chart cannot describe a different period. */
   performance: RangePerformance | null;
+  /** Mints the wallet still holds — the breakdown marks the rest as closed. */
+  heldMints: string[];
   loading: boolean;
 }
 
-const EMPTY: Omit<History, "loading"> = { days: [], performance: null };
+const EMPTY: Omit<History, "loading"> = { days: [], performance: null, heldMints: [] };
 
 /**
  * The portfolio over the last `days`, reconstructed server-side from on-chain
@@ -50,10 +52,11 @@ export function usePortfolioHistory(days = 90): History {
       body: JSON.stringify({ owner, days }),
     })
       .then((r) => r.json())
-      .then((j: { days?: PerformanceDay[]; performance?: RangePerformance }) => {
+      .then((j: { days?: PerformanceDay[]; performance?: RangePerformance; heldMints?: string[] }) => {
         const next = {
           days: Array.isArray(j?.days) ? j.days : [],
           performance: j?.performance ?? null,
+          heldMints: Array.isArray(j?.heldMints) ? j.heldMints : [],
         };
         if (!cancelled) {
           setData(next);
