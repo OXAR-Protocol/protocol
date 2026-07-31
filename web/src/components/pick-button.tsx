@@ -13,12 +13,16 @@ export function PickButton({
   picked,
   onToggle,
   label,
+  compact,
   className,
 }: {
   picked: boolean;
   onToggle: () => void;
   /** For screen readers — which thing this picks. */
   label: string;
+  /** Icon only until there's room for words. In a position row the full label is
+   *  wider than the name beside it, so on a phone the name lost. */
+  compact?: boolean;
   className?: string;
 }) {
   const { t } = useT();
@@ -48,7 +52,9 @@ export function PickButton({
       } ${className ?? ""}`}
     >
       {picked ? <Check size={11} strokeWidth={2.5} /> : <Plus size={11} strokeWidth={2.5} />}
-      {picked ? t("bulk.picked") : t("bulk.pick")}
+      <span className={compact ? "hidden sm:inline" : undefined}>
+        {picked ? t("bulk.picked") : t("bulk.pick")}
+      </span>
     </span>
   );
 }

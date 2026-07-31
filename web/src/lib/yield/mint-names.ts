@@ -33,3 +33,17 @@ export function isCashMint(mint: string): boolean {
 export function nameOfMint(mint: string): string | null {
   return NAMES[mint] ?? null;
 }
+
+const SOURCE_IDS: Record<string, string> = {
+  ...Object.fromEntries(
+    PROVIDERS.filter((p) => p.heldMint).map((p) => [p.heldMint as string, p.id]),
+  ),
+  [JL_USDC]: "jupiter-lend-usdc",
+  [JL_USDT]: "jupiter-lend-usdt",
+};
+
+/** The source a mint belongs to — what the logo and monogram helpers key off. A
+ *  breakdown reads far faster with the same marks the positions list uses. */
+export function sourceIdOfMint(mint: string): string | null {
+  return SOURCE_IDS[mint] ?? null;
+}
