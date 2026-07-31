@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { fromBaseUnits } from "@/lib/yield";
+import { fromBaseUnits, positionTitle } from "@/lib/yield";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { PickBar } from "@/components/pick-bar";
 import { AllocationSheet } from "@/components/allocation-sheet";
@@ -83,7 +83,7 @@ export function PickedSellBar({ views, allHeld, onOutcome, onDone }: Props) {
           mode="sell"
           rows={views.map((v) => ({
             id: v.id,
-            name: v.name,
+            name: positionTitle(v),
             symbol: v.assetSymbol,
             maxUsd: fromBaseUnits(v.underlyingBalance, v.decimals),
           }))}

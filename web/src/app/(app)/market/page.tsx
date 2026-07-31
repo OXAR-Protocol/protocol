@@ -279,7 +279,7 @@ export default function YieldPage() {
         </p>
       </div>
     </div>
-      <PickedBuyBar />
+      <PickedBuyBar views={views} />
     </PickSetProvider>
   );
 }

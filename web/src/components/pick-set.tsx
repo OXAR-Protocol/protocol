@@ -13,6 +13,8 @@ import { createContext, useContext, useMemo, useState, type ReactNode } from "re
 interface PickSet {
   picked: ReadonlySet<string>;
   toggle: (id: string) => void;
+  /** Trade one pick for another — the same basket slot, a different market. */
+  swap: (from: string, to: string) => void;
   clear: () => void;
   /** Off when the feature is dark — sections then render no pick control at all. */
   enabled: boolean;
@@ -31,6 +33,14 @@ export function PickSetProvider({ enabled, children }: { enabled: boolean; child
           const next = new Set(prev);
           if (next.has(id)) next.delete(id);
           else next.add(id);
+          return next;
+        }),
+      swap: (from, to) =>
+        setPicked((prev) => {
+          if (!prev.has(from) || from === to) return prev;
+          const next = new Set(prev);
+          next.delete(from);
+          next.add(to);
           return next;
         }),
       clear: () => setPicked(new Set()),

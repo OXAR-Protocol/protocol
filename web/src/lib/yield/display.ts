@@ -43,6 +43,11 @@ export function unitLabelOf(v: { name: string; assetSymbol: string }): string {
  * position someone had funded days earlier looked to them like it wasn't there at all.
  * Falling back to the source's own name costs nothing and says which is which.
  */
-export function positionTitle(v: { name: string; assetSymbol: string }): string {
-  return v.name.match(/\(([^)]+)\)/)?.[1] ?? v.name;
+export function positionTitle(v: { name: string; assetSymbol: string; group?: string }): string {
+  const ticker = v.name.match(/\(([^)]+)\)/)?.[1];
+  if (ticker) return ticker;
+  // Members of a group share one name by construction — every Jupiter Lend market is
+  // called "Jupiter Lend", and the market is only in the symbol. Without this, two
+  // positions in two different markets are one word, twice.
+  return v.group ? `${v.name} ${v.assetSymbol}` : v.name;
 }
