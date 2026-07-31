@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { Check, Loader2, X } from "lucide-react";
+import { ArrowLeftRight, Check, Loader2, X } from "lucide-react";
 
 import { formatUsdAmount, floorToCents, normalizeDecimalInput } from "@oxar/sdk";
 
@@ -175,8 +175,13 @@ export function AllocationSheet({
                           key={alt.id}
                           type="button"
                           onClick={() => swapRow(r.id, alt.id)}
-                          className="rounded-full border border-black/10 px-2 py-0.5 text-[10px] lowercase tracking-wide text-black/45 transition hover:border-black/40 hover:text-black"
+                          aria-label={t("alloc.switchTo", { name: alt.label })}
+                          title={t("alloc.switchTo", { name: alt.label })}
+                          className="inline-flex items-center gap-1 rounded-full border border-black/15 px-2 py-0.5 text-[10px] lowercase tracking-wide text-black/50 transition hover:border-black/40 hover:text-black"
                         >
+                          {/* Without a mark of its own this read as a label rather than
+                              a control — reported as "not obvious you can change it". */}
+                          <ArrowLeftRight size={9} strokeWidth={2} className="shrink-0" />
                           {alt.label} {(alt.apy * 100).toFixed(2)}%
                         </button>
                       ))}

@@ -184,6 +184,7 @@ export const en = {
   "bulk.progress": "selling {n} of {total}",
   "bulk.converting": "converting your money…",
   "alloc.addWithCard": "add money with a card",
+  "alloc.switchTo": "put it in {name} instead",
   "bulk.failed": "didn't go through: {ids}",
   "bulk.sellSelected": "sell all",
   "bulk.clear": "clear",
