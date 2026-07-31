@@ -314,6 +314,7 @@ export const en = {
   "intro.body": "your money shouldn't sit still. here it sleeps somewhere that pays.",
   "intro.showMeAround": "show me around",
   "intro.skip": "skip",
+  "err.gaslessRefused": "free network fees don’t cover this particular payment. add a little SOL for the network fee, or pay with a different token — your money hasn’t moved.",
 
   // Terms gate — in-app, before the welcome/tour (see terms/terms-gate-modal.tsx)
   "terms.gate.title": "before you continue",
