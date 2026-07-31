@@ -92,7 +92,7 @@ export default function HomePage() {
               <Loader2 className="animate-spin inline" size={28} />
             </span>
           ) : (
-            <LiveAmount value={totalUsdc} apy={blendedApy} variant="hero" />
+            <LiveAmount value={totalUsdc} apy={blendedApy} variant="lg" />
           )}
           {(yieldEarn.value > 0 || stockEarn.value > 0 || goldEarn.value > 0) && (
             <span className="text-sm text-[#3c05c7] flex flex-wrap items-baseline gap-x-3 gap-y-1">

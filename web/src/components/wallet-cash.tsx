@@ -49,7 +49,9 @@ export function WalletCash() {
       <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">{t("home.wallet.label")}</p>
-          <p className="mt-2 text-[clamp(1.5rem,3.5vw,2.25rem)] font-light leading-none text-black tabular-nums">
+          {/* The hero scale, taken from the balance below: what you can act on now
+              leads, and what already works follows it a size down. */}
+          <p className="mt-2 text-[clamp(2.5rem,6vw,4rem)] font-light leading-none tracking-[-0.02em] text-black tabular-nums">
             ${total.toFixed(2)}
           </p>
         </div>
