@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
-import { PhotoBg } from "@/components/photo-bg";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useLiveBalances } from "@/hooks/use-live-balances";
 import { useT } from "@/lib/i18n";
@@ -36,16 +35,8 @@ export function WalletCash() {
     <Link
       href="/market"
       data-tour="deposit"
-      className="group relative mb-12 block overflow-hidden rounded-[12px] border border-black/10 bg-white p-5 transition-colors hover:border-black/30"
+      className="group relative mb-12 block"
     >
-      {/* zoomOnMobile: on a phone this card is nearly square, so the default crop showed
-          the whole bill — drips and all — running under the chips and the CTA. */}
-      <PhotoBg
-        src="/art/dripping-dollar.webp"
-        scrim="left"
-        position="object-[right_top]"
-        zoomOnMobile
-      />
       <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">{t("home.wallet.label")}</p>

@@ -66,6 +66,7 @@ export default function HomePage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="mb-8"
       >
         <SectionLabel>{`${greeting}, ${handle}`}</SectionLabel>
       </motion.div>
@@ -80,13 +81,21 @@ export default function HomePage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.05 }}
-        className="mt-6 mb-12"
+        className="relative mt-6 mb-12 overflow-hidden rounded-[12px] border border-black/10 bg-white p-5"
         data-tour="balance"
       >
-        <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
+        {/* The photo belongs to the money that is alive. The wallet above is a plain
+            statement of what is sitting still, and reads better bare. */}
+        <PhotoBg
+          src="/art/dripping-dollar.webp"
+          scrim="left"
+          position="object-[right_top]"
+          zoomOnMobile
+        />
+        <p className="relative lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
           {t("home.sleepingMoney")}
         </p>
-        <div className="mt-3 flex items-baseline gap-4">
+        <div className="relative mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
           {loading ? (
             <span className="text-[clamp(2rem,5vw,3rem)] font-light text-black/40 leading-none">
               <Loader2 className="animate-spin inline" size={28} />
