@@ -1,22 +1,26 @@
 import { NextResponse } from "next/server";
 
 import {
-  dailyPortfolioValue,
+  portfolioSeries,
+  summarizePerformance,
   trimLeadingEmpty,
-  type HoldingDelta,
   type PriceSeries,
+  type WalletTx,
 } from "@oxar/sdk";
 
 import { fetchWithRetry } from "@oxar/sdk";
 
 import { heliusApiKey, fetchEnhancedHistory } from "@/lib/helius/history";
-import { POSITION_MINTS } from "@/lib/yield/position-mints";
+import { readWalletBalances } from "@/lib/solana/balances";
+import { TRACKED_MINTS } from "@/lib/yield/position-mints";
 
 /**
- * Portfolio value over time, reconstructed — we record no history and don't need
- * to. Holdings come from replaying the wallet's transfers; prices come from
+ * The portfolio over time — what it was worth, what it earned, and what moved in or
+ * out — reconstructed rather than recorded. Holdings come from today's on-chain
+ * balances replayed backward through the wallet's transfers; prices come from
  * DefiLlama's coins API (free, no key, one request for every mint at once). So the
- * chart shows the past from the day it ships rather than starting empty.
+ * chart and the figures under it exist from the day they ship rather than starting
+ * empty, and both are derived from the same single pass.
  *
  * Server-side because it pages Helius history, which is expensive and holds a key.
  */
@@ -32,7 +36,7 @@ const isAddress = (a: unknown): a is string =>
 
 // Reconstruction is the same work every time until a new transaction lands, so the
 // answer is cached like the earnings basis it sits beside.
-const cache = new Map<string, { at: number; points: unknown }>();
+const cache = new Map<string, { at: number; body: unknown }>();
 const TTL = 300_000;
 
 interface LlamaChart {
@@ -113,54 +117,66 @@ export async function POST(req: Request) {
   const cacheKey = `${owner}:${days}`;
   const cached = cache.get(cacheKey);
   if (cached && Date.now() - cached.at < TTL) {
-    return NextResponse.json({ points: cached.points });
+    return NextResponse.json(cached.body);
   }
 
   try {
-    const txs = await fetchEnhancedHistory(owner, key, 25);
+    // Balances are READ; only the movements are replayed. See `readWalletBalances`.
+    const [history, balancesNow] = await Promise.all([
+      fetchEnhancedHistory(owner, key, 25),
+      readWalletBalances(owner, TRACKED_MINTS),
+    ]);
 
-    // Every movement of an asset we track. Balances "now" are summed from the same
-    // deltas: reading them on-chain would be more precise, but it would also be a
-    // second source that can disagree with the replay and bend the line at the end.
-    const deltas: HoldingDelta[] = [];
-    const balancesNow: Record<string, number> = {};
-    for (const tx of txs) {
+    // One transaction, one entry: the direction of its legs is what separates money
+    // crossing the wallet's edge from one thing you own becoming another.
+    const txs: WalletTx[] = [];
+    for (const tx of history) {
+      const legs: Record<string, number> = {};
       for (const t of tx.tokenTransfers ?? []) {
         if (!t.mint || typeof t.tokenAmount !== "number") continue;
-        if (!POSITION_MINTS.has(t.mint)) continue;
+        if (!TRACKED_MINTS.has(t.mint)) continue;
         const sign = t.toUserAccount === owner ? 1 : t.fromUserAccount === owner ? -1 : 0;
         if (sign === 0) continue;
-        const delta = sign * t.tokenAmount;
-        deltas.push({ mint: t.mint, timestamp: tx.timestamp ?? 0, delta });
-        balancesNow[t.mint] = (balancesNow[t.mint] ?? 0) + delta;
+        legs[t.mint] = (legs[t.mint] ?? 0) + sign * t.tokenAmount;
       }
+      if (Object.keys(legs).length) txs.push({ timestamp: tx.timestamp ?? 0, legs });
     }
 
-    const mints = Object.keys(balancesNow);
-    const { series: prices, status: priceStatus } = await fetchPrices(mints, days);
-    const points = trimLeadingEmpty(
-      dailyPortfolioValue({
+    const mints = new Set(Object.keys(balancesNow));
+    for (const tx of txs) for (const mint of Object.keys(tx.legs)) mints.add(mint);
+    const { series: prices, status: priceStatus } = await fetchPrices([...mints], days);
+
+    const series = trimLeadingEmpty(
+      portfolioSeries({
         now: Math.floor(Date.now() / 1000),
         days,
         balancesNow,
-        deltas,
+        txs,
         prices,
       }),
     );
+    const performance = summarizePerformance(series);
 
     // Counts, not contents: an empty chart has several possible causes (no history
     // read, no tracked mint moved, no price found) and they are indistinguishable
     // from the outside. Cheap to keep, and it turns "it doesn't work" into a fact.
-    const debug = {
-      txs: txs.length,
-      trackedMints: POSITION_MINTS.size,
-      movedMints: mints.length,
-      pricedMints: Object.keys(prices).length,
-      deltas: deltas.length,
-      points: points.length,
+    // `days` short of what was asked for means the replay ran out of history there.
+    const body = {
+      days: series,
+      performance,
+      debug: {
+        txs: history.length,
+        trackedMints: TRACKED_MINTS.size,
+        heldMints: Object.keys(balancesNow).length,
+        movedMints: mints.size,
+        pricedMints: Object.keys(prices).length,
+        priceStatus,
+        covered: series.length,
+        asked: days,
+      },
     };
-    cache.set(cacheKey, { at: Date.now(), points });
-    return NextResponse.json({ points, debug });
+    cache.set(cacheKey, { at: Date.now(), body });
+    return NextResponse.json(body);
   } catch (e) {
     console.error("Portfolio history error:", e);
     return NextResponse.json({ error: "History request failed" }, { status: 502 });

@@ -2,32 +2,43 @@
 
 import { useEffect, useState } from "react";
 
-import type { PortfolioPoint } from "@oxar/sdk";
+import type { PerformanceDay, RangePerformance } from "@oxar/sdk";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { getCached, setCache } from "@/lib/cache";
 
+interface History {
+  /** Oldest first. Each day carries its value AND what produced it. */
+  days: PerformanceDay[];
+  /** Earned, return, and flows over exactly the days above — computed in the same
+   *  pass, so the figures under the chart cannot describe a different period. */
+  performance: RangePerformance | null;
+  loading: boolean;
+}
+
+const EMPTY: Omit<History, "loading"> = { days: [], performance: null };
+
 /**
- * Portfolio value over the last `days`, reconstructed server-side from on-chain
- * history + daily prices (`/api/portfolio-history`). Fetch-on-mount, cached — the
- * reconstruction is the same work until a new transaction lands.
+ * The portfolio over the last `days`, reconstructed server-side from on-chain
+ * balances + transfers + daily prices (`/api/portfolio-history`). Fetch-on-mount,
+ * cached — the reconstruction is the same work until a new transaction lands.
  */
-export function usePortfolioHistory(days = 90) {
+export function usePortfolioHistory(days = 90): History {
   const { walletAddress } = useSolanaContext();
-  const [points, setPoints] = useState<PortfolioPoint[]>([]);
+  const [data, setData] = useState(EMPTY);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const owner = walletAddress?.toBase58();
     if (!owner) {
-      setPoints([]);
+      setData(EMPTY);
       setLoading(false);
       return;
     }
-    const key = `portfolio-history:${owner}:${days}`;
-    const cached = getCached<PortfolioPoint[]>(key);
+    const key = `portfolio-history:v2:${owner}:${days}`;
+    const cached = getCached<typeof EMPTY>(key);
     if (cached) {
-      setPoints(cached);
+      setData(cached);
       setLoading(false);
       return;
     }
@@ -39,15 +50,18 @@ export function usePortfolioHistory(days = 90) {
       body: JSON.stringify({ owner, days }),
     })
       .then((r) => r.json())
-      .then((j: { points?: PortfolioPoint[] }) => {
-        const list = Array.isArray(j?.points) ? j.points : [];
+      .then((j: { days?: PerformanceDay[]; performance?: RangePerformance }) => {
+        const next = {
+          days: Array.isArray(j?.days) ? j.days : [],
+          performance: j?.performance ?? null,
+        };
         if (!cancelled) {
-          setPoints(list);
-          setCache(key, list);
+          setData(next);
+          setCache(key, next);
         }
       })
       .catch(() => {
-        if (!cancelled) setPoints([]);
+        if (!cancelled) setData(EMPTY);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -57,5 +71,5 @@ export function usePortfolioHistory(days = 90) {
     };
   }, [walletAddress, days]);
 
-  return { points, loading };
+  return { ...data, loading };
 }
