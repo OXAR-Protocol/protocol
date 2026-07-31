@@ -13,11 +13,11 @@ interface Props {
 export function LoadMoreButton({ remaining, label, onClick }: Props) {
   if (remaining <= 0) return null;
   return (
-    <div className="mt-3 flex justify-center">
+    <div className="mt-4 flex justify-center">
       <button
         type="button"
         onClick={onClick}
-        className="rounded-full border border-black/15 px-4 py-1.5 text-[11px] lowercase tracking-wide text-black/55 transition hover:border-black/40 hover:text-black"
+        className="rounded-full border border-black/25 bg-white px-5 py-2 text-[13px] lowercase tracking-wide text-black/70 shadow-sm transition hover:border-black hover:text-black"
       >
         {label}
       </button>

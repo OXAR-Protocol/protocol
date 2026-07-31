@@ -1,10 +1,13 @@
 /** Shared display maps for yield sources, keyed by the risk/chain unions. */
 
 /** Tailwind text-tone per risk tier. */
+/** Weight-300 at 80% opacity was legible on the dark surfaces these were designed
+ *  for; the cards are white now, and amber-300 on white is the one a tester couldn't
+ *  read. Same hues, the weight the rest of the app already uses on white. */
 export const RISK_TONE: Record<string, string> = {
-  low: "text-emerald-300/80",
-  medium: "text-amber-300/80",
-  high: "text-rose-300/80",
+  low: "text-emerald-600",
+  medium: "text-amber-600",
+  high: "text-rose-600",
 };
 
 /** Human-readable risk label per tier. */
