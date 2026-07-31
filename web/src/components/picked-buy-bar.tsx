@@ -73,9 +73,21 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
       if (!p) return null;
       // Siblings of a collapsed source, so the market chosen for you is changeable
       // here rather than only back on the card it came from.
+      // Same product, different settlement currency — Jupiter Lend's USDC beside its
+      // USDT. NOT "same section": every xStock shares group "xstocks", so keying on
+      // the group alone offered Amazon as an alternative to Microsoft, 27 chips deep,
+      // each labelled with the currency they are all bought with. Members of a real
+      // pair share one NAME and differ only in what you pay with.
       const alternatives = views
-        .filter((o) => !!p.group && o.group === p.group && o.id !== p.id && !pickSet.picked.has(o.id))
-        .map((o) => ({ id: o.id, label: o.assetSymbol, apy: o.apy }));
+        .filter(
+          (o) =>
+            !!p.group &&
+            o.group === p.group &&
+            o.name === p.name &&
+            o.id !== p.id &&
+            !pickSet.picked.has(o.id),
+        )
+        .map((o) => ({ id: o.id, label: unitLabelOf(o), apy: o.apy }));
       // Buying is priced by the market, so the unit price has to be asked for —
       // unlike selling, where the position already knows what it's worth.
       const price = p.heldMint ? prices[p.heldMint]?.price : undefined;

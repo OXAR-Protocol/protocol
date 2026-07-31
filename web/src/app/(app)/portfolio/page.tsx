@@ -70,6 +70,11 @@ export default function HomePage() {
         <SectionLabel>{`${greeting}, ${handle}`}</SectionLabel>
       </motion.div>
 
+      {/* What's in the wallet leads: it is the money a person can act on right now,
+          and the nudge to put it to work only makes sense before the figure that
+          shows what already is. */}
+      <WalletCash />
+
       {/* Balance hero */}
       <motion.section
         initial={{ opacity: 0, y: 16 }}
@@ -126,8 +131,6 @@ export default function HomePage() {
         </p>
       </motion.section>
 
-      {/* Money in the wallet, not put to work yet — nudge to invest it. */}
-      <WalletCash />
 
       {/* Empty state — first-time hero */}
       {totalUsdc === 0 && !loading && (
