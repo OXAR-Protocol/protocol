@@ -17,7 +17,9 @@ export function TermsBlocked({ onReviewTerms }: { onReviewTerms: () => void }) {
   const { logout } = usePrivy();
 
   return (
-    <div className="safe-top safe-bottom fixed inset-0 z-[60] flex items-center justify-center bg-white px-6 text-center text-black">
+    <div
+      data-no-pull
+      className="safe-top safe-bottom fixed inset-0 z-[60] flex items-center justify-center bg-white px-6 text-center text-black">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}

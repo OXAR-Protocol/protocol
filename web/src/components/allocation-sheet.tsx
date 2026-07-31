@@ -128,7 +128,9 @@ export function AllocationSheet({
   // document, painted straight over the confirm button. Scrolling couldn't rescue it
   // — the button wasn't past the sheet's edge, it was under the nav.
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/25 p-0 backdrop-blur-sm sm:items-center sm:p-6">
+    <div
+      data-no-pull
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/25 p-0 backdrop-blur-sm sm:items-center sm:p-6">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
