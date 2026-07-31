@@ -57,3 +57,22 @@ function bytesToBase64(bytes: Uint8Array): string {
   }
   return btoa(binary);
 }
+
+/**
+ * Tell the server why gasless fell back, so the reason survives past the user's own
+ * console. Fire-and-forget on purpose: this runs inside a money action, and a report
+ * that could delay or break a transaction would be worse than no report at all.
+ */
+export function reportGaslessFailure(wallet: string, stage: string, error: unknown): void {
+  const reason = error instanceof Error ? error.message : String(error);
+  try {
+    void fetch("/api/gasless-report", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ wallet, stage, reason }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    // Reporting must never be the thing that breaks a transaction.
+  }
+}

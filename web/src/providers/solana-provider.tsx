@@ -17,7 +17,7 @@ import { UserFacingError } from "@/lib/yield";
 import { RPC_URL } from "@/lib/constants";
 import { clearCache } from "@/lib/cache";
 import { deriveSolanaWallets, hasExternalSolanaWallet } from "@/lib/wallet/solana-wallets";
-import { koraEnabled, koraPayer, koraBlockhash, koraSignAndSend } from "@/lib/gas/kora";
+import { koraEnabled, koraPayer, koraBlockhash, koraSignAndSend, reportGaslessFailure } from "@/lib/gas/kora";
 
 /** Minimal wallet signer — what yield providers need to sign + send. */
 export interface WalletSigner {
@@ -129,6 +129,10 @@ class PrivySolanaAdapter implements WalletSigner {
         return await this._signAndSendViaKora(tx);
       } catch (e) {
         console.warn("Kora gasless path failed; falling back to native SOL gas:", e);
+        // …and where we can actually read it. Three different faults — node down,
+        // relayer refused the transaction, wallet couldn't partial-sign — used to
+        // reach the user as one sentence and reach us not at all.
+        reportGaslessFailure(this._publicKey.toBase58(), "signAndSend", e);
         // Falling back only helps a wallet that can actually pay the fee. For one
         // holding no SOL — the whole point of gasless — native gas is a guaranteed
         // failure wearing the words "insufficient funds", which is both wrong and
