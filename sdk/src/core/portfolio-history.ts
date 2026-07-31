@@ -16,12 +16,6 @@
 /** Daily prices per mint, ascending by time. */
 export type PriceSeries = Record<string, readonly { t: number; price: number }[]>;
 
-export interface PortfolioPoint {
-  /** Unix seconds at the end of that day. */
-  t: number;
-  usd: number;
-}
-
 /** Below half a cent a portfolio is worth nothing that survives display rounding.
  *  The backward replay leaves float residue (~1e-13 dollars) on the days before the
  *  first trade; letting it through reads as "held almost nothing" instead of

@@ -4,7 +4,7 @@ import { netInvestedFromSwaps } from "@/lib/earnings/swaps";
 import { heliusApiKey, fetchEnhancedHistory } from "@/lib/helius/history";
 import { XSTOCKS } from "@/lib/yield/xstocks";
 import { GOLD } from "@/lib/yield/gold";
-import { JL_USDC, JL_USDT } from "@/lib/yield/position-mints";
+import { CASH_MINTS, JL_USDC, JL_USDT } from "@/lib/yield/position-mints";
 
 // On-chain cost-basis proxy. Reads the wallet's parsed transaction history from
 // Helius (key stays server-side) and derives net USD invested per swap-and-hold
@@ -12,24 +12,24 @@ import { JL_USDC, JL_USDT } from "@/lib/yield/position-mints";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-const USDT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
 // Jupiter Lend receipt (jl) tokens — the SPL you HOLD after depositing (value accrues in
 // price). Deposit = costMint → jlToken; withdraw = jlToken → costMint, so the same
 // swap-attribution engine works: net invested = cost spent to acquire the jlToken.
 // Shared with the wallet card, which must not list them as idle cash.
 
-// Net invested = cost spent acquiring `heldMint`. Stocks come straight from the xStocks
-// catalog so the two never drift.
-const SOURCES: { id: string; heldMint: string; costMint: string }[] = [
-  { id: "ondo-usdy", heldMint: "A1KLoBrKBde8Ty9qtNQUtq3C2ortoC3u7twggz7sEto6", costMint: USDC },
-  { id: "maple-solana", heldMint: "AvZZF1YaZDziPY2RCK4oJrRVrbN3mTD9NL24hPeaZeUj", costMint: USDC },
-  { id: "onre-onyc", heldMint: "5Y8NV33Vv7WbnLfq3zBcKSdYPrk7g2KoiQoe7M2tcxp5", costMint: USDC },
-  // Jupiter Lend: hold jlUSDC/jlUSDT, attribute against the deposited dollar (USDC/USDT).
-  { id: "jupiter-lend-usdc", heldMint: JL_USDC, costMint: USDC },
-  { id: "jupiter-lend-usdt", heldMint: JL_USDT, costMint: USDT },
-  ...XSTOCKS.map((s) => ({ id: s.id, heldMint: s.mint, costMint: USDC })),
-  ...GOLD.map((g) => ({ id: g.id, heldMint: g.mint, costMint: USDC })),
+// Net invested = cost spent acquiring `heldMint`, paid in any of the dollars the app
+// deals in (CASH_MINTS — the same set the portfolio card measures over, so the two
+// never disagree about what a dollar is). Stocks come straight from the xStocks
+// catalog so those never drift either.
+const SOURCES: { id: string; heldMint: string }[] = [
+  { id: "ondo-usdy", heldMint: "A1KLoBrKBde8Ty9qtNQUtq3C2ortoC3u7twggz7sEto6" },
+  { id: "maple-solana", heldMint: "AvZZF1YaZDziPY2RCK4oJrRVrbN3mTD9NL24hPeaZeUj" },
+  { id: "onre-onyc", heldMint: "5Y8NV33Vv7WbnLfq3zBcKSdYPrk7g2KoiQoe7M2tcxp5" },
+  // Jupiter Lend: hold jlUSDC/jlUSDT, attribute against the dollars deposited.
+  { id: "jupiter-lend-usdc", heldMint: JL_USDC },
+  { id: "jupiter-lend-usdt", heldMint: JL_USDT },
+  ...XSTOCKS.map((s) => ({ id: s.id, heldMint: s.mint })),
+  ...GOLD.map((g) => ({ id: g.id, heldMint: g.mint })),
 ];
 // NOTE: Kamino (klend) is NOT here yet — it's obligation-based (no transferable receipt
 // token in the wallet), so the held-mint attribution can't see it. It needs
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     const txs = await fetchEnhancedHistory(owner, key, 25);
     const basis: Record<string, number> = {};
     for (const s of SOURCES) {
-      basis[s.id] = netInvestedFromSwaps(txs, owner, s.heldMint, s.costMint);
+      basis[s.id] = netInvestedFromSwaps(txs, owner, s.heldMint, CASH_MINTS);
     }
     cache.set(owner, { at: Date.now(), basis });
     return NextResponse.json({ basis });

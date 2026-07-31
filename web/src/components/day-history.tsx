@@ -66,9 +66,11 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
               {d.usd !== null && (
                 <span className="text-[13px] text-black/70">${formatUsdAmount(d.usd)}</span>
               )}
-              {d.changeUsd !== null && !isDustUsd(Math.abs(d.changeUsd)) && (
-                <span className={`text-[12px] ${d.changeUsd >= 0 ? "text-black/45" : "text-red-600"}`}>
-                  {formatSignedUsd(d.changeUsd)}
+              {/* What the day EARNED, not how its total moved: on a day money went in,
+                  the second number is mostly the deposit and reads as profit. */}
+              {d.earnedUsd !== null && !isDustUsd(Math.abs(d.earnedUsd)) && (
+                <span className={`text-[12px] ${d.earnedUsd >= 0 ? "text-black/45" : "text-red-600"}`}>
+                  {formatSignedUsd(d.earnedUsd)}
                 </span>
               )}
             </span>

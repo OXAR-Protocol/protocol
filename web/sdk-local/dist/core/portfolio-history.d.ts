@@ -17,11 +17,6 @@ export type PriceSeries = Record<string, readonly {
     t: number;
     price: number;
 }[]>;
-export interface PortfolioPoint {
-    /** Unix seconds at the end of that day. */
-    t: number;
-    usd: number;
-}
 export declare function isDustUsd(usd: number): boolean;
 /** Price at or before `t`; the earliest known price before the series starts, so a
  *  position that predates our price data is valued rather than silently dropped. */

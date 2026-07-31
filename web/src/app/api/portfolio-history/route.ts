@@ -30,6 +30,9 @@ export const dynamic = "force-dynamic";
 const PRICES_URL = "https://coins.llama.fi/chart";
 const MAX_DAYS = 365;
 const DEFAULT_DAYS = 90;
+/** Ceiling on paging, not a target — see `fetchEnhancedHistory`. 4000 transactions is
+ *  deep enough for a year of ordinary use and still returns inside the request. */
+const MAX_PAGES = 40;
 
 const isAddress = (a: unknown): a is string =>
   typeof a === "string" && a.length >= 32 && a.length <= 44;
@@ -88,7 +91,7 @@ async function fetchPrices(
           const res = await fetchWithRetry(`${PRICES_URL}/solana:${m}?period=1d&span=${days}`);
           if (res.ok) await readChart(res, series);
         } catch {
-          // A mint nobody prices simply doesn't contribute — see dailyPortfolioValue.
+          // A mint nobody prices simply doesn't contribute — see portfolioSeries.
         }
       }),
     );
@@ -122,8 +125,13 @@ export async function POST(req: Request) {
 
   try {
     // Balances are READ; only the movements are replayed. See `readWalletBalances`.
+    // History is paged until it reaches back past the window rather than to a fixed
+    // count — a year on a busy wallet needs more than 2500 transactions, and a week
+    // on a quiet one needs one page.
+    const now = Math.floor(Date.now() / 1000);
+    const windowStart = now - days * 86_400;
     const [history, balancesNow] = await Promise.all([
-      fetchEnhancedHistory(owner, key, 25),
+      fetchEnhancedHistory(owner, key, MAX_PAGES, windowStart),
       readWalletBalances(owner, TRACKED_MINTS),
     ]);
 
@@ -148,7 +156,7 @@ export async function POST(req: Request) {
 
     const series = trimLeadingEmpty(
       portfolioSeries({
-        now: Math.floor(Date.now() / 1000),
+        now,
         days,
         balancesNow,
         txs,

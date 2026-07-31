@@ -15,7 +15,7 @@ import {
   type ProviderView,
 } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
-import { groupByDay, summarizeDays, activeDays, utcDayStart } from "@oxar/sdk";
+import { groupByDay, countActivity, activeDays, utcDayStart } from "@oxar/sdk";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { isXStock } from "@/lib/yield/xstocks";
 import { isGold } from "@/lib/yield/gold";
@@ -75,8 +75,9 @@ export function PortfolioPanel() {
     const cutoff = history.days.length ? utcDayStart(history.days[0]!.t) : 0;
     return groupByDay(events.filter((e) => e.timestamp >= cutoff), history.days);
   }, [events, history.days]);
-  const rangeStats = useMemo(() => summarizeDays(days), [days]);
-  // The summary reads EVERY day; the list shows only the ones something happened on.
+  // Counts only — every figure that is money comes from the value series itself.
+  const counts = useMemo(() => countActivity(days), [days]);
+  // The count reads EVERY day; the list shows only the ones something happened on.
   // A quiet day repeats what the chart already draws, and there is one per calendar
   // day — pages of "$0.00" rows burying the few that record a decision.
   const listedDays = useMemo(() => activeDays(days), [days]);
@@ -128,7 +129,7 @@ export function PortfolioPanel() {
         <PortfolioChart
           points={history.days}
           performance={history.performance}
-          stats={rangeStats}
+          counts={counts}
           range={range}
           onRangeChange={setRange}
           loading={history.loading}

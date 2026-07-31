@@ -8,7 +8,7 @@ import {
   formatDayShort,
   type PerformanceDay,
   type RangePerformance,
-  type RangeStats,
+  type ActivityCount,
 } from "@oxar/sdk";
 
 import { HoverChart } from "@/components/hover-chart";
@@ -24,7 +24,7 @@ interface Props {
   performance: RangePerformance | null;
   /** Only the trade COUNT comes from the activity feed; every figure that is money
    *  comes from `performance`, so the two can't describe different periods. */
-  stats: RangeStats;
+  counts: ActivityCount;
   range: Range;
   onRangeChange: (r: Range) => void;
   loading: boolean;
@@ -43,7 +43,7 @@ interface Props {
 export function PortfolioChart({
   points,
   performance,
-  stats,
+  counts,
   range,
   onRangeChange,
   loading,
@@ -104,8 +104,8 @@ export function PortfolioChart({
         <Stat label={t("history.tookOut")} value={`$${formatUsdAmount(performance?.outUsd ?? 0)}`} />
         <Stat
           label={t("history.trades")}
-          value={String(stats.trades)}
-          hint={stats.activeDays > 0 ? t("history.onDays", { n: String(stats.activeDays) }) : undefined}
+          value={String(counts.trades)}
+          hint={counts.activeDays > 0 ? t("history.onDays", { n: String(counts.activeDays) }) : undefined}
         />
       </div>
     </div>
