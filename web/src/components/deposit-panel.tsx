@@ -365,19 +365,21 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         </>
       )}
 
-      {/* Card on-ramp (Privy → MoonPay / Coinbase / Stripe, routed by geo). Shown
-          everywhere EXCEPT inside a mobile wallet's in-app browser (external + mobile),
-          where the widget black-screens. Desktop external wallets are fine. */}
-      {canUseCard && (
+      {/* Divider only when the crypto path is also shown above. */}
+      {!emptyWallet && (
+        <div className="mt-3 flex items-center gap-3 text-[10px] lowercase tracking-wide text-black/30">
+          <span className="h-px flex-1 bg-black/10" />
+          {t("common.or")}
+          <span className="h-px flex-1 bg-black/10" />
+        </div>
+      )}
+
+      {/* Card on-ramp (Privy → MoonPay / Coinbase / Stripe, routed by geo). Its widget
+          black-screens inside a mobile wallet's in-app browser, so it can't be used
+          there — but it is still SHOWN, disabled, with the reason. Hiding it silently
+          read as "the card option disappeared" and left no way to ask for it back. */}
+      {canUseCard ? (
         <>
-          {/* Divider only when the crypto path is also shown above. */}
-          {!emptyWallet && (
-            <div className="mt-3 flex items-center gap-3 text-[10px] lowercase tracking-wide text-black/30">
-              <span className="h-px flex-1 bg-black/10" />
-              {t("common.or")}
-              <span className="h-px flex-1 bg-black/10" />
-            </div>
-          )}
           <button
             onClick={canCancelApplePay ? applePay.cancel : handleApplePay}
             disabled={(applePay.busy && !canCancelApplePay) || busy || applePayBelowMin}
@@ -406,17 +408,33 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
           {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}
         </>
+      ) : (
+        <>
+          <button
+            disabled
+            className="mt-3 w-full px-4 py-3 rounded-full border border-black/15 text-[15px] font-medium tracking-tight text-black/30 inline-flex items-center justify-center gap-1.5"
+          >
+            <CreditCard size={16} strokeWidth={1.75} />
+            <span className="capitalize">{verb}</span>
+            <span>with card</span>
+          </button>
+          <p className="mt-2 text-center text-[10px] leading-snug lowercase tracking-wide text-black/40">
+            {t("deposit.cardInAppBrowser")}
+          </p>
+        </>
       )}
 
-      {/* A second card provider, always offered rather than kept as a fallback.
-          The built-in one (Privy → MoonPay / Coinbase / Stripe) doesn't cover
-          everyone — MoonPay excludes Ukraine outright — and even where it does, a
-          given card can be refused by one provider and accepted by the other. Sits
-          outside the canUseCard block on purpose: it's a plain link, so it also
-          works in the in-app browsers where the widget black-screens. */}
+      {/* The second card provider. A plain link, so it works everywhere the widget
+          doesn't — which is why it becomes the primary button when the built-in one
+          can't run. Offered as a choice even when both work: the two providers refuse
+          different cards, and Paybis lands straight on Solana. */}
       <button
         onClick={() => setShowTopUp(true)}
-        className="mt-3 w-full rounded-full border border-black/15 px-4 py-3 text-[13px] lowercase tracking-wide text-black/60 transition hover:border-black/40 hover:text-black"
+        className={
+          canUseCard
+            ? "mt-3 w-full rounded-full border border-black/15 px-4 py-3 text-[13px] lowercase tracking-wide text-black/60 transition hover:border-black/40 hover:text-black"
+            : "mt-3 w-full rounded-full bg-black px-4 py-3 text-[15px] font-medium tracking-tight text-white transition hover:bg-black/90"
+        }
       >
         {t("topup.altLink")}
       </button>
