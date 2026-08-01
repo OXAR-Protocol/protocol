@@ -9,11 +9,10 @@ import { USDC_MINT } from "@/lib/constants";
 import { useT } from "@/lib/i18n";
 
 /**
- * Cash out to a bank card — COMING SOON. Direct card payout needs a licensed
- * provider (Transak) with KYB/an entity, which isn't live yet. Until then the
- * sheet explains the status and points users at withdrawing to an account they
- * already control (via Send). The Transak server route stays wired for when the
- * partner account is approved — see /api/transak-session.
+ * Cash out to a bank card — COMING SOON. Paying out fiat ourselves would need an
+ * entity and a licence, so the plan is a redirect to a licensed provider who is
+ * the counterparty to the user. Until one is wired, the sheet explains the status
+ * and points users at withdrawing to an account they already control (via Send).
  */
 export function CashOutSheet({ onClose }: { onClose: () => void }) {
   const { t } = useT();
