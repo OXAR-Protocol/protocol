@@ -91,6 +91,7 @@ export default function HomePage() {
           scrim="left"
           position="object-[right_top]"
           zoomOnMobile
+          opacity="opacity-30"
         />
         <p className="relative lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
           {t("home.sleepingMoney")}
