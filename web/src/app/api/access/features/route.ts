@@ -13,8 +13,11 @@ export const runtime = "nodejs";
 const DEFAULT_INSIDER_EMAILS = ["daniel.l@oxar.app"];
 
 /** Keys on for insiders, in code so the switch carries a commit (see below).
- *  ondo-stocks: Delora/DFlow stock rail pilot (AAPLon) — real-money pass pending. */
-const DEFAULT_INSIDER_FEATURES = ["ondo-stocks"];
+ *  ondo-stocks:    Delora/DFlow stock rail pilot (AAPLon) — real-money pass pending.
+ *  paybis-cashout: card cash-out via Paybis. One real sale has gone through end to
+ *                  end; arrival tracking and a second provider are still missing, so
+ *                  it stays with insiders until the flow has been walked a few times. */
+const DEFAULT_INSIDER_FEATURES = ["ondo-stocks", "paybis-cashout"];
 
 
 

@@ -9,6 +9,7 @@ export * from "./core/fetch-retry";
 export * from "./core/evm-assets";
 export * from "./core/assets";
 export * from "./core/delora";
+export * from "./core/paybis";
 export * from "./core/jupiter-swap";
 export * from "./core/earnings-basis";
 export * from "./core/features";

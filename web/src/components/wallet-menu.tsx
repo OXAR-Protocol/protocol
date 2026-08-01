@@ -8,8 +8,9 @@ import { Copy, Check, LogOut, ChevronDown, ArrowUpRight, KeyRound, CreditCard } 
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { SendSheet } from "@/components/send-sheet";
-import { CashOutSheet } from "@/components/cash-out-sheet";
+import { CashOutSheet, CASH_OUT_FEATURE } from "@/components/cash-out-sheet";
 import { useSolanaName } from "@/hooks/use-solana-name";
+import { useFeature } from "@/hooks/use-features";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -21,6 +22,7 @@ export function WalletMenu() {
   const { user, logout } = usePrivy();
   const { walletAddress } = useSolanaContext();
   const { exportWallet } = useExportWallet();
+  const cashOutLive = useFeature(CASH_OUT_FEATURE);
   const { t } = useT();
   const [open, setOpen] = useState(false);
   const [showSend, setShowSend] = useState(false);
@@ -85,9 +87,11 @@ export function WalletMenu() {
           >
             <CreditCard size={13} strokeWidth={1.5} />
             {t("rail.cashOut")}
-            <span className="ml-auto rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] lowercase tracking-wide text-black/45">
-              {t("common.soon")}
-            </span>
+            {!cashOutLive && (
+              <span className="ml-auto rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] lowercase tracking-wide text-black/45">
+                {t("common.soon")}
+              </span>
+            )}
           </button>
 
           {isEmbedded && (
