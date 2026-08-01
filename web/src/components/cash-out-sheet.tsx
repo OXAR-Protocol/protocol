@@ -1,10 +1,9 @@
 "use client";
 
-import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
-import { X, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 
 import { CashOutFlow } from "@/components/cash-out-flow";
+import { PaybisSheet } from "@/components/paybis-sheet";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useFeature } from "@/hooks/use-features";
 import { USDC_MINT } from "@/lib/constants";
@@ -24,39 +23,14 @@ export function CashOutSheet({ onClose }: { onClose: () => void }) {
   const live = useFeature(CASH_OUT_FEATURE);
   const usdcValue = assets.find((a) => a.mint === USDC_MINT)?.usdValue ?? 0;
 
-  return createPortal(
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      data-no-pull
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-white/70 px-4 py-6 backdrop-blur-sm"
-      onClick={onClose}
+  return (
+    <PaybisSheet
+      label={live ? t("cashout.labelLive") : t("cashout.label")}
+      title={t("cashout.title")}
+      onClose={onClose}
     >
-      <motion.div
-        initial={{ y: 60, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 60, opacity: 0 }}
-        transition={{ type: "spring", damping: 26, stiffness: 220 }}
-        onClick={(e) => e.stopPropagation()}
-        className="relative max-h-full w-full max-w-[440px] overflow-y-auto rounded-[12px] border border-black/15 bg-white p-6 md:p-7"
-      >
-        <div className="mb-5 flex items-start justify-between">
-          <div>
-            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">
-              {live ? t("cashout.labelLive") : t("cashout.label")}
-            </p>
-            <h2 className="mt-1 text-xl text-black">{t("cashout.title")}</h2>
-          </div>
-          <button onClick={onClose} className="text-black/45 transition hover:text-black">
-            <X size={18} strokeWidth={1.5} />
-          </button>
-        </div>
-
-        {live ? <CashOutFlow usdc={usdcValue} /> : <ComingSoon usdcValue={usdcValue} onClose={onClose} />}
-      </motion.div>
-    </motion.div>,
-    document.body,
+      {live ? <CashOutFlow usdc={usdcValue} /> : <ComingSoon usdcValue={usdcValue} onClose={onClose} />}
+    </PaybisSheet>
   );
 }
 

@@ -2,22 +2,29 @@
 
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { ExternalLink, ArrowUpRight, TriangleAlert, Loader2 } from "lucide-react";
+import { ExternalLink, ArrowUpRight } from "lucide-react";
 
-import { PAYBIS_FEE_WARN_FRACTION, PAYBIS_FIATS, paybisSellUrl, type PaybisFiat } from "@oxar/sdk";
+import { paybisSellUrl, type PaybisFiat } from "@oxar/sdk";
 
-import { CashOutSteps } from "@/components/cash-out-steps";
+import { PaybisAmount } from "@/components/paybis-amount";
+import { PaybisSteps, type PaybisStep } from "@/components/paybis-steps";
 import { SendSheet } from "@/components/send-sheet";
 import { usePaybisQuote } from "@/hooks/use-paybis-quote";
 import { useT } from "@/lib/i18n";
 
-const money = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const STEPS: readonly PaybisStep[] = [
+  { title: "cashout.s1.title", body: "cashout.s1.body", shot: "01-form" },
+  { title: "cashout.s2.title", body: "cashout.s2.body", shot: "02-originator" },
+  { title: "cashout.s3.title", body: "cashout.s3.body", shot: "03-source" },
+  { title: "cashout.s4.title", body: "cashout.s4.body" },
+  { title: "cashout.s5.title", body: "cashout.s5.body", shot: "04-address" },
+  { title: "cashout.s6.title", body: "cashout.s6.body" },
+];
 
 /**
  * Cash out through Paybis. They are the counterparty — their licence, their KYC,
- * their payout — so we quote, explain, and hand over. The quote is the point: their
- * fee is mostly flat, so it is brutal on small amounts and cheap on real ones, and
- * nobody should discover that after the money has gone.
+ * their payout — so we quote, explain, and hand over. Selling goes over Base because
+ * their Solana USDC is buy-only, which is why Send opens preselected to Base.
  */
 export function CashOutFlow({ usdc }: { usdc: number }) {
   const { t } = useT();
@@ -25,77 +32,24 @@ export function CashOutFlow({ usdc }: { usdc: number }) {
   const [amount, setAmount] = useState(usdc >= 1 ? String(Math.floor(usdc)) : "");
   const [showSend, setShowSend] = useState(false);
 
-  const { quote, loading, error } = usePaybisQuote(Number(amount), fiat);
-  const pricey = quote !== null && quote.feeFraction > PAYBIS_FEE_WARN_FRACTION;
+  const { quote, loading, error } = usePaybisQuote("sell", Number(amount), fiat);
 
   return (
     <>
-      <div className="rounded-[10px] border border-black/10 px-4 py-3">
-        <div className="flex items-baseline justify-between gap-3">
-          <label className="text-[11px] lowercase tracking-wide text-black/40">{t("cashout.amount")}</label>
-          <button
-            onClick={() => setAmount(String(Math.floor(usdc)))}
-            className="text-[11px] lowercase text-black/40 transition hover:text-black"
-          >
-            {t("cashout.max", { amount: money(usdc) })}
-          </button>
-        </div>
-        <div className="mt-1 flex items-center gap-2">
-          <input
-            value={amount}
-            onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
-            inputMode="decimal"
-            placeholder="0"
-            className="min-w-0 flex-1 bg-transparent text-[20px] tabular-nums text-black outline-none placeholder:text-black/25"
-          />
-          <span className="text-[13px] text-black/40">USDC</span>
-        </div>
-      </div>
-
-      <div className="mt-2 flex gap-1.5">
-        {PAYBIS_FIATS.map((f) => (
-          <button
-            key={f}
-            onClick={() => setFiat(f)}
-            className={`rounded-full border px-3 py-1 text-[12px] transition ${
-              f === fiat ? "border-black/70 text-black" : "border-black/15 text-black/45 hover:border-black/35"
-            }`}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-3 min-h-[58px] rounded-[10px] border border-black/10 bg-black/[0.02] px-4 py-3">
-        {loading && !quote ? (
-          <Loader2 size={15} strokeWidth={1.5} className="animate-spin text-black/30" />
-        ) : quote ? (
-          <>
-            <p className="text-[11px] lowercase tracking-wide text-black/40">{t("cashout.youGet")}</p>
-            <p className="mt-0.5 text-[18px] tabular-nums text-black">
-              ≈ {money(quote.receive)} {quote.currency}
-            </p>
-            <p className="mt-0.5 text-[11px] tabular-nums text-black/45">
-              {t("cashout.fee", {
-                fee: `${money(quote.fee)} ${quote.currency}`,
-                pct: (quote.feeFraction * 100).toFixed(1),
-              })}
-            </p>
-          </>
-        ) : (
-          <p className="text-[12px] text-black/40">{error ?? t("cashout.enterAmount")}</p>
-        )}
-      </div>
-
-      {pricey && (
-        <div className="mt-2 flex items-start gap-2 rounded-[10px] border border-amber-500/30 bg-amber-500/[0.06] px-3 py-2.5">
-          <TriangleAlert size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-amber-600" />
-          <p className="text-[12px] leading-snug text-black/65">{t("cashout.pricey")}</p>
-        </div>
-      )}
+      <PaybisAmount
+        amount={amount}
+        onAmount={setAmount}
+        unit="USDC"
+        max={usdc}
+        fiat={fiat}
+        onFiat={setFiat}
+        quote={quote}
+        loading={loading}
+        error={error}
+      />
 
       <p className="mt-5 text-[11px] lowercase tracking-[0.18em] text-black/35">{t("cashout.how")}</p>
-      <CashOutSteps />
+      <PaybisSteps dir="cashout" steps={STEPS} />
 
       <a
         href={paybisSellUrl()}

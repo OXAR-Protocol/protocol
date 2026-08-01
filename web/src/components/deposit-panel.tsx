@@ -2,9 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
+import { AnimatePresence } from "framer-motion";
 import { CreditCard } from "lucide-react";
 
 import { PayWithField } from "@/components/pay-with-field";
+import { TopUpSheet, TOP_UP_FEATURE } from "@/components/top-up-sheet";
+import { useFeature } from "@/hooks/use-features";
 import { koraEnabled } from "@/lib/gas/kora";
 import { DepositConfirm } from "@/components/deposit-confirm";
 import { ExitCostNotice } from "@/components/exit-cost-notice";
@@ -77,6 +80,8 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const [selectedUid, setSelectedUid] = useState<string | null>(null);
   // Show the "no surprises" review before the deposit signs.
   const [confirming, setConfirming] = useState(false);
+  const [showTopUp, setShowTopUp] = useState(false);
+  const paybisTopUp = useFeature(TOP_UP_FEATURE);
   // USD to buy via Apple Pay when the wallet is empty — there's no pay-asset to
   // size the amount from, so the user enters it directly. Pre-filled, editable.
   const [buyUsdInput, setBuyUsdInput] = useState("");
@@ -402,6 +407,22 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           </p>
 
           {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}
+        </>
+      )}
+
+      {/* The built-in on-ramp doesn't cover everyone — MoonPay excludes Ukraine
+          outright — so offer the Paybis hand-off as a second door. Outside the
+          canUseCard block on purpose: it's a plain link, so it also works in the
+          in-app browsers where the widget black-screens. */}
+      {paybisTopUp && (
+        <>
+          <button
+            onClick={() => setShowTopUp(true)}
+            className="mt-3 w-full text-center text-[11px] lowercase tracking-wide text-black/40 underline underline-offset-2 transition hover:text-black"
+          >
+            {t("topup.altLink")}
+          </button>
+          <AnimatePresence>{showTopUp && <TopUpSheet onClose={() => setShowTopUp(false)} />}</AnimatePresence>
         </>
       )}
     </div>
