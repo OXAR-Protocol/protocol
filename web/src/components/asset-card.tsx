@@ -92,8 +92,12 @@ export function AssetCard({
         className="group relative isolate overflow-hidden p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition-colors text-left disabled:opacity-50 min-h-[120px] flex flex-col justify-between"
       >
         <BanknoteBg seed={asset.id} />
-        {pick && <span className="absolute right-3 top-3 z-10">{pick}</span>}
-        {head}
+        {/* In the flow, not floated over the corner: the pill is ~125px wide with its
+            words on, and pinned it printed over the end of a long name. */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">{head}</div>
+          {pick && <span className="shrink-0">{pick}</span>}
+        </div>
         {spark && <div className="my-2">{spark}</div>}
         <div className={spark ? "mt-1" : "mt-3"}>
           {priceEl}

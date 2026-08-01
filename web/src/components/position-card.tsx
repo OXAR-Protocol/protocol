@@ -52,15 +52,6 @@ export function PositionCard({ view, onOpen, change24h, earned, picked, onToggle
       }`}
     >
       <BanknoteBg seed={view.id} />
-      {onTogglePick && (
-        <PickButton
-          picked={!!picked}
-          onToggle={onTogglePick}
-          label={view.name}
-          compact
-          className="absolute right-3 top-3 z-10"
-        />
-      )}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-3 min-w-0">
           <AssetIcon src={assetLogoSrc(view.id)} label={assetIconLabel(view.id, view.assetSymbol)} size={32} />
@@ -71,11 +62,18 @@ export function PositionCard({ view, onOpen, change24h, earned, picked, onToggle
             </span>
           </div>
         </div>
-        <ArrowUpRight
-          size={16}
-          strokeWidth={1.5}
-          className="text-black/40 group-hover:text-black transition shrink-0"
-        />
+        {/* In the flow, not floated over the corner: with its words back the pill is
+            ~125px wide, and pinned it covered both the arrow and the end of the name. */}
+        <div className="flex shrink-0 items-start gap-2">
+          {onTogglePick && (
+            <PickButton picked={!!picked} onToggle={onTogglePick} label={view.name} />
+          )}
+          <ArrowUpRight
+            size={16}
+            strokeWidth={1.5}
+            className="text-black/40 group-hover:text-black transition shrink-0"
+          />
+        </div>
       </div>
 
       <Sparkline
