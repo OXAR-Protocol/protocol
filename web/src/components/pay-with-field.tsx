@@ -5,6 +5,7 @@ import { ArrowUpDown, ChevronDown } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
 import { OriginGasNote } from "@/components/origin-gas-note";
+import { useDropPlacement } from "@/hooks/use-drop-placement";
 import { useT } from "@/lib/i18n";
 import {
   checkOriginGas,
@@ -68,6 +69,7 @@ export function PayWithField({
   const [mode, setMode] = useState<"token" | "usd">("token");
   const [usdStr, setUsdStr] = useState("");
   const ref = useRef<HTMLDivElement>(null);
+  const drop = useDropPlacement(open, ref);
   const active = assets.find((a) => assetUid(a) === activeUid) ?? null;
   const price = active && active.uiAmount > 0 ? active.usdValue / active.uiAmount : 0;
   const tokenAmt = parseFloat(amount) || 0;
@@ -230,7 +232,12 @@ export function PayWithField({
 
       {/* Holdings picker */}
       {open && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-64 overflow-auto rounded-[12px] border border-black/15 bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+        <div
+          style={{ maxHeight: drop.maxHeight }}
+          className={`absolute left-0 right-0 z-50 overflow-auto rounded-[12px] border border-black/15 bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${
+            drop.up ? "bottom-full mb-1" : "top-full mt-1"
+          }`}
+        >
           {assets.map((a) => {
             const uid = assetUid(a);
             const net = assetNetworkLabel(a);

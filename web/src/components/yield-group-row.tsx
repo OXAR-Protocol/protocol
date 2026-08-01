@@ -8,7 +8,7 @@ import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { Sparkline } from "@/components/sparkline";
 import { trendUp, trendLineTone } from "@/lib/yield/trend";
-import { BanknoteBg } from "@/components/banknote-bg";
+import { MarketRow } from "@/components/market-row";
 import { useApyHistory } from "@/hooks/use-apy-history";
 
 interface Props {
@@ -39,67 +39,64 @@ export function YieldGroupRow({ group, onOpen }: Props) {
   );
 
   return (
-    <button
-      onClick={onOpen}
-      className="group relative isolate flex w-full items-center gap-3 overflow-hidden rounded-[8px] border border-black/10 bg-white p-5 text-left transition-colors hover:border-black/30"
-    >
-      <BanknoteBg seed={group.views[0]?.id ?? group.name} />
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-3">
-          <AssetIcon src={assetLogoSrc(group.views[0]?.id ?? "")} label={group.name} size={36} />
-          <div className="min-w-0">
-            <div className="flex items-baseline gap-2">
-              <p className="truncate text-base text-black">{group.name}</p>
-              <span className="text-[10px] lowercase tracking-wide text-emerald-600">● live</span>
-            </div>
-            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-              {group.views.map((v) => (
-                <span
-                  key={v.id}
-                  className="rounded border border-black/15 px-1.5 py-0.5 text-[10px] lowercase tracking-wide text-black/55"
-                >
-                  {unitLabelOf(v)}
-                </span>
-              ))}
+    <MarketRow
+      seed={group.views[0]?.id ?? group.name}
+      onOpen={onOpen}
+      lead={
+        <>
+          <div className="flex items-center gap-3">
+            <AssetIcon src={assetLogoSrc(group.views[0]?.id ?? "")} label={group.name} size={36} />
+            <div className="min-w-0">
+              <div className="flex items-baseline gap-2">
+                <p className="truncate text-base text-black">{group.name}</p>
+                <span className="text-[10px] lowercase tracking-wide text-emerald-600">● live</span>
+              </div>
+              <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                {group.views.map((v) => (
+                  <span
+                    key={v.id}
+                    className="rounded border border-black/15 px-1.5 py-0.5 text-[10px] lowercase tracking-wide text-black/55"
+                  >
+                    {unitLabelOf(v)}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-        {positionTotal > 0 && (
-          <p className="mt-1 text-[11px] tabular-nums text-[#3c05c7]/80">
-            you own ${positionTotal.toFixed(2)}
-          </p>
-        )}
-      </div>
-
-      {/* Same fixed columns as YieldProviderRow — see the note there. */}
-      <div className="hidden w-[140px] shrink-0 sm:block">
-        {history.length > 1 && (
+          {positionTotal > 0 && (
+            <p className="mt-1 text-[11px] tabular-nums text-[#3c05c7]/80">
+              you own ${positionTotal.toFixed(2)}
+            </p>
+          )}
+        </>
+      }
+      chart={
+        history.length > 1 ? (
           <Sparkline values={history} height={32} className={`h-8 w-full ${trendLineTone(up)}`} />
-        )}
-      </div>
-
-      <div className="w-[112px] shrink-0 text-right">
-        {/* "up to" is set small so the RATE lines up with the plain rates above and
-            below it, rather than pushing the whole figure left. */}
-        <p className="text-xl tabular-nums text-black">
-          <span className="text-[11px] lowercase tracking-wide text-black/40">up to </span>
-          {(group.maxApy * 100).toFixed(2)}%
-        </p>
-        <p className={`text-[10px] lowercase tracking-wide ${RISK_TONE[top.riskLevel] ?? "text-black/55"}`}>
-          {RISK_LABEL[top.riskLevel] ?? top.riskLevel}
-        </p>
-      </div>
-
-      {pickSet?.enabled && (
-        <span className="shrink-0">
+        ) : null
+      }
+      figure={
+        <>
+          {/* "up to" is set small so the RATE lines up with the plain rates above and
+              below it, rather than pushing the whole figure left. */}
+          <p className="text-xl tabular-nums text-black">
+            <span className="text-[11px] lowercase tracking-wide text-black/40">up to </span>
+            {(group.maxApy * 100).toFixed(2)}%
+          </p>
+          <p className={`text-[10px] lowercase tracking-wide ${RISK_TONE[top.riskLevel] ?? "text-black/55"}`}>
+            {RISK_LABEL[top.riskLevel] ?? top.riskLevel}
+          </p>
+        </>
+      }
+      pick={
+        pickSet?.enabled ? (
           <PickButton
             picked={pickSet.picked.has(top.id)}
             onToggle={() => pickSet.toggle(top.id)}
             label={top.name}
           />
-        </span>
-      )}
-    </button>
+        ) : null
+      }
+    />
   );
 }
