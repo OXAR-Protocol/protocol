@@ -80,6 +80,8 @@ export const en = {
 
   // Deposit / confirm / success
   "deposit.cardMinimum": "minimum {value} · card",
+  "deposit.cardInAppBrowser":
+    "card payment can't open inside a wallet's browser — open oxar.app in Safari or Chrome to use it, or pay with Paybis below",
   "deposit.payWith": "pay with",
   "deposit.loadingAssets": "Loading your assets…",
   "deposit.noAssets": "No assets found in your wallet.",

@@ -71,6 +71,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "pile.explore": "Подивитися джерела",
 
   "deposit.cardMinimum": "мінімум {value} · картка",
+  "deposit.cardInAppBrowser":
+    "оплата карткою не відкривається у браузері гаманця — зайди на oxar.app у Safari чи Chrome, або оплати через Paybis нижче",
   "deposit.payWith": "оплата з",
   "deposit.loadingAssets": "Завантажуємо твої активи…",
   "deposit.noAssets": "У гаманці поки нічого немає.",
