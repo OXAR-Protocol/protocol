@@ -370,6 +370,35 @@ export const en = {
   "cashout.yourUsdc": "your USDC",
   "cashout.gotIt": "got it",
 
+  // Cash-out via Paybis (behind the flag)
+  "cashout.labelLive": "cash out · via Paybis",
+  "cashout.amount": "amount",
+  "cashout.max": "max {amount}",
+  "cashout.youGet": "you get",
+  "cashout.fee": "Paybis fee {fee} · {pct}%",
+  "cashout.enterAmount": "enter an amount to see the payout",
+  "cashout.pricey":
+    "Most of that fee is fixed, so it hurts small amounts and barely shows on large ones. Cashing out more at once costs you far less.",
+  "cashout.how": "how it works",
+  "cashout.open": "open Paybis",
+  "cashout.haveAddress": "I have their address — send",
+  "cashout.disclaimer":
+    "Paybis sells your dollars and pays your card. They verify you and hold the licence; we never touch the money and take nothing.",
+  "cashout.s1.title": "Start the sale on Paybis",
+  "cashout.s1.body":
+    "Pick USDC on Base and the currency you want. Paybis can't take USDC on Solana — we bridge it for you in the last step.",
+  "cashout.s2.title": "Say the money is yours",
+  "cashout.s2.body": "Choose “I am the originator” — it is your money.",
+  "cashout.s3.title": "Say it comes from your own wallet",
+  "cashout.s3.body": "Choose “My personal wallet”, then tick both boxes to continue.",
+  "cashout.s4.title": "Add the card to be paid",
+  "cashout.s4.body": "The card has to be in your name. Paybis rejects anyone else's.",
+  "cashout.s5.title": "Copy their address and send from here",
+  "cashout.s5.body":
+    "Paybis shows a one-time address. Copy it, come back, tap send below — Base is already selected. Never reuse an old address.",
+  "cashout.s6.title": "Wait for the card",
+  "cashout.s6.body": "Your dollars reach Paybis in about a minute; they pay out after that.",
+
   // Send sheet
   "send.label": "Send / Withdraw",
   "send.title": "Take it anywhere",

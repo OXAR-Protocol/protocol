@@ -16,7 +16,14 @@ import { DEST_CHAINS, getDestChain, type DestAsset } from "@/lib/wallet/outbound
 import { useT } from "@/lib/i18n";
 
 /** Send any held Solana asset into any asset, anywhere (transfer / swap / bridge). */
-export function SendSheet({ onClose }: { onClose: () => void }) {
+export function SendSheet({
+  onClose,
+  initialDestKey = "solana",
+}: {
+  onClose: () => void;
+  /** Preselect a destination — cash-out opens straight onto Base, where Paybis pays. */
+  initialDestKey?: string;
+}) {
   const { t } = useT();
   const { assets, loading } = useWalletAssets();
   const { send, status, error: sendError } = useSend();
@@ -24,7 +31,7 @@ export function SendSheet({ onClose }: { onClose: () => void }) {
   const [sourceMint, setSourceMint] = useState<string | null>(null);
   // Default to a same-chain Solana send — the common case. Cross-chain (Base/Arbitrum)
   // is still selectable below; opening straight onto a bridge was the confusing part.
-  const [destKey, setDestKey] = useState("solana");
+  const [destKey, setDestKey] = useState(initialDestKey);
   const [assetSym, setAssetSym] = useState("USDC");
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");

@@ -345,6 +345,34 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "cashout.yourUsdc": "твої USDC",
   "cashout.gotIt": "зрозуміло",
 
+  "cashout.labelLive": "виведення · через Paybis",
+  "cashout.amount": "сума",
+  "cashout.max": "макс. {amount}",
+  "cashout.youGet": "ти отримаєш",
+  "cashout.fee": "комісія Paybis {fee} · {pct}%",
+  "cashout.enterAmount": "введи суму, щоб побачити виплату",
+  "cashout.pricey":
+    "Більша частина цієї комісії фіксована, тому на малих сумах вона болюча, а на великих майже непомітна. Вивести більше за раз коштує значно дешевше.",
+  "cashout.how": "як це працює",
+  "cashout.open": "відкрити Paybis",
+  "cashout.haveAddress": "маю їхню адресу — надіслати",
+  "cashout.disclaimer":
+    "Paybis продає твої долари й виплачує на картку. Вони перевіряють тебе і мають ліцензію; ми не торкаємося грошей і не беремо нічого.",
+  "cashout.s1.title": "Почни продаж на Paybis",
+  "cashout.s1.body":
+    "Обери USDC у мережі Base і потрібну валюту. Paybis не приймає USDC у Solana — ми перекинемо їх за тебе на останньому кроці.",
+  "cashout.s2.title": "Підтверди, що гроші твої",
+  "cashout.s2.body": "Обери «I am the originator» — це твої кошти.",
+  "cashout.s3.title": "Підтверди, що надсилаєш зі свого гаманця",
+  "cashout.s3.body": "Обери «My personal wallet», потім постав обидві галочки.",
+  "cashout.s4.title": "Додай картку для виплати",
+  "cashout.s4.body": "Картка має бути оформлена на тебе. Чужі Paybis відхиляє.",
+  "cashout.s5.title": "Скопіюй їхню адресу й надішли звідси",
+  "cashout.s5.body":
+    "Paybis покаже одноразову адресу. Скопіюй її, повернись сюди й натисни кнопку нижче — мережу Base уже обрано. Ніколи не використовуй стару адресу повторно.",
+  "cashout.s6.title": "Чекай на картку",
+  "cashout.s6.body": "Долари дійдуть до Paybis приблизно за хвилину, після цього вони роблять виплату.",
+
   "send.label": "Надіслати / Вивести",
   "send.title": "Забери куди завгодно",
   "send.sent": "Надіслано ✓",

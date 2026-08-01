@@ -57,6 +57,7 @@ __exportStar(require("./core/fetch-retry"), exports);
 __exportStar(require("./core/evm-assets"), exports);
 __exportStar(require("./core/assets"), exports);
 __exportStar(require("./core/delora"), exports);
+__exportStar(require("./core/paybis"), exports);
 __exportStar(require("./core/jupiter-swap"), exports);
 __exportStar(require("./core/earnings-basis"), exports);
 __exportStar(require("./core/features"), exports);
