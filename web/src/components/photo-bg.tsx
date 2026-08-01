@@ -21,6 +21,7 @@ export function PhotoBg({
   scrim = "left",
   position = "object-right",
   zoomOnMobile = false,
+  opacity,
 }: {
   src: string;
   scrim?: keyof typeof SCRIMS;
@@ -34,6 +35,15 @@ export function PhotoBg({
    * reverts at `md`.
    */
   zoomOnMobile?: boolean;
+  /**
+   * Tailwind opacity class for the photo itself, e.g. "opacity-30".
+   *
+   * The scrim only holds white for the first two thirds of the width; past that the
+   * photo is at full strength, which is fine under a short row of chips and not fine
+   * under a line of numbers that runs the whole way across. Where the copy is wider
+   * than the scrim, turn the photo down instead of trying to cover it.
+   */
+  opacity?: string;
 }) {
   // Emit exactly one width/inset set per branch. Listing `w-full` and `w-[200%]` together
   // does NOT work: Tailwind resolves that by rule order in the stylesheet, where `w-full`
@@ -50,7 +60,7 @@ export function PhotoBg({
         alt=""
         aria-hidden
         loading="lazy"
-        className={`pointer-events-none absolute h-full select-none object-cover ${position} ${box}`}
+        className={`pointer-events-none absolute h-full select-none object-cover ${position} ${box} ${opacity ?? ""}`}
       />
       <div aria-hidden className={`absolute inset-0 ${SCRIMS[scrim]}`} />
     </>
