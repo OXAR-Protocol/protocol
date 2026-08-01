@@ -211,7 +211,6 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "rail.exitCostUnavailable": "зараз немає способу вийти з такою сумою — це ринок, а не ми",
   "rail.exitCostCeiling": "зараз максимум, який вийде продати за раз, — це приблизно {usd}. більшу позицію доведеться продавати в кілька заходів, і ціна щоразу трохи зміниться. це глибина ринку, а не наша комісія",
   "rail.cashOut": "вивести на картку",
-  "common.soon": "скоро",
   "common.or": "або",
   "common.copy": "Копіювати",
   "common.copied": "Скопійовано",
@@ -332,18 +331,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "activity.empty": "поки нічого — твої гроші ще посапують.",
   "activity.showMore": "показати ще",
 
-  "cashout.label": "виведення · скоро",
   "cashout.title": "Виведи на свою картку",
-  "cashout.body1a": "Пряме виведення на картку ",
-  "cashout.body1b": "вже скоро",
-  "cashout.body1c":
-    " — ми завершуємо ліцензований off-ramp, щоб ти міг продати одразу на Visa / Mastercard за лічені хвилини.",
-  "cashout.body2a":
-    "А поки можеш вивести свої долари на будь-який гаманець чи біржу, якою вже користуєшся (Binance, Revolut тощо), через ",
-  "cashout.body2b": "Надіслати",
-  "cashout.body2c": " — і вивести звідти. Твої кошти, твої ключі, будь-коли.",
-  "cashout.yourUsdc": "твої USDC",
-  "cashout.gotIt": "зрозуміло",
 
   "cashout.labelLive": "виведення · через Paybis",
   "cashout.amount": "сума",
@@ -373,7 +361,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "cashout.s6.title": "Чекай на картку",
   "cashout.s6.body": "Долари дійдуть до Paybis приблизно за хвилину, після цього вони роблять виплату.",
 
-  "topup.altLink": "картку відхилено? поповни через Paybis",
+  "topup.altLink": "оплатити через Paybis",
+  "topup.altHint": "інший провайдер карток · долари приходять одразу на Solana",
   "topup.label": "поповнення · через Paybis",
   "topup.title": "Поповни карткою",
   "topup.uaWarning":

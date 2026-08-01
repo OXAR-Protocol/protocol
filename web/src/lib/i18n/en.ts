@@ -225,7 +225,6 @@ export const en = {
   "rail.exitCostUnavailable": "there's no way out at this size right now — that's the market, not us",
   "rail.exitCostCeiling": "right now, about {usd} is the most that would sell in one go — a bigger position means selling in a few goes, with the price moving each time. that's the market's depth, not a fee we charge",
   "rail.cashOut": "cash out to card",
-  "common.soon": "soon",
   "common.or": "or",
   "common.copy": "Copy",
   "common.copied": "Copied",
@@ -357,18 +356,7 @@ export const en = {
   "activity.showMore": "show more",
 
   // Cash-out sheet
-  "cashout.label": "cash out · coming soon",
   "cashout.title": "Cash out to your card",
-  "cashout.body1a": "Direct card payout is ",
-  "cashout.body1b": "coming soon",
-  "cashout.body1c":
-    " — we're finishing the licensed off-ramp so you can sell straight to a Visa / Mastercard, in minutes.",
-  "cashout.body2a":
-    "In the meantime you can withdraw your dollars to any wallet or exchange you already use (Binance, Revolut, etc.) with ",
-  "cashout.body2b": "Send",
-  "cashout.body2c": ", and cash out from there — your funds, your keys, anytime.",
-  "cashout.yourUsdc": "your USDC",
-  "cashout.gotIt": "got it",
 
   // Cash-out via Paybis (behind the flag)
   "cashout.labelLive": "cash out · via Paybis",
@@ -400,7 +388,8 @@ export const en = {
   "cashout.s6.body": "Your dollars reach Paybis in about a minute; they pay out after that.",
 
   // Top up with a card via Paybis (behind the flag)
-  "topup.altLink": "card declined? top up through Paybis",
+  "topup.altLink": "pay with Paybis instead",
+  "topup.altHint": "another card provider · lands straight on Solana",
   "topup.label": "top up · via Paybis",
   "topup.title": "Top up with a card",
   "topup.uaWarning":
