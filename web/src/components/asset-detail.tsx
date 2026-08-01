@@ -184,8 +184,17 @@ export function AssetDetail({
         >
           {/* The wallet card's treatment, not a violet wash: a white card and a real
               photograph. The engraving at 6% behind a purple tint read as a smudge —
-              a picture you can't quite see is worse than no picture. */}
-          <PhotoBg src="/art/dripping-dollar.webp" scrim="left" position="object-[right_top]" zoomOnMobile />
+              a picture you can't quite see is worse than no picture.
+              Turned down to 30%, like the balance card it echoes: the scrim only holds
+              white for the first two thirds, and "sell now: … above market value" runs
+              the whole way across — past the scrim it was reading over bare engraving. */}
+          <PhotoBg
+            src="/art/dripping-dollar.webp"
+            scrim="left"
+            position="object-[right_top]"
+            zoomOnMobile
+            opacity="opacity-30"
+          />
           <div className="relative">
           <p className="lowercase text-[13px] text-black/55">{t("asset.yourPosition")}</p>
           <p className="mt-1 text-[clamp(24px,3.4vw,34px)] font-bold tabular-nums">

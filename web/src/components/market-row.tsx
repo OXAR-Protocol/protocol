@@ -18,6 +18,10 @@ interface Props {
   figure: ReactNode;
   /** Omitted entirely (not hidden) when picking is off. */
   pick?: ReactNode;
+  /** Anything after the pick control — an "opens" arrow, say. */
+  trailing?: ReactNode;
+  /** In the basket: the row itself says so, not only the pill. */
+  selected?: boolean;
 }
 
 /**
@@ -30,13 +34,25 @@ interface Props {
  * left to go, and the ticker ran under the price. Stacking buys back the width
  * without taking the words off the button — a bare "+" doesn't say what it does.
  */
-export function MarketRow({ seed, onOpen, disabled, lead, chart, figure, pick }: Props) {
+export function MarketRow({
+  seed,
+  onOpen,
+  disabled,
+  lead,
+  chart,
+  figure,
+  pick,
+  trailing,
+  selected,
+}: Props) {
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onOpen}
-      className="group relative isolate flex w-full items-center gap-3 overflow-hidden rounded-[8px] border border-black/10 bg-white p-5 text-left transition-colors hover:border-black/30 disabled:opacity-50"
+      className={`group relative isolate flex w-full items-center gap-3 overflow-hidden rounded-[8px] border bg-white p-5 text-left transition-colors disabled:opacity-50 ${
+        selected ? "border-black/40 ring-1 ring-black/10" : "border-black/10 hover:border-black/30"
+      }`}
     >
       <BanknoteBg seed={seed} />
 
@@ -45,11 +61,14 @@ export function MarketRow({ seed, onOpen, disabled, lead, chart, figure, pick }:
       <div className="hidden w-[140px] shrink-0 sm:block">{chart}</div>
 
       <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-3">
-        {/* Fixed width from `sm` up so the figures line up down the list; on a
-            phone the cluster is as wide as the pick pill, which does the same. */}
-        <div className="text-right sm:w-[112px]">{figure}</div>
+        {/* A floor, not a cap, from `sm` up: it lines the figures up down the list,
+            while a longer label underneath ("… since you bought") takes the width it
+            needs instead of wrapping into a ragged stack. Either way the figures keep
+            one right edge — the pick pill after them is a constant width. */}
+        <div className="text-right sm:min-w-[112px]">{figure}</div>
         {pick}
       </div>
+      {trailing}
     </button>
   );
 }
