@@ -399,6 +399,30 @@ export const en = {
   "cashout.s6.title": "Wait for the card",
   "cashout.s6.body": "Your dollars reach Paybis in about a minute; they pay out after that.",
 
+  // Top up with a card via Paybis (behind the flag)
+  "topup.altLink": "card declined? top up through Paybis",
+  "topup.label": "top up · via Paybis",
+  "topup.title": "Top up with a card",
+  "topup.uaWarning":
+    "Ukrainian cards are declined here — not by Paybis, but by the banks, under an NBU rule on crypto payments. Use a card issued elsewhere.",
+  "topup.yourAddress": "your address — copy it first",
+  "topup.open": "open Paybis",
+  "topup.disclaimer":
+    "Paybis takes the payment and sends the dollars straight to your wallet. They verify you and hold the licence; we never touch the money and take nothing.",
+  "topup.s1.title": "Check the amount",
+  "topup.s1.body":
+    "Paybis opens with your amount and currency already filled in, buying USDC on Solana.",
+  "topup.s2.title": "Paste your address",
+  "topup.s2.body":
+    "Pick “External wallet” and paste the address you copied above — or scan the QR. Never type it by hand.",
+  "topup.s3.title": "Say the money is coming to you",
+  "topup.s3.body": "Choose “I am sending the crypto-assets to myself”.",
+  "topup.s4.title": "Say it's a personal wallet",
+  "topup.s4.body": "Choose “A personal wallet”, then tick both boxes to continue.",
+  "topup.s5.title": "Pay and wait",
+  "topup.s5.body":
+    "Your bank will ask you to confirm the payment. The dollars land in your wallet a few minutes later.",
+
   // Send sheet
   "send.label": "Send / Withdraw",
   "send.title": "Take it anywhere",
