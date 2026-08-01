@@ -93,10 +93,16 @@ export default function HomePage() {
           zoomOnMobile
           opacity="opacity-30"
         />
-        <p className="relative lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
+        {/* ONE wrapper over everything, not `relative` sprinkled per child: the photo
+            and its scrim are absolutely positioned, so any static sibling paints
+            UNDER them. The "drop dollars into a source" line was added without it and
+            vanished — half swallowed by the white scrim, half showing through the
+            bill. A wrapper makes that impossible for whatever gets added next. */}
+        <div className="relative">
+        <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
           {t("home.sleepingMoney")}
         </p>
-        <div className="relative mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
           {loading ? (
             <span className="text-[clamp(2rem,5vw,3rem)] font-light text-black/40 leading-none">
               <Loader2 className="animate-spin inline" size={28} />
@@ -139,6 +145,7 @@ export default function HomePage() {
             ? t(positionCount === 1 ? "home.sources.one" : "home.sources.many", { n: positionCount })
             : t("home.empty.cta")}
         </p>
+        </div>
       </motion.section>
 
 
