@@ -28,7 +28,7 @@ function aggregate(sources: { currentValue: number; invested: number; apy: numbe
 
 export default function HomePage() {
   const { user } = usePrivy();
-  const { totalUsdc, blendedApy, positionCount, views, loading } =
+  const { totalUsdc, blendedApy, views, loading } =
     useAggregatePersonalBalance();
   // Real earnings already made (current value − on-chain cost basis), not a projection.
   // Split yield vs stocks — they're different products.
@@ -140,11 +140,6 @@ export default function HomePage() {
             </span>
           )}
         </div>
-        <p className="mt-3 text-sm text-black/45">
-          {totalUsdc > 0
-            ? t(positionCount === 1 ? "home.sources.one" : "home.sources.many", { n: positionCount })
-            : t("home.empty.cta")}
-        </p>
         </div>
       </motion.section>
 
