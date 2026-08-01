@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Check } from "lucide-react";
 
+import { useDropPlacement } from "@/hooks/use-drop-placement";
+
 export interface CustomSelectOption {
   value: string;
   label: string;
@@ -30,6 +32,7 @@ export function CustomSelect({
 }: CustomSelectProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const drop = useDropPlacement(open, ref);
 
   useEffect(() => {
     if (!open) return;
@@ -75,7 +78,12 @@ export function CustomSelect({
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full left-0 mt-1 min-w-full bg-white border border-black/15 rounded shadow-[0_8px_24px_rgba(0,0,0,0.6)] py-1 max-h-64 overflow-auto">
+        <div
+          style={{ maxHeight: drop.maxHeight }}
+          className={`absolute z-50 left-0 min-w-full bg-white border border-black/15 rounded shadow-[0_8px_24px_rgba(0,0,0,0.6)] py-1 overflow-auto ${
+            drop.up ? "bottom-full mb-1" : "top-full mt-1"
+          }`}
+        >
           {options.map((opt) => {
             const isActive = opt.value === value;
             return (

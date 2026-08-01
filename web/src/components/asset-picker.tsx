@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { TokenIcon } from "@/components/token-icon";
+import { useDropPlacement } from "@/hooks/use-drop-placement";
 import type { WalletAsset } from "@oxar/sdk";
 
 const fmt = (n: number) =>
@@ -22,6 +23,7 @@ export function AssetPicker({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const drop = useDropPlacement(open, ref, 240);
   const active = assets.find((a) => a.mint === value) ?? null;
 
   useEffect(() => {
@@ -57,7 +59,12 @@ export function AssetPicker({
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-[10px] border border-black/15 bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+        <div
+          style={{ maxHeight: drop.maxHeight }}
+          className={`absolute left-0 right-0 z-50 overflow-auto rounded-[10px] border border-black/15 bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${
+            drop.up ? "bottom-full mb-1" : "top-full mt-1"
+          }`}
+        >
           {assets.map((a) => (
             <button
               key={a.mint}

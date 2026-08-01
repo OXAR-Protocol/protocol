@@ -4,7 +4,7 @@ import { PickButton } from "@/components/pick-button";
 import { usePickSet } from "@/components/pick-set";
 import { Sparkline } from "@/components/sparkline";
 import { trendUp, trendLineTone } from "@/lib/yield/trend";
-import { BanknoteBg } from "@/components/banknote-bg";
+import { MarketRow } from "@/components/market-row";
 import { useApyHistory } from "@/hooks/use-apy-history";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
@@ -33,58 +33,54 @@ export function YieldProviderRow({ view, onOpen }: Props) {
   const inPosition = positionValue > 0;
 
   return (
-    <button
-      onClick={onOpen}
-      className="group relative isolate flex w-full items-center gap-3 overflow-hidden rounded-[8px] border border-black/10 bg-white p-5 text-left transition-colors hover:border-black/30"
-    >
-      <BanknoteBg seed={view.id} />
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-3">
-          <AssetIcon src={assetLogoSrc(view.id)} label={assetIconLabel(view.id, view.assetSymbol)} size={36} />
-          <div className="min-w-0">
-            <div className="flex items-baseline gap-2">
-              <p className="truncate text-base text-black">{view.name}</p>
-              <span className="rounded border border-black/15 px-1.5 py-0.5 text-[10px] lowercase tracking-wide text-black/60">
-                {view.assetSymbol}
-              </span>
-              <span className="text-[10px] lowercase tracking-wide text-emerald-600">● live</span>
+    <MarketRow
+      seed={view.id}
+      onOpen={onOpen}
+      lead={
+        <>
+          <div className="flex items-center gap-3">
+            <AssetIcon src={assetLogoSrc(view.id)} label={assetIconLabel(view.id, view.assetSymbol)} size={36} />
+            <div className="min-w-0">
+              {/* Wraps rather than overflows: on a phone the chip and the "live"
+                  dot had nowhere to go and printed over the rate. */}
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <p className="truncate text-base text-black">{view.name}</p>
+                <span className="rounded border border-black/15 px-1.5 py-0.5 text-[10px] lowercase tracking-wide text-black/60">
+                  {view.assetSymbol}
+                </span>
+                <span className="text-[10px] lowercase tracking-wide text-emerald-600">● live</span>
+              </div>
             </div>
           </div>
-        </div>
-        {inPosition && (
-          <p className="mt-1 text-[11px] tabular-nums text-[#3c05c7]/80">
-            you own ${positionValue.toFixed(2)}
-          </p>
-        )}
-      </div>
-
-      {/* Fixed-width columns, not content-width ones: with the figure sized to its
-          own text, "up to 4.99%" is wider than "3.55%" and drags the chart beside it
-          out of line with the row above. The slot is rendered even when there's no
-          series, so a source without history doesn't shift the whole row either. */}
-      <div className="hidden w-[140px] shrink-0 sm:block">
-        {history.length > 1 && (
+          {inPosition && (
+            <p className="mt-1 text-[11px] tabular-nums text-[#3c05c7]/80">
+              you own ${positionValue.toFixed(2)}
+            </p>
+          )}
+        </>
+      }
+      chart={
+        history.length > 1 ? (
           <Sparkline values={history} height={32} className={`h-8 w-full ${trendLineTone(up)}`} />
-        )}
-      </div>
-
-      <div className="w-[112px] shrink-0 text-right">
-        <p className="text-xl tabular-nums text-black">{(view.apy * 100).toFixed(2)}%</p>
-        <p className={`text-[10px] lowercase tracking-wide ${RISK_TONE[view.riskLevel] ?? "text-black/55"}`}>
-          {RISK_LABEL[view.riskLevel] ?? view.riskLevel}
-        </p>
-      </div>
-
-      {pickSet?.enabled && (
-        <span className="shrink-0">
+        ) : null
+      }
+      figure={
+        <>
+          <p className="text-xl tabular-nums text-black">{(view.apy * 100).toFixed(2)}%</p>
+          <p className={`text-[10px] lowercase tracking-wide ${RISK_TONE[view.riskLevel] ?? "text-black/55"}`}>
+            {RISK_LABEL[view.riskLevel] ?? view.riskLevel}
+          </p>
+        </>
+      }
+      pick={
+        pickSet?.enabled ? (
           <PickButton
             picked={pickSet.picked.has(view.id)}
             onToggle={() => pickSet.toggle(view.id)}
             label={view.name}
           />
-        </span>
-      )}
-    </button>
+        ) : null
+      }
+    />
   );
 }
