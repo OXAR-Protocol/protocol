@@ -7,7 +7,7 @@ import { CreditCard } from "lucide-react";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { DepositPanel } from "@/components/deposit-panel";
 import { YieldAmountField } from "@/components/yield-amount-field";
-import { CashOutSheet, CASH_OUT_FEATURE } from "@/components/cash-out-sheet";
+import { CashOutSheet } from "@/components/cash-out-sheet";
 import { useSwapOutPreview, NOTABLE_SELL_COST } from "@/hooks/use-swap-out-preview";
 import { useFeature } from "@/hooks/use-features";
 import { SellAmountControls } from "@/components/sell-amount-controls";
@@ -57,7 +57,6 @@ export function AssetActionRail({
   const canSell = positionValue > 0;
   // Fractions, a one-press full exit, and a units view — dark until the key is on.
   const sellingV2 = useFeature("selling-v2");
-  const cashOutLive = useFeature(CASH_OUT_FEATURE);
   // Units are only meaningful where a unit has a price (stocks, gold), and only
   // while the flag is on; everything else stays denominated in dollars.
   const unitsMode = sellingV2 && sellInUnits && !!sharePriceUsd && sharePriceUsd > 0;
@@ -181,11 +180,6 @@ export function AssetActionRail({
           >
             <CreditCard size={14} strokeWidth={1.5} />
             {t("rail.cashOut")}
-            {!cashOutLive && (
-              <span className="rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] lowercase tracking-wide text-black/45">
-                {t("common.soon")}
-              </span>
-            )}
           </button>
         </>
       )}

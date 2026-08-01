@@ -6,8 +6,7 @@ import { AnimatePresence } from "framer-motion";
 import { CreditCard } from "lucide-react";
 
 import { PayWithField } from "@/components/pay-with-field";
-import { TopUpSheet, TOP_UP_FEATURE } from "@/components/top-up-sheet";
-import { useFeature } from "@/hooks/use-features";
+import { TopUpSheet } from "@/components/top-up-sheet";
 import { koraEnabled } from "@/lib/gas/kora";
 import { DepositConfirm } from "@/components/deposit-confirm";
 import { ExitCostNotice } from "@/components/exit-cost-notice";
@@ -81,7 +80,6 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // Show the "no surprises" review before the deposit signs.
   const [confirming, setConfirming] = useState(false);
   const [showTopUp, setShowTopUp] = useState(false);
-  const paybisTopUp = useFeature(TOP_UP_FEATURE);
   // USD to buy via Apple Pay when the wallet is empty — there's no pay-asset to
   // size the amount from, so the user enters it directly. Pre-filled, editable.
   const [buyUsdInput, setBuyUsdInput] = useState("");
@@ -410,21 +408,22 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         </>
       )}
 
-      {/* The built-in on-ramp doesn't cover everyone — MoonPay excludes Ukraine
-          outright — so offer the Paybis hand-off as a second door. Outside the
-          canUseCard block on purpose: it's a plain link, so it also works in the
-          in-app browsers where the widget black-screens. */}
-      {paybisTopUp && (
-        <>
-          <button
-            onClick={() => setShowTopUp(true)}
-            className="mt-3 w-full text-center text-[11px] lowercase tracking-wide text-black/40 underline underline-offset-2 transition hover:text-black"
-          >
-            {t("topup.altLink")}
-          </button>
-          <AnimatePresence>{showTopUp && <TopUpSheet onClose={() => setShowTopUp(false)} />}</AnimatePresence>
-        </>
-      )}
+      {/* A second card provider, always offered rather than kept as a fallback.
+          The built-in one (Privy → MoonPay / Coinbase / Stripe) doesn't cover
+          everyone — MoonPay excludes Ukraine outright — and even where it does, a
+          given card can be refused by one provider and accepted by the other. Sits
+          outside the canUseCard block on purpose: it's a plain link, so it also
+          works in the in-app browsers where the widget black-screens. */}
+      <button
+        onClick={() => setShowTopUp(true)}
+        className="mt-3 w-full rounded-full border border-black/15 px-4 py-3 text-[13px] lowercase tracking-wide text-black/60 transition hover:border-black/40 hover:text-black"
+      >
+        {t("topup.altLink")}
+      </button>
+      <p className="mt-1.5 text-center text-[10px] lowercase tracking-wide text-black/30">
+        {t("topup.altHint")}
+      </p>
+      <AnimatePresence>{showTopUp && <TopUpSheet onClose={() => setShowTopUp(false)} />}</AnimatePresence>
     </div>
   );
 }
