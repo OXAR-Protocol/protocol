@@ -4,6 +4,9 @@ import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { X, ChevronRight } from "lucide-react";
 
+import { cardRouteUnserved } from "@oxar/sdk";
+
+import { useCountry } from "@/hooks/use-country";
 import { useT } from "@/lib/i18n";
 import type { TranslationKey } from "@/lib/i18n/en";
 
@@ -30,6 +33,7 @@ export interface CardRoute {
  */
 export function CardRouteSheet({ routes, onClose }: { routes: readonly CardRoute[]; onClose: () => void }) {
   const { t } = useT();
+  const country = useCountry();
 
   return createPortal(
     <motion.div
@@ -75,6 +79,11 @@ export function CardRouteSheet({ routes, onClose }: { routes: readonly CardRoute
                 <span className="mt-0.5 block text-[12px] leading-snug text-black/50">
                   {route.unavailable ?? t(route.body)}
                 </span>
+                {cardRouteUnserved(route.key, country) && (
+                  <span className="mt-1 block text-[12px] leading-snug text-amber-700">
+                    {t("cardroute.notInCountry")}
+                  </span>
+                )}
               </span>
               {!route.unavailable && (
                 <ChevronRight size={16} strokeWidth={1.5} className="shrink-0 text-black/30" />
