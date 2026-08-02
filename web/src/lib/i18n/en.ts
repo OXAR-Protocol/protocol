@@ -391,13 +391,12 @@ export const en = {
   // Card route chooser
   "cardroute.label": "pay by card",
   "cardroute.title": "Which way?",
-  "cardroute.builtin.title": "MoonPay, Coinbase or Stripe",
-  "cardroute.builtin.body": "Pay right here, no account anywhere. Not available in every country.",
+  "cardroute.builtin.title": "MoonPay",
+  "cardroute.builtin.body": "Pay without leaving the app. Uses the amount you typed above.",
   "cardroute.paybis.title": "Paybis",
   "cardroute.notInCountry": "doesn't serve your country — likely to be declined",
-  "cardroute.paybis.body":
-    "Opens their site, needs an account and ID check. Takes EUR, USD or hryvnia, and the dollars land straight on Solana.",
-  "cardroute.belowMin": "needs at least ${min} — raise the amount above",
+  "cardroute.paybis.body": "Opens their page, where you set the amount. Needs an account and an ID check. Takes euros, dollars or hryvnia.",
+  "cardroute.belowMin": "enter at least ${min} in the amount field above",
   "cardroute.footer":
     "Whoever takes the payment holds the licence and checks you. We never touch the money and take nothing.",
 

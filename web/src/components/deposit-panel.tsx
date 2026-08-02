@@ -416,10 +416,14 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             routes={[
               {
                 key: "builtin",
+                // Labelled MoonPay: Privy can route this to Coinbase or Stripe, but
+                // MoonPay is the default and the one whose coverage we've verified.
+                // Listing all three read as jargon in a two-item choice.
                 title: "cardroute.builtin.title",
                 body: "cardroute.builtin.body",
                 // The Privy widget black-screens inside a mobile wallet's in-app
-                // browser, and below the on-ramp floor there is nothing to charge.
+                // browser. The floor is the on-ramp's, and it reads the amount from
+                // the field above — Paybis asks for its own, hence the wording.
                 unavailable: !canUseCard
                   ? t("deposit.cardInAppBrowser")
                   : applePayBelowMin
