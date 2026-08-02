@@ -70,9 +70,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "pile.empty.body": "Твої позиції з'являться тут, щойно гроші почнуть працювати.",
   "pile.explore": "Подивитися джерела",
 
-  "deposit.cardMinimum": "мінімум {value} · картка",
   "deposit.cardInAppBrowser":
-    "оплата карткою не відкривається у браузері гаманця — зайди на oxar.app у Safari чи Chrome, або оплати через Paybis нижче",
+    "не відкривається у браузері гаманця — зайди на oxar.app у Safari чи Chrome, або обери Paybis",
   "deposit.payWith": "оплата з",
   "deposit.loadingAssets": "Завантажуємо твої активи…",
   "deposit.noAssets": "У гаманці поки нічого немає.",
@@ -363,8 +362,17 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "cashout.s6.title": "Чекай на картку",
   "cashout.s6.body": "Долари дійдуть до Paybis приблизно за хвилину, після цього вони роблять виплату.",
 
-  "topup.altLink": "оплатити через Paybis",
-  "topup.altHint": "інший провайдер карток · долари приходять одразу на Solana",
+  "cardroute.label": "оплата карткою",
+  "cardroute.title": "Яким шляхом?",
+  "cardroute.builtin.title": "Картка · найшвидше",
+  "cardroute.builtin.body": "Оплата просто тут, без реєстрації. Доступно не в усіх країнах.",
+  "cardroute.paybis.title": "Paybis",
+  "cardroute.paybis.body":
+    "Відкриє їхній сайт, потрібен акаунт і перевірка документів. Приймає євро, долари й гривню, а долари приходять одразу на Solana.",
+  "cardroute.belowMin": "потрібно щонайменше ${min} — збільш суму вище",
+  "cardroute.footer":
+    "Той, хто приймає платіж, має ліцензію і перевіряє тебе. Ми не торкаємося грошей і не беремо нічого.",
+
   "topup.label": "поповнення · через Paybis",
   "topup.title": "Поповни карткою",
   "topup.uaWarning":

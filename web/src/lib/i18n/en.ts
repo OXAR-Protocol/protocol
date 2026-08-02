@@ -79,9 +79,8 @@ export const en = {
   "pile.explore": "Explore yield",
 
   // Deposit / confirm / success
-  "deposit.cardMinimum": "minimum {value} · card",
   "deposit.cardInAppBrowser":
-    "card payment can't open inside a wallet's browser — open oxar.app in Safari or Chrome to use it, or pay with Paybis below",
+    "can't open inside a wallet's browser — open oxar.app in Safari or Chrome, or pick Paybis",
   "deposit.payWith": "pay with",
   "deposit.loadingAssets": "Loading your assets…",
   "deposit.noAssets": "No assets found in your wallet.",
@@ -389,9 +388,19 @@ export const en = {
   "cashout.s6.title": "Wait for the card",
   "cashout.s6.body": "Your dollars reach Paybis in about a minute; they pay out after that.",
 
+  // Card route chooser
+  "cardroute.label": "pay by card",
+  "cardroute.title": "Which way?",
+  "cardroute.builtin.title": "Card · fastest",
+  "cardroute.builtin.body": "Pay right here, no account anywhere. Not available in every country.",
+  "cardroute.paybis.title": "Paybis",
+  "cardroute.paybis.body":
+    "Opens their site, needs an account and ID check. Takes EUR, USD or hryvnia, and the dollars land straight on Solana.",
+  "cardroute.belowMin": "needs at least ${min} — raise the amount above",
+  "cardroute.footer":
+    "Whoever takes the payment holds the licence and checks you. We never touch the money and take nothing.",
+
   // Top up with a card via Paybis (behind the flag)
-  "topup.altLink": "pay with Paybis instead",
-  "topup.altHint": "another card provider · lands straight on Solana",
   "topup.label": "top up · via Paybis",
   "topup.title": "Top up with a card",
   "topup.uaWarning":
