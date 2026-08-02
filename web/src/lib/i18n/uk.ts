@@ -364,9 +364,10 @@ export const uk: Partial<Record<TranslationKey, string>> = {
 
   "cardroute.label": "оплата карткою",
   "cardroute.title": "Яким шляхом?",
-  "cardroute.builtin.title": "Картка · найшвидше",
+  "cardroute.builtin.title": "MoonPay, Coinbase або Stripe",
   "cardroute.builtin.body": "Оплата просто тут, без реєстрації. Доступно не в усіх країнах.",
   "cardroute.paybis.title": "Paybis",
+  "cardroute.notInCountry": "не працює у твоїй країні — швидше за все відхилять",
   "cardroute.paybis.body":
     "Відкриє їхній сайт, потрібен акаунт і перевірка документів. Приймає євро, долари й гривню, а долари приходять одразу на Solana.",
   "cardroute.belowMin": "потрібно щонайменше ${min} — збільш суму вище",
