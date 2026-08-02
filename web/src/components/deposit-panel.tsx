@@ -7,6 +7,7 @@ import { CreditCard } from "lucide-react";
 
 import { PayWithField } from "@/components/pay-with-field";
 import { TopUpSheet } from "@/components/top-up-sheet";
+import { CardRouteSheet } from "@/components/card-route-sheet";
 import { koraEnabled } from "@/lib/gas/kora";
 import { DepositConfirm } from "@/components/deposit-confirm";
 import { ExitCostNotice } from "@/components/exit-cost-notice";
@@ -80,6 +81,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // Show the "no surprises" review before the deposit signs.
   const [confirming, setConfirming] = useState(false);
   const [showTopUp, setShowTopUp] = useState(false);
+  const [showRoutes, setShowRoutes] = useState(false);
   // USD to buy via Apple Pay when the wallet is empty — there's no pay-asset to
   // size the amount from, so the user enters it directly. Pre-filled, editable.
   const [buyUsdInput, setBuyUsdInput] = useState("");
@@ -374,73 +376,68 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         </div>
       )}
 
-      {/* Card on-ramp (Privy → MoonPay / Coinbase / Stripe, routed by geo). Its widget
-          black-screens inside a mobile wallet's in-app browser, so it can't be used
-          there — but it is still SHOWN, disabled, with the reason. Hiding it silently
-          read as "the card option disappeared" and left no way to ask for it back. */}
-      {canUseCard ? (
-        <>
-          <button
-            onClick={canCancelApplePay ? applePay.cancel : handleApplePay}
-            disabled={(applePay.busy && !canCancelApplePay) || busy || applePayBelowMin}
-            className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[15px] font-medium tracking-tight hover:bg-black/90 disabled:opacity-40 transition inline-flex items-center justify-center gap-1.5"
-          >
-            {applePay.busy ? (
-              // While funding/arriving, the same button stops waiting — a card
-              // window the user backed out of never resolves on its own. Once
-              // buying, there's nothing left to cancel (see canCancelApplePay).
-              <span className="lowercase">
-                {canCancelApplePay ? t("alloc.stopWaiting") : t(`status.${applePay.status}` as "status.buying")}
-              </span>
-            ) : (
-              <>
-                <CreditCard size={16} strokeWidth={1.75} />
-                <span className="capitalize">{verb}</span>
-                <span>with card</span>
-              </>
-            )}
-          </button>
-          <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/30">
-            {/* Just the floor. The amount charged is the one in the field above, so
-                repeating it here only added a number to read. */}
-            {t("deposit.cardMinimum", { value: `$${APPLE_PAY_MIN_USD}` })}
-          </p>
+      {/* One card button; which provider is a choice behind it (see CardRouteSheet).
+          Two competing buttons made a vendor name the label, which means nothing to
+          someone who has never heard of Paybis, and read as a fallback rather than
+          what it is — also a card payment.
 
-          {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}
-        </>
-      ) : (
-        <>
-          <button
-            disabled
-            className="mt-3 w-full px-4 py-3 rounded-full border border-black/15 text-[15px] font-medium tracking-tight text-black/30 inline-flex items-center justify-center gap-1.5"
-          >
+          While a card purchase is in flight this button stops being a chooser and
+          becomes the progress/cancel control: a card window the user backed out of
+          never resolves on its own, so that has to stay reachable. */}
+      <button
+        onClick={
+          applePay.busy
+            ? canCancelApplePay
+              ? applePay.cancel
+              : undefined
+            : () => setShowRoutes(true)
+        }
+        disabled={(applePay.busy && !canCancelApplePay) || busy}
+        className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[15px] font-medium tracking-tight hover:bg-black/90 disabled:opacity-40 transition inline-flex items-center justify-center gap-1.5"
+      >
+        {applePay.busy ? (
+          <span className="lowercase">
+            {canCancelApplePay ? t("alloc.stopWaiting") : t(`status.${applePay.status}` as "status.buying")}
+          </span>
+        ) : (
+          <>
             <CreditCard size={16} strokeWidth={1.75} />
             <span className="capitalize">{verb}</span>
             <span>with card</span>
-          </button>
-          <p className="mt-2 text-center text-[10px] leading-snug lowercase tracking-wide text-black/40">
-            {t("deposit.cardInAppBrowser")}
-          </p>
-        </>
-      )}
-
-      {/* The second card provider. A plain link, so it works everywhere the widget
-          doesn't — which is why it becomes the primary button when the built-in one
-          can't run. Offered as a choice even when both work: the two providers refuse
-          different cards, and Paybis lands straight on Solana. */}
-      <button
-        onClick={() => setShowTopUp(true)}
-        className={
-          canUseCard
-            ? "mt-3 w-full rounded-full border border-black/15 px-4 py-3 text-[13px] lowercase tracking-wide text-black/60 transition hover:border-black/40 hover:text-black"
-            : "mt-3 w-full rounded-full bg-black px-4 py-3 text-[15px] font-medium tracking-tight text-white transition hover:bg-black/90"
-        }
-      >
-        {t("topup.altLink")}
+          </>
+        )}
       </button>
-      <p className="mt-1.5 text-center text-[10px] lowercase tracking-wide text-black/30">
-        {t("topup.altHint")}
-      </p>
+
+      {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}
+
+      <AnimatePresence>
+        {showRoutes && (
+          <CardRouteSheet
+            routes={[
+              {
+                key: "builtin",
+                title: "cardroute.builtin.title",
+                body: "cardroute.builtin.body",
+                // The Privy widget black-screens inside a mobile wallet's in-app
+                // browser, and below the on-ramp floor there is nothing to charge.
+                unavailable: !canUseCard
+                  ? t("deposit.cardInAppBrowser")
+                  : applePayBelowMin
+                    ? t("cardroute.belowMin", { min: String(APPLE_PAY_MIN_USD) })
+                    : undefined,
+                onSelect: handleApplePay,
+              },
+              {
+                key: "paybis",
+                title: "cardroute.paybis.title",
+                body: "cardroute.paybis.body",
+                onSelect: () => setShowTopUp(true),
+              },
+            ]}
+            onClose={() => setShowRoutes(false)}
+          />
+        )}
+      </AnimatePresence>
       <AnimatePresence>{showTopUp && <TopUpSheet onClose={() => setShowTopUp(false)} />}</AnimatePresence>
     </div>
   );
