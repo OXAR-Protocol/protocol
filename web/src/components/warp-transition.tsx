@@ -156,32 +156,10 @@ export function WarpProvider({ children }: { children: ReactNode }) {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.15 }}
           >
+            {/* Just the mark. The canvas already draws the logo; spelling out
+                "OXAR PROTOCOL" underneath it said the same thing twice, in the
+                voice of a whitepaper rather than a product. */}
             <canvas ref={canvasRef} className="absolute inset-0" />
-
-            <motion.div
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{
-                opacity: [0, 0, 0, 1, 1, 0],
-                y: [10, 10, 10, 0, 0, 0],
-              }}
-              transition={{
-                duration: WARP_DURATION / 1000,
-                times: [0, 0.4, 0.48, 0.55, 0.68, 0.75],
-                ease: "easeOut",
-              }}
-            >
-              <span
-                className="absolute text-sm md:text-base font-medium tracking-[0.3em] uppercase select-none"
-                style={{
-                  top: "50%",
-                  marginTop: "120px",
-                  color: "rgba(0, 0, 0, 0.5)",
-                }}
-              >
-                OXAR PROTOCOL
-              </span>
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
