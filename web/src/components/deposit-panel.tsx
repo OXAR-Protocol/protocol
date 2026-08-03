@@ -6,8 +6,9 @@ import { AnimatePresence } from "framer-motion";
 import { CreditCard } from "lucide-react";
 
 import { PayWithField } from "@/components/pay-with-field";
-import { TopUpSheet } from "@/components/top-up-sheet";
-import { CardRouteSheet } from "@/components/card-route-sheet";
+import { TopUpSheet, TOP_UP_FEATURE } from "@/components/top-up-sheet";
+import { CardRouteSheet, type CardRoute } from "@/components/card-route-sheet";
+import { useFeature } from "@/hooks/use-features";
 import { koraEnabled } from "@/lib/gas/kora";
 import { DepositConfirm } from "@/components/deposit-confirm";
 import { ExitCostNotice } from "@/components/exit-cost-notice";
@@ -82,6 +83,9 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const [confirming, setConfirming] = useState(false);
   const [showTopUp, setShowTopUp] = useState(false);
   const [showRoutes, setShowRoutes] = useState(false);
+  // Paybis is back to insiders while the Ukrainian on-ramp is unsolved —
+  // everyone else gets the built-in card and nothing to choose between.
+  const paybisTopUp = useFeature(TOP_UP_FEATURE);
   // USD to buy via Apple Pay when the wallet is empty — there's no pay-asset to
   // size the amount from, so the user enters it directly. Pre-filled, editable.
   const [buyUsdInput, setBuyUsdInput] = useState("");
@@ -207,6 +211,39 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
       </div>
     );
   }
+
+  const cardRoutes: CardRoute[] = [
+    {
+      key: "builtin",
+      // Labelled MoonPay: Privy can route this to Coinbase or Stripe, but MoonPay is
+      // the default and the one whose coverage we've verified. Listing all three read
+      // as jargon in a short list.
+      title: "cardroute.builtin.title",
+      body: "cardroute.builtin.body",
+      // The Privy widget black-screens inside a mobile wallet's in-app browser. The
+      // floor is the on-ramp's, and it reads the amount from the field above — Paybis
+      // asks for its own, hence the wording.
+      unavailable: !canUseCard
+        ? t("deposit.cardInAppBrowser")
+        : applePayBelowMin
+          ? t("cardroute.belowMin", { min: String(APPLE_PAY_MIN_USD) })
+          : undefined,
+      onSelect: handleApplePay,
+    },
+    ...(paybisTopUp
+      ? [
+          {
+            key: "paybis",
+            title: "cardroute.paybis.title",
+            body: "cardroute.paybis.body",
+            onSelect: () => setShowTopUp(true),
+          } satisfies CardRoute,
+        ]
+      : []),
+  ];
+  // A chooser with one option is just a slower button: with Paybis off, the card
+  // button runs the built-in route itself, and carries that route's own blockers.
+  const onlyRoute = cardRoutes.length === 1 ? cardRoutes[0] : null;
 
   return (
     <div className="p-4 rounded-[6px] border border-black/10 bg-white">
@@ -390,9 +427,11 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             ? canCancelApplePay
               ? applePay.cancel
               : undefined
-            : () => setShowRoutes(true)
+            : onlyRoute
+              ? onlyRoute.onSelect
+              : () => setShowRoutes(true)
         }
-        disabled={(applePay.busy && !canCancelApplePay) || busy}
+        disabled={(applePay.busy && !canCancelApplePay) || busy || !!onlyRoute?.unavailable}
         className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[15px] font-medium tracking-tight hover:bg-black/90 disabled:opacity-40 transition inline-flex items-center justify-center gap-1.5"
       >
         {applePay.busy ? (
@@ -408,36 +447,20 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         )}
       </button>
 
+      {/* With no choice to open, the one route's blocker has to surface here — the
+          chooser was the only thing saying why the button wouldn't work. */}
+      {onlyRoute?.unavailable && !applePay.busy && (
+        <p className="mt-2 text-center text-[10px] leading-snug lowercase tracking-wide text-black/40">
+          {onlyRoute.unavailable}
+        </p>
+      )}
+
       {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}
 
       <AnimatePresence>
-        {showRoutes && (
+        {showRoutes && !onlyRoute && (
           <CardRouteSheet
-            routes={[
-              {
-                key: "builtin",
-                // Labelled MoonPay: Privy can route this to Coinbase or Stripe, but
-                // MoonPay is the default and the one whose coverage we've verified.
-                // Listing all three read as jargon in a two-item choice.
-                title: "cardroute.builtin.title",
-                body: "cardroute.builtin.body",
-                // The Privy widget black-screens inside a mobile wallet's in-app
-                // browser. The floor is the on-ramp's, and it reads the amount from
-                // the field above — Paybis asks for its own, hence the wording.
-                unavailable: !canUseCard
-                  ? t("deposit.cardInAppBrowser")
-                  : applePayBelowMin
-                    ? t("cardroute.belowMin", { min: String(APPLE_PAY_MIN_USD) })
-                    : undefined,
-                onSelect: handleApplePay,
-              },
-              {
-                key: "paybis",
-                title: "cardroute.paybis.title",
-                body: "cardroute.paybis.body",
-                onSelect: () => setShowTopUp(true),
-              },
-            ]}
+            routes={cardRoutes}
             onClose={() => setShowRoutes(false)}
           />
         )}

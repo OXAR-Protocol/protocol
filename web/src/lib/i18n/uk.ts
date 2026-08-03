@@ -362,6 +362,18 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "cashout.s6.title": "Чекай на картку",
   "cashout.s6.body": "Долари дійдуть до Paybis приблизно за хвилину, після цього вони роблять виплату.",
 
+  "common.soon": "скоро",
+  "cashout.label": "виведення · скоро",
+  "cashout.body1a": "Пряме виведення на картку ",
+  "cashout.body1b": "вже скоро",
+  "cashout.body1c":
+    " — ми завершуємо ліцензований off-ramp, щоб ти міг продати одразу на Visa / Mastercard за лічені хвилини.",
+  "cashout.body2a":
+    "А поки можеш вивести свої долари на будь-який гаманець чи біржу, якою вже користуєшся (Binance, Revolut тощо), через ",
+  "cashout.body2b": "Надіслати",
+  "cashout.body2c": " — і вивести звідти. Твої кошти, твої ключі, будь-коли.",
+  "cashout.yourUsdc": "твої USDC",
+  "cashout.gotIt": "зрозуміло",
   "cardroute.label": "оплата карткою",
   "cardroute.title": "Яким шляхом?",
   "cardroute.builtin.title": "MoonPay",

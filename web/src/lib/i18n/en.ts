@@ -389,6 +389,18 @@ export const en = {
   "cashout.s6.body": "Your dollars reach Paybis in about a minute; they pay out after that.",
 
   // Card route chooser
+  "common.soon": "soon",
+  "cashout.label": "cash out · coming soon",
+  "cashout.body1a": "Direct card payout is ",
+  "cashout.body1b": "coming soon",
+  "cashout.body1c":
+    " — we're finishing the licensed off-ramp so you can sell straight to a Visa / Mastercard, in minutes.",
+  "cashout.body2a":
+    "In the meantime you can withdraw your dollars to any wallet or exchange you already use (Binance, Revolut, etc.) with ",
+  "cashout.body2b": "Send",
+  "cashout.body2c": ", and cash out from there — your funds, your keys, anytime.",
+  "cashout.yourUsdc": "your USDC",
+  "cashout.gotIt": "got it",
   "cardroute.label": "pay by card",
   "cardroute.title": "Which way?",
   "cardroute.builtin.title": "MoonPay",

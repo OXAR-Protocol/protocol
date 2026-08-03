@@ -12,6 +12,9 @@ import { usePaybisQuote } from "@/hooks/use-paybis-quote";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useT } from "@/lib/i18n";
 
+/** Feature key for the Paybis top-up. Insiders only. */
+export const TOP_UP_FEATURE = "paybis-topup";
+
 const STEPS: readonly PaybisStep[] = [
   { title: "topup.s1.title", body: "topup.s1.body", shot: "01-form" },
   { title: "topup.s2.title", body: "topup.s2.body", shot: "02-wallet" },
