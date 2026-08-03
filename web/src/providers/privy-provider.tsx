@@ -54,6 +54,15 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
           accentColor: "#FFFFFF",
           // EVM + Solana wallets can still be LINKED (for paying) — not for login.
           walletChainType: "ethereum-and-solana",
+          // Two wallets, not a wall of them — Privy's default list is long and most
+          // of it is noise to someone who has one wallet or none.
+          //
+          // NOTE: this list is global, so it also drives the modal `linkWallet()`
+          // opens for "pay from another chain". Someone whose EVM wallet is MetaMask
+          // or Rainbow can no longer link it there. Phantom speaks EVM too, so the
+          // path isn't closed — but it is narrower. Add an entry back here if that
+          // turns out to cost more than the clutter did.
+          walletList: ["phantom", "solflare"],
           logo: "https://oxar.app/images/white.svg",
           landingHeader: "Welcome to OXAR",
           loginMessage: "Real-world yields. On-chain access.",
