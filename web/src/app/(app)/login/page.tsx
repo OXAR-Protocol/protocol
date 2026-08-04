@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -34,10 +35,24 @@ export default function LoginPage() {
       </Link>
 
       <div className="relative flex max-w-[560px] flex-col items-center text-center">
-        <motion.span
+        {/* The one place nothing said whose app this is — the page you land on before
+            you have an account. Just the mark: the headline is already the wordmark's
+            job, and a name under a name would read as a logo lockup nobody designed. */}
+        <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
+          className="mb-8"
+        >
+          {/* unoptimized: Next's image optimizer refuses SVG without
+              `dangerouslyAllowSVG`, and this is our own static file. */}
+          <Image src="/images/black.svg" alt="OXAR" width={56} height={60} priority unoptimized />
+        </motion.div>
+
+        <motion.span
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.08 }}
           className="lowercase text-[clamp(15px,1.4vw,18px)] text-black/45"
         >
           {t("login.welcome")}
@@ -46,7 +61,7 @@ export default function LoginPage() {
         <motion.h1
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
+          transition={{ duration: 0.6, delay: 0.18 }}
           className="mt-6 lowercase text-[clamp(38px,7vw,68px)] leading-[1.0] tracking-[-0.05em]"
         >
           {t("login.titleA")} <span className="italic text-black/45">{t("login.titleB")}</span>
@@ -55,7 +70,7 @@ export default function LoginPage() {
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.25 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-6 max-w-[420px] lowercase text-[clamp(15px,1.4vw,18px)] leading-snug text-black/50"
         >
           {t("login.body")}
@@ -64,7 +79,7 @@ export default function LoginPage() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{ duration: 0.6, delay: 0.44 }}
           className="mt-10 flex w-full max-w-[380px] flex-col items-center gap-3"
         >
           <button
