@@ -77,3 +77,4 @@ __exportStar(require("./core/tracked-mints"), exports);
 __exportStar(require("./core/poll-arrival"), exports);
 __exportStar(require("./core/terms"), exports);
 __exportStar(require("./core/feedback"), exports);
+__exportStar(require("./core/market-sort"), exports);

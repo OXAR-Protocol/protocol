@@ -6,13 +6,13 @@ import { motion } from "framer-motion";
 import { X, List, LayoutGrid } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
-import { YIELD_SOURCES, APY_BUCKETS, type ApyBucket } from "@oxar/sdk";
+import { YIELD_SOURCES, APY_BUCKETS, sortMarketItems, type ApyBucket, type MarketSortKey } from "@oxar/sdk";
 import { YieldSourceRow } from "@/components/yield-source-row";
 import { YieldProviderRow } from "@/components/yield-provider-row";
 import { YieldGroupRow } from "@/components/yield-group-row";
-import { SourceSortToggle, useTvlMap, sortGroups, type SourceSort } from "@/components/source-sort";
+import { MarketSortSelect, useTvlMap } from "@/components/market-sort";
 import { SourceCard } from "@/components/source-card";
-import { groupProviderViews } from "@/lib/yield";
+import { groupProviderViews, pickTarget, fromBaseUnits } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { XSTOCKS } from "@/lib/yield/xstocks";
 import { GOLD } from "@/lib/yield/gold";
@@ -46,7 +46,7 @@ export default function YieldPage() {
   const [apyBucket, setApyBucket] = useState<ApyBucket | null>(null);
   const [layout, setLayout] = useState<Layout>("list");
   // Off by default: the catalog order is ours, any ranking has to be asked for.
-  const [sort, setSort] = useState<SourceSort>(null);
+  const [sort, setSort] = useState<MarketSortKey>("");
   const tvlMap = useTvlMap();
 
   useEffect(() => {
@@ -70,7 +70,15 @@ export default function YieldPage() {
 
   // Collapse same-protocol stablecoins (Jupiter) into one card; others stay standalone.
   const liveGroups = useMemo(() => groupProviderViews(liveSources), [liveSources]);
-  const shownGroups = useMemo(() => sortGroups(liveGroups, sort, tvlMap), [liveGroups, sort, tvlMap]);
+  const shownGroups = useMemo(
+    () =>
+      sortMarketItems(liveGroups, sort, (g) => ({
+        name: g.name,
+        position: g.views.reduce((sum, v) => sum + fromBaseUnits(v.underlyingBalance, v.decimals), 0),
+        deposited: tvlMap[pickTarget(g).defiLlamaPoolId ?? ""] ?? 0,
+      })),
+    [liveGroups, sort, tvlMap],
+  );
 
   // Roadmap catalog — sources not yet integrated as live providers.
   const roadmap = useMemo(() => {
@@ -160,7 +168,7 @@ export default function YieldPage() {
               {t("yield.liveNow")}
             </p>
             <div className="flex items-center gap-2">
-              <SourceSortToggle value={sort} onChange={setSort} />
+              <MarketSortSelect value={sort} onChange={setSort} />
               <div className="flex gap-1">
               {([
                 ["list", List],

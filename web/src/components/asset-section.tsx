@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
+import { sortMarketItems, type MarketSortKey } from "@oxar/sdk";
+
 import { useYieldPositions } from "@/hooks/use-yield-positions";
 import { useFeatures } from "@/hooks/use-features";
 import { useStockPrices } from "@/hooks/use-stock-prices";
@@ -13,6 +15,7 @@ import { useStocksAllowed } from "@/hooks/use-stocks-allowed";
 import type { AssetMeta } from "@/lib/yield/assets";
 import { fromBaseUnits, getProvider } from "@/lib/yield";
 import { useT } from "@/lib/i18n";
+import { MarketSortSelect } from "@/components/market-sort";
 import { usePickSet } from "@/components/pick-set";
 import { AssetCard } from "@/components/asset-card";
 import { AssetSearchInput } from "@/components/asset-search-input";
@@ -54,6 +57,8 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
   const allowed = useStocksAllowed();
   const features = useFeatures();
   const [sector, setSector] = useState<string>("all");
+  // Catalog order by default — see the note in MarketSortSelect.
+  const [sort, setSort] = useState<MarketSortKey>("");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
 
@@ -92,6 +97,33 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
     );
   }, [bySector, searching, trimmedQuery]);
 
+  const { views } = useYieldPositions();
+  const { prices } = useStockPrices(catalog.map((s) => s.mint));
+  const charts = useStockCharts();
+  const { sources } = useEarnings();
+
+  const viewById = useMemo(() => Object.fromEntries(views.map((v) => [v.id, v])), [views]);
+  const earnedById = useMemo(
+    () => Object.fromEntries(sources.map((s) => [s.id, s.earned])),
+    [sources],
+  );
+
+  // Sorting needs what you hold, so it comes after the position hooks. `deposited`
+  // is 0 here on purpose: a tokenised stock's pool figure measures the wrapper, not
+  // demand for the company, so that column simply doesn't apply (see TrustLine).
+  const sorted = useMemo(
+    () =>
+      sortMarketItems(matched, sort, (a) => {
+        const v = viewById[a.id];
+        return {
+          name: a.name,
+          position: v ? fromBaseUnits(v.underlyingBalance, v.decimals) : 0,
+          deposited: 0,
+        };
+      }),
+    [matched, sort, viewById],
+  );
+
   // Changing sector or search resets to the first page of the new set. Adjusted
   // during render — React's documented alternative to an Effect for "reset state
   // when an input changes" — rather than a useEffect, which costs an extra
@@ -105,19 +137,8 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
 
   // While searching, show every match (already a narrow set); otherwise page
   // through the curated catalog order 20 at a time.
-  const shown = searching ? matched : matched.slice(0, page * PAGE_SIZE);
-  const remaining = searching ? 0 : matched.length - shown.length;
-
-  const { views } = useYieldPositions();
-  const { prices } = useStockPrices(catalog.map((s) => s.mint));
-  const charts = useStockCharts();
-  const { sources } = useEarnings();
-
-  const viewById = useMemo(() => Object.fromEntries(views.map((v) => [v.id, v])), [views]);
-  const earnedById = useMemo(
-    () => Object.fromEntries(sources.map((s) => [s.id, s.earned])),
-    [sources],
-  );
+  const shown = searching ? sorted : sorted.slice(0, page * PAGE_SIZE);
+  const remaining = searching ? 0 : sorted.length - shown.length;
 
   if (gated && !allowed) return null;
 
@@ -148,9 +169,13 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
       transition={{ duration: 0.5, delay: 0.18 }}
       className="mt-10"
     >
-      <div data-tour={tourAnchor} className="flex items-baseline justify-between mb-3">
+      <div data-tour={tourAnchor} className="mb-3 flex items-center justify-between gap-2">
         <p className="text-xs lowercase tracking-[0.2em] text-black/40">{title}</p>
-        <span className="text-[10px] lowercase tracking-wide text-black/40">{badge}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] lowercase tracking-wide text-black/40">{badge}</span>
+          {/* No "most deposited" here: see the note on `deposited` above. */}
+          <MarketSortSelect value={sort} onChange={setSort} withDeposited={false} />
+        </div>
       </div>
 
       {/* Search — matches against the whole catalog, not just the current page. */}
