@@ -28,3 +28,4 @@ export * from "./core/portfolio-summary";
 export * from "./core/tracked-mints";
 export * from "./core/poll-arrival";
 export * from "./core/terms";
+export * from "./core/feedback";
