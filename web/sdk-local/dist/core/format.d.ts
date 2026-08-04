@@ -36,3 +36,8 @@ export declare function floorTo(value: number, decimals: number): number;
  * `Number("4,84")` is NaN. Accepts either separator, keeps one, drops the rest.
  */
 export declare function normalizeDecimalInput(raw: string): string;
+/**
+ * A big number at a glance: `$143M`, `$1.4B`, `$920K`. For trust signals, where
+ * the magnitude is the whole message and the digits after it are noise.
+ */
+export declare function compactUsd(value: number): string;

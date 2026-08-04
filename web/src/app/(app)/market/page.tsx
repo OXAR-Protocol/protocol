@@ -10,6 +10,7 @@ import { YIELD_SOURCES, APY_BUCKETS, type ApyBucket } from "@oxar/sdk";
 import { YieldSourceRow } from "@/components/yield-source-row";
 import { YieldProviderRow } from "@/components/yield-provider-row";
 import { YieldGroupRow } from "@/components/yield-group-row";
+import { SourceSortToggle, useTvlMap, sortGroups, type SourceSort } from "@/components/source-sort";
 import { SourceCard } from "@/components/source-card";
 import { groupProviderViews } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
@@ -44,6 +45,9 @@ export default function YieldPage() {
   const { t } = useT();
   const [apyBucket, setApyBucket] = useState<ApyBucket | null>(null);
   const [layout, setLayout] = useState<Layout>("list");
+  // Off by default: the catalog order is ours, any ranking has to be asked for.
+  const [sort, setSort] = useState<SourceSort>(null);
+  const tvlMap = useTvlMap();
 
   useEffect(() => {
     const saved = localStorage.getItem("oxar:yield-layout");
@@ -66,6 +70,7 @@ export default function YieldPage() {
 
   // Collapse same-protocol stablecoins (Jupiter) into one card; others stay standalone.
   const liveGroups = useMemo(() => groupProviderViews(liveSources), [liveSources]);
+  const shownGroups = useMemo(() => sortGroups(liveGroups, sort, tvlMap), [liveGroups, sort, tvlMap]);
 
   // Roadmap catalog — sources not yet integrated as live providers.
   const roadmap = useMemo(() => {
@@ -154,7 +159,9 @@ export default function YieldPage() {
             <p className="text-xs lowercase tracking-[0.2em] text-emerald-600">
               {t("yield.liveNow")}
             </p>
-            <div className="flex gap-1">
+            <div className="flex items-center gap-2">
+              <SourceSortToggle value={sort} onChange={setSort} />
+              <div className="flex gap-1">
               {([
                 ["list", List],
                 ["grid", LayoutGrid],
@@ -172,18 +179,19 @@ export default function YieldPage() {
                   <Icon size={14} strokeWidth={1.5} />
                 </button>
               ))}
+              </div>
             </div>
           </div>
 
           {layout === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {liveGroups.map((g) => (
+              {shownGroups.map((g) => (
                 <SourceCard key={g.key} group={g} onOpen={() => router.push(`/asset/${g.views[0].id}`)} />
               ))}
             </div>
           ) : (
             <div className="space-y-2">
-              {liveGroups.map((g) =>
+              {shownGroups.map((g) =>
                 g.views.length > 1 ? (
                   <YieldGroupRow key={g.key} group={g} onOpen={() => router.push(`/asset/${g.views[0].id}`)} />
                 ) : (

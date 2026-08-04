@@ -68,3 +68,15 @@ export function normalizeDecimalInput(raw: string): string {
   const [whole, ...rest] = cleaned.split(".");
   return rest.length ? `${whole}.${rest.join("")}` : whole;
 }
+
+/**
+ * A big number at a glance: `$143M`, `$1.4B`, `$920K`. For trust signals, where
+ * the magnitude is the whole message and the digits after it are noise.
+ */
+export function compactUsd(value: number): string {
+  if (!Number.isFinite(value)) return "$0";
+  if (value >= 1e9) return `$${(value / 1e9).toFixed(1)}B`;
+  if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
+  if (value >= 1e3) return `$${Math.round(value / 1e3)}K`;
+  return `$${Math.round(value)}`;
+}

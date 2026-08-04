@@ -9,6 +9,7 @@ import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { Sparkline } from "@/components/sparkline";
 import { trendUp, trendLineTone } from "@/lib/yield/trend";
 import { MarketRow } from "@/components/market-row";
+import { TrustLine } from "@/components/trust-line";
 import { useApyHistory } from "@/hooks/use-apy-history";
 
 interface Props {
@@ -68,6 +69,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
               you own ${positionTotal.toFixed(2)}
             </p>
           )}
+          <TrustLine poolId={top.defiLlamaPoolId} sourceId={top.id} />
         </>
       }
       chart={
