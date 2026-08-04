@@ -104,6 +104,7 @@ export function AssetCard({
           {priceEl}
           {changeEl}
           {ownedEl}
+          <TrustLine sourceId={asset.id} />
         </div>
       </button>
     );

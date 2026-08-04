@@ -12,6 +12,7 @@ import { trendUp, trendLineTone } from "@/lib/yield/trend";
 import { AssetIcon } from "@/components/asset-icon";
 import { BanknoteBg } from "@/components/banknote-bg";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
+import { TrustLine } from "@/components/trust-line";
 
 interface Props {
   group: ProviderGroup;
@@ -59,6 +60,7 @@ export function SourceCard({ group, onOpen }: Props) {
               </span>
             ))}
           </div>
+          <TrustLine poolId={top.defiLlamaPoolId} sourceId={top.id} />
           </div>
         </div>
         <ArrowUpRight
