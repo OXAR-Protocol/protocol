@@ -7,7 +7,6 @@ import { X, Loader2, Send } from "lucide-react";
 
 import type { FeedbackKind } from "@oxar/sdk";
 
-import { HandshakeBg } from "@/components/handshake-bg";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useT } from "@/lib/i18n";
 
@@ -95,18 +94,30 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
         </div>
 
         {sent ? (
-          <div className="relative isolate overflow-hidden py-10 text-center">
-            <HandshakeBg />
-            <div className="relative">
-              <p className="text-lg text-black">{t("feedback.thanks")}</p>
-              <p className="mt-1 text-[11px] text-black/45">{t("feedback.thanksHint")}</p>
-              <button
-                onClick={onClose}
-                className="mt-5 rounded-full border border-black/15 bg-white px-4 py-2 text-xs lowercase tracking-wide text-black/60 transition hover:border-black/40 hover:text-black"
-              >
-                {t("common.close")}
-              </button>
-            </div>
+          <div className="py-6 text-center">
+            {/* The same handshake the confirmation screen shows: a report received
+                is the same kind of moment as a transaction done, so it gets the
+                same picture rather than a second visual language for "thank you". */}
+            <motion.div
+              initial={{ scale: 0.7, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ type: "spring", damping: 15, stiffness: 220 }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/art/handshake-cut.webp"
+                alt=""
+                className="mx-auto h-28 w-auto select-none"
+              />
+            </motion.div>
+            <p className="mt-4 text-lg text-black">{t("feedback.thanks")}</p>
+            <p className="mt-1 text-[11px] text-black/45">{t("feedback.thanksHint")}</p>
+            <button
+              onClick={onClose}
+              className="mt-5 rounded-full border border-black/15 px-4 py-2 text-xs lowercase tracking-wide text-black/60 transition hover:border-black/40 hover:text-black"
+            >
+              {t("common.close")}
+            </button>
           </div>
         ) : (
           <>
