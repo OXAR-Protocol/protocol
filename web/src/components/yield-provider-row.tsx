@@ -5,6 +5,7 @@ import { usePickSet } from "@/components/pick-set";
 import { Sparkline } from "@/components/sparkline";
 import { trendUp, trendLineTone } from "@/lib/yield/trend";
 import { MarketRow } from "@/components/market-row";
+import { TrustLine } from "@/components/trust-line";
 import { useApyHistory } from "@/hooks/use-apy-history";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { RISK_TONE, RISK_LABEL, fromBaseUnits } from "@/lib/yield";
@@ -57,6 +58,7 @@ export function YieldProviderRow({ view, onOpen }: Props) {
               you own ${positionValue.toFixed(2)}
             </p>
           )}
+          <TrustLine poolId={view.defiLlamaPoolId} sourceId={view.id} />
         </>
       }
       chart={

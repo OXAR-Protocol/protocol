@@ -2,19 +2,13 @@
 
 import { Check } from "lucide-react";
 
+import { compactUsd } from "@oxar/sdk";
+
 import { useProviderTvl } from "@/hooks/use-provider-tvl";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { getPlatform } from "@/lib/yield/platform";
 import { useT } from "@/lib/i18n";
 import type { ProviderView } from "@/hooks/use-yield-positions";
-
-/** Compact USD: $143M, $1.4B, $920K. */
-function compactUsd(n: number): string {
-  if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
-  if (n >= 1e3) return `$${Math.round(n / 1e3)}K`;
-  return `$${Math.round(n)}`;
-}
 
 /**
  * Trust strip under the asset headline: TVL social-proof ("you're not first —

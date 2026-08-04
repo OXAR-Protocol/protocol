@@ -49,6 +49,7 @@ export const en = {
   "yield.chain.solana": "Solana only",
   "yield.chain.cross": "Cross-chain only",
   "yield.liveNow": "Live now",
+  "market.sortDeposited": "most deposited",
   "yield.stocksTitle": "Stocks · tokenized",
   "sector.all": "all",
   "sector.tech": "tech",

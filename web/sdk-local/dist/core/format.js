@@ -14,6 +14,7 @@ exports.floorToCents = floorToCents;
 exports.centPrecision = centPrecision;
 exports.floorTo = floorTo;
 exports.normalizeDecimalInput = normalizeDecimalInput;
+exports.compactUsd = compactUsd;
 /** Dollar amount at cent precision, grouped. Sub-cent but non-zero → "<0.01". */
 function formatUsdAmount(value, maxDigits = 2) {
     if (!Number.isFinite(value))
@@ -73,4 +74,19 @@ function normalizeDecimalInput(raw) {
     const cleaned = raw.replace(/,/g, ".").replace(/[^\d.]/g, "");
     const [whole, ...rest] = cleaned.split(".");
     return rest.length ? `${whole}.${rest.join("")}` : whole;
+}
+/**
+ * A big number at a glance: `$143M`, `$1.4B`, `$920K`. For trust signals, where
+ * the magnitude is the whole message and the digits after it are noise.
+ */
+function compactUsd(value) {
+    if (!Number.isFinite(value))
+        return "$0";
+    if (value >= 1e9)
+        return `$${(value / 1e9).toFixed(1)}B`;
+    if (value >= 1e6)
+        return `$${(value / 1e6).toFixed(1)}M`;
+    if (value >= 1e3)
+        return `$${Math.round(value / 1e3)}K`;
+    return `$${Math.round(value)}`;
 }

@@ -42,6 +42,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "yield.chain.solana": "Тільки Solana",
   "yield.chain.cross": "Тільки крос-чейн",
   "yield.liveNow": "Вже працює",
+  "market.sortDeposited": "найбільше вкладено",
   "yield.stocksTitle": "Акції · токенізовані",
   "sector.all": "усі",
   "sector.tech": "технології",

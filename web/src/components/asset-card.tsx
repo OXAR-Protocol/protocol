@@ -5,6 +5,7 @@ import { trendLineTone, trendTextTone } from "@/lib/yield/trend";
 import { AssetIcon } from "@/components/asset-icon";
 import { BanknoteBg } from "@/components/banknote-bg";
 import { MarketRow } from "@/components/market-row";
+import { TrustLine } from "@/components/trust-line";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { PickButton } from "@/components/pick-button";
 import type { AssetMeta } from "@/lib/yield/assets";
@@ -116,6 +117,9 @@ export function AssetCard({
         <>
           {head}
           {ownedEl}
+          {/* No pool figure for a swap-held stock — the issuer is the fact that
+              applies. See the note in TrustLine. */}
+          <TrustLine sourceId={asset.id} />
         </>
       }
       chart={spark}

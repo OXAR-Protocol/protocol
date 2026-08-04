@@ -19,5 +19,8 @@ export function getPlatform(id: string): Platform | null {
   if (id.startsWith("ondo")) return { name: "Ondo Finance", kind: "issued" };
   if (id.startsWith("xstock")) return { name: "Backed Finance", kind: "issued" };
   if (id.startsWith("gold-xaut")) return { name: "Tether", kind: "issued" };
+  if (id.startsWith("gold-oro")) return { name: "ORO", kind: "issued" };
+  if (id.startsWith("maple")) return { name: "Maple Finance", kind: "lent" };
+  if (id.startsWith("onre")) return { name: "OnRe", kind: "issued" };
   return null;
 }

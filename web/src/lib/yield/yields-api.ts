@@ -98,6 +98,12 @@ export async function getProviderApy(poolId: string): Promise<number> {
   return (await getApyMap())[poolId] ?? 0;
 }
 
+/** Map of `poolId → USD deposited` for all our sources. One memoised fetch, so
+ *  reading it per row and once for the whole list costs the same. */
+export async function getTvlMap(): Promise<Record<string, number>> {
+  return (await getYields()).tvl;
+}
+
 /** USD deposited (TVL) in one pool (0 if unknown). A social-proof trust signal. */
 export async function getProviderTvl(poolId: string): Promise<number> {
   return (await getYields()).tvl[poolId] ?? 0;
