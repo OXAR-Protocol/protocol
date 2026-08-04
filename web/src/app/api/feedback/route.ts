@@ -64,9 +64,14 @@ export async function POST(req: NextRequest) {
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) {
     console.error("[feedback] TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set — log only");
-    return NextResponse.json({ ok: true });
+    // `delivered` says whether it reached the chat, and it is the whole point of
+    // reporting it: this endpoint answered a cheerful `ok` for two hours while a
+    // deployment older than the environment variables quietly dropped every
+    // report on the floor. A caller can now see that from the outside.
+    return NextResponse.json({ ok: true, delivered: false });
   }
 
+  let delivered = true;
   try {
     // No parse_mode: the message is plain text, so nothing a person types can be
     // read as markup by the receiving client.
@@ -78,11 +83,13 @@ export async function POST(req: NextRequest) {
     if (!res.ok) {
       // Never echo the response: the URL it describes contains the bot token.
       console.error("[feedback] telegram rejected the message", res.status);
+      delivered = false;
     }
   } catch (err) {
     console.error("[feedback] telegram unreachable", err instanceof Error ? err.message : err);
+    delivered = false;
   }
 
   // The report is already saved to the log, so the person is thanked either way.
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, delivered });
 }

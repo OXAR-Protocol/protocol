@@ -7,11 +7,13 @@ import { X, Loader2, Send } from "lucide-react";
 
 import type { FeedbackKind } from "@oxar/sdk";
 
+import { HandshakeBg } from "@/components/handshake-bg";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useT } from "@/lib/i18n";
 
-/** Where someone who'd rather just talk should go. */
-const TELEGRAM_HANDLE = "eternaki";
+/** Where someone who'd rather just talk should go. Two of us, so a question
+ *  doesn't wait on one person being awake. */
+const TELEGRAM_HANDLES = ["eternaki", "tarapatska"] as const;
 
 /**
  * Tell us it's broken, or tell us what's missing.
@@ -93,15 +95,18 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
         </div>
 
         {sent ? (
-          <div className="py-6 text-center">
-            <p className="text-lg text-black">{t("feedback.thanks")}</p>
-            <p className="mt-1 text-[11px] text-black/45">{t("feedback.thanksHint")}</p>
-            <button
-              onClick={onClose}
-              className="mt-5 rounded-full border border-black/15 px-4 py-2 text-xs lowercase tracking-wide text-black/60 transition hover:border-black/40 hover:text-black"
-            >
-              {t("common.close")}
-            </button>
+          <div className="relative isolate overflow-hidden py-10 text-center">
+            <HandshakeBg />
+            <div className="relative">
+              <p className="text-lg text-black">{t("feedback.thanks")}</p>
+              <p className="mt-1 text-[11px] text-black/45">{t("feedback.thanksHint")}</p>
+              <button
+                onClick={onClose}
+                className="mt-5 rounded-full border border-black/15 bg-white px-4 py-2 text-xs lowercase tracking-wide text-black/60 transition hover:border-black/40 hover:text-black"
+              >
+                {t("common.close")}
+              </button>
+            </div>
           </div>
         ) : (
           <>
@@ -159,14 +164,19 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
                 is how you never hear from them. */}
             <p className="mt-4 text-center text-[11px] text-black/45">
               {t("feedback.orTelegram")}{" "}
-              <a
-                href={`https://t.me/${TELEGRAM_HANDLE}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[#3c05c7] hover:underline"
-              >
-                @{TELEGRAM_HANDLE}
-              </a>
+              {TELEGRAM_HANDLES.map((handle, i) => (
+                <span key={handle}>
+                  {i > 0 && " · "}
+                  <a
+                    href={`https://t.me/${handle}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[#3c05c7] hover:underline"
+                  >
+                    @{handle}
+                  </a>
+                </span>
+              ))}
             </p>
           </>
         )}
