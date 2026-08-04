@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
-import { Copy, Check, LogOut } from "lucide-react";
+import { LogOut, MessageSquare } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
+import { Row, WalletCard } from "@/components/you-rows";
+import { FeedbackSheet } from "@/components/feedback-sheet";
 import { forgetIntro } from "@/components/intro-modal";
 import { LanguagePicker } from "@/components/language-picker";
 import { EarlyRiserBadge } from "@/components/early-riser-badge";
@@ -18,6 +20,7 @@ export default function YouPage() {
   const { walletAddress } = useSolanaContext();
   const { t } = useT();
   const [copiedAddr, setCopiedAddr] = useState<string | null>(null);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const email = user?.email?.address;
   // The OXAR account wallet — your funds & positions live here (yield is on Solana).
@@ -92,6 +95,26 @@ export default function YouPage() {
         <LanguagePicker />
       </motion.section>
 
+      {/* Feedback. Sits above the legal fine print and below the settings people
+          actually came for — a channel nobody can find is the same as no channel. */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 }}
+        className="mt-10"
+      >
+        <button
+          type="button"
+          onClick={() => setFeedbackOpen(true)}
+          className="inline-flex items-center gap-2 rounded-[5px] border border-black/15 px-5 py-3 text-xs lowercase tracking-wide text-black/60 transition hover:border-black/40 hover:text-black"
+        >
+          <MessageSquare size={12} strokeWidth={1.5} />
+          {t("you.feedback")}
+        </button>
+      </motion.section>
+
+      {feedbackOpen && <FeedbackSheet onClose={() => setFeedbackOpen(false)} />}
+
       {/* Legal */}
       <motion.section
         initial={{ opacity: 0, y: 16 }}
@@ -148,68 +171,3 @@ export default function YouPage() {
     </div>
   );
 }
-
-function WalletCard({
-  label,
-  hint,
-  address,
-  name,
-  copied,
-  onCopy,
-  dim,
-}: {
-  label: string;
-  hint: string;
-  address: string;
-  /** Primary .sol name (SNS), shown above the address when resolved. */
-  name?: string | null;
-  copied: boolean;
-  onCopy: () => void;
-  dim?: boolean;
-}) {
-  const { t } = useT();
-  const short = `${address.slice(0, 6)}…${address.slice(-6)}`;
-  return (
-    <div
-      className={`flex items-center justify-between p-4 rounded-[5px] border ${
-        dim ? "border-black/[0.06] bg-white/[0.02]" : "border-black/10"
-      }`}
-    >
-      <div className="min-w-0">
-        <p className="text-xs lowercase tracking-wide text-black/40">{label}</p>
-        <p className={`mt-1 text-sm ${dim ? "text-black/55" : "text-black"}`}>
-          {name ?? short}
-        </p>
-        <p className="mt-1 text-[10px] text-black/40">{name ? short : hint}</p>
-      </div>
-      <button
-        onClick={onCopy}
-        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-black/15 hover:border-black/30 text-[11px] lowercase tracking-wide text-black/60 hover:text-black transition"
-      >
-        {copied ? (
-          <>
-            <Check size={12} strokeWidth={1.5} />
-            {t("common.copied")}
-          </>
-        ) : (
-          <>
-            <Copy size={12} strokeWidth={1.5} />
-            {t("common.copy")}
-          </>
-        )}
-      </button>
-    </div>
-  );
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="p-4 rounded-[5px] border border-black/10">
-      <p className="text-xs lowercase tracking-wide text-black/40">
-        {label}
-      </p>
-      <p className="mt-1 text-sm text-black">{value}</p>
-    </div>
-  );
-}
-
