@@ -42,6 +42,8 @@ export function MarketSortSelect({
       value={value}
       onChange={(v) => onChange(v as MarketSortKey)}
       options={options}
+      variant="pill"
+      align="right"
       className="shrink-0"
     />
   );

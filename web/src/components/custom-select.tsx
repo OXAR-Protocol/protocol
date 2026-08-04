@@ -19,6 +19,11 @@ interface CustomSelectProps {
   narrow?: boolean;
   disabled?: boolean;
   className?: string;
+  /** `pill` matches the filter chips beside it — hairline, lowercase, tracked. */
+  variant?: "default" | "pill";
+  /** Which edge the menu hangs from. `right` for a control at the right edge of
+   *  a row, where a wider-than-trigger menu would otherwise run off the screen. */
+  align?: "left" | "right";
 }
 
 export function CustomSelect({
@@ -29,7 +34,10 @@ export function CustomSelect({
   narrow = false,
   disabled = false,
   className = "",
+  variant = "default",
+  align = "left",
 }: CustomSelectProps) {
+  const pill = variant === "pill";
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const drop = useDropPlacement(open, ref);
@@ -61,11 +69,13 @@ export function CustomSelect({
         type="button"
         disabled={disabled}
         onClick={() => setOpen((v) => !v)}
-        className={`inline-flex items-center justify-between gap-2 bg-white border border-black/10 hover:border-black/30 rounded px-3 py-1.5 text-sm text-black transition outline-none focus:border-black/40 disabled:opacity-40 disabled:cursor-not-allowed ${
-          narrow ? "min-w-[3.5rem]" : "min-w-[7rem]"
+        className={`inline-flex items-center justify-between gap-2 border border-black/10 bg-white text-black transition outline-none hover:border-black/30 focus:border-black/40 disabled:cursor-not-allowed disabled:opacity-40 ${
+          pill
+            ? "rounded-full px-3 py-1.5 text-[11px] lowercase tracking-wide"
+            : `rounded px-3 py-1.5 text-sm ${narrow ? "min-w-[3.5rem]" : "min-w-[7rem]"}`
         } ${open ? "border-black/30" : ""}`}
       >
-        <span className={narrow ? "text-center w-full" : "truncate"}>
+        <span className={narrow && !pill ? "w-full text-center" : pill ? "whitespace-nowrap" : "truncate"}>
           {triggerLabel}
         </span>
         <ChevronDown
@@ -80,7 +90,9 @@ export function CustomSelect({
       {open && (
         <div
           style={{ maxHeight: drop.maxHeight }}
-          className={`absolute z-50 left-0 min-w-full bg-white border border-black/15 rounded shadow-[0_8px_24px_rgba(0,0,0,0.6)] py-1 overflow-auto ${
+          className={`absolute z-50 w-max min-w-full overflow-auto border border-black/15 bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${
+            pill ? "rounded-[10px]" : "rounded"
+          } ${align === "right" ? "right-0" : "left-0"} ${
             drop.up ? "bottom-full mb-1" : "top-full mt-1"
           }`}
         >
@@ -94,9 +106,9 @@ export function CustomSelect({
                   onChange(opt.value);
                   setOpen(false);
                 }}
-                className={`w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-left hover:bg-black/[0.04] transition ${
-                  isActive ? "text-black" : "text-black/70"
-                }`}
+                className={`flex w-full items-center justify-between gap-3 whitespace-nowrap px-3 text-left transition hover:bg-black/[0.04] ${
+                  pill ? "py-1.5 text-[12px] lowercase tracking-wide" : "py-2 text-sm"
+                } ${isActive ? "text-black" : "text-black/70"}`}
               >
                 <span className="flex flex-col">
                   <span>{opt.label}</span>

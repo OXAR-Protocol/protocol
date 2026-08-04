@@ -1,6 +1,5 @@
 import { PROVIDERS } from "./registry";
 import { isXStock } from "./xstocks";
-import { isGold } from "./gold";
 
 /**
  * "What am I actually buying?" — answered with links a user can check themselves,
@@ -17,6 +16,13 @@ export interface ProofLink {
   href: string;
 }
 
+/** Tether publishes gold-bar attestations for XAUt — for XAUt, and nothing else.
+ *  This used to be the fallback for every `isGold(id)`, which meant ORO's "what
+ *  backs it" pointed at Tether's vault: not a broken link but a false claim about
+ *  whose bullion is behind the token. Each gold now names its own issuer below,
+ *  and a gold that doesn't name one shows no backing row at all. */
+const XAUT_BACKING = "https://gold.tether.to/transparency";
+
 /** Issuer / attestation pages, per source. Only where one genuinely exists. */
 const ISSUER: Record<string, { issuer?: string; backing?: string }> = {
   "ondo-usdy": {
@@ -31,6 +37,14 @@ const ISSUER: Record<string, { issuer?: string; backing?: string }> = {
     issuer: "https://onre.finance",
     backing: "https://docs.onre.finance/for-capital-providers/redemptions",
   },
+  "gold-oro": {
+    issuer: "https://oro.finance",
+    backing: "https://oro.finance/transparency",
+  },
+  "gold-xaut": {
+    issuer: "https://gold.tether.to",
+    backing: XAUT_BACKING,
+  },
   "jupiter-lend-usdc": { issuer: "https://jup.ag/lend" },
   "jupiter-lend-usdt": { issuer: "https://jup.ag/lend" },
 };
@@ -39,8 +53,6 @@ const ISSUER: Record<string, { issuer?: string; backing?: string }> = {
  *  each token is a claim on. (An earlier guess at this URL 404'd: every link here
  *  is now one that was actually opened.) */
 const XSTOCK_BACKING = "https://assets.backed.fi/legal-documentation";
-/** Tether publishes gold-bar attestations for XAUt. */
-const GOLD_BACKING = "https://gold.tether.to/transparency";
 
 export function proofLinks(id: string): ProofLink[] {
   const provider = PROVIDERS.find((p) => p.id === id);
@@ -54,7 +66,7 @@ export function proofLinks(id: string): ProofLink[] {
   const known = ISSUER[id];
   if (known?.issuer) links.push({ key: "issuer", href: known.issuer });
 
-  const backing = known?.backing ?? (isXStock(id) ? XSTOCK_BACKING : isGold(id) ? GOLD_BACKING : undefined);
+  const backing = known?.backing ?? (isXStock(id) ? XSTOCK_BACKING : undefined);
   if (backing) links.push({ key: "backing", href: backing });
 
   // Where the advertised rate comes from — the same pool the number is read from.
