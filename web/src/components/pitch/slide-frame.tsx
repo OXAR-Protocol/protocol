@@ -22,11 +22,11 @@ interface Props {
 
 // Landing-matched type: DM Sans (set on the page wrapper), lowercase, bracketed
 // labels, tight bold headlines, italic accents. Colours flip with `light`.
-const kickerCls = (light?: boolean) =>
+export const kickerCls = (light?: boolean) =>
   `lowercase text-[clamp(12px,1vw,15px)] leading-none tracking-[0.01em] ${light ? "text-black/40" : "text-white/40"}`;
-const titleCls = (light?: boolean) =>
+export const titleCls = (light?: boolean) =>
   `font-bold lowercase leading-[0.95] tracking-[-0.02em] text-[clamp(34px,6vw,86px)] ${light ? "text-black" : "text-white"}`;
-const subCls = (light?: boolean) =>
+export const subCls = (light?: boolean) =>
   `font-light lowercase text-[clamp(15px,1.5vw,20px)] leading-relaxed max-w-xl ${light ? "text-black/55" : "text-white/55"}`;
 
 /** Bracketed lowercase eyebrow, as on the landing (`[ the problem ]`). */

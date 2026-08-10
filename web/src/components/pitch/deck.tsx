@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { ASK, COMPETITION, MARKET, MODEL, OPTIONS, PRODUCT, ROADMAP, STEPS, TRACTION } from "@/components/pitch/deck-content";
+import { ColumnsSlide, RowsSlide, StatsSlide, StepsSlide } from "@/components/pitch/slide-data";
 import { SlideFrame, Kicker } from "@/components/pitch/slide-frame";
 
 const C = "/pitch/collage";
@@ -9,8 +11,10 @@ const TITLE = "font-bold lowercase leading-[0.95] tracking-[-0.02em] text-white"
 const SUB = "font-light lowercase text-white/55 leading-relaxed";
 
 /** The OXAR pitch — a scroll-snap deck on cut-out photo collages, typeset in the
- *  landing's DM Sans / lowercase / bracketed-label system. First four slides are
- *  dark (the problem), then backgrounds alternate. Copy is tight and accurate. */
+ *  landing's DM Sans / lowercase / bracketed-label system. Structured to be read
+ *  without narration: problem → market → solution → product → how it works → model →
+ *  traction → competition → roadmap → team → ask. Figures come from the investor memo
+ *  (`app/investors/page.tsx`); keep the two in sync. */
 export function Deck() {
   return (
     <>
@@ -26,10 +30,31 @@ export function Deck() {
             a non-custodial savings app on solana. hold dollars, earn real yield, own global
             assets — no bank, no broker, no crypto.
           </p>
+          <p className="mt-10 text-[13px] lowercase text-white/35">investor deck · august 2026 · oxar.app</p>
         </div>
       </section>
 
-      {/* 02 — Problem — dark */}
+      {/* 02 — What OXAR is: answers the cover before anyone has to ask — light */}
+      <section className="flex min-h-screen w-full flex-col justify-center bg-white px-6 py-16 md:px-16">
+        <Kicker light>what oxar is</Kicker>
+        <h2 className="mt-4 max-w-4xl font-bold lowercase leading-[0.95] tracking-[-0.02em] text-black text-[clamp(32px,5.5vw,72px)]">
+          a dollar account that earns — for the people banks <span className={ACCENT}>won&apos;t serve.</span>
+        </h2>
+        <p className="mt-8 max-w-2xl font-light lowercase leading-relaxed text-black/60 text-[clamp(15px,1.5vw,20px)]">
+          you sign in with an email, fund with apple pay or crypto, and the money goes straight
+          from your own wallet into audited protocols. oxar never holds it, and today takes no
+          cut of it.
+        </p>
+        <div className="mt-12 flex flex-wrap gap-3">
+          {["non-custodial", "live on solana mainnet", "email sign-in · apple pay", "withdraw anytime"].map((chip) => (
+            <span key={chip} className="rounded-full border border-black/15 px-4 py-2 text-[13px] lowercase text-black/60">
+              {chip}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* 03 — Problem — dark */}
       <SlideFrame
         kicker="the problem" variant="right"
         image={`${C}/dripping-dollar.png`} imageAlt="Money losing value"
@@ -37,20 +62,13 @@ export function Deck() {
         sub="save in your local currency, and you lose value every year. holding dollars that actually earn is the hard part."
       />
 
-      {/* 03 — Status quo: the old system (hands "hold" the text) — dark */}
-      <SlideFrame
-        kicker="today's options" variant="center"
+      {/* 04 — Why every existing option is half shut — dark */}
+      <ColumnsSlide
+        kicker="today's options"
+        title={<>every door is <span className={ACCENT}>half shut.</span></>}
         image={`${C}/grasping-hands.png`} imageAlt="Hands holding money out of reach"
-        title={<>your money is <span className={ACCENT}>held back.</span></>}
-        sub="dollar accounts pay next to nothing. real yield and global assets sit behind brokers, borders and paperwork."
-      />
-
-      {/* 04 — Status quo: crypto — dark */}
-      <SlideFrame
-        kicker="today's options" variant="right"
-        image={`${C}/dollar-hook.png`} imageAlt="Dollar on a hook"
-        title={<>crypto is a <span className={ACCENT}>trap.</span></>}
-        sub="the tools that reach dollars and yield are built for traders — seed phrases, gas, jargon, scams. not for normal people."
+        columns={OPTIONS}
+        footer="and the tools that do reach real yield are built for traders — seed phrases, gas, jargon, scams."
       />
 
       {/* 05 — Audience — light */}
@@ -61,7 +79,17 @@ export function Deck() {
         sub="emerging-market savers, cross-border freelancers — anyone who wants dollars that grow, without becoming a crypto trader."
       />
 
-      {/* 06 — Solution (hero image) — dark */}
+      {/* 06 — Market sizing — light */}
+      <StatsSlide
+        light kicker="market"
+        title={<>the savers are <span className={ACCENT}>already online.</span></>}
+        sub="we are not waiting on a behaviour change — these people already hold a wallet and already get paid in stablecoins."
+        image={`${C}/bank-phone.png`} imageAlt="A bank in a phone"
+        stats={MARKET}
+        footer="1.4b adults worldwide still have no bank account at all (world bank findex)."
+      />
+
+      {/* 07 — Solution (hero image) — dark */}
       <SlideFrame
         kicker="the solution" variant="full"
         image={`${C}/sleeping-money.png`} imageAlt="Money asleep on a cloud"
@@ -69,23 +97,24 @@ export function Deck() {
         sub="one non-custodial account: hold dollars, earn yield, own treasuries, stocks and gold. email sign-in, apple pay, withdraw anytime."
       />
 
-      {/* 07 — Hub — light */}
-      <SlideFrame
-        light kicker="one account" variant="full"
+      {/* 08 — The product: four surfaces — light */}
+      <ColumnsSlide
+        light kicker="the product"
+        title={<>four things, <span className={ACCENT}>one account.</span></>}
         image={`${C}/microphones.png`} imageAlt="Microphones labelled yield, rwa, gold, bonds, stocks, credit"
-        title={<>every way to grow, <span className={ACCENT}>in one place.</span></>}
-        sub="yield, treasuries, credit, stocks, gold — every source in one account. one tap, no apps to juggle."
+        columns={PRODUCT}
+        footer="one tap each, no apps to juggle, nothing to learn about crypto."
       />
 
-      {/* 08 — Grow / access — dark */}
-      <SlideFrame
-        kicker="not just safe" variant="right"
-        image={`${C}/coin-stack.png`} imageAlt="Coins growing"
-        title={<>protect, then <span className={ACCENT}>grow.</span></>}
-        sub="us treasuries, credit, stocks and gold — assets usually gated by geography or a broker, now a few taps away."
+      {/* 09 — How it works: the money path — dark */}
+      <StepsSlide
+        kicker="how it works"
+        title={<>your money never <span className={ACCENT}>passes through us.</span></>}
+        steps={STEPS}
+        footer="oxar ships no smart contract of its own — we sit on top of audited protocols. nothing to hack, no keys for us to lose, no withdrawal for us to approve."
       />
 
-      {/* 09 — Trust / non-custodial — light */}
+      {/* 10 — Trust / non-custodial — light */}
       <SlideFrame
         light kicker="trust" variant="left"
         image={`${C}/torn-coin.png`} imageAlt="Everyone reaching for a piece of a coin"
@@ -93,50 +122,65 @@ export function Deck() {
         sub="funds move straight from your wallet into audited protocols. oxar holds nothing and takes no cut. nothing to hack, no keys to lose."
       />
 
-      {/* 10 — Traction — dark */}
-      <section className="flex min-h-screen w-full flex-col justify-center bg-black px-6 py-16 md:px-16">
-        <Kicker>traction</Kicker>
-        <h2 className={`${TITLE} mt-4 max-w-3xl text-[clamp(30px,5vw,64px)]`}>
-          a working product, <span className={ACCENT}>already live.</span>
-        </h2>
-        <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4">
-          {[
-            ["live", "on solana mainnet"],
-            ["100+", "waitlist signups"],
-            ["$75k", "intended deposits"],
-            ["30+", "assets — yield, stocks, gold"],
-          ].map(([n, l]) => (
-            <div key={l}>
-              <p className="font-bold leading-none text-white text-[clamp(40px,6vw,76px)]">{n}</p>
-              <p className="mt-3 text-sm lowercase text-white/50">{l}</p>
-            </div>
-          ))}
-        </div>
-        <p className="mt-14 max-w-xl text-sm lowercase text-white/40">
-          bootstrapped two-person team · live on mainnet, not a prototype.
-        </p>
-      </section>
+      {/* 11 — Business model — dark */}
+      <RowsSlide
+        kicker="business model"
+        title={<>today we earn nothing. <span className={ACCENT}>on purpose.</span></>}
+        image={`${C}/coin-stack.png`} imageAlt="Coins growing"
+        rows={MODEL}
+        footer="at this stage, being able to say we take nothing is worth more than the revenue would be."
+      />
 
-      {/* 11 — Why now — light */}
+      {/* 12 — Traction — light */}
+      <StatsSlide
+        light kicker="traction"
+        title={<>a working product, <span className={ACCENT}>already live.</span></>}
+        stats={TRACTION}
+        footer="gasless deposits, apple-pay funding, a live portfolio, english and ukrainian — shipped in months, bootstrapped."
+      />
+
+      {/* 13 — Competition — dark */}
+      <RowsSlide
+        kicker="competition"
+        title={<>nobody covers <span className={ACCENT}>both halves.</span></>}
+        rows={COMPETITION}
+        footer="the defensible part is not the yield — anyone can route to a protocol. it is who we serve, and that they trust us with the first dollar."
+      />
+
+      {/* 14 — Why now — light */}
       <SlideFrame
         light kicker="why now" variant="full"
         image={`${C}/crowd-world.png`} imageAlt="A crowd of the world"
         title={<>the timing is <span className={ACCENT}>now.</span></>}
-        sub="tokenized assets crossed into the billions, crypto payroll is mainstream, card-to-crypto onramps finally work. the rails exist for the first time."
+        sub="tokenized assets crossed into the billions, crypto payroll is mainstream, card-to-crypto onramps finally work. the window is open 12–24 months before revolut and coinbase close it."
       />
 
-      {/* 12 — Team + ask — dark */}
-      <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-6 text-center">
-        <Kicker>the founder</Kicker>
-        <h2 className={`${TITLE} mt-4 text-[clamp(30px,5vw,64px)]`}>
+      {/* 15 — Roadmap — dark */}
+      <RowsSlide
+        kicker="roadmap"
+        title={<>from live, to <span className={ACCENT}>everywhere.</span></>}
+        rows={ROADMAP}
+      />
+
+      {/* 16 — Team — light (type only: handshake.png ships with a baked-in checkerboard) */}
+      <section className="flex min-h-screen w-full flex-col items-center justify-center bg-white px-6 text-center">
+        <Kicker light>the founder</Kicker>
+        <h2 className="mt-4 font-bold lowercase leading-[0.95] tracking-[-0.02em] text-black text-[clamp(30px,5vw,64px)]">
           one founder, one <span className={ACCENT}>live product.</span>
         </h2>
-        <p className={`${SUB} mx-auto mt-6 max-w-lg text-[clamp(15px,1.5vw,19px)]`}>
+        <p className="mx-auto mt-6 max-w-lg font-light lowercase leading-relaxed text-black/55 text-[clamp(15px,1.5vw,19px)]">
           daniel lohachov — building from ukraine. shipped a live product to mainnet in
           months, solo and bootstrapped.
         </p>
-        <p className="mt-8 text-[13px] lowercase text-white/50">oxar.app · daniel.l@oxar.app</p>
       </section>
+
+      {/* 17 — The ask + contact — dark */}
+      <RowsSlide
+        kicker="the ask"
+        title={<>funding the launch, <span className={ACCENT}>not the runway.</span></>}
+        rows={ASK}
+        footer="oxar.app · daniel.l@oxar.app · @eternaki"
+      />
     </>
   );
 }
