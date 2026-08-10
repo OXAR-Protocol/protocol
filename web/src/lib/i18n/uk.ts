@@ -220,7 +220,6 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "common.copy": "Копіювати",
   "common.copied": "Скопійовано",
   "common.close": "закрити",
-  "you.feedback": "розкажи, що зламалося або чого бракує",
   "feedback.label": "відгук",
   "feedback.title": "розкажи нам",
   "feedback.kindBug": "щось зламалося",
@@ -241,6 +240,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "wallet.connecting": "підключення…",
   "wallet.send": "надіслати",
   "wallet.exportKey": "експорт приватного ключа",
+  "wallet.feedback": "розкажи нам",
   "wallet.disconnect": "відключити",
 
   "status.quoting": "Рахуємо…",

@@ -234,7 +234,6 @@ export const en = {
   "common.copy": "Copy",
   "common.copied": "Copied",
   "common.close": "close",
-  "you.feedback": "tell us what's broken or missing",
   "feedback.label": "feedback",
   "feedback.title": "tell us",
   "feedback.kindBug": "something's broken",
@@ -256,6 +255,7 @@ export const en = {
   "wallet.connecting": "connecting…",
   "wallet.send": "send",
   "wallet.exportKey": "export private key",
+  "wallet.feedback": "tell us",
   "wallet.disconnect": "disconnect",
 
   // Busy statuses (tx in flight)

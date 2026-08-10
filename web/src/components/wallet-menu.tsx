@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useExportWallet } from "@privy-io/react-auth/solana";
 import { AnimatePresence } from "framer-motion";
-import { Copy, Check, LogOut, ChevronDown, ArrowUpRight, KeyRound, CreditCard } from "lucide-react";
+import { Copy, Check, LogOut, ChevronDown, ArrowUpRight, KeyRound, CreditCard, MessageSquare } from "lucide-react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { SendSheet } from "@/components/send-sheet";
 import { CashOutSheet, CASH_OUT_FEATURE } from "@/components/cash-out-sheet";
+import { FeedbackSheet } from "@/components/feedback-sheet";
 import { useSolanaName } from "@/hooks/use-solana-name";
 import { useFeature } from "@/hooks/use-features";
 import { useT } from "@/lib/i18n";
@@ -27,6 +28,7 @@ export function WalletMenu() {
   const [open, setOpen] = useState(false);
   const [showSend, setShowSend] = useState(false);
   const [showCashOut, setShowCashOut] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const solana = walletAddress?.toBase58() ?? null;
@@ -105,6 +107,14 @@ export function WalletMenu() {
           )}
 
           <button
+            onClick={() => { setOpen(false); setShowFeedback(true); }}
+            className={`${item} border-b border-black/10 hover:bg-black/[0.04] hover:text-black`}
+          >
+            <MessageSquare size={13} strokeWidth={1.5} />
+            {t("wallet.feedback")}
+          </button>
+
+          <button
             onClick={() => { setOpen(false); logout(); }}
             className={`${item} hover:bg-black/[0.04] hover:text-red-600`}
           >
@@ -116,6 +126,7 @@ export function WalletMenu() {
 
       <AnimatePresence>{showSend && <SendSheet onClose={() => setShowSend(false)} />}</AnimatePresence>
       <AnimatePresence>{showCashOut && <CashOutSheet onClose={() => setShowCashOut(false)} />}</AnimatePresence>
+      <AnimatePresence>{showFeedback && <FeedbackSheet onClose={() => setShowFeedback(false)} />}</AnimatePresence>
     </div>
   );
 }

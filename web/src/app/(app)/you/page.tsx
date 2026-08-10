@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
-import { LogOut, MessageSquare } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { Row, WalletCard } from "@/components/you-rows";
-import { FeedbackSheet } from "@/components/feedback-sheet";
 import { forgetIntro } from "@/components/intro-modal";
 import { LanguagePicker } from "@/components/language-picker";
 import { EarlyRiserBadge } from "@/components/early-riser-badge";
@@ -20,7 +19,6 @@ export default function YouPage() {
   const { walletAddress } = useSolanaContext();
   const { t } = useT();
   const [copiedAddr, setCopiedAddr] = useState<string | null>(null);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const email = user?.email?.address;
   // The OXAR account wallet — your funds & positions live here (yield is on Solana).
@@ -94,26 +92,6 @@ export default function YouPage() {
         </p>
         <LanguagePicker />
       </motion.section>
-
-      {/* Feedback. Sits above the legal fine print and below the settings people
-          actually came for — a channel nobody can find is the same as no channel. */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.15 }}
-        className="mt-10"
-      >
-        <button
-          type="button"
-          onClick={() => setFeedbackOpen(true)}
-          className="inline-flex items-center gap-2 rounded-[5px] border border-black/15 px-5 py-3 text-xs lowercase tracking-wide text-black/60 transition hover:border-black/40 hover:text-black"
-        >
-          <MessageSquare size={12} strokeWidth={1.5} />
-          {t("you.feedback")}
-        </button>
-      </motion.section>
-
-      {feedbackOpen && <FeedbackSheet onClose={() => setFeedbackOpen(false)} />}
 
       {/* Legal */}
       <motion.section
