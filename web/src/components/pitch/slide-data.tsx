@@ -16,6 +16,9 @@ interface ShellProps {
   /** Faint collage behind the type. */
   image?: string;
   imageAlt?: string;
+  /** Run `image` full-bleed under a dark scrim instead of faint behind the type —
+   *  for photographs that fill the frame rather than cut-outs that float in it. */
+  cover?: boolean;
   light?: boolean;
   /** Slide body — supplied by the four wrappers below, not by the deck. */
   children: ReactNode;
@@ -31,7 +34,7 @@ const bodyCls = (light?: boolean) =>
   `font-light lowercase leading-relaxed text-[clamp(14px,1.3vw,17px)] ${light ? "text-black/70" : "text-white/65"}`;
 const ruleCls = (light?: boolean) => (light ? "border-black/10" : "border-white/10");
 
-function Shell({ kicker, title, sub, footer, image, imageAlt = "", light, children }: ShellProps) {
+function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, light, children }: ShellProps) {
   return (
     <section
       className={`relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 py-16 md:px-16 ${light ? "bg-white" : "bg-black"}`}
@@ -41,9 +44,11 @@ function Shell({ kicker, title, sub, footer, image, imageAlt = "", light, childr
       {image && (
         <Image
           src={image} alt={imageAlt} fill loading="eager" sizes="100vw"
-          className={`object-contain ${light ? "opacity-[0.07]" : "opacity-20"}`}
+          className={cover ? "object-cover" : `object-contain ${light ? "opacity-[0.07]" : "opacity-20"}`}
         />
       )}
+      {/* Deep enough that the 13px labels survive the pale patches of the photograph. */}
+      {cover && <div className="absolute inset-0 bg-black/85" />}
       <div className="relative z-10 w-full">
         <p className={kickerCls(light)}>[ {kicker} ]</p>
         <h2 className={`${dataTitleCls(light)} mt-4 max-w-3xl`}>{title}</h2>

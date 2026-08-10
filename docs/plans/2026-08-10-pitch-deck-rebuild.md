@@ -118,7 +118,7 @@ Verbatim-honest, straight from the investor memo.
 - Footer: none of it is implemented. at this stage "we take nothing" is worth more than
   the revenue.
 
-### 12 · traction — `d` · type only *(keep the numbers, add what shipped)*
+### 12 · traction — `d` · banknote-eyes.jpg, full-bleed under a black scrim
 - H: a working product, **already live.**
 - `live` on solana mainnet · `100+` waitlist signups · `$75k` intended deposits ·
   `30+` assets
@@ -181,9 +181,9 @@ existing collage uses, chosen for meaning rather than decoration:
 
 | File | Source | Slide |
 |---|---|---|
-| `institution.png` | `image 3.png` — neoclassical bank with violet columns | 13 competition — the incumbent |
+| `courthouse.png` | user-supplied cut-out, monochrome | 13 competition — the incumbent institution |
+| `banknote-eyes.jpg` | user-supplied photograph | 12 traction — full-bleed under a scrim |
 | `children-pointing.png` | `Two children from behind` | 15 roadmap — one arm pointing ahead |
-| `gold-bar.png` | `Hand with gold ingot` | 12 traction — something real, in hand |
 | `skyline.png` | `image 4.png` — city skyline | 06 market — where the savers are |
 
 `bank-phone.png` moved off the market slide onto 02 (a bank inside a phone — literally
