@@ -134,11 +134,11 @@ export function Deck() {
         footer="at this stage, being able to say we take nothing is worth more than the revenue would be."
       />
 
-      {/* 12 — Traction — light */}
+      {/* 12 — Traction — dark, full-bleed photograph under a scrim */}
       <StatsSlide
-        light kicker="traction"
+        kicker="traction"
         title={<>a working product, <span className={ACCENT}>already live.</span></>}
-        image={`${C}/gold-bar.png`} imageAlt="A hand holding a gold bar"
+        image={`${C}/banknote-eyes.jpg`} imageAlt="Engraved eyes from banknotes of many countries" cover
         stats={TRACTION}
         footer="gasless deposits, apple-pay funding, a live portfolio, english and ukrainian — shipped in months, bootstrapped."
       />
@@ -147,7 +147,7 @@ export function Deck() {
       <RowsSlide
         kicker="competition"
         title={<>nobody covers <span className={ACCENT}>both halves.</span></>}
-        image={`${C}/institution.png`} imageAlt="A neoclassical financial institution"
+        image={`${C}/courthouse.png`} imageAlt="A neoclassical courthouse"
         rows={COMPETITION}
         footer="the defensible part is not the yield — anyone can route to a protocol. it is who we serve, and that they trust us with the first dollar."
       />
