@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { ASK, COMPETITION, MARKET, MODEL, OPTIONS, PRODUCT, ROADMAP, STEPS, TRACTION } from "@/components/pitch/deck-content";
+import { ASK, COMPETITION, MARKET, MODEL, OPTIONS, PRODUCT, ROADMAP, STEPS, TEAM, TRACTION } from "@/components/pitch/deck-content";
 import { ColumnsSlide, RowsSlide, StatsSlide, StepsSlide } from "@/components/pitch/slide-data";
 import { SlideFrame, Kicker } from "@/components/pitch/slide-frame";
 
@@ -35,7 +35,9 @@ export function Deck() {
       </section>
 
       {/* 02 — What OXAR is: answers the cover before anyone has to ask — light */}
-      <section className="flex min-h-screen w-full flex-col justify-center bg-white px-6 py-16 md:px-16">
+      <section className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden bg-white px-6 py-16 md:px-16">
+        <Image src={`${C}/bank-phone.png`} alt="A bank inside a phone" fill sizes="100vw" className="object-contain opacity-[0.07]" />
+        <div className="relative z-10">
         <Kicker light>what oxar is</Kicker>
         <h2 className="mt-4 max-w-4xl font-bold lowercase leading-[0.95] tracking-[-0.02em] text-black text-[clamp(32px,5.5vw,72px)]">
           a dollar account that earns — for the people banks <span className={ACCENT}>won&apos;t serve.</span>
@@ -51,6 +53,7 @@ export function Deck() {
               {chip}
             </span>
           ))}
+        </div>
         </div>
       </section>
 
@@ -84,7 +87,7 @@ export function Deck() {
         light kicker="market"
         title={<>the savers are <span className={ACCENT}>already online.</span></>}
         sub="we are not waiting on a behaviour change — these people already hold a wallet and already get paid in stablecoins."
-        image={`${C}/bank-phone.png`} imageAlt="A bank in a phone"
+        image={`${C}/skyline.png`} imageAlt="A city skyline"
         stats={MARKET}
         footer="1.4b adults worldwide still have no bank account at all (world bank findex)."
       />
@@ -135,6 +138,7 @@ export function Deck() {
       <StatsSlide
         light kicker="traction"
         title={<>a working product, <span className={ACCENT}>already live.</span></>}
+        image={`${C}/gold-bar.png`} imageAlt="A hand holding a gold bar"
         stats={TRACTION}
         footer="gasless deposits, apple-pay funding, a live portfolio, english and ukrainian — shipped in months, bootstrapped."
       />
@@ -143,6 +147,7 @@ export function Deck() {
       <RowsSlide
         kicker="competition"
         title={<>nobody covers <span className={ACCENT}>both halves.</span></>}
+        image={`${C}/institution.png`} imageAlt="A neoclassical financial institution"
         rows={COMPETITION}
         footer="the defensible part is not the yield — anyone can route to a protocol. it is who we serve, and that they trust us with the first dollar."
       />
@@ -159,18 +164,28 @@ export function Deck() {
       <RowsSlide
         kicker="roadmap"
         title={<>from live, to <span className={ACCENT}>everywhere.</span></>}
+        image={`${C}/children-pointing.png`} imageAlt="A child pointing at what's ahead"
         rows={ROADMAP}
       />
 
       {/* 16 — Team — light (type only: handshake.png ships with a baked-in checkerboard) */}
-      <section className="flex min-h-screen w-full flex-col items-center justify-center bg-white px-6 text-center">
-        <Kicker light>the founder</Kicker>
-        <h2 className="mt-4 font-bold lowercase leading-[0.95] tracking-[-0.02em] text-black text-[clamp(30px,5vw,64px)]">
-          one founder, one <span className={ACCENT}>live product.</span>
+      <section className="flex min-h-screen w-full flex-col justify-center bg-white px-6 py-16 md:px-16">
+        <Kicker light>the team</Kicker>
+        <h2 className="mt-4 max-w-3xl font-bold lowercase leading-[0.95] tracking-[-0.02em] text-black text-[clamp(30px,5vw,64px)]">
+          two founders, one <span className={ACCENT}>live product.</span>
         </h2>
-        <p className="mx-auto mt-6 max-w-lg font-light lowercase leading-relaxed text-black/55 text-[clamp(15px,1.5vw,19px)]">
-          daniel lohachov — building from ukraine. shipped a live product to mainnet in
-          months, solo and bootstrapped.
+        <div className="mt-14 grid max-w-4xl gap-x-10 gap-y-10 sm:grid-cols-2">
+          {TEAM.map((m) => (
+            <div key={m.label} className="border-t border-black/10 pt-5">
+              <p className="text-[15px] lowercase text-black">{m.label}</p>
+              <p className="mt-3 font-light lowercase leading-relaxed text-black/60 text-[clamp(14px,1.3vw,17px)]">
+                {m.body}
+              </p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-14 max-w-2xl text-sm lowercase text-black/40">
+          building from ukraine, bootstrapped — a live product on mainnet in months.
         </p>
       </section>
 

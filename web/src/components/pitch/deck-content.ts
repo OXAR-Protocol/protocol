@@ -86,6 +86,12 @@ export const ROADMAP: Row[] = [
   { label: "2027", body: "native ios and android. multi-currency stablecoins. geographic expansion through local partners." },
 ];
 
+/** 16 — the two founders, matching the cap table on the investor page. */
+export const TEAM: Column[] = [
+  { label: "daniel lohachov", body: "product and engineering. founder of the prior oxar iteration; in the solana ecosystem since 2023." },
+  { label: "anna tarapatska", body: "operations, legal and partnerships." },
+];
+
 /** 17 — the ask. */
 export const ASK: Row[] = [
   { label: "not raising", body: "no traditional angel round. a crypto vc seed is planned for post-pmf, 12–18 months out." },

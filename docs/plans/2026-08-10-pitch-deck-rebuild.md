@@ -148,14 +148,12 @@ Verbatim-honest, straight from the investor memo.
 - `q4 2026` first tokenized bonds via a licensed broker partner; cross-chain deposits
 - `2027` ios / android native. multi-currency stablecoins. geographic expansion
 
-### 16 · team — `l` · type only — **DECISION NEEDED**
-`handshake.png` ships with a baked-in transparency checkerboard, so it cannot be used as
-a background — the slide is typographic.
-- Option A (current deck): one founder — daniel lohachov, building from ukraine.
-- Option B (investor memo + cap table): daniel lohachov — product & tech; anna
-  tarapatska — operations, legal, partnerships.
+### 16 · team — `l` · type only *(two founders — decided)*
+Matches the investor memo and the cap table: daniel lohachov — product & engineering;
+anna tarapatska — operations, legal, partnerships. (`handshake.png` ships with a baked-in
+transparency checkerboard and cannot be used as a background, so the slide is typographic.)
 
-### 17 · the ask — `l` · type only *(NEW)* — **DECISION NEEDED**
+### 17 · the ask — `d` · type only *(NEW)*
 From the memo: not raising a traditional angel round; grants + accelerators + hackathon
 prizes to fund launch (target $30k pre-launch); crypto vc seed post-pmf, 12–18 months out.
 - Contact: `oxar.app · daniel.l@oxar.app · @eternaki`
@@ -176,12 +174,26 @@ web/src/components/pitch/
 no new styles. Dark/light alternation preserved slide by slide; the collage runs at 20%
 behind dark data slides and 7% behind light ones, where the cut-outs are high-contrast.
 
+## New collage assets
+
+Four cut-outs pulled from `~/Desktop/pitchdeck`, resized to the 1800px-max convention the
+existing collage uses, chosen for meaning rather than decoration:
+
+| File | Source | Slide |
+|---|---|---|
+| `institution.png` | `image 3.png` — neoclassical bank with violet columns | 13 competition — the incumbent |
+| `children-pointing.png` | `Two children from behind` | 15 roadmap — one arm pointing ahead |
+| `gold-bar.png` | `Hand with gold ingot` | 12 traction — something real, in hand |
+| `skyline.png` | `image 4.png` — city skyline | 06 market — where the savers are |
+
+`bank-phone.png` moved off the market slide onto 02 (a bank inside a phone — literally
+what OXAR is). Note: `handshake.png` and the skyline source `80bcf9…jpg` both ship with a
+baked-in transparency checkerboard and are unusable as backgrounds.
+
 ## Risks
 
 1. **No product screenshots.** The strongest legibility win would be real app shots on
    slide 08. `web/public/` has none, and `app.oxar.app` is allowlist-gated. Needs a
    capture pass, or slide 08 stays typographic.
-2. **Team-slide contradiction** — the deck says "one founder", the investor page and the
-   cap table say two. Whichever we choose, both surfaces must agree.
-3. **Length.** 17 scroll slides is long for a scroll deck. If it needs to be shorter,
+2. **Length.** 17 scroll slides is long for a scroll deck. If it needs to be shorter,
    slides 05 and 14 are the first to merge.
