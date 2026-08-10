@@ -39,12 +39,12 @@ function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, light,
     <section
       className={`relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 py-16 md:px-16 ${light ? "bg-white" : "bg-black"}`}
     >
-      {/* The collage sits behind dense type here, so it runs far fainter than on the
-          photo slides — and fainter still on white, where the cut-outs are high-contrast. */}
+      {/* Matches the photo slides' weight on black (0.45); on white the cut-outs are
+          high-contrast and would fight the type, so they run much fainter. */}
       {image && (
         <Image
           src={image} alt={imageAlt} fill loading="eager" sizes="100vw"
-          className={cover ? "object-cover" : `object-contain ${light ? "opacity-[0.07]" : "opacity-20"}`}
+          className={cover ? "object-cover" : `object-contain ${light ? "opacity-[0.16]" : "opacity-45"}`}
         />
       )}
       {/* Deep enough that the 13px labels survive the pale patches of the photograph. */}
