@@ -40,7 +40,7 @@ function Shell({ kicker, title, sub, footer, image, imageAlt = "", light, childr
           photo slides — and fainter still on white, where the cut-outs are high-contrast. */}
       {image && (
         <Image
-          src={image} alt={imageAlt} fill sizes="100vw"
+          src={image} alt={imageAlt} fill loading="eager" sizes="100vw"
           className={`object-contain ${light ? "opacity-[0.07]" : "opacity-20"}`}
         />
       )}

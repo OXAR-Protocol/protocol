@@ -36,7 +36,7 @@ export function Deck() {
 
       {/* 02 — What OXAR is: answers the cover before anyone has to ask — light */}
       <section className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden bg-white px-6 py-16 md:px-16">
-        <Image src={`${C}/bank-phone.png`} alt="A bank inside a phone" fill sizes="100vw" className="object-contain opacity-[0.07]" />
+        <Image src={`${C}/bank-phone.png`} alt="A bank inside a phone" fill loading="eager" sizes="100vw" className="object-contain opacity-[0.07]" />
         <div className="relative z-10">
         <Kicker light>what oxar is</Kicker>
         <h2 className="mt-4 max-w-4xl font-bold lowercase leading-[0.95] tracking-[-0.02em] text-black text-[clamp(32px,5.5vw,72px)]">

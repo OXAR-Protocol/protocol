@@ -83,7 +83,9 @@ export function SlideFrame({ kicker, title, sub, image, imageAlt = "", children,
         {children}
       </div>
       <div className={`${imgFirst ? "md:order-1" : ""} relative h-[42vh] w-full md:h-[74vh]`}>
-        {image && <Image src={image} alt={imageAlt} fill sizes="(max-width:768px) 100vw, 50vw" className="object-contain" />}
+        {/* eager, not lazy: printing to PDF renders every slide at once, and a lazy
+            image below the fold would come out blank. */}
+        {image && <Image src={image} alt={imageAlt} fill loading="eager" sizes="(max-width:768px) 100vw, 50vw" className="object-contain" />}
       </div>
     </section>
   );
