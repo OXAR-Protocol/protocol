@@ -39,7 +39,10 @@ export function ComingSoon({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="safe-top fixed inset-0 z-50 overflow-y-auto bg-surface-0 px-6 py-16 text-white"
+      // No `safe-top` here: that class sets `padding-top: env(safe-area-inset-top)`
+      // outright and so overrode the `py-*` top padding — which is why this screen
+      // sat flush against the top edge. Fold the notch inset into the padding instead.
+      className="fixed inset-0 z-50 flex overflow-y-auto bg-surface-0 px-6 pb-10 pt-[calc(2.5rem+env(safe-area-inset-top))] text-white sm:pb-16 sm:pt-[calc(4rem+env(safe-area-inset-top))]"
     >
       <div
         aria-hidden
@@ -50,7 +53,11 @@ export function ComingSoon({
         }}
       />
 
-      <div className="relative mx-auto flex w-full max-w-[560px] flex-col items-center gap-6 text-center">
+      {/* `my-auto` and not `justify-center`: auto margins collapse to 0 once the block
+          is taller than the viewport, so the tall states (waitlist standing, small
+          phones, open keyboard) stay fully scrollable instead of having their top cut
+          off — which is what centering a scroll container with justify-center does. */}
+      <div className="relative m-auto flex w-full max-w-[560px] flex-col items-center gap-6 text-center">
         <div className="flex flex-col items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-white/30">
             Closed Alpha
