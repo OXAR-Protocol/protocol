@@ -48,7 +48,11 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
         // embedded wallet (the wedge). Solana wallet → that wallet IS the account,
         // no embedded is created. See
         // docs/plans/2026-06-01-wallet-payment-architecture-v2.md.
-        loginMethods: ["email", "wallet"],
+        // Google and Apple sit beside email because they ARE email, minus typing an
+        // address and waiting for a code — the step most people drop out on. They
+        // must also be switched on in the Privy dashboard (User management →
+        // Authentication); listed here but off there, the buttons simply don't appear.
+        loginMethods: ["email", "google", "apple", "wallet"],
         appearance: {
           theme: "#000000",
           accentColor: "#FFFFFF",
