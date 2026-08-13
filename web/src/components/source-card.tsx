@@ -89,6 +89,7 @@ export function SourceCard({ group, onOpen }: Props) {
       {pickSet?.enabled && (
         <PickButton
           block
+          className="mt-auto"
           picked={pickSet.picked.has(top.id)}
           onToggle={() => pickSet.toggle(top.id)}
           label={top.name}

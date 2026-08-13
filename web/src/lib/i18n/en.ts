@@ -424,6 +424,9 @@ export const en = {
   "cashout.yourUsdc": "your USDC",
   "cashout.gotIt": "got it",
   "common.signIn": "sign in",
+  "signin.inApp":
+    "Signing in with Google doesn't work inside another app's browser — open this page in Safari or Chrome instead.",
+  "signin.copyLink": "copy the link",
   "guest.portfolio.title": "your money, once there is some",
   "guest.portfolio.body": "Sign in and this is where your positions, what they have earned and every move you have made will be.",
   "guest.you.title": "your account lives here",

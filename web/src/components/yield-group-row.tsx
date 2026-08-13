@@ -93,7 +93,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
       pick={
         pickSet?.enabled ? (
           <PickButton
-            block
+            blockOnMobile
             picked={pickSet.picked.has(top.id)}
             onToggle={() => pickSet.toggle(top.id)}
             label={top.name}

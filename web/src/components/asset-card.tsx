@@ -69,10 +69,13 @@ export function AssetCard({
       )}
     </p>
   ) : null;
-  // One shape everywhere: full width along the bottom, card or row. The row gains a
-  // little height for it and keeps its line, which beside the figure it was losing.
-  const pick = showPick ? (
+  // The card always gives it the bottom edge — that is what keeps a row of cards
+  // ending at the same height. A list row only has the width on a wide screen.
+  const pickCard = showPick ? (
     <PickButton block picked={picked} onToggle={onTogglePick} label={asset.name} />
+  ) : null;
+  const pickRow = showPick ? (
+    <PickButton blockOnMobile picked={picked} onToggle={onTogglePick} label={asset.name} />
   ) : null;
   const head = (
     <div className="flex items-center gap-3 min-w-0">
@@ -103,7 +106,7 @@ export function AssetCard({
           {ownedEl}
           <TrustLine sourceId={asset.id} />
         </div>
-        {pick && <div className="mt-3">{pick}</div>}
+        {pickCard && <div className="mt-auto pt-3">{pickCard}</div>}
       </button>
     );
   }
@@ -130,7 +133,7 @@ export function AssetCard({
           {changeEl}
         </>
       }
-      pick={pick}
+      pick={pickRow}
     />
   );
 }
