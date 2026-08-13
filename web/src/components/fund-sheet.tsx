@@ -39,7 +39,7 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
   const paybisTopUp = useFeature(TOP_UP_FEATURE);
 
   const [way, setWay] = useState<Way>(null);
-  const [amount, setAmount] = useState("50");
+  const [amount, setAmount] = useState("");
   // Which network the visitor picked when it isn't Solana — named in the answer.
   const [bridgeChain, setBridgeChain] = useState("");
   const [showRoutes, setShowRoutes] = useState(false);

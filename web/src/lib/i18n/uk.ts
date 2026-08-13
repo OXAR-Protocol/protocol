@@ -450,6 +450,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "fund.card.body": "Apple Pay або банківська картка через ліцензованого провайдера",
   "fund.card.amount": "яка сума",
   "fund.card.continue": "далі",
+  "fund.card.debitHint": "Дебетові картки проходять частіше за кредитні.",
   "fund.card.min": "щонайменше ${min}",
   "fund.exchange.title": "З біржі",
   "fund.exchange.body": "Виведіть з Binance, Bybit, Revolut та інших",

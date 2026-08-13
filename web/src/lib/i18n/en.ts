@@ -477,6 +477,7 @@ export const en = {
   "fund.card.body": "Apple Pay or a bank card, through a licensed provider",
   "fund.card.amount": "how much",
   "fund.card.continue": "continue",
+  "fund.card.debitHint": "Debit cards go through more often than credit.",
   "fund.card.min": "at least ${min}",
   "fund.exchange.title": "From an exchange",
   "fund.exchange.body": "Withdraw from Binance, Bybit, Revolut and the rest",
