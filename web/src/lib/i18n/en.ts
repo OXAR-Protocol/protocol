@@ -6,9 +6,7 @@
  */
 export const en = {
   // Navigation
-  "nav.portfolio": "portfolio",
   "nav.market": "market",
-  "nav.pile": "portfolio",
   "nav.you": "you",
 
   // Greetings
@@ -18,7 +16,6 @@ export const en = {
   "greet.evening": "Good evening",
 
   // Home
-  "home.sleepingMoney": "your sleeping money",
   "home.sources.one": "{n} source · earning every block",
   "home.sources.many": "{n} sources · earning every block",
   "home.empty.cta": "drop dollars into a source to start earning",
@@ -35,10 +32,6 @@ export const en = {
   "home.recentActivity": "recent activity",
   "movers.title": "on the move · 24h",
   "movers.all": "see all →",
-  "home.earned.yield": "yield",
-  "home.earned.stocks": "stocks P&L",
-  "home.earned.gold": "gold P&L",
-  "home.earned.scope": "since you bought · what you still hold",
 
   // Yield list
   "yield.title": "Where your money can sleep",
@@ -150,6 +143,8 @@ export const en = {
   // You / settings
   "you.wallet": "your wallet",
   "you.signedOut": "you're signed out",
+  "settings.label": "you",
+  "settings.title": "Settings",
   "you.language": "language",
   "you.terms": "terms of use",
   "you.replayTour": "watch the walkthrough again",
@@ -459,8 +454,6 @@ export const en = {
   "send.review.warnFinal": "Once it's sent, no one can send it back.",
   "send.review.confirm": "send it",
   "common.signIn": "sign in",
-  "guest.portfolio.title": "your money, once there is some",
-  "guest.portfolio.body": "Sign in and this is where your positions, what they have earned and every move you have made will be.",
   "guest.you.title": "your account lives here",
   "guest.you.body": "Sign in to see your wallet address, your language and the badge you earned by arriving early.",
   "fund.label": "add money",

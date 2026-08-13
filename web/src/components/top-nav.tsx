@@ -9,7 +9,6 @@ import { WalletMenu } from "@/components/wallet-menu";
 import { useSignIn } from "@/hooks/use-sign-in";
 
 const tabs = [
-  { href: "/portfolio", label: "portfolio" },
   { href: "/market", label: "market" },
   { href: "/you", label: "you" },
 ] as const;
@@ -23,7 +22,7 @@ export function TopNav() {
     <nav data-tour-chrome="header" className="safe-top sticky top-0 z-40 bg-[#fbfaf8]/70 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5">
         <Link
-          href={authenticated ? "/portfolio" : "/market"}
+          href={authenticated ? "/you" : "/market"}
           className="shrink-0 text-[22px] font-bold leading-none text-black"
           style={{ fontFamily: DISPLAY }}
         >

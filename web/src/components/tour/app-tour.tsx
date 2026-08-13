@@ -13,7 +13,7 @@ import { TourCard } from "./tour-card";
 /** How long we'll wait for a step's anchors before going with what we have. */
 const ANCHOR_TIMEOUT_MS = 2500;
 /** Where the tour always lands, whether it finishes or gets cut short. */
-const HOME_ROUTE = "/portfolio";
+const HOME_ROUTE = "/you";
 /** Only to pick the card's side before it has measured itself — see `cardArea`. */
 const CARD_HEIGHT_GUESS = 190;
 const GAP = 12;

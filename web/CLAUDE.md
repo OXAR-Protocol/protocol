@@ -19,7 +19,8 @@ Read the root `/OXAR/CLAUDE.md` first for project-wide context.
 
 Two hosts share one Next.js app, routed by `src/middleware.ts`:
 - `oxar.app` — marketing (`/`, `/investors`, `/terms`, `/docs`, `/kit`, `/pitch`)
-- `app.oxar.app` — authenticated app (`/home`, `/yield`, `/pile`, `/markets`, `/you`, `/onboarding`, `/login`)
+- `app.oxar.app` — authenticated app (`/you`, `/market`, `/asset/[id]`, `/onboarding`, `/login`;
+  `/home`, `/pile`, `/portfolio` are redirects kept for old links)
 
 When adding a new authenticated route, append it to `APP_ROUTES` in `middleware.ts` so cross-domain redirects work.
 
@@ -32,9 +33,11 @@ src/
       layout.tsx          Providers + tab-bar + warp transitions
       home/               Greeting + balance + top markets
       yield/              Yield sources — open one to deposit/withdraw (live: Jupiter Lend)
-      pile/               Your pile — live positions across every source (portfolio)
+      pile/               Redirect → /you
       markets/            Yield-source catalog (roadmap sources)
-      you/                Settings, wallet, sign-out
+      you/                THE page: profile + wallet + chart + positions + history
+                          (settings live in a sheet behind the gear). The portfolio
+                          was merged in — one object, one screen.
       onboarding/         First-run onboarding
       login/              Privy login
     investors/, terms/, docs/, kit/, pitch/   Marketing pages

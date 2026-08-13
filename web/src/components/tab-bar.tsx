@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Wallet, TrendingUp, User } from "lucide-react";
+import { Wallet, TrendingUp } from "lucide-react";
 
 import { useT } from "@/lib/i18n";
 
+/** Two, because there are two things here: everything on offer, and everything you
+ *  own. The portfolio used to be a third tab showing what /you already shows. */
 const tabs = [
-  { href: "/portfolio", key: "nav.portfolio", icon: Wallet },
   { href: "/market", key: "nav.market", icon: TrendingUp },
-  { href: "/you", key: "nav.you", icon: User },
+  { href: "/you", key: "nav.you", icon: Wallet },
 ] as const;
 
 /**

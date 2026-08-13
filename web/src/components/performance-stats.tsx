@@ -1,60 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import {
   formatUsdAmount,
   formatSignedUsd,
-  formatDayShort,
   isDustUsd,
-  type PerformanceDay,
   type RangePerformance,
   type ActivityCount,
 } from "@oxar/sdk";
 
-import { HoverChart } from "@/components/hover-chart";
 import { EarnedBreakdown } from "@/components/earned-breakdown";
+import { type Range } from "@/lib/history-range";
 import { useT } from "@/lib/i18n";
 
-/** How far back to look. */
-export const RANGES = [7, 30, 90, 365] as const;
-export type Range = (typeof RANGES)[number];
-
-interface Props {
-  points: PerformanceDay[];
-  /** Earned, return and flows — from the value series itself. */
-  performance: RangePerformance | null;
-  /** Still held today; anything else in the breakdown was closed inside the range. */
-  heldMints: string[];
-  /** Only the trade COUNT comes from the activity feed; every figure that is money
-   *  comes from `performance`, so the two can't describe different periods. */
-  counts: ActivityCount;
-  range: Range;
-  onRangeChange: (r: Range) => void;
-  loading: boolean;
-  locale: string;
-}
-
 /**
- * The portfolio's shape over a chosen stretch of time.
- *
- * It used to be a bare line: a fixed 90 days, no way to change it, and every point's
- * timestamp thrown away before it reached the chart — so a scrub told you what the
- * money was worth but never when. A line you can't read a date off is decoration.
- * The numbers under it are the same range summed up, so the picture and the figures
- * can't be describing different periods.
+ * The four figures under the line: what the range earned, what went in, what came
+ * out, and how much was done. All of them come from the value series the chart
+ * draws, so the picture and the numbers cannot be describing different periods.
  */
-export function PortfolioChart({
-  points,
+export function PerformanceStats({
   performance,
   heldMints,
   counts,
   range,
-  onRangeChange,
-  loading,
-  locale,
-}: Props) {
+}: {
+  performance: RangePerformance | null;
+  /** Still held today; anything else in the breakdown was closed inside the range. */
+  heldMints: string[];
+  /** Only the trade COUNT comes from the activity feed; every figure that is money
+   *  comes from `performance`. */
+  counts: ActivityCount;
+  range: Range;
+}) {
   const { t } = useT();
   const [showBreakdown, setShowBreakdown] = useState(false);
   // Nothing to open when the range earned nothing anyone can attribute.
@@ -65,40 +44,8 @@ export function PortfolioChart({
   const traded = !!performance && !isDustUsd(Math.abs(performance.costUsd));
 
   return (
-    <div>
-      <div className="mb-3 flex flex-wrap gap-1.5">
-        {RANGES.map((r) => (
-          <button
-            key={r}
-            type="button"
-            onClick={() => onRangeChange(r)}
-            className={`rounded-full px-2.5 py-1 text-[11px] lowercase tracking-wide transition ${
-              range === r ? "bg-black text-white" : "bg-black/[0.05] text-black/55 hover:text-black"
-            }`}
-          >
-            {t(`history.range.${r}` as "history.range.7")}
-          </button>
-        ))}
-      </div>
-
-      {loading ? (
-        <div className="flex h-[110px] items-center justify-center text-black/25">
-          <Loader2 size={16} className="animate-spin" />
-        </div>
-      ) : points.length > 1 ? (
-        <HoverChart
-          values={points.map((p) => p.usd)}
-          labels={points.map((p) => formatDayShort(p.t, locale))}
-          format={(v) => `$${formatUsdAmount(v)}`}
-          height={110}
-          className="text-[#3c05c7]"
-          fill
-        />
-      ) : (
-        <p className="py-10 text-center text-[12px] text-black/35">{t("history.noChart")}</p>
-      )}
-
-      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/[0.06] pt-4 sm:grid-cols-4">
+    <>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/[0.06] pt-4 sm:grid-cols-4">
         {/* What you made, not what you moved. The figure this replaced was end-minus-
             start, which a deposit inflates and a withdrawal erases — it read as profit
             and wasn't. The percentage beside it is time-weighted, so it survives a
@@ -147,7 +94,7 @@ export function PortfolioChart({
       {showBreakdown && performance && (
         <EarnedBreakdown performance={performance} heldMints={heldMints} />
       )}
-    </div>
+    </>
   );
 }
 
