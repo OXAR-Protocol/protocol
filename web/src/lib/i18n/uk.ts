@@ -397,6 +397,9 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "cashout.yourUsdc": "твої USDC",
   "cashout.gotIt": "зрозуміло",
   "common.signIn": "увійти",
+  "signin.inApp":
+    "Вхід через Google не працює у браузері іншого застосунку — відкрийте цю сторінку в Safari або Chrome.",
+  "signin.copyLink": "скопіювати посилання",
   "guest.portfolio.title": "ваші гроші — щойно вони зʼявляться",
   "guest.portfolio.body": "Увійдіть, і тут будуть ваші позиції, скільки вони заробили та кожен ваш рух.",
   "guest.you.title": "тут живе ваш акаунт",

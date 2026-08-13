@@ -14,6 +14,7 @@ export function PickButton({
   onToggle,
   label,
   block,
+  blockOnMobile,
   className,
 }: {
   picked: boolean;
@@ -22,6 +23,8 @@ export function PickButton({
   label: string;
   /** Full width along the bottom of a card, instead of a chip in the corner. */
   block?: boolean;
+  /** Full width on a phone, back to a chip once the row has width to spare. */
+  blockOnMobile?: boolean;
   className?: string;
 }) {
   const { t } = useT();
@@ -45,11 +48,15 @@ export function PickButton({
         }
       }}
       className={`cursor-pointer items-center gap-1 rounded-full border lowercase tracking-wide transition ${
-        // A card has a bottom edge to give it; a row has only its side, where a
-        // full-width control would push everything else out of the line.
+        // Three shapes for one control. A card always gives it the bottom edge, so
+        // every card in a row of them ends the same way. A LIST row only has width
+        // to spare on a wide screen — on a phone the control drops under the row,
+        // on a desktop it sits back at the right where the eye already goes.
         block
           ? "flex w-full justify-center px-4 py-2 text-[12px]"
-          : "inline-flex shrink-0 px-2.5 py-1 text-[11px]"
+          : blockOnMobile
+            ? "flex w-full justify-center px-4 py-2 text-[12px] sm:inline-flex sm:w-auto sm:shrink-0 sm:px-2.5 sm:py-1 sm:text-[11px]"
+            : "inline-flex shrink-0 px-2.5 py-1 text-[11px]"
       } ${
         picked
           ? "border-black bg-black text-white"
