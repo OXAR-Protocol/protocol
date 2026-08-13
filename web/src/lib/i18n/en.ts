@@ -450,6 +450,7 @@ export const en = {
   "withdraw.bank.title": "To a bank account",
   "withdraw.bank.body": "Needs a company behind it — we're working on that",
   "send.paste": "paste",
+  "send.arrives": "arrives as ≈{value} on {chain}, after the bridge's fee",
   "send.review.open": "review",
   "send.review.sending": "you're sending",
   "send.review.to": "to",
