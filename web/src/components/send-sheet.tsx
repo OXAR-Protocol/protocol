@@ -10,6 +10,7 @@ import { SendReview } from "@/components/send-review";
 import { AssetPicker } from "@/components/asset-picker";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useSend } from "@/hooks/use-send";
+import { useBridgePreview } from "@/hooks/use-bridge-preview";
 import { toBaseUnits } from "@/lib/yield";
 import { USDC_MINT } from "@/lib/constants";
 import { isValidAddressForChain, maxSendable } from "@/lib/wallet/transfer";
@@ -67,6 +68,19 @@ export function SendSheet({
           ? t("send.errAddress", { chain: destChain.chain === "ethereum" ? "EVM" : "Solana" })
           : null;
   const busy = status !== "idle";
+
+  // Crossing a chain costs a fee the bridge sets, and it used to be discovered by
+  // sending. Now it's quoted while the amount can still be changed.
+  const bridgePreview = useBridgePreview({
+    amountBase,
+    decimals: source?.decimals ?? 6,
+    originMint: source?.mint ?? "",
+    destChainId: destChain.chainId,
+    destMint: destAsset.mint,
+    destDecimals: destAsset.decimals,
+    to: to.trim(),
+    enabled: !isSolanaDest && !!source && !validation,
+  });
 
   const paste = async () => {
     try {
@@ -238,6 +252,19 @@ export function SendSheet({
             {/* The reason it can't go yet belongs beside the form, not inside the
                 button: a control that names the action and then names the problem
                 instead is doing two jobs, and the action is the one it forgets. */}
+            {/* What lands on the other side — the bridge's fee, said before signing
+                rather than discovered after. */}
+            {!isSolanaDest && (bridgePreview.quoting || bridgePreview.outAmount !== null) && (
+              <p className="mt-3 text-[11px] tabular-nums text-black/45">
+                {bridgePreview.quoting
+                  ? t("deposit.quoting")
+                  : t("send.arrives", {
+                      value: `${bridgePreview.outAmount!.toFixed(2)} ${destAsset.symbol}`,
+                      chain: destChain.label,
+                    })}
+              </p>
+            )}
+
             {!busy && validation && (
               <p className="mt-4 text-[11px] leading-snug text-black/45">{validation}</p>
             )}

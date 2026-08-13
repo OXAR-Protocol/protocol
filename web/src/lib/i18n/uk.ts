@@ -423,6 +423,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "withdraw.bank.title": "На банківський рахунок",
   "withdraw.bank.body": "Потрібна юрособа — ми над цим працюємо",
   "send.paste": "вставити",
+  "send.arrives": "дійде ≈{value} у мережі {chain}, після комісії мосту",
   "send.review.open": "перевірити",
   "send.review.sending": "ви надсилаєте",
   "send.review.to": "куди",
