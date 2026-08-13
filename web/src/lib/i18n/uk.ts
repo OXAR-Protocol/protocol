@@ -442,10 +442,12 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "fund.crypto.hint":
     "Надішліть USDC у мережі Solana на цю адресу. Вона ваша — ніхто інший не зможе рухати те, що сюди прийде.",
   "fund.copyAddress": "скопіювати адресу",
-  "fund.network.hint": "З якої мережі ви надсилаєте?",
-  "fund.network.direct": "Одразу у ваш гаманець",
-  "fund.bridged.body":
-    "Ваш рахунок живе на Solana, тому нашої адреси в мережі {chain} не існує. Щоб заплатити з {chain}, відкрийте актив і оберіть \u00abоплатити з іншої мережі\u00bb \u2014 платить ваш власний гаманець, а гроші перейдуть мостом автоматично.",
+  "fund.network.hint": "Звідки надходять гроші?",
+  "fund.network.solana": "З гаманця Solana",
+  "fund.network.direct": "Одразу у ваш гаманець, без посередників",
+  "fund.network.elsewhere": "З іншої мережі або з біржі",
+  "fund.network.bridged": "Надішліть, що маєте і звідки маєте — сюди прийдуть долари",
+  "fund.network.disclosure": "Обмін виконує інший провайдер. Курс і час зарахування — його, не наші.",
   "fund.card.title": "Карткою",
   "fund.card.body": "Apple Pay або банківська картка через ліцензованого провайдера",
   "fund.card.amount": "яка сума",

@@ -469,10 +469,12 @@ export const en = {
   "fund.crypto.hint":
     "Send USDC on Solana to this address. It's yours — nobody else can move what lands here.",
   "fund.copyAddress": "copy the address",
-  "fund.network.hint": "Which network are you sending from?",
-  "fund.network.direct": "Straight into your wallet",
-  "fund.bridged.body":
-    "Your account lives on Solana, so there is no {chain} address of ours to send to. To pay from {chain}, open an asset and choose \u201cpay from another chain\u201d \u2014 your own wallet pays, and the money bridges over automatically.",
+  "fund.network.hint": "Where are the funds coming from?",
+  "fund.network.solana": "A Solana wallet",
+  "fund.network.direct": "Straight into your wallet, nothing in between",
+  "fund.network.elsewhere": "Another network, or an exchange",
+  "fund.network.bridged": "Send what you hold, from where you hold it — it arrives here as dollars",
+  "fund.network.disclosure": "Another provider does the converting. The rate and how long it takes are theirs, not ours.",
   "fund.card.title": "With a card",
   "fund.card.body": "Apple Pay or a bank card, through a licensed provider",
   "fund.card.amount": "how much",

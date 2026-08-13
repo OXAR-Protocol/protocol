@@ -20,7 +20,7 @@ import { useT } from "@/lib/i18n";
 /** The card on-ramp's own floor, in dollars. */
 const CARD_MIN_USD = 20;
 
-type Way = null | "crypto" | "network" | "exchange" | "card" | "bridged";
+type Way = null | "crypto" | "network" | "exchange" | "card";
 
 /**
  * Getting dollars INTO the wallet — on its own, before any question of where they
@@ -40,8 +40,6 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
 
   const [way, setWay] = useState<Way>(null);
   const [amount, setAmount] = useState("");
-  // Which network the visitor picked when it isn't Solana — named in the answer.
-  const [bridgeChain, setBridgeChain] = useState("");
   const [showRoutes, setShowRoutes] = useState(false);
   const [showPaybis, setShowPaybis] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
@@ -159,7 +157,7 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
           <>
             <button
               type="button"
-              onClick={() => setWay(way === "crypto" || way === "bridged" ? "network" : null)}
+              onClick={() => setWay(way === "crypto" ? "network" : null)}
               className="mb-4 inline-flex items-center gap-1.5 text-[13px] lowercase text-black/40 transition hover:text-black"
             >
               <ArrowLeft size={13} strokeWidth={1.5} />
@@ -173,19 +171,7 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
                 onContinue={() => setShowRoutes(true)}
               />
             ) : way === "network" ? (
-              <DepositNetworks
-                onSolana={() => setWay("crypto")}
-                onBridged={(label) => {
-                  setBridgeChain(label);
-                  setWay("bridged");
-                }}
-              />
-            ) : way === "bridged" ? (
-              // No address of ours exists on that chain — the honest answer is what
-              // has to happen instead, not a screen pretending there is one.
-              <p className="text-[13px] leading-relaxed text-black/60">
-                {t("fund.bridged.body", { chain: bridgeChain })}
-              </p>
+              <DepositNetworks onSolana={() => setWay("crypto")} />
             ) : (
               <FundAddress
                 address={address}
