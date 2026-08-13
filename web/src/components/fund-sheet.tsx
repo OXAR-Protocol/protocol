@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { ArrowLeft, Banknote, Building2, CreditCard, Loader2, Wallet } from "lucide-react";
+import { ArrowLeft, Banknote, Building2, CreditCard, Coins, Loader2, Wallet } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
@@ -10,6 +10,7 @@ import { SheetShell } from "@/components/sheet-shell";
 import { FundAddress } from "@/components/fund-address";
 import { FundCardAmount } from "@/components/fund-card-amount";
 import { DepositNetworks } from "@/components/deposit-networks";
+import { FundConvert } from "@/components/fund-convert";
 import { CardRouteSheet, type CardRoute } from "@/components/card-route-sheet";
 import { TopUpSheet, TOP_UP_FEATURE } from "@/components/top-up-sheet";
 import { useCardTopUp, getUsdcUi } from "@/hooks/use-card-topup";
@@ -20,7 +21,7 @@ import { useT } from "@/lib/i18n";
 /** The card on-ramp's own floor, in dollars. */
 const CARD_MIN_USD = 20;
 
-type Way = null | "crypto" | "network" | "exchange" | "card";
+type Way = null | "crypto" | "network" | "exchange" | "card" | "convert";
 
 /**
  * Getting dollars INTO the wallet — on its own, before any question of where they
@@ -140,6 +141,16 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
                 </span>
               </button>
 
+              <button type="button" onClick={() => setWay("convert")} className={row}>
+                <Coins size={16} strokeWidth={1.5} className="shrink-0 text-black/45" />
+                <span className="min-w-0">
+                  <span className="block text-[14px] text-black">{t("fund.convert.title")}</span>
+                  <span className="block text-[12px] leading-snug text-black/45">
+                    {t("fund.convert.body")}
+                  </span>
+                </span>
+              </button>
+
               <button type="button" onClick={() => setWay("exchange")} className={row}>
                 <Building2 size={16} strokeWidth={1.5} className="shrink-0 text-black/45" />
                 <span className="min-w-0">
@@ -173,6 +184,8 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
                 onChange={setAmount}
                 onContinue={() => setShowRoutes(true)}
               />
+            ) : way === "convert" ? (
+              <FundConvert onConverted={() => setWay(null)} />
             ) : way === "network" ? (
               <DepositNetworks onSolana={() => setWay("crypto")} />
             ) : (

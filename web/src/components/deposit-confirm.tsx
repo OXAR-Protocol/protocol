@@ -27,8 +27,9 @@ interface Props {
   /** Cross-chain step that failed, kept after `status` resets — marks it red. */
   failedAt?: string | null;
   /** Whether the origin chain's own coin is there to pay its network fee. Computed
-   *  upstream, where the full holdings list lives. */
-  gas: OriginGasStatus;
+   *  upstream, where the full holdings list lives. Only a cross-chain pay asset can
+   *  lack it, so a Solana-only caller leaves it out. */
+  gas?: OriginGasStatus;
   error: string | null;
   onConfirm: () => void;
   onBack: () => void;
@@ -114,7 +115,7 @@ export function DepositConfirm({
           <p className="mt-1.5 text-[10px] lowercase tracking-wide text-black/40">{t("confirm.step.hint")}</p>
           {/* Which side pays which fee, stated plainly — and a warning instead if the
               origin chain's coin isn't there to pay it. */}
-          {gas.kind === "ok" ? (
+          {!gas || gas.kind === "ok" ? (
             <OriginGasSplit payAsset={payAsset} />
           ) : (
             <OriginGasNote status={gas} payAsset={payAsset} />

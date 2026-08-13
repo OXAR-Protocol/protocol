@@ -102,6 +102,14 @@ export function spendableBase(asset: WalletAsset, reserveGas = true): bigint {
   return asset.amount;
 }
 
+/** What the asset is worth to spend, in dollars — its balance net of the gas reserve
+ *  `spendableBase` keeps back. The dollar figure every buying screen quotes. */
+export function spendableUsd(asset: WalletAsset, reserveGas = true): number {
+  if (asset.uiAmount <= 0) return 0;
+  const price = asset.usdValue / asset.uiAmount;
+  return (Number(spendableBase(asset, reserveGas)) / 10 ** asset.decimals) * price;
+}
+
 /** USD amount → base units of `asset`, at its current unit price (usdValue/uiAmount).
  *  Single source of truth for the USD-denominated money path. */
 export function usdToBase(asset: WalletAsset, usd: number): bigint {

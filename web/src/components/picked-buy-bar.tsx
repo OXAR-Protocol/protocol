@@ -1,64 +1,40 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, Loader2 } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { Wallet } from "lucide-react";
 
-import { assetUid, spendableBase, rescaleAllocations, type WalletAsset } from "@oxar/sdk";
+import { spendableUsd, formatUsdAmount } from "@oxar/sdk";
 
 import { usePickSet } from "@/components/pick-set";
 import { PickBar } from "@/components/pick-bar";
 import { AllocationSheet } from "@/components/allocation-sheet";
-import { PayWithField } from "@/components/pay-with-field";
+import { FundSheet } from "@/components/fund-sheet";
 import { useBulkTrade } from "@/hooks/use-bulk-trade";
-import { useBulkFunding } from "@/hooks/use-bulk-funding";
-import { useCardTopUp } from "@/hooks/use-card-topup";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
-import { useEvmAssets } from "@/hooks/use-evm-assets";
-import { usePrivy } from "@privy-io/react-auth";
-import { useBridgeDeposit } from "@/hooks/use-bridge-deposit";
 import { USDC_MINT } from "@/lib/constants";
-
-/** The bridge needs a provider only to read the destination mint; every basket
- *  settles in the same dollar asset, so any USDC source answers that. */
-const USDC_PROVIDER_ID = "jupiter-lend-usdc";
 import { getProvider, toFriendlyError, positionTitle, unitLabelOf } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { useT } from "@/lib/i18n";
 
-/** What the card form opens on — the on-ramps won't sell less than this. */
-const CARD_MINIMUM_USD = 20;
-
-/** USD the asset can actually put towards a purchase, net of any fee reserve. */
-function spendableUsd(a: WalletAsset): number {
-  if (a.uiAmount <= 0) return 0;
-  const price = a.usdValue / a.uiAmount;
-  return (Number(spendableBase(a)) / 10 ** a.decimals) * price;
-}
-
 /**
  * The bar and the sheet for everything picked on a page — yield sources, stocks and
  * gold alike. Mounted once, inside the set, so the sections can't each grow their own.
  *
- * The basket can be paid for with anything on Solana, not only USDC. Because the
- * purchases settle in USDC, a different pay-asset is converted ONCE for the whole
- * basket rather than per asset: one prompt, one slippage hit, not N of each.
+ * The basket is paid for in dollars, like everything else in the app. It used to ask
+ * which coin — and on which chain — should settle a basket of purchases, which is a
+ * question about our plumbing, not about what the person is buying. The budget is now
+ * simply the dollars in the wallet; other money becomes dollars in the top-up sheet.
  */
 export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
   const { t } = useT();
   const pickSet = usePickSet();
   const bulk = useBulkTrade();
-  const { fundUsdc, converting } = useBulkFunding();
-  const { topUp, cancel: cancelTopUp, busy: toppingUp } = useCardTopUp();
   const { assets, refresh: refreshAssets } = useWalletAssets();
-  const { assets: evmAssets, evmAddress } = useEvmAssets();
-  const { linkWallet, unlinkWallet } = usePrivy();
-  // Any provider id works here — the bridge only needs the destination mint, and
-  // every basket settles in the same one.
-  const bridge = useBridgeDeposit(USDC_PROVIDER_ID);
   const [allocating, setAllocating] = useState(false);
-  const [payUid, setPayUid] = useState<string | null>(null);
+  const [funding, setFunding] = useState(false);
   const [fundError, setFundError] = useState<string | null>(null);
   // Prices for the picked price-exposure assets, so a row can be typed in shares.
   const pickedMints = views
@@ -96,61 +72,18 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
     })
     .filter((r): r is NonNullable<typeof r> => !!r);
 
-  // Solana first (instant or a quick swap), then the other chains. A cross-chain
-  // basket doesn't complete here: it bridges now and buys when the money lands.
-  const payable = [...assets, ...evmAssets].filter((a) => a.usdValue > 0);
-  const payAsset =
-    payable.find((a) => assetUid(a) === payUid) ??
-    payable.find((a) => a.mint === USDC_MINT) ??
-    payable[0] ??
-    null;
+  // One currency, so one balance: the dollars already in the wallet.
+  const payAsset = assets.find((a) => a.chain === "solana" && a.mint === USDC_MINT) ?? null;
   const budget = payAsset ? spendableUsd(payAsset) : 0;
 
   const buy = async (amounts: Record<string, number>) => {
     if (!payAsset) return;
     setFundError(null);
 
-    // Paying from another chain: send the money once and hand the watcher the whole
-    // plan. It buys on arrival, minutes later, shrinking the plan as each leg lands —
-    // so nothing here waits, and nothing is bought twice if the page is closed.
-    if (payAsset.chain === "ethereum") {
-      const total = Object.values(amounts).reduce((sum, v) => sum + v, 0);
-      const plan = Object.entries(amounts)
-        .filter(([, v]) => v > 0)
-        .map(([providerId, amountUsd]) => ({ providerId, amountUsd }));
-      if (!plan.length) return;
-      try {
-        await bridge.bridgeAndDeposit(payAsset, total, plan);
-        setAllocating(false);
-        pickSet.clear();
-        bulk.reset();
-      } catch (e) {
-        console.error("Bridging the basket failed:", e);
-        setFundError(toFriendlyError(e));
-      }
-      return;
-    }
-
-    let spendable = amounts;
-    if (payAsset.mint !== USDC_MINT) {
-      const asked = Object.values(amounts).reduce((sum, v) => sum + v, 0);
-      let realized: number;
-      try {
-        realized = await fundUsdc(payAsset, asked);
-      } catch (e) {
-        console.error("Funding the basket failed:", e);
-        setFundError(toFriendlyError(e));
-        return;
-      }
-      // The conversion lands at or below what was quoted. Spending the original
-      // amounts against the smaller balance would starve the LAST purchase.
-      spendable = rescaleAllocations(amounts, realized);
-    }
-
     const outcomes = await bulk.run(
       rows
-        .filter((r) => (spendable[r.id] ?? 0) > 0)
-        .map((r) => ({ kind: "buy" as const, id: r.id, amountUsd: spendable[r.id]! })),
+        .filter((r) => (amounts[r.id] ?? 0) > 0)
+        .map((r) => ({ kind: "buy" as const, id: r.id, amountUsd: amounts[r.id]! })),
     );
     if (outcomes.every((o) => o.ok)) {
       setAllocating(false);
@@ -161,33 +94,21 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
     }
   };
 
-  // Card money is a TOP-UP, not a payment method: the on-ramp delivers dollars to the
-  // wallet minutes later, so it can't be a leg of a run that signs transactions now.
-  // It raises the budget, then the user splits it and buys — same as any other balance.
-  const addWithCard = async () => {
+  // Money in is a SIDE errand — it raises the budget, it doesn't buy anything. It also
+  // takes over the screen (a card provider's window, an address to send to), so the
+  // basket steps aside for it and comes back when it's done.
+  const openFunding = () => {
     setFundError(null);
-    // Stand aside while the provider's window is open. Ours is a fixed overlay, and
-    // a fixed overlay does not move when iOS raises the keyboard — the amount field
-    // ended up underneath it. With the sheet closed the provider owns the screen and
-    // the keyboard behaves; the basket is still here when we come back.
     setAllocating(false);
-    try {
-      await topUp(CARD_MINIMUM_USD);
-      await refreshAssets();
-      // Back to the default choice, which prefers USDC — the money just added.
-      setPayUid(null);
-      setAllocating(true);
-    } catch (e) {
-      console.error("Card top-up failed:", e);
-      setFundError(toFriendlyError(e));
-      setAllocating(true);
-    }
+    setFunding(true);
+  };
+  const closeFunding = () => {
+    setFunding(false);
+    void refreshAssets().catch((e: unknown) => setFundError(toFriendlyError(e)));
+    setAllocating(true);
   };
 
-  // A card top-up is a SIDE errand — it adds to the budget, it doesn't buy anything.
-  // Including it here froze every input behind a spinner with no way out, which is
-  // exactly what an abandoned provider window looked like.
-  const busy = bulk.state === "running" || converting || bridge.status !== "idle";
+  const busy = bulk.state === "running";
 
   return (
     <>
@@ -214,75 +135,31 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
           results={bulk.results}
           payWith={
             <>
-              {payAsset && (
-                <PayWithField
-                  assets={payable}
-                  activeUid={assetUid(payAsset)}
-                  onSelectUid={setPayUid}
-                  // The amounts are set per row below, so the field is a CHOICE of
-                  // currency, not a second place to type a number.
-                  amount=""
-                  onAmountChange={() => {}}
-                  usdAmount={budget}
-                  productMint={USDC_MINT}
-                  readOnlyAmount
-                />
-              )}
-              {/* Without this the picker only ever lists what's ALREADY connected, so
-                  "pay from another chain" was invisible to anyone who hadn't linked a
-                  wallet — the single-asset panel offers the same link, and the basket
-                  sheet was the only place missing it. */}
-              {!evmAddress ? (
-                <button
-                  type="button"
-                  onClick={() => linkWallet()}
-                  className="mt-2 text-[11px] lowercase tracking-wide text-black/40 underline decoration-black/20 underline-offset-2 transition hover:text-black/70"
-                >
-                  {t("deposit.payFromAnotherChain")}
-                </button>
-              ) : (
-                <div className="mt-2 flex items-center gap-2 text-[10px] lowercase tracking-wide text-black/45">
-                  <span>
-                    EVM {evmAddress.slice(0, 6)}…{evmAddress.slice(-4)}
-                  </span>
-                  <button type="button" onClick={() => unlinkWallet(evmAddress)} className="underline transition hover:text-black/70">
-                    {t("deposit.disconnect")}
-                  </button>
-                </div>
-              )}
-
-              {payAsset?.chain === "ethereum" && (
-                <p className="mt-2 text-[11px] leading-snug text-black/45">
-                  {t("alloc.bridgeNote")}
-                </p>
-              )}
+              <div className="flex items-center gap-2 rounded-[10px] border border-black/10 px-3 py-2.5">
+                <Wallet size={14} strokeWidth={1.5} className="shrink-0 text-black/40" />
+                <span className="text-[12px] lowercase tracking-wide text-black/45">
+                  {t("alloc.dollars")}
+                </span>
+                <span className="ml-auto text-[13px] tabular-nums text-black">
+                  ${formatUsdAmount(budget)}
+                </span>
+              </div>
               <button
                 type="button"
-                onClick={toppingUp ? cancelTopUp : addWithCard}
+                onClick={openFunding}
                 disabled={busy}
                 className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-2.5 text-[13px] lowercase tracking-wide text-black/70 transition hover:border-black/40 hover:text-black disabled:opacity-40"
               >
-                {toppingUp ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <CreditCard size={14} strokeWidth={1.5} />
-                )}
-                {/* While waiting, the same button stops waiting. A spinner with no
-                    way out is how an abandoned card window looked. */}
-                {toppingUp ? t("alloc.stopWaiting") : t("alloc.addWithCard")}
+                {t("wallet.fund")}
               </button>
             </>
           }
           progress={
-            bridge.status !== "idle"
-              ? t("bulk.bridging")
-              : converting
-              ? t("bulk.converting")
-              : bulk.state === "running"
-                ? t("bulk.progress", { n: String(bulk.done.length), total: String(rows.length) })
-                : null
+            bulk.state === "running"
+              ? t("bulk.progress", { n: String(bulk.done.length), total: String(rows.length) })
+              : null
           }
-          error={fundError ?? bridge.error}
+          error={fundError}
           onConfirm={buy}
           onClose={() => {
             setAllocating(false);
@@ -291,6 +168,7 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
           }}
         />
       )}
+      <AnimatePresence>{funding && <FundSheet onClose={closeFunding} />}</AnimatePresence>
     </>
   );
 }
