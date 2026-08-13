@@ -9,6 +9,7 @@ import { formatUsdAmount } from "@oxar/sdk";
 import { SheetShell } from "@/components/sheet-shell";
 import { FundAddress } from "@/components/fund-address";
 import { FundCardAmount } from "@/components/fund-card-amount";
+import { DepositNetworks } from "@/components/deposit-networks";
 import { CardRouteSheet, type CardRoute } from "@/components/card-route-sheet";
 import { TopUpSheet, TOP_UP_FEATURE } from "@/components/top-up-sheet";
 import { useCardTopUp, getUsdcUi } from "@/hooks/use-card-topup";
@@ -19,7 +20,7 @@ import { useT } from "@/lib/i18n";
 /** The card on-ramp's own floor, in dollars. */
 const CARD_MIN_USD = 20;
 
-type Way = null | "crypto" | "exchange" | "card";
+type Way = null | "crypto" | "network" | "exchange" | "card" | "bridged";
 
 /**
  * Getting dollars INTO the wallet — on its own, before any question of where they
@@ -38,7 +39,9 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
   const paybisTopUp = useFeature(TOP_UP_FEATURE);
 
   const [way, setWay] = useState<Way>(null);
-  const [amount, setAmount] = useState("50");
+  const [amount, setAmount] = useState("");
+  // Which network the visitor picked when it isn't Solana — named in the answer.
+  const [bridgeChain, setBridgeChain] = useState("");
   const [showRoutes, setShowRoutes] = useState(false);
   const [showPaybis, setShowPaybis] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
@@ -107,7 +110,7 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
             </p>
 
             <div className="flex flex-col gap-2">
-              <button type="button" onClick={() => setWay("crypto")} className={row}>
+              <button type="button" onClick={() => setWay("network")} className={row}>
                 <Wallet size={16} strokeWidth={1.5} className="shrink-0 text-black/45" />
                 <span className="min-w-0">
                   <span className="block text-[14px] text-black">{t("fund.crypto.title")}</span>
@@ -156,7 +159,7 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
           <>
             <button
               type="button"
-              onClick={() => setWay(null)}
+              onClick={() => setWay(way === "crypto" || way === "bridged" ? "network" : null)}
               className="mb-4 inline-flex items-center gap-1.5 text-[13px] lowercase text-black/40 transition hover:text-black"
             >
               <ArrowLeft size={13} strokeWidth={1.5} />
@@ -169,6 +172,20 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
                 onChange={setAmount}
                 onContinue={() => setShowRoutes(true)}
               />
+            ) : way === "network" ? (
+              <DepositNetworks
+                onSolana={() => setWay("crypto")}
+                onBridged={(label) => {
+                  setBridgeChain(label);
+                  setWay("bridged");
+                }}
+              />
+            ) : way === "bridged" ? (
+              // No address of ours exists on that chain — the honest answer is what
+              // has to happen instead, not a screen pretending there is one.
+              <p className="text-[13px] leading-relaxed text-black/60">
+                {t("fund.bridged.body", { chain: bridgeChain })}
+              </p>
             ) : (
               <FundAddress
                 address={address}
