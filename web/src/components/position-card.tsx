@@ -62,18 +62,11 @@ export function PositionCard({ view, onOpen, change24h, earned, picked, onToggle
             </span>
           </div>
         </div>
-        {/* In the flow, not floated over the corner: with its words back the pill is
-            ~125px wide, and pinned it covered both the arrow and the end of the name. */}
-        <div className="flex shrink-0 items-start gap-2">
-          {onTogglePick && (
-            <PickButton picked={!!picked} onToggle={onTogglePick} label={view.name} />
-          )}
-          <ArrowUpRight
-            size={16}
-            strokeWidth={1.5}
-            className="text-black/40 group-hover:text-black transition shrink-0"
-          />
-        </div>
+        <ArrowUpRight
+          size={16}
+          strokeWidth={1.5}
+          className="shrink-0 text-black/40 transition group-hover:text-black"
+        />
       </div>
 
       <Sparkline
@@ -122,6 +115,12 @@ export function PositionCard({ view, onOpen, change24h, earned, picked, onToggle
           </p>
         )}
       </div>
+
+      {/* The card's one action, along its bottom edge — it used to sit in the top
+          line, where it crowded the name and the arrow. */}
+      {onTogglePick && (
+        <PickButton block picked={!!picked} onToggle={onTogglePick} label={view.name} />
+      )}
     </button>
   );
 }

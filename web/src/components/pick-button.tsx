@@ -13,12 +13,15 @@ export function PickButton({
   picked,
   onToggle,
   label,
+  block,
   className,
 }: {
   picked: boolean;
   onToggle: () => void;
   /** For screen readers — which thing this picks. */
   label: string;
+  /** Full width along the bottom of a card, instead of a chip in the corner. */
+  block?: boolean;
   className?: string;
 }) {
   const { t } = useT();
@@ -41,7 +44,13 @@ export function PickButton({
           onToggle();
         }
       }}
-      className={`inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] lowercase tracking-wide transition ${
+      className={`cursor-pointer items-center gap-1 rounded-full border lowercase tracking-wide transition ${
+        // A card has a bottom edge to give it; a row has only its side, where a
+        // full-width control would push everything else out of the line.
+        block
+          ? "flex w-full justify-center px-4 py-2 text-[12px]"
+          : "inline-flex shrink-0 px-2.5 py-1 text-[11px]"
+      } ${
         picked
           ? "border-black bg-black text-white"
           : "border-black/15 bg-white/80 text-black/50 hover:border-black/40 hover:text-black"
