@@ -70,6 +70,9 @@ export function AssetDetail({
     enabled: positionValue > 0 && !!view.heldMint,
   });
   const quote = view.heldMint ? prices[view.heldMint] : undefined;
+  // Price of one unit, when a unit has one (stocks, gold) — lets a receipt say
+  // "0.0023 ORO" rather than only the dollars that moved.
+  const sharePriceUsd = price ? quote?.price : undefined;
   const up = (quote?.change24h ?? 0) >= 0;
   const src = earnings.sources.find((s) => s.id === view.id);
   const earned = src ? src.currentValue - src.invested : undefined;
@@ -104,10 +107,15 @@ export function AssetDetail({
     const landed = walletAddress
       ? await settledAmount(connection, sig, walletAddress, view.assetMint)
       : null;
+    const soldUnits =
+      sharePriceUsd && sharePriceUsd > 0 ? requested / sharePriceUsd : undefined;
     setResult({
       kind: "withdraw",
       amount: landed !== null && landed > BigInt(0) ? fromBaseUnits(landed, view.decimals) : requested,
       symbol: price ? "USDC" : view.assetSymbol,
+      units: soldUnits,
+      unitLabel: soldUnits !== undefined ? unitLabel : undefined,
+      assetId: view.id,
     });
     settle();
   };
@@ -304,11 +312,23 @@ export function AssetDetail({
             positionValue={positionValue}
             amount={amount}
             onAmountChange={setAmount}
-            onDeposited={(usd, pending) => { setResult({ kind: "deposit", amount: usd, symbol: price ? "USDC" : view.assetSymbol, pending }); settle(); }}
+            onDeposited={(usd, pending) => {
+              const boughtUnits = sharePriceUsd && sharePriceUsd > 0 ? usd / sharePriceUsd : undefined;
+              setResult({
+                kind: "deposit",
+                amount: usd,
+                symbol: price ? "USDC" : view.assetSymbol,
+                pending,
+                units: boughtUnits,
+                unitLabel: boughtUnits !== undefined ? unitLabel : undefined,
+                assetId: view.id,
+              });
+              settle();
+            }}
             onSell={handleExit}
             loading={loading}
             error={error}
-            sharePriceUsd={price ? quote?.price : undefined}
+            sharePriceUsd={sharePriceUsd}
             unitLabel={unitLabel}
           />
         </motion.div>

@@ -5,6 +5,10 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
+import { floorTo } from "@oxar/sdk";
+
+import { AssetIcon } from "@/components/asset-icon";
+import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { useT } from "@/lib/i18n";
 
 export interface ActionResult {
@@ -14,6 +18,12 @@ export interface ActionResult {
   symbol: string;
   /** Cross-chain buy still bridging — credited in the background, not done yet. */
   pending?: boolean;
+  /** What was actually traded — "0.0023 ORO" reads as a thing owned, where a
+   *  dollar figure alone reads as a receipt for something unnamed. */
+  units?: number;
+  unitLabel?: string;
+  /** Source id, for the asset's own mark beside the amount. */
+  assetId?: string;
 }
 
 interface Props {
@@ -75,8 +85,15 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         <p className="mt-2 text-[40px] font-medium leading-none tracking-[-0.02em] text-black tabular-nums">
           ${result.amount.toFixed(2)}
         </p>
-        <span className="mt-3 inline-block rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-[11px] lowercase tracking-wide text-black/55">
-          {result.symbol}
+        {/* What you now hold (or no longer do), named. The dollar figure above says
+            how much moved; this says what it was. */}
+        <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-[11px] lowercase tracking-wide text-black/55">
+          {result.assetId && (
+            <AssetIcon src={assetLogoSrc(result.assetId)} label={result.symbol} size={14} />
+          )}
+          {result.units !== undefined && result.unitLabel
+            ? `${floorTo(result.units, 6)} ${result.unitLabel}`
+            : result.symbol}
         </span>
         {result.pending && (
           <p className="mt-2 max-w-[260px] text-[12px] leading-snug text-black/45">
