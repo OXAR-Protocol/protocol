@@ -72,10 +72,24 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
                 <span className="text-[13px] text-black/70">${formatUsdAmount(d.usd)}</span>
               )}
               {/* What the day EARNED, not how its total moved: on a day money went in,
-                  the second number is mostly the deposit and reads as profit. */}
+                  the second number is mostly the deposit and reads as profit.
+
+                  Said in words, because a bare signed figure next to a balance is a
+                  riddle — and a minus has two different meanings. Money spent
+                  swapping one holding for another is a COST, not a holding that
+                  fell, and on a savings app most small red numbers are that one. */}
               {d.earnedUsd !== null && !isDustUsd(Math.abs(d.earnedUsd)) && (
-                <span className={`text-[12px] ${d.earnedUsd >= 0 ? "text-black/45" : "text-red-600"}`}>
-                  {formatSignedUsd(d.earnedUsd)}
+                <span
+                  className={`text-[12px] ${d.earnedUsd > 0 ? "text-emerald-600" : "text-red-600"}`}
+                >
+                  {formatSignedUsd(d.earnedUsd)}{" "}
+                  <span className="text-black/40">
+                    {d.earnedUsd > 0
+                      ? t("history.earned")
+                      : Math.abs(d.costUsd ?? 0) >= Math.abs(d.marketUsd ?? 0)
+                        ? t("history.tradingCost")
+                        : t("history.market")}
+                  </span>
                 </span>
               )}
             </span>

@@ -33,6 +33,22 @@ describe("utcDayStart", () => {
 });
 
 describe("groupByDay", () => {
+  it("carries the day's breakdown through, so a row can say what a minus was", () => {
+    const days = groupByDay([ev(at(DAY), "buy", 10)], [
+      { t: at(DAY, 23), usd: 100, earnedUsd: -21.4, marketUsd: -0.4, costUsd: -21 },
+    ]);
+    expect(days[0]!.earnedUsd).toBe(-21.4);
+    // Cost dominates → the row calls it what it is: money spent swapping, not a
+    // holding that fell.
+    expect(Math.abs(days[0]!.costUsd!)).toBeGreaterThan(Math.abs(days[0]!.marketUsd!));
+  });
+
+  it("leaves the breakdown null when the series doesn't carry one", () => {
+    const days = groupByDay([ev(at(DAY), "buy", 10)]);
+    expect(days[0]!.marketUsd).toBeNull();
+    expect(days[0]!.costUsd).toBeNull();
+  });
+
   it("buckets events by day, newest day first, newest event first", () => {
     const days = groupByDay([
       ev(at(DAY, 9), "buy", 10),

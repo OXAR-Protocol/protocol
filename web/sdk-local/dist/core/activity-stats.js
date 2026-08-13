@@ -45,7 +45,7 @@ function groupByDay(events, points = []) {
     const dayOf = (day) => {
         let d = byDay.get(day);
         if (!d) {
-            d = { day, usd: null, earnedUsd: null, inUsd: 0, outUsd: 0, events: [] };
+            d = { day, usd: null, earnedUsd: null, marketUsd: null, costUsd: null, inUsd: 0, outUsd: 0, events: [] };
             byDay.set(day, d);
         }
         return d;
@@ -55,6 +55,10 @@ function groupByDay(events, points = []) {
         d.usd = p.usd;
         if (p.earnedUsd !== undefined)
             d.earnedUsd = p.earnedUsd;
+        if (p.marketUsd !== undefined)
+            d.marketUsd = p.marketUsd;
+        if (p.costUsd !== undefined)
+            d.costUsd = p.costUsd;
     }
     for (const e of events) {
         const d = dayOf(utcDayStart(e.timestamp));
