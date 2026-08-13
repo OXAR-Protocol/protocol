@@ -498,6 +498,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "send.step.amount": "Скільки?",
   "send.step.token": "Що надсилаємо?",
   "send.step.review": "Перевірте",
+  "send.network.solanaOnly": "{sym} ходить лише в Solana — в інших мережах для нього немає ринку. Надсилаємо на адресу Solana.",
   "send.network.hint": "Оберіть, куди йдуть гроші. Адреса, яку вставите далі, має належати цій мережі.",
   "send.network.instant": "Прямо туди, за секунди, без мосту",
   "send.network.bridged": "Прийде як {sym} — переносить міст, пару хвилин",

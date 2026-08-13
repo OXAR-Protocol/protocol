@@ -2,7 +2,7 @@
 
 import { AssetIcon } from "@/components/asset-icon";
 import { SheetRow } from "@/components/sheet-row";
-import { DEST_CHAINS } from "@/lib/wallet/outbound-destinations";
+import { destChainsFor } from "@/lib/wallet/outbound-destinations";
 import { useT } from "@/lib/i18n";
 
 /** Chain logos ship with the app, like the asset ones. `key` is the destination's. */
@@ -16,14 +16,27 @@ const chainLogo = (key: string) => `/logos/chains/${key}.png`;
  * after invites pasting one and picking the wrong other. So the network is chosen,
  * then the field knows what a valid address even looks like.
  */
-export function SendNetwork({ onPick }: { onPick: (key: string) => void }) {
+export function SendNetwork({
+  mint,
+  symbol,
+  onPick,
+}: {
+  /** Which holding is going — it decides which networks can even be offered. */
+  mint: string;
+  symbol: string;
+  onPick: (key: string) => void;
+}) {
   const { t } = useT();
+  const chains = destChainsFor(mint);
+  const solanaOnly = chains.length === 1;
 
   return (
     <>
-      <p className="mb-3 text-[13px] leading-snug text-black/50">{t("send.network.hint")}</p>
+      <p className="mb-3 text-[13px] leading-snug text-black/50">
+        {solanaOnly ? t("send.network.solanaOnly", { sym: symbol }) : t("send.network.hint")}
+      </p>
       <div className="flex flex-col gap-2">
-        {DEST_CHAINS.map((d) => (
+        {chains.map((d) => (
           <SheetRow
             key={d.key}
             leading={<AssetIcon src={chainLogo(d.key)} label={d.label} size={40} />}
