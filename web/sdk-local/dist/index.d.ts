@@ -11,7 +11,6 @@ export * from "./core/assets";
 export * from "./core/delora";
 export * from "./core/paybis";
 export * from "./core/card-coverage";
-export * from "./core/in-app-browser";
 export * from "./core/wallet-deltas";
 export * from "./core/jupiter-swap";
 export * from "./core/earnings-basis";
