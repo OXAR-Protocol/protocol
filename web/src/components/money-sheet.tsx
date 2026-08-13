@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { ArrowUpRight, Clock, Plus, Wallet } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, Clock, Wallet } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
 import { SheetShell } from "@/components/sheet-shell";
+import { SheetRow } from "@/components/sheet-row";
 import { FundSheet } from "@/components/fund-sheet";
 import { SendSheet } from "@/components/send-sheet";
 import { WithdrawPicker } from "@/components/withdraw-picker";
@@ -49,12 +50,6 @@ export function MoneySheet({ onClose }: { onClose: () => void }) {
     };
   }, [connection, walletAddress]);
 
-  // `items-start` + a fixed min height: one row has a two-line description and the
-  // other doesn't, and two boxes of different heights beside each other read as a
-  // mistake rather than a difference.
-  const row =
-    "flex min-h-[76px] w-full items-center gap-3 rounded-[10px] border border-black/12 px-4 py-3.5 text-left transition hover:border-black/40";
-
   return (
     <>
       <SheetShell label={t("money.label")} title={t("money.title")} onClose={onClose}>
@@ -64,15 +59,18 @@ export function MoneySheet({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="flex flex-col gap-2">
-          <button type="button" onClick={() => setOpen("fund")} className={row}>
-            <Plus size={16} strokeWidth={1.5} className="shrink-0 text-black/45" />
-            <Label title={t("money.fund.title")} body={t("money.fund.body")} />
-          </button>
-
-          <button type="button" onClick={() => setOpen("withdraw")} className={row}>
-            <ArrowUpRight size={16} strokeWidth={1.5} className="shrink-0 text-black/45" />
-            <Label title={t("money.withdraw.title")} body={t("money.withdraw.body")} />
-          </button>
+          <SheetRow
+            icon={ArrowDownToLine}
+            title={t("money.fund.title")}
+            body={t("money.fund.body")}
+            onClick={() => setOpen("fund")}
+          />
+          <SheetRow
+            icon={ArrowUpFromLine}
+            title={t("money.withdraw.title")}
+            body={t("money.withdraw.body")}
+            onClick={() => setOpen("withdraw")}
+          />
         </div>
 
         <p className="mt-5 flex items-center gap-2 text-[11px] text-black/40">
@@ -106,15 +104,6 @@ function Figure({ label, value }: { label: string; value: number | null }) {
         {value === null ? "—" : `$${formatUsdAmount(value)}`}
       </p>
     </div>
-  );
-}
-
-function Label({ title, body }: { title: string; body: string }) {
-  return (
-    <span className="min-w-0">
-      <span className="block text-[14px] text-black">{title}</span>
-      <span className="block text-[12px] leading-snug text-black/45">{body}</span>
-    </span>
   );
 }
 

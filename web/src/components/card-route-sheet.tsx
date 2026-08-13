@@ -1,11 +1,11 @@
 "use client";
 
-import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
-import { X, ChevronRight } from "lucide-react";
+import { CreditCard } from "lucide-react";
 
 import { cardRouteUnserved } from "@oxar/sdk";
 
+import { SheetShell } from "@/components/sheet-shell";
+import { SheetRow } from "@/components/sheet-row";
 import { useCountry } from "@/hooks/use-country";
 import { useT } from "@/lib/i18n";
 import type { TranslationKey } from "@/lib/i18n/en";
@@ -35,66 +35,34 @@ export function CardRouteSheet({ routes, onClose }: { routes: readonly CardRoute
   const { t } = useT();
   const country = useCountry();
 
-  return createPortal(
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      data-no-pull
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-white/70 px-4 py-6 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ y: 60, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 60, opacity: 0 }}
-        transition={{ type: "spring", damping: 26, stiffness: 220 }}
-        onClick={(e) => e.stopPropagation()}
-        className="relative max-h-full w-full max-w-[400px] overflow-y-auto rounded-[12px] border border-black/15 bg-white p-6"
-      >
-        <div className="mb-5 flex items-start justify-between">
-          <div>
-            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">{t("cardroute.label")}</p>
-            <h2 className="mt-1 text-xl text-black">{t("cardroute.title")}</h2>
-          </div>
-          <button onClick={onClose} className="text-black/45 transition hover:text-black">
-            <X size={18} strokeWidth={1.5} />
-          </button>
-        </div>
-
-        <div className="space-y-2">
-          {routes.map((route) => (
-            <button
+  return (
+    <SheetShell label={t("cardroute.label")} title={t("cardroute.title")} onClose={onClose}>
+      <div className="flex flex-col gap-2">
+        {routes.map((route) => {
+          const unserved = cardRouteUnserved(route.key, country);
+          return (
+            <SheetRow
               key={route.key}
-              onClick={() => {
-                if (route.unavailable) return;
-                onClose();
-                route.onSelect();
-              }}
-              disabled={!!route.unavailable}
-              className="flex w-full items-center gap-3 rounded-[10px] border border-black/15 px-4 py-3 text-left transition enabled:hover:border-black/40 disabled:opacity-45"
-            >
-              <span className="min-w-0 flex-1">
-                <span className="block text-[14px] text-black">{t(route.title)}</span>
-                <span className="mt-0.5 block text-[12px] leading-snug text-black/50">
-                  {route.unavailable ?? t(route.body)}
-                </span>
-                {cardRouteUnserved(route.key, country) && (
-                  <span className="mt-1 block text-[12px] leading-snug text-amber-700">
-                    {t("cardroute.notInCountry")}
-                  </span>
-                )}
-              </span>
-              {!route.unavailable && (
-                <ChevronRight size={16} strokeWidth={1.5} className="shrink-0 text-black/30" />
-              )}
-            </button>
-          ))}
-        </div>
+              icon={CreditCard}
+              title={t(route.title)}
+              // One line, and the most important one: why this route can't run beats
+              // what makes it different, and both beat nothing.
+              body={route.unavailable ?? (unserved ? t("cardroute.notInCountry") : t(route.body))}
+              badge={unserved && !route.unavailable ? t("common.soon") : undefined}
+              onClick={
+                route.unavailable
+                  ? undefined
+                  : () => {
+                      onClose();
+                      route.onSelect();
+                    }
+              }
+            />
+          );
+        })}
+      </div>
 
-        <p className="mt-4 text-[11px] leading-snug text-black/40">{t("cardroute.footer")}</p>
-      </motion.div>
-    </motion.div>,
-    document.body,
+      <p className="mt-4 text-[11px] leading-snug text-black/40">{t("cardroute.footer")}</p>
+    </SheetShell>
   );
 }

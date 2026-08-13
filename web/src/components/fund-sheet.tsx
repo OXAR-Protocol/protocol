@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { ArrowLeft, Banknote, Building2, CreditCard, Coins, Loader2, Wallet } from "lucide-react";
+import { ArrowLeft, ArrowLeftRight, Banknote, Building2, CreditCard, Wallet } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
 import { SheetShell } from "@/components/sheet-shell";
+import { SheetRow } from "@/components/sheet-row";
 import { FundAddress } from "@/components/fund-address";
 import { FundCardAmount } from "@/components/fund-card-amount";
 import { DepositNetworks } from "@/components/deposit-networks";
@@ -96,8 +97,6 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
       : []),
   ];
 
-  const row =
-    "flex w-full items-center gap-3 rounded-[10px] border border-black/12 px-4 py-3.5 text-left transition hover:border-black/40";
 
   return (
     <>
@@ -112,54 +111,31 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
             </p>
 
             <div className="flex flex-col gap-2">
-              <button type="button" onClick={() => setWay("network")} className={row}>
-                <Wallet size={16} strokeWidth={1.5} className="shrink-0 text-black/45" />
-                <span className="min-w-0">
-                  <span className="block text-[14px] text-black">{t("fund.crypto.title")}</span>
-                  <span className="block text-[12px] leading-snug text-black/45">
-                    {t("fund.crypto.body")}
-                  </span>
-                </span>
-              </button>
-
-              <button
-                type="button"
+              <SheetRow
+                icon={Wallet}
+                title={t("fund.crypto.title")}
+                body={t("fund.crypto.body")}
+                onClick={() => setWay("network")}
+              />
+              <SheetRow
+                icon={CreditCard}
+                title={t("fund.card.title")}
+                body={t("fund.card.body")}
+                busy={busy}
                 onClick={() => setWay("card")}
-                disabled={busy}
-                className={`${row} disabled:opacity-50`}
-              >
-                {busy ? (
-                  <Loader2 size={16} className="shrink-0 animate-spin text-black/45" />
-                ) : (
-                  <CreditCard size={16} strokeWidth={1.5} className="shrink-0 text-black/45" />
-                )}
-                <span className="min-w-0">
-                  <span className="block text-[14px] text-black">{t("fund.card.title")}</span>
-                  <span className="block text-[12px] leading-snug text-black/45">
-                    {t("fund.card.body")}
-                  </span>
-                </span>
-              </button>
-
-              <button type="button" onClick={() => setWay("convert")} className={row}>
-                <Coins size={16} strokeWidth={1.5} className="shrink-0 text-black/45" />
-                <span className="min-w-0">
-                  <span className="block text-[14px] text-black">{t("fund.convert.title")}</span>
-                  <span className="block text-[12px] leading-snug text-black/45">
-                    {t("fund.convert.body")}
-                  </span>
-                </span>
-              </button>
-
-              <button type="button" onClick={() => setWay("exchange")} className={row}>
-                <Building2 size={16} strokeWidth={1.5} className="shrink-0 text-black/45" />
-                <span className="min-w-0">
-                  <span className="block text-[14px] text-black">{t("fund.exchange.title")}</span>
-                  <span className="block text-[12px] leading-snug text-black/45">
-                    {t("fund.exchange.body")}
-                  </span>
-                </span>
-              </button>
+              />
+              <SheetRow
+                icon={ArrowLeftRight}
+                title={t("fund.convert.title")}
+                body={t("fund.convert.body")}
+                onClick={() => setWay("convert")}
+              />
+              <SheetRow
+                icon={Building2}
+                title={t("fund.exchange.title")}
+                body={t("fund.exchange.body")}
+                onClick={() => setWay("exchange")}
+              />
             </div>
 
             <p className="mt-5 flex items-start gap-2 text-[11px] leading-snug text-black/40">
