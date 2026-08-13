@@ -3,9 +3,10 @@
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { X, Loader2, ExternalLink } from "lucide-react";
+import { X, Loader2, ExternalLink, ClipboardPaste } from "lucide-react";
 
 import { CustomSelect } from "@/components/custom-select";
+import { SendReview } from "@/components/send-review";
 import { AssetPicker } from "@/components/asset-picker";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useSend } from "@/hooks/use-send";
@@ -36,6 +37,9 @@ export function SendSheet({
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [result, setResult] = useState<{ sig: string; crossChain: boolean } | null>(null);
+  // The form and its last look before the money goes. Sending is the one
+  // irreversible act here, so it never happens straight off the form.
+  const [reviewing, setReviewing] = useState(false);
 
   // Default source: USDC if held, else the largest holding.
   const source = useMemo(() => {
@@ -63,6 +67,14 @@ export function SendSheet({
           ? t("send.errAddress", { chain: destChain.chain === "ethereum" ? "EVM" : "Solana" })
           : null;
   const busy = status !== "idle";
+
+  const paste = async () => {
+    try {
+      setTo((await navigator.clipboard.readText()).trim());
+    } catch {
+      // Clipboard read denied — typing still works.
+    }
+  };
 
   const handleSend = async () => {
     if (!source || validation) return;
@@ -115,6 +127,17 @@ export function SendSheet({
               {t("send.viewSolscan")} <ExternalLink size={12} strokeWidth={1.5} />
             </a>
           </div>
+        ) : reviewing && source ? (
+          <SendReview
+            amount={amount}
+            symbol={source.symbol}
+            to={to.trim()}
+            chainLabel={destChain.label}
+            isEvm={!isSolanaDest}
+            busy={busy}
+            onBack={() => setReviewing(false)}
+            onConfirm={handleSend}
+          />
         ) : (
           <>
             {/* What is leaving. The picker already shows the icon, the symbol and the
@@ -153,12 +176,24 @@ export function SendSheet({
             <p className="text-[10px] lowercase tracking-wide text-black/40 mt-4 mb-1.5">
               {t("send.toAddress", { chain: destChain.chain === "ethereum" ? "EVM" : "Solana" })}
             </p>
-            <input
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              placeholder={destChain.chain === "ethereum" ? "0x…" : t("send.addressPlaceholder")}
-              className="w-full bg-transparent border border-black/15 focus:border-black/40 outline-none rounded-[5px] px-3 py-2 text-xs text-black"
-            />
+            <div className="flex items-center gap-2 rounded-[5px] border border-black/15 px-3 py-2 focus-within:border-black/40">
+              <input
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                placeholder={destChain.chain === "ethereum" ? "0x…" : t("send.addressPlaceholder")}
+                className="min-w-0 flex-1 bg-transparent text-xs text-black outline-none"
+              />
+              {/* Addresses are pasted, never typed — the button saves a fiddly long-press
+                  on a phone, which is where this is used. */}
+              <button
+                type="button"
+                onClick={paste}
+                className="inline-flex shrink-0 items-center gap-1 text-[11px] lowercase tracking-wide text-black/45 transition hover:text-black"
+              >
+                <ClipboardPaste size={12} strokeWidth={1.5} />
+                {t("send.paste")}
+              </button>
+            </div>
             {/* EVM addresses look identical on every chain — remind which network
                 the funds land on so nothing is sent to the wrong one. */}
             {!isSolanaDest && to.trim() !== "" && (
@@ -207,11 +242,11 @@ export function SendSheet({
               <p className="mt-4 text-[11px] leading-snug text-black/45">{validation}</p>
             )}
             <button
-              onClick={handleSend}
+              onClick={() => setReviewing(true)}
               disabled={busy || !!validation}
               className="mt-3 w-full px-4 py-3.5 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-25 transition inline-flex items-center justify-center gap-2"
             >
-              {busy ? <><Loader2 className="animate-spin" size={14} /> {t("send.sending")}</> : t("send.action", { asset: destAsset.symbol, chain: destChain.label })}
+              {busy ? <><Loader2 className="animate-spin" size={14} /> {t("send.sending")}</> : t("send.review.open")}
             </button>
 
             {sendError && <p className="mt-3 text-xs text-red-400 text-center">{sendError}</p>}
