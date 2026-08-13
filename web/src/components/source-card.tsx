@@ -36,14 +36,6 @@ export function SourceCard({ group, onOpen }: Props) {
       onClick={onOpen}
       className="group relative isolate overflow-hidden flex flex-col gap-4 p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition text-left"
     >
-      {pickSet?.enabled && (
-        <PickButton
-          picked={pickSet.picked.has(top.id)}
-          onToggle={() => pickSet.toggle(top.id)}
-          label={top.name}
-          className="absolute right-3 top-3 z-10"
-        />
-      )}
       <BanknoteBg seed={group.views[0]?.id ?? group.name} />
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-3 min-w-0">
@@ -90,6 +82,18 @@ export function SourceCard({ group, onOpen }: Props) {
           {RISK_LABEL[top.riskLevel] ?? top.riskLevel}
         </p>
       </div>
+
+      {/* Along the bottom edge, the width of the card. In the corner it was a chip
+          competing with the name and the arrow for the same top line; here it reads
+          as the card's one action. */}
+      {pickSet?.enabled && (
+        <PickButton
+          block
+          picked={pickSet.picked.has(top.id)}
+          onToggle={() => pickSet.toggle(top.id)}
+          label={top.name}
+        />
+      )}
     </button>
   );
 }

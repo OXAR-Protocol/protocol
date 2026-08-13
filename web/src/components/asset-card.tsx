@@ -69,8 +69,14 @@ export function AssetCard({
       )}
     </p>
   ) : null;
+  // Two shapes of the same control: a chip beside a row, a full-width button along
+  // the bottom of a card. A row has no bottom edge to spare — a block there would
+  // stretch the list by half again.
   const pick = showPick ? (
     <PickButton picked={picked} onToggle={onTogglePick} label={asset.name} />
+  ) : null;
+  const pickBlock = showPick ? (
+    <PickButton block picked={picked} onToggle={onTogglePick} label={asset.name} />
   ) : null;
   const head = (
     <div className="flex items-center gap-3 min-w-0">
@@ -93,12 +99,7 @@ export function AssetCard({
         className="group relative isolate overflow-hidden p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition-colors text-left disabled:opacity-50 min-h-[120px] flex flex-col justify-between"
       >
         <BanknoteBg seed={asset.id} />
-        {/* In the flow, not floated over the corner: the pill is ~125px wide with its
-            words on, and pinned it printed over the end of a long name. */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">{head}</div>
-          {pick && <span className="shrink-0">{pick}</span>}
-        </div>
+        <div className="min-w-0">{head}</div>
         {spark && <div className="my-2">{spark}</div>}
         <div className={spark ? "mt-1" : "mt-3"}>
           {priceEl}
@@ -106,6 +107,7 @@ export function AssetCard({
           {ownedEl}
           <TrustLine sourceId={asset.id} />
         </div>
+        {pickBlock && <div className="mt-3">{pickBlock}</div>}
       </button>
     );
   }
