@@ -31,24 +31,25 @@ export function TopNav() {
         </Link>
 
         <div className="flex items-center gap-[clamp(16px,3vw,40px)]">
-          {authenticated && (
-            <div className="hidden items-center gap-[clamp(16px,2.4vw,36px)] md:flex">
-              {tabs.map((tab) => {
-                const isActive = pathname.startsWith(tab.href);
-                return (
-                  <Link
-                    key={tab.href}
-                    href={tab.href}
-                    className={`lowercase text-[15px] transition-colors ${
-                      isActive ? "text-black" : "text-black/40 hover:text-black"
-                    }`}
-                  >
-                    {tab.label}
-                  </Link>
-                );
-              })}
-            </div>
-          )}
+          {/* Shown signed out as well — the phone's bar already is, and hiding these
+              left a desktop visitor on one page with no way off it. The portfolio and
+              profile are public and empty, so every link here leads somewhere real. */}
+          <div className="hidden items-center gap-[clamp(16px,2.4vw,36px)] md:flex">
+            {tabs.map((tab) => {
+              const isActive = pathname.startsWith(tab.href);
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className={`lowercase text-[15px] transition-colors ${
+                    isActive ? "text-black" : "text-black/40 hover:text-black"
+                  }`}
+                >
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </div>
 
           {ready &&
             (authenticated ? (
