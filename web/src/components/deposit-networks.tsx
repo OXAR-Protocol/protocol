@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronRight, Globe, Loader2 } from "lucide-react";
+import { Globe, Wallet } from "lucide-react";
 
+import { SheetRow } from "@/components/sheet-row";
 import { useDepositAddressFlow } from "@/hooks/use-deposit-address-flow";
 import { useT } from "@/lib/i18n";
 
@@ -21,36 +22,24 @@ export function DepositNetworks({ onSolana }: { onSolana: () => void }) {
   const { t } = useT();
   const { open, busy, error } = useDepositAddressFlow();
 
-  const row =
-    "flex w-full items-center gap-3 rounded-[10px] border border-black/12 px-4 py-3.5 text-left transition hover:border-black/40 disabled:opacity-50";
-
   return (
     <div>
       <p className="mb-3 text-[12px] leading-snug text-black/50">{t("fund.network.hint")}</p>
 
       <div className="flex flex-col gap-2">
-        <button type="button" onClick={onSolana} className={row}>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[14px] text-black">{t("fund.network.solana")}</span>
-            <span className="block text-[12px] text-black/45">{t("fund.network.direct")}</span>
-          </span>
-          <ChevronRight size={15} strokeWidth={1.5} className="shrink-0 text-black/30" />
-        </button>
-
-        <button type="button" onClick={() => void open()} disabled={busy} className={row}>
-          <Globe size={16} strokeWidth={1.5} className="shrink-0 text-black/45" />
-          <span className="min-w-0 flex-1">
-            <span className="block text-[14px] text-black">{t("fund.network.elsewhere")}</span>
-            <span className="block text-[12px] leading-snug text-black/45">
-              {t("fund.network.bridged")}
-            </span>
-          </span>
-          {busy ? (
-            <Loader2 size={15} className="shrink-0 animate-spin text-black/30" />
-          ) : (
-            <ChevronRight size={15} strokeWidth={1.5} className="shrink-0 text-black/30" />
-          )}
-        </button>
+        <SheetRow
+          icon={Wallet}
+          title={t("fund.network.solana")}
+          body={t("fund.network.direct")}
+          onClick={onSolana}
+        />
+        <SheetRow
+          icon={Globe}
+          title={t("fund.network.elsewhere")}
+          body={t("fund.network.bridged")}
+          busy={busy}
+          onClick={() => void open()}
+        />
       </div>
 
       {/* Whoever moves the money says what it costs and how long it takes — we don't

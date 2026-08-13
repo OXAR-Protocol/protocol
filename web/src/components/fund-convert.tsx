@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
 
 import { formatUsdAmount, spendableUsd, type WalletAsset } from "@oxar/sdk";
 
+import { SheetRow } from "@/components/sheet-row";
+import { TokenIcon } from "@/components/token-icon";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useBulkFunding } from "@/hooks/use-bulk-funding";
 import { useSolanaContext } from "@/providers/solana-provider";
@@ -65,24 +66,20 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
       <p className="mb-3 text-[13px] leading-snug text-black/50">{t("convert.hint")}</p>
       <div className="flex flex-col gap-2">
         {coins.map(({ asset, usd }) => (
-          <button
+          <SheetRow
             key={asset.mint}
-            type="button"
+            leading={<TokenIcon asset={asset} className="h-10 w-10 shrink-0 rounded-full" />}
+            title={asset.symbol}
+            body={`${Number(asset.uiAmount.toPrecision(4))} ${asset.symbol}`}
+            busy={pending === asset.mint}
             disabled={converting}
-            onClick={() => convert(asset, usd)}
-            className="flex items-center gap-3 rounded-[10px] border border-black/12 px-4 py-3.5 text-left transition hover:border-black/40 disabled:opacity-50"
-          >
-            <span className="min-w-0">
-              <span className="block text-[14px] text-black">{asset.symbol}</span>
-              <span className="block text-[12px] leading-snug text-black/45">
-                {asset.uiAmount.toPrecision(4)} {asset.symbol}
+            trailing={
+              <span className="shrink-0 text-[14px] tabular-nums text-black">
+                ${formatUsdAmount(usd)}
               </span>
-            </span>
-            <span className="ml-auto flex items-center gap-2 text-[13px] tabular-nums text-black">
-              {pending === asset.mint && <Loader2 size={14} className="animate-spin text-black/45" />}
-              ${formatUsdAmount(usd)}
-            </span>
-          </button>
+            }
+            onClick={() => void convert(asset, usd)}
+          />
         ))}
       </div>
       <p className="mt-4 text-[11px] leading-snug text-black/40">{t("convert.rate")}</p>
