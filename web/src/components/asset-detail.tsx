@@ -121,8 +121,10 @@ export function AssetDetail({
     settle();
   };
 
+  // The bottom padding clears the buy/sell bar alone — the tab bar hides on this
+  // page (see `TabBar`), so the page no longer has to make room for both.
   return (
-    <div className="relative mx-auto max-w-[1100px] pb-44 pt-2 lg:pb-32">
+    <div className="relative mx-auto max-w-[1100px] pb-28 pt-2 lg:pb-32">
       {/* Headline */}
       <motion.div {...fade(0)} className="flex items-start gap-4">
         <AssetIcon

@@ -54,8 +54,11 @@ export function AssetActionBar({
 
   return (
     <>
-      <div className="safe-bottom pointer-events-none fixed inset-x-0 bottom-[4.5rem] z-40 px-4 lg:hidden">
-        <div className="pointer-events-auto mx-auto flex max-w-[520px] gap-2 rounded-full border border-black/10 bg-white/90 p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
+      {/* Along the bottom edge, where the navigation used to be: on this page the tab
+          bar steps aside (see `TabBar`), so the two acts have the place a thumb
+          already reaches for, instead of hovering above a bar competing with them. */}
+      <div className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 lg:hidden">
+        <div className="pointer-events-auto mx-auto mb-3 flex max-w-[520px] gap-2 rounded-full border border-black/10 bg-white/90 p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
           <button
             type="button"
             onClick={() => setOpen("buy")}
