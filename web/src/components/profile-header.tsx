@@ -48,7 +48,9 @@ export function ProfileHeader() {
   // handle, then the address they signed in with.
   const name =
     solName ?? (email ? email.split("@")[0]! : address ? `${address.slice(0, 4)}…${address.slice(-4)}` : "you");
-  const secondary = email ?? (address ? `${address.slice(0, 6)}…${address.slice(-6)}` : null);
+  // Always the address, never the email: the line under a name exists to be copied
+  // into a wallet or an exchange's withdrawal field, and an email can't receive money.
+  const secondary = address ? `${address.slice(0, 6)}…${address.slice(-6)}` : null;
   const plate = useMemo(() => plateFor(address ?? name), [address, name]);
 
   const [copied, setCopied] = useState(false);
