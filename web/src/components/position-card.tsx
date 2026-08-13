@@ -28,11 +28,13 @@ interface Props {
   change24h?: number;
   /** Profit since this was bought (on-chain cost basis), when we can attribute it. */
   earned?: number;
+  /** What was put in, same basis — turns "worth $10.22" into "worth $10.22, from $10.05". */
+  invested?: number;
 }
 
 /** Grid ("квадратик") card for one source — APY trend for yield, price trend
  *  + 24h change for price-exposure assets (stocks/gold). */
-export function PositionCard({ view, onOpen, change24h, earned, picked, onTogglePick }: Props) {
+export function PositionCard({ view, onOpen, change24h, earned, invested, picked, onTogglePick }: Props) {
   const { t } = useT();
   const value = fromBaseUnits(view.underlyingBalance, view.decimals);
   const apyHistory = useApyHistory(view.defiLlamaPoolId);
@@ -43,6 +45,11 @@ export function PositionCard({ view, onOpen, change24h, earned, picked, onToggle
   // Price assets know their direction from the 24h move; a yield source reads it
   // off the series it draws.
   const priceUp = isPrice ? (change24h ?? 0) >= 0 : trendUp(history);
+  // Units held, when the asset is something you own by the piece.
+  const units =
+    isPrice && view.heldDecimals !== undefined
+      ? Number(view.shares) / 10 ** view.heldDecimals
+      : 0;
 
   return (
     <button
@@ -115,6 +122,23 @@ export function PositionCard({ view, onOpen, change24h, earned, picked, onToggle
           </p>
         )}
       </div>
+
+      {/* Worth compared to what, and bought at what price. Two facts a holding is
+          judged by, and neither was on the card — only the current value, which
+          says nothing on its own. Shown when the cost basis is known and the unit
+          count is real; a made-up average is worse than none. */}
+      {invested !== undefined && invested > 0 && (
+        <div className="flex items-center justify-between gap-2 border-t border-black/[0.06] pt-3 text-[11px] tabular-nums text-black/40">
+          <span>
+            {t("position.invested")} ${invested.toFixed(2)}
+          </span>
+          {units > 0 && (
+            <span>
+              {t("position.avgEntry")} ${floorTo(invested / units, 6)}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* The card's one action, along its bottom edge — it used to sit in the top
           line, where it crowded the name and the arrow. */}

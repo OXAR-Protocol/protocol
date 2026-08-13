@@ -27,7 +27,7 @@ import { useStockCharts } from "@/hooks/use-stock-charts";
 import { useActivity } from "@/hooks/use-activity";
 import { useLiveBalances } from "@/hooks/use-live-balances";
 import { usePortfolioHistory } from "@/hooks/use-portfolio-history";
-import { useEarnedById } from "@/hooks/use-earnings";
+import { useEarnedById, useInvestedById } from "@/hooks/use-earnings";
 
 
 
@@ -87,6 +87,7 @@ export function PortfolioPanel() {
   // Profit per position since it was bought — the card above says what the whole
   // portfolio did; this is what says WHICH holding is dragging.
   const earnedById = useEarnedById();
+  const investedById = useInvestedById();
 
   // Pile is the portfolio: only sources where you actually hold a position.
   const allHeld = views.filter((v) => v.underlyingBalance > BigInt(0));
@@ -181,6 +182,7 @@ export function PortfolioPanel() {
                 onOpen={() => router.push(`/asset/${v.id}`)}
                 change24h={change24hOf(v)}
                 earned={earnedById[v.id]}
+                invested={investedById[v.id]}
                 picked={selected.has(v.id)}
                 onTogglePick={sellingV2 ? () => toggleSelected(v.id) : undefined}
               />
