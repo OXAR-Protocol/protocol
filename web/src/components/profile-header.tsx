@@ -104,12 +104,14 @@ export function ProfileHeader() {
         {joined && <Stat icon={Clock} text={t("profile.joined", { date: joined })} />}
       </div>
 
-      {/* The same two doors as the portfolio — money in, and everything else. */}
-      <div className="mt-6 flex items-center justify-between gap-4 rounded-[12px] border border-black/10 bg-white px-4 py-3.5">
-        <div className="min-w-0">
-          <p className="text-[11px] lowercase tracking-wide text-black/40">{t("money.free")}</p>
-          <p className="mt-0.5 text-[20px] tabular-nums text-black">${formatUsdAmount(free)}</p>
-        </div>
+      {/* The same two doors as the portfolio — money in, and everything else. A size
+          down from the total below, because of two numbers on a screen only one can
+          be the headline, and this one is the smaller question: what's spendable. */}
+      <div className="mt-6 flex items-center justify-between gap-4 rounded-[12px] border border-black/10 bg-white px-4 py-3">
+        <p className="min-w-0 text-[13px] text-black/45">
+          {t("money.free")}{" "}
+          <span className="ml-1 text-[17px] tabular-nums text-black">${formatUsdAmount(free)}</span>
+        </p>
         <MoneyActions />
       </div>
     </section>

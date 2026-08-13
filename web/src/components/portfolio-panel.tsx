@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -15,7 +15,6 @@ import {
   type ProviderView,
 } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
-import { groupByDay, countActivity, activeDays, utcDayStart } from "@oxar/sdk";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { isXStock } from "@/lib/yield/xstocks";
 import { isGold } from "@/lib/yield/gold";
@@ -24,7 +23,7 @@ import { useFeature } from "@/hooks/use-features";
 import { PortfolioChart, type Range } from "@/components/portfolio-chart";
 import { DayHistory } from "@/components/day-history";
 import { useStockCharts } from "@/hooks/use-stock-charts";
-import { useActivity } from "@/hooks/use-activity";
+import { useDayActivity } from "@/hooks/use-day-activity";
 import { useLiveBalances } from "@/hooks/use-live-balances";
 import { usePortfolioHistory } from "@/hooks/use-portfolio-history";
 import { useEarnedById, useInvestedById } from "@/hooks/use-earnings";
@@ -66,22 +65,7 @@ export function PortfolioPanel() {
   // Reconstructed from on-chain history + daily prices — see /api/portfolio-history.
   const [range, setRange] = useState<Range>(30);
   const history = usePortfolioHistory(range);
-  // Deep enough for a year of ordinary use; the route caps it.
-  const { events, loading: loadingEvents } = useActivity(500);
-
-  // The day list's window comes from the value series, not the clock: it is by
-  // definition the stretch the chart is drawing, so the two can't disagree about
-  // what "30 days" means.
-  const days = useMemo(() => {
-    const cutoff = history.days.length ? utcDayStart(history.days[0]!.t) : 0;
-    return groupByDay(events.filter((e) => e.timestamp >= cutoff), history.days);
-  }, [events, history.days]);
-  // Counts only — every figure that is money comes from the value series itself.
-  const counts = useMemo(() => countActivity(days), [days]);
-  // The count reads EVERY day; the list shows only the ones something happened on.
-  // A quiet day repeats what the chart already draws, and there is one per calendar
-  // day — pages of "$0.00" rows burying the few that record a decision.
-  const listedDays = useMemo(() => activeDays(days), [days]);
+  const { counts, listedDays, loading: loadingEvents } = useDayActivity(history.days);
   // One batched request covers every card's sparkline (see /api/stock-charts).
   const charts = useStockCharts();
   // Profit per position since it was bought — the card above says what the whole
