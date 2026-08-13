@@ -52,12 +52,15 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
         // waiting for a code — the step most people drop out on. It runs on Privy's
         // own OAuth credentials, so switching it on in the dashboard was the whole job.
         //
+        // Passkey does the same job on the device itself — Face ID or a fingerprint,
+        // no inbox, no third party's credentials to obtain first.
+        //
         // Apple is NOT here yet on purpose. Its dashboard entry demands our own OAuth
         // credentials before production (Client ID, signing key, key + team id, all
         // marked required), which needs a paid Apple developer account and, by Apple's
         // own warning, can take weeks. Listing it before those exist ships a button
         // that fails when pressed. Add "apple" back the day the credentials are saved.
-        loginMethods: ["email", "google", "wallet"],
+        loginMethods: ["email", "google", "passkey", "wallet"],
         appearance: {
           theme: "#000000",
           accentColor: "#FFFFFF",
