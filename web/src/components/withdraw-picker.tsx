@@ -40,12 +40,15 @@ export function WithdrawPicker({
           body={t("withdraw.wallet.body")}
           onClick={onWallet}
         />
+        {/* Marked "soon" and still opening was the worst of both: the badge said wait,
+            the tap said go, and what it went to was a screen explaining the wait.
+            While the flag is off it behaves exactly like the bank line below. */}
         <SheetRow
           icon={CreditCard}
           title={t("withdraw.card.title")}
           body={t("withdraw.card.body")}
           badge={cardLive ? undefined : t("common.soon")}
-          onClick={onCard}
+          onClick={cardLive ? onCard : undefined}
         />
         {/* No onClick: there is nothing behind it yet, and a control that opens
             nothing is worse than a line that says so. */}
