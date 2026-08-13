@@ -76,6 +76,9 @@ export declare const DEFAULT_EVM_GAS_RESERVE_USD = 0.5;
  *    always, since the EVM origin tx is never sponsored.
  *  - ERC-20 / SPL tokens: pay gas in a separate coin → spend the full balance. */
 export declare function spendableBase(asset: WalletAsset, reserveGas?: boolean): bigint;
+/** What the asset is worth to spend, in dollars — its balance net of the gas reserve
+ *  `spendableBase` keeps back. The dollar figure every buying screen quotes. */
+export declare function spendableUsd(asset: WalletAsset, reserveGas?: boolean): number;
 /** USD amount → base units of `asset`, at its current unit price (usdValue/uiAmount).
  *  Single source of truth for the USD-denominated money path. */
 export declare function usdToBase(asset: WalletAsset, usd: number): bigint;

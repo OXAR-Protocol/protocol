@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DEFAULT_EVM_GAS_RESERVE_USD = exports.EVM_GAS_RESERVE_USD = exports.SOL_SPONSORED_RESERVE = exports.SOL_FEE_RESERVE = exports.SOL_MINT = void 0;
 exports.assetUid = assetUid;
 exports.spendableBase = spendableBase;
+exports.spendableUsd = spendableUsd;
 exports.usdToBase = usdToBase;
 exports.buildWalletAssets = buildWalletAssets;
 const units_1 = require("./units");
@@ -69,6 +70,14 @@ function spendableBase(asset, reserveGas = true) {
         return max > BigInt(0) ? max : BigInt(0);
     }
     return asset.amount;
+}
+/** What the asset is worth to spend, in dollars — its balance net of the gas reserve
+ *  `spendableBase` keeps back. The dollar figure every buying screen quotes. */
+function spendableUsd(asset, reserveGas = true) {
+    if (asset.uiAmount <= 0)
+        return 0;
+    const price = asset.usdValue / asset.uiAmount;
+    return (Number(spendableBase(asset, reserveGas)) / 10 ** asset.decimals) * price;
 }
 /** USD amount → base units of `asset`, at its current unit price (usdValue/uiAmount).
  *  Single source of truth for the USD-denominated money path. */

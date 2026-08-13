@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { AnimatePresence } from "framer-motion";
 
-import { PayWithField } from "@/components/pay-with-field";
 import { AmountQuickPicks } from "@/components/amount-quick-picks";
 import { FundSheet } from "@/components/fund-sheet";
 import { koraEnabled } from "@/lib/gas/kora";
@@ -18,13 +17,12 @@ import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { isPriceExposure } from "@/lib/yield/assets";
-import { assetUid, checkOriginGas, normalizeDecimalInput, spendableBase } from "@oxar/sdk";
+import { normalizeDecimalInput, spendableBase } from "@oxar/sdk";
 import { USDC_MINT } from "@/lib/constants";
 import { useT, localizeError } from "@/lib/i18n";
 
 // Cross-chain (bridge) minimum: below this the bridge fee eats the amount and the
 // route often can't quote at all. Same-chain Solana pays have NO minimum.
-const BRIDGE_MIN_USD = 5;
 
 interface Props {
   view: ProviderView;
@@ -39,14 +37,24 @@ interface Props {
   unitLabel?: string;
 }
 
-/** Deposit with any asset on any chain: pick a pay-asset, enter an amount in that
- *  currency, see the net USDC. The money path stays USD-denominated underneath. */
+/**
+ * Buying, in dollars.
+ *
+ * This panel used to ask what to pay with — USDC, SOL, USDT, or a token on another
+ * chain — which is the crypto machinery we promise not to show. Someone came to buy
+ * a hundred dollars of Apple; which coin settles it is our problem, not theirs.
+ *
+ * So the only currency here is the dollar, and the only balance that matters is the
+ * USDC already in the wallet. Other coins haven't disappeared: they stopped being a
+ * payment method and became what they are — other money, turned into dollars in the
+ * top-up sheet, which is also where paying from another chain now lives.
+ */
 export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUsd, unitLabel = "shares" }: Props) {
   const { t } = useT();
   const lower = verb.toLowerCase();
-  const { linkWallet, unlinkWallet } = usePrivy();
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
-  const { assets: evmAssets, evmAddress, loading: evmLoading } = useEvmAssets();
+  // EVM balances still feed the preview's gas check; they are no longer payable here.
+  const { evmAddress } = useEvmAssets();
   const { depositWith, busy, status, failedAt, error } = useDeposit(view.id);
   const busyLabel = busy ? t(`status.${status}` as "status.working") : null;
   // Apple Pay / card path — funds fresh USDC via Privy's on-ramp, then buys.
@@ -60,9 +68,6 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // (USD-denominated) money path below via the asset's unit price. `null` = the
   // field is untouched, so it shows a ≈ $50 default of the current currency.
   const [amount, setAmount] = useState<string | null>(null);
-  // Selection is by asset UID, not mint — native EVM coins share one mint across
-  // networks, so keying by mint would pick the wrong-network ETH to bridge.
-  const [selectedUid, setSelectedUid] = useState<string | null>(null);
   // Show the "no surprises" review before the deposit signs.
   const [confirming, setConfirming] = useState(false);
   const [showFund, setShowFund] = useState(false);
@@ -71,42 +76,34 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // USD to buy via Apple Pay when the wallet is empty — there's no pay-asset to
   // size the amount from, so the user enters it directly. Pre-filled, editable.
 
-  // Solana first (instant/swap), then EVM (bridge).
-  const assets = useMemo(() => [...solAssets, ...evmAssets], [solAssets, evmAssets]);
-  const assetsLoading = solLoading || evmLoading;
-  // No crypto to pay with (fresh email wallet) — Apple Pay is the only route.
-  const emptyWallet = !assetsLoading && assets.length === 0;
+  const assetsLoading = solLoading;
+  // Paying dollars into a dollar product needs no swap at all.
+  const isDirect = view.assetMint === USDC_MINT;
+  // The wallet's dollars. Everything else it holds is spendable only after being
+  // turned into these, which is a separate, explicit act — money never moves
+  // sideways on its own.
+  const payAsset = useMemo(
+    () => solAssets.find((a) => a.chain === "solana" && a.mint === USDC_MINT) ?? null,
+    [solAssets],
+  );
+  const free = payAsset
+    ? Number(spendableBase(payAsset, !koraEnabled() || isExternal)) / 10 ** payAsset.decimals
+    : 0;
+  const emptyWallet = !assetsLoading && free <= 0;
 
-  // Default: the product's own asset if held, else the largest Solana holding, else first.
-  const defaultUid = useMemo(() => {
-    if (assets.length === 0) return null;
-    const pick =
-      // Hold the product's own asset already? pay with it (instant, no swap).
-      assets.find((a) => a.chain === "solana" && a.mint === view.assetMint) ??
-      // Else default to USDC — the dollar asset, clean sponsored path, no SOL wrap.
-      assets.find((a) => a.chain === "solana" && a.mint === USDC_MINT) ??
-      solAssets[0] ??
-      assets[0];
-    return assetUid(pick);
-  }, [assets, solAssets, view.assetMint]);
 
-  const activeUid = selectedUid ?? defaultUid;
-  const payAsset = assets.find((a) => assetUid(a) === activeUid) ?? null;
-  const isDirect = payAsset?.chain === "solana" && payAsset.mint === view.assetMint;
-
-  const unitPrice = payAsset && payAsset.uiAmount > 0 ? payAsset.usdValue / payAsset.uiAmount : 0;
-  // Start empty (0) — the user types how much; nothing is pre-filled, so the
-  // buy/deposit button stays disabled until they enter an amount.
+  // Dollars in, dollars out: no unit price to convert through any more.
   const effectiveAmount = amount ?? "";
-  const usdAmount = (parseFloat(effectiveAmount) || 0) * unitPrice;
+  const usdAmount = parseFloat(effectiveAmount) || 0;
+  const short = usdAmount > free ? usdAmount - free : 0;
 
   // Quantity entry: type N units (e.g. shares) → fill the pay amount with the
   // USD-equivalent (units × unit price), expressed in the pay-asset's currency.
-  const canQuantity = !!sharePriceUsd && sharePriceUsd > 0 && unitPrice > 0;
+  const canQuantity = !!sharePriceUsd && sharePriceUsd > 0;
   const sharesValue = canQuantity ? usdAmount / sharePriceUsd! : 0;
   const onSharesChange = (s: string) => {
     const n = parseFloat(s);
-    setAmount(n > 0 ? String(Number(((n * sharePriceUsd!) / unitPrice).toPrecision(6))) : "");
+    setAmount(n > 0 ? String(Number((n * sharePriceUsd!).toFixed(2))) : "");
   };
 
   const preview = useNetPreview({
@@ -128,12 +125,6 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // Price-exposure only (stocks/gold) — yield sources don't carry this framing.
   const price = isPriceExposure(view.id);
 
-  // Bridge route = paying with an EVM (cross-chain) asset. Enforce a floor there
-  // ONLY — a same-chain Solana pay (USDC / SPL swap) can be any amount. Small
-  // tolerance: entering exactly "$5" round-trips through token units (5/price →
-  // 8-sig-fig round → ×price) to ~$4.9999, which would wrongly trip the boundary.
-  const bridgeBelowMin =
-    payAsset?.chain === "ethereum" && usdAmount > 0 && usdAmount < BRIDGE_MIN_USD - 0.01;
 
   const handleDeposit = async () => {
     if (!payAsset || usdAmount <= 0) return;
@@ -166,7 +157,6 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           label={busyLabel}
           status={status}
           failedAt={failedAt}
-          gas={checkOriginGas(payAsset, assets)}
           error={error}
           onConfirm={handleDeposit}
           onBack={() => setConfirming(false)}
@@ -182,14 +172,11 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           reads as if the user is buying USDC, not paying with it for the asset. */}
       <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">{t("deposit.payWith")}</p>
 
-      {/* Pay with: currency + amount in one field */}
+      {/* One currency, so the field says the amount and nothing else. */}
       <div className="mt-2">
         {assetsLoading ? (
           <p className="text-xs text-black/40">{t("deposit.loadingAssets")}</p>
         ) : emptyWallet ? (
-          // Nothing to pay with yet. Money comes in first, then it's spent — the same
-          // two steps for a card as for anything else, instead of a card buy that
-          // quietly bought SOL and swapped it (see the note on the panel).
           <div className="rounded-[12px] border border-black/10 p-4 text-center">
             <p className="text-[13px] leading-snug text-black/55">{t("deposit.emptyWallet")}</p>
             <button
@@ -201,30 +188,26 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             </button>
           </div>
         ) : (
-          <PayWithField
-            assets={assets}
-            activeUid={activeUid}
-            onSelectUid={setSelectedUid}
-            amount={effectiveAmount}
-            onAmountChange={setAmount}
-            usdAmount={usdAmount}
-            productMint={view.assetMint}
-            // With the relayer paying fees, the only SOL that must stay behind is the
-            // wrapped-SOL rent — not a whole fee budget. External wallets still pay
-            // their own fee, so they keep the larger reserve.
-            reserveGas={!koraEnabled() || isExternal}
-          />
-        )}
+          <>
+            <div className="flex items-center gap-2 rounded-[12px] border border-black/10 px-4 py-3 transition-colors focus-within:border-black/30">
+              <span className="text-[22px] text-black/35">$</span>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={effectiveAmount}
+                onChange={(e) => setAmount(normalizeDecimalInput(e.target.value))}
+                placeholder="0.00"
+                className="w-full bg-transparent text-[22px] tabular-nums text-black outline-none placeholder:text-black/25"
+              />
+            </div>
 
-        {/* How much of what you have, and what that is — the ceiling was only
-            legible inside the field above, so typing meant guessing at it. */}
-        {!emptyWallet && payAsset && (
-          <AmountQuickPicks
-            available={Number(spendableBase(payAsset, !koraEnabled() || isExternal)) / 10 ** payAsset.decimals}
-            onPick={(v) => setAmount(String(Number(v.toFixed(payAsset.decimals))))}
-            onTopUp={() => setShowFund(true)}
-            disabled={busy}
-          />
+            <AmountQuickPicks
+              available={free}
+              onPick={(v) => setAmount(v.toFixed(2))}
+              onTopUp={() => setShowFund(true)}
+              disabled={busy}
+            />
+          </>
         )}
 
         {/* Quantity shortcut — type how many units to buy; the pay amount fills in. */}
@@ -243,37 +226,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           </div>
         )}
 
-        {/* Advanced funding rail: pay from another chain (EVM → Delora bridge).
-            Demoted to a quiet link — it's the heaviest path (several wallet
-            confirmations), so the default stays USDC-on-Solana / card above. */}
-        {!evmAddress ? (
-          <button
-            onClick={() => linkWallet()}
-            className="mt-2 text-[11px] lowercase tracking-wide text-black/40 underline decoration-black/20 underline-offset-2 hover:text-black/70 transition"
-          >
-            {t("deposit.payFromAnotherChain")}
-          </button>
-        ) : (
-          // Connected EVM wallet — let the user disconnect it (e.g. to link another).
-          <div className="mt-2 flex items-center gap-2 text-[10px] lowercase tracking-wide text-black/45">
-            <span>
-              EVM {evmAddress.slice(0, 6)}…{evmAddress.slice(-4)}
-            </span>
-            <button
-              onClick={() => unlinkWallet(evmAddress)}
-              className="underline hover:text-black/70 transition"
-            >
-              {t("deposit.disconnect")}
-            </button>
-          </div>
-        )}
 
-        {/* Selected a cross-chain asset → warn that it confirms several steps. */}
-        {payAsset?.chain === "ethereum" && (
-          <p className="mt-2 text-[10px] lowercase tracking-wide text-amber-700/80">
-            {t("deposit.bridgeConfirmsHint")}
-          </p>
-        )}
       </div>
 
       {/* Net received */}
@@ -323,15 +276,22 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             // A card top-up that's still funding/arriving hasn't touched the wallet
             // yet — no reason to freeze this unrelated path. Once it's actually
             // buying (signing+sending), the two shouldn't race the same wallet.
-            disabled={busy || !payAsset || usdAmount <= 0 || bridgeBelowMin}
+            disabled={busy || !payAsset || usdAmount <= 0 || short > 0}
             className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
           >
             {verb}
           </button>
-          {bridgeBelowMin ? (
-            <p className="mt-2 text-center text-[10px] lowercase tracking-wide text-black/40">
-              {t("deposit.bridgeMinAmount", { value: `$${BRIDGE_MIN_USD}` })}
-            </p>
+          {short > 0 ? (
+            // Not enough dollars: say how many are missing and offer the way to get
+            // them. Quietly swapping something else the wallet holds would be moving
+            // money nobody asked to move.
+            <button
+              type="button"
+              onClick={() => setShowFund(true)}
+              className="mt-2 w-full text-center text-[11px] leading-snug text-black/50 underline decoration-black/20 underline-offset-2 transition hover:text-black"
+            >
+              {t("deposit.short", { value: `$${short.toFixed(2)}` })}
+            </button>
           ) : error ? (
             <p className="mt-3 text-xs text-red-400 text-center">{localizeError(error, t)}</p>
           ) : null}
