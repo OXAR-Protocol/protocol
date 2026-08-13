@@ -229,6 +229,13 @@ export const en = {
   "rail.exitCostNow": "getting out right now would cost about {pct}% — that's the market's price, not a fee we charge",
   "rail.exitCostUnavailable": "there's no way out at this size right now — that's the market, not us",
   "rail.exitCostCeiling": "right now, about {usd} is the most that would sell in one go — a bigger position means selling in a few goes, with the price moving each time. that's the market's depth, not a fee we charge",
+  "sell.details": "details",
+  "sell.detail.asked": "you're selling",
+  "sell.detail.cost": "cost to get out",
+  "sell.detail.impact": "price impact",
+  "sell.detail.output": "you receive",
+  "sell.detail.note":
+    "The difference is what the market pays for this size right now — not a fee we take. We take none.",
   "rail.cashOut": "cash out to card",
   "rail.guestTitle": "sign in to put money in",
   "rail.guestBody": "the numbers here are live. your money stays in your own wallet — we never hold it.",
