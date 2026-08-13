@@ -15,10 +15,10 @@ import { useBridgePreview } from "@/hooks/use-bridge-preview";
 import { toBaseUnits } from "@/lib/yield";
 import { USDC_MINT } from "@/lib/constants";
 import { maxSendable } from "@/lib/wallet/transfer";
-import { getDestChain, type DestAsset } from "@/lib/wallet/outbound-destinations";
+import { canLeaveSolana, getDestChain, type DestAsset } from "@/lib/wallet/outbound-destinations";
 import { useT } from "@/lib/i18n";
 
-type Step = "network" | "address" | "amount" | "token" | "review";
+type Step = "token" | "network" | "address" | "amount" | "review";
 
 /**
  * Sending money, one question at a time.
@@ -47,7 +47,7 @@ export function SendSheet({
   const { assets, loading } = useWalletAssets();
   const { send, status, error: sendError } = useSend();
 
-  const [step, setStep] = useState<Step>("network");
+  const [step, setStep] = useState<Step>("token");
   const [destKey, setDestKey] = useState(initialDestKey);
   const [sourceMint, setSourceMint] = useState<string | null>(null);
   const [to, setTo] = useState("");
@@ -94,11 +94,13 @@ export function SendSheet({
     }
   };
 
+  // Back retraces the way in. From the address, that's the network — unless this
+  // holding never had a network to choose, in which case it's the token list.
   const back: Record<Step, Step | null> = {
-    network: null,
-    address: "network",
+    token: null,
+    network: "token",
+    address: source && canLeaveSolana(source.mint) ? "network" : "token",
     amount: "address",
-    token: "amount",
     review: "amount",
   };
 
@@ -140,8 +142,10 @@ export function SendSheet({
             </button>
           )}
 
-          {step === "network" ? (
+          {step === "network" && source ? (
             <SendNetwork
+              mint={source.mint}
+              symbol={source.symbol}
               onPick={(key) => {
                 setDestKey(key);
                 setStep("address");
@@ -150,15 +154,27 @@ export function SendSheet({
           ) : step === "address" ? (
             <SendAddress chain={destChain} value={to} onChange={setTo} onContinue={() => setStep("amount")} />
           ) : step === "token" ? (
-            <SendToken
-              assets={assets}
-              activeMint={source?.mint ?? null}
-              onPick={(mint) => {
-                setSourceMint(mint);
-                setAmount("");
-                setStep("amount");
-              }}
-            />
+            loading ? (
+              <p className="text-[13px] text-black/45">{t("send.loading")}</p>
+            ) : (
+              <SendToken
+                assets={assets}
+                activeMint={source?.mint ?? null}
+                onPick={(mint) => {
+                  setSourceMint(mint);
+                  setAmount("");
+                  // A share, gold or a yield receipt has no market on another chain,
+                  // so there is no network question to ask — it goes to a Solana
+                  // address or nowhere. Skipping a one-answer screen beats showing it.
+                  if (canLeaveSolana(mint)) {
+                    setStep("network");
+                  } else {
+                    setDestKey("solana");
+                    setStep("address");
+                  }
+                }}
+              />
+            )
           ) : step === "amount" ? (
             loading ? (
               <p className="text-[13px] text-black/45">{t("send.loading")}</p>

@@ -529,6 +529,7 @@ export const en = {
   "send.step.amount": "How much?",
   "send.step.token": "Send what?",
   "send.step.review": "Check it over",
+  "send.network.solanaOnly": "{sym} only travels on Solana — there's no market for it on another network. It goes to a Solana address.",
   "send.network.hint": "Pick where the money is going. The address you paste next has to belong to this network.",
   "send.network.instant": "Straight there, seconds, no bridge",
   "send.network.bridged": "Arrives as {sym} — a bridge does the crossing, a couple of minutes",

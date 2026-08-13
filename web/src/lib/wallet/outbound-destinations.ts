@@ -53,6 +53,27 @@ export const DEST_CHAINS: DestChain[] = [
 export const getDestChain = (key: string): DestChain =>
   DEST_CHAINS.find((d) => d.key === key) ?? DEST_CHAINS[0];
 
+/** Solana USDT — the third thing a bridge will quote out of. */
+const USDT_MINT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
+
+/**
+ * What the bridge can actually carry off Solana. Everything else — a tokenized
+ * share, gold, a yield receipt — has no market on the other side, so a quote either
+ * fails or comes back so bad that taking it would be the loss, not the fee.
+ *
+ * Offering those chains anyway and failing at the quote three screens later is the
+ * worst version: the chain is a promise the send flow can't keep.
+ */
+const BRIDGEABLE = new Set([USDC_MINT, USDT_MINT, SOL_MINT]);
+
+export const canLeaveSolana = (mint: string): boolean => BRIDGEABLE.has(mint);
+
+/** The networks this holding can reach. Solana always; the rest only if a bridge
+ *  will quote it. */
+export function destChainsFor(mint: string): DestChain[] {
+  return canLeaveSolana(mint) ? DEST_CHAINS : DEST_CHAINS.filter((d) => d.chain === "solana");
+}
+
 /**
  * How to reach the destination from the source: cross-chain → bridge; same Solana
  * asset → plain transfer; different Solana asset → swap.
