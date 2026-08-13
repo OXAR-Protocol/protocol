@@ -7,7 +7,18 @@
  * catalog is now readable without an account — and the wall moved from the
  * entrance onto the money.
  */
-const PUBLIC_APP_PATHS = ["/market", "/yield", "/asset"] as const;
+const PUBLIC_APP_PATHS = [
+  "/market",
+  "/yield",
+  "/asset",
+  // The portfolio and profile are public too, but empty: a visitor with no account
+  // has no positions and no settings, so each says so and offers the way in. They
+  // exist signed out because the tab bar does — three tabs where one of them
+  // bounces you elsewhere is a broken bar, not a gate.
+  "/portfolio",
+  "/home",
+  "/you",
+] as const;
 
 /** True when a signed-out visitor may see this route. */
 export function isPublicAppPath(pathname: string): boolean {
