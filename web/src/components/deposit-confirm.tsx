@@ -10,6 +10,7 @@ import { BridgeSteps, type BridgeStep } from "@/components/bridge-steps";
 import { isNativeEvm } from "@/lib/evm/erc20";
 import { OriginGasNote, OriginGasSplit } from "@/components/origin-gas-note";
 import type { OriginGasStatus } from "@oxar/sdk";
+import { SwipeToConfirm } from "@/components/swipe-to-confirm";
 import { useT, localizeError } from "@/lib/i18n";
 
 interface Props {
@@ -128,20 +129,14 @@ export function DepositConfirm({
 
       {error && <p className="mt-3 text-xs text-red-500 text-center">{localizeError(error, t)}</p>}
 
-      <button
-        onClick={onConfirm}
-        disabled={busy}
-        className="mt-4 w-full px-4 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
-      >
-        {busy ? (
-          <>
-            <Loader2 className="animate-spin" size={14} />
-            {label}
-          </>
-        ) : (
-          `${t("confirm.confirm", { verb: verb.toLowerCase() })}`
-        )}
-      </button>
+      {/* A swipe, not a tap: this is the point of no return on a screen full of
+          numbers, and a thumb scrolling past a button is how accidents happen. */}
+      <SwipeToConfirm
+        label={t("confirm.confirm", { verb: verb.toLowerCase() })}
+        busyLabel={label ?? undefined}
+        busy={busy}
+        onConfirm={onConfirm}
+      />
       <button
         onClick={onBack}
         disabled={busy}
