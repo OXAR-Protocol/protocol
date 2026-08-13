@@ -468,6 +468,11 @@ export const en = {
   "fund.crypto.body": "Send USDC from Phantom, MetaMask or any wallet you hold",
   "fund.crypto.hint":
     "Send USDC on Solana to this address. It's yours — nobody else can move what lands here.",
+  "fund.copyAddress": "copy the address",
+  "fund.network.hint": "Which network are you sending from?",
+  "fund.network.direct": "Straight into your wallet",
+  "fund.bridged.body":
+    "Your account lives on Solana, so there is no {chain} address of ours to send to. To pay from {chain}, open an asset and choose \u201cpay from another chain\u201d \u2014 your own wallet pays, and the money bridges over automatically.",
   "fund.card.title": "With a card",
   "fund.card.body": "Apple Pay or a bank card, through a licensed provider",
   "fund.card.amount": "how much",
