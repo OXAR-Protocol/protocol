@@ -1,6 +1,5 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import type { NetPreview } from "@/hooks/use-net-preview";

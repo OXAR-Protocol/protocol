@@ -76,6 +76,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
 
   "deposit.cardInAppBrowser":
     "не відкривається у браузері гаманця — зайди на oxar.app у Safari чи Chrome, або обери Paybis",
+  "deposit.emptyWallet": "Поки нічого витрачати. Спочатку покладіть долари в гаманець — карткою, з іншого гаманця або з біржі.",
   "deposit.payWith": "оплата з",
   "deposit.loadingAssets": "Завантажуємо твої активи…",
   "deposit.noAssets": "У гаманці поки нічого немає.",

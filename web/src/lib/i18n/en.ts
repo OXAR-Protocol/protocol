@@ -85,6 +85,7 @@ export const en = {
   // Deposit / confirm / success
   "deposit.cardInAppBrowser":
     "can't open inside a wallet's browser — open oxar.app in Safari or Chrome, or pick Paybis",
+  "deposit.emptyWallet": "Nothing to spend yet. Put dollars in the wallet first — with a card, from another wallet, or out of an exchange.",
   "deposit.payWith": "pay with",
   "deposit.loadingAssets": "Loading your assets…",
   "deposit.noAssets": "No assets found in your wallet.",

@@ -1,16 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { AnimatePresence } from "framer-motion";
-import { CreditCard } from "lucide-react";
 
 import { PayWithField } from "@/components/pay-with-field";
-import { TopUpSheet, TOP_UP_FEATURE } from "@/components/top-up-sheet";
-import { CardRouteSheet, type CardRoute } from "@/components/card-route-sheet";
 import { AmountQuickPicks } from "@/components/amount-quick-picks";
 import { FundSheet } from "@/components/fund-sheet";
-import { useFeature } from "@/hooks/use-features";
 import { koraEnabled } from "@/lib/gas/kora";
 import { DepositConfirm } from "@/components/deposit-confirm";
 import { ExitCostNotice } from "@/components/exit-cost-notice";
@@ -18,7 +14,6 @@ import { useSolanaContext } from "@/providers/solana-provider";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useEvmAssets } from "@/hooks/use-evm-assets";
 import { useDeposit } from "@/hooks/use-deposit";
-import { useFundAndBuy } from "@/hooks/use-fund-and-buy";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
@@ -27,10 +22,6 @@ import { assetUid, checkOriginGas, normalizeDecimalInput, spendableBase } from "
 import { USDC_MINT } from "@/lib/constants";
 import { useT, localizeError } from "@/lib/i18n";
 
-// On-ramp minimum (MoonPay/Transak floor). There is no default amount: the card
-// charges exactly what the user typed, and below the floor the button is disabled.
-// A default meant a button that would charge $50 nobody asked for.
-const APPLE_PAY_MIN_USD = 20;
 // Cross-chain (bridge) minimum: below this the bridge fee eats the amount and the
 // route often can't quote at all. Same-chain Solana pays have NO minimum.
 const BRIDGE_MIN_USD = 5;
@@ -63,16 +54,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // of the pay-asset picker below.
   // Card buy funds native SOL (Privy on-ramp), keeps a gas buffer, swaps the rest
   // into the asset. The user's own SOL pays gas for any tx — no relayer/sponsorship.
-  const applePay = useFundAndBuy(view.id);
   const { isExternal } = useSolanaContext();
-  // The card on-ramp widget black-screens ONLY inside a mobile wallet's in-app
-  // browser (external wallet + mobile). It's fine for embedded wallets anywhere and
-  // for external wallets on desktop (a normal browser tab), so only hide it there.
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
-  }, []);
-  const canUseCard = !(isExternal && isMobile);
 
   // Amount is entered in the selected currency's units; USD is derived for the
   // (USD-denominated) money path below via the asset's unit price. `null` = the
@@ -83,15 +65,11 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const [selectedUid, setSelectedUid] = useState<string | null>(null);
   // Show the "no surprises" review before the deposit signs.
   const [confirming, setConfirming] = useState(false);
-  const [showTopUp, setShowTopUp] = useState(false);
   const [showFund, setShowFund] = useState(false);
-  const [showRoutes, setShowRoutes] = useState(false);
   // Paybis is back to insiders while the Ukrainian on-ramp is unsolved —
   // everyone else gets the built-in card and nothing to choose between.
-  const paybisTopUp = useFeature(TOP_UP_FEATURE);
   // USD to buy via Apple Pay when the wallet is empty — there's no pay-asset to
   // size the amount from, so the user enters it directly. Pre-filled, editable.
-  const [buyUsdInput, setBuyUsdInput] = useState("");
 
   // Solana first (instant/swap), then EVM (bridge).
   const assets = useMemo(() => [...solAssets, ...evmAssets], [solAssets, evmAssets]);
@@ -150,6 +128,13 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // Price-exposure only (stocks/gold) — yield sources don't carry this framing.
   const price = isPriceExposure(view.id);
 
+  // Bridge route = paying with an EVM (cross-chain) asset. Enforce a floor there
+  // ONLY — a same-chain Solana pay (USDC / SPL swap) can be any amount. Small
+  // tolerance: entering exactly "$5" round-trips through token units (5/price →
+  // 8-sig-fig round → ×price) to ~$4.9999, which would wrongly trip the boundary.
+  const bridgeBelowMin =
+    payAsset?.chain === "ethereum" && usdAmount > 0 && usdAmount < BRIDGE_MIN_USD - 0.01;
+
   const handleDeposit = async () => {
     if (!payAsset || usdAmount <= 0) return;
     try {
@@ -165,31 +150,6 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // USD the card buy will charge — always what the user typed. With crypto in the
   // wallet that's the pay amount; with an empty wallet it's the field above. Nothing
   // typed means nothing charged, which disables the button rather than assuming.
-  const applePayUsd = emptyWallet
-    ? Math.max(0, parseFloat(normalizeDecimalInput(buyUsdInput)) || 0)
-    : usdAmount;
-  // Small tolerance: USDC isn't priced at exactly $1 (Jupiter ~0.9997), so a typed
-  // "$20" converts to ~$19.99 and would wrongly trip the $20 minimum at the boundary.
-  const applePayBelowMin = applePayUsd < APPLE_PAY_MIN_USD - 0.5;
-  // Bridge route = paying with an EVM (cross-chain) asset. Enforce a floor there
-  // ONLY — a same-chain Solana pay (USDC / SPL swap) can be any amount. Small
-  // tolerance: entering exactly "$5" round-trips through token units (5/price →
-  // 8-sig-fig round → ×price) to ~$4.9999, which would wrongly trip the boundary.
-  const bridgeBelowMin =
-    payAsset?.chain === "ethereum" && usdAmount > 0 && usdAmount < BRIDGE_MIN_USD - 0.01;
-  const handleApplePay = async () => {
-    try {
-      const base = await applePay.buyWithApplePay(applePayUsd);
-      onDeposited(Number(base) / 10 ** view.decimals);
-    } catch {
-      // surfaced via `applePay.error`
-    }
-  };
-  // Once the on-ramp resolves, funds are still landing on-chain and can take a
-  // few minutes — Privy has no "cancelled" result for a backed-out card flow, so
-  // this is the only way out of that wait. Not offered mid-buy: the swap+deposit
-  // tx is already signing by then.
-  const canCancelApplePay = applePay.status === "funding" || applePay.status === "arriving";
 
   if (confirming && payAsset) {
     return (
@@ -215,38 +175,6 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
     );
   }
 
-  const cardRoutes: CardRoute[] = [
-    {
-      key: "builtin",
-      // Labelled MoonPay: Privy can route this to Coinbase or Stripe, but MoonPay is
-      // the default and the one whose coverage we've verified. Listing all three read
-      // as jargon in a short list.
-      title: "cardroute.builtin.title",
-      body: "cardroute.builtin.body",
-      // The Privy widget black-screens inside a mobile wallet's in-app browser. The
-      // floor is the on-ramp's, and it reads the amount from the field above — Paybis
-      // asks for its own, hence the wording.
-      unavailable: !canUseCard
-        ? t("deposit.cardInAppBrowser")
-        : applePayBelowMin
-          ? t("cardroute.belowMin", { min: String(APPLE_PAY_MIN_USD) })
-          : undefined,
-      onSelect: handleApplePay,
-    },
-    ...(paybisTopUp
-      ? [
-          {
-            key: "paybis",
-            title: "cardroute.paybis.title",
-            body: "cardroute.paybis.body",
-            onSelect: () => setShowTopUp(true),
-          } satisfies CardRoute,
-        ]
-      : []),
-  ];
-  // A chooser with one option is just a slower button: with Paybis off, the card
-  // button runs the built-in route itself, and carries that route's own blockers.
-  const onlyRoute = cardRoutes.length === 1 ? cardRoutes[0] : null;
 
   return (
     <div className="p-4 rounded-[6px] border border-black/10 bg-white">
@@ -259,27 +187,19 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         {assetsLoading ? (
           <p className="text-xs text-black/40">{t("deposit.loadingAssets")}</p>
         ) : emptyWallet ? (
-          !canUseCard ? (
-            // Empty external wallet on mobile: no crypto to pay with, and the card
-            // widget black-screens here — fund the wallet itself, then come back.
-            <p className="text-xs text-black/40">{t("deposit.noAssets")}</p>
-          ) : (
-            // Empty wallet with a usable card route → enter how much to buy (USD).
-            <div className="rounded-[12px] border border-black/10 px-3 py-2.5 transition-colors focus-within:border-black/30">
-              <div className="flex items-center gap-1">
-                <span className="text-[20px] text-black/40">$</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={buyUsdInput}
-                  onChange={(e) => setBuyUsdInput(normalizeDecimalInput(e.target.value))}
-                  placeholder={String(APPLE_PAY_MIN_USD)}
-                  className="w-full bg-transparent text-[20px] text-black outline-none placeholder:text-black/25"
-                />
-              </div>
-              <p className="mt-0.5 text-[10px] lowercase tracking-wide text-black/40">{t("deposit.buyAmountHint")}</p>
-            </div>
-          )
+          // Nothing to pay with yet. Money comes in first, then it's spent — the same
+          // two steps for a card as for anything else, instead of a card buy that
+          // quietly bought SOL and swapped it (see the note on the panel).
+          <div className="rounded-[12px] border border-black/10 p-4 text-center">
+            <p className="text-[13px] leading-snug text-black/55">{t("deposit.emptyWallet")}</p>
+            <button
+              type="button"
+              onClick={() => setShowFund(true)}
+              className="mt-3 w-full rounded-full bg-black px-4 py-2.5 text-[13px] lowercase tracking-wide text-white transition hover:bg-black/85"
+            >
+              {t("wallet.fund")}
+            </button>
+          </div>
         ) : (
           <PayWithField
             assets={assets}
@@ -403,7 +323,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             // A card top-up that's still funding/arriving hasn't touched the wallet
             // yet — no reason to freeze this unrelated path. Once it's actually
             // buying (signing+sending), the two shouldn't race the same wallet.
-            disabled={busy || (applePay.busy && !canCancelApplePay) || !payAsset || usdAmount <= 0 || bridgeBelowMin}
+            disabled={busy || !payAsset || usdAmount <= 0 || bridgeBelowMin}
             className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
           >
             {verb}
@@ -418,68 +338,9 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         </>
       )}
 
-      {/* Divider only when the crypto path is also shown above. */}
-      {!emptyWallet && (
-        <div className="mt-3 flex items-center gap-3 text-[10px] lowercase tracking-wide text-black/30">
-          <span className="h-px flex-1 bg-black/10" />
-          {t("common.or")}
-          <span className="h-px flex-1 bg-black/10" />
-        </div>
-      )}
-
-      {/* One card button; which provider is a choice behind it (see CardRouteSheet).
-          Two competing buttons made a vendor name the label, which means nothing to
-          someone who has never heard of Paybis, and read as a fallback rather than
-          what it is — also a card payment.
-
-          While a card purchase is in flight this button stops being a chooser and
-          becomes the progress/cancel control: a card window the user backed out of
-          never resolves on its own, so that has to stay reachable. */}
-      <button
-        onClick={
-          applePay.busy
-            ? canCancelApplePay
-              ? applePay.cancel
-              : undefined
-            : onlyRoute
-              ? onlyRoute.onSelect
-              : () => setShowRoutes(true)
-        }
-        disabled={(applePay.busy && !canCancelApplePay) || busy || !!onlyRoute?.unavailable}
-        className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[15px] font-medium tracking-tight hover:bg-black/90 disabled:opacity-40 transition inline-flex items-center justify-center gap-1.5"
-      >
-        {applePay.busy ? (
-          <span className="lowercase">
-            {canCancelApplePay ? t("alloc.stopWaiting") : t(`status.${applePay.status}` as "status.buying")}
-          </span>
-        ) : (
-          <>
-            <CreditCard size={16} strokeWidth={1.75} />
-            <span className="capitalize">{verb}</span>
-            <span>with card</span>
-          </>
-        )}
-      </button>
-
-      {/* With no choice to open, the one route's blocker has to surface here — the
-          chooser was the only thing saying why the button wouldn't work. */}
-      {onlyRoute?.unavailable && !applePay.busy && (
-        <p className="mt-2 text-center text-[10px] leading-snug lowercase tracking-wide text-black/40">
-          {onlyRoute.unavailable}
-        </p>
-      )}
-
-      {applePay.error && <p className="mt-2 text-xs text-red-500 text-center">{localizeError(applePay.error, t)}</p>}
-
-      <AnimatePresence>
-        {showRoutes && !onlyRoute && (
-          <CardRouteSheet
-            routes={cardRoutes}
-            onClose={() => setShowRoutes(false)}
-          />
-        )}
-      </AnimatePresence>
-      <AnimatePresence>{showTopUp && <TopUpSheet onClose={() => setShowTopUp(false)} />}</AnimatePresence>
+      {/* Money in and money spent are two steps now, not one button that did both.
+          Topping up lives in its own sheet (card, crypto, exchange) and this panel
+          only spends what is already here. */}
       <AnimatePresence>{showFund && <FundSheet onClose={() => setShowFund(false)} />}</AnimatePresence>
     </div>
   );
