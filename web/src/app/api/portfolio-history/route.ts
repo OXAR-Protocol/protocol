@@ -4,6 +4,7 @@ import {
   portfolioSeries,
   summarizePerformance,
   trackedMints,
+  walletDeltas,
   trimLeadingEmpty,
   type PriceSeries,
   type WalletTx,
@@ -136,17 +137,15 @@ export async function POST(req: Request) {
       readWalletBalances(owner),
     ]);
 
-    // Everything the owner moved, transaction by transaction.
-    const moved = history.map((tx) => {
-      const legs: Record<string, number> = {};
-      for (const t of tx.tokenTransfers ?? []) {
-        if (!t.mint || typeof t.tokenAmount !== "number") continue;
-        const sign = t.toUserAccount === owner ? 1 : t.fromUserAccount === owner ? -1 : 0;
-        if (sign === 0) continue;
-        legs[t.mint] = (legs[t.mint] ?? 0) + sign * t.tokenAmount;
-      }
-      return { timestamp: tx.timestamp ?? 0, legs };
-    });
+    // Everything the owner moved, transaction by transaction — as NET balance
+    // changes, not as a sum of transfer legs. A routed swap moves the same dollars
+    // through several pools, and adding those legs reported a $5 trade as $2,459
+    // (see `walletDeltas`), which then flowed into "cost to trade" and the percent
+    // return as if the wallet had thousands in it.
+    const moved = history.map((tx) => ({
+      timestamp: tx.timestamp ?? 0,
+      legs: walletDeltas(tx, owner),
+    }));
 
     const tracked = trackedMints(moved, TRACKED_MINTS);
 
