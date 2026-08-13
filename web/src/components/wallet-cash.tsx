@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
+import { PhotoBg } from "@/components/photo-bg";
 import { TokenIcon } from "@/components/token-icon";
 import { MoneyActions } from "@/components/money-actions";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
@@ -39,8 +40,17 @@ export function WalletCash() {
   const extra = assets.length - chips.length;
 
   return (
-    <section className="mb-12">
-      <div className="flex items-start justify-between gap-4">
+    // A card, with the note behind it. A figure this size on bare background read as
+    // a heading; the paper says what kind of number it is before the label does.
+    <section className="relative mb-12 overflow-hidden rounded-[12px] border border-black/10 bg-white p-5">
+      <PhotoBg
+        src="/art/dripping-dollar.webp"
+        scrim="left"
+        position="object-[right_top]"
+        zoomOnMobile
+        opacity="opacity-30"
+      />
+      <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">{t("home.wallet.label")}</p>
           {/* The hero scale, taken from the balance below: what you can act on now
@@ -53,7 +63,7 @@ export function WalletCash() {
       </div>
 
       {worthShowing && (
-        <>
+        <div className="relative">
           {/* What's sitting there — a few asset chips for tangibility. */}
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {chips.map((a) => (
@@ -78,7 +88,7 @@ export function WalletCash() {
             {t("home.wallet.cta")}
             <ArrowUpRight size={14} strokeWidth={1.5} />
           </Link>
-        </>
+        </div>
       )}
     </section>
   );

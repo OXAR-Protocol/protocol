@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, ArrowUpRight } from "lucide-react";
 
+import { PhotoBg } from "@/components/photo-bg";
 import { PositionCard } from "@/components/position-card";
 import { PositionRow } from "@/components/position-row";
 import { PickedSellBar } from "@/components/picked-sell-bar";
@@ -92,12 +93,15 @@ export function PositionsSection() {
           <Loader2 className="animate-spin text-black/40" size={24} />
         </div>
       ) : held.length === 0 ? (
-        <div className="rounded-[8px] border border-black/10 bg-white p-8 text-center">
-          <p className="text-base text-black">{t("pile.empty.title")}</p>
-          <p className="mt-1 text-xs text-black/45">{t("pile.empty.body")}</p>
+        <div className="relative overflow-hidden rounded-[8px] border border-black/10 bg-white p-8 text-center">
+          {/* An empty state is where a photo earns its place: nothing to read yet, and
+              the picture says what the words are for. */}
+          <PhotoBg src="/art/coin-stacking.webp" scrim="center" position="object-right" opacity="opacity-25" />
+          <p className="relative text-base text-black">{t("pile.empty.title")}</p>
+          <p className="relative mt-1 text-xs text-black/45">{t("pile.empty.body")}</p>
           <Link
             href="/market"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-black px-4 py-2 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85"
+            className="relative mt-4 inline-flex items-center gap-1.5 rounded-full bg-black px-4 py-2 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85"
           >
             {t("pile.explore")}
             <ArrowUpRight size={14} strokeWidth={1.5} />
