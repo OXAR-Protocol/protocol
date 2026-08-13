@@ -67,13 +67,13 @@ export default function HomePage() {
   }
 
   return (
-    <div className="mx-auto max-w-[900px] pt-8 pb-32">
+    <div className="mx-auto max-w-[900px] pb-32">
       {/* Greeting */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8"
+        className="mb-6"
       >
         <SectionLabel>{`${greeting}, ${handle}`}</SectionLabel>
       </motion.div>
