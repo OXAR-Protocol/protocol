@@ -13,18 +13,21 @@ function stockTicker(id: string): string {
 
 /**
  * Yield sources and gold, by provider id. Self-hosted for the same reason the
- * stocks are: these came from the token's own metadata (Jupiter's list, the
- * issuer's repo, CoinGecko for USDY, whose Arweave gateway serves HTML to a
- * plain fetch), and an IPFS or Arweave gateway is not something a logo should
- * depend on at render time. Extensions differ because the sources do — two of
- * them publish an SVG, and re-rastering a vector to match the others would only
- * make it worse.
+ * stocks are: these came from the tokens' own metadata (Jupiter's list, CoinGecko
+ * where that failed), and an IPFS or Arweave gateway is not something a logo should
+ * depend on at render time.
+ *
+ * All are square, edge to edge, like the stock logos — a token's round mark left as
+ * a circle floated inside the tile with a rim of card showing around it, which read
+ * as a mistake next to a column of full-bleed squares. Each is composited onto its
+ * own rim colour, with the mark's cut-outs (Tether's T) kept white so filling the
+ * outside doesn't erase the letter.
  */
 const ASSET_LOGOS: Record<string, string> = {
   "jupiter-lend-usdc": "/logos/assets/jupiter-lend-usdc.png",
-  "jupiter-lend-usdt": "/logos/assets/jupiter-lend-usdt.svg",
+  "jupiter-lend-usdt": "/logos/assets/jupiter-lend-usdt.png",
   "ondo-usdy": "/logos/assets/ondo-usdy.png",
-  "maple-syrup": "/logos/assets/maple-syrup.svg",
+  "maple-solana": "/logos/assets/maple-solana.png",
   "onre-onyc": "/logos/assets/onre-onyc.png",
   "gold-xaut": "/logos/assets/gold-xaut.png",
   "gold-oro": "/logos/assets/gold-oro.png",
