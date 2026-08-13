@@ -52,10 +52,14 @@ export function middleware(req: NextRequest) {
   const isApp = host === APP_DOMAIN;
   const isMarketing = host === MARKETING_DOMAIN;
 
-  // Bare app.oxar.app/ → the portfolio. It pointed at /home, which since the rename
-  // is itself a redirect — so every visit to the bare domain took two hops.
+  // Bare app.oxar.app/ → the portfolio for someone signed in, the catalog for
+  // everyone else. A first-time visitor used to land on their own empty portfolio
+  // (behind the alpha wall, so in practice on a form); the catalog at least shows
+  // what this is. The Privy session cookie only picks the landing page here — it
+  // gates nothing, and the real check still happens client-side.
   if (isApp && pathname === "/") {
-    const url = new URL(`https://${APP_DOMAIN}/portfolio${search}`);
+    const signedIn = !!req.cookies.get("privy-token");
+    const url = new URL(`https://${APP_DOMAIN}${signedIn ? "/portfolio" : "/market"}${search}`);
     return NextResponse.redirect(url, 307);
   }
 

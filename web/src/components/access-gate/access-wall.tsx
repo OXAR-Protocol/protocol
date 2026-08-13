@@ -1,10 +1,12 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, createContext, useContext, useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ComingSoon, type Standing } from "./coming-soon";
 import { isValidInviteCode, INVITE_FLAG, CHANNEL_KEY } from "./invite";
+import { isPublicAppPath } from "@/lib/access/public-paths";
 import { markFirstSeen } from "@/lib/badge/early-riser";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,6 +23,15 @@ interface CheckResult {
   rank?: Standing["rank"];
 }
 
+/** Has this browser cleared the wall? Chrome (nav, action rails) asks so it can
+ *  send a visitor to the wall instead of opening a Privy login they can't finish. */
+const UnlockedContext = createContext(false);
+
+/** True once the wall is cleared in this browser — false for a shop-window visitor. */
+export function useAccessUnlocked(): boolean {
+  return useContext(UnlockedContext);
+}
+
 /**
  * Closed-alpha access wall. Sits OUTSIDE Privy: an approved email (from the
  * waitlist allowlist) unlocks the app; everyone else gets the waitlist screen.
@@ -28,8 +39,13 @@ interface CheckResult {
  * untouched — the wall never talks to Privy. This is what makes wallet login
  * work on mobile: Privy isn't even mounted until the wall is cleared, so a
  * wallet's in-app browser can't auto-login past it.
+ *
+ * The catalog (`isPublicAppPath`) is the exception: it renders for everyone, wall
+ * or no wall, so a link from an announcement lands on the asset instead of a form.
+ * Nothing there can move money — the deposit rail asks the visitor in first.
  */
 export function AccessWall({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const [state, setState] = useState<State>("loading");
   const [email, setEmail] = useState("");
   const [checking, setChecking] = useState(false);
@@ -98,8 +114,18 @@ export function AccessWall({ children }: { children: ReactNode }) {
     }
   };
 
+  // The shop window renders for everyone — including while the wall is still
+  // reading localStorage, because a white flash on a shared link is the thing we
+  // set out to remove.
+  if (isPublicAppPath(pathname)) {
+    return (
+      <UnlockedContext.Provider value={state === "unlocked"}>{children}</UnlockedContext.Provider>
+    );
+  }
   if (state === "loading") return <div className="fixed inset-0 bg-white" />;
-  if (state === "unlocked") return <>{children}</>;
+  if (state === "unlocked") {
+    return <UnlockedContext.Provider value>{children}</UnlockedContext.Provider>;
+  }
 
   if (denial) {
     return (
