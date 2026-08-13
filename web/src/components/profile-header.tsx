@@ -2,14 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { Check, Clock, Copy, Layers, Wallet } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { Check, Clock, Copy, Layers, Settings, Wallet } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
 import { EarlyRiserBadge } from "@/components/early-riser-badge";
-import { MoneyActions } from "@/components/money-actions";
+import { SettingsSheet } from "@/components/settings-sheet";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
-import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useSolanaName } from "@/hooks/use-solana-name";
 import { useT } from "@/lib/i18n";
@@ -39,9 +39,6 @@ export function ProfileHeader() {
   const { user } = usePrivy();
   const { walletAddress } = useSolanaContext();
   const { totalUsdc, positionCount } = useAggregatePersonalBalance();
-  const { assets } = useWalletAssets();
-  // What's free to act on right now — the figure the plus changes.
-  const free = assets.reduce((sum, a) => sum + a.usdValue, 0);
 
   const address = walletAddress?.toBase58() ?? user?.wallet?.address ?? null;
   const solName = useSolanaName(address);
@@ -55,6 +52,7 @@ export function ProfileHeader() {
   const plate = useMemo(() => plateFor(address ?? name), [address, name]);
 
   const [copied, setCopied] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const copyAddress = () => {
     if (!address) return;
     navigator.clipboard.writeText(address);
@@ -67,7 +65,7 @@ export function ProfileHeader() {
     : null;
 
   return (
-    <section>
+    <section data-tour="account">
       <div className="flex items-center gap-4">
         <span
           className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-[24px] uppercase text-white ${plate}`}
@@ -100,6 +98,17 @@ export function ProfileHeader() {
             </button>
           )}
         </div>
+
+        {/* Settings live behind the gear: a page you open to see what you're worth
+            shouldn't end in configuration. */}
+        <button
+          type="button"
+          onClick={() => setShowSettings(true)}
+          aria-label={t("settings.title")}
+          className="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 text-black/45 transition hover:border-black/30 hover:text-black"
+        >
+          <Settings size={17} strokeWidth={1.5} />
+        </button>
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-black/50">
@@ -108,16 +117,10 @@ export function ProfileHeader() {
         {joined && <Stat icon={Clock} text={t("profile.joined", { date: joined })} />}
       </div>
 
-      {/* The same two doors as the portfolio — money in, and everything else. A size
-          down from the total below, because of two numbers on a screen only one can
-          be the headline, and this one is the smaller question: what's spendable. */}
-      <div className="mt-6 flex items-center justify-between gap-4 rounded-[12px] border border-black/10 bg-white px-4 py-3">
-        <p className="min-w-0 text-[13px] text-black/45">
-          {t("money.free")}{" "}
-          <span className="ml-1 text-[17px] tabular-nums text-black">${formatUsdAmount(free)}</span>
-        </p>
-        <MoneyActions />
-      </div>
+      <AnimatePresence>
+        {showSettings && <SettingsSheet onClose={() => setShowSettings(false)} />}
+      </AnimatePresence>
+
     </section>
   );
 }

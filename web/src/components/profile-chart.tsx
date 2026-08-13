@@ -11,7 +11,7 @@ import {
 } from "@oxar/sdk";
 
 import { HoverChart } from "@/components/hover-chart";
-import { RANGES, type Range } from "@/components/portfolio-chart";
+import { RANGES, type Range } from "@/lib/history-range";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -47,7 +47,7 @@ export function ProfileChart({
   const up = earned === null || earned >= 0;
 
   return (
-    <section>
+    <section data-tour="balance">
       <p className="text-[11px] lowercase tracking-wide text-black/40">{t("profile.allTogether")}</p>
       <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <div className="flex flex-wrap items-baseline gap-x-3">

@@ -28,13 +28,13 @@ export interface TourStep {
  */
 export const TOUR_STEPS: readonly TourStep[] = [
   {
-    route: "/portfolio",
+    route: "/you",
     anchor: "balance",
     titleKey: "tour.balance.title",
     bodyKey: "tour.balance.body",
   },
   {
-    route: "/portfolio",
+    route: "/you",
     anchor: "deposit",
     titleKey: "tour.deposit.title",
     bodyKey: "tour.deposit.body",
@@ -55,7 +55,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     bodyKey: "tour.multiAdd.body",
   },
   {
-    route: "/portfolio",
+    route: "/you",
     anchor: "history",
     titleKey: "tour.history.title",
     bodyKey: "tour.history.body",

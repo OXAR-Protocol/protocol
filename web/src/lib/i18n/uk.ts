@@ -2,9 +2,7 @@ import type { TranslationKey } from "./en";
 
 /** Ukrainian. Simple-mode voice: гроші/долари, не токени. */
 export const uk: Partial<Record<TranslationKey, string>> = {
-  "nav.portfolio": "портфель",
   "nav.market": "ринок",
-  "nav.pile": "мої гроші",
   "nav.you": "профіль",
 
   "greet.late": "Не спиться",
@@ -12,7 +10,6 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "greet.afternoon": "Доброго дня",
   "greet.evening": "Доброго вечора",
 
-  "home.sleepingMoney": "твої сплячі гроші",
   "home.sources.one": "{n} джерело · заробляє щомиті",
   "home.sources.many": "{n} джерел · заробляє щомиті",
   "home.empty.cta": "поклади долари в джерело — і вони почнуть заробляти",
@@ -29,10 +26,6 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "home.recentActivity": "остання активність",
   "movers.title": "у русі · 24 год",
   "movers.all": "усі →",
-  "home.earned.yield": "дохід",
-  "home.earned.stocks": "акції · прибуток",
-  "home.earned.gold": "золото · прибуток",
-  "home.earned.scope": "з моменту купівлі · те, що ще тримаєш",
 
   "yield.title": "Де твої гроші можуть спати",
   "yield.subtitle":
@@ -138,6 +131,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
 
   "you.wallet": "твій гаманець",
   "you.signedOut": "ти вийшов з акаунта",
+  "settings.label": "ти",
+  "settings.title": "Налаштування",
   "you.language": "мова",
   "you.terms": "умови використання",
   "you.replayTour": "пройти екскурсію ще раз",
@@ -432,8 +427,6 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "send.review.warnFinal": "Після відправлення повернути їх не зможе ніхто.",
   "send.review.confirm": "надіслати",
   "common.signIn": "увійти",
-  "guest.portfolio.title": "ваші гроші — щойно вони зʼявляться",
-  "guest.portfolio.body": "Увійдіть, і тут будуть ваші позиції, скільки вони заробили та кожен ваш рух.",
   "guest.you.title": "тут живе ваш акаунт",
   "guest.you.body": "Увійдіть, щоб побачити адресу гаманця, мову та значок за те, що ви прийшли рано.",
   "fund.label": "поповнення",
