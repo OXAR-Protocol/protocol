@@ -72,6 +72,9 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
       unavailable: isExternal && isMobile ? t("deposit.cardInAppBrowser") : undefined,
       onSelect: () => {
         setShowRoutes(false);
+        // Close ours before theirs opens: a fixed overlay doesn't move when iOS
+        // raises the keyboard, and the provider's amount field ended up under it.
+        onClose();
         void topUp(Number(amount)).catch(() => {
           /* cancelled or declined — the provider has already said so */
         });
