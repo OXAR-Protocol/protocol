@@ -49,8 +49,11 @@ export function MoneySheet({ onClose }: { onClose: () => void }) {
     };
   }, [connection, walletAddress]);
 
+  // `items-start` + a fixed min height: one row has a two-line description and the
+  // other doesn't, and two boxes of different heights beside each other read as a
+  // mistake rather than a difference.
   const row =
-    "flex w-full items-center gap-3 rounded-[10px] border border-black/12 px-4 py-3.5 text-left transition hover:border-black/40";
+    "flex min-h-[76px] w-full items-center gap-3 rounded-[10px] border border-black/12 px-4 py-3.5 text-left transition hover:border-black/40";
 
   return (
     <>

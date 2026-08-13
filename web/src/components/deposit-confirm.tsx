@@ -131,7 +131,7 @@ export function DepositConfirm({
       {/* A swipe, not a tap: this is the point of no return on a screen full of
           numbers, and a thumb scrolling past a button is how accidents happen. */}
       <SwipeToConfirm
-        label={t("confirm.confirm", { verb: verb.toLowerCase() })}
+        label={t("confirm.hold", { verb: verb.toLowerCase() })}
         busyLabel={label ?? undefined}
         busy={busy}
         onConfirm={onConfirm}

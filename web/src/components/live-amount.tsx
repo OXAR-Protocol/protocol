@@ -1,6 +1,7 @@
 "use client";
 
 import { useLiveValue } from "@/hooks/use-live-value";
+import { useSmoothNumber } from "@/hooks/use-smooth-number";
 
 type Variant = "hero" | "lg" | "md" | "sm";
 
@@ -29,7 +30,11 @@ const SIZES: Record<Variant, string> = {
  */
 export function LiveAmount({ value, apy, variant = "md", className }: Props) {
   const live = useLiveValue(value, apy);
-  const safe = Math.max(value > 0 ? live : value, 0);
+  // The tick is already smooth; this eases the steps AROUND it — a refresh landing,
+  // a position settling — so a total that changed doesn't read as a total that was
+  // wrong a moment ago.
+  const smooth = useSmoothNumber(Math.max(value > 0 ? live : value, 0));
+  const safe = Math.max(smooth, 0);
   const text = safe.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

@@ -76,12 +76,13 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
         />
       </div>
 
-      <Sparkline
-        values={history}
-        className={`h-9 w-full ${trendLineTone(priceUp)}`}
-      />
+      {/* A fixed slot: an asset with no series left a hole where its neighbour had a
+          chart, and the two cards then disagreed about where everything below sits. */}
+      <div className="h-9">
+        <Sparkline values={history} className={`h-9 w-full ${trendLineTone(priceUp)}`} />
+      </div>
 
-      <div className="flex items-end justify-between gap-2">
+      <div className="flex min-h-[62px] items-end justify-between gap-2">
         <div className="min-w-0">
           <LiveAmount value={value} apy={view.apy} variant="md" />
           {/* How much you own, not only what it's worth. The list rows say this;
@@ -128,7 +129,7 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
           says nothing on its own. Shown when the cost basis is known and the unit
           count is real; a made-up average is worse than none. */}
       {invested !== undefined && invested > 0 && (
-        <div className="flex items-center justify-between gap-2 border-t border-black/[0.06] pt-3 text-[11px] tabular-nums text-black/40">
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-black/[0.06] pt-3 text-[11px] tabular-nums text-black/40">
           <span>
             {t("position.invested")} ${invested.toFixed(2)}
           </span>

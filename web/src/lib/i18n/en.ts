@@ -84,7 +84,7 @@ export const en = {
 
   // Deposit / confirm / success
   "deposit.cardInAppBrowser":
-    "can't open inside a wallet's browser — open oxar.app in Safari or Chrome, or pick Paybis",
+    "can't open inside a wallet's browser — open oxar.app in Safari or Chrome",
   "deposit.emptyWallet": "Nothing to spend yet. Put dollars in the wallet first — with a card, from another wallet, or out of an exchange.",
   "deposit.payWith": "pay with",
   "deposit.loadingAssets": "Loading your assets…",
@@ -115,6 +115,7 @@ export const en = {
   "confirm.footer":
     "withdraw anytime · no lock · OXAR never holds your money — runs on USDC, digital dollars (1 USDC = $1). your wallet signs it.",
   "confirm.confirm": "confirm {verb}",
+  "confirm.hold": "hold to {verb}",
   "confirm.back": "back",
   "success.deposited": "Deposited",
   "success.withdrew": "Withdrew",
