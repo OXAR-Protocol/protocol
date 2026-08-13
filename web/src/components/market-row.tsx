@@ -50,7 +50,11 @@ export function MarketRow({
       type="button"
       disabled={disabled}
       onClick={onOpen}
-      className={`group relative isolate flex w-full flex-wrap items-center gap-3 overflow-hidden rounded-[8px] border bg-white p-5 text-left transition-colors disabled:opacity-50 ${
+      // A floor on the height, so a list of them is a list and not a staircase: some
+      // rows carry a subtitle, a unit count or a "since you bought" line and some
+      // carry none, and left to the content each row was a different size. The floor
+      // is the tall version's height — short rows grow into it, tall ones are unaffected.
+      className={`group relative isolate flex min-h-[104px] w-full flex-wrap items-center gap-3 overflow-hidden rounded-[8px] border bg-white p-5 text-left transition-colors disabled:opacity-50 ${
         selected ? "border-black/40 ring-1 ring-black/10" : "border-black/10 hover:border-black/30"
       }`}
     >
