@@ -10,9 +10,10 @@ import { DepositPanel } from "@/components/deposit-panel";
 import { GuestActionRail } from "@/components/guest-action-rail";
 import { YieldAmountField } from "@/components/yield-amount-field";
 import { CashOutSheet, CASH_OUT_FEATURE } from "@/components/cash-out-sheet";
-import { useSwapOutPreview, NOTABLE_SELL_COST } from "@/hooks/use-swap-out-preview";
+import { useSwapOutPreview } from "@/hooks/use-swap-out-preview";
 import { useFeature } from "@/hooks/use-features";
 import { SellAmountControls } from "@/components/sell-amount-controls";
+import { SellDetails } from "@/components/sell-details";
 import { floorToCents, formatUsdAmount } from "@oxar/sdk";
 import { useT, localizeError } from "@/lib/i18n";
 
@@ -74,8 +75,6 @@ export function AssetActionRail({
     usdAmount: amount,
     enabled: tab === "sell" && canSell && !!view.heldMint,
   });
-  const sellCostNotable =
-    sellOut.costFraction !== null && sellOut.costFraction >= NOTABLE_SELL_COST;
   const tabClass = (active: boolean) =>
     `rounded-full py-2 text-[13px] lowercase tracking-wide transition ${
       active ? "bg-white text-black shadow-sm" : "text-black/45 hover:text-black/70"
@@ -156,29 +155,16 @@ export function AssetActionRail({
             }
           />
 
-          {/* What you'll actually receive — a real quote, shown instead of blocking the
-              sell (which used to leave holders with no way out). The gap against the
-              amount asked for is NOT a fee the sell charges: on a thin token the pool
-              simply sits off the reference price the position is valued at, often
-              because the spread was paid on the way IN. So the wording states the
-              difference rather than blaming the exit. */}
-          {sellOut.proceedsUsd !== null && (
-            <p
-              className={`mt-2 text-center text-[12px] tabular-nums ${
-                sellCostNotable ? "text-[#a35b00]" : "text-black/45"
-              }`}
-            >
-              {t("rail.youReceive")}: ${formatUsdAmount(sellOut.proceedsUsd)}
-              {sellCostNotable && (
-                <>
-                  {" · "}
-                  {t("rail.belowMarketShort", {
-                    pct: ((sellOut.costFraction ?? 0) * 100).toFixed(1),
-                  })}
-                </>
-              )}
-            </p>
-          )}
+          {/* What you'll actually receive, with the arithmetic behind it one tap away.
+              The gap against the amount asked for is NOT a fee the sell charges: on a
+              thin token the pool simply sits off the reference price the position is
+              valued at, often because the spread was paid on the way IN. */}
+          <SellDetails
+            asked={amount}
+            proceeds={sellOut.proceedsUsd}
+            costFraction={sellOut.costFraction}
+            quoting={sellOut.quoting}
+          />
 
           {/* Cash all the way out — sell to USDC here, then off-ramp to a card.
               Secondary button beside the primary "sell" — same shape, lighter weight. */}
