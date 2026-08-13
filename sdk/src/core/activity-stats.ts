@@ -33,6 +33,12 @@ export interface DayActivity<T extends DatedFlow = DatedFlow> {
    *  deposit, and only one of them is what the day was worth to you. Null when the
    *  series doesn't cover the day. */
   earnedUsd: number | null;
+  /** The two halves of `earnedUsd`, so a row can name what it is rather than leaving
+   *  a bare signed figure beside a balance: what the market did to what was held,
+   *  and what exchanging one holding for another cost to execute. A day that only
+   *  swapped is all cost — money spent, not a holding that fell. */
+  marketUsd: number | null;
+  costUsd: number | null;
   /** Money put in / taken out that day, from the events themselves. */
   inUsd: number;
   outUsd: number;
@@ -66,14 +72,14 @@ export function isSameUtcDay(a: number, b: number): boolean {
  */
 export function groupByDay<T extends DatedFlow>(
   events: readonly T[],
-  points: readonly { t: number; usd: number; earnedUsd?: number }[] = [],
+  points: readonly { t: number; usd: number; earnedUsd?: number; marketUsd?: number; costUsd?: number }[] = [],
 ): DayActivity<T>[] {
   const byDay = new Map<number, DayActivity<T>>();
 
   const dayOf = (day: number): DayActivity<T> => {
     let d = byDay.get(day);
     if (!d) {
-      d = { day, usd: null, earnedUsd: null, inUsd: 0, outUsd: 0, events: [] };
+      d = { day, usd: null, earnedUsd: null, marketUsd: null, costUsd: null, inUsd: 0, outUsd: 0, events: [] };
       byDay.set(day, d);
     }
     return d;
@@ -83,6 +89,8 @@ export function groupByDay<T extends DatedFlow>(
     const d = dayOf(utcDayStart(p.t));
     d.usd = p.usd;
     if (p.earnedUsd !== undefined) d.earnedUsd = p.earnedUsd;
+    if (p.marketUsd !== undefined) d.marketUsd = p.marketUsd;
+    if (p.costUsd !== undefined) d.costUsd = p.costUsd;
   }
 
   for (const e of events) {
