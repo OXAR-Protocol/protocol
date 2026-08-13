@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { usePrivy } from "@privy-io/react-auth";
 import { X, List, LayoutGrid } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
@@ -40,7 +41,10 @@ const APY_RANGE: Record<ApyBucket, string> = {
 };
 
 export default function YieldPage() {
-  const canPickMany = useFeature("selling-v2");
+  // Picking is the first half of buying, so it needs an account. Signed out, the
+  // catalog reads as a catalog: tap a row, see the asset, sign in there to act.
+  const { authenticated } = usePrivy();
+  const canPickMany = useFeature("selling-v2") && authenticated;
   const router = useRouter();
   const { t } = useT();
   const [apyBucket, setApyBucket] = useState<ApyBucket | null>(null);

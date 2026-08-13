@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { CreditCard } from "lucide-react";
+import { usePrivy } from "@privy-io/react-auth";
 
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { DepositPanel } from "@/components/deposit-panel";
+import { GuestActionRail } from "@/components/guest-action-rail";
 import { YieldAmountField } from "@/components/yield-amount-field";
 import { CashOutSheet, CASH_OUT_FEATURE } from "@/components/cash-out-sheet";
 import { useSwapOutPreview, NOTABLE_SELL_COST } from "@/hooks/use-swap-out-preview";
@@ -51,6 +53,7 @@ export function AssetActionRail({
   unitLabel,
 }: Props) {
   const { t } = useT();
+  const { authenticated, ready } = usePrivy();
   const [tab, setTab] = useState<"buy" | "sell">("buy");
   const [showCashOut, setShowCashOut] = useState(false);
   const [sellInUnits, setSellInUnits] = useState(false);
@@ -77,6 +80,11 @@ export function AssetActionRail({
     `rounded-full py-2 text-[13px] lowercase tracking-wide transition ${
       active ? "bg-white text-black shadow-sm" : "text-black/45 hover:text-black/70"
     }`;
+
+  // Signed out, the rail has nothing to act on — no wallet, no position. It becomes
+  // the one ask on an otherwise public page. `ready` guards the flash of it while
+  // Privy is still restoring a session.
+  if (ready && !authenticated) return <GuestActionRail />;
 
   return (
     <div className="lg:sticky lg:top-24">

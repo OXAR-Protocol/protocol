@@ -6,6 +6,7 @@ import { usePrivy } from "@privy-io/react-auth";
 
 import { DISPLAY } from "@/components/landing-v2/fonts";
 import { WalletMenu } from "@/components/wallet-menu";
+import { useSignIn } from "@/hooks/use-sign-in";
 
 const tabs = [
   { href: "/portfolio", label: "portfolio" },
@@ -15,12 +16,17 @@ const tabs = [
 
 export function TopNav() {
   const pathname = usePathname();
-  const { authenticated, ready, login } = usePrivy();
+  const { authenticated, ready } = usePrivy();
+  const signIn = useSignIn();
 
   return (
     <nav data-tour-chrome="header" className="safe-top sticky top-0 z-40 bg-[#fbfaf8]/70 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5">
-        <Link href="/portfolio" className="shrink-0 text-[22px] font-bold leading-none text-black" style={{ fontFamily: DISPLAY }}>
+        <Link
+          href={authenticated ? "/portfolio" : "/market"}
+          className="shrink-0 text-[22px] font-bold leading-none text-black"
+          style={{ fontFamily: DISPLAY }}
+        >
           OXAR.
         </Link>
 
@@ -49,7 +55,7 @@ export function TopNav() {
               <WalletMenu />
             ) : (
               <button
-                onClick={() => login()}
+                onClick={signIn}
                 className="rounded-full bg-black px-5 py-2 lowercase text-[14px] font-medium text-white transition-colors hover:bg-black/85"
               >
                 sign in

@@ -285,7 +285,9 @@ export function AssetDetail({
             <AssetProof id={view.id} />
           </motion.section>
 
-          {view.heldMint && (
+          {/* "your history with this" needs a "you". Signed out it read as an empty
+              ledger — a promise of nothing — so it isn't offered at all. */}
+          {view.heldMint && walletAddress && (
             <motion.section {...fade(0.2)} className="mt-10">
               <p className="mb-3 lowercase text-[13px] text-black/45">{t("asset.history")}</p>
               {/* Only this asset's rows — a ledger of everything belongs in the portfolio. */}
