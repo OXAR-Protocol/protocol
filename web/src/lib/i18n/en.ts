@@ -462,9 +462,6 @@ export const en = {
   "send.review.warnFinal": "Once it's sent, no one can send it back.",
   "send.review.confirm": "send it",
   "common.signIn": "sign in",
-  "signin.inApp":
-    "Signing in with Google doesn't work inside another app's browser — open this page in Safari or Chrome instead.",
-  "signin.copyLink": "copy the link",
   "guest.portfolio.title": "your money, once there is some",
   "guest.portfolio.body": "Sign in and this is where your positions, what they have earned and every move you have made will be.",
   "guest.you.title": "your account lives here",
@@ -499,10 +496,10 @@ export const en = {
   "wallet.fund": "top up",
   "cardroute.label": "pay by card",
   "cardroute.title": "Which way?",
-  "cardroute.builtin.title": "MoonPay",
-  "cardroute.builtin.body": "Pay without leaving the app. Uses the amount you typed above.",
+  "cardroute.builtin.title": "Bank card",
+  "cardroute.builtin.body": "Pay without leaving the app. The provider is picked for your country.",
   "cardroute.paybis.title": "Paybis",
-  "cardroute.notInCountry": "doesn't serve your country — likely to be declined",
+  "cardroute.notInCountry": "unlikely to work in your country — the payment is usually declined",
   "cardroute.paybis.body": "Opens their page, where you set the amount. Needs an account and an ID check. Takes euros, dollars or hryvnia.",
   "cardroute.belowMin": "enter at least ${min} in the amount field above",
   "cardroute.footer":

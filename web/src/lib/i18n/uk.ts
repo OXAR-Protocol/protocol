@@ -435,9 +435,6 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "send.review.warnFinal": "Після відправлення повернути їх не зможе ніхто.",
   "send.review.confirm": "надіслати",
   "common.signIn": "увійти",
-  "signin.inApp":
-    "Вхід через Google не працює у браузері іншого застосунку — відкрийте цю сторінку в Safari або Chrome.",
-  "signin.copyLink": "скопіювати посилання",
   "guest.portfolio.title": "ваші гроші — щойно вони зʼявляться",
   "guest.portfolio.body": "Увійдіть, і тут будуть ваші позиції, скільки вони заробили та кожен ваш рух.",
   "guest.you.title": "тут живе ваш акаунт",
@@ -472,10 +469,10 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "wallet.fund": "поповнити",
   "cardroute.label": "оплата карткою",
   "cardroute.title": "Яким шляхом?",
-  "cardroute.builtin.title": "MoonPay",
-  "cardroute.builtin.body": "Оплата не виходячи з застосунку. Бере суму, яку ти ввів вище.",
+  "cardroute.builtin.title": "Банківська картка",
+  "cardroute.builtin.body": "Оплата не виходячи з застосунку. Провайдера підбирають під вашу країну.",
   "cardroute.paybis.title": "Paybis",
-  "cardroute.notInCountry": "не працює у твоїй країні — швидше за все відхилять",
+  "cardroute.notInCountry": "навряд чи спрацює у вашій країні — платіж зазвичай відхиляють",
   "cardroute.paybis.body": "Відкриє їхню сторінку, суму вкажеш там. Потрібен акаунт і перевірка документів. Приймає євро, долари або гривню.",
   "cardroute.belowMin": "введи щонайменше ${min} у полі суми вище",
   "cardroute.footer":

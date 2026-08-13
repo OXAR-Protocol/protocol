@@ -1,7 +1,6 @@
 "use client";
 
 import { useSignIn } from "@/hooks/use-sign-in";
-import { InAppHint } from "@/components/in-app-hint";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -27,7 +26,6 @@ export function GuestActionRail() {
         >
           {t("rail.guestCta")}
         </button>
-        <InAppHint />
       </div>
     </div>
   );

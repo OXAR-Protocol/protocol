@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 
 import { SectionLabel } from "@/components/section-label";
 import { useSignIn } from "@/hooks/use-sign-in";
-import { InAppHint } from "@/components/in-app-hint";
 import { useT } from "@/lib/i18n";
 import type { TranslationKey } from "@/lib/i18n/en";
 
@@ -48,7 +47,6 @@ export function GuestEmpty({
         >
           {t("common.signIn")}
         </button>
-        <InAppHint />
       </div>
     </motion.div>
   );
