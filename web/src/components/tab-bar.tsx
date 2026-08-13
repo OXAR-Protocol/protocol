@@ -29,6 +29,11 @@ export function TabBar() {
   const pathname = usePathname();
   const { t } = useT();
 
+  // An asset's page is a room you came into to do one thing. Two bars stacked at the
+  // bottom — buy/sell above, navigation below — argue about which is the act; the
+  // navigation is the one that can wait, and the back arrow up top already leads out.
+  if (pathname.startsWith("/asset/")) return null;
+
   return (
     <nav
       data-tour-chrome="tabbar"
