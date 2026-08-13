@@ -6,6 +6,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { LogOut } from "lucide-react";
 
 import { ProfileHeader } from "@/components/profile-header";
+import { ProfileChart } from "@/components/profile-chart";
 import { Row, WalletCard } from "@/components/you-rows";
 import { forgetIntro } from "@/components/intro-modal";
 import { LanguagePicker } from "@/components/language-picker";
@@ -36,7 +37,7 @@ export default function YouPage() {
   if (!ready) return null;
 
   return (
-    <div className="max-w-[800px] mx-auto pt-8 pb-32">
+    <div className="max-w-[800px] mx-auto pb-32">
       {/* Signed in, the page opens on who you are; signed out there is no profile to
           show, so the account section below does the asking. */}
       {authenticated && (
@@ -46,6 +47,7 @@ export default function YouPage() {
           transition={{ duration: 0.5 }}
         >
           <ProfileHeader />
+          <ProfileChart />
         </motion.div>
       )}
 

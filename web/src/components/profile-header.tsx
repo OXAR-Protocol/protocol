@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { Clock, Layers, Wallet } from "lucide-react";
+import { Check, Clock, Copy, Layers, Wallet } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
@@ -53,12 +53,20 @@ export function ProfileHeader() {
   const secondary = email ?? (address ? `${address.slice(0, 6)}…${address.slice(-6)}` : null);
   const plate = useMemo(() => plateFor(address ?? name), [address, name]);
 
+  const [copied, setCopied] = useState(false);
+  const copyAddress = () => {
+    if (!address) return;
+    navigator.clipboard.writeText(address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
   const joined = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString(undefined, { month: "short", year: "numeric" })
     : null;
 
   return (
-    <section className="mt-8">
+    <section>
       <div className="flex items-center gap-4">
         <span
           className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-[24px] uppercase text-white ${plate}`}
@@ -69,7 +77,24 @@ export function ProfileHeader() {
           <h1 className="truncate text-[clamp(22px,3vw,32px)] leading-tight tracking-[-0.03em] text-black">
             {name}
           </h1>
-          {secondary && <p className="mt-0.5 truncate text-[13px] text-black/45">{secondary}</p>}
+          {/* The address is here to be taken somewhere — a wallet, an exchange's
+              withdrawal field — so tapping it copies rather than selects. */}
+          {secondary && (
+            <button
+              type="button"
+              onClick={copyAddress}
+              disabled={!address}
+              aria-label={t("fund.copyAddress")}
+              className="mt-0.5 inline-flex max-w-full items-center gap-1.5 text-[13px] text-black/45 transition enabled:hover:text-black"
+            >
+              <span className="truncate">{secondary}</span>
+              {copied ? (
+                <Check size={12} strokeWidth={2} className="shrink-0 text-[#3c05c7]" />
+              ) : (
+                <Copy size={12} strokeWidth={1.5} className="shrink-0 text-black/30" />
+              )}
+            </button>
+          )}
         </div>
       </div>
 
