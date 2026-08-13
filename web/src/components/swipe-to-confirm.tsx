@@ -1,19 +1,23 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useMotionValue } from "framer-motion";
-import { ChevronsRight, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
+
+/** How long the press has to last to count as a decision. */
+const HOLD_MS = 800;
 
 /**
- * The last gesture before money moves.
+ * The last gesture before money moves: press and hold.
  *
- * A button is one tap, and one tap is what a thumb does by accident while
- * scrolling a page of numbers. A swipe cannot happen by accident, and it costs
- * nothing to someone who meant it — which is the whole trade: friction where the
- * consequence is real, nowhere else.
+ * It was a swipe first, and a swipe was wrong on the web. A horizontal drag that
+ * starts near the left edge is the browser's own "go back" gesture — on iOS the
+ * page navigated away instead of confirming, which is the worst possible outcome
+ * for a control whose whole job is deliberateness.
  *
- * Falls back to a plain click for keyboards and screen readers: the guard is
- * against a slip, not against people who navigate differently.
+ * Holding costs the same intent and collides with nothing: no browser reserves a
+ * long press, and it works identically with a mouse, a thumb and a keyboard
+ * (space or enter held down). Let go early and the fill drains back — nothing
+ * happens, which is what a slip should do.
  */
 export function SwipeToConfirm({
   label,
@@ -28,62 +32,78 @@ export function SwipeToConfirm({
   disabled?: boolean;
   onConfirm: () => void;
 }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
-  const [done, setDone] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const holding = useRef(false);
+  const startedAt = useRef(0);
+  const frame = useRef<number>(0);
+  const locked = !!disabled || !!busy;
 
-  const KNOB = 52;
-  const locked = !!disabled || !!busy || done;
-
-  const settle = () => {
-    const width = trackRef.current?.offsetWidth ?? 0;
-    const travel = Math.max(0, width - KNOB - 8);
-    // Two thirds of the way is a decision; less is a slip, and it springs back.
-    if (x.get() >= travel * 0.66) {
-      setDone(true);
-      x.set(travel);
-      onConfirm();
-    } else {
-      x.set(0);
-    }
+  const stop = () => {
+    holding.current = false;
+    cancelAnimationFrame(frame.current);
+    setProgress(0);
   };
 
+  const tick = (now: number) => {
+    if (!holding.current) return;
+    const done = Math.min(1, (now - startedAt.current) / HOLD_MS);
+    setProgress(done);
+    if (done >= 1) {
+      holding.current = false;
+      setProgress(0);
+      onConfirm();
+      return;
+    }
+    frame.current = requestAnimationFrame(tick);
+  };
+
+  const start = () => {
+    if (locked || holding.current) return;
+    holding.current = true;
+    // rAF hands the same clock to the callback, so the start mark comes from there
+    // too — one time source, and nothing reads the clock during a render.
+    startedAt.current = 0;
+    frame.current = requestAnimationFrame((now) => {
+      startedAt.current = now;
+      tick(now);
+    });
+  };
+
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
+
   return (
-    <div
-      ref={trackRef}
-      className={`relative mt-3 h-[60px] w-full overflow-hidden rounded-full border border-black/12 bg-black/[0.03] ${
-        locked ? "opacity-60" : ""
-      }`}
+    <button
+      type="button"
+      disabled={locked}
+      onPointerDown={start}
+      onPointerUp={stop}
+      onPointerLeave={stop}
+      onPointerCancel={stop}
+      onKeyDown={(e) => {
+        if (e.key === " " || e.key === "Enter") start();
+      }}
+      onKeyUp={stop}
+      // Stops the browser treating the press as the start of a scroll or a
+      // double-tap zoom, which made the fill stutter on a phone.
+      style={{ touchAction: "manipulation" }}
+      className="relative mt-3 h-[60px] w-full select-none overflow-hidden rounded-full border border-black/12 bg-black/[0.03] text-[14px] lowercase tracking-wide text-black/60 transition disabled:opacity-40"
     >
-      <button
-        type="button"
-        onClick={() => !locked && onConfirm()}
-        disabled={locked}
-        className="absolute inset-0 flex items-center justify-center text-[14px] lowercase tracking-wide text-black/55"
-      >
+      {/* The fill IS the timer — no separate spinner to read while deciding. */}
+      <span
+        aria-hidden
+        style={{ width: `${progress * 100}%` }}
+        className="absolute inset-y-0 left-0 bg-black/[0.07]"
+      />
+      <span className="relative inline-flex items-center gap-2">
         {busy ? (
-          <span className="inline-flex items-center gap-2">
+          <>
             <Loader2 size={14} className="animate-spin" />
             {busyLabel ?? label}
-          </span>
+          </>
         ) : (
           label
         )}
-      </button>
-
-      {!locked && (
-        <motion.div
-          drag="x"
-          dragConstraints={trackRef}
-          dragElastic={0}
-          dragMomentum={false}
-          style={{ x }}
-          onDragEnd={settle}
-          className="absolute left-1 top-1 flex h-[52px] w-[52px] cursor-grab items-center justify-center rounded-full bg-black text-white active:cursor-grabbing"
-        >
-          <ChevronsRight size={18} strokeWidth={2} />
-        </motion.div>
-      )}
-    </div>
+      </span>
+    </button>
   );
 }

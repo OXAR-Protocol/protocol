@@ -62,15 +62,18 @@ export function MarketRow({
 
       {/* A floor, not a cap, from `sm` up: it lines the figures up down the list,
           while a longer label underneath ("… since you bought") takes the width it
-          needs instead of wrapping into a ragged stack. */}
-      <div className="shrink-0 text-right sm:min-w-[112px]">{figure}</div>
+          needs instead of wrapping into a ragged stack. The trailing mark rides with
+          it — on its own after a wrapped control it read as a stray glyph. */}
+      <div className="flex shrink-0 items-center gap-2">
+        <div className="text-right sm:min-w-[112px]">{figure}</div>
+        {trailing}
+      </div>
 
       {/* Wraps rather than stacks: on a phone it takes the full width and drops to
           its own line, on a wider screen there is room and it stays in the row, at
           the right, where it was. One node either way — `w-full sm:w-auto` on the
           control itself does the switching. */}
       {pick && <div className="w-full sm:w-auto">{pick}</div>}
-      {trailing}
     </button>
   );
 }

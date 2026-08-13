@@ -75,7 +75,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "pile.explore": "Подивитися джерела",
 
   "deposit.cardInAppBrowser":
-    "не відкривається у браузері гаманця — зайди на oxar.app у Safari чи Chrome, або обери Paybis",
+    "не відкривається у браузері гаманця — відкрийте oxar.app у Safari чи Chrome",
   "deposit.emptyWallet": "Поки нічого витрачати. Спочатку покладіть долари в гаманець — карткою, з іншого гаманця або з біржі.",
   "deposit.payWith": "оплата з",
   "deposit.loadingAssets": "Завантажуємо твої активи…",
@@ -106,6 +106,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "confirm.footer":
     "знімай коли завгодно · без блокувань · OXAR ніколи не тримає твої гроші — працює на USDC, цифрових доларах (1 USDC = $1). підписує твій гаманець.",
   "confirm.confirm": "підтвердити",
+  "confirm.hold": "утримуйте, щоб підтвердити",
   "confirm.back": "назад",
   "success.deposited": "Покладено",
   "success.withdrew": "Знято",

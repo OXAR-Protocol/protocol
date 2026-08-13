@@ -9,6 +9,7 @@ import { LiveAmount } from "@/components/live-amount";
 import { AssetIcon } from "@/components/asset-icon";
 import { MarketRow } from "@/components/market-row";
 import { Sparkline } from "@/components/sparkline";
+import { useApyHistory } from "@/hooks/use-apy-history";
 import { PickButton } from "@/components/pick-button";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { isPriceExposure } from "@/lib/yield/assets";
@@ -39,6 +40,11 @@ interface Props {
  */
 export function PositionRow({ view, onOpen, change24h, chart, earned, picked, onTogglePick }: Props) {
   const { t } = useT();
+  // A yield source has no price to draw, but it has a rate — the card has always
+  // shown that curve and the row showed an empty slot, so a Jupiter Lend position
+  // looked like the one line in the list with nothing to say.
+  const apyHistory = useApyHistory(view.defiLlamaPoolId);
+  const series = chart?.length ? chart : apyHistory;
   const value = fromBaseUnits(view.underlyingBalance, view.decimals);
   const title = positionTitle(view);
   // The full name, unless it would just say the title twice.
@@ -67,13 +73,19 @@ export function PositionRow({ view, onOpen, change24h, chart, earned, picked, on
           </div>
         </div>
       }
-      // The same batched series the grid cards use — one request for every row,
-      // so a chart per position costs nothing extra.
+      // Price series for something you own by the piece, the rate's own curve for a
+      // savings source — the cards drew both, the rows drew only the first.
       chart={
-        isPriceExposure(view.id) && (chart?.length ?? 0) > 1 ? (
+        series.length > 1 ? (
           <Sparkline
-            values={chart!}
-            className={(change24h ?? 0) >= 0 ? "text-emerald-600" : "text-red-600"}
+            values={series}
+            className={
+              isPriceExposure(view.id)
+                ? (change24h ?? 0) >= 0
+                  ? "text-emerald-600"
+                  : "text-red-600"
+                : "text-[#3c05c7]/70"
+            }
           />
         ) : null
       }
