@@ -12,12 +12,14 @@ import { LanguagePicker } from "@/components/language-picker";
 import { EarlyRiserBadge } from "@/components/early-riser-badge";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useSolanaName } from "@/hooks/use-solana-name";
+import { useSignIn } from "@/hooks/use-sign-in";
 import { useT } from "@/lib/i18n";
 
 export default function YouPage() {
   const { user, logout, ready, authenticated } = usePrivy();
   const { walletAddress } = useSolanaContext();
   const { t } = useT();
+  const signIn = useSignIn();
   const [copiedAddr, setCopiedAddr] = useState<string | null>(null);
 
   const email = user?.email?.address;
@@ -72,8 +74,15 @@ export default function YouPage() {
             />
           )}
           {!authenticated && (
-            <div className="p-4 rounded-[12px] border border-black/10 bg-white text-center text-sm text-black/45">
-              {t("you.signedOut")}
+            <div className="rounded-[12px] border border-black/10 bg-white p-6 text-center">
+              <p className="text-sm text-black/45">{t("guest.you.body")}</p>
+              <button
+                type="button"
+                onClick={signIn}
+                className="mt-4 rounded-full bg-black px-6 py-2.5 text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85"
+              >
+                {t("common.signIn")}
+              </button>
             </div>
           )}
           <EarlyRiserBadge />

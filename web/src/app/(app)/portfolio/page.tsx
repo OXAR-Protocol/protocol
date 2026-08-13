@@ -12,6 +12,7 @@ import { LiveEarned } from "@/components/live-earned";
 import { WalletCash } from "@/components/wallet-cash";
 import { PhotoBg } from "@/components/photo-bg";
 import { FundSheet } from "@/components/fund-sheet";
+import { GuestEmpty } from "@/components/guest-empty";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
 import { PortfolioPanel } from "@/components/portfolio-panel";
@@ -28,7 +29,7 @@ function aggregate(sources: { currentValue: number; invested: number; apy: numbe
 }
 
 export default function HomePage() {
-  const { user } = usePrivy();
+  const { user, ready, authenticated } = usePrivy();
   const { totalUsdc, blendedApy, views, loading } =
     useAggregatePersonalBalance();
   // Real earnings already made (current value − on-chain cost basis), not a projection.
@@ -60,6 +61,12 @@ export default function HomePage() {
     (v) => Number(v.underlyingBalance) > 0,
   );
 
+
+  // The tab is reachable signed out, so the page answers rather than redirects:
+  // there are no positions to show, and the way in is right there.
+  if (ready && !authenticated) {
+    return <GuestEmpty label="portfolio" title="guest.portfolio.title" body="guest.portfolio.body" />;
+  }
 
   return (
     <div className="mx-auto max-w-[900px] pt-8 pb-32">
