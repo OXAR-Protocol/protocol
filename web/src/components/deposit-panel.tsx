@@ -8,6 +8,8 @@ import { CreditCard } from "lucide-react";
 import { PayWithField } from "@/components/pay-with-field";
 import { TopUpSheet, TOP_UP_FEATURE } from "@/components/top-up-sheet";
 import { CardRouteSheet, type CardRoute } from "@/components/card-route-sheet";
+import { AmountQuickPicks } from "@/components/amount-quick-picks";
+import { FundSheet } from "@/components/fund-sheet";
 import { useFeature } from "@/hooks/use-features";
 import { koraEnabled } from "@/lib/gas/kora";
 import { DepositConfirm } from "@/components/deposit-confirm";
@@ -21,7 +23,7 @@ import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { isPriceExposure } from "@/lib/yield/assets";
-import { assetUid, checkOriginGas, normalizeDecimalInput } from "@oxar/sdk";
+import { assetUid, checkOriginGas, normalizeDecimalInput, spendableBase } from "@oxar/sdk";
 import { USDC_MINT } from "@/lib/constants";
 import { useT, localizeError } from "@/lib/i18n";
 
@@ -82,6 +84,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // Show the "no surprises" review before the deposit signs.
   const [confirming, setConfirming] = useState(false);
   const [showTopUp, setShowTopUp] = useState(false);
+  const [showFund, setShowFund] = useState(false);
   const [showRoutes, setShowRoutes] = useState(false);
   // Paybis is back to insiders while the Ukrainian on-ramp is unsolved —
   // everyone else gets the built-in card and nothing to choose between.
@@ -293,6 +296,17 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           />
         )}
 
+        {/* How much of what you have, and what that is — the ceiling was only
+            legible inside the field above, so typing meant guessing at it. */}
+        {!emptyWallet && payAsset && (
+          <AmountQuickPicks
+            available={Number(spendableBase(payAsset, !koraEnabled() || isExternal)) / 10 ** payAsset.decimals}
+            onPick={(v) => setAmount(String(Number(v.toFixed(payAsset.decimals))))}
+            onTopUp={() => setShowFund(true)}
+            disabled={busy}
+          />
+        )}
+
         {/* Quantity shortcut — type how many units to buy; the pay amount fills in. */}
         {canQuantity && payAsset && (
           <div className="mt-2 flex items-center justify-between gap-2 rounded-[10px] border border-black/10 px-3 py-2">
@@ -466,6 +480,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         )}
       </AnimatePresence>
       <AnimatePresence>{showTopUp && <TopUpSheet onClose={() => setShowTopUp(false)} />}</AnimatePresence>
+      <AnimatePresence>{showFund && <FundSheet onClose={() => setShowFund(false)} />}</AnimatePresence>
     </div>
   );
 }
