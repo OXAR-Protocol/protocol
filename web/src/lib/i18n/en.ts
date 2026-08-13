@@ -148,10 +148,7 @@ export const en = {
   "trust.selfCustody": "self-custody",
 
   // You / settings
-  "you.account": "account",
-  "you.email": "email",
   "you.wallet": "your wallet",
-  "you.walletHint": "your money & positions live here",
   "you.signedOut": "you're signed out",
   "you.language": "language",
   "you.terms": "terms of use",

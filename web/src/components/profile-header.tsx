@@ -6,6 +6,7 @@ import { Check, Clock, Copy, Layers, Wallet } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
+import { EarlyRiserBadge } from "@/components/early-riser-badge";
 import { MoneyActions } from "@/components/money-actions";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
@@ -74,9 +75,12 @@ export function ProfileHeader() {
           {name.slice(0, 1)}
         </span>
         <div className="min-w-0">
-          <h1 className="truncate text-[clamp(22px,3vw,32px)] leading-tight tracking-[-0.03em] text-black">
-            {name}
-          </h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="truncate text-[clamp(22px,3vw,32px)] leading-tight tracking-[-0.03em] text-black">
+              {name}
+            </h1>
+            <EarlyRiserBadge />
+          </div>
           {/* The address is here to be taken somewhere — a wallet, an exchange's
               withdrawal field — so tapping it copies rather than selects. */}
           {secondary && (
