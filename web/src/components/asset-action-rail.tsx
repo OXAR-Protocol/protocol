@@ -36,6 +36,11 @@ interface Props {
   sharePriceUsd?: number;
   /** Label for one unit, e.g. "SPCXx". */
   unitLabel?: string;
+  /** Which act the caller already committed to — the phone's bar asks first. */
+  initialTab?: "buy" | "sell";
+  /** Inside a sheet: no sticky positioning, and no tab strip, because the sheet's
+   *  own title already says which act this is. */
+  bare?: boolean;
 }
 
 /** Sticky Buy / Sell rail beside the chart (Ondo-style). Buy = DepositPanel;
@@ -52,10 +57,12 @@ export function AssetActionRail({
   error,
   sharePriceUsd,
   unitLabel,
+  initialTab,
+  bare,
 }: Props) {
   const { t } = useT();
   const { authenticated, ready } = usePrivy();
-  const [tab, setTab] = useState<"buy" | "sell">("buy");
+  const [tab, setTab] = useState<"buy" | "sell">(initialTab ?? "buy");
   const [showCashOut, setShowCashOut] = useState(false);
   const [sellInUnits, setSellInUnits] = useState(false);
   const canSell = positionValue > 0;
@@ -86,9 +93,9 @@ export function AssetActionRail({
   if (ready && !authenticated) return <GuestActionRail />;
 
   return (
-    <div className="lg:sticky lg:top-24">
-      {/* Buy / Sell toggle */}
-      <div className="mb-3 grid grid-cols-2 gap-1 rounded-full bg-black/[0.05] p-1">
+    <div className={bare ? "" : "lg:sticky lg:top-24"}>
+      {/* Buy / Sell toggle — hidden in a sheet, whose title already says which. */}
+      <div className={`mb-3 grid grid-cols-2 gap-1 rounded-full bg-black/[0.05] p-1 ${bare ? "hidden" : ""}`}>
         <button type="button" onClick={() => setTab("buy")} className={tabClass(tab === "buy")}>
           {price ? t("rail.buy") : t("rail.deposit")}
         </button>

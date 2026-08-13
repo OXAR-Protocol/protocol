@@ -17,6 +17,7 @@ import { useT } from "@/lib/i18n";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { getAssetInfo } from "@/lib/yield/asset-info";
 import { AssetActionRail } from "@/components/asset-action-rail";
+import { AssetActionBar } from "@/components/asset-action-bar";
 import { AssetTrustStrip } from "@/components/asset-trust-strip";
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
@@ -121,7 +122,7 @@ export function AssetDetail({
   };
 
   return (
-    <div className="relative mx-auto max-w-[1100px] pb-32 pt-2">
+    <div className="relative mx-auto max-w-[1100px] pb-44 pt-2 lg:pb-32">
       {/* Headline */}
       <motion.div {...fade(0)} className="flex items-start gap-4">
         <AssetIcon
@@ -304,8 +305,9 @@ export function AssetDetail({
           )}
         </div>
 
-        {/* Right: sticky buy/sell rail */}
-        <motion.div {...fade(0.2)}>
+        {/* Desktop: the rail beside the chart. On a phone it moves into a sheet
+            raised by the bar at the bottom — see AssetActionBar. */}
+        <motion.div {...fade(0.2)} className="hidden lg:block">
           <AssetActionRail
             view={view}
             price={price}
@@ -333,6 +335,34 @@ export function AssetDetail({
           />
         </motion.div>
       </div>
+
+      {/* Phone: the two acts wait at the bottom instead of sitting open halfway
+          down the page, asking what to pay with before anyone said they'd buy. */}
+      <AssetActionBar
+        view={view}
+        price={price}
+        positionValue={positionValue}
+        amount={amount}
+        onAmountChange={setAmount}
+        onDeposited={(usd, pending) => {
+          const boughtUnits = sharePriceUsd && sharePriceUsd > 0 ? usd / sharePriceUsd : undefined;
+          setResult({
+            kind: "deposit",
+            amount: usd,
+            symbol: price ? "USDC" : view.assetSymbol,
+            pending,
+            units: boughtUnits,
+            unitLabel: boughtUnits !== undefined ? unitLabel : undefined,
+            assetId: view.id,
+          });
+          settle();
+        }}
+        onSell={handleExit}
+        loading={loading}
+        error={error}
+        sharePriceUsd={sharePriceUsd}
+        unitLabel={unitLabel}
+      />
 
       <AnimatePresence>{result && <YieldActionSuccess result={result} onDone={() => setResult(null)} address={walletAddress?.toBase58()} />}</AnimatePresence>
     </div>
