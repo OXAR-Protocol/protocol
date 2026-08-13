@@ -1,3 +1,5 @@
+import { walletDeltas } from "@oxar/sdk";
+
 import type { EnhancedTx } from "@/lib/helius/history";
 
 /**
@@ -75,15 +77,16 @@ export function parseActivity(
     let sentOther = false; // owner sent a non-USDC, non-known token (e.g. vault receipt)
     let receivedOther = false;
 
-    for (const t of tx.tokenTransfers ?? []) {
-      if (!t.mint || typeof t.tokenAmount !== "number") continue;
-      const sign = t.toUserAccount === owner ? 1 : t.fromUserAccount === owner ? -1 : 0;
-      if (sign === 0) continue;
-      if (t.mint === usdcMint) {
-        usdcDelta += sign * t.tokenAmount;
-      } else if (assetNames[t.mint]) {
-        assetDelta[t.mint] = (assetDelta[t.mint] ?? 0) + sign * t.tokenAmount;
-      } else if (sign > 0) {
+    // NET per mint, not the sum of transfer legs: a routed swap moves the same
+    // dollars through several pools, and adding those legs printed a $5 sale as
+    // "+$2,459" (see `walletDeltas`).
+    for (const [mint, delta] of Object.entries(walletDeltas(tx, owner))) {
+      if (delta === 0) continue;
+      if (mint === usdcMint) {
+        usdcDelta += delta;
+      } else if (assetNames[mint]) {
+        assetDelta[mint] = (assetDelta[mint] ?? 0) + delta;
+      } else if (delta > 0) {
         receivedOther = true;
       } else {
         sentOther = true;

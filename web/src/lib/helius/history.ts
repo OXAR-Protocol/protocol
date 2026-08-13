@@ -4,6 +4,8 @@
  * recent-activity feed, so the paging logic lives in one place.
  */
 
+import type { AccountData } from "@oxar/sdk";
+
 /** One token movement inside an enhanced transaction (the fields we read). */
 export interface EnhancedTokenTransfer {
   fromUserAccount?: string;
@@ -20,6 +22,10 @@ export interface EnhancedTx {
   timestamp?: number;
   type?: string;
   tokenTransfers?: EnhancedTokenTransfer[];
+  /** Per-account net balance changes — the honest reading of what moved, since a
+   *  routed swap's transfers count the same dollars once per hop. See
+   *  `walletDeltas` in the SDK. */
+  accountData?: AccountData[];
 }
 
 /** Helius API key from the RPC URL (`?api-key=`) or `HELIUS_API_KEY`. Null if absent. */
