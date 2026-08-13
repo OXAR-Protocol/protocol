@@ -19,6 +19,24 @@ export function toBaseUnits(amount: string | number, decimals: number): bigint {
 }
 
 /**
+ * The same conversion, for text a person is still typing.
+ *
+ * `toBaseUnits` THROWS on anything that isn't a finished number — and "0." is what
+ * every amount field holds for the moment between the zero and the cents. Called
+ * during a render (to size a quote, to enable a button), that throw takes the whole
+ * screen down: on a phone the browser just says the page couldn't load.
+ *
+ * So: null for input that isn't a number yet, and let the caller treat that as zero.
+ */
+export function toBaseUnitsPartial(amount: string, decimals: number): bigint | null {
+  const s = amount.trim();
+  if (s === "" || !/^\d*(\.\d*)?$/.test(s)) return null;
+  const cleaned = s === "." ? "" : s.endsWith(".") ? s.slice(0, -1) : s.startsWith(".") ? `0${s}` : s;
+  if (cleaned === "") return null;
+  return toBaseUnits(cleaned, decimals);
+}
+
+/**
  * Base units → human number, for DISPLAY only (e.g. 50_000_000n → 50). Uses float
  * division, so don't round-trip large/high-decimal balances back into on-chain
  * amounts — use the provider's share balance for that (see `redeemAll`).

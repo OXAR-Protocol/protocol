@@ -3,47 +3,37 @@
 import { useCallback } from "react";
 
 import { useUniversalDeposit } from "@/hooks/use-universal-deposit";
-import { useBridgeDeposit } from "@/hooks/use-bridge-deposit";
 import type { WalletAsset } from "@oxar/sdk";
 
 const LABELS: Record<string, string> = {
   quoting: "Quoting…",
   swapping: "Swapping…",
-  approving: "Approving…",
-  bridging: "Bridging…",
-  arriving: "Waiting for funds…",
   depositing: "Depositing…",
 };
 
 /**
- * One deposit entry point over both routers: Solana (direct / Jupiter swap) and
- * cross-chain (Delora bridge). Dispatches by the pay-asset's chain and exposes a
- * unified busy status + human label.
+ * One deposit entry point: pay from the Solana wallet, directly or through a swap.
+ *
+ * It used to dispatch to a second, cross-chain router when the pay-asset lived on an
+ * EVM chain. Nothing reaches that branch any more — buying spends the wallet's
+ * dollars, and money from another chain arrives as a deposit address before any of
+ * this runs — so the branch, and the linked wallet it needed, are gone.
  */
 export function useDeposit(providerId: string) {
   const solana = useUniversalDeposit(providerId);
-  const bridge = useBridgeDeposit(providerId);
 
   const depositWith = useCallback(
-    (payAsset: WalletAsset, usdAmount: number): Promise<bigint> =>
-      payAsset.chain === "ethereum"
-        ? bridge.bridgeAndDeposit(payAsset, usdAmount)
-        : solana.depositWith(payAsset, usdAmount),
-    [bridge, solana],
+    (payAsset: WalletAsset, usdAmount: number): Promise<bigint> => solana.depositWith(payAsset, usdAmount),
+    [solana],
   );
 
-  const status = bridge.status !== "idle" ? bridge.status : solana.status;
-  const busy = status !== "idle";
-  const error = bridge.error ?? solana.error;
+  const busy = solana.status !== "idle";
 
   return {
     depositWith,
     busy,
-    status,
-    // Which cross-chain step broke — the step tracker keeps showing it after `status`
-    // has already fallen back to "idle".
-    failedAt: bridge.failedAt,
-    label: busy ? LABELS[status] ?? "Working…" : null,
-    error,
+    status: solana.status,
+    label: busy ? LABELS[solana.status] ?? "Working…" : null,
+    error: solana.error,
   };
 }

@@ -12,7 +12,7 @@ import { SendReview } from "@/components/send-review";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useSend } from "@/hooks/use-send";
 import { useBridgePreview } from "@/hooks/use-bridge-preview";
-import { toBaseUnits } from "@/lib/yield";
+import { toBaseUnitsPartial } from "@oxar/sdk";
 import { USDC_MINT } from "@/lib/constants";
 import { maxSendable } from "@/lib/wallet/transfer";
 import { canLeaveSolana, getDestChain, type DestAsset } from "@/lib/wallet/outbound-destinations";
@@ -69,7 +69,10 @@ export function SendSheet({
       ? { symbol: source.symbol, mint: source.mint, decimals: source.decimals }
       : destChain.assets[0]!;
 
-  const amountBase = source ? toBaseUnits(amount || "0", source.decimals) : BigInt(0);
+  // "0." is what this field holds between the zero and the cents, and the strict
+  // parser throws on it — during a render, which on a phone reads as "the page
+  // couldn't load". Half-typed means zero here, not a crash.
+  const amountBase = source ? (toBaseUnitsPartial(amount, source.decimals) ?? BigInt(0)) : BigInt(0);
   const busy = status !== "idle";
 
   // Crossing a chain costs a fee the bridge sets, and it used to be discovered by

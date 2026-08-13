@@ -11,7 +11,6 @@ import { DepositConfirm } from "@/components/deposit-confirm";
 import { ExitCostNotice } from "@/components/exit-cost-notice";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
-import { useEvmAssets } from "@/hooks/use-evm-assets";
 import { useDeposit } from "@/hooks/use-deposit";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
@@ -21,13 +20,9 @@ import { normalizeDecimalInput, spendableBase } from "@oxar/sdk";
 import { USDC_MINT } from "@/lib/constants";
 import { useT, localizeError } from "@/lib/i18n";
 
-// Cross-chain (bridge) minimum: below this the bridge fee eats the amount and the
-// route often can't quote at all. Same-chain Solana pays have NO minimum.
-
 interface Props {
   view: ProviderView;
-  /** `pending` = a cross-chain buy that's still bridging (credited in background). */
-  onDeposited: (usdAmount: number, pending?: boolean) => void;
+  onDeposited: (usdAmount: number) => void;
   /** Action verb — "Deposit" (default) for yield sources, "Buy" for stocks. */
   verb?: string;
   /** Per-unit USD price (e.g. a share price). When set, a "buy N units" input
@@ -53,9 +48,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const { t } = useT();
   const lower = verb.toLowerCase();
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
-  // EVM balances still feed the preview's gas check; they are no longer payable here.
-  const { evmAddress } = useEvmAssets();
-  const { depositWith, busy, status, failedAt, error } = useDeposit(view.id);
+  const { depositWith, busy, status, error } = useDeposit(view.id);
   const busyLabel = busy ? t(`status.${status}` as "status.working") : null;
   // Apple Pay / card path — funds fresh USDC via Privy's on-ramp, then buys.
   // Works with no crypto in the wallet (the whole point), so it's independent
@@ -111,7 +104,6 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
     usdAmount,
     productMint: view.assetMint,
     productDecimals: view.decimals,
-    evmAddress,
   });
 
   // Swap-and-hold (Ondo / stocks): the deposit swaps USDC → the held asset, so show
@@ -131,8 +123,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
     try {
       const depositedBase = await depositWith(payAsset, usdAmount);
       setConfirming(false); // leave the review so the panel resets behind the success overlay
-      // EVM pay-assets bridge in the background — the deposit isn't done yet.
-      onDeposited(Number(depositedBase) / 10 ** view.decimals, payAsset.chain === "ethereum");
+      onDeposited(Number(depositedBase) / 10 ** view.decimals);
     } catch {
       // surfaced via `error` — stay on the review so the user can retry
     }
@@ -155,8 +146,6 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           swapIn={swapIn}
           busy={busy}
           label={busyLabel}
-          status={status}
-          failedAt={failedAt}
           error={error}
           onConfirm={handleDeposit}
           onBack={() => setConfirming(false)}
@@ -248,9 +237,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             t("deposit.quoting")
           ) : preview.netUsdc !== null ? (
             t("deposit.youllDo", { verb: lower, value: `~$${preview.netUsdc.toFixed(2)} ${view.assetSymbol}` }) +
-            (preview.kind === "bridge"
-              ? ` · ${t("confirm.route.fee")} ~$${(preview.feeUsd ?? 0).toFixed(2)}${preview.etaSec ? ` · ~${preview.etaSec}s` : ""}`
-              : t("deposit.afterSwap"))
+            t("deposit.afterSwap")
           ) : (
             t("deposit.cantQuote")
           )}

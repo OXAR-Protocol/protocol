@@ -3,6 +3,7 @@
 import { Info } from "lucide-react";
 
 import { AmountKeypad } from "@/components/amount-keypad";
+import { AnimatedAmount } from "@/components/animated-amount";
 import { useT } from "@/lib/i18n";
 
 const PRESETS = [20, 100, 250, 500];
@@ -37,9 +38,9 @@ export function FundCardAmount({
       <p className="text-center text-[11px] lowercase tracking-wide text-black/40">
         {t("fund.card.amount")}
       </p>
-      <p className="mt-1 text-center text-[2.6rem] font-light leading-none tracking-[-0.03em] text-black tabular-nums">
+      <p className="mt-1 text-center text-[2.6rem] font-light leading-none tracking-[-0.03em] text-black">
         <span className={value === "" ? "text-black/25" : "text-black/45"}>$</span>
-        {value === "" ? <span className="text-black/25">0</span> : value}
+        <AnimatedAmount value={value} />
       </p>
 
       <div className="mt-5 grid grid-cols-4 gap-2">

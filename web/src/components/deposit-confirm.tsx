@@ -5,10 +5,6 @@ import type { ProviderView } from "@/hooks/use-yield-positions";
 import type { NetPreview } from "@/hooks/use-net-preview";
 import type { SwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { WalletAsset } from "@oxar/sdk";
-import { BridgeSteps, type BridgeStep } from "@/components/bridge-steps";
-import { isNativeEvm } from "@/lib/evm/erc20";
-import { OriginGasNote, OriginGasSplit } from "@/components/origin-gas-note";
-import type { OriginGasStatus } from "@oxar/sdk";
 import { SwipeToConfirm } from "@/components/swipe-to-confirm";
 import { useT, localizeError } from "@/lib/i18n";
 
@@ -22,14 +18,6 @@ interface Props {
   swapIn: SwapInPreview;
   busy: boolean;
   label: string | null;
-  /** Live deposit status ("idle" before signing) — drives the bridge step tracker. */
-  status: string;
-  /** Cross-chain step that failed, kept after `status` resets — marks it red. */
-  failedAt?: string | null;
-  /** Whether the origin chain's own coin is there to pay its network fee. Computed
-   *  upstream, where the full holdings list lives. Only a cross-chain pay asset can
-   *  lack it, so a Solana-only caller leaves it out. */
-  gas?: OriginGasStatus;
   error: string | null;
   onConfirm: () => void;
   onBack: () => void;
@@ -56,30 +44,13 @@ export function DepositConfirm({
   swapIn,
   busy,
   label,
-  status,
-  failedAt,
-  gas,
   error,
   onConfirm,
   onBack,
 }: Props) {
   const { t } = useT();
   const held = !!view.heldMint;
-  // Cross-chain confirms several steps in the wallet — show the sequence up front so
-  // the multiple prompts feel guided, not random. Native ETH skips the approve step.
-  const isBridge = payAsset.chain === "ethereum";
-  const bridgeSteps: BridgeStep[] = isBridge
-    ? [
-        ...(isNativeEvm(payAsset.mint) ? [] : [{ key: "approving", label: t("confirm.step.approve") }]),
-        { key: "bridging", label: t("confirm.step.bridge") },
-        { key: "buy", label: t("confirm.step.buy") },
-      ]
-    : [];
-  const route = isDirect
-    ? t("confirm.route.instant")
-    : payAsset.chain === "ethereum"
-      ? `${t("confirm.route.bridge")}${preview.etaSec ? ` · ~${Math.round(preview.etaSec / 60)} min` : ""}${preview.feeUsd ? ` · ${t("confirm.route.fee")} ~${money(preview.feeUsd)}` : ""}`
-      : t("confirm.route.swap");
+  const route = isDirect ? t("confirm.route.instant") : t("confirm.route.swap");
 
   // What you'll end up with, net of any conversion.
   const get = held
@@ -108,20 +79,6 @@ export function DepositConfirm({
         <Row k={t("confirm.route")} v={route} />
         <Row k={t("confirm.whereItGoes")} v={held ? t("confirm.ownWallet") : view.name} />
       </div>
-
-      {isBridge && (
-        <div className="mt-3 rounded-[8px] border border-black/10 px-3 py-2.5">
-          <BridgeSteps steps={bridgeSteps} status={busy ? status : "idle"} failedAt={busy ? null : failedAt} />
-          <p className="mt-1.5 text-[10px] lowercase tracking-wide text-black/40">{t("confirm.step.hint")}</p>
-          {/* Which side pays which fee, stated plainly — and a warning instead if the
-              origin chain's coin isn't there to pay it. */}
-          {!gas || gas.kind === "ok" ? (
-            <OriginGasSplit payAsset={payAsset} />
-          ) : (
-            <OriginGasNote status={gas} payAsset={payAsset} />
-          )}
-        </div>
-      )}
 
       <p className="mt-3 text-[11px] leading-snug text-black/45">
         {t("confirm.footer")}

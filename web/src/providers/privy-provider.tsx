@@ -3,7 +3,6 @@
 import { PrivyProvider as PrivyProviderBase } from "@privy-io/react-auth";
 import { toSolanaWalletConnectors, useSolanaFundingPlugin } from "@privy-io/react-auth/solana";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
-import { mainnet, base, arbitrum, optimism, polygon } from "viem/chains";
 import { ReactNode } from "react";
 import { RPC_URL } from "@/lib/constants";
 
@@ -64,42 +63,26 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
         appearance: {
           theme: "#000000",
           accentColor: "#FFFFFF",
-          // EVM + Solana wallets can still be LINKED (for paying) — not for login.
-          walletChainType: "ethereum-and-solana",
+          // Solana only, for login and for linking. The account IS a Solana wallet;
+          // an EVM wallet was only ever a way to pay, and money now arrives from other
+          // chains as a deposit address (Relay) that needs no wallet connected at all.
+          walletChainType: "solana-only",
           // Not a wall of wallets, but not a wall in front of one either. The three
-          // Solana wallets worth naming come first; the two `detected_*` entries then
-          // add whatever the person actually has installed, so a Backpack or MetaMask
-          // user isn't told their own wallet doesn't exist.
-          //
-          // The detected entries matter for a second reason: this list is global, so
-          // it also drives the modal `linkWallet()` opens for "pay from another
-          // chain". Pinning brands alone left that flow with no EVM wallet to pick.
-          walletList: [
-            "phantom",
-            "solflare",
-            "backpack",
-            "detected_solana_wallets",
-            "detected_ethereum_wallets",
-          ],
+          // worth naming come first; `detected_solana_wallets` then adds whatever the
+          // person actually has installed, so a Backpack user isn't told their own
+          // wallet doesn't exist.
+          walletList: ["phantom", "solflare", "backpack", "detected_solana_wallets"],
           logo: "https://oxar.app/images/white.svg",
           landingHeader: "Welcome to OXAR",
           loginMessage: "Real-world yields. On-chain access.",
           showWalletLoginFirst: false,
         },
-        // EVM networks we read balances on / bridge from (Story 4 cross-chain).
-        defaultChain: mainnet,
-        supportedChains: [mainnet, base, arbitrum, optimism, polygon],
         embeddedWallets: {
           solana: {
             // Create an embedded wallet ONLY for users who have no wallet of their
             // own (email/social login). A wallet-login user operates from their own
             // wallet — don't spawn a second, empty one (the v2 fix).
             createOnLogin: "users-without-wallets",
-          },
-          // EVM funds come from the user's external wallet (MetaMask/Rainbow);
-          // don't litter every account with an empty embedded EVM wallet.
-          ethereum: {
-            createOnLogin: "off",
           },
         },
         externalWallets: {
