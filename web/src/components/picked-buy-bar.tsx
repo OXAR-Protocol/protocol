@@ -166,14 +166,21 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
   // It raises the budget, then the user splits it and buys — same as any other balance.
   const addWithCard = async () => {
     setFundError(null);
+    // Stand aside while the provider's window is open. Ours is a fixed overlay, and
+    // a fixed overlay does not move when iOS raises the keyboard — the amount field
+    // ended up underneath it. With the sheet closed the provider owns the screen and
+    // the keyboard behaves; the basket is still here when we come back.
+    setAllocating(false);
     try {
       await topUp(CARD_MINIMUM_USD);
       await refreshAssets();
       // Back to the default choice, which prefers USDC — the money just added.
       setPayUid(null);
+      setAllocating(true);
     } catch (e) {
       console.error("Card top-up failed:", e);
       setFundError(toFriendlyError(e));
+      setAllocating(true);
     }
   };
 
