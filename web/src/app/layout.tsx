@@ -1,13 +1,18 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Instrument_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import { PageWrapper } from "@/components/page-wrapper";
 
-const instrumentSerif = Instrument_Serif({
-  weight: "400",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
+/** Brand serif, served from the repo — see the note in `landing-v2/fonts.ts` on
+ *  why these aren't fetched from Google at build time. */
+const instrumentSerif = localFont({
+  src: [
+    { path: "./fonts/instrument-serif-normal-latin.woff2", style: "normal", weight: "400" },
+    { path: "./fonts/instrument-serif-normal-latin-ext.woff2", style: "normal", weight: "400" },
+    { path: "./fonts/instrument-serif-italic-latin.woff2", style: "italic", weight: "400" },
+    { path: "./fonts/instrument-serif-italic-latin-ext.woff2", style: "italic", weight: "400" },
+  ],
   variable: "--font-instrument-serif",
   display: "swap",
 });
