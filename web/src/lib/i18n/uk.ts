@@ -136,10 +136,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "trust.noFees": "без комісій",
   "trust.selfCustody": "гроші у тебе",
 
-  "you.account": "акаунт",
-  "you.email": "email",
   "you.wallet": "твій гаманець",
-  "you.walletHint": "тут живуть твої гроші та позиції",
   "you.signedOut": "ти вийшов з акаунта",
   "you.language": "мова",
   "you.terms": "умови використання",
