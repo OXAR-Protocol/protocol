@@ -13,6 +13,15 @@ const tabs = [
   { href: "/you", key: "nav.you", icon: User },
 ] as const;
 
+/**
+ * The phone's navigation, as a bar that floats over the page rather than a strip
+ * ruled off along the bottom edge.
+ *
+ * The strip took a full band of a small screen and drew a line across everything
+ * above it; floating, it costs the width it needs and the page reads on beneath.
+ * Only the tab you're on carries its word — three labels at once is what made the
+ * strip need that much room in the first place.
+ */
 export function TabBar() {
   const pathname = usePathname();
   const { authenticated } = usePrivy();
@@ -21,8 +30,11 @@ export function TabBar() {
   if (!authenticated) return null;
 
   return (
-    <nav data-tour-chrome="tabbar" className="safe-bottom fixed bottom-0 left-0 right-0 z-50 border-t border-black/10 bg-white/90 backdrop-blur-md md:hidden">
-      <div className="mx-auto flex h-16 max-w-[600px] items-stretch justify-around px-2">
+    <nav
+      data-tour-chrome="tabbar"
+      className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-50 md:hidden"
+    >
+      <div className="pointer-events-auto mx-auto mb-3 flex w-fit items-center gap-1 rounded-full border border-black/10 bg-white/85 p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
         {tabs.map((tab) => {
           const isActive = pathname.startsWith(tab.href);
           const Icon = tab.icon;
@@ -31,14 +43,15 @@ export function TabBar() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-1 flex-col items-center justify-center gap-1 transition-colors ${
-                isActive ? "text-black" : "text-black/35"
+              aria-current={isActive ? "page" : undefined}
+              className={`flex items-center gap-2 rounded-full px-4 py-2.5 transition-colors ${
+                isActive ? "bg-black text-white" : "text-black/40 hover:text-black"
               }`}
             >
               <Icon size={18} strokeWidth={1.5} />
-              <span className="lowercase text-[10px] tracking-[0.04em]">
-                {t(tab.key)}
-              </span>
+              {isActive && (
+                <span className="lowercase text-[13px] tracking-[0.02em]">{t(tab.key)}</span>
+              )}
             </Link>
           );
         })}

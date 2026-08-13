@@ -1,11 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
-import { X } from "lucide-react";
 
-/** Shared modal shell for the Paybis legs — scrolls, because both carry a walkthrough. */
+import { SheetShell } from "@/components/sheet-shell";
+
+/** The Paybis legs use the shared money-sheet shell — kept as its own name because
+ *  both walkthroughs read better with the vendor said out loud at the call site. */
 export function PaybisSheet({
   label,
   title,
@@ -17,35 +17,9 @@ export function PaybisSheet({
   onClose: () => void;
   children: ReactNode;
 }) {
-  return createPortal(
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      data-no-pull
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-white/70 px-4 py-6 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ y: 60, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 60, opacity: 0 }}
-        transition={{ type: "spring", damping: 26, stiffness: 220 }}
-        onClick={(e) => e.stopPropagation()}
-        className="relative max-h-full w-full max-w-[440px] overflow-y-auto rounded-[12px] border border-black/15 bg-white p-6 md:p-7"
-      >
-        <div className="mb-5 flex items-start justify-between">
-          <div>
-            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">{label}</p>
-            <h2 className="mt-1 text-xl text-black">{title}</h2>
-          </div>
-          <button onClick={onClose} className="text-black/45 transition hover:text-black">
-            <X size={18} strokeWidth={1.5} />
-          </button>
-        </div>
-        {children}
-      </motion.div>
-    </motion.div>,
-    document.body,
+  return (
+    <SheetShell label={label} title={title} onClose={onClose}>
+      {children}
+    </SheetShell>
   );
 }

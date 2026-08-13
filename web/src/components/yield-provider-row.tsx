@@ -77,6 +77,7 @@ export function YieldProviderRow({ view, onOpen }: Props) {
       pick={
         pickSet?.enabled ? (
           <PickButton
+            block
             picked={pickSet.picked.has(view.id)}
             onToggle={() => pickSet.toggle(view.id)}
             label={view.name}
