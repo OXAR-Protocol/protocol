@@ -4,32 +4,26 @@ import { useEffect, useRef, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useExportWallet } from "@privy-io/react-auth/solana";
 import { AnimatePresence } from "framer-motion";
-import { Copy, Check, LogOut, ChevronDown, ArrowUpRight, KeyRound, CreditCard, MessageSquare, Plus } from "lucide-react";
+import { Copy, Check, LogOut, ChevronDown, KeyRound, MessageSquare, Wallet } from "lucide-react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
-import { SendSheet } from "@/components/send-sheet";
-import { CashOutSheet, CASH_OUT_FEATURE } from "@/components/cash-out-sheet";
-import { FundSheet } from "@/components/fund-sheet";
+import { MoneySheet } from "@/components/money-sheet";
 import { FeedbackSheet } from "@/components/feedback-sheet";
 import { useSolanaName } from "@/hooks/use-solana-name";
-import { useFeature } from "@/hooks/use-features";
 import { useT } from "@/lib/i18n";
 
 /**
- * Header wallet control: shows the active Solana address as a pill; the dropdown
- * lists addresses (Solana + EVM) to copy, a Send action (move funds out to any
- * address), an Export action for the built-in wallet, and disconnect.
+ * Header wallet control: the active Solana address as a pill. The dropdown holds
+ * the address to copy, the one door to everything money can do, the key export for
+ * the built-in wallet, and the way out.
  */
 export function WalletMenu() {
   const { user, logout } = usePrivy();
   const { walletAddress } = useSolanaContext();
   const { exportWallet } = useExportWallet();
-  const cashOutLive = useFeature(CASH_OUT_FEATURE);
   const { t } = useT();
   const [open, setOpen] = useState(false);
-  const [showFund, setShowFund] = useState(false);
-  const [showSend, setShowSend] = useState(false);
-  const [showCashOut, setShowCashOut] = useState(false);
+  const [showMoney, setShowMoney] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -77,36 +71,14 @@ export function WalletMenu() {
         <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-[12px] border border-black/10 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
           <AddressRow label={t("you.wallet")} address={solana} />
 
-          {/* Money in, money out, money across — one list, in the order someone
-              actually needs them. Topping up used to live only inside an asset,
-              which is no help to a wallet with nothing in it yet. */}
+          {/* One door for money instead of three items that each did a piece of it —
+              in, out and across all live behind this now (see MoneySheet). */}
           <button
-            onClick={() => { setOpen(false); setShowFund(true); }}
+            onClick={() => { setOpen(false); setShowMoney(true); }}
             className={`${item} border-b border-black/10 hover:bg-black/[0.04] hover:text-black`}
           >
-            <Plus size={13} strokeWidth={1.5} />
-            {t("wallet.fund")}
-          </button>
-
-          <button
-            onClick={() => { setOpen(false); setShowSend(true); }}
-            className={`${item} border-b border-black/10 hover:bg-black/[0.04] hover:text-black`}
-          >
-            <ArrowUpRight size={13} strokeWidth={1.5} />
-            {t("wallet.send")}
-          </button>
-
-          <button
-            onClick={() => { setOpen(false); setShowCashOut(true); }}
-            className={`${item} border-b border-black/10 hover:bg-black/[0.04] hover:text-black`}
-          >
-            <CreditCard size={13} strokeWidth={1.5} />
-            {t("rail.cashOut")}
-            {!cashOutLive && (
-              <span className="ml-auto rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] lowercase tracking-wide text-black/45">
-                {t("common.soon")}
-              </span>
-            )}
+            <Wallet size={13} strokeWidth={1.5} />
+            {t("money.title")}
           </button>
 
           {isEmbedded && (
@@ -137,9 +109,7 @@ export function WalletMenu() {
         </div>
       )}
 
-      <AnimatePresence>{showFund && <FundSheet onClose={() => setShowFund(false)} />}</AnimatePresence>
-      <AnimatePresence>{showSend && <SendSheet onClose={() => setShowSend(false)} />}</AnimatePresence>
-      <AnimatePresence>{showCashOut && <CashOutSheet onClose={() => setShowCashOut(false)} />}</AnimatePresence>
+      <AnimatePresence>{showMoney && <MoneySheet onClose={() => setShowMoney(false)} />}</AnimatePresence>
       <AnimatePresence>{showFeedback && <FeedbackSheet onClose={() => setShowFeedback(false)} />}</AnimatePresence>
     </div>
   );

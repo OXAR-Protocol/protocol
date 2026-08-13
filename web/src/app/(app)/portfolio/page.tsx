@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
-import { ArrowUpRight, Sparkles, Loader2, Plus } from "lucide-react";
+import { ArrowUpRight, Sparkles, Loader2, Plus, MoreHorizontal } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { LiveAmount } from "@/components/live-amount";
@@ -12,6 +12,7 @@ import { LiveEarned } from "@/components/live-earned";
 import { WalletCash } from "@/components/wallet-cash";
 import { PhotoBg } from "@/components/photo-bg";
 import { FundSheet } from "@/components/fund-sheet";
+import { MoneySheet } from "@/components/money-sheet";
 import { GuestEmpty } from "@/components/guest-empty";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
@@ -40,6 +41,7 @@ export default function HomePage() {
   const goldEarn = aggregate(earnings.sources.filter((s) => isGold(s.id)));
   const { t } = useT();
   const [showFund, setShowFund] = useState(false);
+  const [showMoney, setShowMoney] = useState(false);
   const [greetKey, setGreetKey] = useState<"greet.morning" | "greet.afternoon" | "greet.evening" | "greet.late" | null>(null);
 
   useEffect(() => {
@@ -114,14 +116,25 @@ export default function HomePage() {
           </p>
           {/* Beside the balance, because "where do dollars come from" is the question
               this number provokes when it reads $0.00. */}
-          <button
-            type="button"
-            onClick={() => setShowFund(true)}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-black px-4 py-2 text-[13px] lowercase tracking-wide text-white transition hover:bg-black/85"
-          >
-            <Plus size={13} strokeWidth={2} />
-            {t("wallet.fund")}
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowFund(true)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-black px-4 py-2 text-[13px] lowercase tracking-wide text-white transition hover:bg-black/85"
+            >
+              <Plus size={13} strokeWidth={2} />
+              {t("wallet.fund")}
+            </button>
+            {/* Everything else money can do — out, across, and what it all adds up to. */}
+            <button
+              type="button"
+              onClick={() => setShowMoney(true)}
+              aria-label={t("money.title")}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/15 text-black/55 transition hover:border-black/40 hover:text-black"
+            >
+              <MoreHorizontal size={16} strokeWidth={1.5} />
+            </button>
+          </div>
         </div>
         <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
           {loading ? (
@@ -209,6 +222,7 @@ export default function HomePage() {
 
       <AnimatePresence>
         {showFund && <FundSheet onClose={() => setShowFund(false)} />}
+        {showMoney && <MoneySheet onClose={() => setShowMoney(false)} />}
       </AnimatePresence>
     </div>
   );
