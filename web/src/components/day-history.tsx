@@ -31,12 +31,17 @@ const INFLOW = new Set(["sell", "withdraw", "receive"]);
  * reading the timestamps in the viewer's zone would put a late-evening trade on a
  * different row than the day it was counted in.
  */
-/** How many transactions to show before asking. A history is skimmed, not read. */
+/** How many transactions each "show more" adds. A history is skimmed, not read. */
 const PAGE = 20;
+/** What opens: the latest day, alone. `takeByEventCount` never splits a day, so any
+ *  limit below the newest day's transaction count resolves to exactly that day —
+ *  the answer to "what happened today", with the rest a tap away rather than a
+ *  wall of past weeks under a page you came to for something else. */
+const FIRST = 1;
 
 export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[]; locale: string }) {
   const { t } = useT();
-  const [limit, setLimit] = useState(PAGE);
+  const [limit, setLimit] = useState(FIRST);
   // Read the clock after mount, not during render: the date is cosmetic (it only
   // decides whether the newest row says "today" or its date), and reading it in
   // render makes this component impure for no benefit.
