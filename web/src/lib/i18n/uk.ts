@@ -215,6 +215,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "rail.exitCostNow": "вийти прямо зараз коштувало б приблизно {pct}% — це ціна ринку, а не наша комісія",
   "rail.exitCostUnavailable": "зараз немає способу вийти з такою сумою — це ринок, а не ми",
   "rail.exitCostCeiling": "зараз максимум, який вийде продати за раз, — це приблизно {usd}. більшу позицію доведеться продавати в кілька заходів, і ціна щоразу трохи зміниться. це глибина ринку, а не наша комісія",
+  "position.invested": "вкладено",
+  "position.avgEntry": "сер.",
   "sell.details": "деталі",
   "sell.detail.asked": "ви продаєте",
   "sell.detail.cost": "вартість виходу",

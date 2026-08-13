@@ -136,3 +136,18 @@ export function useEarnedById(): Record<string, number> {
     [sources],
   );
 }
+
+/**
+ * What you put in, by source id — the other half of `useEarnedById`.
+ *
+ * A position card that shows only what something is worth answers half a question:
+ * worth compared to what? This is the "what", and dividing it by the units held
+ * gives the price the position was built at.
+ */
+export function useInvestedById(): Record<string, number> {
+  const { sources } = useEarnings();
+  return useMemo(
+    () => Object.fromEntries(sources.map((s) => [s.id, s.invested])),
+    [sources],
+  );
+}
