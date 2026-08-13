@@ -52,14 +52,11 @@ export function middleware(req: NextRequest) {
   const isApp = host === APP_DOMAIN;
   const isMarketing = host === MARKETING_DOMAIN;
 
-  // Bare app.oxar.app/ → the portfolio for someone signed in, the catalog for
-  // everyone else. A first-time visitor used to land on their own empty portfolio
-  // (behind the alpha wall, so in practice on a form); the catalog at least shows
-  // what this is. The Privy session cookie only picks the landing page here — it
-  // gates nothing, and the real check still happens client-side.
+  // Bare app.oxar.app/ → the catalog, signed in or not. The portfolio is the right
+  // landing page only for someone who already has positions; for everyone else it
+  // is an empty screen, and what they came for is the list of places to put money.
   if (isApp && pathname === "/") {
-    const signedIn = !!req.cookies.get("privy-token");
-    const url = new URL(`https://${APP_DOMAIN}${signedIn ? "/portfolio" : "/market"}${search}`);
+    const url = new URL(`https://${APP_DOMAIN}/market${search}`);
     return NextResponse.redirect(url, 307);
   }
 

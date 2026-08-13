@@ -15,7 +15,9 @@ export default function LoginPage() {
   const { t } = useT();
 
   useEffect(() => {
-    if (ready && authenticated) router.replace("/portfolio");
+    // The market, not the portfolio: a new account's portfolio is empty, and
+    // the first thing anyone needs is somewhere to put money.
+    if (ready && authenticated) router.replace("/market");
   }, [ready, authenticated, router]);
 
   // The access wall already approved this browser. Here we just authenticate —
