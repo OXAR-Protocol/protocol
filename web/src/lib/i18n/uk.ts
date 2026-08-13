@@ -136,7 +136,6 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "trust.noFees": "без комісій",
   "trust.selfCustody": "гроші у тебе",
 
-  "you.title": "налаштування і профіль",
   "you.account": "акаунт",
   "you.email": "email",
   "you.wallet": "твій гаманець",
@@ -404,6 +403,9 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "money.label": "ваші гроші",
   "money.title": "Гроші",
   "money.free": "вільні",
+  "profile.working": "{value} працює",
+  "profile.positions": "позицій: {n}",
+  "profile.joined": "тут із {date}",
   "money.working": "вже працюють",
   "money.fund.title": "Поповнити",
   "money.fund.body": "З гаманця, карткою або з біржі",

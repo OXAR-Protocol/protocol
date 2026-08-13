@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
 import { LogOut } from "lucide-react";
 
-import { SectionLabel } from "@/components/section-label";
+import { ProfileHeader } from "@/components/profile-header";
 import { Row, WalletCard } from "@/components/you-rows";
 import { forgetIntro } from "@/components/intro-modal";
 import { LanguagePicker } from "@/components/language-picker";
@@ -37,16 +37,17 @@ export default function YouPage() {
 
   return (
     <div className="max-w-[800px] mx-auto pt-8 pb-32">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <SectionLabel>you</SectionLabel>
-        <h1 className="mt-4 text-[clamp(26px,4vw,44px)] leading-[1.04] tracking-[-0.04em] lowercase text-black">
-          {t("you.title")}
-        </h1>
-      </motion.div>
+      {/* Signed in, the page opens on who you are; signed out there is no profile to
+          show, so the account section below does the asking. */}
+      {authenticated && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <ProfileHeader />
+        </motion.div>
+      )}
 
       {/* Account */}
       <motion.section

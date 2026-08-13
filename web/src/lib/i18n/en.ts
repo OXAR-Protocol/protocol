@@ -148,7 +148,6 @@ export const en = {
   "trust.selfCustody": "self-custody",
 
   // You / settings
-  "you.title": "settings & profile",
   "you.account": "account",
   "you.email": "email",
   "you.wallet": "your wallet",
@@ -431,6 +430,9 @@ export const en = {
   "money.label": "your money",
   "money.title": "Money",
   "money.free": "free to use",
+  "profile.working": "{value} working",
+  "profile.positions": "{n} positions",
+  "profile.joined": "here since {date}",
   "money.working": "already working",
   "money.fund.title": "Top up",
   "money.fund.body": "From a wallet, with a card, or out of an exchange",
