@@ -9,7 +9,6 @@ import { JoinCapture } from "@/components/access-gate/join-capture";
 import { ChannelReport } from "@/components/channel-tracker";
 import { WarpProvider } from "@/components/warp-transition";
 import { WarpOnEntry } from "@/components/warp-on-entry";
-import { PendingBridgeBanner } from "@/components/pending-bridge-banner";
 import { TermsAndIntroGate } from "@/components/terms/terms-and-intro-gate";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 
@@ -30,7 +29,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <div className="flex min-h-screen flex-col">
                   <TopNav />
                   <div className="mx-auto w-full max-w-[1100px] flex-1 px-5 pt-6">
-                    <PendingBridgeBanner />
                     {children}
                     <JoinCapture />
                     <ChannelReport />

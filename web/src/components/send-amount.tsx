@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { formatUsdAmount, type WalletAsset } from "@oxar/sdk";
 
 import { AmountKeypad } from "@/components/amount-keypad";
+import { AnimatedAmount } from "@/components/animated-amount";
 import { TokenIcon } from "@/components/token-icon";
 import { maxSendable } from "@/lib/wallet/transfer";
 import { useT } from "@/lib/i18n";
@@ -50,8 +51,8 @@ export function SendAmount({
 
   return (
     <>
-      <p className="text-center text-[2.6rem] font-light leading-none tracking-[-0.03em] tabular-nums text-black">
-        {value === "" ? <span className="text-black/25">0</span> : value}
+      <p className="text-center text-[2.6rem] font-light leading-none tracking-[-0.03em] text-black">
+        <AnimatedAmount value={value} />
         <span className="ml-2 text-[1.4rem] text-black/40">{asset.symbol}</span>
       </p>
       {unitPrice > 0 && (

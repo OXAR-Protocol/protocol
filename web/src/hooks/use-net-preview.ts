@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 
-import { useSolanaContext } from "@/providers/solana-provider";
-import { getSwapQuote, buildQuoteRequest, networkToChainId, bridgeFeeUsd, usdToBase, type WalletAsset } from "@oxar/sdk";
+import { getSwapQuote, usdToBase, type WalletAsset } from "@oxar/sdk";
 
 export interface NetPreview {
-  kind: "direct" | "swap" | "bridge";
+  kind: "direct" | "swap";
   /** Guaranteed-min USDC the deposit will receive, in display units. */
   netUsdc: number | null;
   quoting: boolean;
@@ -15,8 +14,8 @@ export interface NetPreview {
 }
 
 /**
- * Live "you'll deposit ~$X" preview for the selected pay-asset: direct (full
- * amount), Jupiter swap (min-out), or Delora bridge (min-out + fee + ETA).
+ * Live "you'll deposit ~$X" preview for the pay-asset: the full amount when it's
+ * already the product's currency, else a Jupiter swap's guaranteed minimum.
  * Debounced; cancels in-flight quotes on change.
  */
 export function useNetPreview(params: {
@@ -24,18 +23,10 @@ export function useNetPreview(params: {
   usdAmount: number;
   productMint: string;
   productDecimals: number;
-  evmAddress: string | null;
 }): NetPreview {
-  const { payAsset, usdAmount, productMint, productDecimals, evmAddress } = params;
-  const { walletAddress } = useSolanaContext();
+  const { payAsset, usdAmount, productMint, productDecimals } = params;
   const isDirect = payAsset?.chain === "solana" && payAsset.mint === productMint;
-  const kind: NetPreview["kind"] = !payAsset
-    ? "direct"
-    : payAsset.chain === "ethereum"
-      ? "bridge"
-      : isDirect
-        ? "direct"
-        : "swap";
+  const kind: NetPreview["kind"] = !payAsset || isDirect ? "direct" : "swap";
 
   const [state, setState] = useState<Omit<NetPreview, "kind">>({ netUsdc: null, quoting: false });
 
@@ -52,40 +43,12 @@ export function useNetPreview(params: {
     setState((s) => ({ ...s, quoting: true }));
     const t = setTimeout(async () => {
       try {
-        if (payAsset.chain === "ethereum") {
-          const originChainId = payAsset.network ? networkToChainId(payAsset.network) : null;
-          if (!originChainId || !walletAddress) throw new Error("no route");
-          const req = buildQuoteRequest({
-            senderAddress: evmAddress ?? "0x0000000000000000000000000000000000000000",
-            originChainId,
-            amount: usdToBase(payAsset, usdAmount),
-            originCurrency: payAsset.mint,
-            receiverAddress: walletAddress.toBase58(),
-            destinationMint: productMint,
-          });
-          const res = await fetch("/api/bridge-quote", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(req),
-          });
-          const q = await res.json();
-          if (!res.ok) throw new Error(q?.error || "no route");
-          if (!cancelled) {
-            setState({
-              netUsdc: Number(q.minOutputAmount) / 10 ** productDecimals,
-              quoting: false,
-              feeUsd: bridgeFeeUsd(q),
-              etaSec: q.estimatedTimeSec,
-            });
-          }
-        } else {
-          const q = await getSwapQuote({
-            inputMint: payAsset.mint,
-            outputMint: productMint,
-            amount: usdToBase(payAsset, usdAmount),
-          });
-          if (!cancelled) setState({ netUsdc: Number(q.otherAmountThreshold) / 10 ** productDecimals, quoting: false });
-        }
+        const q = await getSwapQuote({
+          inputMint: payAsset.mint,
+          outputMint: productMint,
+          amount: usdToBase(payAsset, usdAmount),
+        });
+        if (!cancelled) setState({ netUsdc: Number(q.otherAmountThreshold) / 10 ** productDecimals, quoting: false });
       } catch {
         if (!cancelled) setState({ netUsdc: null, quoting: false });
       }
@@ -94,7 +57,7 @@ export function useNetPreview(params: {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [payAsset, usdAmount, isDirect, productMint, productDecimals, evmAddress, walletAddress]);
+  }, [payAsset, usdAmount, isDirect, productMint, productDecimals]);
 
   return { kind, ...state };
 }
