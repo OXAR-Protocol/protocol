@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
-import { ArrowUpRight, Sparkles, Loader2 } from "lucide-react";
+import { ArrowUpRight, Sparkles, Loader2, Plus } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
 import { LiveAmount } from "@/components/live-amount";
 import { LiveEarned } from "@/components/live-earned";
 import { WalletCash } from "@/components/wallet-cash";
 import { PhotoBg } from "@/components/photo-bg";
+import { FundSheet } from "@/components/fund-sheet";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useEarnings } from "@/hooks/use-earnings";
 import { PortfolioPanel } from "@/components/portfolio-panel";
@@ -37,6 +38,7 @@ export default function HomePage() {
   const stockEarn = aggregate(earnings.sources.filter((s) => isXStock(s.id)));
   const goldEarn = aggregate(earnings.sources.filter((s) => isGold(s.id)));
   const { t } = useT();
+  const [showFund, setShowFund] = useState(false);
   const [greetKey, setGreetKey] = useState<"greet.morning" | "greet.afternoon" | "greet.evening" | "greet.late" | null>(null);
 
   useEffect(() => {
@@ -99,9 +101,21 @@ export default function HomePage() {
             vanished — half swallowed by the white scrim, half showing through the
             bill. A wrapper makes that impossible for whatever gets added next. */}
         <div className="relative">
-        <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
-          {t("home.sleepingMoney")}
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <p className="lowercase text-[clamp(13px,1.1vw,16px)] text-black/45">
+            {t("home.sleepingMoney")}
+          </p>
+          {/* Beside the balance, because "where do dollars come from" is the question
+              this number provokes when it reads $0.00. */}
+          <button
+            type="button"
+            onClick={() => setShowFund(true)}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-black px-4 py-2 text-[13px] lowercase tracking-wide text-white transition hover:bg-black/85"
+          >
+            <Plus size={13} strokeWidth={2} />
+            {t("wallet.fund")}
+          </button>
+        </div>
         <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
           {loading ? (
             <span className="text-[clamp(2rem,5vw,3rem)] font-light text-black/40 leading-none">
@@ -186,6 +200,9 @@ export default function HomePage() {
           real one — the same object shown twice, which is why home read as filler. */}
       {activePositions.length > 0 && <PortfolioPanel />}
 
+      <AnimatePresence>
+        {showFund && <FundSheet onClose={() => setShowFund(false)} />}
+      </AnimatePresence>
     </div>
   );
 }

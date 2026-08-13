@@ -69,13 +69,9 @@ export function AssetCard({
       )}
     </p>
   ) : null;
-  // Two shapes of the same control: a chip beside a row, a full-width button along
-  // the bottom of a card. A row has no bottom edge to spare — a block there would
-  // stretch the list by half again.
+  // One shape everywhere: full width along the bottom, card or row. The row gains a
+  // little height for it and keeps its line, which beside the figure it was losing.
   const pick = showPick ? (
-    <PickButton picked={picked} onToggle={onTogglePick} label={asset.name} />
-  ) : null;
-  const pickBlock = showPick ? (
     <PickButton block picked={picked} onToggle={onTogglePick} label={asset.name} />
   ) : null;
   const head = (
@@ -107,7 +103,7 @@ export function AssetCard({
           {ownedEl}
           <TrustLine sourceId={asset.id} />
         </div>
-        {pickBlock && <div className="mt-3">{pickBlock}</div>}
+        {pick && <div className="mt-3">{pick}</div>}
       </button>
     );
   }
