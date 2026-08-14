@@ -61,8 +61,11 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
         // that fails when pressed. Add "apple" back the day the credentials are saved.
         loginMethods: ["email", "google", "passkey", "wallet"],
         appearance: {
-          theme: "#000000",
-          accentColor: "#FFFFFF",
+          // The app's own paper, not white: a modal a shade brighter than the page
+          // behind it reads as a different product borrowed for the occasion.
+          theme: "#fbfaf8",
+          // The brand's violet, the same accent the app uses for anything live.
+          accentColor: "#3c05c7",
           // Solana only, for login and for linking. The account IS a Solana wallet;
           // an EVM wallet was only ever a way to pay, and money now arrives from other
           // chains as a deposit address (Relay) that needs no wallet connected at all.
@@ -72,7 +75,9 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
           // person actually has installed, so a Backpack user isn't told their own
           // wallet doesn't exist.
           walletList: ["phantom", "solflare", "backpack", "detected_solana_wallets"],
-          logo: "https://oxar.app/images/white.svg",
+          // The dark mark, because the sheet is light now — the white one used to be
+          // the only thing visible on a black modal and would be invisible here.
+          logo: "https://oxar.app/images/black.svg",
           landingHeader: "Welcome to OXAR",
           loginMessage: "Real-world yields. On-chain access.",
           showWalletLoginFirst: false,
