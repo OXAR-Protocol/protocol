@@ -2,12 +2,13 @@
 
 import { useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeftRight, Check, Loader2, X } from "lucide-react";
+import { ArrowLeftRight, Check, X } from "lucide-react";
 
 import { formatUsdAmount, floorTo, floorToCents, normalizeDecimalInput } from "@oxar/sdk";
 
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
+import { SwipeToConfirm } from "@/components/swipe-to-confirm";
 import { useT } from "@/lib/i18n";
 
 export interface AllocationRow {
@@ -294,21 +295,22 @@ export function AllocationSheet({
         {/* Sticky: with several assets the list is taller than the sheet, and a
             confirm you have to go looking for is a confirm people don't find. */}
         <div className="sticky bottom-0 -mx-5 mt-4 bg-gradient-to-t from-white via-white to-white/0 px-5 pb-1 pt-3">
-        <button
-          type="button"
-          disabled={busy || nothing || overBudget}
-          onClick={() =>
+        {/* Held, not tapped — several assets bought or sold in one gesture is the
+            biggest single act in the app, and it sits under a thumb that has just
+            been scrolling a list. */}
+        <SwipeToConfirm
+          label={t("confirm.hold", {
+            verb: t(mode === "sell" ? "alloc.confirmSell" : "alloc.confirmBuy", {
+              usd: `$${formatUsdAmount(allocated)}`,
+            }),
+          })}
+          busyLabel={progress ?? undefined}
+          busy={busy}
+          disabled={nothing || overBudget}
+          onConfirm={() =>
             onConfirm(Object.fromEntries(rows.map((r) => [r.id, valueOf(r)]).filter(([, v]) => (v as number) > 0)))
           }
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3 text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-30"
-        >
-          {busy && <Loader2 size={14} className="animate-spin" />}
-          {busy && progress
-            ? progress
-            : t(mode === "sell" ? "alloc.confirmSell" : "alloc.confirmBuy", {
-                usd: `$${formatUsdAmount(allocated)}`,
-              })}
-        </button>
+        />
 
         {/* Several assets means several transactions — said once, before signing. */}
         <p className="mt-2 text-center text-[11px] text-black/35">

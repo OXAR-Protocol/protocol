@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
+import { motion, useDragControls } from "framer-motion";
 import { X } from "lucide-react";
 
 /**
@@ -28,6 +28,11 @@ export function SheetShell({
   onClose: () => void;
   children: ReactNode;
 }) {
+  // Dragging starts at the handle and nowhere else. With the whole surface listening,
+  // every downward swipe was read as "put it away", so a list longer than the sheet
+  // could not be scrolled at all — the finger moved the sheet instead of the list.
+  const drag = useDragControls();
+
   // A sheet over a scrolling page lets the page scroll under it — the sheet moves,
   // the background moves, and neither feels attached to the finger.
   useEffect(() => {
@@ -53,6 +58,8 @@ export function SheetShell({
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 32, stiffness: 320 }}
         drag="y"
+        dragListener={false}
+        dragControls={drag}
         dragConstraints={{ top: 0, bottom: 0 }}
         dragElastic={{ top: 0, bottom: 0.4 }}
         onDragEnd={(_, info) => {
@@ -62,9 +69,15 @@ export function SheetShell({
         onClick={(e) => e.stopPropagation()}
         className="safe-bottom relative max-h-[88vh] w-full overflow-y-auto rounded-t-[22px] border border-black/10 bg-white px-6 pb-6 pt-3 sm:max-h-full sm:max-w-[440px] sm:rounded-[16px] sm:px-7 sm:pb-7 sm:pt-6"
       >
-        {/* The handle is the instruction: a bar you can grab, only where dragging is
-            what the surface does. */}
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-black/15 sm:hidden" />
+        {/* The handle is the instruction: a bar you can grab, and the only place the
+            sheet listens for a drag. `touch-none` keeps the browser from claiming the
+            gesture as a scroll before framer sees it. */}
+        <div
+          onPointerDown={(e) => drag.start(e)}
+          className="mx-auto -mt-1 mb-3 flex h-6 w-16 cursor-grab touch-none items-center justify-center active:cursor-grabbing sm:hidden"
+        >
+          <div className="h-1 w-10 rounded-full bg-black/15" />
+        </div>
 
         <div className="mb-5 flex items-start justify-between">
           <div>
