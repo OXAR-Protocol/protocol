@@ -73,7 +73,7 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
     .filter((r): r is NonNullable<typeof r> => !!r);
 
   // One currency, so one balance: the dollars already in the wallet.
-  const payAsset = assets.find((a) => a.chain === "solana" && a.mint === USDC_MINT) ?? null;
+  const payAsset = assets.find((a) => a.mint === USDC_MINT) ?? null;
   const budget = payAsset ? spendableUsd(payAsset) : 0;
 
   const buy = async (amounts: Record<string, number>) => {

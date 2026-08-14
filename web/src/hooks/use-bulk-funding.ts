@@ -39,13 +39,6 @@ export function useBulkFunding() {
       if (usdAmount <= 0) return 0;
       // Already the settlement currency — nothing to convert, nothing to lose.
       if (payAsset.mint === USDC_MINT) return usdAmount;
-      if (payAsset.chain !== "solana") {
-        throw new UserFacingError(
-          "Paying from another chain takes a couple of minutes to arrive, so it can't fund " +
-            "several purchases at once yet. Buy them one at a time, or pay with something on Solana.",
-        );
-      }
-
       let payBase = usdToBase(payAsset, usdAmount);
       const maxSpend = spendableBase(payAsset);
       if (maxSpend <= BigInt(0)) throw new UserFacingError(`Not enough ${payAsset.symbol} after network fees`);

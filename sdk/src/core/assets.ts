@@ -3,19 +3,21 @@ import { toBaseUnits } from "./units";
 /** Native SOL wrapped-mint sentinel (used as the asset id for SOL). */
 export const SOL_MINT = "So11111111111111111111111111111111111111112";
 
-/** A wallet holding, valued in USD. `amount` is in base units. */
+/** A wallet holding, valued in USD. `amount` is in base units.
+ *
+ *  Solana only, and stated in the type rather than checked at every call site: the
+ *  account IS a Solana wallet, nothing builds an asset on another chain, and the six
+ *  `chain === "solana"` filters that used to guard against it were all always true.
+ *  Sending money TO another chain is a property of the destination, not of a holding. */
 export interface WalletAsset {
-  /** Asset id: Solana mint, or EVM token contract (native sentinel for ETH/etc.). */
+  /** Solana mint. */
   mint: string;
   symbol: string;
   decimals: number;
   amount: bigint;
   uiAmount: number;
   usdValue: number;
-  /** Chain the asset lives on — drives the deposit router (direct/swap vs bridge). */
-  chain: "solana" | "ethereum";
-  /** Alchemy network id (EVM only), e.g. "base-mainnet" — needed for bridge quotes. */
-  network?: string;
+  chain: "solana";
   logo?: string;
 }
 
@@ -34,12 +36,11 @@ export interface DasResult {
 /** Jupiter Price v3: `{ [mint]: { usdPrice } }`. */
 export type PriceMap = Record<string, { usdPrice?: number } | undefined>;
 
-/** Stable id unique across chains. Native EVM coins (ETH/POL) share one mint —
- *  the zero sentinel — on every network, so we key on (chain, network, mint).
- *  Used for picker keys and pay-asset selection; keying by mint alone collides
- *  (e.g. ETH on Base vs Arbitrum) and could bridge from the wrong network. */
+/** Stable id for a holding. One chain, so the mint is the whole answer — it used to
+ *  key on (chain, network, mint) because native ETH shares one sentinel mint across
+ *  five networks, and picking the wrong one could bridge from the wrong chain. */
 export function assetUid(a: WalletAsset): string {
-  return `${a.chain}:${a.network ?? ""}:${a.mint}`;
+  return a.mint;
 }
 
 const DUST_USD = 0.01;

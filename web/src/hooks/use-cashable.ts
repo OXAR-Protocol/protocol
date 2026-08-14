@@ -59,7 +59,7 @@ export function useCashable(): { items: Cashable[]; loading: boolean } {
 
   const items = useMemo(() => {
     const coins: Cashable[] = assets
-      .filter((a) => a.chain === "solana" && a.mint !== USDC_MINT)
+      .filter((a) => a.mint !== USDC_MINT)
       .map((a) => ({
         kind: "coin" as const,
         key: `coin:${a.mint}`,

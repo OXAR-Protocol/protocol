@@ -7,7 +7,7 @@ import type { WalletAsset } from "@oxar/sdk";
 // Resolve a fallback logo (CoinGecko) at most once per token, shared across all
 // icon instances. `null` means "looked, found nothing" — render the monogram.
 const fallbackCache = new Map<string, string | null>();
-const keyOf = (a: WalletAsset) => `${a.chain}:${a.network ?? ""}:${a.mint}`;
+const keyOf = (a: WalletAsset) => a.mint;
 
 async function resolveFallback(asset: WalletAsset): Promise<string | null> {
   const k = keyOf(asset);
@@ -19,7 +19,6 @@ async function resolveFallback(asset: WalletAsset): Promise<string | null> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chain: asset.chain,
-        network: asset.network,
         mint: asset.mint,
         symbol: asset.symbol,
       }),

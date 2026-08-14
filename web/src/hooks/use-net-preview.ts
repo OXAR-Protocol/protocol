@@ -25,7 +25,7 @@ export function useNetPreview(params: {
   productDecimals: number;
 }): NetPreview {
   const { payAsset, usdAmount, productMint, productDecimals } = params;
-  const isDirect = payAsset?.chain === "solana" && payAsset.mint === productMint;
+  const isDirect = payAsset?.mint === productMint;
   const kind: NetPreview["kind"] = !payAsset || isDirect ? "direct" : "swap";
 
   const [state, setState] = useState<Omit<NetPreview, "kind">>({ netUsdc: null, quoting: false });

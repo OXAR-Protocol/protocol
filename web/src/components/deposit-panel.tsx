@@ -76,7 +76,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   // turned into these, which is a separate, explicit act — money never moves
   // sideways on its own.
   const payAsset = useMemo(
-    () => solAssets.find((a) => a.chain === "solana" && a.mint === USDC_MINT) ?? null,
+    () => solAssets.find((a) => a.mint === USDC_MINT) ?? null,
     [solAssets],
   );
   const free = payAsset
