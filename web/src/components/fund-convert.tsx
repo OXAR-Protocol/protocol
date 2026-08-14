@@ -2,67 +2,71 @@
 
 import { useState } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import Link from "next/link";
 
-import { formatUsdAmount, spendableUsd, type WalletAsset } from "@oxar/sdk";
+import { formatUsdAmount } from "@oxar/sdk";
 
 import { AmountKeypad } from "@/components/amount-keypad";
 import { AnimatedAmount } from "@/components/animated-amount";
+import { AssetIcon } from "@/components/asset-icon";
 import { SheetRow } from "@/components/sheet-row";
 import { TokenIcon } from "@/components/token-icon";
-import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useBulkFunding } from "@/hooks/use-bulk-funding";
-import { useSolanaContext } from "@/providers/solana-provider";
-import { koraEnabled } from "@/lib/gas/kora";
+import { useBulkTrade } from "@/hooks/use-bulk-trade";
+import { useCashable, MIN_CASH_USD, type Cashable } from "@/hooks/use-cashable";
 import { toFriendlyError } from "@/lib/yield";
-import { USDC_MINT } from "@/lib/constants";
 import { useT, localizeError } from "@/lib/i18n";
 
-/** Below this the swap costs more in spread than it returns in dollars. */
-const MIN_CONVERT_USD = 1;
 const FRACTIONS = [0.25, 0.5, 1] as const;
 
 /**
- * Other money, made spendable.
+ * Turning anything you hold into dollars.
  *
  * Coins used to double as a way to pay: the buy panel would swap whatever you held
  * on the way into a purchase. That hid a trade inside a purchase. Now buying spends
- * dollars only, and this is the one place a coin becomes dollars — a deliberate act,
- * on an amount you choose rather than the whole balance.
+ * dollars only, and this is where everything else becomes dollars — a loose coin by
+ * a swap, a position by selling it. Two different roads, one question, so one list:
+ * asked "what can I turn into money", the honest answer is all of it.
  *
- * What ISN'T here: anything you bought. A position is sold on its own page, where
- * the price it's worth, what it cost you and the spread out are all on screen. The
- * same swap run from a list of coins would be a second, blinder way to sell.
+ * The amount is yours to choose. It used to convert whole balances on a single tap,
+ * which is a decision made for someone rather than by them.
  */
 export function FundConvert({ onConverted }: { onConverted: () => void }) {
   const { t } = useT();
-  const { assets, loading, refresh } = useWalletAssets();
+  const { items, loading } = useCashable();
   const { fundUsdc, converting } = useBulkFunding();
-  const { isExternal } = useSolanaContext();
-  const [picked, setPicked] = useState<WalletAsset | null>(null);
+  const bulk = useBulkTrade();
+  const [picked, setPicked] = useState<Cashable | null>(null);
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const reserveGas = !koraEnabled() || isExternal;
-  const coins = assets
-    .filter((a) => a.chain === "solana" && a.mint !== USDC_MINT)
-    .map((a) => ({ asset: a, usd: spendableUsd(a, reserveGas) }))
-    .filter((c) => c.usd >= MIN_CONVERT_USD)
-    .sort((a, b) => b.usd - a.usd);
-
-  const available = picked ? spendableUsd(picked, reserveGas) : 0;
+  const busy = converting || bulk.state === "running";
+  const available = picked?.usd ?? 0;
   const typed = Number(amount);
-  const ready = Number.isFinite(typed) && typed >= MIN_CONVERT_USD && typed <= available;
+  const ready = Number.isFinite(typed) && typed >= MIN_CASH_USD && typed <= available;
 
-  const convert = async () => {
+  const run = async () => {
     if (!picked || !ready) return;
     setError(null);
     try {
-      await fundUsdc(picked, typed);
-      await refresh();
+      if (picked.kind === "coin") {
+        await fundUsdc(picked.asset, typed);
+      } else {
+        // The same sale the asset's own page runs — one implementation, so cost
+        // basis and the earnings view can't disagree about what left.
+        const [outcome] = await bulk.run([
+          {
+            kind: "sell",
+            id: picked.view.id,
+            shares: picked.view.shares,
+            valueUsd: picked.usd,
+            amountUsd: typed,
+          },
+        ]);
+        if (outcome && !outcome.ok) throw new Error(outcome.error ?? "Sale failed");
+      }
       onConverted();
     } catch (e) {
-      console.error("Converting to dollars failed:", e);
+      console.error("Turning into dollars failed:", e);
       setError(toFriendlyError(e));
     }
   };
@@ -75,7 +79,7 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
         <button
           type="button"
           onClick={() => setPicked(null)}
-          disabled={converting}
+          disabled={busy}
           className="mb-4 inline-flex items-center gap-1.5 text-[13px] lowercase text-black/40 transition hover:text-black disabled:opacity-40"
         >
           <ArrowLeft size={13} strokeWidth={1.5} />
@@ -87,7 +91,7 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
           <AnimatedAmount value={amount} />
         </p>
         <p className="mt-2 flex items-center justify-center gap-2 text-[12px] text-black/45">
-          <TokenIcon asset={picked} className="h-5 w-5 shrink-0 rounded-full" />
+          <Icon item={picked} size={20} />
           {t("convert.available", { value: `$${formatUsdAmount(available)}`, sym: picked.symbol })}
         </p>
 
@@ -110,11 +114,11 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
 
         <button
           type="button"
-          onClick={convert}
-          disabled={!ready || converting}
+          onClick={run}
+          disabled={!ready || busy}
           className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3.5 text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-25"
         >
-          {converting && <Loader2 size={14} className="animate-spin" />}
+          {busy && <Loader2 size={14} className="animate-spin" />}
           {t("convert.action", { sym: picked.symbol })}
         </button>
 
@@ -128,21 +132,24 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
     <>
       <p className="mb-3 text-[13px] leading-snug text-black/50">{t("convert.hint")}</p>
 
-      {coins.length === 0 ? (
+      {items.length === 0 ? (
         <p className="text-[13px] leading-snug text-black/50">{t("convert.nothing")}</p>
       ) : (
         <div className="flex flex-col gap-2">
-          {coins.map(({ asset, usd }) => (
+          {items.map((item) => (
             <SheetRow
-              key={asset.mint}
-              leading={<TokenIcon asset={asset} className="h-10 w-10 shrink-0 rounded-full" />}
-              title={asset.symbol}
-              body={`${Number(asset.uiAmount.toPrecision(4))} ${asset.symbol}`}
+              key={item.key}
+              leading={<Icon item={item} size={40} />}
+              title={item.symbol}
+              body={item.detail}
+              badge={item.kind === "position" ? t("convert.position") : undefined}
               trailing={
-                <span className="shrink-0 text-[14px] tabular-nums text-black">${formatUsdAmount(usd)}</span>
+                <span className="shrink-0 text-[14px] tabular-nums text-black">
+                  ${formatUsdAmount(item.usd)}
+                </span>
               }
               onClick={() => {
-                setPicked(asset);
+                setPicked(item);
                 setAmount("");
                 setError(null);
               }}
@@ -150,15 +157,16 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
           ))}
         </div>
       )}
-
-      {/* Where the rest of it is. Someone looking for the ONyc they bought is right
-          to expect it in a list of what they hold — it just isn't sold from here. */}
-      <p className="mt-4 text-[11px] leading-snug text-black/40">
-        {t("convert.positionsElsewhere")}{" "}
-        <Link href="/you" className="underline decoration-black/20 underline-offset-2 hover:text-black">
-          {t("convert.positionsLink")}
-        </Link>
-      </p>
     </>
+  );
+}
+
+/** A coin wears its token logo; a position wears the source's. */
+function Icon({ item, size }: { item: Cashable; size: number }) {
+  const cls = size >= 40 ? "h-10 w-10 shrink-0 rounded-full" : "h-5 w-5 shrink-0 rounded-full";
+  return item.kind === "coin" ? (
+    <TokenIcon asset={item.asset} className={cls} />
+  ) : (
+    <AssetIcon src={item.logo} label={item.symbol} size={size} className="shrink-0" />
   );
 }
