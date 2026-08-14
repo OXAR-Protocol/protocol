@@ -5,8 +5,7 @@ import { useCallback, useState } from "react";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
 import { getProvider, toBaseUnits, toFriendlyError, UserFacingError } from "@/lib/yield";
-import { chooseDepositPath } from "@/lib/yield/deposit-path";
-import { getSwapQuote, buildSwapTx, deserializeSwapTx, priceImpactTooHigh, spendableBase, type WalletAsset } from "@oxar/sdk";
+import { chooseDepositPath, getSwapQuote, buildSwapTx, deserializeSwapTx, priceImpactTooHigh, spendableBase, type WalletAsset } from "@oxar/sdk";
 import { trackEvent } from "@/lib/track";
 
 export type DepositStatus = "idle" | "swapping" | "depositing";
@@ -30,7 +29,7 @@ export function useUniversalDeposit(providerId: string) {
       if (usdAmount <= 0) return BigInt(0);
 
       const productMint = provider.asset.toBase58();
-      const path = chooseDepositPath({ payMint: payAsset.mint, payChain: payAsset.chain, productMint });
+      const path = chooseDepositPath({ payMint: payAsset.mint, productMint });
 
       setError(null);
       try {
@@ -42,7 +41,8 @@ export function useUniversalDeposit(providerId: string) {
           return amount;
         }
 
-        if (path === "swap") {
+        // Not direct, so: swap into the product's asset first.
+        {
           // USD → pay-asset base units, reserving SOL for fees.
           const price = payAsset.usdValue / payAsset.uiAmount;
           const payUi = usdAmount / price;
@@ -90,8 +90,6 @@ export function useUniversalDeposit(providerId: string) {
           return depositAmount;
         }
 
-        // path === "bridge" — handled by useBridgeDeposit, not here.
-        throw new UserFacingError("Cross-chain deposits are coming soon");
       } catch (e) {
         console.error("Universal deposit failed:", e);
         setError(toFriendlyError(e));

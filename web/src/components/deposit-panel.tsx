@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
 import { AnimatePresence } from "framer-motion";
 
 import { AmountQuickPicks } from "@/components/amount-quick-picks";
@@ -11,7 +10,7 @@ import { DepositConfirm } from "@/components/deposit-confirm";
 import { ExitCostNotice } from "@/components/exit-cost-notice";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
-import { useDeposit } from "@/hooks/use-deposit";
+import { useUniversalDeposit } from "@/hooks/use-universal-deposit";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
@@ -48,7 +47,8 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const { t } = useT();
   const lower = verb.toLowerCase();
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
-  const { depositWith, busy, status, error } = useDeposit(view.id);
+  const { depositWith, status, error } = useUniversalDeposit(view.id);
+  const busy = status !== "idle";
   const busyLabel = busy ? t(`status.${status}` as "status.working") : null;
   // Apple Pay / card path — funds fresh USDC via Privy's on-ramp, then buys.
   // Works with no crypto in the wallet (the whole point), so it's independent

@@ -56,6 +56,7 @@ __exportStar(require("./core/units"), exports);
 __exportStar(require("./core/fetch-retry"), exports);
 __exportStar(require("./core/assets"), exports);
 __exportStar(require("./core/delora"), exports);
+__exportStar(require("./core/deposit-path"), exports);
 __exportStar(require("./core/paybis"), exports);
 __exportStar(require("./core/card-coverage"), exports);
 __exportStar(require("./core/wallet-deltas"), exports);
