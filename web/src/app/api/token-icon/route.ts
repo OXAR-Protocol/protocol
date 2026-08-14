@@ -1,25 +1,16 @@
 import { NextResponse } from "next/server";
 
-// Resolve a token logo from CoinGecko when our primary sources (DAS / Jupiter /
-// Alchemy) have none or a dead URL. Keeps any CoinGecko key off the client and
-// caches results per server instance so we never hammer the rate limit.
+// Resolve a token logo from CoinGecko when our primary sources (DAS / Jupiter) have
+// none or a dead URL. Keeps any CoinGecko key off the client and caches results per
+// server instance so we never hammer the rate limit.
+//
+// Solana only. It used to branch on chain and look contracts up per EVM platform,
+// for wallet assets that could be on Base or Arbitrum — those balances stopped being
+// read when the app went Solana-only, so every request that reaches this arrives with
+// a Solana mint.
 
 const CG = "https://api.coingecko.com/api/v3";
-// Trim the (otherwise ~130KB) coin payload down to just the image.
-const SLIM =
-  "localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false";
 
-// Alchemy network id → CoinGecko asset-platform id.
-const PLATFORM: Record<string, string> = {
-  "eth-mainnet": "ethereum",
-  "base-mainnet": "base",
-  "arb-mainnet": "arbitrum-one",
-  "opt-mainnet": "optimistic-ethereum",
-  "matic-mainnet": "polygon-pos",
-};
-// Native EVM coin symbol → CoinGecko coin id.
-const NATIVE_ID: Record<string, string> = { ETH: "ethereum", POL: "matic-network", MATIC: "matic-network" };
-const EVM_NATIVE = "0x0000000000000000000000000000000000000000";
 
 // Cache resolved icons (and misses, as null) for the instance lifetime.
 const cache = new Map<string, string | null>();
@@ -35,13 +26,13 @@ async function cgImage(path: string): Promise<string | null> {
 }
 
 export async function POST(req: Request) {
-  let body: { chain?: string; network?: string; mint?: string; symbol?: string };
+  let body: { chain?: string; network?: string; mint?: string };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
-  const { chain, network, mint, symbol } = body;
+  const { chain, network, mint } = body;
   if (typeof mint !== "string" || !mint) {
     return NextResponse.json({ error: "mint required" }, { status: 400 });
   }
@@ -51,17 +42,7 @@ export async function POST(req: Request) {
 
   let icon: string | null = null;
   try {
-    if (chain === "ethereum") {
-      if (mint === EVM_NATIVE) {
-        const id = NATIVE_ID[(symbol ?? "ETH").toUpperCase()] ?? "ethereum";
-        icon = await cgImage(`/coins/${id}?${SLIM}`);
-      } else {
-        const platform = PLATFORM[network ?? ""] ?? "ethereum";
-        icon = await cgImage(`/coins/${platform}/contract/${mint}`);
-      }
-    } else {
-      icon = await cgImage(`/coins/solana/contract/${mint}`);
-    }
+    icon = await cgImage(`/coins/solana/contract/${mint}`);
   } catch {
     icon = null;
   }

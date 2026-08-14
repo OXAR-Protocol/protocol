@@ -8,6 +8,7 @@ export * from "./core/units";
 export * from "./core/fetch-retry";
 export * from "./core/assets";
 export * from "./core/delora";
+export * from "./core/deposit-path";
 export * from "./core/paybis";
 export * from "./core/card-coverage";
 export * from "./core/wallet-deltas";
