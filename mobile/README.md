@@ -9,11 +9,14 @@ deploy.
 
 ## How the web app knows it's in the app
 
-`appendUserAgent: "OXARApp"` in `capacitor.config.json`. The WebView loads the same URL
-a browser does, so nothing else distinguishes them, and some things should differ:
-confirming a trade is a press-and-hold here (a thumb slips; a mouse doesn't) and a
-plain click on the web. The web reads it in `useIsNativeApp`, which also accepts the
-injected `Capacitor` global so an older build of the app still answers correctly.
+`appendUserAgent: "OXARApp"` in `capacitor.config.json` — the WebView loads the same URL
+a browser does, so nothing else distinguishes them. Read in `useHoldsToConfirm`, along
+with the injected `Capacitor` global.
+
+It is a SECOND opinion there, not the main one. Confirming a trade takes a press-and-hold
+under a thumb and a click under a mouse, and "are we in the shell" turned out not to
+answer that: signing in with a wallet opens the app inside Phantom's own browser, which
+is neither our WebView nor Safari. The primary check is `pointer: coarse`.
 
 Changing this file needs a rebuild of the shell — the user agent is baked in at build
 time, not served.
