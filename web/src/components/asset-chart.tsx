@@ -115,8 +115,9 @@ export function AssetChart({ mint }: { mint: string }) {
         </div>
       </div>
 
-      {/* Full width on a phone — the page's padding stops at the chart's edge. */}
-      <div className="-mx-5 flex h-56 items-center justify-center sm:mx-0">
+      {/* Full width on a phone — the page's padding stops at the chart's edge, and
+          the dot field marks this band as the one place data is drawn. */}
+      <div className="dot-field -mx-5 flex h-56 items-center justify-center sm:mx-0">
         {loading ? (
           <Loader2 className="animate-spin text-ink/40" size={18} />
         ) : closes.length > 1 ? (
