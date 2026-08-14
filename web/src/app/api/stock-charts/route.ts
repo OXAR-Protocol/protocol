@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { XSTOCKS } from "@/lib/yield/xstocks";
-import { GOLD } from "@/lib/yield/gold";
+import { METALS } from "@/lib/yield/metals-catalog";
 import { fetchWithRetry } from "@oxar/sdk";
 
 // Batched price-history for the price-exposure card sparklines (stocks + gold).
@@ -33,7 +33,7 @@ export async function GET() {
     return NextResponse.json({ charts: cache.charts });
   }
   const to = Date.now();
-  const mints = [...XSTOCKS.map((s) => s.mint), ...GOLD.map((g) => g.mint)];
+  const mints = [...XSTOCKS.map((s) => s.mint), ...METALS.map((m) => m.mint)];
   const entries = await Promise.all(
     mints.map(async (mint) => [mint, await closesFor(mint, to)] as const),
   );

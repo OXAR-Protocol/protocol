@@ -162,6 +162,16 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
     facts: [{ label: "backed by", value: "physical gold (1 token ≈ 1 oz)" }, { label: "issuer", value: "Tether" }],
   },
 
+  "silver-dominion": {
+    about: "Dominion Silver (SILV) — one troy ounce of physical silver per token, held in allocated vault storage. Silver is the cheaper entry into a metal: an ounce costs a fraction of gold, so a small amount still buys a whole one. It pays no interest, so what you hold is the metal's price.",
+    category: "commodity · silver",
+    facts: [
+      { label: "backed by", value: "physical silver (1 token ≈ 1 oz)" },
+      { label: "issuer", value: "Dominion" },
+      { label: "can be frozen", value: "yes — the issuer can freeze and move this token" },
+    ],
+  },
+
   // ── Yield sources ───────────────────────────────────────
   "jupiter-lend-usdc": {
     about: "Your dollars are lent out on Jupiter Lend, Solana's largest lending market, to borrowers who post collateral. You earn the interest they pay. Withdraw any time.",

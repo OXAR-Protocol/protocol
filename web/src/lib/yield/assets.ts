@@ -1,10 +1,10 @@
 import { isXStock } from "./xstocks";
-import { isGold } from "./gold";
+import { isMetal } from "./metals-catalog";
 
 /**
  * A price-exposure asset (tokenized stock or commodity) shown in a buy/sell
  * section: holdings are valued at market price, P&L = value − cost basis, no APY.
- * Both `XStockMeta` and `GoldMeta` satisfy this shape, so one section component
+ * Both `XStockMeta` and `MetalMeta` satisfy this shape, so one section component
  * renders either catalog.
  */
 export interface AssetMeta {
@@ -19,5 +19,5 @@ export interface AssetMeta {
 
 /** True for price-exposure holdings (stocks + commodities) vs yield-bearing sources. */
 export function isPriceExposure(id: string): boolean {
-  return isXStock(id) || isGold(id);
+  return isXStock(id) || isMetal(id);
 }

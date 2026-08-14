@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { netInvestedFromSwaps } from "@/lib/earnings/swaps";
 import { heliusApiKey, fetchEnhancedHistory } from "@/lib/helius/history";
 import { XSTOCKS } from "@/lib/yield/xstocks";
-import { GOLD } from "@/lib/yield/gold";
+import { METALS } from "@/lib/yield/metals-catalog";
 import { CASH_MINTS, JL_USDC, JL_USDT } from "@/lib/yield/position-mints";
 
 // On-chain cost-basis proxy. Reads the wallet's parsed transaction history from
@@ -29,7 +29,7 @@ const SOURCES: { id: string; heldMint: string }[] = [
   { id: "jupiter-lend-usdc", heldMint: JL_USDC },
   { id: "jupiter-lend-usdt", heldMint: JL_USDT },
   ...XSTOCKS.map((s) => ({ id: s.id, heldMint: s.mint })),
-  ...GOLD.map((g) => ({ id: g.id, heldMint: g.mint })),
+  ...METALS.map((m) => ({ id: m.id, heldMint: m.mint })),
 ];
 // NOTE: Kamino (klend) is NOT here yet — it's obligation-based (no transferable receipt
 // token in the wallet), so the held-mint attribution can't see it. It needs

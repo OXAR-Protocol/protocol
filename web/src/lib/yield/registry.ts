@@ -19,7 +19,7 @@ import { ondoUsdyProvider } from "./ondo";
 import { mapleSyrupProvider } from "./maple";
 import { onreOnycProvider } from "./onre";
 import { xstockProviders } from "./xstocks";
-import { goldProviders } from "./gold";
+import { metalProviders } from "./metals";
 import type { YieldProvider } from "./types";
 
 /**
@@ -33,7 +33,7 @@ export const PROVIDERS: readonly YieldProvider[] = [
   mapleSyrupProvider,
   onreOnycProvider,
   ...xstockProviders,
-  ...goldProviders,
+  ...metalProviders,
 ];
 
 export function getProvider(id: string): YieldProvider | undefined {

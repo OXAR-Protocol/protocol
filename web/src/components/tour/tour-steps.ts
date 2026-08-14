@@ -44,7 +44,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     // The three section headings, not the three full lists — a hole per compact
     // label reads as "there are these kinds here"; holes around the lists would
     // just be the page again, undimmed.
-    anchor: ["catalog", "catalog-stocks", "catalog-gold"],
+    anchor: ["catalog", "catalog-stocks", "catalog-metals"],
     titleKey: "tour.catalog.title",
     bodyKey: "tour.catalog.body",
   },

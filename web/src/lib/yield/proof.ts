@@ -45,6 +45,13 @@ const ISSUER: Record<string, { issuer?: string; backing?: string }> = {
     issuer: "https://gold.tether.to",
     backing: XAUT_BACKING,
   },
+  // Dominion's site is the `external_url` in SILV's own on-chain metadata, so the link
+  // is the issuer's claim about itself, not our guess. No backing row: they describe
+  // "audited vault storage" but publish no attestation page we could open — under this
+  // file's rule that is a claim we don't make on their behalf.
+  "silver-dominion": {
+    issuer: "https://dominion.market",
+  },
   "jupiter-lend-usdc": { issuer: "https://jup.ag/lend" },
   "jupiter-lend-usdt": { issuer: "https://jup.ag/lend" },
 };

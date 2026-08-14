@@ -18,7 +18,7 @@ import { useLiveBalances } from "@/hooks/use-live-balances";
 import { useFeature } from "@/hooks/use-features";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { isXStock } from "@/lib/yield/xstocks";
-import { isGold } from "@/lib/yield/gold";
+import { isMetal } from "@/lib/yield/metals-catalog";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -60,7 +60,7 @@ export function PositionsSection() {
   const held = allHeld.filter((v) => {
     if (filter === "all") return true;
     if (filter === "stocks") return isXStock(v.id);
-    if (filter === "gold") return isGold(v.id);
+    if (filter === "metals") return isMetal(v.id);
     return !isPriceExposure(v.id);
   });
   const toggleSelected = (id: string) =>

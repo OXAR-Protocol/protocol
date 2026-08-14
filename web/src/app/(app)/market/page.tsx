@@ -16,7 +16,7 @@ import { SourceCard } from "@/components/source-card";
 import { groupProviderViews, pickTarget, fromBaseUnits } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { XSTOCKS } from "@/lib/yield/xstocks";
-import { GOLD } from "@/lib/yield/gold";
+import { METALS } from "@/lib/yield/metals-catalog";
 import { AssetSection } from "@/components/asset-section";
 import { TopMoversCarousel } from "@/components/top-movers-carousel";
 import { PickSetProvider } from "@/components/pick-set";
@@ -232,14 +232,14 @@ export default function YieldPage() {
         layout={layout}
       />
 
-      {/* Tokenized commodities — physical gold (not a security; no geoblock) */}
+      {/* Tokenized commodities — physical metal (not a security; no geoblock) */}
       <AssetSection
-        catalog={GOLD}
-        title={t("yield.goldTitle")}
+        catalog={METALS}
+        title={t("yield.metalsTitle")}
         badge="physical"
         kind="Commodity"
-        note="physical gold · tokenized"
-        tourAnchor="catalog-gold"
+        note="physical metal · tokenized"
+        tourAnchor="catalog-metals"
         layout={layout}
       />
 
