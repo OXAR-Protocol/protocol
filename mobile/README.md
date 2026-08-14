@@ -7,6 +7,17 @@ whole Next.js app as-is. `www/` is only an offline fallback splash.
 This folder is **isolated from `web/`** — it does not touch the web build or the Vercel
 deploy.
 
+## How the web app knows it's in the app
+
+`appendUserAgent: "OXARApp"` in `capacitor.config.json`. The WebView loads the same URL
+a browser does, so nothing else distinguishes them, and some things should differ:
+confirming a trade is a press-and-hold here (a thumb slips; a mouse doesn't) and a
+plain click on the web. The web reads it in `useIsNativeApp`, which also accepts the
+injected `Capacitor` global so an older build of the app still answers correctly.
+
+Changing this file needs a rebuild of the shell — the user agent is baked in at build
+time, not served.
+
 ## Prerequisites (one-time)
 
 - **Xcode** (full app, from the Mac App Store — ~7 GB) for iOS.

@@ -299,10 +299,8 @@ export function AllocationSheet({
             biggest single act in the app, and it sits under a thumb that has just
             been scrolling a list. */}
         <SwipeToConfirm
-          label={t("confirm.hold", {
-            verb: t(mode === "sell" ? "alloc.confirmSell" : "alloc.confirmBuy", {
-              usd: `$${formatUsdAmount(allocated)}`,
-            }),
+          label={t(mode === "sell" ? "alloc.confirmSell" : "alloc.confirmBuy", {
+            usd: `$${formatUsdAmount(allocated)}`,
           })}
           busyLabel={progress ?? undefined}
           busy={busy}
