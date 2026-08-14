@@ -45,8 +45,7 @@ export function SendSent({
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-        <p className="mt-4 text-[10px] lowercase tracking-[0.2em] text-black/40">{t("send.sent")}</p>
-        <p className="mt-2 text-[36px] font-medium leading-none tracking-[-0.02em] tabular-nums text-black">
+        <p className="mt-5 text-[36px] font-medium leading-none tracking-[-0.02em] tabular-nums text-black">
           {amount} <span className="text-[20px] text-black/45">{symbol}</span>
         </p>
 

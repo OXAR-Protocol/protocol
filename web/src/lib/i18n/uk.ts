@@ -511,7 +511,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "send.token.arrivesAs": "Через мережі ходять лише гроші. Що б ви не обрали, прийде як {sym} у {chain}.",
   "send.token.noneForChain": "У гаманці немає нічого, що доїде до {chain} — доїдуть долари, USDT або SOL.",
   "send.label": "Надіслати / Вивести",
-  "send.sent": "Надіслано ✓",
+  "send.sent": "Надіслано",
   "send.youSend": "Ти надсилаєш",
   "send.loading": "Завантаження…",
   "send.noAssets": "Нема чого надсилати.",

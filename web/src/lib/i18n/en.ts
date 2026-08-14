@@ -542,7 +542,7 @@ export const en = {
   "send.token.arrivesAs": "Only money makes the crossing. Whatever you pick arrives as {sym} on {chain}.",
   "send.token.noneForChain": "Nothing in the wallet can travel to {chain} — dollars, USDT or SOL can.",
   "send.label": "Send / Withdraw",
-  "send.sent": "Sent ✓",
+  "send.sent": "Sent",
   "send.youSend": "You send",
   "send.loading": "Loading…",
   "send.noAssets": "No assets to send.",
