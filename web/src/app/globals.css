@@ -140,10 +140,22 @@ input[type="number"] {
 
 /* App-wide paper texture — a warm near-white base with a barely-there dot grain,
    à la Backyard. Cards stay white so they lift off it subtly. */
+/* The page itself is plain. The grain used to run under every screen, which makes it
+   wallpaper — you stop seeing it, and it flattens the one place it could have meant
+   something. It now belongs to a single band (see `.dot-field`), the way fomo puts
+   it behind the chart and nowhere else. */
 .app-texture {
   background-color: var(--page);
-  background-image: radial-gradient(rgba(var(--grain), 0.012) 1px, transparent 1px);
-  background-size: 8px 8px;
+}
+
+/* A field of dots for ONE section — the chart, where it reads as graph paper rather
+   than as texture. Slightly stronger than the old page-wide value, because it is now
+   a deliberate surface instead of a whisper nobody notices. */
+.dot-field {
+  background-image: radial-gradient(rgba(var(--grain), 0.06) 1px, transparent 1px);
+  background-size: 14px 14px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
 }
 
 /* Safe-area insets — needed because the Capacitor shell draws edge-to-edge under the

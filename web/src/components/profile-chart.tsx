@@ -76,8 +76,10 @@ export function ProfileChart({
         </div>
       </div>
 
-      {/* Full-bleed on a phone: the page's own padding stops at the chart's edge. */}
-      <div className="mt-4 -mx-5 sm:mx-0">
+      {/* Full-bleed on a phone: the page's own padding stops at the chart's edge. The
+          dot field lives here and nowhere else — behind data it reads as graph paper,
+          everywhere else it was just wallpaper. */}
+      <div className="dot-field mt-4 -mx-5 sm:mx-0">
         {loading ? (
           <div className="flex h-[150px] items-center justify-center text-ink/25">
             <Loader2 size={16} className="animate-spin" />
