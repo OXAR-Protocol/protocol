@@ -15,15 +15,19 @@
 }
 
 [data-theme="dark"] {
-  --paper: #141414;
+  /* Not black. Near-black reads as a hole in the screen, and cards sitting on it
+     have nothing to lift off — the depth in a good dark theme comes from the GAP
+     between the page and what's on it, not from how dark either one is. So: a page
+     a few points off black with a cold cast, and a card clearly above it. */
+  --paper: #1a1b20;
   --ink: #f4f4f5;
-  --page: #0b0b0b;
+  --page: #0f1014;
   /* The brand violet is unreadable on black at its light-theme value — same hue,
      lifted until it carries. */
   --brand: #a78bfa;
   --profit: #34d399;
   --loss: #f87171;
-  --scrim: 11, 11, 11;
+  --scrim: 15, 16, 20;
   --grain: 255, 255, 255;
 }
 
