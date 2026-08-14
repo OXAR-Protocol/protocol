@@ -19,9 +19,8 @@ describe("assetLogoSrc", () => {
     expect(missing.map((p) => p.id)).toEqual([]);
   });
 
-  it("serves stock logos by ticker, sharing one file across rails", () => {
+  it("serves stock logos by ticker", () => {
     expect(assetLogoSrc("xstock-aapl")).toBe("/logos/xstocks/AAPL.png");
-    expect(assetLogoSrc("xstock-aapl-ondo")).toBe("/logos/xstocks/AAPL.png");
   });
 
   it("has no logo for an id that isn't a source", () => {

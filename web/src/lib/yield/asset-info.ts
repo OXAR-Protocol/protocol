@@ -41,11 +41,6 @@ export const ASSET_INFO: Record<string, AssetInfo> = {
     category: "us stock · technology",
     facts: [{ label: "sector", value: "consumer electronics & services" }, { label: "hq", value: "Cupertino, USA" }],
   },
-  "xstock-aapl-ondo": {
-    about: "The same Apple exposure, issued by Ondo Global Markets and traded against live US-market liquidity instead of an onchain pool. Buys and sells follow US market hours.",
-    category: "us stock · technology",
-    facts: [{ label: "issuer", value: "Ondo Global Markets" }, { label: "trading", value: "US market hours" }],
-  },
   "xstock-msft": {
     about: "Microsoft makes Windows, Office and the Azure cloud, and owns a big stake in OpenAI. Sells mostly to businesses, so revenue is steady and recurring.",
     category: "us stock · technology",

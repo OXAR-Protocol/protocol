@@ -13,12 +13,11 @@ export const runtime = "nodejs";
 const DEFAULT_INSIDER_EMAILS = ["daniel.l@oxar.app"];
 
 /** Keys on for insiders, in code so the switch carries a commit (see below).
- *  ondo-stocks:    Delora/DFlow stock rail pilot (AAPLon) — real-money pass pending.
  *  paybis-cashout: card cash-out via Paybis. Works, but no arrival tracking yet.
  *  paybis-topup:   card top-up via Paybis. Pulled back from everyone: it cannot serve
  *                  the users who need it most — Ukrainian banks decline the charge —
  *                  so offering it broadly was a choice that mostly ends in a decline. */
-const DEFAULT_INSIDER_FEATURES = ["ondo-stocks", "paybis-cashout", "paybis-topup"];
+const DEFAULT_INSIDER_FEATURES = ["paybis-cashout", "paybis-topup"];
 
 
 
