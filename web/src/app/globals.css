@@ -15,19 +15,25 @@
 }
 
 [data-theme="dark"] {
-  /* Not black. Near-black reads as a hole in the screen, and cards sitting on it
-     have nothing to lift off — the depth in a good dark theme comes from the GAP
-     between the page and what's on it, not from how dark either one is. So: a page
-     a few points off black with a cold cast, and a card clearly above it. */
-  --paper: #1a1b20;
-  --ink: #f4f4f5;
-  --page: #0f1014;
+  /* Darker AND more readable are not the same dial.
+     
+     Readability on a dark screen comes from the INK, not from the background: every
+     secondary line in the app is a fraction of it (`text-ink/45`, `/40`), so lifting
+     the ink to pure white lifts all of them at once. That buys the room to take the
+     page down.
+     
+     What must NOT close is the gap between page and card — depth here is that gap,
+     and a card that melts into the background is what makes a dark theme feel flat
+     no matter how black it gets. Both drop by the same amount, so it holds. */
+  --paper: #16171c;
+  --ink: #ffffff;
+  --page: #0a0b0e;
   /* The brand violet is unreadable on black at its light-theme value — same hue,
      lifted until it carries. */
   --brand: #a78bfa;
   --profit: #34d399;
   --loss: #f87171;
-  --scrim: 15, 16, 20;
+  --scrim: 10, 11, 14;
   --grain: 255, 255, 255;
 }
 
