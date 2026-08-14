@@ -471,8 +471,12 @@ input[type="number"] {
   padding-top: env(safe-area-inset-top);
 }
 
+/* ADDS the inset to whatever padding an element already has, instead of replacing
+   it. As a plain `padding-bottom` this rule sits after Tailwind's utilities and won
+   the cascade, so a sheet asking for `pb-6` got 0 wherever there is no notch — every
+   desktop browser — and its last line sat flush against the bottom edge. */
 .safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: calc(var(--pb, 0px) + env(safe-area-inset-bottom));
 }
 
 /* Absolutely-positioned children resolve `top` against the padding *edge*, so a
