@@ -62,19 +62,10 @@ export declare const SOL_FEE_RESERVE: bigint;
  * which stranded small balances: 0.0047 SOL (~$0.35) read as nothing spendable.
  */
 export declare const SOL_SPONSORED_RESERVE: bigint;
-/** USD of native coin to keep for the ORIGIN-CHAIN network fee when paying with a
- *  native EVM coin (ETH/POL). Without it the bridge tx spends the whole balance and
- *  the wallet rejects it ("insufficient ETH"). Heuristic per network — L1 gas is
- *  dear and volatile, L2s are cheap. (Precise per-tx gas estimation is a follow-up.)
- *  Keys are Alchemy network ids (see bridge/delora `NETWORK_CHAIN_ID`). */
-export declare const EVM_GAS_RESERVE_USD: Record<string, number>;
-export declare const DEFAULT_EVM_GAS_RESERVE_USD = 0.5;
 /** Base units of an asset that may be spent, leaving gas for the network fee.
  *  - Native SOL: reserve SOL for the tx fee (skipped for Privy-sponsored wallets
  *    via `reserveGas = false`, which keep only the wrapped-SOL rent).
- *  - Native EVM coin (ETH/POL): reserve gas for the origin-chain (bridge) fee —
- *    always, since the EVM origin tx is never sponsored.
- *  - ERC-20 / SPL tokens: pay gas in a separate coin → spend the full balance. */
+ *  - SPL tokens: gas is paid in SOL → spend the full balance. */
 export declare function spendableBase(asset: WalletAsset, reserveGas?: boolean): bigint;
 /** What the asset is worth to spend, in dollars — its balance net of the gas reserve
  *  `spendableBase` keeps back. The dollar figure every buying screen quotes. */

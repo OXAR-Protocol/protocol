@@ -39,7 +39,6 @@ export {
 export { buildKoraLegacyTx, rebuildV0WithKora } from "./core/kora-tx";
 export * from "./core/units";
 export * from "./core/fetch-retry";
-export * from "./core/evm-assets";
 export * from "./core/assets";
 export * from "./core/delora";
 export * from "./core/paybis";
@@ -53,7 +52,6 @@ export * from "./core/exit-cost";
 export * from "./core/tx-delta";
 export * from "./core/format";
 export * from "./core/allocations";
-export * from "./core/origin-gas";
 export * from "./core/activity-stats";
 export * from "./core/format-date";
 export * from "./core/portfolio-history";

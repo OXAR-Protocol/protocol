@@ -1,5 +1,4 @@
 import { toBaseUnits } from "./units";
-import { EVM_NATIVE_SENTINEL } from "./evm-assets";
 
 /** Native SOL wrapped-mint sentinel (used as the asset id for SOL). */
 export const SOL_MINT = "So11111111111111111111111111111111111111112";
@@ -61,42 +60,16 @@ export const SOL_FEE_RESERVE = BigInt(10_000_000); // 0.01 SOL
  */
 export const SOL_SPONSORED_RESERVE = BigInt(2_300_000); // 0.0023 SOL
 
-/** USD of native coin to keep for the ORIGIN-CHAIN network fee when paying with a
- *  native EVM coin (ETH/POL). Without it the bridge tx spends the whole balance and
- *  the wallet rejects it ("insufficient ETH"). Heuristic per network — L1 gas is
- *  dear and volatile, L2s are cheap. (Precise per-tx gas estimation is a follow-up.)
- *  Keys are Alchemy network ids (see bridge/delora `NETWORK_CHAIN_ID`). */
-export const EVM_GAS_RESERVE_USD: Record<string, number> = {
-  "eth-mainnet": 1.5, // Ethereum L1 — expensive, spikes
-  "matic-mainnet": 0.05,
-  "base-mainnet": 0.1,
-  "arb-mainnet": 0.1,
-  "opt-mainnet": 0.1,
-};
-export const DEFAULT_EVM_GAS_RESERVE_USD = 0.5;
-
-/** True for a native EVM coin (ETH/POL) — pays its own origin-chain gas. */
-function isNativeEvmCoin(asset: WalletAsset): boolean {
-  return asset.chain === "ethereum" && asset.mint === EVM_NATIVE_SENTINEL;
-}
-
 /** Base units of an asset that may be spent, leaving gas for the network fee.
  *  - Native SOL: reserve SOL for the tx fee (skipped for Privy-sponsored wallets
  *    via `reserveGas = false`, which keep only the wrapped-SOL rent).
- *  - Native EVM coin (ETH/POL): reserve gas for the origin-chain (bridge) fee —
- *    always, since the EVM origin tx is never sponsored.
- *  - ERC-20 / SPL tokens: pay gas in a separate coin → spend the full balance. */
+ *  - SPL tokens: gas is paid in SOL → spend the full balance. */
 export function spendableBase(asset: WalletAsset, reserveGas = true): bigint {
   if (asset.mint === SOL_MINT) {
     // Sponsored (embedded) wallets pay no fee, but a native-SOL swap still needs the
     // small wrapped-SOL rent → keep a reduced reserve; external cover the full fee too.
     const reserve = reserveGas ? SOL_FEE_RESERVE : SOL_SPONSORED_RESERVE;
     const max = asset.amount - reserve;
-    return max > BigInt(0) ? max : BigInt(0);
-  }
-  if (isNativeEvmCoin(asset)) {
-    const usd = EVM_GAS_RESERVE_USD[asset.network ?? ""] ?? DEFAULT_EVM_GAS_RESERVE_USD;
-    const max = asset.amount - usdToBase(asset, usd);
     return max > BigInt(0) ? max : BigInt(0);
   }
   return asset.amount;

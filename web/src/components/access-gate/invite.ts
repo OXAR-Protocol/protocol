@@ -18,9 +18,6 @@ export const INVITE_CODES = [
   "oro-gold",
 ] as const;
 
-/** Back-compat single-code export (first code). Prefer `isValidInviteCode`. */
-export const INVITE_CODE = INVITE_CODES[0];
-
 /** Is this `?code` one of our valid invite codes? */
 export function isValidInviteCode(code: string | null | undefined): code is string {
   return !!code && (INVITE_CODES as readonly string[]).includes(code);

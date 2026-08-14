@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { ArrowDownToLine, ArrowUpFromLine, Clock, Wallet } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, Clock } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
@@ -107,5 +107,3 @@ function Figure({ label, value }: { label: string; value: number | null }) {
   );
 }
 
-/** Re-exported so the wallet icon has something to render beside the menu item. */
-export const MoneyIcon = Wallet;

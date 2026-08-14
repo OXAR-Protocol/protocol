@@ -1,13 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DEFAULT_EVM_GAS_RESERVE_USD = exports.EVM_GAS_RESERVE_USD = exports.SOL_SPONSORED_RESERVE = exports.SOL_FEE_RESERVE = exports.SOL_MINT = void 0;
+exports.SOL_SPONSORED_RESERVE = exports.SOL_FEE_RESERVE = exports.SOL_MINT = void 0;
 exports.assetUid = assetUid;
 exports.spendableBase = spendableBase;
 exports.spendableUsd = spendableUsd;
 exports.usdToBase = usdToBase;
 exports.buildWalletAssets = buildWalletAssets;
 const units_1 = require("./units");
-const evm_assets_1 = require("./evm-assets");
 /** Native SOL wrapped-mint sentinel (used as the asset id for SOL). */
 exports.SOL_MINT = "So11111111111111111111111111111111111111112";
 /** Stable id unique across chains. Native EVM coins (ETH/POL) share one mint —
@@ -33,40 +32,16 @@ exports.SOL_FEE_RESERVE = BigInt(10000000); // 0.01 SOL
  * which stranded small balances: 0.0047 SOL (~$0.35) read as nothing spendable.
  */
 exports.SOL_SPONSORED_RESERVE = BigInt(2300000); // 0.0023 SOL
-/** USD of native coin to keep for the ORIGIN-CHAIN network fee when paying with a
- *  native EVM coin (ETH/POL). Without it the bridge tx spends the whole balance and
- *  the wallet rejects it ("insufficient ETH"). Heuristic per network — L1 gas is
- *  dear and volatile, L2s are cheap. (Precise per-tx gas estimation is a follow-up.)
- *  Keys are Alchemy network ids (see bridge/delora `NETWORK_CHAIN_ID`). */
-exports.EVM_GAS_RESERVE_USD = {
-    "eth-mainnet": 1.5, // Ethereum L1 — expensive, spikes
-    "matic-mainnet": 0.05,
-    "base-mainnet": 0.1,
-    "arb-mainnet": 0.1,
-    "opt-mainnet": 0.1,
-};
-exports.DEFAULT_EVM_GAS_RESERVE_USD = 0.5;
-/** True for a native EVM coin (ETH/POL) — pays its own origin-chain gas. */
-function isNativeEvmCoin(asset) {
-    return asset.chain === "ethereum" && asset.mint === evm_assets_1.EVM_NATIVE_SENTINEL;
-}
 /** Base units of an asset that may be spent, leaving gas for the network fee.
  *  - Native SOL: reserve SOL for the tx fee (skipped for Privy-sponsored wallets
  *    via `reserveGas = false`, which keep only the wrapped-SOL rent).
- *  - Native EVM coin (ETH/POL): reserve gas for the origin-chain (bridge) fee —
- *    always, since the EVM origin tx is never sponsored.
- *  - ERC-20 / SPL tokens: pay gas in a separate coin → spend the full balance. */
+ *  - SPL tokens: gas is paid in SOL → spend the full balance. */
 function spendableBase(asset, reserveGas = true) {
     if (asset.mint === exports.SOL_MINT) {
         // Sponsored (embedded) wallets pay no fee, but a native-SOL swap still needs the
         // small wrapped-SOL rent → keep a reduced reserve; external cover the full fee too.
         const reserve = reserveGas ? exports.SOL_FEE_RESERVE : exports.SOL_SPONSORED_RESERVE;
         const max = asset.amount - reserve;
-        return max > BigInt(0) ? max : BigInt(0);
-    }
-    if (isNativeEvmCoin(asset)) {
-        const usd = exports.EVM_GAS_RESERVE_USD[asset.network ?? ""] ?? exports.DEFAULT_EVM_GAS_RESERVE_USD;
-        const max = asset.amount - usdToBase(asset, usd);
         return max > BigInt(0) ? max : BigInt(0);
     }
     return asset.amount;
