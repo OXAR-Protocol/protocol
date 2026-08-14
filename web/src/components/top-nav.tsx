@@ -23,7 +23,7 @@ export function TopNav() {
       <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5">
         <Link
           href={authenticated ? "/you" : "/market"}
-          className="shrink-0 text-[22px] font-bold leading-none text-black"
+          className="shrink-0 text-[22px] font-bold leading-none text-ink"
           style={{ fontFamily: DISPLAY }}
         >
           OXAR.
@@ -41,7 +41,7 @@ export function TopNav() {
                   key={tab.href}
                   href={tab.href}
                   className={`lowercase text-[15px] transition-colors ${
-                    isActive ? "text-black" : "text-black/40 hover:text-black"
+                    isActive ? "text-ink" : "text-ink/40 hover:text-ink"
                   }`}
                 >
                   {tab.label}
@@ -56,7 +56,7 @@ export function TopNav() {
             ) : (
               <button
                 onClick={signIn}
-                className="rounded-full bg-black px-5 py-2 lowercase text-[14px] font-medium text-white transition-colors hover:bg-black/85"
+                className="rounded-full bg-ink px-5 py-2 lowercase text-[14px] font-medium text-paper transition-colors hover:bg-ink/85"
               >
                 sign in
               </button>

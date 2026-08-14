@@ -86,7 +86,7 @@ export function HoverChart({ values, format, height = 220, className, fill, labe
       {frac !== null && (
         <>
           <div
-            className="pointer-events-none absolute inset-y-0 w-px bg-black/25"
+            className="pointer-events-none absolute inset-y-0 w-px bg-ink/25"
             style={{ left: `${leftPct}%` }}
           />
           <div
@@ -94,11 +94,11 @@ export function HoverChart({ values, format, height = 220, className, fill, labe
             style={{ left: `${leftPct}%`, top: `${topPct}%` }}
           />
           <div
-            className="pointer-events-none absolute whitespace-nowrap rounded-[6px] bg-black px-2 py-1 text-[11px] tabular-nums text-white"
+            className="pointer-events-none absolute whitespace-nowrap rounded-[6px] bg-ink px-2 py-1 text-[11px] tabular-nums text-paper"
             style={{ left: `${leftPct}%`, top: `${topPct}%`, transform: `translate(${tx}, ${ty})` }}
           >
             {format(value)}
-            {label && <span className="ml-1.5 text-white/50">{label}</span>}
+            {label && <span className="ml-1.5 text-paper/50">{label}</span>}
           </div>
         </>
       )}

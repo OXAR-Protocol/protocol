@@ -40,5 +40,5 @@ export function TrustLine({ poolId, sourceId }: { poolId?: string; sourceId: str
         : null;
 
   if (!fact) return null;
-  return <p className="mt-1 text-[11px] tabular-nums text-black/40">{fact}</p>;
+  return <p className="mt-1 text-[11px] tabular-nums text-ink/40">{fact}</p>;
 }

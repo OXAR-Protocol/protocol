@@ -35,11 +35,11 @@ export function FundCardAmount({
 
   return (
     <div>
-      <p className="text-center text-[11px] lowercase tracking-wide text-black/40">
+      <p className="text-center text-[11px] lowercase tracking-wide text-ink/40">
         {t("fund.card.amount")}
       </p>
-      <p className="mt-1 text-center text-[2.6rem] font-light leading-none tracking-[-0.03em] text-black">
-        <span className={value === "" ? "text-black/25" : "text-black/45"}>$</span>
+      <p className="mt-1 text-center text-[2.6rem] font-light leading-none tracking-[-0.03em] text-ink">
+        <span className={value === "" ? "text-ink/25" : "text-ink/45"}>$</span>
         <AnimatedAmount value={value} />
       </p>
 
@@ -51,8 +51,8 @@ export function FundCardAmount({
             onClick={() => onChange(String(preset))}
             className={`rounded-full border py-2 text-[13px] tabular-nums transition ${
               value === String(preset)
-                ? "border-black bg-black text-white"
-                : "border-black/15 text-black/60 hover:border-black/40 hover:text-black"
+                ? "border-ink bg-ink text-paper"
+                : "border-ink/15 text-ink/60 hover:border-ink/40 hover:text-ink"
             }`}
           >
             ${preset}
@@ -66,7 +66,7 @@ export function FundCardAmount({
 
       {/* Their line, and it's true: debit clears where credit gets blocked for
           anything that looks like crypto. */}
-      <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-black/40">
+      <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-ink/40">
         <Info size={12} strokeWidth={1.5} />
         {t("fund.card.debitHint")}
       </p>
@@ -75,7 +75,7 @@ export function FundCardAmount({
         type="button"
         onClick={onContinue}
         disabled={belowMin}
-        className="mt-4 w-full rounded-full bg-black px-4 py-3.5 text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-30"
+        className="mt-4 w-full rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-30"
       >
         {belowMin ? t("fund.card.min", { min: String(min) }) : t("fund.card.continue")}
       </button>

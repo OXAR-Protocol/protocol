@@ -27,19 +27,19 @@ export default function AssetPage() {
     <div className="pt-2">
       <button
         onClick={() => router.back()}
-        className="lowercase text-[14px] text-black/40 transition-colors hover:text-black"
+        className="lowercase text-[14px] text-ink/40 transition-colors hover:text-ink"
       >
         ← back
       </button>
 
       {loading && !view ? (
         <div className="flex justify-center py-24">
-          <Loader2 className="animate-spin text-black/30" size={24} />
+          <Loader2 className="animate-spin text-ink/30" size={24} />
         </div>
       ) : !view ? (
         <div className="py-24 text-center">
           <p className="text-[18px]">asset not found</p>
-          <p className="mt-1 lowercase text-[14px] text-black/45">this asset isn&apos;t in the catalog.</p>
+          <p className="mt-1 lowercase text-[14px] text-ink/45">this asset isn&apos;t in the catalog.</p>
         </div>
       ) : (
         <AssetDetail

@@ -48,7 +48,7 @@ export function AssetCard({
     ) : null;
 
   const priceEl = (
-    <p className="text-lg text-black tabular-nums">
+    <p className="text-lg text-ink tabular-nums">
       {price ? `$${price.price.toFixed(2)}` : "—"}
     </p>
   );
@@ -59,10 +59,10 @@ export function AssetCard({
     </p>
   ) : null;
   const ownedEl = holdings > 0 ? (
-    <p className="mt-1 text-[11px] text-[#3c05c7]/80 tabular-nums">
+    <p className="mt-1 text-[11px] text-[var(--brand)]/80 tabular-nums">
       you own ${holdings.toFixed(2)}
       {typeof earned === "number" && (
-        <span className={earned >= 0 ? "text-emerald-400/70" : "text-red-400/70"}>
+        <span className={earned >= 0 ? "text-emerald-400/70" : "text-loss/70"}>
           {" · "}
           {earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)}
         </span>
@@ -83,8 +83,8 @@ export function AssetCard({
       <div className="min-w-0">
         {/* Truncate, don't spill: without this a ticker in a squeezed column ran
             out from under itself and printed over the price beside it. */}
-        <p className="truncate text-base text-black">{asset.token}</p>
-        <p className="mt-0.5 truncate text-xs text-black/45">{asset.name}</p>
+        <p className="truncate text-base text-ink">{asset.token}</p>
+        <p className="mt-0.5 truncate text-xs text-ink/45">{asset.name}</p>
       </div>
     </div>
   );
@@ -95,7 +95,7 @@ export function AssetCard({
         type="button"
         disabled={!openable}
         onClick={() => openable && onOpen()}
-        className="group relative isolate overflow-hidden p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition-colors text-left disabled:opacity-50 min-h-[120px] flex flex-col justify-between"
+        className="group relative isolate overflow-hidden p-5 rounded-[8px] border border-ink/10 bg-paper hover:border-ink/30 transition-colors text-left disabled:opacity-50 min-h-[120px] flex flex-col justify-between"
       >
         <BanknoteBg seed={asset.id} />
         <div className="min-w-0">{head}</div>

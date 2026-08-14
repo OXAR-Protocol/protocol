@@ -74,7 +74,7 @@ export function TokenIcon({ asset, className }: { asset: WalletAsset; className:
   if (!src)
     return (
       <span
-        className={`${className} flex items-center justify-center rounded-full bg-black/[0.06] text-[10px] font-semibold uppercase text-black/50`}
+        className={`${className} flex items-center justify-center rounded-full bg-ink/[0.06] text-[10px] font-semibold uppercase text-ink/50`}
       >
         {asset.symbol.slice(0, 1)}
       </span>

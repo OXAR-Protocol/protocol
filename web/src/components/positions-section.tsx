@@ -90,18 +90,18 @@ export function PositionsSection() {
 
       {loading ? (
         <div className="flex justify-center p-8">
-          <Loader2 className="animate-spin text-black/40" size={24} />
+          <Loader2 className="animate-spin text-ink/40" size={24} />
         </div>
       ) : held.length === 0 ? (
-        <div className="relative overflow-hidden rounded-[8px] border border-black/10 bg-white p-8 text-center">
+        <div className="relative overflow-hidden rounded-[8px] border border-ink/10 bg-paper p-8 text-center">
           {/* An empty state is where a photo earns its place: nothing to read yet, and
               the picture says what the words are for. */}
           <PhotoBg src="/art/coin-stacking.webp" scrim="center" position="object-right" opacity="opacity-25" />
-          <p className="relative text-base text-black">{t("pile.empty.title")}</p>
-          <p className="relative mt-1 text-xs text-black/45">{t("pile.empty.body")}</p>
+          <p className="relative text-base text-ink">{t("pile.empty.title")}</p>
+          <p className="relative mt-1 text-xs text-ink/45">{t("pile.empty.body")}</p>
           <Link
             href="/market"
-            className="relative mt-4 inline-flex items-center gap-1.5 rounded-full bg-black px-4 py-2 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85"
+            className="relative mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[14px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85"
           >
             {t("pile.explore")}
             <ArrowUpRight size={14} strokeWidth={1.5} />

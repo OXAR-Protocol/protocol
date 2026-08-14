@@ -5,6 +5,7 @@ import { LogOut } from "lucide-react";
 
 import { SheetShell } from "@/components/sheet-shell";
 import { LanguagePicker } from "@/components/language-picker";
+import { ThemePicker } from "@/components/theme-picker";
 import { forgetIntro } from "@/components/intro-modal";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useT } from "@/lib/i18n";
@@ -25,7 +26,10 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <SheetShell label={t("settings.label")} title={t("settings.title")} onClose={onClose}>
-      <p className="mb-3 text-[11px] lowercase tracking-wide text-black/40">{t("you.language")}</p>
+      <p className="mb-3 text-[11px] lowercase tracking-wide text-ink/40">{t("settings.appearance")}</p>
+      <ThemePicker />
+
+      <p className="mb-3 mt-6 text-[11px] lowercase tracking-wide text-ink/40">{t("you.language")}</p>
       <LanguagePicker />
 
       {/* /terms is a marketing route (see middleware.ts) that only resolves on
@@ -35,7 +39,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
         <a
           href="https://oxar.app/terms"
-          className="text-xs lowercase tracking-wide text-black/40 transition hover:text-black/60"
+          className="text-xs lowercase tracking-wide text-ink/40 transition hover:text-ink/60"
         >
           {t("you.terms")}
         </a>
@@ -48,7 +52,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
               // app layout, so this sheet can't re-trigger it directly.
               window.location.href = "/you";
             }}
-            className="text-xs lowercase tracking-wide text-black/40 transition hover:text-black/60"
+            className="text-xs lowercase tracking-wide text-ink/40 transition hover:text-ink/60"
           >
             {t("you.replayTour")}
           </button>
@@ -58,7 +62,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       {authenticated && (
         <button
           onClick={logout}
-          className="mt-6 inline-flex items-center gap-2 rounded-full border border-black/15 px-5 py-3 text-xs lowercase tracking-wide text-black/60 transition hover:border-red-500/40 hover:text-red-500"
+          className="mt-6 inline-flex items-center gap-2 rounded-full border border-ink/15 px-5 py-3 text-xs lowercase tracking-wide text-ink/60 transition hover:border-red-500/40 hover:text-loss"
         >
           <LogOut size={12} strokeWidth={1.5} />
           {t("you.signOut")}

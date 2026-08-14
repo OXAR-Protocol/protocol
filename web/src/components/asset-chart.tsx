@@ -88,13 +88,13 @@ export function AssetChart({ mint }: { mint: string }) {
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           {changePct !== null && (
-            <span className={`text-[13px] tabular-nums ${up ? "text-emerald-600" : "text-red-600"}`}>
+            <span className={`text-[13px] tabular-nums ${up ? "text-profit" : "text-loss"}`}>
               {up ? "+" : ""}
               {changePct.toFixed(2)}% · {range}
             </span>
           )}
           {lo !== null && hi !== null && (
-            <span className="text-[11px] tabular-nums text-black/40">
+            <span className="text-[11px] tabular-nums text-ink/40">
               ${lo.toFixed(2)} – ${hi.toFixed(2)} range
             </span>
           )}
@@ -106,7 +106,7 @@ export function AssetChart({ mint }: { mint: string }) {
               key={r}
               onClick={() => setRange(r)}
               className={`rounded-full px-2.5 py-1 text-[11px] lowercase tracking-wide transition ${
-                range === r ? "bg-black text-white" : "bg-black/[0.05] text-black/55 hover:text-black"
+                range === r ? "bg-ink text-paper" : "bg-ink/[0.05] text-ink/55 hover:text-ink"
               }`}
             >
               {r}
@@ -118,7 +118,7 @@ export function AssetChart({ mint }: { mint: string }) {
       {/* Full width on a phone — the page's padding stops at the chart's edge. */}
       <div className="-mx-5 flex h-56 items-center justify-center sm:mx-0">
         {loading ? (
-          <Loader2 className="animate-spin text-black/40" size={18} />
+          <Loader2 className="animate-spin text-ink/40" size={18} />
         ) : closes.length > 1 ? (
           <HoverChart
             values={closes}
@@ -126,10 +126,10 @@ export function AssetChart({ mint }: { mint: string }) {
             height={220}
             fill
             format={(v) => `$${v.toFixed(2)}`}
-            className={up ? "text-emerald-500/80" : "text-red-500/80"}
+            className={up ? "text-emerald-500/80" : "text-loss/80"}
           />
         ) : (
-          <p className="text-xs text-black/40">No price history for this range.</p>
+          <p className="text-xs text-ink/40">No price history for this range.</p>
         )}
       </div>
     </div>

@@ -38,17 +38,17 @@ export function AssetTrustStrip({ view }: { view: ProviderView }) {
   return (
     <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
       {(platform || tvl !== null) && (
-        <p className="text-[14px] text-black/55">
+        <p className="text-[14px] text-ink/55">
           {platform && (
             <>
               {platform.kind === "lent" ? `${t("trust.lentOn")} ` : `${t("trust.issuedBy")} `}
-              <span className="font-medium text-black">{platform.name}</span>
+              <span className="font-medium text-ink">{platform.name}</span>
             </>
           )}
           {platform && tvl !== null && " · "}
           {tvl !== null && (
             <>
-              <span className="font-medium text-black tabular-nums">{compactUsd(tvl)}</span>{" "}
+              <span className="font-medium text-ink tabular-nums">{compactUsd(tvl)}</span>{" "}
               {price ? t("trust.held") : t("trust.deposited")}
             </>
           )}
@@ -58,9 +58,9 @@ export function AssetTrustStrip({ view }: { view: ProviderView }) {
         {chips.map((c) => (
           <span
             key={c}
-            className="inline-flex items-center gap-1 rounded-full border border-black/10 px-3 py-1 text-[12px] lowercase tracking-wide text-black/55"
+            className="inline-flex items-center gap-1 rounded-full border border-ink/10 px-3 py-1 text-[12px] lowercase tracking-wide text-ink/55"
           >
-            <Check size={12} strokeWidth={2} className="text-[#3c05c7]" />
+            <Check size={12} strokeWidth={2} className="text-[var(--brand)]" />
             {c}
           </span>
         ))}

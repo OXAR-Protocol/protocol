@@ -79,13 +79,13 @@ export function JoinCapture() {
     <AnimatePresence>
       {show && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/40 p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="relative w-full max-w-[380px] overflow-hidden rounded-[18px] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.25)]"
+            className="relative w-full max-w-[380px] overflow-hidden rounded-[18px] bg-paper shadow-[0_20px_60px_rgba(0,0,0,0.25)]"
             initial={{ y: 24, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 24, opacity: 0 }}
@@ -94,28 +94,28 @@ export function JoinCapture() {
             <button
               onClick={dismiss}
               aria-label="Close"
-              className="absolute right-3 top-3 z-10 text-black/40 transition hover:text-black"
+              className="absolute right-3 top-3 z-10 text-ink/40 transition hover:text-ink"
             >
               <X size={18} strokeWidth={1.5} />
             </button>
 
             {/* Hero — the "money resting on a cloud" collage on a soft brand tint. */}
-            <div className="flex justify-center bg-[#3c05c7]/[0.06] px-4 pt-8">
+            <div className="flex justify-center bg-[var(--brand)]/[0.06] px-4 pt-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/join-cloud-v3.webp" alt="" className="h-60 w-auto max-w-full object-contain" />
             </div>
 
             <div className="px-6 pb-6 pt-5">
               {done ? (
-                <p className="py-6 text-center text-[15px] text-black">
+                <p className="py-6 text-center text-[15px] text-ink">
                   You&apos;re in. We&apos;ll keep you posted. 👋
                 </p>
               ) : (
                 <>
-                  <h2 className="text-[22px] font-semibold tracking-[-0.02em] text-black">
+                  <h2 className="text-[22px] font-semibold tracking-[-0.02em] text-ink">
                     You&apos;re early.
                   </h2>
-                  <p className="mt-1.5 text-[13px] leading-snug text-black/55">
+                  <p className="mt-1.5 text-[13px] leading-snug text-ink/55">
                     Drop your email — be first to know when big updates land, and we&apos;ll lock
                     in your access across devices.
                   </p>
@@ -127,18 +127,18 @@ export function JoinCapture() {
                       onKeyDown={(e) => e.key === "Enter" && submit()}
                       placeholder="you@email.com"
                       inputMode="email"
-                      className="w-full rounded-[12px] border border-black/15 px-3.5 py-3 text-[15px] outline-none placeholder:text-black/30 focus:border-black/40"
+                      className="w-full rounded-[12px] border border-ink/15 px-3.5 py-3 text-[15px] outline-none placeholder:text-ink/30 focus:border-ink/40"
                     />
                     <button
                       onClick={submit}
                       disabled={!valid || busy}
-                      className="w-full rounded-full bg-black py-3 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-40"
+                      className="w-full rounded-full bg-ink py-3 text-[14px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-40"
                     >
                       {busy ? "…" : "keep me posted"}
                     </button>
                     <button
                       onClick={dismiss}
-                      className="mt-1 text-[12px] lowercase tracking-wide text-black/40 transition hover:text-black/70"
+                      className="mt-1 text-[12px] lowercase tracking-wide text-ink/40 transition hover:text-ink/70"
                     >
                       maybe later
                     </button>

@@ -61,14 +61,14 @@ export function ProfileMoney() {
       </motion.div>
 
       <motion.section {...rise(0.1)} className="mt-10">
-        <p className="mb-3 text-xs lowercase tracking-[0.2em] text-black/40">{t("profile.positionsLabel")}</p>
+        <p className="mb-3 text-xs lowercase tracking-[0.2em] text-ink/40">{t("profile.positionsLabel")}</p>
         <PositionsSection />
       </motion.section>
 
       <motion.section {...rise(0.15)} className="mt-10" data-tour="history">
-        <p className="mb-3 text-xs lowercase tracking-[0.2em] text-black/40">{t("pile.history")}</p>
+        <p className="mb-3 text-xs lowercase tracking-[0.2em] text-ink/40">{t("pile.history")}</p>
         {loadingDays ? (
-          <div className="flex justify-center py-10 text-black/25">
+          <div className="flex justify-center py-10 text-ink/25">
             <Loader2 size={16} className="animate-spin" />
           </div>
         ) : (

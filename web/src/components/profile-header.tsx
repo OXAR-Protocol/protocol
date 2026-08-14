@@ -15,7 +15,7 @@ import { useSolanaName } from "@/hooks/use-solana-name";
 import { useT } from "@/lib/i18n";
 
 /** Four brand-adjacent plates; the address picks one, so it's the same every visit. */
-const PLATES = ["bg-[#3c05c7]", "bg-black", "bg-[#b45309]", "bg-[#065f46]"] as const;
+const PLATES = ["bg-[var(--brand)]", "bg-ink", "bg-[#b45309]", "bg-[#065f46]"] as const;
 
 function plateFor(seed: string): string {
   let hash = 0;
@@ -70,13 +70,13 @@ export function ProfileHeader() {
     <section data-tour="account">
       <div className="flex items-center gap-4">
         <span
-          className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-[24px] uppercase text-white ${plate}`}
+          className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-[24px] uppercase text-paper ${plate}`}
         >
           {name.slice(0, 1)}
         </span>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="truncate text-[clamp(22px,3vw,32px)] leading-tight tracking-[-0.03em] text-black">
+            <h1 className="truncate text-[clamp(22px,3vw,32px)] leading-tight tracking-[-0.03em] text-ink">
               {name}
             </h1>
             <EarlyRiserBadge />
@@ -89,13 +89,13 @@ export function ProfileHeader() {
               onClick={copyAddress}
               disabled={!address}
               aria-label={t("fund.copyAddress")}
-              className="mt-0.5 inline-flex max-w-full items-center gap-1.5 text-[13px] text-black/45 transition enabled:hover:text-black"
+              className="mt-0.5 inline-flex max-w-full items-center gap-1.5 text-[13px] text-ink/45 transition enabled:hover:text-ink"
             >
               <span className="truncate">{secondary}</span>
               {copied ? (
-                <Check size={12} strokeWidth={2} className="shrink-0 text-[#3c05c7]" />
+                <Check size={12} strokeWidth={2} className="shrink-0 text-[var(--brand)]" />
               ) : (
-                <Copy size={12} strokeWidth={1.5} className="shrink-0 text-black/30" />
+                <Copy size={12} strokeWidth={1.5} className="shrink-0 text-ink/30" />
               )}
             </button>
           )}
@@ -107,13 +107,13 @@ export function ProfileHeader() {
           type="button"
           onClick={() => setShowSettings(true)}
           aria-label={t("settings.title")}
-          className="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 text-black/45 transition hover:border-black/30 hover:text-black"
+          className="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink/10 text-ink/45 transition hover:border-ink/30 hover:text-ink"
         >
           <Settings size={17} strokeWidth={1.5} />
         </button>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-black/50">
+      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-ink/50">
         <Stat icon={Wallet} text={t("profile.working", { value: `$${formatUsdAmount(totalUsdc)}` })} />
         <Stat icon={Layers} text={t("profile.positions", { n: String(positionCount) })} />
         {joined && <Stat icon={Clock} text={t("profile.joined", { date: joined })} />}
@@ -130,7 +130,7 @@ export function ProfileHeader() {
 function Stat({ icon: Icon, text }: { icon: typeof Wallet; text: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <Icon size={13} strokeWidth={1.5} className="text-black/30" />
+      <Icon size={13} strokeWidth={1.5} className="text-ink/30" />
       {text}
     </span>
   );

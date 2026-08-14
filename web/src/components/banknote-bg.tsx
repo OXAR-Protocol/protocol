@@ -34,7 +34,7 @@ export function BanknoteBg({ seed, hover = false }: { seed: string; hover?: bool
         /* brand-violet glow that warms in on hover, over the banknote side */
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-12 top-1/2 -z-10 h-52 w-52 -translate-y-1/2 rounded-full bg-[#3c05c7] opacity-0 blur-3xl transition-opacity duration-300 group-hover:opacity-[0.18]"
+          className="pointer-events-none absolute -right-12 top-1/2 -z-10 h-52 w-52 -translate-y-1/2 rounded-full bg-[var(--brand)] opacity-0 blur-3xl transition-opacity duration-300 group-hover:opacity-[0.18]"
         />
       )}
     </>

@@ -50,7 +50,7 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
 
   if (days.length === 0) {
     return (
-      <div className="rounded-[12px] border border-black/10 bg-white p-8 text-center text-[13px] text-black/45">
+      <div className="rounded-[12px] border border-ink/10 bg-paper p-8 text-center text-[13px] text-ink/45">
         {t("activity.empty")}
       </div>
     );
@@ -61,15 +61,15 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
   return (
     <div className="space-y-3">
       {shown.map((d) => (
-        <div key={d.day} className="rounded-[12px] border border-black/10 bg-white">
+        <div key={d.day} className="rounded-[12px] border border-ink/10 bg-paper">
           {/* The day itself: what it closed at, and how that moved. */}
-          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-black/[0.06] px-4 py-3">
-            <span className="text-[13px] text-black">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-ink/[0.06] px-4 py-3">
+            <span className="text-[13px] text-ink">
               {d.day === today ? t("history.today") : formatDay(d.day, locale)}
             </span>
             <span className="flex items-baseline gap-2 tabular-nums">
               {d.usd !== null && (
-                <span className="text-[13px] text-black/70">${formatUsdAmount(d.usd)}</span>
+                <span className="text-[13px] text-ink/70">${formatUsdAmount(d.usd)}</span>
               )}
               {/* What the day EARNED, not how its total moved: on a day money went in,
                   the second number is mostly the deposit and reads as profit.
@@ -80,10 +80,10 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
                   fell, and on a savings app most small red numbers are that one. */}
               {d.earnedUsd !== null && !isDustUsd(Math.abs(d.earnedUsd)) && (
                 <span
-                  className={`text-[12px] ${d.earnedUsd > 0 ? "text-emerald-600" : "text-red-600"}`}
+                  className={`text-[12px] ${d.earnedUsd > 0 ? "text-profit" : "text-loss"}`}
                 >
                   {formatSignedUsd(d.earnedUsd)}{" "}
-                  <span className="text-black/40">
+                  <span className="text-ink/40">
                     {d.earnedUsd > 0
                       ? t("history.earned")
                       : Math.abs(d.costUsd ?? 0) >= Math.abs(d.marketUsd ?? 0)
@@ -98,7 +98,7 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
           {/* What was done that day. A day can have a value and no transactions —
               that's a day the market moved, which is worth seeing on its own. */}
           {d.events.length > 0 && (
-            <div className="divide-y divide-black/[0.06]">
+            <div className="divide-y divide-ink/[0.06]">
               {d.events.map((e) => {
                 const inflow = INFLOW.has(e.kind);
                 return (
@@ -107,9 +107,9 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
                     href={`https://solscan.io/tx/${e.signature}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-black/[0.02]"
+                    className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-ink/[0.02]"
                   >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-black/[0.05] text-black/45">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink/[0.05] text-ink/45">
                       {inflow ? (
                         <ArrowDownLeft size={12} strokeWidth={2} />
                       ) : (
@@ -117,20 +117,20 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
                       )}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] text-black">{e.label}</span>
+                      <span className="block truncate text-[13px] text-ink">{e.label}</span>
                       {e.units !== undefined && (
-                        <span className="block text-[11px] tabular-nums text-black/40">
+                        <span className="block text-[11px] tabular-nums text-ink/40">
                           {e.units} {e.unitPriceUsd !== undefined && `· $${formatUsdAmount(e.unitPriceUsd)} ${t("activity.each")}`}
                         </span>
                       )}
                     </span>
                     <span className="shrink-0 text-right tabular-nums">
                       {e.usd !== null && (
-                        <span className="block text-[13px] text-black/70">
+                        <span className="block text-[13px] text-ink/70">
                           {inflow ? "+" : "−"}${formatUsdAmount(e.usd)}
                         </span>
                       )}
-                      <span className="block text-[11px] text-black/35">
+                      <span className="block text-[11px] text-ink/35">
                         {formatTimeOfDay(e.timestamp, locale)}
                       </span>
                     </span>
@@ -146,7 +146,7 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
         <button
           type="button"
           onClick={() => setLimit((n) => n + PAGE)}
-          className="w-full rounded-[12px] border border-black/10 bg-white py-3 text-[12px] lowercase tracking-wide text-black/55 transition hover:border-black/30 hover:text-black"
+          className="w-full rounded-[12px] border border-ink/10 bg-paper py-3 text-[12px] lowercase tracking-wide text-ink/55 transition hover:border-ink/30 hover:text-ink"
         >
           {t("activity.showMore")}
         </button>

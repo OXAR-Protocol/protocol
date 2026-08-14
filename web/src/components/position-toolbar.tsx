@@ -47,7 +47,7 @@ export function PositionToolbar({ allHeld, filter, onFilter, layout, onLayout, s
   return (
     <>
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-xs lowercase tracking-[0.2em] text-black/40">{t("pile.positions")}</p>
+        <p className="text-xs lowercase tracking-[0.2em] text-ink/40">{t("pile.positions")}</p>
         {allHeld.length > 0 && (
           <div className="flex gap-1">
             {(
@@ -62,8 +62,8 @@ export function PositionToolbar({ allHeld, filter, onFilter, layout, onLayout, s
                 aria-label={`${mode} view`}
                 className={`rounded-[5px] border p-1.5 transition ${
                   layout === mode
-                    ? "border-black/30 text-black"
-                    : "border-black/10 text-black/45 hover:text-black/70"
+                    ? "border-ink/30 text-ink"
+                    : "border-ink/10 text-ink/45 hover:text-ink/70"
                 }`}
               >
                 <Icon size={14} strokeWidth={1.5} />
@@ -74,7 +74,7 @@ export function PositionToolbar({ allHeld, filter, onFilter, layout, onLayout, s
       </div>
 
       {showPickHint && (
-        <p className="mb-2 text-[11px] lowercase tracking-wide text-black/35">{t("bulk.hint")}</p>
+        <p className="mb-2 text-[11px] lowercase tracking-wide text-ink/35">{t("bulk.hint")}</p>
       )}
 
       {allHeld.length > 1 && (
@@ -85,7 +85,7 @@ export function PositionToolbar({ allHeld, filter, onFilter, layout, onLayout, s
               type="button"
               onClick={() => onFilter(f)}
               className={`rounded-full px-3 py-1 text-[11px] lowercase tracking-wide transition ${
-                filter === f ? "bg-black text-white" : "bg-black/[0.05] text-black/55 hover:text-black"
+                filter === f ? "bg-ink text-paper" : "bg-ink/[0.05] text-ink/55 hover:text-ink"
               }`}
             >
               {t(`pile.filter.${f}` as "pile.filter.all")}

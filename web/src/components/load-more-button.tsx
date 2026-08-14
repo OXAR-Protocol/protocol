@@ -17,7 +17,7 @@ export function LoadMoreButton({ remaining, label, onClick }: Props) {
       <button
         type="button"
         onClick={onClick}
-        className="rounded-full border border-black/25 bg-white px-5 py-2 text-[13px] lowercase tracking-wide text-black/70 shadow-sm transition hover:border-black hover:text-black"
+        className="rounded-full border border-ink/25 bg-paper px-5 py-2 text-[13px] lowercase tracking-wide text-ink/70 shadow-sm transition hover:border-ink hover:text-ink"
       >
         {label}
       </button>

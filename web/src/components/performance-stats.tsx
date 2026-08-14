@@ -45,7 +45,7 @@ export function PerformanceStats({
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/[0.06] pt-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-ink/[0.06] pt-4 sm:grid-cols-4">
         {/* What you made, not what you moved. The figure this replaced was end-minus-
             start, which a deposit inflates and a withdrawal erases — it read as profit
             and wasn't. The percentage beside it is time-weighted, so it survives a
@@ -71,7 +71,7 @@ export function PerformanceStats({
                 onClick={() => setShowBreakdown((open) => !open)}
                 aria-expanded={showBreakdown}
                 aria-label={t("history.byAsset")}
-                className="flex h-4 w-4 items-center justify-center rounded-full bg-black/[0.05] text-black/40 transition hover:text-black"
+                className="flex h-4 w-4 items-center justify-center rounded-full bg-ink/[0.05] text-ink/40 transition hover:text-ink"
               >
                 <ChevronDown
                   size={10}
@@ -115,13 +115,13 @@ function Stat({
 }) {
   return (
     <div>
-      <p className="flex items-center gap-1.5 text-[10px] lowercase tracking-wide text-black/40">
+      <p className="flex items-center gap-1.5 text-[10px] lowercase tracking-wide text-ink/40">
         {label}
         {action}
       </p>
-      <p className={`mt-0.5 text-[15px] tabular-nums ${negative ? "text-red-600" : "text-black"}`}>{value}</p>
-      {hint && <p className="text-[11px] tabular-nums text-black/35">{hint}</p>}
-      {note && <p className="text-[10px] lowercase tabular-nums text-black/30">{note}</p>}
+      <p className={`mt-0.5 text-[15px] tabular-nums ${negative ? "text-loss" : "text-ink"}`}>{value}</p>
+      {hint && <p className="text-[11px] tabular-nums text-ink/35">{hint}</p>}
+      {note && <p className="text-[10px] lowercase tabular-nums text-ink/30">{note}</p>}
     </div>
   );
 }

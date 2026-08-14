@@ -103,9 +103,9 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
       <SheetShell label={t("fund.label")} title={t("fund.title")} onClose={onClose}>
         {way === null ? (
           <>
-            <p className="mb-4 text-[13px] text-black/50">
+            <p className="mb-4 text-[13px] text-ink/50">
               {t("fund.free")}:{" "}
-              <span className="tabular-nums text-black/80">
+              <span className="tabular-nums text-ink/80">
                 {balance === null ? "…" : `$${formatUsdAmount(balance)}`}
               </span>
             </p>
@@ -138,7 +138,7 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
               />
             </div>
 
-            <p className="mt-5 flex items-start gap-2 text-[11px] leading-snug text-black/40">
+            <p className="mt-5 flex items-start gap-2 text-[11px] leading-snug text-ink/40">
               <Banknote size={13} strokeWidth={1.5} className="mt-px shrink-0" />
               {t("fund.timing")}
             </p>
@@ -148,7 +148,7 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={() => setWay(way === "crypto" ? "network" : null)}
-              className="mb-4 inline-flex items-center gap-1.5 text-[13px] lowercase text-black/40 transition hover:text-black"
+              className="mb-4 inline-flex items-center gap-1.5 text-[13px] lowercase text-ink/40 transition hover:text-ink"
             >
               <ArrowLeft size={13} strokeWidth={1.5} />
               {t("fund.back")}

@@ -135,7 +135,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
   if (confirming && payAsset) {
     return (
-      <div className="p-4 rounded-[6px] border border-black/10 bg-white">
+      <div className="p-4 rounded-[6px] border border-ink/10 bg-paper">
         <DepositConfirm
           verb={verb}
           usdAmount={usdAmount}
@@ -156,37 +156,37 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
 
   return (
-    <div className="p-4 rounded-[6px] border border-black/10 bg-white">
+    <div className="p-4 rounded-[6px] border border-ink/10 bg-paper">
       {/* Label the field as the PAYMENT method — without this the prominent "USDC"
           reads as if the user is buying USDC, not paying with it for the asset. */}
-      <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">{t("deposit.payWith")}</p>
+      <p className="text-[10px] lowercase tracking-wide text-ink/40 mb-2">{t("deposit.payWith")}</p>
 
       {/* One currency, so the field says the amount and nothing else. */}
       <div className="mt-2">
         {assetsLoading ? (
-          <p className="text-xs text-black/40">{t("deposit.loadingAssets")}</p>
+          <p className="text-xs text-ink/40">{t("deposit.loadingAssets")}</p>
         ) : emptyWallet ? (
-          <div className="rounded-[12px] border border-black/10 p-4 text-center">
-            <p className="text-[13px] leading-snug text-black/55">{t("deposit.emptyWallet")}</p>
+          <div className="rounded-[12px] border border-ink/10 p-4 text-center">
+            <p className="text-[13px] leading-snug text-ink/55">{t("deposit.emptyWallet")}</p>
             <button
               type="button"
               onClick={() => setShowFund(true)}
-              className="mt-3 w-full rounded-full bg-black px-4 py-2.5 text-[13px] lowercase tracking-wide text-white transition hover:bg-black/85"
+              className="mt-3 w-full rounded-full bg-ink px-4 py-2.5 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
             >
               {t("wallet.fund")}
             </button>
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-2 rounded-[12px] border border-black/10 px-4 py-3 transition-colors focus-within:border-black/30">
-              <span className="text-[22px] text-black/35">$</span>
+            <div className="flex items-center gap-2 rounded-[12px] border border-ink/10 px-4 py-3 transition-colors focus-within:border-ink/30">
+              <span className="text-[22px] text-ink/35">$</span>
               <input
                 type="text"
                 inputMode="decimal"
                 value={effectiveAmount}
                 onChange={(e) => setAmount(normalizeDecimalInput(e.target.value))}
                 placeholder="0.00"
-                className="w-full bg-transparent text-[22px] tabular-nums text-black outline-none placeholder:text-black/25"
+                className="w-full bg-transparent text-[22px] tabular-nums text-ink outline-none placeholder:text-ink/25"
               />
             </div>
 
@@ -201,17 +201,17 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
         {/* Quantity shortcut — type how many units to buy; the pay amount fills in. */}
         {canQuantity && payAsset && (
-          <div className="mt-2 flex items-center justify-between gap-2 rounded-[10px] border border-black/10 px-3 py-2">
-            <span className="text-[11px] lowercase tracking-wide text-black/40">{lower}</span>
+          <div className="mt-2 flex items-center justify-between gap-2 rounded-[10px] border border-ink/10 px-3 py-2">
+            <span className="text-[11px] lowercase tracking-wide text-ink/40">{lower}</span>
             <input
               type="text"
               inputMode="decimal"
               value={sharesValue ? Number(sharesValue.toPrecision(4)) : ""}
               onChange={(e) => onSharesChange(normalizeDecimalInput(e.target.value))}
               placeholder="0"
-              className="min-w-0 flex-1 bg-transparent text-right text-[15px] text-black outline-none placeholder:text-black/25"
+              className="min-w-0 flex-1 bg-transparent text-right text-[15px] text-ink outline-none placeholder:text-ink/25"
             />
-            <span className="shrink-0 text-[12px] text-black/45">{unitLabel}</span>
+            <span className="shrink-0 text-[12px] text-ink/45">{unitLabel}</span>
           </div>
         )}
 
@@ -220,7 +220,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
       {/* Net received */}
       {payAsset && usdAmount > 0 && (
-        <p className="mt-2 text-[11px] text-black/45">
+        <p className="mt-2 text-[11px] text-ink/45">
           {view.heldMint ? (
             // Swap-and-hold: show what you'll actually hold + the swap cost.
             swapIn.quoting
@@ -264,7 +264,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             // yet — no reason to freeze this unrelated path. Once it's actually
             // buying (signing+sending), the two shouldn't race the same wallet.
             disabled={busy || !payAsset || usdAmount <= 0 || short > 0}
-            className="mt-3 w-full px-4 py-3 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
+            className="mt-3 w-full px-4 py-3 rounded-full bg-ink text-paper text-[14px] font-medium lowercase tracking-wide hover:bg-ink/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
           >
             {verb}
           </button>
@@ -275,12 +275,12 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             <button
               type="button"
               onClick={() => setShowFund(true)}
-              className="mt-2 w-full text-center text-[11px] leading-snug text-black/50 underline decoration-black/20 underline-offset-2 transition hover:text-black"
+              className="mt-2 w-full text-center text-[11px] leading-snug text-ink/50 underline decoration-black/20 underline-offset-2 transition hover:text-ink"
             >
               {t("deposit.short", { value: `$${short.toFixed(2)}` })}
             </button>
           ) : error ? (
-            <p className="mt-3 text-xs text-red-400 text-center">{localizeError(error, t)}</p>
+            <p className="mt-3 text-xs text-loss text-center">{localizeError(error, t)}</p>
           ) : null}
         </>
       )}

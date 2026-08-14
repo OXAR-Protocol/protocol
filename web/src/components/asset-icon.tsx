@@ -23,11 +23,11 @@ export function AssetIcon({
   const radius = Math.max(8, Math.round(size * 0.26));
   const dim = { width: size, height: size, minWidth: size, borderRadius: radius };
   const tile =
-    "inline-flex shrink-0 items-center justify-center overflow-hidden bg-white ring-1 ring-black/10";
+    "inline-flex shrink-0 items-center justify-center overflow-hidden bg-paper ring-1 ring-ink/10";
 
   if (!src || failed) {
     return (
-      <span style={dim} className={`${tile} bg-black/[0.04] font-medium text-black/55 ${className}`}>
+      <span style={dim} className={`${tile} bg-ink/[0.04] font-medium text-ink/55 ${className}`}>
         <span style={{ fontSize: Math.round(size * 0.36) }}>{initials}</span>
       </span>
     );

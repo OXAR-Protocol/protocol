@@ -27,8 +27,8 @@ const money = (n: number) => `$${(n < 0.01 ? n.toFixed(4) : n.toFixed(2)).replac
 
 const Row = ({ k, v }: { k: string; v: string }) => (
   <div className="flex items-baseline justify-between gap-3 py-2">
-    <span className="lowercase text-[12px] text-black/45">{k}</span>
-    <span className="text-[13px] tabular-nums text-black text-right">{v}</span>
+    <span className="lowercase text-[12px] text-ink/45">{k}</span>
+    <span className="text-[13px] tabular-nums text-ink text-right">{v}</span>
   </div>
 );
 
@@ -70,9 +70,9 @@ export function DepositConfirm({
 
   return (
     <div>
-      <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">{t("confirm.review", { verb: verb.toLowerCase() })}</p>
+      <p className="text-[10px] lowercase tracking-wide text-ink/40 mb-2">{t("confirm.review", { verb: verb.toLowerCase() })}</p>
 
-      <div className="divide-y divide-black/5">
+      <div className="divide-y divide-ink/5">
         <Row k={t("confirm.youPay")} v={`${money(usdAmount)} · ${payAsset.symbol}`} />
         <Row k={held ? t("confirm.youllHold") : t("confirm.youllGet")} v={get} />
         {swapCost !== null && <Row k={t("confirm.swapCostOneTime")} v={`~${money(swapCost)}`} />}
@@ -80,11 +80,11 @@ export function DepositConfirm({
         <Row k={t("confirm.whereItGoes")} v={held ? t("confirm.ownWallet") : view.name} />
       </div>
 
-      <p className="mt-3 text-[11px] leading-snug text-black/45">
+      <p className="mt-3 text-[11px] leading-snug text-ink/45">
         {t("confirm.footer")}
       </p>
 
-      {error && <p className="mt-3 text-xs text-red-500 text-center">{localizeError(error, t)}</p>}
+      {error && <p className="mt-3 text-xs text-loss text-center">{localizeError(error, t)}</p>}
 
       {/* The point of no return on a screen full of numbers. On a phone that asks
           for a hold, because a thumb scrolling past a button is how accidents
@@ -98,7 +98,7 @@ export function DepositConfirm({
       <button
         onClick={onBack}
         disabled={busy}
-        className="mt-2 w-full py-2 text-[12px] lowercase tracking-wide text-black/45 hover:text-black/70 disabled:opacity-30 transition"
+        className="mt-2 w-full py-2 text-[12px] lowercase tracking-wide text-ink/45 hover:text-ink/70 disabled:opacity-30 transition"
       >
         {t("confirm.back")}
       </button>

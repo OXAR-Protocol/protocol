@@ -49,14 +49,14 @@ export function YieldGroupRow({ group, onOpen }: Props) {
             <AssetIcon src={assetLogoSrc(group.views[0]?.id ?? "")} label={group.name} size={36} />
             <div className="min-w-0">
               <div className="flex items-baseline gap-2">
-                <p className="truncate text-base text-black">{group.name}</p>
-                <span className="text-[10px] lowercase tracking-wide text-emerald-600">● live</span>
+                <p className="truncate text-base text-ink">{group.name}</p>
+                <span className="text-[10px] lowercase tracking-wide text-profit">● live</span>
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                 {group.views.map((v) => (
                   <span
                     key={v.id}
-                    className="rounded border border-black/15 px-1.5 py-0.5 text-[10px] lowercase tracking-wide text-black/55"
+                    className="rounded border border-ink/15 px-1.5 py-0.5 text-[10px] lowercase tracking-wide text-ink/55"
                   >
                     {unitLabelOf(v)}
                   </span>
@@ -65,7 +65,7 @@ export function YieldGroupRow({ group, onOpen }: Props) {
             </div>
           </div>
           {positionTotal > 0 && (
-            <p className="mt-1 text-[11px] tabular-nums text-[#3c05c7]/80">
+            <p className="mt-1 text-[11px] tabular-nums text-[var(--brand)]/80">
               you own ${positionTotal.toFixed(2)}
             </p>
           )}
@@ -81,11 +81,11 @@ export function YieldGroupRow({ group, onOpen }: Props) {
         <>
           {/* "up to" is set small so the RATE lines up with the plain rates above and
               below it, rather than pushing the whole figure left. */}
-          <p className="text-xl tabular-nums text-black">
-            <span className="text-[11px] lowercase tracking-wide text-black/40">up to </span>
+          <p className="text-xl tabular-nums text-ink">
+            <span className="text-[11px] lowercase tracking-wide text-ink/40">up to </span>
             {(group.maxApy * 100).toFixed(2)}%
           </p>
-          <p className={`text-[10px] lowercase tracking-wide ${RISK_TONE[top.riskLevel] ?? "text-black/55"}`}>
+          <p className={`text-[10px] lowercase tracking-wide ${RISK_TONE[top.riskLevel] ?? "text-ink/55"}`}>
             {RISK_LABEL[top.riskLevel] ?? top.riskLevel}
           </p>
         </>

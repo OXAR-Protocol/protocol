@@ -16,13 +16,13 @@ export function GuestActionRail() {
 
   return (
     <div className="lg:sticky lg:top-24">
-      <div className="rounded-2xl border border-black/10 bg-white/70 p-5">
+      <div className="rounded-2xl border border-ink/10 bg-paper/70 p-5">
         <p className="text-[15px] lowercase">{t("rail.guestTitle")}</p>
-        <p className="mt-1.5 text-[13px] leading-snug text-black/55">{t("rail.guestBody")}</p>
+        <p className="mt-1.5 text-[13px] leading-snug text-ink/55">{t("rail.guestBody")}</p>
         <button
           type="button"
           onClick={signIn}
-          className="mt-4 w-full rounded-full bg-black px-4 py-3 text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85"
+          className="mt-4 w-full rounded-full bg-ink px-4 py-3 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
         >
           {t("rail.guestCta")}
         </button>

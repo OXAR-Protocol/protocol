@@ -105,10 +105,10 @@ export default function YieldPage() {
         transition={{ duration: 0.5 }}
       >
         <SectionLabel>market</SectionLabel>
-        <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-black leading-[1.04] tracking-[-0.04em] lowercase">
+        <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-ink leading-[1.04] tracking-[-0.04em] lowercase">
           {t("yield.title")}
         </h1>
-        <p className="mt-3 text-sm text-black/45 max-w-lg">
+        <p className="mt-3 text-sm text-ink/45 max-w-lg">
           {t("yield.subtitle")}
         </p>
       </motion.div>
@@ -124,7 +124,7 @@ export default function YieldPage() {
         transition={{ duration: 0.5, delay: 0.05 }}
         className="mt-8 flex flex-wrap items-center gap-3"
       >
-        <p className="w-full text-[11px] lowercase tracking-wide text-black/40">
+        <p className="w-full text-[11px] lowercase tracking-wide text-ink/40">
           {t("market.filterScope")}
         </p>
         <div className="flex flex-wrap gap-2">
@@ -137,19 +137,19 @@ export default function YieldPage() {
                 title={bucket.description}
                 className={`rounded-full border px-3.5 py-1.5 text-xs lowercase tracking-wide transition ${
                   isActive
-                    ? "border-[#3c05c7]/50 bg-[#3c05c7]/[0.06] text-black"
-                    : "border-black/10 text-black/55 hover:border-black/30 hover:text-black"
+                    ? "border-[var(--brand)]/50 bg-[var(--brand)]/[0.06] text-ink"
+                    : "border-ink/10 text-ink/55 hover:border-ink/30 hover:text-ink"
                 }`}
               >
                 {bucket.label}
-                <span className={isActive ? "text-[#3c05c7]/70" : "text-black/35"}> · {APY_RANGE[bucket.id]}</span>
+                <span className={isActive ? "text-[var(--brand)]/70" : "text-ink/35"}> · {APY_RANGE[bucket.id]}</span>
               </button>
             );
           })}
           {apyBucket && (
             <button
               onClick={() => setApyBucket(null)}
-              className="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] lowercase tracking-wide text-black/40 hover:text-black"
+              className="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] lowercase tracking-wide text-ink/40 hover:text-ink"
               title="Clear filter"
             >
               <X size={11} strokeWidth={1.5} />
@@ -168,7 +168,7 @@ export default function YieldPage() {
           className="mt-10"
         >
           <div data-tour="catalog" className="flex items-center justify-between mb-3">
-            <p className="text-xs lowercase tracking-[0.2em] text-emerald-600">
+            <p className="text-xs lowercase tracking-[0.2em] text-profit">
               {t("yield.liveNow")}
             </p>
             <div className="flex items-center gap-2">
@@ -184,8 +184,8 @@ export default function YieldPage() {
                   aria-label={`${mode} view`}
                   className={`p-1.5 rounded-[5px] border transition ${
                     layout === mode
-                      ? "border-black/30 text-black"
-                      : "border-black/10 text-black/45 hover:text-black/70"
+                      ? "border-ink/30 text-ink"
+                      : "border-ink/10 text-ink/45 hover:text-ink/70"
                   }`}
                 >
                   <Icon size={14} strokeWidth={1.5} />
@@ -251,7 +251,7 @@ export default function YieldPage() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="mt-10"
         >
-          <p className="text-xs lowercase tracking-[0.2em] text-black/40 mb-3">
+          <p className="text-xs lowercase tracking-[0.2em] text-ink/40 mb-3">
             {t("yield.soonSolana")}
           </p>
           <div className="space-y-2">
@@ -271,10 +271,10 @@ export default function YieldPage() {
           className="mt-12"
         >
           <div className="flex items-baseline justify-between mb-3">
-            <p className="text-xs lowercase tracking-[0.2em] text-black/40">
+            <p className="text-xs lowercase tracking-[0.2em] text-ink/40">
               {t("yield.soonCross")}
             </p>
-            <p className="text-[10px] lowercase tracking-wide text-black/40">
+            <p className="text-[10px] lowercase tracking-wide text-ink/40">
               via Delora
             </p>
           </div>
@@ -287,14 +287,14 @@ export default function YieldPage() {
       )}
 
       {nothingMatches && (
-        <p className="mt-12 text-sm text-black/40 text-center">
+        <p className="mt-12 text-sm text-ink/40 text-center">
           {t("yield.noMatch")}
         </p>
       )}
 
-      <div className="mt-12 p-5 rounded-[8px] border border-black/10 bg-white">
-        <p className="text-sm text-black">{t("yield.nfa.title")}</p>
-        <p className="mt-1 text-xs text-black/45 leading-relaxed">
+      <div className="mt-12 p-5 rounded-[8px] border border-ink/10 bg-paper">
+        <p className="text-sm text-ink">{t("yield.nfa.title")}</p>
+        <p className="mt-1 text-xs text-ink/45 leading-relaxed">
           {t("yield.nfa.body")}
         </p>
       </div>

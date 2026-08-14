@@ -25,7 +25,7 @@ export function EarlyRiserBadge() {
   return (
     <span
       title={t("badge.earlyRiser.subtitle")}
-      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#3c05c7]/20 bg-[#3c05c7]/[0.06] px-2 py-0.5 text-[10px] lowercase tracking-wide text-[#3c05c7]"
+      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--brand)]/20 bg-[var(--brand)]/[0.06] px-2 py-0.5 text-[10px] lowercase tracking-wide text-[var(--brand)]"
     >
       <Sunrise size={11} strokeWidth={1.8} />
       {t("badge.earlyRiser.title")}

@@ -170,9 +170,9 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
       className="mt-10"
     >
       <div data-tour={tourAnchor} className="mb-3 flex items-center justify-between gap-2">
-        <p className="text-xs lowercase tracking-[0.2em] text-black/40">{title}</p>
+        <p className="text-xs lowercase tracking-[0.2em] text-ink/40">{title}</p>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] lowercase tracking-wide text-black/40">{badge}</span>
+          <span className="text-[10px] lowercase tracking-wide text-ink/40">{badge}</span>
           {/* No "most deposited" here: see the note on `deposited` above. */}
           <MarketSortSelect value={sort} onChange={setSort} withDeposited={false} />
         </div>
@@ -195,8 +195,8 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
               onClick={() => setSector(s)}
               className={`rounded-full border px-3 py-1 text-[11px] lowercase tracking-wide transition ${
                 sector === s
-                  ? "border-black bg-black text-white"
-                  : "border-black/15 text-black/55 hover:border-black/40"
+                  ? "border-ink bg-ink text-paper"
+                  : "border-ink/15 text-ink/55 hover:border-ink/40"
               }`}
             >
               {t(`sector.${s}` as "sector.all")}
@@ -206,7 +206,7 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
       )}
 
       {shown.length === 0 ? (
-        <p className="py-6 text-center text-sm text-black/40">{t("asset.search.empty")}</p>
+        <p className="py-6 text-center text-sm text-ink/40">{t("asset.search.empty")}</p>
       ) : layout === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{shown.map(card)}</div>
       ) : (

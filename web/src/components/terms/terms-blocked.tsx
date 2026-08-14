@@ -19,7 +19,7 @@ export function TermsBlocked({ onReviewTerms }: { onReviewTerms: () => void }) {
   return (
     <div
       data-no-pull
-      className="safe-top safe-bottom fixed inset-0 z-[60] flex items-center justify-center bg-white px-6 text-center text-black">
+      className="safe-top safe-bottom fixed inset-0 z-[60] flex items-center justify-center bg-paper px-6 text-center text-ink">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -28,20 +28,20 @@ export function TermsBlocked({ onReviewTerms }: { onReviewTerms: () => void }) {
         <div className="mb-6">
           <LanguageChips />
         </div>
-        <p className="text-[17px] leading-snug text-black">{t("terms.gate.blockedTitle")}</p>
-        <p className="mt-3 text-[13px] leading-relaxed text-black/50">{t("terms.gate.blockedBody")}</p>
+        <p className="text-[17px] leading-snug text-ink">{t("terms.gate.blockedTitle")}</p>
+        <p className="mt-3 text-[13px] leading-relaxed text-ink/50">{t("terms.gate.blockedBody")}</p>
 
         <button
           type="button"
           onClick={onReviewTerms}
-          className="mt-7 rounded-full bg-black px-6 py-3 text-[13px] lowercase tracking-wide text-white transition hover:bg-black/85"
+          className="mt-7 rounded-full bg-ink px-6 py-3 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
         >
           {t("terms.gate.reviewTerms")}
         </button>
         <button
           type="button"
           onClick={() => logout()}
-          className="mt-3 text-[12px] lowercase tracking-wide text-black/40 transition hover:text-black"
+          className="mt-3 text-[12px] lowercase tracking-wide text-ink/40 transition hover:text-ink"
         >
           {t("terms.gate.signOut")}
         </button>

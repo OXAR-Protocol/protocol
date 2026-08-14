@@ -104,8 +104,8 @@ export function PullToRefresh() {
       style={{ transform: `translateY(${pull * 0.6}px)` }}
     >
       <span
-        className={`mt-2 flex h-8 w-8 items-center justify-center rounded-full border bg-white/90 backdrop-blur transition-colors ${
-          ready || refreshing ? "border-black/20 text-black" : "border-black/10 text-black/35"
+        className={`mt-2 flex h-8 w-8 items-center justify-center rounded-full border bg-paper/90 backdrop-blur transition-colors ${
+          ready || refreshing ? "border-ink/20 text-ink" : "border-ink/10 text-ink/35"
         }`}
       >
         <RefreshCw

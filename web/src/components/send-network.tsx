@@ -24,7 +24,7 @@ export function SendNetwork({ onPick }: { onPick: (key: string) => void }) {
 
   return (
     <>
-      <p className="mb-3 text-[13px] leading-snug text-black/50">{t("send.network.hint")}</p>
+      <p className="mb-3 text-[13px] leading-snug text-ink/50">{t("send.network.hint")}</p>
       <div className="flex flex-col gap-2">
         {DEST_CHAINS.map((d) => (
           <SheetRow

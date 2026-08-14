@@ -64,40 +64,40 @@ export function TopUpSheet({ onClose }: { onClose: () => void }) {
         error={error}
       />
 
-      <div className="mt-3 rounded-[10px] border border-[#3c05c7]/25 bg-[#3c05c7]/[0.04] px-4 py-3">
-        <p className="text-[12px] leading-snug text-black/65">{t("topup.uaWarning")}</p>
+      <div className="mt-3 rounded-[10px] border border-[var(--brand)]/25 bg-[var(--brand)]/[0.04] px-4 py-3">
+        <p className="text-[12px] leading-snug text-ink/65">{t("topup.uaWarning")}</p>
       </div>
 
       <button
         onClick={copy}
         disabled={!address}
-        className="mt-4 flex w-full items-center justify-between gap-3 rounded-[10px] border border-black/15 px-4 py-3 text-left transition hover:border-black/40 disabled:opacity-50"
+        className="mt-4 flex w-full items-center justify-between gap-3 rounded-[10px] border border-ink/15 px-4 py-3 text-left transition hover:border-ink/40 disabled:opacity-50"
       >
         <span className="min-w-0">
-          <span className="block text-[11px] lowercase tracking-wide text-black/40">{t("topup.yourAddress")}</span>
-          <span className="block truncate text-[13px] text-black/80">{address || "…"}</span>
+          <span className="block text-[11px] lowercase tracking-wide text-ink/40">{t("topup.yourAddress")}</span>
+          <span className="block truncate text-[13px] text-ink/80">{address || "…"}</span>
         </span>
         {copied ? (
-          <Check size={15} strokeWidth={1.5} className="shrink-0 text-[#3c05c7]" />
+          <Check size={15} strokeWidth={1.5} className="shrink-0 text-[var(--brand)]" />
         ) : (
-          <Copy size={15} strokeWidth={1.5} className="shrink-0 text-black/40" />
+          <Copy size={15} strokeWidth={1.5} className="shrink-0 text-ink/40" />
         )}
       </button>
 
-      <p className="mt-5 text-[11px] lowercase tracking-[0.18em] text-black/35">{t("cashout.how")}</p>
+      <p className="mt-5 text-[11px] lowercase tracking-[0.18em] text-ink/35">{t("cashout.how")}</p>
       <PaybisSteps dir="topup" steps={STEPS} />
 
       <a
         href={paybisBuyUrl(fiat, Number(amount) > 0 ? Number(amount) : undefined)}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85"
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85"
       >
         {t("topup.open")}
         <ExternalLink size={14} strokeWidth={1.5} />
       </a>
 
-      <p className="mt-3 text-[11px] leading-snug text-black/40">{t("topup.disclaimer")}</p>
+      <p className="mt-3 text-[11px] leading-snug text-ink/40">{t("topup.disclaimer")}</p>
     </PaybisSheet>
   );
 }

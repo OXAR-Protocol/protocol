@@ -59,7 +59,7 @@ export function TourCard({
       initial={{ y: side === "bottom" ? 16 : -16, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-x-3 z-[60] mx-auto max-w-[420px] rounded-[16px] border border-black/10 bg-white p-4 shadow-[0_8px_28px_rgba(0,0,0,0.16)]"
+      className="fixed inset-x-3 z-[60] mx-auto max-w-[420px] rounded-[16px] border border-ink/10 bg-paper p-4 shadow-[0_8px_28px_rgba(0,0,0,0.16)]"
       style={
         side === "bottom"
           ? { bottom: `calc(100vh - ${band.bottom}px + ${GAP}px)` }
@@ -67,7 +67,7 @@ export function TourCard({
       }
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[11px] lowercase tracking-wide text-black/40">
+        <p className="text-[11px] lowercase tracking-wide text-ink/40">
           {t("tour.step", { current: String(stepIndex + 1), total: String(total) })}
         </p>
         {/* Always present: taps are blocked during the tour, so the way out must
@@ -76,21 +76,21 @@ export function TourCard({
           type="button"
           onClick={onSkip}
           aria-label={t("tour.skip")}
-          className="text-black/40 transition hover:text-black"
+          className="text-ink/40 transition hover:text-ink"
         >
           <X size={16} strokeWidth={1.5} />
         </button>
       </div>
 
-      <p className="mt-2 text-[16px] leading-snug text-black">{t(titleKey)}</p>
-      <p className="mt-1.5 text-[13px] leading-relaxed text-black/55">{t(bodyKey)}</p>
+      <p className="mt-2 text-[16px] leading-snug text-ink">{t(titleKey)}</p>
+      <p className="mt-1.5 text-[13px] leading-relaxed text-ink/55">{t(bodyKey)}</p>
 
       <div className="mt-4 flex items-center justify-between gap-3">
         <button
           type="button"
           onClick={onBack}
           disabled={!canGoBack}
-          className="inline-flex items-center gap-1 text-[12px] lowercase tracking-wide text-black/45 transition hover:text-black disabled:opacity-0"
+          className="inline-flex items-center gap-1 text-[12px] lowercase tracking-wide text-ink/45 transition hover:text-ink disabled:opacity-0"
         >
           <ArrowLeft size={12} strokeWidth={1.5} />
           {t("tour.back")}
@@ -98,7 +98,7 @@ export function TourCard({
         <button
           type="button"
           onClick={onNext}
-          className="inline-flex items-center gap-1.5 rounded-full bg-black px-4 py-2 text-[13px] lowercase tracking-wide text-white transition hover:bg-black/85"
+          className="inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
         >
           {t(isLast ? "tour.done" : "tour.next")}
           {isLast ? <Check size={13} strokeWidth={2} /> : <ArrowRight size={13} strokeWidth={1.5} />}

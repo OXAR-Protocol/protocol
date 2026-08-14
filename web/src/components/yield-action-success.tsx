@@ -79,15 +79,15 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">
+        <p className="text-[10px] lowercase tracking-[0.2em] text-ink/40">
           {verb}
         </p>
-        <p className="mt-2 text-[40px] font-medium leading-none tracking-[-0.02em] text-black tabular-nums">
+        <p className="mt-2 text-[40px] font-medium leading-none tracking-[-0.02em] text-ink tabular-nums">
           ${result.amount.toFixed(2)}
         </p>
         {/* What you now hold (or no longer do), named. The dollar figure above says
             how much moved; this says what it was. */}
-        <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-[11px] lowercase tracking-wide text-black/55">
+        <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-ink/[0.03] px-3 py-1 text-[11px] lowercase tracking-wide text-ink/55">
           {result.assetId && (
             <AssetIcon src={assetLogoSrc(result.assetId)} label={result.symbol} size={14} />
           )}
@@ -96,7 +96,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
             : result.symbol}
         </span>
         {result.pending && (
-          <p className="mt-2 max-w-[260px] text-[12px] leading-snug text-black/45">
+          <p className="mt-2 max-w-[260px] text-[12px] leading-snug text-ink/45">
             {t("success.bridgingBody")}
           </p>
         )}
@@ -107,10 +107,10 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="flex items-center gap-4 text-[12px] lowercase tracking-wide text-black/50"
+        className="flex items-center gap-4 text-[12px] lowercase tracking-wide text-ink/50"
       >
         {!result.pending && (
-          <Link href="/you" className="underline-offset-2 hover:text-black hover:underline transition">
+          <Link href="/you" className="underline-offset-2 hover:text-ink hover:underline transition">
             {t("success.viewPosition")}
           </Link>
         )}
@@ -119,7 +119,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
             href={`https://solscan.io/account/${address}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-0.5 underline-offset-2 hover:text-black hover:underline transition"
+            className="inline-flex items-center gap-0.5 underline-offset-2 hover:text-ink hover:underline transition"
           >
             {t("success.onSolscan")}
             <ArrowUpRight size={12} strokeWidth={1.5} />
@@ -132,7 +132,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.45 }}
         onClick={onDone}
-        className="mt-1 px-6 py-2.5 rounded-full bg-black text-white text-[14px] font-medium lowercase tracking-wide hover:bg-black/85 transition"
+        className="mt-1 px-6 py-2.5 rounded-full bg-ink text-paper text-[14px] font-medium lowercase tracking-wide hover:bg-ink/85 transition"
       >
         {t("success.done")}
       </motion.button>

@@ -49,12 +49,12 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
   return (
     <div
       data-no-pull
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-6">
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-ink/40 backdrop-blur-sm sm:items-center sm:p-6">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="flex max-h-[92vh] w-full max-w-[560px] flex-col overflow-hidden rounded-t-[20px] border border-black/10 bg-white sm:rounded-[20px]"
+        className="flex max-h-[92vh] w-full max-w-[560px] flex-col overflow-hidden rounded-t-[20px] border border-ink/10 bg-paper sm:rounded-[20px]"
       >
         {/* The eyes get a band of their own rather than sitting behind the header.
             First attempt put the photo behind the header text: at ~100px tall and 560
@@ -73,19 +73,19 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
             className="h-full w-full select-none object-cover object-center"
           />
           {/* Melts into the header below instead of ending on a hard seam. */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-b from-transparent to-white" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-b from-transparent to-paper" />
         </div>
 
-        <div className="border-b border-black/10 px-5 pb-3 pt-3">
+        <div className="border-b border-ink/10 px-5 pb-3 pt-3">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[15px] text-black">{t("terms.gate.title")}</p>
+            <p className="text-[15px] text-ink">{t("terms.gate.title")}</p>
             <LanguageChips />
           </div>
-          <p className="mt-1 break-all font-mono text-[11px] leading-relaxed text-black/45">
+          <p className="mt-1 break-all font-mono text-[11px] leading-relaxed text-ink/45">
             {t("terms.gate.forWallet", { addr: walletAddress })}
           </p>
           {locale === "uk" && (
-            <p className="mt-1 text-[10px] text-black/35">{t("terms.gate.translationNote")}</p>
+            <p className="mt-1 text-[10px] text-ink/35">{t("terms.gate.translationNote")}</p>
           )}
 
           <div className="-mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-1">
@@ -94,7 +94,7 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
                 key={s.id}
                 type="button"
                 onClick={() => scrollTo(s.id)}
-                className="shrink-0 rounded-full bg-black/[0.05] px-3 py-1 text-[11px] lowercase tracking-wide text-black/55 transition hover:text-black"
+                className="shrink-0 rounded-full bg-ink/[0.05] px-3 py-1 text-[11px] lowercase tracking-wide text-ink/55 transition hover:text-ink"
               >
                 {s.short}
               </button>
@@ -102,7 +102,7 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-4 text-[13px] leading-relaxed text-black/60 [&_a]:text-[#3c05c7] [&_a]:underline [&_h3]:mb-1.5 [&_h3]:text-[14px] [&_h3]:font-medium [&_h3]:text-black [&_strong]:font-medium [&_strong]:text-black">
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-4 text-[13px] leading-relaxed text-ink/60 [&_a]:text-[var(--brand)] [&_a]:underline [&_h3]:mb-1.5 [&_h3]:text-[14px] [&_h3]:font-medium [&_h3]:text-ink [&_strong]:font-medium [&_strong]:text-ink">
           {sections.map((s) => (
             <div key={s.id} ref={(el) => { sectionRefs.current[s.id] = el; }}>
               <h3>{s.heading}</h3>
@@ -111,8 +111,8 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
           ))}
         </div>
 
-        <div className="border-t border-black/10 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4">
-          <label className="flex items-start gap-2.5 text-[12px] leading-snug text-black/60">
+        <div className="border-t border-ink/10 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4">
+          <label className="flex items-start gap-2.5 text-[12px] leading-snug text-ink/60">
             <input
               type="checkbox"
               checked={agreed}
@@ -126,7 +126,7 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
             <button
               type="button"
               onClick={onDecline}
-              className="text-[12px] lowercase tracking-wide text-black/40 transition hover:text-black"
+              className="text-[12px] lowercase tracking-wide text-ink/40 transition hover:text-ink"
             >
               {t("terms.gate.decline")}
             </button>
@@ -134,13 +134,13 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
               type="button"
               disabled={!agreed}
               onClick={onAgree}
-              className="rounded-full bg-black px-5 py-2.5 text-[13px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-30"
+              className="rounded-full bg-ink px-5 py-2.5 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-30"
             >
               {t("terms.gate.agree")}
             </button>
           </div>
 
-          <p className="mt-3 text-center text-[10px] text-black/35">
+          <p className="mt-3 text-center text-[10px] text-ink/35">
             {t("terms.gate.footer", { version: TERMS_VERSION, date: termsDate(locale), email: "support@oxar.app" })}
           </p>
         </div>

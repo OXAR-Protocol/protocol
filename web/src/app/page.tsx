@@ -13,7 +13,7 @@ export const metadata: Metadata = {
  */
 export default function Home() {
   return (
-    <div className={`${dmSans.variable} ${dmSans.className} bg-white`}>
+    <div className={`${dmSans.variable} ${dmSans.className} bg-paper`}>
       <LandingShell />
     </div>
   );

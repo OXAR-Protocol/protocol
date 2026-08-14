@@ -84,7 +84,7 @@ export function AssetActionRail({
   });
   const tabClass = (active: boolean) =>
     `rounded-full py-2 text-[13px] lowercase tracking-wide transition ${
-      active ? "bg-white text-black shadow-sm" : "text-black/45 hover:text-black/70"
+      active ? "bg-paper text-ink shadow-sm" : "text-ink/45 hover:text-ink/70"
     }`;
 
   // Signed out, the rail has nothing to act on — no wallet, no position. It becomes
@@ -95,7 +95,7 @@ export function AssetActionRail({
   return (
     <div className={bare ? "" : "lg:sticky lg:top-24"}>
       {/* Buy / Sell toggle — hidden in a sheet, whose title already says which. */}
-      <div className={`mb-3 grid grid-cols-2 gap-1 rounded-full bg-black/[0.05] p-1 ${bare ? "hidden" : ""}`}>
+      <div className={`mb-3 grid grid-cols-2 gap-1 rounded-full bg-ink/[0.05] p-1 ${bare ? "hidden" : ""}`}>
         <button type="button" onClick={() => setTab("buy")} className={tabClass(tab === "buy")}>
           {price ? t("rail.buy") : t("rail.deposit")}
         </button>
@@ -135,7 +135,7 @@ export function AssetActionRail({
                 <button
                   type="button"
                   onClick={() => onAmountChange(floorToCents(positionValue))}
-                  className="lowercase tracking-wide text-[#3c05c7]/80 transition hover:text-[#3c05c7]"
+                  className="lowercase tracking-wide text-[var(--brand)]/80 transition hover:text-[var(--brand)]"
                 >
                   {t("rail.max")}
                 </button>
@@ -184,12 +184,12 @@ export function AssetActionRail({
           <button
             type="button"
             onClick={() => setShowCashOut(true)}
-            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-3 text-[14px] lowercase tracking-wide text-black/70 transition hover:border-black/40 hover:text-black"
+            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-ink/15 px-4 py-3 text-[14px] lowercase tracking-wide text-ink/70 transition hover:border-ink/40 hover:text-ink"
           >
             <CreditCard size={14} strokeWidth={1.5} />
             {t("rail.cashOut")}
             {!cashOutLive && (
-              <span className="rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] lowercase tracking-wide text-black/45">
+              <span className="rounded-full bg-ink/[0.06] px-2 py-0.5 text-[9px] lowercase tracking-wide text-ink/45">
                 {t("common.soon")}
               </span>
             )}
@@ -197,7 +197,7 @@ export function AssetActionRail({
         </>
       )}
 
-      {error && <p className="mt-3 text-center text-xs text-red-600">{localizeError(error, t)}</p>}
+      {error && <p className="mt-3 text-center text-xs text-loss">{localizeError(error, t)}</p>}
 
       <AnimatePresence>
         {showCashOut && <CashOutSheet onClose={() => setShowCashOut(false)} />}

@@ -13,5 +13,5 @@ export default function JoinPage() {
   useEffect(() => {
     router.replace("/market");
   }, [router]);
-  return <div className="fixed inset-0 bg-white" />;
+  return <div className="fixed inset-0 bg-paper" />;
 }

@@ -48,15 +48,15 @@ export function ProfileChart({
 
   return (
     <section data-tour="balance">
-      <p className="text-[11px] lowercase tracking-wide text-black/40">{t("profile.allTogether")}</p>
+      <p className="text-[11px] lowercase tracking-wide text-ink/40">{t("profile.allTogether")}</p>
       <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <div className="flex flex-wrap items-baseline gap-x-3">
-          <p className="text-[clamp(30px,6vw,44px)] font-light leading-none tracking-[-0.02em] tabular-nums text-black">
+          <p className="text-[clamp(30px,6vw,44px)] font-light leading-none tracking-[-0.02em] tabular-nums text-ink">
             ${formatUsdAmount(now)}
           </p>
-          <p className={`whitespace-nowrap text-[13px] tabular-nums ${up ? "text-emerald-600" : "text-red-600"}`}>
+          <p className={`whitespace-nowrap text-[13px] tabular-nums ${up ? "text-profit" : "text-loss"}`}>
             {earned === null ? "—" : formatSignedUsd(earned)}
-            <span className="text-black/40"> · {t(`history.range.${range}` as "history.range.7")}</span>
+            <span className="text-ink/40"> · {t(`history.range.${range}` as "history.range.7")}</span>
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export function ProfileChart({
               type="button"
               onClick={() => onRangeChange(r)}
               className={`rounded-full px-2.5 py-1 text-[11px] lowercase tracking-wide transition ${
-                range === r ? "bg-black text-white" : "bg-black/[0.05] text-black/55 hover:text-black"
+                range === r ? "bg-ink text-paper" : "bg-ink/[0.05] text-ink/55 hover:text-ink"
               }`}
             >
               {t(`history.range.${r}` as "history.range.7")}
@@ -79,7 +79,7 @@ export function ProfileChart({
       {/* Full-bleed on a phone: the page's own padding stops at the chart's edge. */}
       <div className="mt-4 -mx-5 sm:mx-0">
         {loading ? (
-          <div className="flex h-[150px] items-center justify-center text-black/25">
+          <div className="flex h-[150px] items-center justify-center text-ink/25">
             <Loader2 size={16} className="animate-spin" />
           </div>
         ) : points.length > 1 ? (
@@ -88,11 +88,11 @@ export function ProfileChart({
             labels={points.map((p) => formatDayShort(p.t, locale))}
             format={(v) => `$${formatUsdAmount(v)}`}
             height={150}
-            className={up ? "text-emerald-600" : "text-red-600"}
+            className={up ? "text-profit" : "text-loss"}
             fill
           />
         ) : (
-          <p className="py-12 text-center text-[12px] text-black/35">{t("history.noChart")}</p>
+          <p className="py-12 text-center text-[12px] text-ink/35">{t("history.noChart")}</p>
         )}
       </div>
     </section>

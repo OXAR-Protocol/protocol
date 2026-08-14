@@ -49,7 +49,7 @@ export function SheetShell({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       data-no-pull
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/20 backdrop-blur-[2px] sm:items-center sm:bg-white/70 sm:backdrop-blur-sm sm:px-4 sm:py-6"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-ink/20 backdrop-blur-[2px] sm:items-center sm:bg-paper/70 sm:backdrop-blur-sm sm:px-4 sm:py-6"
       onClick={onClose}
     >
       <motion.div
@@ -69,7 +69,7 @@ export function SheetShell({
         onClick={(e) => e.stopPropagation()}
         // `--pb` is the padding the sheet wants; `.safe-bottom` adds the notch inset
         // on top of it (see globals.css) rather than standing in for it.
-        className="safe-bottom relative max-h-[88vh] w-full overflow-y-auto rounded-t-[22px] border border-black/10 bg-white px-6 pt-3 [--pb:1.5rem] sm:max-h-full sm:max-w-[440px] sm:rounded-[16px] sm:px-7 sm:pt-6 sm:[--pb:1.75rem]"
+        className="safe-bottom relative max-h-[88vh] w-full overflow-y-auto rounded-t-[22px] border border-ink/10 bg-paper px-6 pt-3 [--pb:1.5rem] sm:max-h-full sm:max-w-[440px] sm:rounded-[16px] sm:px-7 sm:pt-6 sm:[--pb:1.75rem]"
       >
         {/* The handle is the instruction: a bar you can grab, and the only place the
             sheet listens for a drag. `touch-none` keeps the browser from claiming the
@@ -78,18 +78,18 @@ export function SheetShell({
           onPointerDown={(e) => drag.start(e)}
           className="mx-auto -mt-1 mb-3 flex h-6 w-16 cursor-grab touch-none items-center justify-center active:cursor-grabbing sm:hidden"
         >
-          <div className="h-1 w-10 rounded-full bg-black/15" />
+          <div className="h-1 w-10 rounded-full bg-ink/15" />
         </div>
 
         <div className="mb-5 flex items-start justify-between">
           <div>
-            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">{label}</p>
-            <h2 className="mt-1 text-xl text-black">{title}</h2>
+            <p className="text-[10px] lowercase tracking-[0.2em] text-ink/40">{label}</p>
+            <h2 className="mt-1 text-xl text-ink">{title}</h2>
           </div>
           <button
             onClick={onClose}
             aria-label="close"
-            className="-mr-1 -mt-1 p-1 text-black/45 transition hover:text-black"
+            className="-mr-1 -mt-1 p-1 text-ink/45 transition hover:text-ink"
           >
             <X size={18} strokeWidth={1.5} />
           </button>

@@ -42,7 +42,7 @@ export function ComingSoon({
       // No `safe-top` here: that class sets `padding-top: env(safe-area-inset-top)`
       // outright and so overrode the `py-*` top padding — which is why this screen
       // sat flush against the top edge. Fold the notch inset into the padding instead.
-      className="fixed inset-0 z-50 flex overflow-y-auto bg-surface-0 px-6 pb-10 pt-[calc(2.5rem+env(safe-area-inset-top))] text-white sm:pb-16 sm:pt-[calc(4rem+env(safe-area-inset-top))]"
+      className="fixed inset-0 z-50 flex overflow-y-auto bg-page px-6 pb-10 pt-[calc(2.5rem+env(safe-area-inset-top))] text-ink sm:pb-16 sm:pt-[calc(4rem+env(safe-area-inset-top))]"
     >
       <div
         aria-hidden
@@ -59,13 +59,13 @@ export function ComingSoon({
           off — which is what centering a scroll container with justify-center does. */}
       <div className="relative m-auto flex w-full max-w-[560px] flex-col items-center gap-6 text-center">
         <div className="flex flex-col items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-white/30">
+          <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-paper/30">
             Closed Alpha
           </span>
-          <h1 className="font-sans text-[clamp(1.8rem,5vw,2.4rem)] font-normal leading-[1.1] text-white">
+          <h1 className="font-sans text-[clamp(1.8rem,5vw,2.4rem)] font-normal leading-[1.1] text-paper">
             {onWaitlist ? "You’re on the list" : "Coming soon"}
           </h1>
-          <p className="mt-1 max-w-[380px] font-mono text-[11px] leading-relaxed text-white/40">
+          <p className="mt-1 max-w-[380px] font-mono text-[11px] leading-relaxed text-paper/40">
             {onWaitlist
               ? "You already claimed your spot. We’re opening access in waves — invite friends to move up the queue."
               : "OXAR is in private alpha. Join the waitlist to claim your spot — we’re opening access in waves."}
@@ -89,12 +89,12 @@ export function ComingSoon({
           {onBack && (
             <button
               onClick={onBack}
-              className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/40 transition-colors hover:text-white/80"
+              className="font-mono text-[10px] uppercase tracking-[0.25em] text-paper/40 transition-colors hover:text-paper/80"
             >
               &larr; Use a different email
             </button>
           )}
-          {email && <p className="font-mono text-[10px] text-white/25">{email}</p>}
+          {email && <p className="font-mono text-[10px] text-paper/25">{email}</p>}
         </div>
       </div>
     </motion.div>

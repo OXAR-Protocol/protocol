@@ -24,7 +24,7 @@ export function DepositNetworks({ onSolana }: { onSolana: () => void }) {
 
   return (
     <div>
-      <p className="mb-3 text-[12px] leading-snug text-black/50">{t("fund.network.hint")}</p>
+      <p className="mb-3 text-[12px] leading-snug text-ink/50">{t("fund.network.hint")}</p>
 
       <div className="flex flex-col gap-2">
         <SheetRow
@@ -44,9 +44,9 @@ export function DepositNetworks({ onSolana }: { onSolana: () => void }) {
 
       {/* Whoever moves the money says what it costs and how long it takes — we don't
           set the route, so we don't promise its terms. */}
-      <p className="mt-4 text-[11px] leading-snug text-black/40">{t("fund.network.disclosure")}</p>
+      <p className="mt-4 text-[11px] leading-snug text-ink/40">{t("fund.network.disclosure")}</p>
 
-      {error && <p className="mt-2 text-[11px] text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-[11px] text-loss">{error}</p>}
     </div>
   );
 }
