@@ -7,7 +7,7 @@ import { ArrowUpRight, Sparkles } from "lucide-react";
 
 import { ProfileHeader } from "@/components/profile-header";
 import { ProfileMoney } from "@/components/profile-money";
-import { WalletCash } from "@/components/wallet-cash";
+import { MoneyPanel } from "@/components/money-panel";
 import { PhotoBg } from "@/components/photo-bg";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useSignIn } from "@/hooks/use-sign-in";
@@ -57,7 +57,7 @@ export default function YouPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[900px] pb-32">
+    <div className="mx-auto max-w-[1100px] pb-32">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -66,11 +66,6 @@ export default function YouPage() {
       >
         <ProfileHeader />
       </motion.div>
-
-      {/* What you can act on right now, and the two doors that change it. */}
-      <div className="mt-8">
-        <WalletCash />
-      </div>
 
       {totalUsdc === 0 && !loading ? (
         <motion.section
@@ -102,7 +97,7 @@ export default function YouPage() {
           </div>
         </motion.section>
       ) : (
-        <ProfileMoney />
+        <ProfileMoney wallet={<MoneyPanel />} />
       )}
     </div>
   );
