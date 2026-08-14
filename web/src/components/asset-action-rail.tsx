@@ -146,6 +146,10 @@ export function AssetActionRail({
             loading={loading}
             disabled={loading || amount <= 0 || amount > positionValue}
             variant="primary"
+            // Selling is as final as buying — a market order that can't be recalled —
+            // so it asks for the same deliberate press rather than a tap a thumb can
+            // find by accident while scrolling.
+            hold
             controls={
               sellingV2 ? (
                 <SellAmountControls

@@ -257,15 +257,17 @@ export function AssetDetail({
             {view.heldMint ? (
               <AssetChart mint={view.heldMint} />
             ) : apyHistory.length > 1 ? (
-              <div className="rounded-[12px] border border-black/10 p-5" data-tour="chart">
-                <p className="lowercase text-[13px] text-black/45 mb-3">{t("asset.apyLastDays", { n: apyHistory.length })}</p>
-                <HoverChart
-                  values={apyHistory}
-                  height={220}
-                  fill
-                  format={(v) => `${v.toFixed(2)}%`}
-                  className="text-[#3c05c7]/70"
-                />
+              <div data-tour="chart">
+                <p className="mb-3 lowercase text-[13px] text-black/45">{t("asset.apyLastDays", { n: apyHistory.length })}</p>
+                <div className="-mx-5 sm:mx-0">
+                  <HoverChart
+                    values={apyHistory}
+                    height={220}
+                    fill
+                    format={(v) => `${v.toFixed(2)}%`}
+                    className="text-[#3c05c7]/70"
+                  />
+                </div>
               </div>
             ) : null}
           </motion.div>

@@ -5,6 +5,8 @@ import { Loader2 } from "lucide-react";
 
 import { normalizeDecimalInput } from "@oxar/sdk";
 
+import { SwipeToConfirm } from "@/components/swipe-to-confirm";
+
 interface Props {
   /** Section label, e.g. "Deposit USDC". */
   label: string;
@@ -22,6 +24,9 @@ interface Props {
   /** Extra controls (quick fractions, denomination switch) rendered between the hint
    *  and the action — inside the card, beside the amount they change. */
   controls?: ReactNode;
+  /** Press-and-hold instead of a tap. For the acts that can't be undone: buying
+   *  already holds, and selling is no easier to take back. */
+  hold?: boolean;
 }
 
 const BUTTON_VARIANT = {
@@ -42,6 +47,7 @@ export function YieldAmountField({
   disabled,
   variant,
   controls,
+  hold,
 }: Props) {
   return (
     <div className="p-4 rounded-[6px] border border-black/10 bg-white">
@@ -61,20 +67,24 @@ export function YieldAmountField({
       </div>
       <div className="mt-2 text-[11px] text-black/40">{hint}</div>
       {controls}
-      <button
-        onClick={onAction}
-        disabled={disabled}
-        className={`mt-3 w-full px-4 py-3 rounded-full text-[14px] font-medium lowercase tracking-wide disabled:opacity-30 transition inline-flex items-center justify-center gap-2 ${BUTTON_VARIANT[variant]}`}
-      >
-        {loading ? (
-          <>
-            <Loader2 className="animate-spin" size={14} />
-            Working…
-          </>
-        ) : (
-          actionLabel
-        )}
-      </button>
+      {hold ? (
+        <SwipeToConfirm label={actionLabel} busy={loading} disabled={disabled} onConfirm={onAction} />
+      ) : (
+        <button
+          onClick={onAction}
+          disabled={disabled}
+          className={`mt-3 w-full px-4 py-3 rounded-full text-[14px] font-medium lowercase tracking-wide disabled:opacity-30 transition inline-flex items-center justify-center gap-2 ${BUTTON_VARIANT[variant]}`}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="animate-spin" size={14} />
+              Working…
+            </>
+          ) : (
+            actionLabel
+          )}
+        </button>
+      )}
     </div>
   );
 }
