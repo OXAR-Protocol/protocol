@@ -4,8 +4,9 @@ import { useCallback, useState } from "react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useYieldActions } from "@/hooks/use-yield-actions";
+import { useSwap } from "@/hooks/use-swap";
 import { getProvider, toBaseUnits, toFriendlyError, UserFacingError } from "@/lib/yield";
-import { chooseDepositPath, getSwapQuote, buildSwapTx, deserializeSwapTx, priceImpactTooHigh, spendableBase, type WalletAsset } from "@oxar/sdk";
+import { chooseDepositPath, spendableBase, type WalletAsset } from "@oxar/sdk";
 import { trackEvent } from "@/lib/track";
 
 export type DepositStatus = "idle" | "swapping" | "depositing";
@@ -17,8 +18,9 @@ export type DepositStatus = "idle" | "swapping" | "depositing";
  * USDC base units actually deposited.
  */
 export function useUniversalDeposit(providerId: string) {
-  const { wallet, connection, walletAddress, isExternal } = useSolanaContext();
+  const { wallet, walletAddress } = useSolanaContext();
   const { deposit } = useYieldActions(providerId);
+  const swap = useSwap();
   const [status, setStatus] = useState<DepositStatus>("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -55,27 +57,16 @@ export function useUniversalDeposit(providerId: string) {
           if (payBase > maxSpend) payBase = maxSpend;
 
           setStatus("swapping");
-          // External wallets need a legacy tx (they mishandle Jupiter's v0); embedded keeps v0.
-          const asLegacy = isExternal;
-          const quote = await getSwapQuote({
+          const { minOut } = await swap({
             inputMint: payAsset.mint,
             outputMint: productMint,
             amount: payBase,
-            asLegacy,
+            opts,
           });
-          if (priceImpactTooHigh(quote)) {
-            throw new UserFacingError("Price impact too high — try a smaller amount");
-          }
 
-          const b64 = await buildSwapTx(quote, walletAddress.toBase58(), { asLegacy });
-          const tx = deserializeSwapTx(b64, asLegacy);
-          const sig = await wallet.signAndSend(tx, opts);
-          await connection.confirmTransaction(sig, "confirmed");
-
-          // Deposit the guaranteed-min output (otherAmountThreshold ≤ realized), so the
-          // deposit can't fail on slippage; any tiny remainder stays as USDC in the wallet.
-          // (Avoids a balance-read race that could falsely report "no USDC arrived".)
-          const depositAmount = BigInt(quote.otherAmountThreshold);
+          // Deposit the guaranteed-min output, so the deposit can't fail on slippage;
+          // any tiny remainder stays as USDC in the wallet.
+          const depositAmount = minOut;
           setStatus("depositing");
           try {
             const depositSig = await deposit(depositAmount, opts);
@@ -98,7 +89,7 @@ export function useUniversalDeposit(providerId: string) {
         setStatus("idle");
       }
     },
-    [wallet, walletAddress, connection, deposit, providerId],
+    [wallet, walletAddress, deposit, providerId, swap],
   );
 
   return { depositWith, status, error };

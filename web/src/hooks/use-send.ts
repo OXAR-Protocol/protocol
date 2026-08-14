@@ -9,13 +9,10 @@ import {
 } from "@solana/spl-token";
 
 import { useSolanaContext } from "@/providers/solana-provider";
+import { useSwap } from "@/hooks/use-swap";
 import { toFriendlyError, UserFacingError } from "@/lib/yield";
 import {
   SOL_MINT,
-  getSwapQuote,
-  buildSwapTx,
-  deserializeSwapTx,
-  priceImpactTooHigh,
   DELORA_SOLANA_CHAIN_ID,
   bridgeFeeTooHigh,
   type WalletAsset,
@@ -40,7 +37,8 @@ const deserialize = (b64: string) =>
  * native on an EVM chain. The active Solana wallet signs + pays the SOL fee.
  */
 export function useSend() {
-  const { wallet, walletAddress, connection, isExternal } = useSolanaContext();
+  const { wallet, walletAddress, connection } = useSolanaContext();
+  const swap = useSwap();
   const [status, setStatus] = useState<SendStatus>("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -100,13 +98,7 @@ export function useSend() {
         }
 
         if (kind === "swap") {
-          // External wallets need a legacy tx (they mishandle Jupiter's v0); embedded keeps v0.
-          const asLegacy = isExternal;
-          const quote = await getSwapQuote({ inputMint: source.mint, outputMint: destAsset.mint, amount: amountBase, asLegacy });
-          if (priceImpactTooHigh(quote)) throw new UserFacingError("Price impact too high — try a smaller amount");
-          const tx = deserializeSwapTx(await buildSwapTx(quote, owner, { asLegacy }), asLegacy);
-          const sig = await wallet.signAndSend(tx);
-          await connection.confirmTransaction(sig, "confirmed");
+          const { sig } = await swap({ inputMint: source.mint, outputMint: destAsset.mint, amount: amountBase });
           return { sig, crossChain: false };
         }
 
@@ -136,7 +128,7 @@ export function useSend() {
         setStatus("idle");
       }
     },
-    [wallet, walletAddress, connection, sendVersioned],
+    [wallet, walletAddress, connection, sendVersioned, swap],
   );
 
   return { send, status, error };

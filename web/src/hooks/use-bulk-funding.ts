@@ -3,12 +3,9 @@
 import { useCallback, useState } from "react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
+import { useSwap } from "@/hooks/use-swap";
 import { UserFacingError } from "@/lib/yield";
 import {
-  getSwapQuote,
-  buildSwapTx,
-  deserializeSwapTx,
-  priceImpactTooHigh,
   spendableBase,
   usdToBase,
   type WalletAsset,
@@ -30,7 +27,8 @@ import { USDC_MINT } from "@/lib/constants";
  * see `rescaleAllocations` — or the last purchase in the run will come up short.
  */
 export function useBulkFunding() {
-  const { wallet, connection, walletAddress, isExternal } = useSolanaContext();
+  const { wallet, walletAddress } = useSolanaContext();
+  const swap = useSwap();
   const [converting, setConverting] = useState(false);
 
   const fundUsdc = useCallback(
@@ -46,32 +44,16 @@ export function useBulkFunding() {
 
       setConverting(true);
       try {
-        // External wallets mishandle Jupiter's v0 transactions — same rule as the
-        // single-asset path.
-        const asLegacy = isExternal;
-        const quote = await getSwapQuote({
-          inputMint: payAsset.mint,
-          outputMint: USDC_MINT,
-          amount: payBase,
-          asLegacy,
-        });
-        if (priceImpactTooHigh(quote)) {
-          throw new UserFacingError("Price impact too high — try a smaller amount");
-        }
-
-        const tx = deserializeSwapTx(await buildSwapTx(quote, walletAddress.toBase58(), { asLegacy }), asLegacy);
-        const sig = await wallet.signAndSend(tx);
-        await connection.confirmTransaction(sig, "confirmed");
-
+        const { minOut } = await swap({ inputMint: payAsset.mint, outputMint: USDC_MINT, amount: payBase });
         // The guaranteed minimum, not the quoted amount: it's the number the wallet is
         // certain to hold. Reading the balance instead would race the confirmation.
         const usdcDecimals = 6;
-        return Number(BigInt(quote.otherAmountThreshold)) / 10 ** usdcDecimals;
+        return Number(minOut) / 10 ** usdcDecimals;
       } finally {
         setConverting(false);
       }
     },
-    [wallet, walletAddress, connection, isExternal],
+    [wallet, walletAddress, swap],
   );
 
   return { fundUsdc, converting };
