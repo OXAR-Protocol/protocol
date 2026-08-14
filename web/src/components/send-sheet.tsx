@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { SheetShell } from "@/components/sheet-shell";
 import { SendNetwork } from "@/components/send-network";
@@ -9,6 +9,7 @@ import { SendAddress } from "@/components/send-address";
 import { SendAmount } from "@/components/send-amount";
 import { SendToken } from "@/components/send-token";
 import { SendReview } from "@/components/send-review";
+import { SendSent } from "@/components/send-sent";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useSend } from "@/hooks/use-send";
 import { useBridgePreview } from "@/hooks/use-bridge-preview";
@@ -18,7 +19,7 @@ import { maxSendable } from "@/lib/wallet/transfer";
 import { canLeaveSolana, getDestChain, type DestAsset } from "@/lib/wallet/outbound-destinations";
 import { useT } from "@/lib/i18n";
 
-type Step = "token" | "network" | "address" | "amount" | "review";
+type Step = "network" | "token" | "address" | "amount" | "review";
 
 /**
  * Sending money, one question at a time.
@@ -47,7 +48,7 @@ export function SendSheet({
   const { assets, loading } = useWalletAssets();
   const { send, status, error: sendError } = useSend();
 
-  const [step, setStep] = useState<Step>("token");
+  const [step, setStep] = useState<Step>("network");
   const [destKey, setDestKey] = useState(initialDestKey);
   const [sourceMint, setSourceMint] = useState<string | null>(null);
   const [to, setTo] = useState("");
@@ -97,14 +98,14 @@ export function SendSheet({
     }
   };
 
-  // Back retraces the way in. From the address, that's the network — unless this
-  // holding never had a network to choose, in which case it's the token list.
+  // Back retraces the way in. The review has its own, so the shell doesn't add a
+  // second one above it.
   const back: Record<Step, Step | null> = {
-    token: null,
-    network: "token",
-    address: source && canLeaveSolana(source.mint) ? "network" : "token",
+    network: null,
+    token: "network",
+    address: "token",
     amount: "address",
-    review: "amount",
+    review: null,
   };
 
   const titleKey: Record<Step, string> = {
@@ -117,21 +118,15 @@ export function SendSheet({
 
   return (
     <SheetShell label={t("send.label")} title={result ? t("send.sent") : titleKey[step]} onClose={onClose}>
-      {result ? (
-        <div className="py-6 text-center">
-          <p className="text-lg text-black">{t("send.sent")}</p>
-          {result.crossChain && (
-            <p className="mt-1 text-[11px] text-black/45">{t("send.arriving", { chain: destChain.label })}</p>
-          )}
-          <a
-            href={`https://solscan.io/tx/${result.sig}`}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-3 inline-flex items-center gap-1.5 text-xs text-[#3c05c7] hover:underline"
-          >
-            {t("send.viewSolscan")} <ExternalLink size={12} strokeWidth={1.5} />
-          </a>
-        </div>
+      {result && source ? (
+        <SendSent
+          amount={amount}
+          symbol={source.symbol}
+          to={to.trim()}
+          chainLabel={destChain.label}
+          crossChain={result.crossChain}
+          signature={result.sig}
+        />
       ) : (
         <>
           {back[step] && !busy && (
@@ -145,13 +140,16 @@ export function SendSheet({
             </button>
           )}
 
-          {step === "network" && source ? (
+          {step === "network" ? (
             <SendNetwork
-              mint={source.mint}
-              symbol={source.symbol}
               onPick={(key) => {
                 setDestKey(key);
-                setStep("address");
+                // A holding that can't make the crossing isn't on the next screen at
+                // all, so a stale choice would sit there unseen. Clear it.
+                if (getDestChain(key).chain !== "solana" && source && !canLeaveSolana(source.mint)) {
+                  setSourceMint(null);
+                }
+                setStep("token");
               }}
             />
           ) : step === "address" ? (
@@ -162,19 +160,12 @@ export function SendSheet({
             ) : (
               <SendToken
                 assets={assets}
+                chain={destChain}
                 activeMint={source?.mint ?? null}
                 onPick={(mint) => {
                   setSourceMint(mint);
                   setAmount("");
-                  // A share, gold or a yield receipt has no market on another chain,
-                  // so there is no network question to ask — it goes to a Solana
-                  // address or nowhere. Skipping a one-answer screen beats showing it.
-                  if (canLeaveSolana(mint)) {
-                    setStep("network");
-                  } else {
-                    setDestKey("solana");
-                    setStep("address");
-                  }
+                  setStep("address");
                 }}
               />
             )
