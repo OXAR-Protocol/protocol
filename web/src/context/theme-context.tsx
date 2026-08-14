@@ -52,14 +52,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem(KEY) as ThemeChoice | null;
-    const initial: ThemeChoice = saved === "light" || saved === "dark" ? saved : "system";
+    // Light until asked otherwise. "system" is offered, not assumed: a dark theme
+    // nobody has looked at yet shouldn't arrive by itself on every phone that
+    // happens to be in dark mode. Flip this default once it has been through a
+    // proper look.
+    const initial: ThemeChoice =
+      saved === "light" || saved === "dark" || saved === "system" ? saved : "light";
     setChoiceState(initial);
     apply(initial === "system" ? systemTheme() : initial);
 
     // Keep following the OS while the setting says to.
     const media = window.matchMedia?.("(prefers-color-scheme: dark)");
     const onSystem = () => {
-      const current = (localStorage.getItem(KEY) as ThemeChoice | null) ?? "system";
+      const current = localStorage.getItem(KEY) as ThemeChoice | null;
       if (current === "system") apply(systemTheme());
     };
     media?.addEventListener?.("change", onSystem);
@@ -69,8 +74,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setChoice = useCallback(
     (next: ThemeChoice) => {
       setChoiceState(next);
-      if (next === "system") localStorage.removeItem(KEY);
-      else localStorage.setItem(KEY, next);
+      localStorage.setItem(KEY, next);
       apply(next === "system" ? systemTheme() : next);
     },
     [apply],

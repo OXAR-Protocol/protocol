@@ -64,7 +64,8 @@ export default function RootLayout({
               // Runs before the first paint: a dark-theme user must not see a white
               // flash, and a "system" user must not see the light one either.
               "try{var t=localStorage.getItem('oxar-theme');" +
-              "if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';" +
+              "if(t==='system')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';" +
+              "if(t!=='light'&&t!=='dark')t='light';" +
               "document.documentElement.setAttribute('data-theme',t)}catch(e){}",
           }}
         />
