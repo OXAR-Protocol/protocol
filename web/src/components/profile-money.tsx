@@ -33,7 +33,7 @@ const rise = (delay: number) => ({
  * sum it, the day list takes its window from it — so nothing on screen can be
  * describing a different month than its neighbour.
  */
-export function ProfileMoney() {
+export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
   const { t, locale } = useT();
   const [range, setRange] = useState<Range>(30);
   const history = usePortfolioHistory(range);
@@ -41,7 +41,11 @@ export function ProfileMoney() {
 
   return (
     <>
-      <motion.div {...rise(0.05)} className="mt-8">
+      {/* Two columns from `lg`: the chart takes the width it deserves and the money
+          panel fills what used to be empty margin. Below that everything is full
+          width, because a table squeezed into two thirds is a worse table. */}
+      <motion.div {...rise(0.05)} className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div>
         <ProfileChart
           points={history.days}
           performance={history.performance}
@@ -58,10 +62,14 @@ export function ProfileMoney() {
             range={range}
           />
         </div>
+        </div>
+
+        {wallet}
       </motion.div>
 
+      {/* No heading: the rows are self-evidently what you hold, and "what it's made
+          of" was a label explaining a list that explains itself. */}
       <motion.section {...rise(0.1)} className="mt-10">
-        <p className="mb-3 text-xs lowercase tracking-[0.2em] text-ink/40">{t("profile.positionsLabel")}</p>
         <PositionsSection />
       </motion.section>
 

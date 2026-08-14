@@ -386,7 +386,6 @@ export const en = {
   "money.free": "free to use",
   "profile.working": "{value} working",
   "profile.allTogether": "everything, all together",
-  "profile.positionsLabel": "what it's made of",
   "profile.positions": "{n} positions",
   "profile.joined": "here since {date}",
   "money.working": "already working",
