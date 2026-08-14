@@ -156,7 +156,7 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
           }
           progress={
             bulk.state === "running"
-              ? t("bulk.progress", { n: String(bulk.done.length), total: String(rows.length) })
+              ? t("bulk.progressBuy", { n: String(bulk.done.length), total: String(rows.length) })
               : null
           }
           error={fundError}

@@ -70,7 +70,7 @@ export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, on
       )}
       <span className="min-w-0 flex-1 truncate text-[13px] tabular-nums text-black/70">
         {selling
-          ? t("bulk.progress", { n: String(done.length), total: String(selectedCount) })
+          ? t(mode === "sell" ? "bulk.progressSell" : "bulk.progressBuy", { n: String(done.length), total: String(selectedCount) })
           : mode === "sell"
             ? // Selling: the figure is what the picked positions are worth — a fact
               // about the selection.
