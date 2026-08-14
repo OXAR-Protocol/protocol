@@ -61,8 +61,19 @@ function themePage(): [number, number, number] {
 }
 
 function hexToRgb(hex: string): [number, number, number] | null {
-  const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(hex);
-  return m ? [parseInt(m[1]!, 16), parseInt(m[2]!, 16), parseInt(m[3]!, 16)] : null;
+  // Both forms. The source says #ffffff, but what `getComputedStyle` hands back is
+  // whatever the minifier left in the stylesheet — and it shortens that to #fff.
+  // Reading only the long form meant every colour fell through to the fallback,
+  // which drew a black mark on a black screen.
+  const m = /^#?([\da-f]{3}|[\da-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const v = m[1]!;
+  const full = v.length === 3 ? v.replace(/./g, (c) => c + c) : v;
+  return [
+    parseInt(full.slice(0, 2), 16),
+    parseInt(full.slice(2, 4), 16),
+    parseInt(full.slice(4, 6), 16),
+  ];
 }
 
 /** Ink at an alpha, as a canvas colour. */

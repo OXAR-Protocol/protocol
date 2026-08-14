@@ -14,7 +14,7 @@ import { useSwapOutPreview } from "@/hooks/use-swap-out-preview";
 import { useFeature } from "@/hooks/use-features";
 import { SellAmountControls } from "@/components/sell-amount-controls";
 import { SellDetails } from "@/components/sell-details";
-import { floorToCents, formatUsdAmount } from "@oxar/sdk";
+import { formatUsdAmount } from "@oxar/sdk";
 import { useT, localizeError } from "@/lib/i18n";
 
 interface Props {
@@ -129,16 +129,12 @@ export function AssetActionRail({
             symbol={unitsMode ? (unitLabel ?? "units") : price ? "USDC" : view.assetSymbol}
             value={unitsMode ? amount / sharePriceUsd! : amount}
             onChange={(v) => onAmountChange(unitsMode ? v * sharePriceUsd! : v)}
+            // Just the figure. "max" sat here as a second way to do what the "sell
+            // all" pill below already does, one line apart — two controls for one
+            // act, and the quieter one looked like the real one.
             hint={
-              <span className="flex items-center gap-2">
+              <span>
                 {price ? t("rail.worth") : t("rail.available")}: ${formatUsdAmount(positionValue)}
-                <button
-                  type="button"
-                  onClick={() => onAmountChange(floorToCents(positionValue))}
-                  className="lowercase tracking-wide text-[var(--brand)]/80 transition hover:text-[var(--brand)]"
-                >
-                  {t("rail.max")}
-                </button>
               </span>
             }
             // Just the act. Where it takes a hold — the app — the control says so
