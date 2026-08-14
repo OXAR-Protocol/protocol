@@ -210,7 +210,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
 
   "wallet.connecting": "підключення…",
   "wallet.exportKey": "експорт приватного ключа",
-  "wallet.feedback": "розкажи нам",
+  "wallet.manageFunds": "керувати коштами",
+  "wallet.feedback": "відгук",
   "wallet.disconnect": "відключити",
 
   "status.quoting": "Рахуємо…",

@@ -78,7 +78,7 @@ export function WalletMenu() {
             className={`${item} border-b border-ink/10 hover:bg-ink/[0.04] hover:text-ink`}
           >
             <Wallet size={13} strokeWidth={1.5} />
-            {t("money.title")}
+            {t("wallet.manageFunds")}
           </button>
 
           {isEmbedded && (

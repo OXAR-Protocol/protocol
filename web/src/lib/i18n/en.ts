@@ -225,7 +225,8 @@ export const en = {
   // Wallet menu
   "wallet.connecting": "connecting…",
   "wallet.exportKey": "export private key",
-  "wallet.feedback": "tell us",
+  "wallet.manageFunds": "manage funds",
+  "wallet.feedback": "feedback",
   "wallet.disconnect": "disconnect",
 
   // Busy statuses (tx in flight)
