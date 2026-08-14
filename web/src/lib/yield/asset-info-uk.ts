@@ -21,11 +21,6 @@ export const ASSET_INFO_UK: Record<string, AssetInfo> = {
     category: "акція США · технології",
     facts: [{ label: "сектор", value: "споживча електроніка й сервіси" }, { label: "штаб-квартира", value: "Купертіно, США" }],
   },
-  "xstock-aapl-ondo": {
-    about: "Та сама частка Apple, але випущена Ondo Global Markets і торгується проти живої ліквідності ринку США, а не ончейн-пулу. Купівля та продаж — у години роботи біржі США.",
-    category: "акція США · технології",
-    facts: [{ label: "емітент", value: "Ondo Global Markets" }, { label: "торгівля", value: "у години ринку США" }],
-  },
   "xstock-msft": {
     about: "Microsoft робить Windows, Office і хмару Azure, володіє великою часткою в OpenAI. Продає переважно бізнесам, тож виручка стабільна й повторювана.",
     category: "акція США · технології",

@@ -16,7 +16,6 @@ import {
   marketLooksBroken,
 } from "@oxar/sdk";
 import { UserFacingError } from "./errors";
-import { buildDeloraStockSwapTx } from "./delora-stock-swap";
 import type {
   BuildIxParams,
   RedeemTxParams,
@@ -44,9 +43,6 @@ export interface XStockConfig {
   name: string; // display name
   sector?: string; // browse category: tech/crypto/finance/consumer/health/index
   mint: string; // xStock mint (Token-2022)
-  /** Swap rail. Default = Jupiter AMM (Backed xStocks). "delora" = Delora/DFlow
-   *  RFQ (Ondo Global Markets tokens — Jupiter does not route them at all). */
-  rail?: "delora";
   /** Token decimals (Backed xStocks = 8, Ondo = 9). */
   decimals?: number;
   /** Feature key gating this ticker — see `YieldProvider.feature`. */
@@ -111,13 +107,6 @@ export const XSTOCKS: readonly XStockMeta[] = [
   { id: "xstock-intc", symbol: "INTC", token: "INTCx", name: "Intel", sector: "tech", mint: "XshPgPdXFRWB8tP1j82rebb2Q9rPgGX37RuqzohmArM" },
   { id: "xstock-pg", symbol: "PG", token: "PGx", name: "Procter & Gamble", sector: "consumer", mint: "XsYdjDjNUygZ7yGKfQaB6TxLh2gC6RRjzLtLAGJrhzV" },
   { id: "xstock-xom", symbol: "XOM", token: "XOMx", name: "Exxon Mobil", sector: "energy", mint: "XsaHND8sHyfMfsWPj6kSdd5VwvCayZvjYgKmmcNL5qh" },
-  // Ondo-rail pilot (2026-07-29, insider-gated): same swap-and-hold model, but the
-  // swap goes through Delora/DFlow RFQ instead of the Jupiter AMM — Ondo GM mints
-  // aren't routable on Jupiter, and the AMM pools are too thin for size (AAPLx pool
-  // ~$87k → 8.7% impact on a $5k buy). DFlow quotes follow US market hours; off-hours
-  // buys fail with a friendly "market closed". Un-gate only after a real-money pass
-  // + Kora allowlisting of the DFlow program (see PR).
-  { id: "xstock-aapl-ondo", symbol: "AAPL", token: "AAPLon", name: "Apple · Ondo", sector: "tech", mint: "123mYEnRLM2LLYsJW3K6oyYh8uP1fngj732iG638ondo", rail: "delora", decimals: 9, feature: "ondo-stocks" },
 ];
 
 const STOCK_MINTS = XSTOCKS.map((s) => s.mint);
@@ -201,9 +190,6 @@ export function createXStockProvider(cfg: XStockMeta): YieldProvider {
   }
 
   async function swap(owner: PublicKey, inputMint: string, outputMint: string, amount: bigint): Promise<Transaction | VersionedTransaction> {
-    if (cfg.rail === "delora") {
-      return buildDeloraStockSwapTx({ owner, inputMint, outputMint, amount, stockMint: heldMint, stockDecimals });
-    }
     const quote = await getSwapQuote({ inputMint, outputMint, amount, asLegacy: true, slippageBps: 100 });
     // Cost is shown before signing (buy: DepositPanel, sell: AssetActionRail), so it's
     // the user's call — we only stop a route that loses most of the value. Judged on the

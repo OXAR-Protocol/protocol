@@ -5,8 +5,9 @@
 // valid-PNG error body that decoded WITHOUT firing onError (blank tiles); Parqet was
 // CORS-blocked + 404'd + returned wrong-company logos. Tickers without a bundled file
 // (ETFs like SPY/QQQ/GLD, private SPCX, CRCL) just fall back to a monogram.
-/** Ticker from a stock id — an Ondo-rail variant ("xstock-aapl-ondo") shares the
- *  underlying company's ticker, logo and monogram. */
+/** Ticker from a stock id. The `-ondo` suffix is still stripped: a rail variant of
+ *  the same company would share its ticker and logo, and the one that existed is
+ *  gone rather than impossible. */
 function stockTicker(id: string): string {
   return id.slice("xstock-".length).replace(/-ondo$/, "").toUpperCase();
 }
