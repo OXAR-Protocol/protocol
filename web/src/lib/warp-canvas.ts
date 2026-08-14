@@ -39,10 +39,51 @@ export function buildWarpPaths(): { paths: WarpPath[]; glass: WarpGlassPath[] } 
   return { paths, glass };
 }
 
+
+/**
+ * The mark is drawn in ink and lit by the page it sits on, both read live from CSS.
+ *
+ * Every colour here used to be a number — black strokes, a black fill, a white
+ * highlight, a white fade-out — which was correct exactly once, on a white page.
+ * On the dark theme it drew a black logo on a near-black background: a loading
+ * screen that looks like nothing is loading.
+ */
+function themeInk(): [number, number, number] {
+  if (typeof document === "undefined") return [0, 0, 0];
+  const ink = getComputedStyle(document.documentElement).getPropertyValue("--ink").trim();
+  return hexToRgb(ink) ?? [0, 0, 0];
+}
+
+function themePage(): [number, number, number] {
+  if (typeof document === "undefined") return [255, 255, 255];
+  const page = getComputedStyle(document.documentElement).getPropertyValue("--page").trim();
+  return hexToRgb(page) ?? [255, 255, 255];
+}
+
+function hexToRgb(hex: string): [number, number, number] | null {
+  const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(hex);
+  return m ? [parseInt(m[1]!, 16), parseInt(m[2]!, 16), parseInt(m[3]!, 16)] : null;
+}
+
+/** Ink at an alpha, as a canvas colour. */
+const ink = (a: number) => {
+  const [r, g, b] = themeInk();
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+};
+
+/** The page colour at an alpha — used for the glassy highlight and the fade-out,
+ *  both of which are "the surface showing through the mark". */
+const page = (a: number) => {
+  const [r, g, b] = themePage();
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+};
+
 function strokeGradient(ctx: CanvasRenderingContext2D, alphaA: number, alphaB: number) {
   const gradient = ctx.createLinearGradient(0, 0, LOGO_VIEWBOX.width, 0);
-  gradient.addColorStop(0, `rgba(0, 0, 0, ${alphaA})`);
-  gradient.addColorStop(1, `rgba(60, 60, 60, ${alphaB})`);
+  // Same two stops as before — full ink into a softer ink — just relative to the
+  // theme rather than to black.
+  gradient.addColorStop(0, ink(alphaA));
+  gradient.addColorStop(1, ink(alphaB * 0.76));
   return gradient;
 }
 
@@ -69,7 +110,7 @@ export function drawPhaseDraw(ctx: CanvasRenderingContext2D, progress: number, p
     ctx.setLineDash([entry.length]);
     ctx.lineDashOffset = dashOffset;
 
-    ctx.strokeStyle = `rgba(0, 0, 0, ${0.3 * segP})`;
+    ctx.strokeStyle = ink(0.3 * segP);
     ctx.lineWidth = 8;
     ctx.filter = "blur(6px)";
     ctx.stroke(entry.path2d);
@@ -106,11 +147,11 @@ export function drawPhaseFill(
   ctx.rect(0, wipeY, LOGO_VIEWBOX.width, LOGO_VIEWBOX.height - wipeY);
   ctx.clip();
 
-  ctx.fillStyle = "#000000";
+  ctx.fillStyle = ink(1);
   for (const entry of paths) ctx.fill(entry.path2d);
 
   for (const g of glass) {
-    ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.fillStyle = page(0.2);
     ctx.fill(g.path2d);
   }
   ctx.restore();
@@ -134,10 +175,10 @@ export function drawPhaseBreath(
   ctx.scale(scale, scale);
   ctx.translate(-lcx, -lcy);
 
-  ctx.fillStyle = "#000000";
+  ctx.fillStyle = ink(1);
   for (const entry of paths) ctx.fill(entry.path2d);
   for (const g of glass) {
-    ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.fillStyle = page(0.2);
     ctx.fill(g.path2d);
   }
   ctx.restore();
@@ -160,11 +201,11 @@ export function drawPhaseUnfill(
     ctx.rect(0, wipeY, LOGO_VIEWBOX.width, LOGO_VIEWBOX.height - wipeY);
     ctx.clip();
 
-    ctx.fillStyle = "#000000";
+    ctx.fillStyle = ink(1);
     for (const entry of paths) ctx.fill(entry.path2d);
 
     for (const g of glass) {
-      ctx.fillStyle = `rgba(255, 255, 255, ${0.2 * (1 - eased)})`;
+      ctx.fillStyle = page(0.2 * (1 - eased));
       ctx.fill(g.path2d);
     }
     ctx.restore();
@@ -204,7 +245,7 @@ export function drawPhaseUndraw(ctx: CanvasRenderingContext2D, progress: number,
     ctx.setLineDash([entry.length]);
     ctx.lineDashOffset = dashOffset;
 
-    ctx.strokeStyle = `rgba(0, 0, 0, ${0.3 * revealFraction})`;
+    ctx.strokeStyle = ink(0.3 * revealFraction);
     ctx.lineWidth = 8;
     ctx.filter = "blur(6px)";
     ctx.stroke(entry.path2d);
@@ -239,9 +280,9 @@ export function drawRadialGlow(
   if (glowAlpha <= 0.01) return;
 
   const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 200);
-  grad.addColorStop(0, `rgba(0, 0, 0, ${glowAlpha * 0.35})`);
-  grad.addColorStop(0.5, `rgba(0, 0, 0, ${glowAlpha * 0.12})`);
-  grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+  grad.addColorStop(0, ink(glowAlpha * 0.35));
+  grad.addColorStop(0.5, ink(glowAlpha * 0.12));
+  grad.addColorStop(1, ink(0));
   ctx.fillStyle = grad;
   ctx.beginPath();
   ctx.arc(cx, cy, 200, 0, Math.PI * 2);
@@ -252,6 +293,6 @@ export function drawRadialGlow(
 export function drawPhaseFade(ctx: CanvasRenderingContext2D, progress: number, w: number, h: number) {
   if (progress < 0.96) return;
   const fadeP = (progress - 0.96) / 0.04;
-  ctx.fillStyle = `rgba(255, 255, 255, ${fadeP})`;
+  ctx.fillStyle = page(fadeP);
   ctx.fillRect(0, 0, w, h);
 }
