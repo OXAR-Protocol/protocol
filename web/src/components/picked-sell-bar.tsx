@@ -103,7 +103,7 @@ export function PickedSellBar({ views, allHeld, onOutcome, onDone }: Props) {
           results={bulk.results}
           progress={
             bulk.state === "running"
-              ? t("bulk.progress", { n: String(bulk.done.length), total: String(views.length) })
+              ? t("bulk.progressSell", { n: String(bulk.done.length), total: String(views.length) })
               : null
           }
           onConfirm={sellSelected}
