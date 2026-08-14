@@ -9,12 +9,11 @@ exports.buildWalletAssets = buildWalletAssets;
 const units_1 = require("./units");
 /** Native SOL wrapped-mint sentinel (used as the asset id for SOL). */
 exports.SOL_MINT = "So11111111111111111111111111111111111111112";
-/** Stable id unique across chains. Native EVM coins (ETH/POL) share one mint —
- *  the zero sentinel — on every network, so we key on (chain, network, mint).
- *  Used for picker keys and pay-asset selection; keying by mint alone collides
- *  (e.g. ETH on Base vs Arbitrum) and could bridge from the wrong network. */
+/** Stable id for a holding. One chain, so the mint is the whole answer — it used to
+ *  key on (chain, network, mint) because native ETH shares one sentinel mint across
+ *  five networks, and picking the wrong one could bridge from the wrong chain. */
 function assetUid(a) {
-    return `${a.chain}:${a.network ?? ""}:${a.mint}`;
+    return a.mint;
 }
 const DUST_USD = 0.01;
 /** Keep this much SOL for tx fees (swap + deposit) when paying with native SOL. */

@@ -15,25 +15,9 @@ import {
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 describe("assetUid", () => {
-  const nativeEth = (network: string): WalletAsset => ({
-    mint: "0x0000000000000000000000000000000000000000",
-    symbol: "ETH",
-    decimals: 18,
-    amount: BigInt(1),
-    uiAmount: 1,
-    usdValue: 3000,
-    chain: "ethereum",
-    network,
-  });
-
-  it("distinguishes native ETH across networks (same mint, different network)", () => {
-    // The bug: native ETH shares one mint everywhere, so keying by mint collides.
-    expect(assetUid(nativeEth("base-mainnet"))).not.toBe(assetUid(nativeEth("arb-mainnet")));
-  });
-
-  it("is stable across calls", () => {
-    const a = asset({ mint: "So111", chain: "solana" });
-    expect(assetUid(a)).toBe(assetUid(a));
+  it("is the mint — one chain, so nothing else can collide", () => {
+    const a = asset({ mint: "So111" });
+    expect(assetUid(a)).toBe("So111");
   });
 });
 
@@ -112,7 +96,7 @@ describe("spendableBase", () => {
 
 
   it("does NOT reserve for ERC-20 tokens (gas is paid in the native coin)", () => {
-    const usdcOnBase = asset({ mint: "0xUSDC", amount: 50_000_000n, decimals: 6, chain: "ethereum", network: "base-mainnet" });
+    const usdcOnBase = asset({ mint: "0xUSDC", amount: 50_000_000n, decimals: 6, chain: "solana" });
     expect(spendableBase(usdcOnBase)).toBe(50_000_000n);
   });
 

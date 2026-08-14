@@ -36,7 +36,7 @@ export function SendToken({
   const crossing = chain.chain !== "solana";
 
   const sendable = assets
-    .filter((a) => a.chain === "solana" && maxSendable(a) > BigInt(0))
+    .filter((a) => maxSendable(a) > BigInt(0))
     .filter((a) => !crossing || canLeaveSolana(a.mint))
     .sort((a, b) => (a.mint === USDC_MINT ? -1 : b.mint === USDC_MINT ? 1 : b.usdValue - a.usdValue));
 

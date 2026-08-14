@@ -17,7 +17,7 @@ export interface ProviderView {
   decimals: number;
   description: string;
   riskLevel: "low" | "medium" | "high";
-  chain: "solana" | "ethereum";
+  chain: "solana";
   /** Optional group id — providers sharing it collapse into one marketplace card. */
   group?: string;
   /** DefiLlama pool id — for the APY history sparkline. */

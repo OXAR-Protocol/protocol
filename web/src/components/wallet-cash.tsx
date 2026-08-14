@@ -68,7 +68,7 @@ export function WalletCash() {
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {chips.map((a) => (
               <span
-                key={`${a.chain}:${a.network ?? ""}:${a.mint}`}
+                key={a.mint}
                 className="inline-flex items-center gap-1.5 rounded-full border border-black/10 py-1 pl-1 pr-2.5"
               >
                 <TokenIcon asset={a} className="h-4 w-4" />
