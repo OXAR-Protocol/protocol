@@ -19,7 +19,7 @@ export function TopNav() {
   const signIn = useSignIn();
 
   return (
-    <nav data-tour-chrome="header" className="safe-top sticky top-0 z-40 bg-[#fbfaf8]/70 backdrop-blur-md">
+    <nav data-tour-chrome="header" className="safe-top sticky top-0 z-40 bg-page/70 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5">
         <Link
           href={authenticated ? "/you" : "/market"}

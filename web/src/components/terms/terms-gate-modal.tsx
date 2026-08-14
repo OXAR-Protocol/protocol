@@ -65,7 +65,7 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
             Still nowhere near the legal text. That's the same contrast problem a
             tester reported on the banknote cards, and this is the one screen where
             every line has to survive being read. */}
-        <div className="relative h-[132px] shrink-0 overflow-hidden bg-[#faf9f7]">
+        <div className="relative h-[132px] shrink-0 overflow-hidden bg-page">
           <img
             src="/art/torn-eyes.webp"
             alt=""
