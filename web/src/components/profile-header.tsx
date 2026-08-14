@@ -45,12 +45,14 @@ export function ProfileHeader() {
   const email = user?.email?.address;
 
   // A name, in order of how much it says about the person: their .sol, their email
-  // handle, then the address they signed in with.
-  const name =
-    solName ?? (email ? email.split("@")[0]! : address ? `${address.slice(0, 4)}…${address.slice(-4)}` : "you");
-  // Always the address, never the email: the line under a name exists to be copied
-  // into a wallet or an exchange's withdrawal field, and an email can't receive money.
-  const secondary = address ? `${address.slice(0, 6)}…${address.slice(-6)}` : null;
+  // handle, then — failing both — the address itself.
+  const named = solName ?? (email ? email.split("@")[0]! : null);
+  const short = address ? `${address.slice(0, 6)}…${address.slice(-6)}` : null;
+  const name = named ?? short ?? "you";
+  // Only when the name ISN'T already the address. With no .sol and no email the
+  // heading IS the address, and a second line under it said the same string twice
+  // in two different truncations.
+  const secondary = named ? short : null;
   const plate = useMemo(() => plateFor(address ?? name), [address, name]);
 
   const [copied, setCopied] = useState(false);
@@ -76,9 +78,32 @@ export function ProfileHeader() {
         </span>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="truncate text-[clamp(22px,3vw,32px)] leading-tight tracking-[-0.03em] text-ink">
-              {name}
-            </h1>
+            {named ? (
+              <h1 className="truncate text-[clamp(22px,3vw,32px)] leading-tight tracking-[-0.03em] text-ink">
+                {name}
+              </h1>
+            ) : (
+              // The heading is the address, so it does the address's job: tap to copy.
+              <button
+                type="button"
+                onClick={copyAddress}
+                aria-label={t("fund.copyAddress")}
+                className="group inline-flex max-w-full items-center gap-2 text-left"
+              >
+                <h1 className="truncate text-[clamp(22px,3vw,32px)] leading-tight tracking-[-0.03em] text-ink">
+                  {name}
+                </h1>
+                {copied ? (
+                  <Check size={15} strokeWidth={2} className="shrink-0 text-[var(--brand)]" />
+                ) : (
+                  <Copy
+                    size={15}
+                    strokeWidth={1.5}
+                    className="shrink-0 text-ink/30 transition group-hover:text-ink/60"
+                  />
+                )}
+              </button>
+            )}
             <EarlyRiserBadge />
           </div>
           {/* The address is here to be taken somewhere — a wallet, an exchange's
