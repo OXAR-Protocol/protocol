@@ -32,11 +32,13 @@ export function AnimatedAmount({
             // Position + character: a "5" that stays the fifth character stays put,
             // while a "5" replacing a "4" is a new element and animates.
             key={`${i}-${ch}`}
-            layout
-            initial={{ opacity: 0, y: 8, scale: 0.86 }}
+            initial={{ opacity: 0, y: 6, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.86 }}
-            transition={{ type: "spring", stiffness: 520, damping: 34, mass: 0.5 }}
+            // Leaving is a fade in place and nothing else. `layout` used to slide the
+            // survivors along, so pressing keys quickly caught a digit mid-slide,
+            // sitting on top of its neighbour.
+            exit={{ opacity: 0, transition: { duration: 0.08 } }}
+            transition={{ type: "spring", stiffness: 700, damping: 40, mass: 0.4 }}
             className="inline-block tabular-nums"
           >
             {ch}
