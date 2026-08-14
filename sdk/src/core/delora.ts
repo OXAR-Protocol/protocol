@@ -10,19 +10,6 @@ export const DELORA_SOLANA_CHAIN_ID = 1_000_000_001;
 /** Max share of the deposit we let bridge fees consume before blocking. */
 const FEE_CAP_FRACTION = 0.3;
 
-/** Alchemy network id → Delora numeric EVM chain id (our supported set). */
-const NETWORK_CHAIN_ID: Record<string, number> = {
-  "eth-mainnet": 1,
-  "opt-mainnet": 10,
-  "matic-mainnet": 137,
-  "base-mainnet": 8453,
-  "arb-mainnet": 42161,
-};
-
-export function networkToChainId(network: string): number | null {
-  return NETWORK_CHAIN_ID[network] ?? null;
-}
-
 export interface BridgeQuote {
   inputAmount: string;
   outputAmount: string;
@@ -54,38 +41,3 @@ export function bridgeFeeTooHigh(quote: BridgeQuote, depositUsd: number): boolea
   return bridgeFeeUsd(quote) > FEE_CAP_FRACTION * depositUsd;
 }
 
-/** Guaranteed-min USDC out, in base units. */
-export function bridgeNetOut(quote: BridgeQuote): bigint {
-  return BigInt(quote.minOutputAmount);
-}
-
-export interface QuoteRequest {
-  senderAddress: string;
-  originChainId: number;
-  destinationChainId: number;
-  amount: string;
-  originCurrency: string;
-  destinationCurrency: string;
-  receiverAddress: string;
-}
-
-/** Build the (server-route) quote request for an EVM → Solana bridge. The
- * destination is the selected market's asset (USDC / USDG / USDT), not hardcoded. */
-export function buildQuoteRequest(params: {
-  senderAddress: string;
-  originChainId: number;
-  amount: bigint;
-  originCurrency: string;
-  receiverAddress: string;
-  destinationMint: string;
-}): QuoteRequest {
-  return {
-    senderAddress: params.senderAddress,
-    originChainId: params.originChainId,
-    destinationChainId: DELORA_SOLANA_CHAIN_ID,
-    amount: params.amount.toString(),
-    originCurrency: params.originCurrency,
-    destinationCurrency: params.destinationMint,
-    receiverAddress: params.receiverAddress,
-  };
-}

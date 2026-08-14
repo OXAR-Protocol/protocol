@@ -10,15 +10,9 @@ export const en = {
   "nav.you": "you",
 
   // Greetings
-  "greet.late": "Up late",
-  "greet.morning": "Good morning",
-  "greet.afternoon": "Good afternoon",
-  "greet.evening": "Good evening",
 
   // Home
-  "home.sources.one": "{n} source · earning every block",
   "home.sources.many": "{n} sources · earning every block",
-  "home.empty.cta": "drop dollars into a source to start earning",
   "home.startHere": "start here",
   "home.napping1": "your money's been napping.",
   "home.napping2": "let's wake it up.",
@@ -27,20 +21,13 @@ export const en = {
   "home.wakeUp": "wake up your money",
   "home.wallet.label": "in your wallet · not working yet",
   "home.wallet.cta": "put it to work",
-  "home.whereSleeping": "where it's sleeping",
-  "home.manage": "manage →",
-  "home.recentActivity": "recent activity",
   "movers.title": "on the move · 24h",
-  "movers.all": "see all →",
 
   // Yield list
   "yield.title": "Where your money can sleep",
   "yield.subtitle":
     "Pick a source. Open it. Add dollars. Withdraw anytime. Money goes straight into the source — it stays yours.",
   "yield.clear": "clear",
-  "yield.chain.all": "All chains",
-  "yield.chain.solana": "Solana only",
-  "yield.chain.cross": "Cross-chain only",
   "yield.liveNow": "Live now",
   "sort.default": "our order",
   "sort.name": "a → z",
@@ -66,10 +53,6 @@ export const en = {
   "yield.nfa.body": "Rates are current targets, not guarantees. You always sign every move.",
 
   // Pile
-  "pile.title": "Everything you've got working",
-  "pile.subtitle":
-    "Your live positions across every source. Tap one to add more or withdraw — the money stays in your own hands.",
-  "pile.total": "Total balance",
   "pile.positions": "Positions",
   "pile.empty.title": "You haven't deposited yet",
   "pile.empty.body": "Your positions show up here once you put money to work.",
@@ -86,14 +69,7 @@ export const en = {
   "deposit.youllHold": "you'll hold ≈ {value}",
   "deposit.swapCost": "swap cost ~{value}",
   "deposit.cantQuote": "couldn't quote — try a different amount",
-  "deposit.buyAmountHint": "how much to buy · apple pay or card",
-  "deposit.bridgeMinAmount": "minimum {value} to buy from another chain — or pay with USDC on Solana",
-  "deposit.bridgeConfirmsHint": "paying from another chain — you'll confirm a few steps in your wallet",
   "confirm.review": "review your {verb}",
-  "confirm.step.approve": "approve",
-  "confirm.step.bridge": "bridge",
-  "confirm.step.buy": "buy",
-  "confirm.step.hint": "you'll confirm each step in your wallet",
   "confirm.youPay": "you pay",
   "confirm.youllHold": "you'll hold",
   "confirm.youllGet": "you'll get",
@@ -105,7 +81,6 @@ export const en = {
   "confirm.ownWallet": "your own wallet",
   "confirm.footer":
     "withdraw anytime · no lock · OXAR never holds your money — runs on USDC, digital dollars (1 USDC = $1). your wallet signs it.",
-  "confirm.confirm": "confirm {verb}",
   "confirm.hold": "hold to {verb}",
   "confirm.back": "back",
   "success.deposited": "Deposited",
@@ -142,7 +117,6 @@ export const en = {
 
   // You / settings
   "you.wallet": "your wallet",
-  "you.signedOut": "you're signed out",
   "settings.label": "you",
   "settings.title": "Settings",
   "you.language": "language",
@@ -151,7 +125,6 @@ export const en = {
   "you.signOut": "sign out",
   "badge.earlyRiser.title": "early riser",
   "badge.earlyRiser.subtitle": "here while the market was still asleep",
-  "badge.earlyRiser.tag": "closed alpha",
 
   // Risk labels
   "risk.low": "low risk",
@@ -170,19 +143,15 @@ export const en = {
   "rail.withdrawLabel": "Withdraw {sym}",
   "rail.worth": "worth",
   "rail.available": "available",
-  "pay.keptForFees": "all {sym} kept for network fees",
   "rail.sellAll": "sell all",
   "rail.switchUnits": "switch between dollars and units",
   "rail.youHold": "you hold {n} {sym}",
   "rail.sellUnitsLabel": "Sell {sym}",
-  "rail.showUnits": "enter in {sym}",
-  "rail.showDollars": "enter in dollars",
   "bulk.select": "select {name}",
   "bulk.progress": "selling {n} of {total}",
   "alloc.dollars": "dollars to spend",
   "alloc.switchTo": "put it in {name} instead",
   "alloc.switchUnits": "switch between dollars and units",
-  "bulk.failed": "didn't go through: {ids}",
   "bulk.sellSelected": "sell all",
   "bulk.clear": "clear",
   "pile.history": "history",
@@ -215,7 +184,6 @@ export const en = {
   "rail.actionSell": "Sell",
   "rail.actionWithdraw": "Withdraw",
   "rail.youReceive": "you receive",
-  "rail.belowMarketShort": "{pct}% below market value",
   "rail.exitCostNow": "getting out right now would cost about {pct}% — that's the market's price, not a fee we charge",
   "rail.exitCostUnavailable": "there's no way out at this size right now — that's the market, not us",
   "rail.exitCostCeiling": "right now, about {usd} is the most that would sell in one go — a bigger position means selling in a few goes, with the price moving each time. that's the market's depth, not a fee we charge",
@@ -232,8 +200,6 @@ export const en = {
   "rail.guestTitle": "sign in to put money in",
   "rail.guestBody": "the numbers here are live. your money stays in your own wallet — we never hold it.",
   "rail.guestCta": "sign in",
-  "common.or": "or",
-  "common.copy": "Copy",
   "common.copied": "Copied",
   "common.close": "close",
   "feedback.label": "feedback",
@@ -250,12 +216,9 @@ export const en = {
   "feedback.orTelegram": "or just write to",
   "feedback.errFailed": "couldn't send that — try again, or write on telegram",
   "deposit.afterSwap": " (after swap)",
-  "confirm.route.bridge": "bridge",
-  "confirm.route.fee": "fee",
 
   // Wallet menu
   "wallet.connecting": "connecting…",
-  "wallet.send": "send",
   "wallet.exportKey": "export private key",
   "wallet.feedback": "tell us",
   "wallet.disconnect": "disconnect",
@@ -298,8 +261,6 @@ export const en = {
   "login.continue": "continue",
 
   // Activity
-  "history.title": "your history",
-  "history.subtitle": "what your money was worth, and everything you did to it.",
   "history.range.7": "7 days",
   "history.range.30": "30 days",
   "history.range.90": "90 days",
@@ -320,12 +281,8 @@ export const en = {
   "history.tookOut": "took out",
   "history.trades": "trades",
   "history.onDays": "on {n} days",
-  "history.byDay": "day by day",
   "history.today": "today",
   "history.noChart": "no value history yet — it appears once you hold something.",
-  "gas.missing": "paying from {chain} needs a little {sym} on {chain} for the network fee — about {usd}. That fee is charged by the network in {sym}, so dollars can't cover it. The Solana side is on us.",
-  "gas.low": "you have {have} of {sym} on {chain} — the network fee there usually costs about {usd}. It may not go through. The Solana side is on us.",
-  "gas.split": "network fee on {chain} is paid in that chain's own coin, from your wallet. The Solana side is on us.",
   "market.filterScope": "these narrow the savings rates below — stocks and metals aren't filtered",
   "err.gaslessDown": "free network fees are briefly unavailable and your wallet has no SOL to cover one. your money is safe where it is — try again in a moment.",
   "intro.headline": "where your money sleeps",
@@ -425,7 +382,6 @@ export const en = {
   "profile.working": "{value} working",
   "profile.allTogether": "everything, all together",
   "profile.positionsLabel": "what it's made of",
-  "profile.allPositions": "all {n} positions",
   "profile.positions": "{n} positions",
   "profile.joined": "here since {date}",
   "money.working": "already working",
@@ -454,14 +410,12 @@ export const en = {
   "send.review.warnFinal": "Once it's sent, no one can send it back.",
   "send.review.confirm": "send it",
   "common.signIn": "sign in",
-  "guest.you.title": "your account lives here",
   "guest.you.body": "Sign in to see your wallet address, your language and the badge you earned by arriving early.",
   "fund.label": "add money",
   "fund.title": "Top up",
   "fund.free": "free to use",
   "fund.back": "back",
   "fund.timing": "crypto arrives in about a minute; a card takes 5–15.",
-  "fund.yourAddress": "your address",
   "fund.crypto.title": "From a crypto wallet",
   "fund.crypto.body": "Send USDC from Phantom, MetaMask or any wallet you hold",
   "fund.crypto.hint":
@@ -499,7 +453,6 @@ export const en = {
   "cardroute.paybis.title": "Paybis",
   "cardroute.notInCountry": "unlikely to work in your country — the payment is usually declined",
   "cardroute.paybis.body": "Opens their page, where you set the amount. Needs an account and an ID check. Takes euros, dollars or hryvnia.",
-  "cardroute.belowMin": "enter at least ${min} in the amount field above",
   "cardroute.footer":
     "Whoever takes the payment holds the licence and checks you. We never touch the money and take nothing.",
 
@@ -542,7 +495,6 @@ export const en = {
   "send.token.noneForChain": "Nothing in the wallet can travel to {chain} — dollars, USDT or SOL can.",
   "send.label": "Send / Withdraw",
   "send.sent": "Sent",
-  "send.youSend": "You send",
   "send.loading": "Loading…",
   "send.noAssets": "No assets to send.",
   "send.evmWarning": "make sure this address receives on {chain} — funds sent to the wrong network can't be recovered.",
@@ -553,7 +505,6 @@ export const en = {
   "send.sentTo": "to {address} on {chain}",
   "send.viewSolscan": "View on Solscan",
   "send.sending": "Sending…",
-  "send.action": "Send {asset} → {chain}",
   "deposit.youllDo": "you'll {verb} {value}",
 
   // User-facing errors (mapped from thrown messages)

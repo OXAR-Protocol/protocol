@@ -94,5 +94,3 @@ export function useSwapOutPreview(params: {
   return state;
 }
 
-/** Above this the sell cost is worth flagging in amber rather than stating quietly. */
-export const NOTABLE_SELL_COST = 0.01;
