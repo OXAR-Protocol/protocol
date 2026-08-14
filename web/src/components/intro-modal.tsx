@@ -127,7 +127,7 @@ export function IntroModal() {
               <LanguageChips />
             </div>
 
-            <div className="relative h-[240px] w-full overflow-hidden bg-[#faf9f7]">
+            <div className="relative h-[240px] w-full overflow-hidden bg-page">
               <img
                 src="/art/intro/sleeping-money.webp"
                 alt=""

@@ -114,7 +114,10 @@ export function WarpProvider({ children }: { children: ReactNode }) {
       const elapsed = now - startTimeRef.current;
       const progress = Math.min(elapsed / duration, 1);
 
-      ctx.fillStyle = "#ffffff";
+      // The canvas covers the whole screen, so painting it white on a dark theme is
+      // a flash of the other design mid-navigation. Read the live page colour.
+      ctx.fillStyle =
+        getComputedStyle(document.documentElement).getPropertyValue("--page").trim() || "#ffffff";
       ctx.fillRect(0, 0, w, h);
 
       ctx.save();

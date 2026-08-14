@@ -4,6 +4,8 @@ import { PrivyProvider as PrivyProviderBase } from "@privy-io/react-auth";
 import { toSolanaWalletConnectors, useSolanaFundingPlugin } from "@privy-io/react-auth/solana";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { ReactNode } from "react";
+
+import { useTheme } from "@/context/theme-context";
 import { RPC_URL } from "@/lib/constants";
 
 const PRIVY_APP_ID: string = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? (() => {
@@ -39,8 +41,18 @@ function SolanaFundingPlugin() {
 }
 
 export function PrivyProvider({ children }: { children: ReactNode }) {
+  // Privy draws its own sheets — sign-in, the wallet list, the deposit address — and
+  // a white modal over a dark app is the loudest seam there is. It takes plain values,
+  // so it follows our theme by being handed our values.
+  const { theme } = useTheme();
+  const dark = theme === "dark";
   return (
     <PrivyProviderBase
+      // Privy reads `config` when it mounts, so a theme switch has to remount it or
+      // the sheet keeps the old palette until a reload — which reads as the switch
+      // not working. Remounting is cheap here: the session lives in storage, not in
+      // this tree.
+      key={theme}
       appId={PRIVY_APP_ID}
       config={{
         // v2: the account is the wallet you log in with. Email → we create an
@@ -63,9 +75,9 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
         appearance: {
           // The app's own paper, not white: a modal a shade brighter than the page
           // behind it reads as a different product borrowed for the occasion.
-          theme: "#fbfaf8",
-          // The brand's violet, the same accent the app uses for anything live.
-          accentColor: "#3c05c7",
+          theme: dark ? "#141414" : "#fbfaf8",
+          // The brand's violet — lifted on dark, where the light-theme value goes black.
+          accentColor: dark ? "#a78bfa" : "#3c05c7",
           // Solana only, for login and for linking. The account IS a Solana wallet;
           // an EVM wallet was only ever a way to pay, and money now arrives from other
           // chains as a deposit address (Relay) that needs no wallet connected at all.
@@ -75,9 +87,8 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
           // person actually has installed, so a Backpack user isn't told their own
           // wallet doesn't exist.
           walletList: ["phantom", "solflare", "backpack", "detected_solana_wallets"],
-          // The dark mark, because the sheet is light now — the white one used to be
-          // the only thing visible on a black modal and would be invisible here.
-          logo: "https://oxar.app/images/black.svg",
+          // Whichever mark survives the sheet it's printed on.
+          logo: dark ? "https://oxar.app/images/white.svg" : "https://oxar.app/images/black.svg",
           landingHeader: "Welcome to OXAR",
           loginMessage: "Real-world yields. On-chain access.",
           showWalletLoginFirst: false,
