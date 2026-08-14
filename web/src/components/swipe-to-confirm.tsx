@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
-import { useIsNativeApp } from "@/hooks/use-native-app";
+import { useHoldsToConfirm } from "@/hooks/use-holds-to-confirm";
 import { useT } from "@/lib/i18n";
 
 /** How long the press has to last to count as a decision. */
@@ -12,17 +12,16 @@ const HOLD_MS = 800;
 /**
  * The last gesture before money moves — and it isn't the same gesture everywhere.
  *
- * In the app it's a press and hold. A phone is held one-handed while walking, the
- * button sits under a thumb that has just been scrolling, and a tap is a millimetre
- * away from an accident; the hold costs a moment and collides with nothing (no
- * browser reserves a long press, and it works with a thumb, a mouse or a held
- * space bar). It replaced a swipe, which on iOS was the browser's own "go back"
+ * Under a thumb it's a press and hold. The phone is held one-handed, the button sits
+ * under a finger that has just been scrolling, and a tap is a millimetre from an
+ * accident; the hold costs a moment and collides with nothing (no browser reserves a
+ * long press). It replaced a swipe, which on iOS was the browser's own "go back"
  * gesture — the page left instead of confirming.
  *
- * On the web it's a click. A pointer doesn't slip, nothing scrolls under it, and
- * making someone hold a mouse button down for the better part of a second is a
- * ceremony that reads as a broken button, not as care. Same component, same words,
- * the gesture the device deserves.
+ * Under a mouse it's a click. A pointer doesn't slip, nothing scrolls under it, and
+ * making someone hold a button down for most of a second reads as broken rather than
+ * careful. Same component, same words — `useHoldsToConfirm` decides which, by input
+ * rather than by screen size or by which app is showing the page.
  */
 export function SwipeToConfirm({
   label,
@@ -39,7 +38,7 @@ export function SwipeToConfirm({
   onConfirm: () => void;
 }) {
   const { t } = useT();
-  const hold = useIsNativeApp();
+  const hold = useHoldsToConfirm();
   const [progress, setProgress] = useState(0);
   const holding = useRef(false);
   const startedAt = useRef(0);
