@@ -67,7 +67,9 @@ export function SheetShell({
           if (info.offset.y > 120 || info.velocity.y > 600) onClose();
         }}
         onClick={(e) => e.stopPropagation()}
-        className="safe-bottom relative max-h-[88vh] w-full overflow-y-auto rounded-t-[22px] border border-black/10 bg-white px-6 pb-6 pt-3 sm:max-h-full sm:max-w-[440px] sm:rounded-[16px] sm:px-7 sm:pb-7 sm:pt-6"
+        // `--pb` is the padding the sheet wants; `.safe-bottom` adds the notch inset
+        // on top of it (see globals.css) rather than standing in for it.
+        className="safe-bottom relative max-h-[88vh] w-full overflow-y-auto rounded-t-[22px] border border-black/10 bg-white px-6 pt-3 [--pb:1.5rem] sm:max-h-full sm:max-w-[440px] sm:rounded-[16px] sm:px-7 sm:pt-6 sm:[--pb:1.75rem]"
       >
         {/* The handle is the instruction: a bar you can grab, and the only place the
             sheet listens for a drag. `touch-none` keeps the browser from claiming the

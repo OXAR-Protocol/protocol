@@ -86,10 +86,11 @@ export function DepositConfirm({
 
       {error && <p className="mt-3 text-xs text-red-500 text-center">{localizeError(error, t)}</p>}
 
-      {/* A swipe, not a tap: this is the point of no return on a screen full of
-          numbers, and a thumb scrolling past a button is how accidents happen. */}
+      {/* The point of no return on a screen full of numbers. On a phone that asks
+          for a hold, because a thumb scrolling past a button is how accidents
+          happen; in a browser a click is enough (see `SwipeToConfirm`). */}
       <SwipeToConfirm
-        label={t("confirm.hold", { verb: verb.toLowerCase() })}
+        label={verb.toLowerCase()}
         busyLabel={label ?? undefined}
         busy={busy}
         onConfirm={onConfirm}

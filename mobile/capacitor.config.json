@@ -7,6 +7,11 @@
     "cleartext": false
   },
   "ios": {
-    "limitsNavigationsToAppBoundDomains": false
+    "limitsNavigationsToAppBoundDomains": false,
+    "appendUserAgent": "OXARApp"
+  },
+  "appendUserAgent": "OXARApp",
+  "android": {
+    "appendUserAgent": "OXARApp"
   }
 }

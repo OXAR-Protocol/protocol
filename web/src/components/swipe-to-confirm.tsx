@@ -3,21 +3,26 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
+import { useIsNativeApp } from "@/hooks/use-native-app";
+import { useT } from "@/lib/i18n";
+
 /** How long the press has to last to count as a decision. */
 const HOLD_MS = 800;
 
 /**
- * The last gesture before money moves: press and hold.
+ * The last gesture before money moves — and it isn't the same gesture everywhere.
  *
- * It was a swipe first, and a swipe was wrong on the web. A horizontal drag that
- * starts near the left edge is the browser's own "go back" gesture — on iOS the
- * page navigated away instead of confirming, which is the worst possible outcome
- * for a control whose whole job is deliberateness.
+ * In the app it's a press and hold. A phone is held one-handed while walking, the
+ * button sits under a thumb that has just been scrolling, and a tap is a millimetre
+ * away from an accident; the hold costs a moment and collides with nothing (no
+ * browser reserves a long press, and it works with a thumb, a mouse or a held
+ * space bar). It replaced a swipe, which on iOS was the browser's own "go back"
+ * gesture — the page left instead of confirming.
  *
- * Holding costs the same intent and collides with nothing: no browser reserves a
- * long press, and it works identically with a mouse, a thumb and a keyboard
- * (space or enter held down). Let go early and the fill drains back — nothing
- * happens, which is what a slip should do.
+ * On the web it's a click. A pointer doesn't slip, nothing scrolls under it, and
+ * making someone hold a mouse button down for the better part of a second is a
+ * ceremony that reads as a broken button, not as care. Same component, same words,
+ * the gesture the device deserves.
  */
 export function SwipeToConfirm({
   label,
@@ -26,12 +31,15 @@ export function SwipeToConfirm({
   disabled,
   onConfirm,
 }: {
+  /** What the act is — "sell", "buy $20". The hold prefix is added where it applies. */
   label: string;
   busyLabel?: string;
   busy?: boolean;
   disabled?: boolean;
   onConfirm: () => void;
 }) {
+  const { t } = useT();
+  const hold = useIsNativeApp();
   const [progress, setProgress] = useState(0);
   const holding = useRef(false);
   const startedAt = useRef(0);
@@ -71,6 +79,32 @@ export function SwipeToConfirm({
 
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
+  const body = (
+    <span className="relative inline-flex items-center gap-2">
+      {busy ? (
+        <>
+          <Loader2 size={14} className="animate-spin" />
+          {busyLabel ?? label}
+        </>
+      ) : (
+        hold ? t("confirm.hold", { verb: label }) : label
+      )}
+    </span>
+  );
+
+  if (!hold) {
+    return (
+      <button
+        type="button"
+        disabled={locked}
+        onClick={onConfirm}
+        className="mt-3 inline-flex h-[52px] w-full items-center justify-center rounded-full bg-black text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-30"
+      >
+        {body}
+      </button>
+    );
+  }
+
   return (
     <button
       type="button"
@@ -94,16 +128,7 @@ export function SwipeToConfirm({
         style={{ width: `${progress * 100}%` }}
         className="absolute inset-y-0 left-0 bg-black/[0.07]"
       />
-      <span className="relative inline-flex items-center gap-2">
-        {busy ? (
-          <>
-            <Loader2 size={14} className="animate-spin" />
-            {busyLabel ?? label}
-          </>
-        ) : (
-          label
-        )}
-      </span>
+      {body}
     </button>
   );
 }

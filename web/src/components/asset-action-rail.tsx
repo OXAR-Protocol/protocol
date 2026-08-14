@@ -141,11 +141,9 @@ export function AssetActionRail({
                 </button>
               </span>
             }
-            // The label IS the instruction: a button that reads "sell" but doesn't
-            // respond to a tap is a broken button, not a careful one.
-            actionLabel={t("confirm.hold", {
-              verb: (price ? t("rail.actionSell") : t("rail.actionWithdraw")).toLowerCase(),
-            })}
+            // Just the act. Where it takes a hold — the app — the control says so
+            // itself; a button that reads "sell" and ignores a tap is a broken button.
+            actionLabel={(price ? t("rail.actionSell") : t("rail.actionWithdraw")).toLowerCase()}
             onAction={onSell}
             loading={loading}
             disabled={loading || amount <= 0 || amount > positionValue}
