@@ -9,7 +9,7 @@ import { RISK_TONE, fromBaseUnits, unitLabelOf } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { Sparkline } from "@/components/sparkline";
 import { trendUp, trendLineTone, trendTextTone } from "@/lib/yield/trend";
-import { floorTo } from "@oxar/sdk";
+import { floorTo, formatUsdAmount } from "@oxar/sdk";
 import { LiveAmount } from "@/components/live-amount";
 import { PickButton } from "@/components/pick-button";
 import { useT } from "@/lib/i18n";
@@ -98,9 +98,9 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
           )}
           {/* Which of your holdings is actually down — the same line the list rows
               carry, so switching layout doesn't lose the answer. */}
-          {typeof earned === "number" && Math.abs(earned) >= 0.005 && (
+          {typeof earned === "number" && (
             <p className={`text-[11px] tabular-nums ${earned >= 0 ? "text-black/40" : "text-red-600"}`}>
-              {earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)} {t("position.sinceBuy")}
+              {earned >= 0 ? "+" : "−"}${formatUsdAmount(Math.abs(earned))} {t("position.sinceBuy")}
             </p>
           )}
         </div>

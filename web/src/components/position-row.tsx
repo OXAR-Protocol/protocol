@@ -2,7 +2,7 @@
 
 import { ArrowUpRight } from "lucide-react";
 
-import { floorTo } from "@oxar/sdk";
+import { floorTo, formatUsdAmount } from "@oxar/sdk";
 
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { LiveAmount } from "@/components/live-amount";
@@ -103,10 +103,14 @@ export function PositionRow({ view, onOpen, change24h, chart, earned, picked, on
             </p>
           )}
           {/* Which of your holdings is actually down. The card above says what the
-              whole portfolio did; only a per-position figure answers "which one". */}
-          {typeof earned === "number" && Math.abs(earned) >= 0.005 && (
+              whole portfolio did; only a per-position figure answers "which one".
+              Shown for every position the engine can attribute, however small: it
+              used to hide under half a cent, so a week-old deposit had the line and
+              a fresh one didn't, which reads as the app knowing about one and not
+              the other. Small amounts get the digits they need instead. */}
+          {typeof earned === "number" && (
             <p className={`text-[11px] tabular-nums ${earned >= 0 ? "text-black/40" : "text-red-600"}`}>
-              {earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)} {t("position.sinceBuy")}
+              {earned >= 0 ? "+" : "−"}${formatUsdAmount(Math.abs(earned))} {t("position.sinceBuy")}
             </p>
           )}
         </>

@@ -82,8 +82,10 @@ export function AssetChart({ mint }: { mint: string }) {
   const hi = closes.length > 1 ? Math.max(...closes) : null;
 
   return (
-    <div className="p-5 rounded-[12px] border border-black/10 bg-white" data-tour="chart">
-      <div className="flex items-start justify-between gap-3 mb-4">
+    // No card around it, like the one on your own page: the line IS the content, and
+    // a border only draws a box around the thing you came to look at.
+    <div data-tour="chart">
+      <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           {changePct !== null && (
             <span className={`text-[13px] tabular-nums ${up ? "text-emerald-600" : "text-red-600"}`}>
@@ -98,14 +100,13 @@ export function AssetChart({ mint }: { mint: string }) {
           )}
         </div>
         <div className="flex gap-1">
+          {/* Same chips as the portfolio's, so a range reads the same wherever it is. */}
           {RANGES.map((r) => (
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`px-2 py-1 rounded-[4px] text-[10px] lowercase tracking-wide transition ${
-                range === r
-                  ? "border border-black/30 text-black"
-                  : "border border-transparent text-black/45 hover:text-black/70"
+              className={`rounded-full px-2.5 py-1 text-[11px] lowercase tracking-wide transition ${
+                range === r ? "bg-black text-white" : "bg-black/[0.05] text-black/55 hover:text-black"
               }`}
             >
               {r}
@@ -114,7 +115,8 @@ export function AssetChart({ mint }: { mint: string }) {
         </div>
       </div>
 
-      <div className="h-56 flex items-center justify-center">
+      {/* Full width on a phone — the page's padding stops at the chart's edge. */}
+      <div className="-mx-5 flex h-56 items-center justify-center sm:mx-0">
         {loading ? (
           <Loader2 className="animate-spin text-black/40" size={18} />
         ) : closes.length > 1 ? (
