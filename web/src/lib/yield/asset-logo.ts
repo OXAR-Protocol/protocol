@@ -32,6 +32,10 @@ const ASSET_LOGOS: Record<string, string> = {
   "onre-onyc": "/logos/assets/onre-onyc.png",
   "gold-xaut": "/logos/assets/gold-xaut.png",
   "gold-oro": "/logos/assets/gold-oro.png",
+  // Silver's rim colour isn't a guess: the issuer's own art carries #1a1a1a in the
+  // RGB of its transparent pixels, so filling the square with it is the mark
+  // finished rather than reframed.
+  "silver-dominion": "/logos/assets/silver-dominion.png",
 };
 
 export function assetLogoSrc(id: string): string | undefined {

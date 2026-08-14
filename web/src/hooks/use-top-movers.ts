@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 
 import { XSTOCKS } from "@/lib/yield/xstocks";
-import { GOLD } from "@/lib/yield/gold";
+import { METALS } from "@/lib/yield/metals-catalog";
 import { useStockPrices } from "./use-stock-prices";
 
 export interface Mover {
@@ -20,7 +20,7 @@ export interface Mover {
 // moves. Yield sources earn a steady APY, not a price move, so they aren't "movers".
 const CATALOG = [
   ...XSTOCKS.map((s) => ({ id: s.id, name: s.name, token: s.token, symbol: s.symbol, mint: s.mint })),
-  ...GOLD.map((g) => ({ id: g.id, name: g.name, token: g.token, symbol: g.symbol, mint: g.mint })),
+  ...METALS.map((m) => ({ id: m.id, name: m.name, token: m.token, symbol: m.symbol, mint: m.mint })),
 ];
 
 const ALL_MINTS = CATALOG.map((c) => c.mint);

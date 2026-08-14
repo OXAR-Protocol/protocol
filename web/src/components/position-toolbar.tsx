@@ -5,7 +5,7 @@ import { List, LayoutGrid } from "lucide-react";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { isXStock } from "@/lib/yield/xstocks";
-import { isGold } from "@/lib/yield/gold";
+import { isMetal } from "@/lib/yield/metals-catalog";
 import { useT } from "@/lib/i18n";
 
 export type Layout = "list" | "grid";
@@ -15,9 +15,9 @@ export type Layout = "list" | "grid";
  * the recent feed", which is not a property of the asset, not a question anyone asks
  * of their own positions, and — reported by a user — not guessable from the word.
  */
-export type Filter = "all" | "yield" | "stocks" | "gold";
+export type Filter = "all" | "yield" | "stocks" | "metals";
 
-const FILTERS = ["all", "yield", "stocks", "gold"] as const;
+const FILTERS = ["all", "yield", "stocks", "metals"] as const;
 
 interface Props {
   /** Every held position — decides which controls are worth offering at all. */
@@ -40,7 +40,7 @@ export function PositionToolbar({ allHeld, filter, onFilter, layout, onLayout, s
   const offered = FILTERS.filter((f) => {
     if (f === "all") return true;
     if (f === "stocks") return allHeld.some((v) => isXStock(v.id));
-    if (f === "gold") return allHeld.some((v) => isGold(v.id));
+    if (f === "metals") return allHeld.some((v) => isMetal(v.id));
     return allHeld.some((v) => !isPriceExposure(v.id));
   });
 

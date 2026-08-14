@@ -15,6 +15,7 @@ import {
   marketLooksBroken,
 } from "@oxar/sdk";
 import { UserFacingError } from "./errors";
+import { METALS, METAL_MINTS, METAL_PROGRAMS, type MetalMeta } from "./metals-catalog";
 import type {
   BuildIxParams,
   RedeemTxParams,
@@ -23,91 +24,48 @@ import type {
 } from "./types";
 
 /**
- * Tokenized physical gold — same swap-and-hold model as Ondo/xStocks: buy = swap
- * USDC→gold, sell = swap back, held in the user's own wallet. No APY (price
+ * Tokenized physical metal — same swap-and-hold model as Ondo/xStocks: buy = swap
+ * USDC→metal, sell = swap back, held in the user's own wallet. No APY (price
  * exposure); P&L = current value − on-chain cost basis (earnings engine).
  *
- * Unlike xStocks (Token-2022), gold tokens are CLASSIC SPL (the Token program,
- * 6 decimals), so holdings are read with a Token-program scan and value uses the
- * token's own decimals. Gold is a commodity, not a US security, so it is NOT
- * behind the Reg S stock geoblock.
+ * Metals span both token programs (gold is classic SPL, Dominion Silver is
+ * Token-2022), so balances are read with one scan per program in the catalog.
+ * A metal is a commodity, not a US security, so it is NOT behind the Reg S
+ * stock geoblock.
  */
 const USDC = new PublicKey(USDC_MINT);
-const TOKEN_PROGRAM = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 
-export interface GoldMeta {
-  id: string; // "gold-<symbol>"
-  symbol: string; // ticker, e.g. "XAUT"
-  token: string; // display symbol, e.g. "XAUt0"
-  name: string; // display name, e.g. "Tether Gold"
-  mint: string; // gold token mint (classic SPL)
-  decimals: number; // token decimals (XAUt0 = 6)
-}
-
-// Catalog — physically-backed gold tokens with usable Solana liquidity (verified via
-// Jupiter). XAUt0 (Tether Gold) is the deepest, 1 token ≈ 1 troy oz. Extend = append
-// a row (P&L follows automatically via /api/earnings).
-export const GOLD: readonly GoldMeta[] = [
-  {
-    id: "gold-xaut",
-    symbol: "XAUT",
-    token: "XAUt0",
-    name: "Tether Gold",
-    mint: "AymATz4TCL9sWNEEV9Kvyz45CHVhDZ6kUgjTJPzLpU9P",
-    decimals: 6,
-  },
-  {
-    // ORO. Same ounce, different promise: this mint has NO freeze authority, where
-    // Tether Gold's issuer can freeze a holder's balance. That is the reason it is
-    // here — it is the only gold on Solana that matches what this app says about
-    // whose money it is. Costs more to enter (~0.25% vs ~0.03% on a $200 buy,
-    // measured 2026-07-31) and the book is thinner: 0.24% at $5k, 0.36% at $20k.
-    //
-    // Their 3–4% staking yield is deliberately NOT offered: it locks the gold for
-    // 12 months, and "withdraw anytime" is a promise we keep. Price exposure only.
-    id: "gold-oro",
-    symbol: "ORO",
-    token: "ORO",
-    name: "ORO Gold",
-    mint: "GoLDppdjB1vDTPSGxyMJFqdnj134yH6Prg9eqsGDiw6A",
-    decimals: 6,
-  },
-];
-
-const GOLD_MINTS = GOLD.map((g) => g.mint);
-
-/** True for a gold provider id (vs a yield source). */
-export function isGold(id: string): boolean {
-  return id.startsWith("gold-");
-}
-
-// --- Shared, deduped batch reads (one network call covers all gold tokens) ---
+// --- Shared, deduped batch reads (one round covers every metal) ---
 interface Holding {
   raw: bigint;
   ui: number;
 }
 const holdingsInflight = new Map<string, Promise<Record<string, Holding>>>();
 
-/** All gold balances for `owner` in ONE Token-program scan, filtered to GOLD mints.
+/** All metal balances for `owner`, one scan per token program, filtered to METAL_MINTS.
  *  raw = base units (for swaps), ui = human amount (for value). Cached 30s + deduped. */
 async function allHoldings(owner: PublicKey, connection: Connection): Promise<Record<string, Holding>> {
   const key = owner.toBase58();
-  const cacheKey = `gold-holdings:${key}`;
+  const cacheKey = `metal-holdings:${key}`;
   const cached = getCached<Record<string, Holding>>(cacheKey);
   if (cached) return cached;
   const pending = holdingsInflight.get(key);
   if (pending) return pending;
   const promise = (async () => {
-    const { value } = await connection.getParsedTokenAccountsByOwner(owner, { programId: TOKEN_PROGRAM });
+    const scans = await Promise.all(
+      METAL_PROGRAMS.map((programId) => connection.getParsedTokenAccountsByOwner(owner, { programId })),
+    );
     const map: Record<string, Holding> = {};
-    for (const { account } of value) {
-      const info = (account.data as ParsedAccountData).parsed?.info;
-      const mint: string | undefined = info?.mint;
-      if (!mint || !GOLD_MINTS.includes(mint)) continue;
-      const ta = info?.tokenAmount;
-      if (!ta?.amount) continue;
-      const cur = map[mint] ?? { raw: BigInt(0), ui: 0 };
-      map[mint] = { raw: cur.raw + BigInt(ta.amount), ui: cur.ui + (ta.uiAmount ?? 0) };
+    for (const { value } of scans) {
+      for (const { account } of value) {
+        const info = (account.data as ParsedAccountData).parsed?.info;
+        const mint: string | undefined = info?.mint;
+        if (!mint || !METAL_MINTS.includes(mint)) continue;
+        const ta = info?.tokenAmount;
+        if (!ta?.amount) continue;
+        const cur = map[mint] ?? { raw: BigInt(0), ui: 0 };
+        map[mint] = { raw: cur.raw + BigInt(ta.amount), ui: cur.ui + (ta.uiAmount ?? 0) };
+      }
     }
     setCache(cacheKey, map);
     return map;
@@ -120,19 +78,19 @@ async function allHoldings(owner: PublicKey, connection: Connection): Promise<Re
 
 let pricesInflight: Promise<Record<string, number>> | null = null;
 
-/** USD price per gold mint in ONE Jupiter Price v3 call. Cached 60s + deduped. */
+/** USD price per metal mint in ONE Jupiter Price v3 call. Cached 60s + deduped. */
 async function allPrices(): Promise<Record<string, number>> {
-  const cacheKey = "gold-prices-all";
+  const cacheKey = "metal-prices-all";
   const cached = getCached<Record<string, number>>(cacheKey);
   if (cached) return cached;
   if (pricesInflight) return pricesInflight;
   pricesInflight = (async () => {
     try {
-      const res = await fetch(`https://lite-api.jup.ag/price/v3?ids=${GOLD_MINTS.join(",")}`);
+      const res = await fetch(`https://lite-api.jup.ag/price/v3?ids=${METAL_MINTS.join(",")}`);
       if (!res.ok) return {};
       const json = (await res.json()) as Record<string, { usdPrice?: number } | undefined>;
       const out: Record<string, number> = {};
-      for (const m of GOLD_MINTS) {
+      for (const m of METAL_MINTS) {
         const p = json[m]?.usdPrice;
         if (typeof p === "number" && p > 0) out[m] = p;
       }
@@ -147,7 +105,7 @@ async function allPrices(): Promise<Record<string, number>> {
   return pricesInflight;
 }
 
-export function createGoldProvider(cfg: GoldMeta): YieldProvider {
+export function createMetalProvider(cfg: MetalMeta): YieldProvider {
   const heldMint = cfg.mint;
 
   function valueUsdcBase(ui: number, price: number): bigint {
@@ -159,15 +117,15 @@ export function createGoldProvider(cfg: GoldMeta): YieldProvider {
     // Cost is shown before signing, so it's the user's call — we only stop a route that
     // loses most of the value. Judged on the amounts, never on `priceImpactPct`, which
     // misreports thin tokens badly.
-    const goldPrice = (await allPrices())[heldMint] ?? 0;
+    const metalPrice = (await allPrices())[heldMint] ?? 0;
     const buying = outputMint === heldMint;
     const ratio = quoteDeliveryRatio({
       inAmount: BigInt(quote.inAmount),
       outAmount: BigInt(quote.outAmount),
       inDecimals: buying ? USDC_DECIMALS : cfg.decimals,
       outDecimals: buying ? cfg.decimals : USDC_DECIMALS,
-      inPriceUsd: buying ? 1 : goldPrice,
-      outPriceUsd: buying ? goldPrice : 1,
+      inPriceUsd: buying ? 1 : metalPrice,
+      outPriceUsd: buying ? metalPrice : 1,
     });
     if (marketLooksBroken(ratio)) {
       throw new UserFacingError("This market looks broken right now — try again later");
@@ -182,7 +140,7 @@ export function createGoldProvider(cfg: GoldMeta): YieldProvider {
     asset: USDC,
     assetSymbol: "USDC",
     decimals: USDC_DECIMALS,
-    description: `Tokenized physical gold · 1 token ≈ 1 oz · buy/sell in USDC`,
+    description: `Tokenized physical ${cfg.metal} · 1 token ≈ 1 oz · buy/sell in USDC`,
     riskLevel: "medium",
     chain: "solana",
     heldMint,
@@ -226,4 +184,4 @@ export function createGoldProvider(cfg: GoldMeta): YieldProvider {
   };
 }
 
-export const goldProviders: readonly YieldProvider[] = GOLD.map(createGoldProvider);
+export const metalProviders: readonly YieldProvider[] = METALS.map(createMetalProvider);
