@@ -75,7 +75,7 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
         appearance: {
           // The app's own paper, not white: a modal a shade brighter than the page
           // behind it reads as a different product borrowed for the occasion.
-          theme: dark ? "#141414" : "#fbfaf8",
+          theme: dark ? "#1a1b20" : "#fbfaf8",
           // The brand's violet — lifted on dark, where the light-theme value goes black.
           accentColor: dark ? "#a78bfa" : "#3c05c7",
           // Solana only, for login and for linking. The account IS a Solana wallet;
