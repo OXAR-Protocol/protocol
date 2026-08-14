@@ -50,7 +50,7 @@ export function TopMoversCarousel() {
       className="mb-12"
     >
       <div className="mb-4 flex items-baseline justify-between">
-        <p className="lowercase text-[clamp(15px,1.4vw,20px)] tracking-[-0.02em] text-black">
+        <p className="lowercase text-[clamp(15px,1.4vw,20px)] tracking-[-0.02em] text-ink">
           {t("movers.title")}
         </p>
       </div>
@@ -65,7 +65,7 @@ export function TopMoversCarousel() {
           ? Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className={`${CARD_BASIS} h-[168px] shrink-0 grow-0 animate-pulse rounded-[18px] border border-black/10 bg-black/[0.03]`}
+                className={`${CARD_BASIS} h-[168px] shrink-0 grow-0 animate-pulse rounded-[18px] border border-ink/10 bg-ink/[0.03]`}
               />
             ))
           : movers.map((m) => {
@@ -75,14 +75,14 @@ export function TopMoversCarousel() {
                 <Link
                   key={m.id}
                   href={`/asset/${m.id}`}
-                  className={`${CARD_BASIS} group relative isolate flex shrink-0 grow-0 snap-start flex-col justify-between overflow-hidden rounded-[18px] border border-black/10 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-black/25 hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]`}
+                  className={`${CARD_BASIS} group relative isolate flex shrink-0 grow-0 snap-start flex-col justify-between overflow-hidden rounded-[18px] border border-ink/10 bg-paper p-5 transition-all hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]`}
                 >
                   <BanknoteBg seed={m.id} hover />
                   <div className="relative flex items-start justify-between">
                     <AssetIcon src={assetLogoSrc(m.id)} label={assetIconLabel(m.id, m.symbol)} size={44} />
                     <span
                       className={`inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-[13px] font-semibold tabular-nums ${
-                        up ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-600"
+                        up ? "bg-emerald-500/10 text-profit" : "bg-red-500/10 text-loss"
                       }`}
                     >
                       <Arrow size={13} strokeWidth={2.25} />
@@ -91,11 +91,11 @@ export function TopMoversCarousel() {
                     </span>
                   </div>
                   <div className="relative mt-5 min-w-0">
-                    <p className="truncate text-[15px] text-black">{m.name}</p>
-                    <p className="mt-1 text-[22px] font-medium leading-none tabular-nums tracking-[-0.02em] text-black">
+                    <p className="truncate text-[15px] text-ink">{m.name}</p>
+                    <p className="mt-1 text-[22px] font-medium leading-none tabular-nums tracking-[-0.02em] text-ink">
                       ${m.price < 1 ? m.price.toFixed(4) : m.price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                    <p className="mt-1.5 text-xs uppercase tracking-wide text-black/35">{m.token}</p>
+                    <p className="mt-1.5 text-xs uppercase tracking-wide text-ink/35">{m.token}</p>
                   </div>
                 </Link>
               );

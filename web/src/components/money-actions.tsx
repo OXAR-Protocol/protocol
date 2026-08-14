@@ -31,8 +31,8 @@ export function MoneyActions({ labelled }: { labelled?: boolean }) {
           aria-label={t("wallet.fund")}
           className={
             labelled
-              ? "inline-flex items-center gap-1.5 rounded-full bg-black px-4 py-2 text-[13px] lowercase tracking-wide text-white transition hover:bg-black/85"
-              : "inline-flex h-10 w-10 items-center justify-center rounded-full bg-black text-white transition hover:bg-black/85"
+              ? "inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
+              : "inline-flex h-10 w-10 items-center justify-center rounded-full bg-ink text-paper transition hover:bg-ink/85"
           }
         >
           <Plus size={labelled ? 13 : 17} strokeWidth={2} />
@@ -43,7 +43,7 @@ export function MoneyActions({ labelled }: { labelled?: boolean }) {
           type="button"
           onClick={() => setOpen("money")}
           aria-label={t("money.title")}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/15 text-black/55 transition hover:border-black/40 hover:text-black"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink/15 text-ink/55 transition hover:border-ink/40 hover:text-ink"
         >
           <MoreHorizontal size={17} strokeWidth={1.5} />
         </button>

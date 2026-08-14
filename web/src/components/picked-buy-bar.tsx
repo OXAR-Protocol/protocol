@@ -135,12 +135,12 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
           results={bulk.results}
           payWith={
             <>
-              <div className="flex items-center gap-2 rounded-[10px] border border-black/10 px-3 py-2.5">
-                <Wallet size={14} strokeWidth={1.5} className="shrink-0 text-black/40" />
-                <span className="text-[12px] lowercase tracking-wide text-black/45">
+              <div className="flex items-center gap-2 rounded-[10px] border border-ink/10 px-3 py-2.5">
+                <Wallet size={14} strokeWidth={1.5} className="shrink-0 text-ink/40" />
+                <span className="text-[12px] lowercase tracking-wide text-ink/45">
                   {t("alloc.dollars")}
                 </span>
-                <span className="ml-auto text-[13px] tabular-nums text-black">
+                <span className="ml-auto text-[13px] tabular-nums text-ink">
                   ${formatUsdAmount(budget)}
                 </span>
               </div>
@@ -148,7 +148,7 @@ export function PickedBuyBar({ views }: { views: readonly ProviderView[] }) {
                 type="button"
                 onClick={openFunding}
                 disabled={busy}
-                className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-2.5 text-[13px] lowercase tracking-wide text-black/70 transition hover:border-black/40 hover:text-black disabled:opacity-40"
+                className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-ink/15 px-4 py-2.5 text-[13px] lowercase tracking-wide text-ink/70 transition hover:border-ink/40 hover:text-ink disabled:opacity-40"
               >
                 {t("wallet.fund")}
               </button>

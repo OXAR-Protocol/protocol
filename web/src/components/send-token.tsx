@@ -42,7 +42,7 @@ export function SendToken({
 
   if (!sendable.length) {
     return (
-      <p className="text-[13px] leading-snug text-black/45">
+      <p className="text-[13px] leading-snug text-ink/45">
         {crossing ? t("send.token.noneForChain", { chain: chain.label }) : t("send.noAssets")}
       </p>
     );
@@ -51,7 +51,7 @@ export function SendToken({
   return (
     <>
       {crossing && (
-        <p className="mb-3 text-[13px] leading-snug text-black/50">
+        <p className="mb-3 text-[13px] leading-snug text-ink/50">
           {t("send.token.arrivesAs", { sym: chain.assets[0]!.symbol, chain: chain.label })}
         </p>
       )}
@@ -64,7 +64,7 @@ export function SendToken({
           body={`${Number((Number(maxSendable(a)) / 10 ** a.decimals).toPrecision(6))} ${a.symbol}`}
           badge={a.mint === activeMint ? t("send.token.selected") : undefined}
           trailing={
-            <span className="shrink-0 text-[14px] tabular-nums text-black">${formatUsdAmount(a.usdValue)}</span>
+            <span className="shrink-0 text-[14px] tabular-nums text-ink">${formatUsdAmount(a.usdValue)}</span>
           }
           onClick={() => onPick(a.mint)}
         />

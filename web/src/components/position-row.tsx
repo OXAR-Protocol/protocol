@@ -62,11 +62,11 @@ export function PositionRow({ view, onOpen, change24h, chart, earned, picked, on
           <div className="min-w-0">
             {/* Truncate, don't spill: without this the title ran out of its squeezed
                 column and under the pick pill on a phone. */}
-            <p className="truncate text-base text-black">{title}</p>
-            {subtitle && <p className="mt-0.5 truncate text-xs text-black/45">{subtitle}</p>}
+            <p className="truncate text-base text-ink">{title}</p>
+            {subtitle && <p className="mt-0.5 truncate text-xs text-ink/45">{subtitle}</p>}
             {/* How much you own, not only what it's worth. */}
             {isPriceExposure(view.id) && view.heldDecimals !== undefined && view.shares > BigInt(0) && (
-              <p className="mt-1 text-[11px] tabular-nums text-[#3c05c7]/80">
+              <p className="mt-1 text-[11px] tabular-nums text-[var(--brand)]/80">
                 {floorTo(Number(view.shares) / 10 ** view.heldDecimals, 6)} {unitLabelOf(view)}
               </p>
             )}
@@ -82,9 +82,9 @@ export function PositionRow({ view, onOpen, change24h, chart, earned, picked, on
             className={
               isPriceExposure(view.id)
                 ? (change24h ?? 0) >= 0
-                  ? "text-emerald-600"
-                  : "text-red-600"
-                : "text-[#3c05c7]/70"
+                  ? "text-profit"
+                  : "text-loss"
+                : "text-[var(--brand)]/70"
             }
           />
         ) : null
@@ -93,12 +93,12 @@ export function PositionRow({ view, onOpen, change24h, chart, earned, picked, on
         <>
           <LiveAmount value={value} apy={view.apy} variant="md" />
           {typeof change24h === "number" ? (
-            <p className={`text-[11px] tabular-nums ${change24h >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+            <p className={`text-[11px] tabular-nums ${change24h >= 0 ? "text-profit" : "text-loss"}`}>
               {change24h >= 0 ? "+" : ""}
               {change24h.toFixed(2)}% 24h
             </p>
           ) : (
-            <p className={`text-[11px] lowercase tracking-wide ${RISK_TONE[view.riskLevel] ?? "text-black/45"}`}>
+            <p className={`text-[11px] lowercase tracking-wide ${RISK_TONE[view.riskLevel] ?? "text-ink/45"}`}>
               {(view.apy * 100).toFixed(2)}% APY
             </p>
           )}
@@ -109,7 +109,7 @@ export function PositionRow({ view, onOpen, change24h, chart, earned, picked, on
               a fresh one didn't, which reads as the app knowing about one and not
               the other. Small amounts get the digits they need instead. */}
           {typeof earned === "number" && (
-            <p className={`text-[11px] tabular-nums ${earned >= 0 ? "text-black/40" : "text-red-600"}`}>
+            <p className={`text-[11px] tabular-nums ${earned >= 0 ? "text-ink/40" : "text-loss"}`}>
               {earned >= 0 ? "+" : "−"}${formatUsdAmount(Math.abs(earned))} {t("position.sinceBuy")}
             </p>
           )}
@@ -128,7 +128,7 @@ export function PositionRow({ view, onOpen, change24h, chart, earned, picked, on
         ) : null
       }
       trailing={
-        <ArrowUpRight size={16} strokeWidth={1.5} className="shrink-0 text-black/40 transition group-hover:text-black" />
+        <ArrowUpRight size={16} strokeWidth={1.5} className="shrink-0 text-ink/40 transition group-hover:text-ink" />
       }
     />
   );

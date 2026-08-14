@@ -164,25 +164,25 @@ export function AllocationSheet({
   return (
     <div
       data-no-pull
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/25 p-0 backdrop-blur-sm sm:items-center sm:p-6">
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-ink/25 p-0 backdrop-blur-sm sm:items-center sm:p-6">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-h-[88vh] w-full max-w-[520px] overflow-auto rounded-t-[16px] border border-black/10 bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-[16px]"
+        className="max-h-[88vh] w-full max-w-[520px] overflow-auto rounded-t-[16px] border border-ink/10 bg-paper p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-[16px]"
       >
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <p className="text-[15px] text-black">
+            <p className="text-[15px] text-ink">
               {t(mode === "sell" ? "alloc.sellTitle" : "alloc.buyTitle")}
             </p>
             {budgetUsd !== undefined && (
-              <p className={`mt-0.5 text-[12px] tabular-nums ${overBudget ? "text-red-600" : "text-black/45"}`}>
+              <p className={`mt-0.5 text-[12px] tabular-nums ${overBudget ? "text-loss" : "text-ink/45"}`}>
                 {t("alloc.left", { usd: `$${formatUsdAmount(Math.abs(remaining))}` })}
                 {overBudget ? ` — ${t("alloc.over")}` : ""}
               </p>
             )}
           </div>
-          <button type="button" onClick={onClose} disabled={busy} className="text-black/35 transition hover:text-black disabled:opacity-40">
+          <button type="button" onClick={onClose} disabled={busy} className="text-ink/35 transition hover:text-ink disabled:opacity-40">
             <X size={18} strokeWidth={1.5} />
           </button>
         </div>
@@ -197,13 +197,13 @@ export function AllocationSheet({
             <div
               key={r.id}
               className={`rounded-[10px] border p-3 ${
-                broke ? "border-red-600/30 bg-red-600/[0.03]" : "border-black/10"
+                broke ? "border-red-600/30 bg-red-600/[0.03]" : "border-ink/10"
               }`}
             >
               <div className="flex items-center gap-3">
                 <AssetIcon src={assetLogoSrc(r.id)} label={assetIconLabel(r.id, r.symbol)} size={28} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] text-black">{r.name}</p>
+                  <p className="truncate text-[14px] text-ink">{r.name}</p>
                   {!busy && !result && (r.alternatives?.length ?? 0) > 0 && (
                     <div className="mt-1 flex flex-wrap gap-1">
                       {r.alternatives!.map((alt) => (
@@ -213,7 +213,7 @@ export function AllocationSheet({
                           onClick={() => swapRow(r.id, alt.id)}
                           aria-label={t("alloc.switchTo", { name: alt.label })}
                           title={t("alloc.switchTo", { name: alt.label })}
-                          className="inline-flex items-center gap-1 rounded-full border border-black/15 px-2 py-0.5 text-[10px] lowercase tracking-wide text-black/50 transition hover:border-black/40 hover:text-black"
+                          className="inline-flex items-center gap-1 rounded-full border border-ink/15 px-2 py-0.5 text-[10px] lowercase tracking-wide text-ink/50 transition hover:border-ink/40 hover:text-ink"
                         >
                           {/* Without a mark of its own this read as a label rather than
                               a control — reported as "not obvious you can change it". */}
@@ -224,12 +224,12 @@ export function AllocationSheet({
                     </div>
                   )}
                   {mode === "sell" && r.maxUsd !== undefined && (
-                    <p className="text-[11px] tabular-nums text-black/40">
+                    <p className="text-[11px] tabular-nums text-ink/40">
                       {t("alloc.youHave", { usd: `$${formatUsdAmount(r.maxUsd)}` })}
                     </p>
                   )}
                 </div>
-                {result?.ok && <Check size={14} strokeWidth={2} className="shrink-0 text-black/45" />}
+                {result?.ok && <Check size={14} strokeWidth={2} className="shrink-0 text-ink/45" />}
                 <div className="flex flex-col items-end">
                 <div className="flex items-baseline gap-1">
                   {r.unitPriceUsd ? (
@@ -239,12 +239,12 @@ export function AllocationSheet({
                       disabled={busy || !!result?.ok}
                       aria-label={t("alloc.switchUnits")}
                       title={t("alloc.switchUnits")}
-                      className="rounded px-1 text-[11px] lowercase tracking-wide text-black/40 underline decoration-dotted underline-offset-2 transition hover:text-black disabled:no-underline"
+                      className="rounded px-1 text-[11px] lowercase tracking-wide text-ink/40 underline decoration-dotted underline-offset-2 transition hover:text-ink disabled:no-underline"
                     >
                       {unitMode(r) ? r.unitLabel : "$"}
                     </button>
                   ) : (
-                    <span className="text-black/35">$</span>
+                    <span className="text-ink/35">$</span>
                   )}
                   <input
                     type="text"
@@ -253,12 +253,12 @@ export function AllocationSheet({
                     onChange={(e) => setAmount(r.id, e.target.value)}
                     placeholder="0"
                     disabled={busy || !!result?.ok}
-                    className="w-24 border-b border-black/15 bg-transparent py-0.5 text-right text-[17px] tabular-nums text-black outline-none focus:border-black/40"
+                    className="w-24 border-b border-ink/15 bg-transparent py-0.5 text-right text-[17px] tabular-nums text-ink outline-none focus:border-ink/40"
                   />
                 </div>
                 {/* Both readings, always — the one being typed and what it comes to. */}
                 {r.unitPriceUsd && typedIn(r.id) > 0 && (
-                  <span className="mt-0.5 text-[10px] tabular-nums text-black/35">
+                  <span className="mt-0.5 text-[10px] tabular-nums text-ink/35">
                     {unitMode(r)
                       ? `$${formatUsdAmount(valueOf(r))}`
                       : `${floorTo(typedIn(r.id) / r.unitPriceUsd, 6)} ${r.unitLabel ?? ""}`}
@@ -267,7 +267,7 @@ export function AllocationSheet({
                 </div>
               </div>
               {result?.ok ? null : result ? (
-                <p className={`mt-2 text-[11px] leading-snug ${broke ? "text-red-600" : "text-black/45"}`}>
+                <p className={`mt-2 text-[11px] leading-snug ${broke ? "text-loss" : "text-ink/45"}`}>
                   {result.cancelled ? t("bulk.stopped") : result.error}
                 </p>
               ) : (
@@ -278,7 +278,7 @@ export function AllocationSheet({
                       type="button"
                       disabled={busy}
                       onClick={() => applyFraction(r, f)}
-                      className="rounded-full bg-black/[0.05] px-2.5 py-1 text-[11px] lowercase tracking-wide text-black/55 transition hover:text-black disabled:opacity-40"
+                      className="rounded-full bg-ink/[0.05] px-2.5 py-1 text-[11px] lowercase tracking-wide text-ink/55 transition hover:text-ink disabled:opacity-40"
                     >
                       {f * 100}%
                     </button>
@@ -290,11 +290,11 @@ export function AllocationSheet({
           })}
         </div>
 
-        {error && <p className="mt-3 text-center text-[12px] text-red-600">{error}</p>}
+        {error && <p className="mt-3 text-center text-[12px] text-loss">{error}</p>}
 
         {/* Sticky: with several assets the list is taller than the sheet, and a
             confirm you have to go looking for is a confirm people don't find. */}
-        <div className="sticky bottom-0 -mx-5 mt-4 bg-gradient-to-t from-white via-white to-white/0 px-5 pb-1 pt-3">
+        <div className="sticky bottom-0 -mx-5 mt-4 bg-gradient-to-t from-paper via-paper to-paper/0 px-5 pb-1 pt-3">
         {/* Held, not tapped — several assets bought or sold in one gesture is the
             biggest single act in the app, and it sits under a thumb that has just
             been scrolling a list. */}
@@ -311,7 +311,7 @@ export function AllocationSheet({
         />
 
         {/* Several assets means several transactions — said once, before signing. */}
-        <p className="mt-2 text-center text-[11px] text-black/35">
+        <p className="mt-2 text-center text-[11px] text-ink/35">
           {t("alloc.note", { n: String(rows.length) })}
         </p>
         </div>

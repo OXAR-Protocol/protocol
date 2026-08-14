@@ -20,8 +20,8 @@ export function LanguageChips() {
           aria-label={l.label}
           className={`rounded-full px-2.5 py-1 text-[10px] uppercase tracking-wide transition ${
             locale === l.value
-              ? "bg-black text-white"
-              : "bg-black/[0.05] text-black/45 hover:text-black"
+              ? "bg-ink text-paper"
+              : "bg-ink/[0.05] text-ink/45 hover:text-ink"
           }`}
         >
           {l.value}
@@ -42,8 +42,8 @@ export function LanguagePicker() {
           onClick={() => setLocale(l.value)}
           className={`px-4 py-2 rounded-full border text-[13px] transition ${
             locale === l.value
-              ? "border-[#3c05c7] bg-[#3c05c7]/[0.05] text-black"
-              : "border-black/10 text-black/60 hover:border-black/30 hover:text-black"
+              ? "border-[var(--brand)] bg-[var(--brand)]/[0.05] text-ink"
+              : "border-ink/10 text-ink/60 hover:border-ink/30 hover:text-ink"
           }`}
         >
           {l.label}

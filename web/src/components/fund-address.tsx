@@ -27,25 +27,25 @@ export function FundAddress({ address, hint }: { address: string; hint: string }
 
   return (
     <div>
-      <p className="text-[12px] leading-snug text-black/60">{hint}</p>
+      <p className="text-[12px] leading-snug text-ink/60">{hint}</p>
 
       <div className="mt-4 flex justify-center">
-        <div className="rounded-[12px] border border-black/10 bg-white p-4">
+        <div className="rounded-[12px] border border-ink/10 bg-paper p-4">
           <QRCodeSVG value={address} size={168} level="M" />
         </div>
       </div>
 
-      <p className="mt-4 break-all text-center font-mono text-[12px] leading-relaxed text-black/60">
+      <p className="mt-4 break-all text-center font-mono text-[12px] leading-relaxed text-ink/60">
         {address}
       </p>
 
       <button
         type="button"
         onClick={copy}
-        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-3 text-[14px] lowercase tracking-wide text-black/70 transition hover:border-black/40 hover:text-black"
+        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-ink/15 px-4 py-3 text-[14px] lowercase tracking-wide text-ink/70 transition hover:border-ink/40 hover:text-ink"
       >
         {copied ? (
-          <Check size={14} strokeWidth={2} className="text-[#3c05c7]" />
+          <Check size={14} strokeWidth={2} className="text-[var(--brand)]" />
         ) : (
           <Copy size={14} strokeWidth={1.5} />
         )}

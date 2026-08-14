@@ -42,27 +42,27 @@ export function SendAddress({
     <>
       <div className="mb-4 flex items-center gap-2.5">
         <AssetIcon src={`/logos/chains/${chain.key}.png`} label={chain.label} size={28} />
-        <p className="text-[13px] text-black/60">{t("send.address.on", { chain: chain.label })}</p>
+        <p className="text-[13px] text-ink/60">{t("send.address.on", { chain: chain.label })}</p>
       </div>
 
-      <div className="flex items-center gap-2 rounded-[12px] border border-black/12 px-4 py-3.5 transition-colors focus-within:border-black/40">
+      <div className="flex items-center gap-2 rounded-[12px] border border-ink/12 px-4 py-3.5 transition-colors focus-within:border-ink/40">
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={isEvm ? "0x…" : t("send.addressPlaceholder")}
           autoComplete="off"
           spellCheck={false}
-          className="min-w-0 flex-1 bg-transparent text-[14px] text-black outline-none placeholder:text-black/25"
+          className="min-w-0 flex-1 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink/25"
         />
         {valid ? (
-          <Check size={15} strokeWidth={2} className="shrink-0 text-emerald-600" />
+          <Check size={15} strokeWidth={2} className="shrink-0 text-profit" />
         ) : (
           // Addresses are pasted, never typed — the button saves a fiddly long-press
           // on a phone, which is where this is used.
           <button
             type="button"
             onClick={paste}
-            className="inline-flex shrink-0 items-center gap-1 text-[12px] lowercase tracking-wide text-black/45 transition hover:text-black"
+            className="inline-flex shrink-0 items-center gap-1 text-[12px] lowercase tracking-wide text-ink/45 transition hover:text-ink"
           >
             <ClipboardPaste size={13} strokeWidth={1.5} />
             {t("send.paste")}
@@ -72,7 +72,7 @@ export function SendAddress({
 
       {/* EVM addresses look identical on every chain — say which network the funds
           land on, because nothing on the other side will. */}
-      <p className="mt-2 text-[11px] leading-snug text-black/45">
+      <p className="mt-2 text-[11px] leading-snug text-ink/45">
         {trimmed !== "" && !valid
           ? t("send.errAddress", { chain: isEvm ? "EVM" : "Solana" })
           : isEvm
@@ -84,7 +84,7 @@ export function SendAddress({
         type="button"
         onClick={onContinue}
         disabled={!valid}
-        className="mt-5 w-full rounded-full bg-black px-4 py-3.5 text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-25"
+        className="mt-5 w-full rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-25"
       >
         {t("fund.card.continue")}
       </button>

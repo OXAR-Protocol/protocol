@@ -41,18 +41,18 @@ export function SendReview({
         type="button"
         onClick={onBack}
         disabled={busy}
-        className="mb-4 inline-flex items-center gap-1.5 text-[13px] lowercase text-black/40 transition hover:text-black disabled:opacity-40"
+        className="mb-4 inline-flex items-center gap-1.5 text-[13px] lowercase text-ink/40 transition hover:text-ink disabled:opacity-40"
       >
         <ArrowLeft size={13} strokeWidth={1.5} />
         {t("fund.back")}
       </button>
 
-      <p className="text-[11px] lowercase tracking-wide text-black/40">{t("send.review.sending")}</p>
-      <p className="mt-1 text-[2rem] font-light leading-none tracking-[-0.02em] text-black tabular-nums">
-        {amount} <span className="text-[1.2rem] text-black/45">{symbol}</span>
+      <p className="text-[11px] lowercase tracking-wide text-ink/40">{t("send.review.sending")}</p>
+      <p className="mt-1 text-[2rem] font-light leading-none tracking-[-0.02em] text-ink tabular-nums">
+        {amount} <span className="text-[1.2rem] text-ink/45">{symbol}</span>
       </p>
 
-      <div className="mt-5 space-y-3 rounded-[10px] border border-black/10 p-4">
+      <div className="mt-5 space-y-3 rounded-[10px] border border-ink/10 p-4">
         <Row label={t("send.review.to")} value={to} mono />
         <Row label={t("send.review.network")} value={chainLabel} />
       </div>
@@ -77,7 +77,7 @@ export function SendReview({
         type="button"
         onClick={onConfirm}
         disabled={busy}
-        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3.5 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-25"
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3.5 text-[14px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-25"
       >
         {busy ? (
           <>
@@ -94,8 +94,8 @@ export function SendReview({
 function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-start justify-between gap-3">
-      <span className="shrink-0 text-[11px] lowercase tracking-wide text-black/40">{label}</span>
-      <span className={`min-w-0 break-all text-right text-[13px] text-black/80 ${mono ? "font-mono" : ""}`}>
+      <span className="shrink-0 text-[11px] lowercase tracking-wide text-ink/40">{label}</span>
+      <span className={`min-w-0 break-all text-right text-[13px] text-ink/80 ${mono ? "font-mono" : ""}`}>
         {value}
       </span>
     </div>

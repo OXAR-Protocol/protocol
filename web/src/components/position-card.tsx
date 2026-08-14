@@ -54,8 +54,8 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
   return (
     <button
       onClick={onOpen}
-      className={`group relative isolate flex flex-col gap-4 overflow-hidden rounded-[8px] border bg-white p-5 text-left transition ${
-        picked ? "border-black/40 ring-1 ring-black/10" : "border-black/10 hover:border-black/30"
+      className={`group relative isolate flex flex-col gap-4 overflow-hidden rounded-[8px] border bg-paper p-5 text-left transition ${
+        picked ? "border-ink/40 ring-1 ring-ink/10" : "border-ink/10 hover:border-ink/30"
       }`}
     >
       <BanknoteBg seed={view.id} />
@@ -63,8 +63,8 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
         <div className="flex items-start gap-3 min-w-0">
           <AssetIcon src={assetLogoSrc(view.id)} label={assetIconLabel(view.id, view.assetSymbol)} size={32} />
           <div className="min-w-0">
-            <p className="text-base text-black truncate">{view.name}</p>
-            <span className="mt-1 inline-block text-[10px] lowercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15">
+            <p className="text-base text-ink truncate">{view.name}</p>
+            <span className="mt-1 inline-block text-[10px] lowercase tracking-wide text-ink/55 px-1.5 py-0.5 rounded border border-ink/15">
               {view.assetSymbol}
             </span>
           </div>
@@ -72,7 +72,7 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
         <ArrowUpRight
           size={16}
           strokeWidth={1.5}
-          className="shrink-0 text-black/40 transition group-hover:text-black"
+          className="shrink-0 text-ink/40 transition group-hover:text-ink"
         />
       </div>
 
@@ -88,18 +88,18 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
           {/* How much you own, not only what it's worth. The list rows say this;
               the cards didn't, so switching layout lost the number. */}
           {isPrice && view.heldDecimals !== undefined && view.shares > BigInt(0) ? (
-            <p className="text-[11px] tabular-nums text-[#3c05c7]/80">
+            <p className="text-[11px] tabular-nums text-[var(--brand)]/80">
               {floorTo(Number(view.shares) / 10 ** view.heldDecimals, 6)} {unitLabelOf(view)}
             </p>
           ) : (
-            <p className="text-[10px] lowercase tracking-wide text-black/40">
+            <p className="text-[10px] lowercase tracking-wide text-ink/40">
               {value > 0 ? "your position" : "tap to deposit"}
             </p>
           )}
           {/* Which of your holdings is actually down — the same line the list rows
               carry, so switching layout doesn't lose the answer. */}
           {typeof earned === "number" && (
-            <p className={`text-[11px] tabular-nums ${earned >= 0 ? "text-black/40" : "text-red-600"}`}>
+            <p className={`text-[11px] tabular-nums ${earned >= 0 ? "text-ink/40" : "text-loss"}`}>
               {earned >= 0 ? "+" : "−"}${formatUsdAmount(Math.abs(earned))} {t("position.sinceBuy")}
             </p>
           )}
@@ -116,7 +116,7 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
         ) : (
           <p
             className={`text-xs tabular-nums shrink-0 ${
-              RISK_TONE[view.riskLevel] ?? "text-black/45"
+              RISK_TONE[view.riskLevel] ?? "text-ink/45"
             }`}
           >
             {(view.apy * 100).toFixed(2)}% APY
@@ -129,7 +129,7 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
           says nothing on its own. Shown when the cost basis is known and the unit
           count is real; a made-up average is worse than none. */}
       {invested !== undefined && invested > 0 && (
-        <div className="mt-auto flex items-center justify-between gap-2 border-t border-black/[0.06] pt-3 text-[11px] tabular-nums text-black/40">
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-ink/[0.06] pt-3 text-[11px] tabular-nums text-ink/40">
           <span>
             {t("position.invested")} ${invested.toFixed(2)}
           </span>

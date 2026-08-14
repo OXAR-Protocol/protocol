@@ -62,7 +62,7 @@ export function CardRouteSheet({ routes, onClose }: { routes: readonly CardRoute
         })}
       </div>
 
-      <p className="mt-4 text-[11px] leading-snug text-black/40">{t("cardroute.footer")}</p>
+      <p className="mt-4 text-[11px] leading-snug text-ink/40">{t("cardroute.footer")}</p>
     </SheetShell>
   );
 }

@@ -51,7 +51,7 @@ export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, on
     {/* One row, always. It used to wrap on a phone, which turns a pill into a blob
         and stacked the icons on top of each other. Nothing here may grow the bar:
         the label truncates, the icons stand down on narrow screens. */}
-    <div className="flex flex-nowrap items-center gap-2 rounded-full border border-black/10 bg-white/95 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.10)] backdrop-blur sm:gap-3">
+    <div className="flex flex-nowrap items-center gap-2 rounded-full border border-ink/10 bg-paper/95 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.10)] backdrop-blur sm:gap-3">
       {/* The set, shown as itself: overlapping marks rather than a count alone. */}
       {picked.length > 0 && (
         <span className="hidden shrink-0 items-center pl-1 sm:flex">
@@ -68,7 +68,7 @@ export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, on
           ))}
         </span>
       )}
-      <span className="min-w-0 flex-1 truncate text-[13px] tabular-nums text-black/70">
+      <span className="min-w-0 flex-1 truncate text-[13px] tabular-nums text-ink/70">
         {selling
           ? t(mode === "sell" ? "bulk.progressSell" : "bulk.progressBuy", { n: String(done.length), total: String(selectedCount) })
           : mode === "sell"
@@ -86,7 +86,7 @@ export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, on
           type="button"
           onClick={onClear}
           disabled={selling}
-          className="text-[12px] lowercase tracking-wide text-black/45 transition hover:text-black disabled:opacity-40"
+          className="text-[12px] lowercase tracking-wide text-ink/45 transition hover:text-ink disabled:opacity-40"
         >
           {t("bulk.clear")}
         </button>
@@ -94,7 +94,7 @@ export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, on
           type="button"
           onClick={onSell}
           disabled={selling || selectedCount === 0}
-          className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-[13px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-40"
         >
           {selling && <Loader2 size={13} className="animate-spin" />}
           {t(mode === "sell" ? "bulk.sellSelected" : "bulk.buySelected")}
@@ -105,7 +105,7 @@ export function PickBar({ picked, selectedCount, totalUsd, state, done, mode, on
     {/* Outside the pill: a message inside a rounded-full container stretched it into
         a blob. Naming what didn't go through, and why — "some failed" can't be acted on. */}
     {state === "done" && (cancelled || realFailures.length > 0) && (
-      <p className={`mt-2 px-4 text-center text-[12px] ${realFailures.length ? "text-red-600" : "text-black/50"}`}>
+      <p className={`mt-2 px-4 text-center text-[12px] ${realFailures.length ? "text-loss" : "text-ink/50"}`}>
         {realFailures.length > 0
           ? realFailures.map((f) => `${f.id}${f.error ? ` — ${f.error}` : ""}`).join(" · ")
           : t("bulk.stopped")}

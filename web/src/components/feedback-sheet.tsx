@@ -70,7 +70,7 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       data-no-pull
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-white/70 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-paper/70 px-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div
@@ -79,16 +79,16 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
         exit={{ y: 60, opacity: 0 }}
         transition={{ type: "spring", damping: 26, stiffness: 220 }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[440px] rounded-[12px] border border-black/15 bg-white p-6 md:p-7"
+        className="relative w-full max-w-[440px] rounded-[12px] border border-ink/15 bg-paper p-6 md:p-7"
       >
         <div className="mb-5 flex items-start justify-between">
           <div>
-            <p className="text-[10px] lowercase tracking-[0.2em] text-black/40">
+            <p className="text-[10px] lowercase tracking-[0.2em] text-ink/40">
               {t("feedback.label")}
             </p>
-            <h2 className="mt-1 text-xl text-black">{t("feedback.title")}</h2>
+            <h2 className="mt-1 text-xl text-ink">{t("feedback.title")}</h2>
           </div>
-          <button onClick={onClose} className="text-black/45 transition hover:text-black">
+          <button onClick={onClose} className="text-ink/45 transition hover:text-ink">
             <X size={18} strokeWidth={1.5} />
           </button>
         </div>
@@ -110,11 +110,11 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
                 className="mx-auto h-28 w-auto select-none"
               />
             </motion.div>
-            <p className="mt-4 text-lg text-black">{t("feedback.thanks")}</p>
-            <p className="mt-1 text-[11px] text-black/45">{t("feedback.thanksHint")}</p>
+            <p className="mt-4 text-lg text-ink">{t("feedback.thanks")}</p>
+            <p className="mt-1 text-[11px] text-ink/45">{t("feedback.thanksHint")}</p>
             <button
               onClick={onClose}
-              className="mt-5 rounded-full border border-black/15 px-4 py-2 text-xs lowercase tracking-wide text-black/60 transition hover:border-black/40 hover:text-black"
+              className="mt-5 rounded-full border border-ink/15 px-4 py-2 text-xs lowercase tracking-wide text-ink/60 transition hover:border-ink/40 hover:text-ink"
             >
               {t("common.close")}
             </button>
@@ -129,8 +129,8 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
                   onClick={() => setKind(k)}
                   className={`flex-1 rounded-full border px-3 py-2 text-xs lowercase tracking-wide transition ${
                     kind === k
-                      ? "border-black bg-black text-white"
-                      : "border-black/15 text-black/55 hover:border-black/40 hover:text-black"
+                      ? "border-ink bg-ink text-paper"
+                      : "border-ink/15 text-ink/55 hover:border-ink/40 hover:text-ink"
                   }`}
                 >
                   {t(k === "bug" ? "feedback.kindBug" : "feedback.kindIdea")}
@@ -144,7 +144,7 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
               rows={5}
               maxLength={2000}
               placeholder={t(kind === "bug" ? "feedback.placeholderBug" : "feedback.placeholderIdea")}
-              className="mt-3 w-full resize-none rounded-[10px] border border-black/10 p-3 text-sm text-black outline-none transition placeholder:text-black/30 focus:border-black/30"
+              className="mt-3 w-full resize-none rounded-[10px] border border-ink/10 p-3 text-sm text-ink outline-none transition placeholder:text-ink/30 focus:border-ink/30"
             />
 
             <input
@@ -152,16 +152,16 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
               onChange={(e) => setContact(e.target.value)}
               maxLength={120}
               placeholder={t("feedback.contactPlaceholder")}
-              className="mt-2 w-full rounded-[10px] border border-black/10 px-3 py-2.5 text-sm text-black outline-none transition placeholder:text-black/30 focus:border-black/30"
+              className="mt-2 w-full rounded-[10px] border border-ink/10 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink/30 focus:border-ink/30"
             />
 
-            {error && <p className="mt-3 text-[11px] text-red-600">{error}</p>}
+            {error && <p className="mt-3 text-[11px] text-loss">{error}</p>}
 
             <button
               type="button"
               onClick={submit}
               disabled={!message.trim() || sending}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3 text-sm lowercase tracking-wide text-white transition disabled:opacity-40"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3 text-sm lowercase tracking-wide text-paper transition disabled:opacity-40"
             >
               {sending ? (
                 <Loader2 size={14} strokeWidth={1.5} className="animate-spin" />
@@ -173,7 +173,7 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
 
             {/* Some people would rather just talk. Making them fill a form first
                 is how you never hear from them. */}
-            <p className="mt-4 text-center text-[11px] text-black/45">
+            <p className="mt-4 text-center text-[11px] text-ink/45">
               {t("feedback.orTelegram")}{" "}
               {TELEGRAM_HANDLES.map((handle, i) => (
                 <span key={handle}>
@@ -182,7 +182,7 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
                     href={`https://t.me/${handle}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[#3c05c7] hover:underline"
+                    className="text-[var(--brand)] hover:underline"
                   >
                     @{handle}
                   </a>

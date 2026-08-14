@@ -45,22 +45,22 @@ export function SendSent({
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-        <p className="mt-5 text-[36px] font-medium leading-none tracking-[-0.02em] tabular-nums text-black">
-          {amount} <span className="text-[20px] text-black/45">{symbol}</span>
+        <p className="mt-5 text-[36px] font-medium leading-none tracking-[-0.02em] tabular-nums text-ink">
+          {amount} <span className="text-[20px] text-ink/45">{symbol}</span>
         </p>
 
-        <p className="mt-3 text-[13px] leading-snug text-black/50">
+        <p className="mt-3 text-[13px] leading-snug text-ink/50">
           {t("send.sentTo", { address: short, chain: chainLabel })}
         </p>
         {crossChain && (
-          <p className="mt-1 text-[11px] text-black/40">{t("send.arriving", { chain: chainLabel })}</p>
+          <p className="mt-1 text-[11px] text-ink/40">{t("send.arriving", { chain: chainLabel })}</p>
         )}
 
         <a
           href={`https://solscan.io/tx/${signature}`}
           target="_blank"
           rel="noreferrer"
-          className="mt-4 inline-flex items-center gap-1.5 text-xs text-[#3c05c7] hover:underline"
+          className="mt-4 inline-flex items-center gap-1.5 text-xs text-[var(--brand)] hover:underline"
         >
           {t("send.viewSolscan")} <ExternalLink size={12} strokeWidth={1.5} />
         </a>

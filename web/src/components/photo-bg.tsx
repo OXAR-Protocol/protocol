@@ -10,10 +10,13 @@
  *  - "left"   solid white under a left-aligned column, clearing to the right (photo shows right)
  *  - "center" white in the middle for centered content, photo peeking at the edges
  */
+// The scrim fades into the surface it sits on, not into white: on a dark theme a
+// white gradient over a photograph is a smear, not a fade. `--scrim` carries the
+// current surface as an rgb triple so the alpha stops still work.
 const SCRIMS = {
-  left: "bg-[linear-gradient(to_right,#ffffff_0%,#ffffff_40%,rgba(255,255,255,0.5)_64%,rgba(255,255,255,0)_92%)]",
+  left: "bg-[linear-gradient(to_right,rgb(var(--scrim))_0%,rgb(var(--scrim))_40%,rgba(var(--scrim),0.5)_64%,rgba(var(--scrim),0)_92%)]",
   center:
-    "bg-[radial-gradient(120%_100%_at_50%_50%,#ffffff_0%,#ffffff_34%,rgba(255,255,255,0.45)_100%)]",
+    "bg-[radial-gradient(120%_100%_at_50%_50%,rgb(var(--scrim))_0%,rgb(var(--scrim))_34%,rgba(var(--scrim),0.45)_100%)]",
 } as const;
 
 export function PhotoBg({

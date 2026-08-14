@@ -71,7 +71,7 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
     }
   };
 
-  if (loading) return <p className="text-[13px] text-black/45">{t("deposit.loadingAssets")}</p>;
+  if (loading) return <p className="text-[13px] text-ink/45">{t("deposit.loadingAssets")}</p>;
 
   if (picked) {
     return (
@@ -80,17 +80,17 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
           type="button"
           onClick={() => setPicked(null)}
           disabled={busy}
-          className="mb-4 inline-flex items-center gap-1.5 text-[13px] lowercase text-black/40 transition hover:text-black disabled:opacity-40"
+          className="mb-4 inline-flex items-center gap-1.5 text-[13px] lowercase text-ink/40 transition hover:text-ink disabled:opacity-40"
         >
           <ArrowLeft size={13} strokeWidth={1.5} />
           {t("fund.back")}
         </button>
 
-        <p className="text-center text-[2.6rem] font-light leading-none tracking-[-0.03em] text-black">
-          <span className={amount === "" ? "text-black/25" : "text-black/45"}>$</span>
+        <p className="text-center text-[2.6rem] font-light leading-none tracking-[-0.03em] text-ink">
+          <span className={amount === "" ? "text-ink/25" : "text-ink/45"}>$</span>
           <AnimatedAmount value={amount} />
         </p>
-        <p className="mt-2 flex items-center justify-center gap-2 text-[12px] text-black/45">
+        <p className="mt-2 flex items-center justify-center gap-2 text-[12px] text-ink/45">
           <Icon item={picked} size={20} />
           {t("convert.available", { value: `$${formatUsdAmount(available)}`, sym: picked.symbol })}
         </p>
@@ -101,7 +101,7 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
               key={f}
               type="button"
               onClick={() => setAmount((available * f).toFixed(2))}
-              className="flex-1 rounded-full border border-black/15 py-1.5 text-[11px] lowercase tracking-wide text-black/55 transition hover:border-black/40 hover:text-black"
+              className="flex-1 rounded-full border border-ink/15 py-1.5 text-[11px] lowercase tracking-wide text-ink/55 transition hover:border-ink/40 hover:text-ink"
             >
               {f === 1 ? t("rail.max") : `${f * 100}%`}
             </button>
@@ -116,24 +116,24 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
           type="button"
           onClick={run}
           disabled={!ready || busy}
-          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3.5 text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-25"
+          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-25"
         >
           {busy && <Loader2 size={14} className="animate-spin" />}
           {t("convert.action", { sym: picked.symbol })}
         </button>
 
-        <p className="mt-3 text-center text-[11px] leading-snug text-black/40">{t("convert.rate")}</p>
-        {error && <p className="mt-3 text-center text-xs text-red-500">{localizeError(error, t)}</p>}
+        <p className="mt-3 text-center text-[11px] leading-snug text-ink/40">{t("convert.rate")}</p>
+        {error && <p className="mt-3 text-center text-xs text-loss">{localizeError(error, t)}</p>}
       </>
     );
   }
 
   return (
     <>
-      <p className="mb-3 text-[13px] leading-snug text-black/50">{t("convert.hint")}</p>
+      <p className="mb-3 text-[13px] leading-snug text-ink/50">{t("convert.hint")}</p>
 
       {items.length === 0 ? (
-        <p className="text-[13px] leading-snug text-black/50">{t("convert.nothing")}</p>
+        <p className="text-[13px] leading-snug text-ink/50">{t("convert.nothing")}</p>
       ) : (
         <div className="flex flex-col gap-2">
           {items.map((item) => (
@@ -144,7 +144,7 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
               body={item.detail}
               badge={item.kind === "position" ? t("convert.position") : undefined}
               trailing={
-                <span className="shrink-0 text-[14px] tabular-nums text-black">
+                <span className="shrink-0 text-[14px] tabular-nums text-ink">
                   ${formatUsdAmount(item.usd)}
                 </span>
               }

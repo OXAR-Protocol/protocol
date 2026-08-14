@@ -58,11 +58,11 @@ export function AssetActionBar({
           bar steps aside (see `TabBar`), so the two acts have the place a thumb
           already reaches for, instead of hovering above a bar competing with them. */}
       <div className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 lg:hidden">
-        <div className="pointer-events-auto mx-auto mb-3 flex max-w-[520px] gap-2 rounded-full border border-black/10 bg-white/90 p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
+        <div className="pointer-events-auto mx-auto mb-3 flex max-w-[520px] gap-2 rounded-full border border-ink/10 bg-paper/90 p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
           <button
             type="button"
             onClick={() => setOpen("buy")}
-            className="flex-1 rounded-full bg-black py-3 text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85"
+            className="flex-1 rounded-full bg-ink py-3 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
           >
             {price ? t("rail.buy") : t("rail.deposit")}
           </button>
@@ -71,7 +71,7 @@ export function AssetActionBar({
             onClick={() => canSell && setOpen("sell")}
             disabled={!canSell}
             title={canSell ? undefined : t("rail.nothingToSell")}
-            className="flex-1 rounded-full border border-black/15 py-3 text-[14px] lowercase tracking-wide text-black/70 transition hover:border-black/40 hover:text-black disabled:opacity-35"
+            className="flex-1 rounded-full border border-ink/15 py-3 text-[14px] lowercase tracking-wide text-ink/70 transition hover:border-ink/40 hover:text-ink disabled:opacity-35"
           >
             {price ? t("rail.sell") : t("rail.withdraw")}
           </button>

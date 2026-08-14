@@ -51,7 +51,7 @@ export function SellAmountControls({
 
   const chip = (active: boolean) =>
     `rounded-full px-2.5 py-1 text-[11px] lowercase tracking-wide transition ${
-      active ? "bg-black text-white" : "bg-black/[0.05] text-black/55 hover:text-black"
+      active ? "bg-ink text-paper" : "bg-ink/[0.05] text-ink/55 hover:text-ink"
     } disabled:cursor-not-allowed disabled:opacity-40`;
 
   const heldUnits = canShowUnits ? positionValue / unitPriceUsd! : 0;
@@ -83,7 +83,7 @@ export function SellAmountControls({
           type="button"
           disabled={disabled}
           onClick={onToggleUnits}
-          className="ml-auto inline-flex items-center gap-1.5 text-[11px] lowercase tracking-wide text-black/40 transition hover:text-black/70"
+          className="ml-auto inline-flex items-center gap-1.5 text-[11px] lowercase tracking-wide text-ink/40 transition hover:text-ink/70"
           title={t("rail.switchUnits")}
           aria-label={t("rail.switchUnits")}
         >
@@ -93,7 +93,7 @@ export function SellAmountControls({
       )}
 
       {canShowUnits && (
-        <span className="w-full text-[11px] tabular-nums text-black/35">
+        <span className="w-full text-[11px] tabular-nums text-ink/35">
           {t("rail.youHold", {
             n: String(floorTo(heldUnits, centPrecision(unitPriceUsd!))),
             sym: unitLabel!,

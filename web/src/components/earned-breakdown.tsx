@@ -31,12 +31,12 @@ export function EarnedBreakdown({
   });
 
   return (
-    <div className="mt-3 rounded-[8px] bg-black/[0.02] px-3 py-2.5">
+    <div className="mt-3 rounded-[8px] bg-ink/[0.02] px-3 py-2.5">
       <Line label={t("history.market")} amount={performance.marketUsd} />
       <Line label={t("history.tradingCost")} amount={performance.costUsd} />
 
       {rows.length > 0 && (
-        <div className="mt-2 space-y-0 border-t border-black/[0.06] pt-2">
+        <div className="mt-2 space-y-0 border-t border-ink/[0.06] pt-2">
           {rows.map((r) => (
             <Line
               key={r.label}
@@ -77,11 +77,11 @@ function Line({
             className="shrink-0"
           />
         )}
-        <span className="truncate text-[11px] lowercase text-black/45">{label}</span>
-        {note && <span className="shrink-0 text-[10px] lowercase text-black/25">· {note}</span>}
+        <span className="truncate text-[11px] lowercase text-ink/45">{label}</span>
+        {note && <span className="shrink-0 text-[10px] lowercase text-ink/25">· {note}</span>}
       </span>
       <span
-        className={`shrink-0 text-[11px] tabular-nums ${amount < 0 ? "text-red-600" : "text-black/70"}`}
+        className={`shrink-0 text-[11px] tabular-nums ${amount < 0 ? "text-loss" : "text-ink/70"}`}
       >
         {formatSignedUsd(amount)}
       </span>

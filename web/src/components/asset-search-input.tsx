@@ -16,7 +16,7 @@ export function AssetSearchInput({ value, onChange, placeholder }: Props) {
       <Search
         size={13}
         strokeWidth={1.5}
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-black/35"
+        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink/35"
       />
       <input
         type="text"
@@ -24,14 +24,14 @@ export function AssetSearchInput({ value, onChange, placeholder }: Props) {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="w-full rounded-full border border-black/15 bg-white py-1.5 pl-8 pr-8 text-[11px] lowercase tracking-wide text-black outline-none transition placeholder:text-black/35 focus:border-black/40"
+        className="w-full rounded-full border border-ink/15 bg-paper py-1.5 pl-8 pr-8 text-[11px] lowercase tracking-wide text-ink outline-none transition placeholder:text-ink/35 focus:border-ink/40"
       />
       {value && (
         <button
           type="button"
           onClick={() => onChange("")}
           aria-label="Clear search"
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-black/35 transition hover:text-black"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink/35 transition hover:text-ink"
         >
           <X size={12} strokeWidth={1.5} />
         </button>

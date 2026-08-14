@@ -38,7 +38,7 @@ export function ExitCostNotice({ heldMint, heldDecimals, usdAmount, priceUsd }: 
 
   const warn = exit.unavailable || exit.band === "expensive";
   return (
-    <p className={`mt-1 text-[11px] lowercase tracking-wide ${warn ? "text-[#a35b00]" : "text-black/45"}`}>
+    <p className={`mt-1 text-[11px] lowercase tracking-wide ${warn ? "text-[#a35b00]" : "text-ink/45"}`}>
       {exit.unavailable
         ? exit.ceilingUsd !== null
           ? t("rail.exitCostCeiling", { usd: `$${formatUsdAmount(exit.ceilingUsd, 0)}` })

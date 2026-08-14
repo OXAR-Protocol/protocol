@@ -40,7 +40,7 @@ export function TabBar() {
       data-tour-chrome="tabbar"
       className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-50 md:hidden"
     >
-      <div className="pointer-events-auto mx-auto mb-3 flex w-fit items-center gap-1 rounded-full border border-black/10 bg-white/85 p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
+      <div className="pointer-events-auto mx-auto mb-3 flex w-fit items-center gap-1 rounded-full border border-ink/10 bg-paper/85 p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
         {tabs.map((tab) => {
           const isActive = pathname.startsWith(tab.href);
           const Icon = tab.icon;
@@ -51,14 +51,14 @@ export function TabBar() {
               href={tab.href}
               aria-current={isActive ? "page" : undefined}
               className={`relative flex items-center gap-2 rounded-full px-4 py-2.5 transition-colors ${
-                isActive ? "text-white" : "text-black/40 hover:text-black"
+                isActive ? "text-paper" : "text-ink/40 hover:text-ink"
               }`}
             >
               {isActive && (
                 <motion.span
                   layoutId="tab-bar-active"
                   transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                  className="absolute inset-0 -z-10 rounded-full bg-black"
+                  className="absolute inset-0 -z-10 rounded-full bg-ink"
                 />
               )}
               <Icon size={18} strokeWidth={1.5} />

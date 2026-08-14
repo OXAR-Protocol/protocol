@@ -34,19 +34,19 @@ export function SourceCard({ group, onOpen }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group relative isolate overflow-hidden flex flex-col gap-4 p-5 rounded-[8px] border border-black/10 bg-white hover:border-black/30 transition text-left"
+      className="group relative isolate overflow-hidden flex flex-col gap-4 p-5 rounded-[8px] border border-ink/10 bg-paper hover:border-ink/30 transition text-left"
     >
       <BanknoteBg seed={group.views[0]?.id ?? group.name} />
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-3 min-w-0">
           <AssetIcon src={assetLogoSrc(group.views[0]?.id ?? "")} label={group.name} size={32} />
           <div className="min-w-0">
-          <p className="text-base text-black truncate">{group.name}</p>
+          <p className="text-base text-ink truncate">{group.name}</p>
           <div className="mt-1 flex items-center gap-1.5 flex-wrap">
             {group.views.map((v) => (
               <span
                 key={v.id}
-                className="text-[10px] lowercase tracking-wide text-black/55 px-1.5 py-0.5 rounded border border-black/15"
+                className="text-[10px] lowercase tracking-wide text-ink/55 px-1.5 py-0.5 rounded border border-ink/15"
               >
                 {v.assetSymbol}
               </span>
@@ -58,7 +58,7 @@ export function SourceCard({ group, onOpen }: Props) {
         <ArrowUpRight
           size={16}
           strokeWidth={1.5}
-          className="text-black/40 group-hover:text-black transition shrink-0"
+          className="text-ink/40 group-hover:text-ink transition shrink-0"
         />
       </div>
 
@@ -66,17 +66,17 @@ export function SourceCard({ group, onOpen }: Props) {
 
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-xl text-black tabular-nums">
+          <p className="text-xl text-ink tabular-nums">
             {grouped ? "up to " : ""}
             {(group.maxApy * 100).toFixed(2)}%
           </p>
-          <p className="text-[10px] lowercase tracking-wide text-black/40">
+          <p className="text-[10px] lowercase tracking-wide text-ink/40">
             {positionTotal > 0 ? `$${positionTotal.toFixed(2)} in` : "APY"}
           </p>
         </div>
         <p
           className={`text-[10px] lowercase tracking-wide shrink-0 ${
-            RISK_TONE[top.riskLevel] ?? "text-black/45"
+            RISK_TONE[top.riskLevel] ?? "text-ink/45"
           }`}
         >
           {RISK_LABEL[top.riskLevel] ?? top.riskLevel}

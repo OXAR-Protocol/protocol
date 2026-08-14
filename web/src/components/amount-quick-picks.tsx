@@ -39,14 +39,14 @@ export function AmountQuickPicks({
             type="button"
             disabled={disabled || available <= 0}
             onClick={() => onPick(available * f)}
-            className="flex-1 rounded-full border border-black/15 py-1.5 text-[11px] lowercase tracking-wide text-black/55 transition hover:border-black/40 hover:text-black disabled:opacity-40"
+            className="flex-1 rounded-full border border-ink/15 py-1.5 text-[11px] lowercase tracking-wide text-ink/55 transition hover:border-ink/40 hover:text-ink disabled:opacity-40"
           >
             {f === 1 ? t("rail.max") : `${f * 100}%`}
           </button>
         ))}
       </div>
 
-      <div className="mt-2 flex items-center gap-1.5 text-[11px] tabular-nums text-black/40">
+      <div className="mt-2 flex items-center gap-1.5 text-[11px] tabular-nums text-ink/40">
         <span>
           ${formatUsdAmount(available)} {t("rail.available")}
         </span>
@@ -55,7 +55,7 @@ export function AmountQuickPicks({
             type="button"
             onClick={onTopUp}
             aria-label={t("wallet.fund")}
-            className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-black/20 text-black/45 transition hover:border-black/50 hover:text-black"
+            className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-ink/20 text-ink/45 transition hover:border-ink/50 hover:text-ink"
           >
             <Plus size={10} strokeWidth={2} />
           </button>

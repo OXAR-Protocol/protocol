@@ -33,7 +33,7 @@ export default function KitPage() {
 
       <section>
         <h2>Tagline</h2>
-        <p className="text-black">Where does your money sleep?</p>
+        <p className="text-ink">Where does your money sleep?</p>
         <p className="mt-2">Sub: <em>Wake it up. Earn yield. Own real assets.</em></p>
       </section>
 
@@ -58,12 +58,12 @@ export default function KitPage() {
           {LOGOS.map((logo) => (
             <div
               key={logo.name}
-              className="flex flex-col items-center gap-4 rounded-[10px] border border-black/10 p-6"
+              className="flex flex-col items-center gap-4 rounded-[10px] border border-ink/10 p-6"
               style={{ backgroundColor: logo.light ? "#f2f2f2" : "#171717" }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={`/images/${logo.file}`} alt={`OXAR ${logo.name}`} className="h-14 w-auto" />
-              <span className={`text-[12px] ${logo.light ? "text-black/45" : "text-white/50"}`}>{logo.name}</span>
+              <span className={`text-[12px] ${logo.light ? "text-ink/45" : "text-paper/50"}`}>{logo.name}</span>
             </div>
           ))}
         </div>
@@ -74,10 +74,10 @@ export default function KitPage() {
         <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
           {COLORS.map((c) => (
             <div key={c.name} className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-[6px] border border-black/15" style={{ backgroundColor: c.hex }} />
+              <div className="h-9 w-9 rounded-[6px] border border-ink/15" style={{ backgroundColor: c.hex }} />
               <div>
-                <div className="text-[12px] text-black">{c.name}</div>
-                <div className="text-[12px] text-black/40">{c.hex}</div>
+                <div className="text-[12px] text-ink">{c.name}</div>
+                <div className="text-[12px] text-ink/40">{c.hex}</div>
               </div>
             </div>
           ))}

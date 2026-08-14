@@ -134,7 +134,7 @@ export function AssetDetail({
           className="mt-1.5"
         />
         <div className="min-w-0 flex-1">
-        <p className="lowercase text-[clamp(14px,1.3vw,18px)] text-black/45">[ {info?.category ?? (price ? "asset" : "yield source")} ]</p>
+        <p className="lowercase text-[clamp(14px,1.3vw,18px)] text-ink/45">[ {info?.category ?? (price ? "asset" : "yield source")} ]</p>
         <h1 className="mt-3 flex flex-wrap items-baseline gap-x-3 text-[clamp(28px,4.4vw,46px)] leading-[1.02] tracking-[-0.04em]">
           {view.name}
         </h1>
@@ -143,15 +143,15 @@ export function AssetDetail({
             <>
               <span className="text-[clamp(26px,4vw,40px)] font-bold tabular-nums">{quote ? `$${quote.price.toFixed(2)}` : "—"}</span>
               {quote && (
-                <span className={`text-[15px] tabular-nums ${up ? "text-emerald-600" : "text-red-600"}`}>
+                <span className={`text-[15px] tabular-nums ${up ? "text-profit" : "text-loss"}`}>
                   {up ? "+" : ""}{quote.change24h.toFixed(2)}% 24h
                 </span>
               )}
             </>
           ) : (
             <>
-              <span className="text-[clamp(26px,4vw,40px)] font-bold tabular-nums text-[#3c05c7]">{(view.apy * 100).toFixed(2)}%</span>
-              <span className="lowercase text-[15px] text-black/45">{t("asset.apy")} · {t(`risk.${view.riskLevel}`)}</span>
+              <span className="text-[clamp(26px,4vw,40px)] font-bold tabular-nums text-[var(--brand)]">{(view.apy * 100).toFixed(2)}%</span>
+              <span className="lowercase text-[15px] text-ink/45">{t("asset.apy")} · {t(`risk.${view.riskLevel}`)}</span>
             </>
           )}
         </div>
@@ -169,12 +169,12 @@ export function AssetDetail({
                   onClick={() => onSelectVariant?.(v.id)}
                   className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px] transition ${
                     active
-                      ? "border-[#3c05c7] bg-[#3c05c7]/[0.05] text-black"
-                      : "border-black/10 text-black/60 hover:border-black/30 hover:text-black"
+                      ? "border-[var(--brand)] bg-[var(--brand)]/[0.05] text-ink"
+                      : "border-ink/10 text-ink/60 hover:border-ink/30 hover:text-ink"
                   }`}
                 >
                   <span className="font-medium">{v.assetSymbol}</span>
-                  <span className="tabular-nums text-[#3c05c7]">{(v.apy * 100).toFixed(2)}%</span>
+                  <span className="tabular-nums text-[var(--brand)]">{(v.apy * 100).toFixed(2)}%</span>
                 </button>
               );
             })}
@@ -191,7 +191,7 @@ export function AssetDetail({
       {positionValue > 0 && (
         <motion.section
           {...fade(0.08)}
-          className="relative mt-6 overflow-hidden rounded-[12px] border border-black/10 bg-white p-5"
+          className="relative mt-6 overflow-hidden rounded-[12px] border border-ink/10 bg-paper p-5"
         >
           {/* The wallet card's treatment, not a violet wash: a white card and a real
               photograph. The engraving at 6% behind a purple tint read as a smudge —
@@ -207,7 +207,7 @@ export function AssetDetail({
             opacity="opacity-30"
           />
           <div className="relative">
-          <p className="lowercase text-[13px] text-black/55">{t("asset.yourPosition")}</p>
+          <p className="lowercase text-[13px] text-ink/55">{t("asset.yourPosition")}</p>
           <p className="mt-1 text-[clamp(24px,3.4vw,34px)] font-bold tabular-nums">
             ${positionValue.toFixed(2)}
           </p>
@@ -215,10 +215,10 @@ export function AssetDetail({
               the pool can sit a couple of percent either side of it, so what you could
               actually walk away with is quoted separately — never inferred. */}
           {realizable.proceedsUsd !== null && (
-            <p className="mt-1 text-[13px] tabular-nums text-black/70">
+            <p className="mt-1 text-[13px] tabular-nums text-ink/70">
               {t("asset.sellNow")}: ${realizable.proceedsUsd.toFixed(2)}
               {Math.abs(realizable.proceedsUsd - positionValue) >= 0.01 && (
-                <span className="text-black/45">
+                <span className="text-ink/45">
                   {" · "}
                   {t(
                     realizable.proceedsUsd < positionValue
@@ -234,9 +234,9 @@ export function AssetDetail({
               )}
             </p>
           )}
-          <p className="mt-1 text-[13px] text-black/45">
+          <p className="mt-1 text-[13px] text-ink/45">
             {price && typeof earned === "number" ? (
-              <span className={`tabular-nums ${earned >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+              <span className={`tabular-nums ${earned >= 0 ? "text-profit" : "text-loss"}`}>
                 {earned >= 0 ? "+" : "−"}${Math.abs(earned).toFixed(2)} {t("asset.sinceYouBought")}
               </span>
             ) : price ? (
@@ -258,14 +258,14 @@ export function AssetDetail({
               <AssetChart mint={view.heldMint} />
             ) : apyHistory.length > 1 ? (
               <div data-tour="chart">
-                <p className="mb-3 lowercase text-[13px] text-black/45">{t("asset.apyLastDays", { n: apyHistory.length })}</p>
+                <p className="mb-3 lowercase text-[13px] text-ink/45">{t("asset.apyLastDays", { n: apyHistory.length })}</p>
                 <div className="-mx-5 sm:mx-0">
                   <HoverChart
                     values={apyHistory}
                     height={220}
                     fill
                     format={(v) => `${v.toFixed(2)}%`}
-                    className="text-[#3c05c7]/70"
+                    className="text-[var(--brand)]/70"
                   />
                 </div>
               </div>
@@ -274,18 +274,18 @@ export function AssetDetail({
 
           {info && (
             <motion.section {...fade(0.1)} className="mt-10">
-              <p className="lowercase text-[13px] text-black/45 mb-3">{t("asset.whatItIs")}</p>
-              <p className="text-[clamp(17px,1.6vw,21px)] leading-snug text-black/80">{info.about}</p>
+              <p className="lowercase text-[13px] text-ink/45 mb-3">{t("asset.whatItIs")}</p>
+              <p className="text-[clamp(17px,1.6vw,21px)] leading-snug text-ink/80">{info.about}</p>
               {info.facts && info.facts.length > 0 && (
-                <div className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-[12px] border border-black/10 bg-black/10 sm:grid-cols-2">
+                <div className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-[12px] border border-ink/10 bg-ink/10 sm:grid-cols-2">
                   {info.facts.map((f, i) => {
                     // An odd last fact would leave an empty 2nd cell showing the grey
                     // grid background — span it full width so the row stays filled.
                     const spanFull = i === info.facts!.length - 1 && info.facts!.length % 2 === 1;
                     return (
-                      <div key={f.label} className={`bg-white p-4 ${spanFull ? "sm:col-span-2" : ""}`}>
-                        <p className="lowercase text-[12px] text-black/40">{f.label}</p>
-                        <p className="mt-1 text-[15px] text-black">{f.value}</p>
+                      <div key={f.label} className={`bg-paper p-4 ${spanFull ? "sm:col-span-2" : ""}`}>
+                        <p className="lowercase text-[12px] text-ink/40">{f.label}</p>
+                        <p className="mt-1 text-[15px] text-ink">{f.value}</p>
                       </div>
                     );
                   })}
@@ -302,7 +302,7 @@ export function AssetDetail({
               ledger — a promise of nothing — so it isn't offered at all. */}
           {view.heldMint && walletAddress && (
             <motion.section {...fade(0.2)} className="mt-10">
-              <p className="mb-3 lowercase text-[13px] text-black/45">{t("asset.history")}</p>
+              <p className="mb-3 lowercase text-[13px] text-ink/45">{t("asset.history")}</p>
               {/* Only this asset's rows — a ledger of everything belongs in the portfolio. */}
               <ActivityFeed mint={view.heldMint} unitLabel={unitLabel} />
             </motion.section>

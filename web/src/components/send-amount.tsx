@@ -51,12 +51,12 @@ export function SendAmount({
 
   return (
     <>
-      <p className="text-center text-[2.6rem] font-light leading-none tracking-[-0.03em] text-black">
+      <p className="text-center text-[2.6rem] font-light leading-none tracking-[-0.03em] text-ink">
         <AnimatedAmount value={value} />
-        <span className="ml-2 text-[1.4rem] text-black/40">{asset.symbol}</span>
+        <span className="ml-2 text-[1.4rem] text-ink/40">{asset.symbol}</span>
       </p>
       {unitPrice > 0 && (
-        <p className="mt-1.5 text-center text-[12px] tabular-nums text-black/40">
+        <p className="mt-1.5 text-center text-[12px] tabular-nums text-ink/40">
           ≈ ${formatUsdAmount((Number(value) || 0) * unitPrice)}
         </p>
       )}
@@ -66,14 +66,14 @@ export function SendAmount({
       <button
         type="button"
         onClick={onPickToken}
-        className="mx-auto mt-4 flex items-center gap-2 rounded-full border border-black/12 py-1.5 pl-1.5 pr-3 transition hover:border-black/40"
+        className="mx-auto mt-4 flex items-center gap-2 rounded-full border border-ink/12 py-1.5 pl-1.5 pr-3 transition hover:border-ink/40"
       >
         <TokenIcon asset={asset} className="h-7 w-7 shrink-0 rounded-full" />
-        <span className="text-[14px] text-black">{asset.symbol}</span>
-        <span className="text-[12px] tabular-nums text-black/40">
+        <span className="text-[14px] text-ink">{asset.symbol}</span>
+        <span className="text-[12px] tabular-nums text-ink/40">
           {available.toLocaleString(undefined, { maximumFractionDigits: 6 })}
         </span>
-        <ChevronRight size={15} strokeWidth={1.5} className="text-black/30" />
+        <ChevronRight size={15} strokeWidth={1.5} className="text-ink/30" />
       </button>
 
       <div className="mt-5 flex gap-1.5">
@@ -83,7 +83,7 @@ export function SendAmount({
             type="button"
             disabled={available <= 0}
             onClick={() => onChange(tidy(available * f, asset.decimals))}
-            className="flex-1 rounded-full border border-black/15 py-1.5 text-[11px] lowercase tracking-wide text-black/55 transition hover:border-black/40 hover:text-black disabled:opacity-40"
+            className="flex-1 rounded-full border border-ink/15 py-1.5 text-[11px] lowercase tracking-wide text-ink/55 transition hover:border-ink/40 hover:text-ink disabled:opacity-40"
           >
             {f === 1 ? t("rail.max") : `${f * 100}%`}
           </button>
@@ -94,13 +94,13 @@ export function SendAmount({
         <AmountKeypad value={value} onChange={onChange} maxDecimals={Math.min(asset.decimals, 6)} />
       </div>
 
-      {note && <p className="mt-2 text-center text-[11px] tabular-nums text-black/45">{note}</p>}
+      {note && <p className="mt-2 text-center text-[11px] tabular-nums text-ink/45">{note}</p>}
 
       <button
         type="button"
         onClick={onContinue}
         disabled={!ready}
-        className="mt-3 w-full rounded-full bg-black px-4 py-3.5 text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-25"
+        className="mt-3 w-full rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-25"
       >
         {overspending ? t("send.notEnough", { sym: asset.symbol }) : t("send.review.open")}
       </button>

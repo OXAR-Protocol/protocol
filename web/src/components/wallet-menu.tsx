@@ -49,33 +49,33 @@ export function WalletMenu() {
 
   if (!solana) {
     return (
-      <span className="lowercase text-[14px] text-black/40">{t("wallet.connecting")}</span>
+      <span className="lowercase text-[14px] text-ink/40">{t("wallet.connecting")}</span>
     );
   }
 
   const item =
-    "w-full flex items-center gap-2 px-3 py-2.5 lowercase text-[14px] text-black/60 transition text-left";
+    "w-full flex items-center gap-2 px-3 py-2.5 lowercase text-[14px] text-ink/60 transition text-left";
 
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-2 rounded-full border border-black/15 px-4 py-2 lowercase text-[14px] text-black/70 transition-colors hover:border-black/40 hover:text-black"
+        className="inline-flex items-center gap-2 rounded-full border border-ink/15 px-4 py-2 lowercase text-[14px] text-ink/70 transition-colors hover:border-ink/40 hover:text-ink"
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-[#3c05c7]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
         {solName ?? shortSolana}
         <ChevronDown size={13} strokeWidth={1.5} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-[12px] border border-black/10 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+        <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-[12px] border border-ink/10 bg-paper shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
           <AddressRow label={t("you.wallet")} address={solana} />
 
           {/* One door for money instead of three items that each did a piece of it —
               in, out and across all live behind this now (see MoneySheet). */}
           <button
             onClick={() => { setOpen(false); setShowMoney(true); }}
-            className={`${item} border-b border-black/10 hover:bg-black/[0.04] hover:text-black`}
+            className={`${item} border-b border-ink/10 hover:bg-ink/[0.04] hover:text-ink`}
           >
             <Wallet size={13} strokeWidth={1.5} />
             {t("money.title")}
@@ -84,7 +84,7 @@ export function WalletMenu() {
           {isEmbedded && (
             <button
               onClick={() => { setOpen(false); void exportWallet({ address: solana }); }}
-              className={`${item} border-b border-black/10 hover:bg-black/[0.04] hover:text-black`}
+              className={`${item} border-b border-ink/10 hover:bg-ink/[0.04] hover:text-ink`}
             >
               <KeyRound size={13} strokeWidth={1.5} />
               {t("wallet.exportKey")}
@@ -93,7 +93,7 @@ export function WalletMenu() {
 
           <button
             onClick={() => { setOpen(false); setShowFeedback(true); }}
-            className={`${item} border-b border-black/10 hover:bg-black/[0.04] hover:text-black`}
+            className={`${item} border-b border-ink/10 hover:bg-ink/[0.04] hover:text-ink`}
           >
             <MessageSquare size={13} strokeWidth={1.5} />
             {t("wallet.feedback")}
@@ -101,7 +101,7 @@ export function WalletMenu() {
 
           <button
             onClick={() => { setOpen(false); logout(); }}
-            className={`${item} hover:bg-black/[0.04] hover:text-red-600`}
+            className={`${item} hover:bg-ink/[0.04] hover:text-loss`}
           >
             <LogOut size={13} strokeWidth={1.5} />
             {t("wallet.disconnect")}
@@ -127,16 +127,16 @@ function AddressRow({ label, address }: { label: string; address: string }) {
   return (
     <button
       onClick={copy}
-      className="w-full flex items-center justify-between gap-2 px-3 py-2.5 hover:bg-black/[0.04] transition text-left border-b border-black/10"
+      className="w-full flex items-center justify-between gap-2 px-3 py-2.5 hover:bg-ink/[0.04] transition text-left border-b border-ink/10"
     >
       <span className="min-w-0">
-        <span className="block lowercase text-[11px] tracking-wide text-black/35">{label}</span>
-        <span className="block text-[13px] text-black/80 truncate">{short}</span>
+        <span className="block lowercase text-[11px] tracking-wide text-ink/35">{label}</span>
+        <span className="block text-[13px] text-ink/80 truncate">{short}</span>
       </span>
       {copied ? (
-        <Check size={13} strokeWidth={1.5} className="text-[#3c05c7] shrink-0" />
+        <Check size={13} strokeWidth={1.5} className="text-[var(--brand)] shrink-0" />
       ) : (
-        <Copy size={13} strokeWidth={1.5} className="text-black/40 shrink-0" />
+        <Copy size={13} strokeWidth={1.5} className="text-ink/40 shrink-0" />
       )}
     </button>
   );

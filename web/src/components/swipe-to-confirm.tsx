@@ -97,7 +97,7 @@ export function SwipeToConfirm({
         type="button"
         disabled={locked}
         onClick={onConfirm}
-        className="mt-3 inline-flex h-[52px] w-full items-center justify-center rounded-full bg-black text-[14px] lowercase tracking-wide text-white transition hover:bg-black/85 disabled:opacity-30"
+        className="mt-3 inline-flex h-[52px] w-full items-center justify-center rounded-full bg-ink text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-30"
       >
         {body}
       </button>
@@ -119,13 +119,13 @@ export function SwipeToConfirm({
       // Stops the browser treating the press as the start of a scroll or a
       // double-tap zoom, which made the fill stutter on a phone.
       style={{ touchAction: "manipulation" }}
-      className="relative mt-3 h-[60px] w-full select-none overflow-hidden rounded-full border border-black/12 bg-black/[0.03] text-[14px] lowercase tracking-wide text-black/60 transition disabled:opacity-40"
+      className="relative mt-3 h-[60px] w-full select-none overflow-hidden rounded-full border border-ink/12 bg-ink/[0.03] text-[14px] lowercase tracking-wide text-ink/60 transition disabled:opacity-40"
     >
       {/* The fill IS the timer — no separate spinner to read while deciding. */}
       <span
         aria-hidden
         style={{ width: `${progress * 100}%` }}
-        className="absolute inset-y-0 left-0 bg-black/[0.07]"
+        className="absolute inset-y-0 left-0 bg-ink/[0.07]"
       />
       {body}
     </button>

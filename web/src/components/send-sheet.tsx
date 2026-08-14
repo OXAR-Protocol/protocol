@@ -133,7 +133,7 @@ export function SendSheet({
             <button
               type="button"
               onClick={() => setStep(back[step]!)}
-              className="mb-4 inline-flex items-center gap-1.5 text-[13px] lowercase text-black/40 transition hover:text-black"
+              className="mb-4 inline-flex items-center gap-1.5 text-[13px] lowercase text-ink/40 transition hover:text-ink"
             >
               <ArrowLeft size={13} strokeWidth={1.5} />
               {t("fund.back")}
@@ -156,7 +156,7 @@ export function SendSheet({
             <SendAddress chain={destChain} value={to} onChange={setTo} onContinue={() => setStep("amount")} />
           ) : step === "token" ? (
             loading ? (
-              <p className="text-[13px] text-black/45">{t("send.loading")}</p>
+              <p className="text-[13px] text-ink/45">{t("send.loading")}</p>
             ) : (
               <SendToken
                 assets={assets}
@@ -171,7 +171,7 @@ export function SendSheet({
             )
           ) : step === "amount" ? (
             loading ? (
-              <p className="text-[13px] text-black/45">{t("send.loading")}</p>
+              <p className="text-[13px] text-ink/45">{t("send.loading")}</p>
             ) : source ? (
               <SendAmount
                 asset={source}
@@ -191,7 +191,7 @@ export function SendSheet({
                 }
               />
             ) : (
-              <p className="text-[13px] text-black/45">{t("send.noAssets")}</p>
+              <p className="text-[13px] text-ink/45">{t("send.noAssets")}</p>
             )
           ) : source ? (
             <SendReview
@@ -206,7 +206,7 @@ export function SendSheet({
             />
           ) : null}
 
-          {sendError && <p className="mt-3 text-center text-xs text-red-500">{sendError}</p>}
+          {sendError && <p className="mt-3 text-center text-xs text-loss">{sendError}</p>}
         </>
       )}
     </SheetShell>

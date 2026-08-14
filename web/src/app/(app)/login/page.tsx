@@ -28,10 +28,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="safe-top fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-white px-6 text-black">
+    <div className="safe-top fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-paper px-6 text-ink">
       <Link
         href="/"
-        className="safe-top-6 absolute left-6 top-6 lowercase text-[14px] text-black/40 transition-colors hover:text-black"
+        className="safe-top-6 absolute left-6 top-6 lowercase text-[14px] text-ink/40 transition-colors hover:text-ink"
       >
         {t("login.back")}
       </Link>
@@ -55,7 +55,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.08 }}
-          className="lowercase text-[clamp(15px,1.4vw,18px)] text-black/45"
+          className="lowercase text-[clamp(15px,1.4vw,18px)] text-ink/45"
         >
           {t("login.welcome")}
         </motion.span>
@@ -66,14 +66,14 @@ export default function LoginPage() {
           transition={{ duration: 0.6, delay: 0.18 }}
           className="mt-6 lowercase text-[clamp(38px,7vw,68px)] leading-[1.0] tracking-[-0.05em]"
         >
-          {t("login.titleA")} <span className="italic text-black/45">{t("login.titleB")}</span>
+          {t("login.titleA")} <span className="italic text-ink/45">{t("login.titleB")}</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-6 max-w-[420px] lowercase text-[clamp(15px,1.4vw,18px)] leading-snug text-black/50"
+          className="mt-6 max-w-[420px] lowercase text-[clamp(15px,1.4vw,18px)] leading-snug text-ink/50"
         >
           {t("login.body")}
         </motion.p>
@@ -87,7 +87,7 @@ export default function LoginPage() {
           <button
             onClick={handleLogin}
             disabled={!ready || authenticated}
-            className="w-full rounded-full bg-black px-8 py-3.5 lowercase text-[16px] font-medium text-white transition-colors hover:bg-black/85 disabled:cursor-not-allowed disabled:bg-black/10 disabled:text-black/30"
+            className="w-full rounded-full bg-ink px-8 py-3.5 lowercase text-[16px] font-medium text-paper transition-colors hover:bg-ink/85 disabled:cursor-not-allowed disabled:bg-ink/10 disabled:text-ink/30"
           >
             {authenticated ? t("login.redirecting") : t("login.continue")}
           </button>

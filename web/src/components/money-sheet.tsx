@@ -73,7 +73,7 @@ export function MoneySheet({ onClose }: { onClose: () => void }) {
           />
         </div>
 
-        <p className="mt-5 flex items-center gap-2 text-[11px] text-black/40">
+        <p className="mt-5 flex items-center gap-2 text-[11px] text-ink/40">
           <Clock size={12} strokeWidth={1.5} />
           {t("money.history")}
         </p>
@@ -98,9 +98,9 @@ export function MoneySheet({ onClose }: { onClose: () => void }) {
 /** One of the two figures — dashes while it's being read, never a false zero. */
 function Figure({ label, value }: { label: string; value: number | null }) {
   return (
-    <div className="rounded-[10px] border border-black/10 px-4 py-3">
-      <p className="text-[11px] lowercase tracking-wide text-black/40">{label}</p>
-      <p className="mt-0.5 text-[18px] tabular-nums text-black">
+    <div className="rounded-[10px] border border-ink/10 px-4 py-3">
+      <p className="text-[11px] lowercase tracking-wide text-ink/40">{label}</p>
+      <p className="mt-0.5 text-[18px] tabular-nums text-ink">
         {value === null ? "—" : `$${formatUsdAmount(value)}`}
       </p>
     </div>

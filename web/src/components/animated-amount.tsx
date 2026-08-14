@@ -25,7 +25,7 @@ export function AnimatedAmount({
   const empty = value === "";
 
   return (
-    <span className={`inline-flex items-baseline ${empty ? "text-black/25" : ""} ${className}`}>
+    <span className={`inline-flex items-baseline ${empty ? "text-ink/25" : ""} ${className}`}>
       <AnimatePresence initial={false} mode="popLayout">
         {chars.map((ch, i) => (
           <motion.span

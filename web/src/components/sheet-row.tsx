@@ -49,35 +49,35 @@ export function SheetRow({
   return (
     <Tag
       {...(inert ? {} : { type: "button" as const, onClick, disabled: disabled || busy })}
-      className={`flex min-h-[76px] w-full items-center gap-3 rounded-[12px] border border-black/12 px-4 py-3 text-left transition ${
+      className={`flex min-h-[76px] w-full items-center gap-3 rounded-[12px] border border-ink/12 px-4 py-3 text-left transition ${
         inert
           ? "cursor-default opacity-60"
-          : "enabled:hover:border-black/40 enabled:hover:bg-black/[0.015] disabled:opacity-45"
+          : "enabled:hover:border-ink/40 enabled:hover:bg-ink/[0.015] disabled:opacity-45"
       }`}
     >
       {leading ?? (
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-black/[0.045] text-black/70">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink/[0.045] text-ink/70">
           {Icon && <Icon size={18} strokeWidth={1.6} />}
         </span>
       )}
 
       <span className="min-w-0 flex-1">
-        <span className="block text-[14px] leading-tight text-black">{title}</span>
-        {body && <span className="mt-0.5 block text-[12px] leading-snug text-black/45">{body}</span>}
+        <span className="block text-[14px] leading-tight text-ink">{title}</span>
+        {body && <span className="mt-0.5 block text-[12px] leading-snug text-ink/45">{body}</span>}
       </span>
 
       {badge && (
-        <span className="shrink-0 rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] lowercase tracking-wide text-black/45">
+        <span className="shrink-0 rounded-full bg-ink/[0.06] px-2 py-0.5 text-[9px] lowercase tracking-wide text-ink/45">
           {badge}
         </span>
       )}
 
       {busy ? (
-        <Loader2 size={16} className="shrink-0 animate-spin text-black/35" />
+        <Loader2 size={16} className="shrink-0 animate-spin text-ink/35" />
       ) : (
         trailing ??
         (chevron && !inert ? (
-          <ChevronRight size={16} strokeWidth={1.5} className="shrink-0 text-black/25" />
+          <ChevronRight size={16} strokeWidth={1.5} className="shrink-0 text-ink/25" />
         ) : null)
       )}
     </Tag>

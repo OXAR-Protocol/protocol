@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${dmSans.variable} ${dmSans.className} app-texture min-h-screen text-black`}>
+    <div className={`${dmSans.variable} ${dmSans.className} app-texture min-h-screen text-ink`}>
       <Suspense fallback={null}>
         <AccessWall>
           <Providers>

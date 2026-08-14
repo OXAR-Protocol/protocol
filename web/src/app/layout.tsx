@@ -55,13 +55,17 @@ export default function RootLayout({
           mismatch makes dev re-mount the tree and flash white. */}
       <body
         suppressHydrationWarning
-        className="bg-surface-0 text-white font-sans antialiased overflow-x-hidden"
+        className="bg-page text-ink font-sans antialiased overflow-x-hidden"
       >
         {/* Apply the saved theme before paint to avoid a dark→light flash. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('oxar-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}",
+              // Runs before the first paint: a dark-theme user must not see a white
+              // flash, and a "system" user must not see the light one either.
+              "try{var t=localStorage.getItem('oxar-theme');" +
+              "if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';" +
+              "document.documentElement.setAttribute('data-theme',t)}catch(e){}",
           }}
         />
         <ThemeProvider>

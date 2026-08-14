@@ -30,8 +30,8 @@ interface Props {
 }
 
 const BUTTON_VARIANT = {
-  primary: "bg-black text-white hover:bg-black/85",
-  secondary: "border border-black/20 hover:border-black/40 text-black",
+  primary: "bg-ink text-paper hover:bg-ink/85",
+  secondary: "border border-ink/20 hover:border-ink/40 text-ink",
 } as const;
 
 /** One deposit/withdraw input + action button. Shared so both flows stay in sync. */
@@ -50,8 +50,8 @@ export function YieldAmountField({
   hold,
 }: Props) {
   return (
-    <div className="p-4 rounded-[6px] border border-black/10 bg-white">
-      <p className="text-[10px] lowercase tracking-wide text-black/40 mb-2">
+    <div className="p-4 rounded-[6px] border border-ink/10 bg-paper">
+      <p className="text-[10px] lowercase tracking-wide text-ink/40 mb-2">
         {label}
       </p>
       <div className="flex items-baseline gap-3">
@@ -61,11 +61,11 @@ export function YieldAmountField({
           step="any"
           value={value}
           onChange={(e) => onChange(Math.max(0, Number(normalizeDecimalInput(e.target.value)) || 0))}
-          className="flex-1 bg-transparent border-b border-black/15 focus:border-black/40 outline-none text-2xl text-black py-1"
+          className="flex-1 bg-transparent border-b border-ink/15 focus:border-ink/40 outline-none text-2xl text-ink py-1"
         />
-        <span className="text-sm text-black/45">{symbol}</span>
+        <span className="text-sm text-ink/45">{symbol}</span>
       </div>
-      <div className="mt-2 text-[11px] text-black/40">{hint}</div>
+      <div className="mt-2 text-[11px] text-ink/40">{hint}</div>
       {controls}
       {hold ? (
         <SwipeToConfirm label={actionLabel} busy={loading} disabled={disabled} onConfirm={onAction} />

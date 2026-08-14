@@ -24,12 +24,12 @@ export function PaybisSteps({ dir, steps }: { dir: string; steps: readonly Paybi
     <ol className="mt-4 space-y-4">
       {steps.map((step, i) => (
         <li key={step.title} className="flex gap-3">
-          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-black/15 text-[10px] tabular-nums text-black/50">
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-ink/15 text-[10px] tabular-nums text-ink/50">
             {i + 1}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] text-black">{t(step.title)}</p>
-            <p className="mt-0.5 text-[12px] leading-snug text-black/50">{t(step.body)}</p>
+            <p className="text-[13px] text-ink">{t(step.title)}</p>
+            <p className="mt-0.5 text-[12px] leading-snug text-ink/50">{t(step.body)}</p>
             {step.shot && (
               <Image
                 src={`/help/${dir}/${step.shot}.webp`}
@@ -37,7 +37,7 @@ export function PaybisSteps({ dir, steps }: { dir: string; steps: readonly Paybi
                 width={900}
                 height={600}
                 unoptimized
-                className="mt-2 w-full rounded-[8px] border border-black/10"
+                className="mt-2 w-full rounded-[8px] border border-ink/10"
               />
             )}
           </div>

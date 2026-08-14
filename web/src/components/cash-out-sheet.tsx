@@ -39,25 +39,25 @@ function ComingSoon({ usdcValue, onClose }: { usdcValue: number; onClose: () => 
   const { t } = useT();
   return (
     <>
-      <div className="flex items-start gap-3 rounded-[10px] border border-[#3c05c7]/25 bg-[#3c05c7]/[0.04] px-4 py-3">
-        <Clock size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-[#3c05c7]" />
-        <p className="text-[13px] leading-snug text-black/70">
-          {t("cashout.body1a")}<span className="text-black">{t("cashout.body1b")}</span>{t("cashout.body1c")}
+      <div className="flex items-start gap-3 rounded-[10px] border border-[var(--brand)]/25 bg-[var(--brand)]/[0.04] px-4 py-3">
+        <Clock size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-[var(--brand)]" />
+        <p className="text-[13px] leading-snug text-ink/70">
+          {t("cashout.body1a")}<span className="text-ink">{t("cashout.body1b")}</span>{t("cashout.body1c")}
         </p>
       </div>
 
-      <p className="mt-4 text-[13px] leading-snug text-black/55">
-        {t("cashout.body2a")}<span className="text-black">{t("cashout.body2b")}</span>{t("cashout.body2c")}
+      <p className="mt-4 text-[13px] leading-snug text-ink/55">
+        {t("cashout.body2a")}<span className="text-ink">{t("cashout.body2b")}</span>{t("cashout.body2c")}
       </p>
 
-      <div className="mt-4 rounded-[10px] border border-black/10 px-4 py-3">
-        <p className="text-[11px] lowercase tracking-wide text-black/40">{t("cashout.yourUsdc")}</p>
-        <p className="mt-0.5 text-[18px] tabular-nums text-black">${usdcValue.toFixed(2)}</p>
+      <div className="mt-4 rounded-[10px] border border-ink/10 px-4 py-3">
+        <p className="text-[11px] lowercase tracking-wide text-ink/40">{t("cashout.yourUsdc")}</p>
+        <p className="mt-0.5 text-[18px] tabular-nums text-ink">${usdcValue.toFixed(2)}</p>
       </div>
 
       <button
         onClick={onClose}
-        className="mt-5 w-full rounded-full bg-black px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85"
+        className="mt-5 w-full rounded-full bg-ink px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85"
       >
         {t("cashout.gotIt")}
       </button>

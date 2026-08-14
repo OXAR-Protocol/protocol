@@ -59,8 +59,8 @@ export function PickButton({
             : "inline-flex shrink-0 px-2.5 py-1 text-[11px]"
       } ${
         picked
-          ? "border-black bg-black text-white"
-          : "border-black/15 bg-white/80 text-black/50 hover:border-black/40 hover:text-black"
+          ? "border-ink bg-ink text-paper"
+          : "border-ink/15 bg-paper/80 text-ink/50 hover:border-ink/40 hover:text-ink"
       } ${className ?? ""}`}
     >
       {picked ? <Check size={11} strokeWidth={2.5} /> : <Plus size={11} strokeWidth={2.5} />}

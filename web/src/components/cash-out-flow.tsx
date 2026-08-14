@@ -48,14 +48,14 @@ export function CashOutFlow({ usdc }: { usdc: number }) {
         error={error}
       />
 
-      <p className="mt-5 text-[11px] lowercase tracking-[0.18em] text-black/35">{t("cashout.how")}</p>
+      <p className="mt-5 text-[11px] lowercase tracking-[0.18em] text-ink/35">{t("cashout.how")}</p>
       <PaybisSteps dir="cashout" steps={STEPS} />
 
       <a
         href={paybisSellUrl()}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-white transition hover:bg-black/85"
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85"
       >
         {t("cashout.open")}
         <ExternalLink size={14} strokeWidth={1.5} />
@@ -63,13 +63,13 @@ export function CashOutFlow({ usdc }: { usdc: number }) {
 
       <button
         onClick={() => setShowSend(true)}
-        className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-3 text-[14px] lowercase tracking-wide text-black/70 transition hover:border-black/40 hover:text-black"
+        className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-ink/15 px-4 py-3 text-[14px] lowercase tracking-wide text-ink/70 transition hover:border-ink/40 hover:text-ink"
       >
         {t("cashout.haveAddress")}
         <ArrowUpRight size={14} strokeWidth={1.5} />
       </button>
 
-      <p className="mt-3 text-[11px] leading-snug text-black/40">{t("cashout.disclaimer")}</p>
+      <p className="mt-3 text-[11px] leading-snug text-ink/40">{t("cashout.disclaimer")}</p>
 
       <AnimatePresence>
         {showSend && <SendSheet initialDestKey="base" onClose={() => setShowSend(false)} />}

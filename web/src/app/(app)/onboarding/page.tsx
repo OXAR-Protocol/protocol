@@ -29,7 +29,7 @@ export default function OnboardingPage() {
         <h1 className="mt-4 max-w-2xl text-[clamp(28px,4.4vw,48px)] leading-[1.04] tracking-[-0.04em]">
           {t("onb.title")}
         </h1>
-        <p className="mt-3 max-w-md lowercase text-[clamp(15px,1.3vw,18px)] text-black/45">
+        <p className="mt-3 max-w-md lowercase text-[clamp(15px,1.3vw,18px)] text-ink/45">
           {t("onb.subtitle")}
         </p>
       </motion.div>
@@ -44,27 +44,27 @@ export default function OnboardingPage() {
         <button
           onClick={() => login()}
           disabled={!ready}
-          className="rounded-[14px] border border-black/10 bg-white p-8 text-left transition-colors hover:border-black/30 disabled:opacity-50"
+          className="rounded-[14px] border border-ink/10 bg-paper p-8 text-left transition-colors hover:border-ink/30 disabled:opacity-50"
         >
-          <Wallet className="mb-6 text-black/50" size={30} strokeWidth={1.5} />
+          <Wallet className="mb-6 text-ink/50" size={30} strokeWidth={1.5} />
           <h2 className="lowercase text-[clamp(20px,2.2vw,26px)] tracking-[-0.02em]">{t("onb.crypto.title")}</h2>
-          <p className="mt-2 lowercase text-[clamp(14px,1.2vw,16px)] leading-snug text-black/50">
+          <p className="mt-2 lowercase text-[clamp(14px,1.2vw,16px)] leading-snug text-ink/50">
             {t("onb.crypto.body")}
           </p>
-          <div className="mt-6 inline-flex items-center gap-1.5 lowercase text-[14px] font-medium text-[#3c05c7]">
+          <div className="mt-6 inline-flex items-center gap-1.5 lowercase text-[14px] font-medium text-[var(--brand)]">
             {t("onb.connect")}
             <ArrowRight size={15} strokeWidth={1.75} />
           </div>
         </button>
 
         {/* Apple Pay / Google Pay (coming soon) */}
-        <div className="rounded-[14px] border border-black/10 bg-white p-8 text-left opacity-80">
-          <Smartphone className="mb-6 text-black/50" size={30} strokeWidth={1.5} />
+        <div className="rounded-[14px] border border-ink/10 bg-paper p-8 text-left opacity-80">
+          <Smartphone className="mb-6 text-ink/50" size={30} strokeWidth={1.5} />
           <h2 className="lowercase text-[clamp(20px,2.2vw,26px)] tracking-[-0.02em]">{t("onb.phone.title")}</h2>
-          <p className="mt-2 lowercase text-[clamp(14px,1.2vw,16px)] leading-snug text-black/50">
+          <p className="mt-2 lowercase text-[clamp(14px,1.2vw,16px)] leading-snug text-ink/50">
             {t("onb.phone.body")}
           </p>
-          <div className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-black/15 px-3 py-1 lowercase text-[12px] tracking-wide text-black/45">
+          <div className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-ink/15 px-3 py-1 lowercase text-[12px] tracking-wide text-ink/45">
             {t("onb.comingMvp")}
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function OnboardingPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 lowercase text-[13px] text-black/35"
+        className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 lowercase text-[13px] text-ink/35"
       >
         <span>{t("onb.chip1")}</span>
         <span className="opacity-50">·</span>

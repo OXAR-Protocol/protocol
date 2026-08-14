@@ -45,16 +45,16 @@ export function YieldProviderRow({ view, onOpen }: Props) {
               {/* Wraps rather than overflows: on a phone the chip and the "live"
                   dot had nowhere to go and printed over the rate. */}
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <p className="truncate text-base text-black">{view.name}</p>
-                <span className="rounded border border-black/15 px-1.5 py-0.5 text-[10px] lowercase tracking-wide text-black/60">
+                <p className="truncate text-base text-ink">{view.name}</p>
+                <span className="rounded border border-ink/15 px-1.5 py-0.5 text-[10px] lowercase tracking-wide text-ink/60">
                   {view.assetSymbol}
                 </span>
-                <span className="text-[10px] lowercase tracking-wide text-emerald-600">● live</span>
+                <span className="text-[10px] lowercase tracking-wide text-profit">● live</span>
               </div>
             </div>
           </div>
           {inPosition && (
-            <p className="mt-1 text-[11px] tabular-nums text-[#3c05c7]/80">
+            <p className="mt-1 text-[11px] tabular-nums text-[var(--brand)]/80">
               you own ${positionValue.toFixed(2)}
             </p>
           )}
@@ -68,8 +68,8 @@ export function YieldProviderRow({ view, onOpen }: Props) {
       }
       figure={
         <>
-          <p className="text-xl tabular-nums text-black">{(view.apy * 100).toFixed(2)}%</p>
-          <p className={`text-[10px] lowercase tracking-wide ${RISK_TONE[view.riskLevel] ?? "text-black/55"}`}>
+          <p className="text-xl tabular-nums text-ink">{(view.apy * 100).toFixed(2)}%</p>
+          <p className={`text-[10px] lowercase tracking-wide ${RISK_TONE[view.riskLevel] ?? "text-ink/55"}`}>
             {RISK_LABEL[view.riskLevel] ?? view.riskLevel}
           </p>
         </>
