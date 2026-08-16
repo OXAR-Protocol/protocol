@@ -22,6 +22,12 @@ interface ShellProps {
   /** Scrim strength over a `cover` image, 0–100. Higher = quieter picture. Busy
    *  photographs under dense text need more; a single figure needs less. */
   scrim?: number;
+  /** Shield only the side the type sits on, and let the rest of the photograph keep
+   *  its colour. Without this the scrim is flat and the whole image goes pale. */
+  scrimFrom?: "left" | "bottom";
+  /** CSS object-position for the image — moves the subject out from under the text
+   *  instead of asking the text to survive on top of it. */
+  imagePos?: string;
   light?: boolean;
   /** Slide body — supplied by the four wrappers below, not by the deck. */
   children: ReactNode;
@@ -37,7 +43,18 @@ const bodyCls = (light?: boolean) =>
   `font-light lowercase leading-relaxed text-[clamp(14px,1.3vw,17px)] ${light ? "text-black/70" : "text-white/65"}`;
 const ruleCls = (light?: boolean) => (light ? "border-black/10" : "border-white/10");
 
-function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim = 85, light, children }: ShellProps) {
+/** Flat wash, or a gradient that only covers the side carrying type. The far end
+ *  keeps a small amount so a bright patch can't blow out a stray line of text. */
+function scrimBg(strength: number, from: ShellProps["scrimFrom"], light?: boolean): string {
+  const rgb = light ? "255,255,255" : "0,0,0";
+  const near = strength / 100;
+  const far = Math.max(0, near - 0.6);
+  if (from === "left") return `linear-gradient(to right, rgba(${rgb},${near}) 0%, rgba(${rgb},${near}) 34%, rgba(${rgb},${far}) 78%)`;
+  if (from === "bottom") return `linear-gradient(to top, rgba(${rgb},${near}) 0%, rgba(${rgb},${near}) 40%, rgba(${rgb},${far}) 85%)`;
+  return `rgba(${rgb},${near})`;
+}
+
+function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim = 85, scrimFrom, imagePos, light, children }: ShellProps) {
   return (
     <section
       className={`relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 py-16 md:px-16 ${light ? "bg-white" : "bg-black"}`}
@@ -48,13 +65,16 @@ function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim 
         <Image
           src={image} alt={imageAlt} fill loading="eager" sizes="100vw"
           className={cover ? "object-cover" : `object-contain ${light ? "opacity-[0.16]" : "opacity-45"}`}
+          style={imagePos ? { objectPosition: imagePos } : undefined}
         />
       )}
-      {/* Deep enough that the 13px labels survive the pale patches of the photograph. */}
+      {/* Deep enough that the 13px labels survive the pale patches of the photograph.
+          With `scrimFrom` it falls away across the frame, so the picture keeps its
+          colour on the side nothing is written. */}
       {cover && (
         <div
           className="absolute inset-0"
-          style={{ background: light ? `rgba(255,255,255,${scrim / 100})` : `rgba(0,0,0,${scrim / 100})` }}
+          style={{ background: scrimBg(scrim, scrimFrom, light) }}
         />
       )}
       <div className="relative z-10 w-full">

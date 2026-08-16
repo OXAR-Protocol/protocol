@@ -87,8 +87,9 @@ export function Deck() {
         light kicker="market"
         title={<>the dollars are <span className={ACCENT}>already here, asleep.</span></>}
         sub="we are not waiting on a behaviour change. the money is already on-chain, already in dollars, and already sitting still — the only thing missing is somewhere to put it that a normal person can use."
-        image={`${C}/hands-over-dollars.jpg`}
-        imageAlt="Two hands reaching across an uncut sheet of hundred-dollar bills" cover scrim={82}
+        image={`${C}/eye-through-clouds.jpg`}
+        imageAlt="An eye and a hand pushing through a tear in a painted sky"
+        cover scrim={80} scrimFrom="left" imagePos="72% 38%"
         stats={MARKET}
         footer="sources: artemis and visa onchain analytics (supply, holders, active users), q2 2026. yield-bearing share is 2–6% depending on whose definition, so 95% idle is the conservative read. som is bottom-up from our own waitlist, not a share of the tam."
       />
@@ -148,8 +149,8 @@ export function Deck() {
       <RowsSlide
         kicker="competition"
         title={<>nobody covers <span className={ACCENT}>both halves.</span></>}
-        image={`${C}/eye-through-clouds.jpg`}
-        imageAlt="An eye watching through a tear in a painted sky" cover scrim={88}
+        image={`${C}/logo-chrome.png`} imageAlt="The OXAR mark in chrome"
+        imagePos="88% center"
         rows={COMPETITION}
         footer="the defensible part is not the yield — anyone can route to a protocol. it is who we serve, and that they trust us with the first dollar."
       />
