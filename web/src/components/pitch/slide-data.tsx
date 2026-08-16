@@ -25,9 +25,15 @@ interface ShellProps {
   /** Shield only the side the type sits on, and let the rest of the photograph keep
    *  its colour. Without this the scrim is flat and the whole image goes pale. */
   scrimFrom?: "left" | "bottom";
-  /** CSS object-position for the image — moves the subject out from under the text
-   *  instead of asking the text to survive on top of it. */
+  /** CSS object-position for the image. Note this does nothing horizontally when a
+   *  portrait source fills a landscape frame — the width is already exact, only the
+   *  vertical crop is free. Use `imageBox` to move the subject sideways. */
   imagePos?: string;
+  /** Give the photograph its own band of the slide instead of running it behind
+   *  everything: full colour, no scrim, and the type keeps clean ground beside it. */
+  imageBox?: "right";
+  /** Width the slide body is held to, so it never runs under `imageBox`. */
+  bodyMax?: string;
   light?: boolean;
   /** Slide body — supplied by the four wrappers below, not by the deck. */
   children: ReactNode;
@@ -54,20 +60,33 @@ function scrimBg(strength: number, from: ShellProps["scrimFrom"], light?: boolea
   return `rgba(${rgb},${near})`;
 }
 
-function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim = 85, scrimFrom, imagePos, light, children }: ShellProps) {
+function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim = 85, scrimFrom, imagePos, imageBox, bodyMax, light, children }: ShellProps) {
   return (
     <section
       className={`relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 py-16 md:px-16 ${light ? "bg-white" : "bg-black"}`}
     >
       {/* Matches the photo slides' weight on black (0.45); on white the cut-outs are
           high-contrast and would fight the type, so they run much fainter. */}
-      {image && (
+      {image && imageBox === "right" ? (
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[44%] md:block">
+          <Image
+            src={image} alt={imageAlt} fill loading="eager" sizes="44vw"
+            className="object-cover"
+            style={imagePos ? { objectPosition: imagePos } : undefined}
+          />
+          {/* Only the seam, so the picture doesn't end on a hard vertical line. */}
+          <div
+            className="absolute inset-y-0 left-0 w-[22%]"
+            style={{ background: `linear-gradient(to right, ${light ? "#fff" : "#000"}, transparent)` }}
+          />
+        </div>
+      ) : image ? (
         <Image
           src={image} alt={imageAlt} fill loading="eager" sizes="100vw"
           className={cover ? "object-cover" : `object-contain ${light ? "opacity-[0.16]" : "opacity-45"}`}
           style={imagePos ? { objectPosition: imagePos } : undefined}
         />
-      )}
+      ) : null}
       {/* Deep enough that the 13px labels survive the pale patches of the photograph.
           With `scrimFrom` it falls away across the frame, so the picture keeps its
           colour on the side nothing is written. */}
@@ -77,7 +96,7 @@ function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim 
           style={{ background: scrimBg(scrim, scrimFrom, light) }}
         />
       )}
-      <div className="relative z-10 w-full">
+      <div className="relative z-10 w-full" style={bodyMax ? { maxWidth: bodyMax } : undefined}>
         <p className={kickerCls(light)}>[ {kicker} ]</p>
         <h2 className={`${dataTitleCls(light)} mt-4 max-w-3xl`}>{title}</h2>
         {sub && <p className={`${subCls(light)} mt-6`}>{sub}</p>}

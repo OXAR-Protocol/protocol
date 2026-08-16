@@ -89,9 +89,9 @@ export function Deck() {
         sub="we are not waiting on a behaviour change. the money is already on-chain, already in dollars, and already sitting still — the only thing missing is somewhere to put it that a normal person can use."
         image={`${C}/eye-through-clouds.jpg`}
         imageAlt="An eye and a hand pushing through a tear in a painted sky"
-        cover scrim={80} scrimFrom="left" imagePos="72% 38%"
+        imageBox="right" imagePos="center 42%" bodyMax="min(980px, 56%)"
         stats={MARKET}
-        footer="sources: artemis and visa onchain analytics (supply, holders, active users), q2 2026. yield-bearing share is 2–6% depending on whose definition, so 95% idle is the conservative read. som is bottom-up from our own waitlist, not a share of the tam."
+        footer="sources: artemis and visa onchain analytics (supply, holders, active users), q2 2026. yield-bearing share is 2–6% depending on whose definition, so 95% idle is the conservative read. som is two basis points of the sam, cross-checked against the $2,080 an average stablecoin address holds."
       />
 
       {/* 07 — Solution (hero image) — dark */}
