@@ -20,18 +20,36 @@ export const OPTIONS: Column[] = [
   },
 ];
 
-/** 06 — market sizing. */
+/** 06 — market sizing, rebuilt 2026-08-16 on published figures rather than on a feel
+ *  for how many people "have a savings instinct". Sized in idle dollars, because that
+ *  is the unit the problem is measured in and the unit a reader can check.
+ *  Sources: stablecoin supply $312B and Solana's $16.7B share (Q2 2026); yield-bearing
+ *  stablecoins ~$11B, i.e. 4–5% of supply; 150M+ addresses hold a non-zero stablecoin
+ *  balance (Artemis); 47M monthly active stablecoin users (Visa). The SOM figure is
+ *  bottom-up from our own waitlist: the median volunteered deposit is $1,200. */
 export const MARKET: Stat[] = [
-  { figure: "~50M", label: "tam", note: "people with a crypto wallet and a savings instinct" },
-  { figure: "~5M", label: "sam", note: "crypto-paid earners, dao contributors, remote workers on stablecoins" },
-  { figure: "500–5k", label: "som · year one", note: "active users, $1–10m in deposits" },
+  {
+    figure: "$295B",
+    label: "tam",
+    note: "on-chain dollars earning nothing — about 95% of a $312b stablecoin market, held across 150m+ addresses",
+  },
+  {
+    figure: "$15B",
+    label: "sam",
+    note: "the idle share of solana's $16.7b stablecoin supply — money we can reach without asking anyone to bridge",
+  },
+  {
+    figure: "$0.6–6M",
+    label: "som · year one",
+    note: "500–5,000 savers at $1,200 each — the median our own waitlist volunteered, not an assumption",
+  },
 ];
 
 /** 08 — the four surfaces of the app. */
 export const PRODUCT: Column[] = [
   {
     label: "earn",
-    body: "dollars into curated yield sources — jupiter lend, ondo usdy (us treasuries), maple (institutional credit). 5–12% apy.",
+    body: "dollars into curated yield sources — jupiter lend, ondo usdy (us treasuries), maple (institutional credit), onre. 5–12% apy.",
   },
   {
     label: "own",
@@ -54,20 +72,37 @@ export const STEPS: string[] = [
   "the money moves straight from your wallet into an audited protocol. the position is yours.",
 ];
 
-/** 11 — the fee math, stated as intent, not as income. */
+/** 11 — how we make money. Rewritten 2026-08-16: the previous version promised a 10%
+ *  performance fee and did the arithmetic off it. That model cannot exist here — see
+ *  the second row — and the figures derived from it were therefore fiction. */
 export const MODEL: Row[] = [
-  { label: "today", body: "$0. no performance fee, no deposit or withdrawal fee, no spread of our own — and our terms of use say the same." },
-  { label: "the intent", body: "10% of the yield earned. on growth, never on principal. nothing is implemented; switching it on is a decision we have not made." },
-  { label: "$10m deposits", body: "at 8% average apy — roughly $80k a year." },
-  { label: "$100m deposits", body: "roughly $800k a year. profitability lands around $26m." },
+  {
+    label: "the model",
+    body: "0.25% on a conversion — buying or selling anything that has to be swapped, where dollars are one side of the trade. putting dollars into a dollar product is not a conversion and costs nothing.",
+  },
+  {
+    label: "why not a cut of the yield",
+    body: "the position sits in the user's own wallet on a public market, and we are not in the flow when they leave. a performance fee needs custody, and custody is the promise we sell.",
+  },
+  {
+    label: "the price",
+    body: "phantom takes 0.85% for the same swap and hides it in the quote; metamask 0.875%. we take a third of that and name it as its own line before you sign.",
+  },
+  {
+    label: "what it earns",
+    body: "revenue tracks turnover, not deposits — about $1 for every $400 swapped. money that sleeps earns us nothing, which is the honest cost of building for savers instead of traders.",
+  },
 ];
 
-/** 12 — traction. */
+/** 12 — traction, counted 2026-08-16 against the production database rather than
+ *  remembered. "100+ signups / $75k intended" was the old pair and it flattered us:
+ *  the $75k comes from ten people, and an investor who asks "out of how many?" and
+ *  hears "ten" discounts everything else on the slide. Better we say it first. */
 export const TRACTION: Stat[] = [
-  { figure: "live", label: "on solana mainnet" },
-  { figure: "100+", label: "waitlist signups" },
-  { figure: "$75k", label: "intended deposits" },
-  { figure: "30+", label: "assets — yield, stocks, gold" },
+  { figure: "live", label: "on solana mainnet", note: "not a prototype — real money, from your own wallet" },
+  { figure: "99", label: "waitlist signups", note: "16 of them arrived through someone else's referral link" },
+  { figure: "$1.2k", label: "median intended deposit", note: "from the 10 who volunteered a figure — $75k in total" },
+  { figure: "36", label: "assets", note: "5 yield sources, 28 tokenized stocks, gold and silver" },
 ];
 
 /** 13 — nobody covers both halves. */
@@ -80,10 +115,10 @@ export const COMPETITION: Row[] = [
 
 /** 15 — roadmap. */
 export const ROADMAP: Row[] = [
-  { label: "now", body: "live on mainnet: dollar yield plus tokenized stocks and gold, end to end, from your own wallet." },
-  { label: "aug 2026", body: "public launch — apple pay deposits, polished onboarding, english and ukrainian." },
-  { label: "q4 2026", body: "first tokenized bonds via a licensed broker partner. more sources, cross-chain deposits fully wired." },
-  { label: "2027", body: "native ios and android. multi-currency stablecoins. geographic expansion through local partners." },
+  { label: "now", body: "live on mainnet in closed alpha: dollar yield, tokenized stocks, gold — end to end, from your own wallet. apple pay funding and gasless deposits both shipped." },
+  { label: "next", body: "open the door. the product is built and the gate is an allowlist; what is missing is people, not features." },
+  { label: "q4 2026", body: "assets from issuers jupiter cannot route today, and from a us broker-dealer whose liquidity beats most of our shelf. euro yield, once lend positions are priced in their own currency instead of assumed to be dollars." },
+  { label: "2027", body: "native ios and android. more currencies than the dollar. geographic expansion through local partners." },
 ];
 
 /** 16 — the two founders, matching the cap table on the investor page. */
