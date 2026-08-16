@@ -14,9 +14,12 @@ stand behind.
 
     python3 pitch/build_pptx.py [output.pptx]
 
-Images are deliberately absent. Each slide carries a note saying what its picture
-has to prove — a picture that only sets a mood is how the last deck ended up with a
-crumpled banknote illustrating a table about competitors.
+LAYOUT NOTE, learned the hard way: python-pptx cannot measure text, so anything
+that positions one block "under" another by estimating the height of the one above
+will eventually overlap it — a two-line headline lands on top of its own subtitle.
+Every block here therefore sits in a fixed slot on a grid. Slots are generous
+enough for the longest string we actually use; if a headline grows past two lines,
+move the slot rather than guessing again.
 """
 
 from __future__ import annotations
@@ -26,25 +29,40 @@ from pathlib import Path
 
 from pptx import Presentation
 from pptx.dml.color import RGBColor
-from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
+ROOT = Path(__file__).resolve().parent.parent
+ART = ROOT / "web" / "public" / "pitch" / "collage"
+
 # --- The look -----------------------------------------------------------------
-# Same three colours and one typeface as the app and the landing page: black,
-# white, and the violet that only ever marks the stressed word.
+# Same three colours and one typeface as the app and the landing: black, white, and
+# the violet that only ever marks the stressed word.
 
 FONT = "DM Sans"
 INK_DARK, PAPER_DARK = RGBColor(0xFF, 0xFF, 0xFF), RGBColor(0x00, 0x00, 0x00)
 INK_LIGHT, PAPER_LIGHT = RGBColor(0x0A, 0x0A, 0x0A), RGBColor(0xFF, 0xFF, 0xFF)
 ACCENT = RGBColor(0x8B, 0x5C, 0xF6)
+MUTED_DARK, MUTED_LIGHT = RGBColor(0x8C, 0x8C, 0x8C), RGBColor(0x6B, 0x6B, 0x6B)
+FAINT_DARK, FAINT_LIGHT = RGBColor(0x5E, 0x5E, 0x5E), RGBColor(0x9A, 0x9A, 0x9A)
+RULE_DARK, RULE_LIGHT = RGBColor(0x28, 0x28, 0x28), RGBColor(0xE2, 0xE2, 0xE2)
 
 W, H = Inches(13.333), Inches(7.5)
 PAD = Inches(0.85)
-COL = Inches(7.4)  # text column; the rest of the frame is left for a picture
 
-MUTED_DARK, MUTED_LIGHT = RGBColor(0x8C, 0x8C, 0x8C), RGBColor(0x6B, 0x6B, 0x6B)
-FAINT_DARK, FAINT_LIGHT = RGBColor(0x5E, 0x5E, 0x5E), RGBColor(0x9A, 0x9A, 0x9A)
-RULE_DARK, RULE_LIGHT = RGBColor(0x24, 0x24, 0x24), RGBColor(0xE2, 0xE2, 0xE2)
+# The grid. Every slot is fixed; nothing is stacked by guessing.
+Y_KICKER = Inches(0.95)
+Y_TITLE = Inches(1.40)
+Y_SUB = Inches(3.15)
+Y_BODY_WITH_SUB = Inches(4.35)
+Y_BODY = Inches(3.30)
+Y_FOOT = H - Inches(1.10)
+
+# Where the picture starts, and how much room that leaves the words. These two are a
+# pair: widen one and the other has to give, or text slides under the photograph.
+PIC_L, PIC_L_WIDE = Inches(8.3), Inches(7.0)
+COL_FULL = W - 2 * PAD
+COL_SPLIT = PIC_L - PAD - Inches(0.35)
+COL_TITLE = PIC_L_WIDE - PAD - Inches(0.35)
 
 
 class Deck:
@@ -54,12 +72,35 @@ class Deck:
 
     # -- primitives ------------------------------------------------------------
 
-    def _slide(self, light: bool):
+    def _slide(self, light: bool, image: str | None, *, wide: bool = False):
         s = self.prs.slides.add_slide(self.prs.slide_layouts[6])
         fill = s.background.fill
         fill.solid()
         fill.fore_color.rgb = PAPER_LIGHT if light else PAPER_DARK
+        # Picture first, so every word lands on top of it rather than under it.
+        if image:
+            self._picture(s, image, wide=wide)
         return s
+
+    def _picture(self, s, name: str, *, wide: bool) -> None:
+        path = ART / name
+        if not path.exists():
+            raise FileNotFoundError(f"missing deck art: {path}")
+        from PIL import Image as PILImage
+
+        iw, ih = PILImage.open(path).size
+        # The right band, inset from the edges so nothing looks pasted on.
+        box_l = PIC_L_WIDE if wide else PIC_L
+        box_w = W - box_l - Inches(0.5)
+        box_t, box_h = Inches(0.7), H - Inches(1.4)
+        scale = min(box_w / iw, box_h / ih)
+        w, h = int(iw * scale), int(ih * scale)
+        s.shapes.add_picture(
+            str(path),
+            Emu(int(box_l + (box_w - w) / 2)),
+            Emu(int(box_t + (box_h - h) / 2)),
+            Emu(w), Emu(h),
+        )
 
     def _box(self, s, left, top, width, height):
         tb = s.shapes.add_textbox(left, top, width, height)
@@ -68,19 +109,16 @@ class Deck:
         tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
         return tf
 
-    def _para(self, tf, first: bool):
-        return tf.paragraphs[0] if first else tf.add_paragraph()
-
-    def _write(self, p, segments, *, size, color, bold=False, italic=False, spacing=1.0):
+    def _write(self, tf, segments, *, size, color, bold=False, spacing=1.0):
         """A paragraph built from (text, is_accent) pairs, so one word can carry the
         violet italic without the whole line changing typeface."""
+        p = tf.paragraphs[0]
         p.line_spacing = spacing
         for text, accent in segments:
             r = p.add_run()
             r.text = text
             f = r.font
-            f.name, f.size, f.bold = FONT, Pt(size), bold
-            f.italic = italic or accent
+            f.name, f.size, f.bold, f.italic = FONT, Pt(size), bold, bool(accent)
             f.color.rgb = ACCENT if accent else color
 
     def _rule(self, s, top, width, light: bool):
@@ -90,134 +128,130 @@ class Deck:
 
     # -- slide furniture -------------------------------------------------------
 
-    def _head(self, s, kicker, title, sub, light, *, top=Inches(1.15), title_size=44):
+    def _head(self, s, kicker, title, sub, light, col, *, title_size=40):
         ink = INK_LIGHT if light else INK_DARK
         muted = MUTED_LIGHT if light else MUTED_DARK
 
-        tf = self._box(s, PAD, top, COL, Inches(0.3))
-        self._write(self._para(tf, True), [(f"[ {kicker} ]", False)], size=13, color=muted)
-
-        tf = self._box(s, PAD, top + Inches(0.5), COL, Inches(1.6))
-        self._write(self._para(tf, True), title, size=title_size, color=ink, bold=True, spacing=0.95)
-
-        bottom = top + Inches(0.5) + Inches(0.62) * (1 + max(0, len(_plain(title)) // 34))
+        self._write(self._box(s, PAD, Y_KICKER, col, Inches(0.3)),
+                    [(f"[ {kicker} ]", False)], size=13, color=muted)
+        self._write(self._box(s, PAD, Y_TITLE, col, Inches(1.6)),
+                    title, size=title_size, color=ink, bold=True, spacing=0.95)
         if sub:
-            tf = self._box(s, PAD, bottom + Inches(0.2), Inches(6.6), Inches(1.4))
-            self._write(self._para(tf, True), [(sub, False)], size=15, color=muted, spacing=1.35)
-            bottom += Inches(0.2) + Inches(0.32) * (1 + len(sub) // 62)
-        return bottom
+            self._write(self._box(s, PAD, Y_SUB, min(col, Inches(6.6)), Inches(1.1)),
+                        [(sub, False)], size=14.5, color=muted, spacing=1.35)
 
-    def _foot(self, s, text, light):
+    def _foot(self, s, text, light, col=None):
         if not text:
             return
-        tf = self._box(s, PAD, H - Inches(1.15), Inches(10.2), Inches(0.8))
-        self._write(
-            self._para(tf, True), [(text, False)],
-            size=11, color=FAINT_LIGHT if light else FAINT_DARK, spacing=1.35,
-        )
-
-    def _note(self, s, text):
-        s.notes_slide.notes_text_frame.text = text
+        self._write(self._box(s, PAD, Y_FOOT, col or COL_FULL, Inches(0.8)),
+                    [(text, False)], size=10.5,
+                    color=FAINT_LIGHT if light else FAINT_DARK, spacing=1.3)
 
     # -- slide kinds -----------------------------------------------------------
 
-    def title(self, title, sub, note):
-        s = self._slide(False)
-        tf = self._box(s, PAD, Inches(2.6), Inches(11.6), Inches(2.0))
-        self._write(self._para(tf, True), title, size=60, color=INK_DARK, bold=True, spacing=0.95)
-        tf = self._box(s, PAD, Inches(4.5), Inches(7.4), Inches(1.2))
-        self._write(self._para(tf, True), [(sub, False)], size=16, color=MUTED_DARK, spacing=1.4)
-        self._note(s, note)
+    def title(self, title, sub, image, note):
+        s = self._slide(False, image, wide=True)
+        self._write(self._box(s, PAD, Inches(2.65), COL_TITLE, Inches(1.75)),
+                    title, size=52, color=INK_DARK, bold=True, spacing=0.95)
+        self._write(self._box(s, PAD, Inches(4.6), COL_TITLE, Inches(1.3)),
+                    [(sub, False)], size=15, color=MUTED_DARK, spacing=1.4)
+        s.notes_slide.notes_text_frame.text = note
         return s
 
-    def statement(self, kicker, title, sub, light, note, footer=None):
-        s = self._slide(light)
-        self._head(s, kicker, title, sub, light, top=Inches(2.2), title_size=50)
-        self._foot(s, footer, light)
-        self._note(s, note)
+    def statement(self, kicker, title, sub, light, image, note, footer=None):
+        s = self._slide(light, image)
+        col = COL_SPLIT if image else COL_FULL
+        self._head(s, kicker, title, sub, light, col, title_size=46)
+        self._foot(s, footer, light, col)
+        s.notes_slide.notes_text_frame.text = note
         return s
 
-    def columns(self, kicker, title, cols, light, note, footer=None):
-        s = self._slide(light)
-        top = self._head(s, kicker, title, None, light)
+    def columns(self, kicker, title, cols, light, image, note, footer=None):
+        s = self._slide(light, image)
+        col = COL_SPLIT if image else COL_FULL
+        self._head(s, kicker, title, None, light, col)
         ink = INK_LIGHT if light else INK_DARK
         muted = MUTED_LIGHT if light else MUTED_DARK
 
         n = len(cols)
-        gutter = Inches(0.5)
-        width = Emu(int((W - 2 * PAD - gutter * (n - 1)) / n))
-        y = top + Inches(1.0)
-        self._rule(s, y - Inches(0.3), W - 2 * PAD, light)
+        gutter = Inches(0.45)
+        width = Emu(int((col - gutter * (n - 1)) / n))
+        y = Y_BODY
+        self._rule(s, y - Inches(0.28), col, light)
         for i, (label, body) in enumerate(cols):
             x = Emu(int(PAD + i * (width + gutter)))
-            tf = self._box(s, x, y, width, Inches(0.35))
-            self._write(self._para(tf, True), [(label, False)], size=15, color=ink)
-            tf = self._box(s, x, y + Inches(0.5), width, Inches(2.4))
-            self._write(self._para(tf, True), [(body, False)], size=12.5, color=muted, spacing=1.4)
-        self._foot(s, footer, light)
-        self._note(s, note)
+            self._write(self._box(s, x, y, width, Inches(0.32)), [(label, False)], size=14, color=ink)
+            self._write(self._box(s, x, y + Inches(0.48), width, Inches(2.4)),
+                        [(body, False)], size=11.5, color=muted, spacing=1.4)
+        self._foot(s, footer, light, col)
+        s.notes_slide.notes_text_frame.text = note
         return s
 
-    def stats(self, kicker, title, sub, items, light, note, footer=None):
-        s = self._slide(light)
-        top = self._head(s, kicker, title, sub, light)
+    def stats(self, kicker, title, sub, items, light, image, note, footer=None):
+        s = self._slide(light, image)
+        col = COL_SPLIT if image else COL_FULL
+        self._head(s, kicker, title, sub, light, col)
         ink = INK_LIGHT if light else INK_DARK
         muted = MUTED_LIGHT if light else MUTED_DARK
         faint = FAINT_LIGHT if light else FAINT_DARK
 
         n = len(items)
-        gutter = Inches(0.45)
-        width = Emu(int((W - 2 * PAD - gutter * (n - 1)) / n))
-        y = max(top + Inches(0.55), Inches(3.9))
+        gutter = Inches(0.4)
+        width = Emu(int((col - gutter * (n - 1)) / n))
+        y = Y_BODY_WITH_SUB if sub else Y_BODY
         for i, (figure, label, note_text) in enumerate(items):
             x = Emu(int(PAD + i * (width + gutter)))
-            tf = self._box(s, x, y, width, Inches(0.9))
-            self._write(self._para(tf, True), [(figure, False)], size=40, color=ink, bold=True, spacing=0.9)
-            tf = self._box(s, x, y + Inches(0.78), width, Inches(0.3))
-            self._write(self._para(tf, True), [(label, False)], size=12, color=muted)
-            tf = self._box(s, x, y + Inches(1.14), width, Inches(1.3))
-            self._write(self._para(tf, True), [(note_text, False)], size=10.5, color=faint, spacing=1.35)
-        self._foot(s, footer, light)
-        self._note(s, note)
+            self._write(self._box(s, x, y, width, Inches(0.62)),
+                        [(figure, False)], size=36, color=ink, bold=True, spacing=0.9)
+            self._write(self._box(s, x, y + Inches(0.66), width, Inches(0.28)),
+                        [(label, False)], size=11.5, color=muted)
+            self._write(self._box(s, x, y + Inches(1.0), width, Inches(1.4)),
+                        [(note_text, False)], size=10, color=faint, spacing=1.3)
+        self._foot(s, footer, light, col)
+        s.notes_slide.notes_text_frame.text = note
         return s
 
-    def rows(self, kicker, title, items, light, note, footer=None):
-        s = self._slide(light)
-        top = self._head(s, kicker, title, None, light)
+    def rows(self, kicker, title, items, light, image, note, footer=None):
+        s = self._slide(light, image)
+        col = COL_SPLIT if image else COL_FULL
+        self._head(s, kicker, title, None, light, col)
         ink = INK_LIGHT if light else INK_DARK
         muted = MUTED_LIGHT if light else MUTED_DARK
 
-        y = top + Inches(0.75)
-        avail = H - Inches(1.5) - y
-        step = Emu(int(avail / len(items)))
+        y = Y_BODY
+        step = Emu(int((Y_FOOT - Inches(0.25) - y) / len(items)))
+        label_w = Inches(2.2)
         for label, body, strong in items:
-            self._rule(s, y, W - 2 * PAD, light)
-            tf = self._box(s, PAD, y + Inches(0.18), Inches(2.4), Inches(0.4))
-            self._write(self._para(tf, True), [(label, False)], size=13, color=ink if strong else muted, bold=strong)
-            tf = self._box(s, PAD + Inches(2.7), y + Inches(0.18), Inches(8.9), step - Inches(0.3))
-            self._write(self._para(tf, True), [(body, False)], size=12, color=ink if strong else muted, spacing=1.35)
+            self._rule(s, y, col, light)
+            self._write(self._box(s, PAD, y + Inches(0.16), label_w, Inches(0.35)),
+                        [(label, False)], size=12.5, color=ink if strong else muted, bold=strong)
+            self._write(self._box(s, PAD + label_w + Inches(0.4), y + Inches(0.16),
+                                  col - label_w - Inches(0.4), step - Inches(0.28)),
+                        [(body, False)], size=11.5, color=ink if strong else muted, spacing=1.32)
             y = Emu(int(y + step))
-        self._foot(s, footer, light)
-        self._note(s, note)
+        self._foot(s, footer, light, col)
+        s.notes_slide.notes_text_frame.text = note
         return s
 
-    def steps(self, kicker, title, items, light, note, footer=None):
-        s = self._slide(light)
-        top = self._head(s, kicker, title, None, light)
+    def steps(self, kicker, title, items, light, image, note, footer=None):
+        s = self._slide(light, image)
+        col = COL_SPLIT if image else COL_FULL
+        self._head(s, kicker, title, None, light, col)
         ink = INK_LIGHT if light else INK_DARK
         muted = MUTED_LIGHT if light else MUTED_DARK
 
-        y = top + Inches(0.8)
-        step = Inches(1.25)
+        y = Y_BODY
+        step = Inches(1.1)
         for i, body in enumerate(items, start=1):
-            self._rule(s, y, W - 2 * PAD, light)
-            tf = self._box(s, PAD, y + Inches(0.2), Inches(1.2), Inches(0.7))
-            self._write(self._para(tf, True), [(f"0{i}", False)], size=30, color=ink, bold=True)
-            tf = self._box(s, PAD + Inches(1.5), y + Inches(0.34), Inches(9.5), Inches(0.8))
-            self._write(self._para(tf, True), [(body, False)], size=13.5, color=muted, spacing=1.35)
+            self._rule(s, y, col, light)
+            self._write(self._box(s, PAD, y + Inches(0.2), Inches(1.1), Inches(0.6)),
+                        [(f"0{i}", False)], size=26, color=ink, bold=True)
+            self._write(self._box(s, PAD + Inches(1.35), y + Inches(0.3),
+                                  col - Inches(1.35), Inches(0.7)),
+                        [(body, False)], size=12.5, color=muted, spacing=1.32)
             y += step
-        self._foot(s, footer, light)
-        self._note(s, note)
+        self._foot(s, footer, light, col)
+        s.notes_slide.notes_text_frame.text = note
         return s
 
     def save(self, path: Path) -> Path:
@@ -225,14 +259,14 @@ class Deck:
         return path
 
 
-def _plain(segments) -> str:
-    return "".join(t for t, _ in segments)
-
-
 # --- The deck -----------------------------------------------------------------
 # Fifteen slides in four movements: the setup, the product, the business, the close.
 # Two slides from the old seventeen are gone — "trust" repeated the money path, and
 # "every way to grow in one place" repeated the product.
+#
+# Slides carrying an argument in columns or rows get no picture. Five rows of
+# numbers plus a photograph is how the last deck ended up with a crumpled banknote
+# illustrating a table about competitors.
 
 def build() -> Deck:
     d = Deck()
@@ -242,8 +276,9 @@ def build() -> Deck:
         [("where does your money ", False), ("sleep?", True)],
         "a non-custodial savings app on solana. hold dollars, earn real yield, "
         "own global assets — no bank, no broker, no crypto.",
-        "PICTURE: the eyes through torn paper. It has to say 'money is watching you, "
-        "and doing nothing' — not decoration, the question itself.",
+        "eyes.png",
+        "The eyes through torn paper: money watching, and doing nothing. It is the "
+        "question itself, not decoration.",
     )
 
     d.statement(
@@ -251,9 +286,8 @@ def build() -> Deck:
         [("inflation ", False), ("eats", True), (" your savings.", False)],
         "save in your local currency and you lose value every year. holding dollars "
         "that actually earn is the hard part.",
-        False,
-        "PICTURE: the dripping hundred — value visibly draining out of a note. Must "
-        "read as loss over time, not as 'money' in general.",
+        False, "dripping-dollar.png",
+        "Value visibly draining out of a note — loss over time, not 'money' in general.",
     )
 
     d.columns(
@@ -264,9 +298,8 @@ def build() -> Deck:
             ("crypto wallets", "0%. your dollars sit still, and you carry the seed phrase, the gas and the scams yourself."),
             ("brokers", "treasuries, stocks, gold — real assets, gated by geography, paperwork and market hours."),
         ],
-        False,
-        "PICTURE: hands reaching for money just out of reach. Three columns already "
-        "carry the argument, so the picture should be small and to one side.",
+        False, None,
+        "No picture: three columns already carry the argument.",
         footer="and the tools that do reach real yield are built for traders — seed phrases, gas, jargon, scams.",
     )
 
@@ -275,9 +308,8 @@ def build() -> Deck:
         [("for the people the system ", False), ("forgets.", True)],
         "emerging-market savers, cross-border freelancers — anyone who wants dollars "
         "that grow, without becoming a crypto trader.",
-        True,
-        "PICTURE: the crowd of hats with one figure in violet. The one person picked "
-        "out of the crowd is the whole slide.",
+        True, "crowd-hats.png",
+        "One figure in violet picked out of the crowd. That single person is the slide.",
     )
 
     # -- product --------------------------------------------------------------
@@ -286,9 +318,8 @@ def build() -> Deck:
         [("a dollar account that ", False), ("actually earns.", True)],
         "one non-custodial account: hold dollars, earn yield, own treasuries, stocks "
         "and gold. email sign-in, apple pay, withdraw anytime.",
-        False,
-        "PICTURE: money asleep on a cloud — the product's own metaphor, and the only "
-        "slide where a soft image is the right answer.",
+        False, "sleeping-money.png",
+        "The product's own metaphor, and the one slide where a soft image is right.",
     )
 
     d.columns(
@@ -300,9 +331,9 @@ def build() -> Deck:
             ("fund it", "apple pay, card, or any crypto you already hold. gas is paid for you — you never need to buy sol."),
             ("your pile", "every position in one view, with what it earned. withdraw any of it, any time, without asking us."),
         ],
-        True,
-        "PICTURE: a real screenshot of the app, not a collage. This is the slide where "
-        "an investor wants to see the thing exists.",
+        True, None,
+        "WANTS A REAL SCREENSHOT of the app, replacing nothing — this is where an "
+        "investor wants proof the thing exists. Drop one on the right when we have it.",
         footer="one tap each, no apps to juggle, nothing to learn about crypto.",
     )
 
@@ -314,10 +345,10 @@ def build() -> Deck:
             "fund it with apple pay, a card, or crypto you already hold.",
             "the money moves straight from your wallet into an audited protocol. the position is yours.",
         ],
-        False,
-        "PICTURE: none, or a diagram we draw ourselves — wallet → protocol, with OXAR "
-        "beside the arrow and not on it. A stock photo would weaken the one slide that "
-        "is a factual claim about custody.",
+        False, None,
+        "No stock photo: this is a factual claim about custody, and a mood image only "
+        "weakens it. A diagram we draw ourselves would work — wallet to protocol, with "
+        "OXAR beside the arrow and not on it.",
         footer="oxar ships no smart contract of its own — we sit on top of audited protocols. "
                "nothing to hack, no keys for us to lose, no withdrawal for us to approve.",
     )
@@ -326,16 +357,15 @@ def build() -> Deck:
     d.stats(
         "market",
         [("the dollars are ", False), ("already here, asleep.", True)],
-        "we are not waiting on a behaviour change. the money is already on-chain, "
-        "already in dollars, and already sitting still.",
+        "the money is already on-chain, already in dollars, and already sitting still.",
         [
             ("$295B", "tam", "on-chain dollars earning nothing — about 95% of a $312b stablecoin market, held across 150m+ addresses"),
             ("$15B", "sam", "the idle share of solana's $16.7b stablecoin supply — money we can reach without asking anyone to bridge"),
             ("$3M", "som · year one", "two basis points of the idle solana float — about 1,400 savers at the $2,080 an average stablecoin address holds"),
         ],
-        True,
-        "PICTURE: something that means 'asleep', not 'finance'. A skyline meant nothing; "
-        "the eye through the sky at least watches. Keep it to one side of the figures.",
+        True, "eye-through-clouds.jpg",
+        "Something that means 'asleep', not 'finance'. A skyline meant nothing; the eye "
+        "through the sky at least watches.",
         footer="sources: artemis and visa onchain analytics, q2 2026. yield-bearing share is 2–6% "
                "depending on whose definition, so 95% idle is the conservative read.",
     )
@@ -349,9 +379,8 @@ def build() -> Deck:
             ("the price", "revolut charges 1.49% to convert plus a 1.5–2.5% spread; phantom 0.85% hidden inside the quote; metamask 0.875%. we take 0.25%, as its own line, before you sign.", False),
             ("what it earns", "revenue tracks turnover, not deposits — about $1 for every $400 swapped. money that sleeps earns us nothing, which is the honest cost of building for savers.", False),
         ],
-        False,
-        "PICTURE: none. Four rows of argument is already a full slide, and the last deck "
-        "put a photograph behind a table and lost both.",
+        False, None,
+        "No picture. Four rows of argument is a full slide.",
         footer="built, disclosed in the terms, and switched off behind two switches — neither of them set. "
                "today, before launch, we take 0%.",
     )
@@ -366,8 +395,8 @@ def build() -> Deck:
             ("defi frontends", "the yield is real and the fee is often zero — but the interface is built for people who already speak the language.", False),
             ("oxar", "5–12%, real assets, nothing held by us, and 0.25% to convert — a sixth of revolut, a third of phantom, printed on screen before you sign.", True),
         ],
-        False,
-        "PICTURE: none. Five rows, and the numbers are the argument.",
+        False, None,
+        "No picture. Five rows, and the numbers are the argument.",
         footer="the defensible part is not the yield — anyone can route to a protocol. "
                "it is who we serve, and that they trust us with the first dollar.",
     )
@@ -382,9 +411,8 @@ def build() -> Deck:
             ("$75k", "intended deposits", "self-reported by the ten who named a figure — an intention, not a commitment. median $1,200"),
             ("36", "assets", "5 yield sources, 28 tokenized stocks, gold and silver"),
         ],
-        False,
-        "PICTURE: the app, or nothing. Four figures with their caveats is a dense slide "
-        "already.",
+        False, None,
+        "The app, or nothing. Four figures with their caveats is dense already.",
         footer="counted against the production database on 16 august 2026, not remembered. gasless deposits, "
                "apple-pay funding, a live portfolio, english and ukrainian — shipped in months, bootstrapped.",
     )
@@ -395,9 +423,8 @@ def build() -> Deck:
         "tokenized assets crossed into the billions, crypto payroll is mainstream, "
         "card-to-crypto onramps finally work. the window is open 12–24 months before "
         "revolut and coinbase close it.",
-        True,
-        "PICTURE: the crowd reading the news — many people turning at once. It has to "
-        "mean 'everyone is arriving', not 'the future'.",
+        True, "crowd-world.png",
+        "Many people turning at once — 'everyone is arriving', not 'the future'.",
     )
 
     # -- close ----------------------------------------------------------------
@@ -410,8 +437,8 @@ def build() -> Deck:
             ("q4 2026", "assets from issuers jupiter cannot route today, and from a us broker-dealer whose liquidity beats most of our shelf. euro yield, once lend positions are priced in their own currency.", False),
             ("2027", "native ios and android. more currencies than the dollar. geographic expansion through local partners.", False),
         ],
-        False,
-        "PICTURE: a child pointing at what's ahead, small and to one side — or nothing.",
+        False, None,
+        "No picture, or the child pointing ahead if the slide feels bare.",
     )
 
     d.columns(
@@ -421,9 +448,9 @@ def build() -> Deck:
             ("daniel lohachov", "product and engineering. founder of the prior oxar iteration; in the solana ecosystem since 2023."),
             ("anna tarapatska", "operations, legal and partnerships."),
         ],
-        False,
-        "PICTURE: the chrome mark, large and to the right. This is the slide where the "
-        "brand can simply be itself.",
+        False, "logo-chrome.png",
+        "The chrome mark, large and to the right. The one slide where the brand can "
+        "simply be itself.",
         footer="building from ukraine, bootstrapped — a live product on mainnet in months.",
     )
 
@@ -435,10 +462,10 @@ def build() -> Deck:
             ("raising instead", "grants, accelerators and hackathon prizes — $30k to carry the launch.", False),
             ("in motion", "solana foundation ecosystem grant, colosseum. partnerships with delora, privy and kora already live in the product.", False),
         ],
-        False,
-        "PICTURE: the hand-drawn study of the mark, faint. The closing slide is the one "
-        "place a sketch belongs — but crop out the handwritten '4-18%' and '$230B', "
-        "because neither is a number this deck uses.",
+        False, None,
+        "The hand-drawn study of the mark would suit the close — but crop out the "
+        "handwritten '4-18%' and '$230B' first, because neither is a number this deck "
+        "uses.",
         footer="oxar.app · daniel.l@oxar.app · @eternaki",
     )
 
@@ -447,5 +474,6 @@ def build() -> Deck:
 
 if __name__ == "__main__":
     out = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.home() / "Desktop" / "OXAR-pitch.pptx"
-    build().save(out)
-    print(f"{out}  ·  {len(build().prs.slides.__iter__.__self__._sldIdLst)} slides")
+    deck = build()
+    deck.save(out)
+    print(f"{out}  ·  {len(deck.prs.slides._sldIdLst)} slides")
