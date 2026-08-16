@@ -201,6 +201,8 @@ export function Deck() {
       <RowsSlide
         kicker="the ask"
         title={<>funding the launch, <span className={ACCENT}>not the runway.</span></>}
+        image={`${C}/mark-sketch.png`} imageAlt="A hand-drawn study of the OXAR mark, annotated"
+        imagePos="80% center" bodyMax="min(1060px, 66%)"
         rows={ASK}
         footer="oxar.app · daniel.l@oxar.app · @eternaki"
       />
