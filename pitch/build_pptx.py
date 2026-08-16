@@ -516,11 +516,14 @@ def build() -> Deck:
         [
             ("now", "live on mainnet in closed alpha: dollar yield, tokenized stocks, gold — end to end, from your own wallet. apple pay funding and gasless deposits both shipped.", False),
             ("next", "open the door. the product is built and the gate is an allowlist; what is missing is people, not features.", False),
-            ("q4 2026", "assets from issuers jupiter cannot route today, and from a us broker-dealer whose liquidity beats most of our shelf. euro yield, once lend positions are priced in their own currency.", False),
+            ("q4 2026", "ukrainian government bonds, tokenized through a licensed broker — the one asset on our shelf that a revolut cannot copy, and the reason a saver in kyiv picks us over a us app.", False),
+            ("also q4", "assets from issuers jupiter cannot route today, and from a us broker-dealer whose liquidity beats most of our shelf. euro yield, once lend positions are priced in their own currency.", False),
             ("2027", "native ios and android. more currencies than the dollar. geographic expansion through local partners.", False),
         ],
         False, None,
-        "No picture, or the child pointing ahead if the slide feels bare.",
+        "No picture, or the child pointing ahead if the slide feels bare. The bond line "
+        "is the one an investor will stop on — it is the only item here that is not "
+        "available to a competitor for the price of an integration.",
     )
 
     d.columns(
