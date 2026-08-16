@@ -74,6 +74,7 @@ export const en = {
   "confirm.youllHold": "you'll hold",
   "confirm.youllGet": "you'll get",
   "confirm.swapCostOneTime": "swap cost (one-time)",
+  "confirm.ourFee": "our fee ({bps}%)",
   "confirm.route": "route",
   "confirm.route.instant": "instant",
   "confirm.route.swap": "swap · ~5s",
@@ -201,6 +202,8 @@ export const en = {
   "sell.detail.output": "you receive",
   "sell.detail.note":
     "The difference is what the market pays for this size right now — not a fee we take. We take none.",
+  "sell.detail.noteFee":
+    "Most of that is the market’s price for getting out now — the spread, not us. Our line is shown separately.",
   "rail.cashOut": "cash out to card",
   "rail.guestTitle": "sign in to put money in",
   "rail.guestBody": "the numbers here are live. your money stays in your own wallet — we never hold it.",

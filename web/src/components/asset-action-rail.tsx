@@ -172,6 +172,7 @@ export function AssetActionRail({
             asked={amount}
             proceeds={sellOut.proceedsUsd}
             costFraction={sellOut.costFraction}
+            feeUsd={sellOut.feeUsd}
             quoting={sellOut.quoting}
           />
 

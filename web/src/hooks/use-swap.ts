@@ -2,15 +2,12 @@
 
 import { useCallback } from "react";
 
-import {
-  getSwapQuote,
-  buildSwapTx,
-  deserializeSwapTx,
-  priceImpactTooHigh,
-} from "@oxar/sdk";
+import { getSwapQuote, buildSwapTx, deserializeSwapTx, priceImpactTooHigh } from "@oxar/sdk";
 
 import { useSolanaContext } from "@/providers/solana-provider";
+import { usePlatformFeeBps } from "@/hooks/use-platform-fee";
 import { UserFacingError } from "@/lib/yield";
+import { FEE_ACCOUNT_USDC, USDC_MINT } from "@/lib/constants";
 
 /** What a completed swap is worth saying: what signed it, and the least it produced. */
 export interface SwapResult {
@@ -33,6 +30,7 @@ export interface SwapResult {
  */
 export function useSwap() {
   const { wallet, connection, walletAddress, isExternal } = useSolanaContext();
+  const feeBps = usePlatformFeeBps();
 
   const swap = useCallback(
     async (params: {
@@ -47,23 +45,33 @@ export function useSwap() {
 
       // External wallets need a legacy tx (they mishandle Jupiter's v0); embedded keeps v0.
       const asLegacy = isExternal;
+      // Only when dollars are one side of the pair: the fee account is a USDC account,
+      // and Jupiter requires the fee mint to be part of the swap.
+      const charging = feeBps > 0 && (params.inputMint === USDC_MINT || params.outputMint === USDC_MINT);
       const quote = await getSwapQuote({
         inputMint: params.inputMint,
         outputMint: params.outputMint,
         amount: params.amount,
         asLegacy,
+        platformFeeBps: charging ? feeBps : undefined,
       });
       if (priceImpactTooHigh(quote)) {
         throw new UserFacingError("Price impact too high — try a smaller amount");
       }
 
-      const tx = deserializeSwapTx(await buildSwapTx(quote, walletAddress.toBase58(), { asLegacy }), asLegacy);
+      const tx = deserializeSwapTx(
+        await buildSwapTx(quote, walletAddress.toBase58(), {
+          asLegacy,
+          feeAccount: charging ? FEE_ACCOUNT_USDC : undefined,
+        }),
+        asLegacy,
+      );
       const sig = await wallet.signAndSend(tx, params.opts);
       await connection.confirmTransaction(sig, "confirmed");
 
       return { sig, minOut: BigInt(quote.otherAmountThreshold) };
     },
-    [wallet, walletAddress, connection, isExternal],
+    [wallet, walletAddress, connection, isExternal, feeBps],
   );
 
   return swap;

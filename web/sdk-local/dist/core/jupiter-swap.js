@@ -43,17 +43,25 @@ function priceImpactTooHigh(quote, maxFraction = 0.015) {
 exports.BROKEN_MARKET_IMPACT = 0.1;
 /** Quote an exact-in swap `inputMint → outputMint` for `amount` (base units). */
 async function getSwapQuote(params) {
-    const { inputMint, outputMint, amount, slippageBps = 50, asLegacy = false } = params;
+    const { inputMint, outputMint, amount, slippageBps = 50, asLegacy = false, platformFeeBps } = params;
     let url = `${QUOTE_URL}?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount.toString()}&slippageBps=${slippageBps}`;
     if (asLegacy)
         url += "&asLegacyTransaction=true";
+    // The quote has to know: Jupiter prices the route net of the fee, so asking for it
+    // only at build time would quote one number and deliver another.
+    if (platformFeeBps && platformFeeBps > 0)
+        url += `&platformFeeBps=${platformFeeBps}`;
     const res = await (0, fetch_retry_1.fetchWithRetry)(url);
     if (!res.ok)
         throw new Error(`Swap quote failed (${res.status})`);
     return (await res.json());
 }
 /** Build the swap transaction (base64) for a quote + owner. v0 by default; legacy when asked. */
-async function buildSwapTx(quote, ownerBase58, opts) {
+async function buildSwapTx(quote, ownerBase58, 
+/** `feeAccount` — the token account that receives the platform fee. Required
+ *  whenever the quote carried `platformFeeBps`; Jupiter rejects the pair
+ *  otherwise, and its mint must be one side of the swap. */
+opts) {
     const body = {
         quoteResponse: quote,
         userPublicKey: ownerBase58,
@@ -62,6 +70,8 @@ async function buildSwapTx(quote, ownerBase58, opts) {
     };
     if (opts?.asLegacy)
         body.asLegacyTransaction = true;
+    if (opts?.feeAccount)
+        body.feeAccount = opts.feeAccount;
     const res = await (0, fetch_retry_1.fetchWithRetry)(SWAP_URL, {
         method: "POST",
         headers: { "content-type": "application/json" },

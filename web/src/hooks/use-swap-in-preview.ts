@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 
 import { USDC_MINT } from "@/lib/constants";
 import { toBaseUnits } from "@/lib/yield";
-import { getSwapQuote } from "@oxar/sdk";
+import { getSwapQuote, platformFeeUsd } from "@oxar/sdk";
+import { usePlatformFeeBps } from "@/hooks/use-platform-fee";
 
 export interface SwapInPreview {
   /** Position value you'll hold right after buying (USD), at mid-price. */
@@ -29,6 +30,7 @@ export function useSwapInPreview(params: {
   enabled: boolean;
 }): SwapInPreview {
   const { heldMint, heldDecimals, usdAmount, enabled } = params;
+  const feeBps = usePlatformFeeBps();
   const [state, setState] = useState<SwapInPreview>(EMPTY);
 
   useEffect(() => {
@@ -40,7 +42,10 @@ export function useSwapInPreview(params: {
     setState((s) => ({ ...s, quoting: true }));
     const t = setTimeout(async () => {
       try {
-        const amount = toBaseUnits(usdAmount.toFixed(6), 6); // USDC base units
+        // Our cut is taken off the dollars going in, so it never reaches the market
+        // and can't be part of what you end up holding.
+        const spend = usdAmount - platformFeeUsd(usdAmount, feeBps);
+        const amount = toBaseUnits(spend.toFixed(6), 6); // USDC base units
         const [quote, priceJson] = await Promise.all([
           getSwapQuote({ inputMint: USDC_MINT, outputMint: heldMint, amount, asLegacy: true, slippageBps: 100 }),
           fetch(`https://lite-api.jup.ag/price/v3?ids=${heldMint}`).then((r) => r.json()),
@@ -63,7 +68,7 @@ export function useSwapInPreview(params: {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [heldMint, heldDecimals, usdAmount, enabled]);
+  }, [heldMint, heldDecimals, usdAmount, enabled, feeBps]);
 
   return state;
 }

@@ -4,7 +4,8 @@
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import type { NetPreview } from "@/hooks/use-net-preview";
 import type { SwapInPreview } from "@/hooks/use-swap-in-preview";
-import type { WalletAsset } from "@oxar/sdk";
+import { platformFeeUsd, type WalletAsset } from "@oxar/sdk";
+import { usePlatformFeeBps } from "@/hooks/use-platform-fee";
 import { SwipeToConfirm } from "@/components/swipe-to-confirm";
 import { useT, localizeError } from "@/lib/i18n";
 
@@ -50,6 +51,12 @@ export function DepositConfirm({
 }: Props) {
   const { t } = useT();
   const held = !!view.heldMint;
+  // Ours, said out loud, on the screen where the numbers are still changeable. Zero
+  // while the switch is off — and then the row isn't drawn at all, because a
+  // "fee: $0.00" line is noise dressed up as disclosure. Dollars into a dollar
+  // product aren't a trade, so there's nothing to charge for.
+  const feeBps = usePlatformFeeBps();
+  const ourFee = isDirect ? 0 : platformFeeUsd(usdAmount, feeBps);
   const route = isDirect ? t("confirm.route.instant") : t("confirm.route.swap");
 
   // What you'll end up with, net of any conversion.
@@ -76,6 +83,9 @@ export function DepositConfirm({
         <Row k={t("confirm.youPay")} v={`${money(usdAmount)} · ${payAsset.symbol}`} />
         <Row k={held ? t("confirm.youllHold") : t("confirm.youllGet")} v={get} />
         {swapCost !== null && <Row k={t("confirm.swapCostOneTime")} v={`~${money(swapCost)}`} />}
+        {ourFee > 0 && (
+          <Row k={t("confirm.ourFee", { bps: (feeBps / 100).toFixed(2) })} v={money(ourFee)} />
+        )}
         <Row k={t("confirm.route")} v={route} />
         <Row k={t("confirm.whereItGoes")} v={held ? t("confirm.ownWallet") : view.name} />
       </div>

@@ -59,10 +59,16 @@ export async function getSwapQuote(params: {
   slippageBps?: number;
   /** Constrain the route so it fits a legacy transaction (for external wallets). */
   asLegacy?: boolean;
+  /** Our cut, in basis points. Omitted or 0 = we take nothing, which is the default
+   *  everywhere until the switch is thrown (see `platform-fee`). */
+  platformFeeBps?: number;
 }): Promise<SwapQuote> {
-  const { inputMint, outputMint, amount, slippageBps = 50, asLegacy = false } = params;
+  const { inputMint, outputMint, amount, slippageBps = 50, asLegacy = false, platformFeeBps } = params;
   let url = `${QUOTE_URL}?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount.toString()}&slippageBps=${slippageBps}`;
   if (asLegacy) url += "&asLegacyTransaction=true";
+  // The quote has to know: Jupiter prices the route net of the fee, so asking for it
+  // only at build time would quote one number and deliver another.
+  if (platformFeeBps && platformFeeBps > 0) url += `&platformFeeBps=${platformFeeBps}`;
   const res = await fetchWithRetry(url);
   if (!res.ok) throw new Error(`Swap quote failed (${res.status})`);
   return (await res.json()) as SwapQuote;
@@ -72,7 +78,10 @@ export async function getSwapQuote(params: {
 export async function buildSwapTx(
   quote: SwapQuote,
   ownerBase58: string,
-  opts?: { asLegacy?: boolean },
+  /** `feeAccount` — the token account that receives the platform fee. Required
+   *  whenever the quote carried `platformFeeBps`; Jupiter rejects the pair
+   *  otherwise, and its mint must be one side of the swap. */
+  opts?: { asLegacy?: boolean; feeAccount?: string },
 ): Promise<string> {
   const body: Record<string, unknown> = {
     quoteResponse: quote,
@@ -81,6 +90,7 @@ export async function buildSwapTx(
     dynamicSlippage: false,
   };
   if (opts?.asLegacy) body.asLegacyTransaction = true;
+  if (opts?.feeAccount) body.feeAccount = opts.feeAccount;
   const res = await fetchWithRetry(SWAP_URL, {
     method: "POST",
     headers: { "content-type": "application/json" },

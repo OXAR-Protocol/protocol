@@ -65,6 +65,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "confirm.youllHold": "отримаєш",
   "confirm.youllGet": "отримаєш",
   "confirm.swapCostOneTime": "вартість обміну (разово)",
+  "confirm.ourFee": "наша комісія ({bps}%)",
   "confirm.route": "шлях",
   "confirm.route.instant": "миттєво",
   "confirm.route.swap": "обмін · ~5с",
@@ -187,6 +188,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "sell.detail.output": "ви отримаєте",
   "sell.detail.note":
     "Різниця — це те, скільки ринок платить за такий обсяг просто зараз, а не наша комісія. Ми не беремо нічого.",
+  "sell.detail.noteFee":
+    "Більша частина цього — ціна ринку за вихід зараз, а не ми. Наш рядок показано окремо.",
   "rail.cashOut": "вивести на картку",
   "rail.guestTitle": "увійдіть, щоб покласти гроші",
   "rail.guestBody": "цифри тут живі. гроші лишаються у вашому власному гаманці — ми їх не тримаємо.",
