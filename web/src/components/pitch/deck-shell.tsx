@@ -10,7 +10,11 @@ const printCss = `
   @page { size: 1600px 900px; margin: 0; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   main { height: auto !important; overflow: visible !important; }
-  main > section { height: 900px !important; min-height: 900px !important; overflow: hidden !important; break-after: page; }
+  main > section {
+    height: 900px !important; min-height: 900px !important;
+    overflow: hidden !important; break-after: page;
+    content-visibility: visible !important;
+  }
   main > section:last-child { break-after: auto; }
 
   /* Chrome does not honour Tailwind's \`md:\` breakpoints when printing, so every
@@ -36,7 +40,9 @@ const printCss = `
  *  at /pitch/short. */
 export function DeckShell({ children }: { children: ReactNode }) {
   return (
-    <main className={`${dmSans.variable} ${dmSans.className} h-screen overflow-y-auto overflow-x-hidden snap-y snap-mandatory bg-black text-white scroll-smooth [&>section]:snap-start [&>section]:snap-always`}>
+    <main
+      className={`${dmSans.variable} ${dmSans.className} h-screen overflow-y-auto overflow-x-hidden snap-y snap-mandatory bg-black text-white scroll-smooth [&>section]:snap-start [&>section]:snap-always [&>section]:[content-visibility:auto] [&>section]:[contain-intrinsic-size:100vw_100vh]`}
+    >
       <style>{printCss}</style>
       {children}
     </main>

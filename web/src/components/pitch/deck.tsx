@@ -150,7 +150,7 @@ export function Deck() {
         kicker="competition"
         title={<>nobody covers <span className={ACCENT}>both halves.</span></>}
         image={`${C}/note-mark.png`} imageAlt="A crumpled hundred-dollar note with the OXAR mark pressed into it"
-        imageBox="right" bodyMax="min(1060px, 64%)" blend="screen"
+        imageBox="right" bodyMax="min(1060px, 64%)"
         rows={COMPETITION}
         footer="the defensible part is not the yield — anyone can route to a protocol. it is who we serve, and that they trust us with the first dollar."
       />
@@ -173,10 +173,10 @@ export function Deck() {
 
       {/* 16 — Team — light (type only: handshake.png ships with a baked-in checkerboard) */}
       <section className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden bg-black px-6 py-16 md:px-16">
-        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] md:block">
+        <div data-band className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] md:block">
           <Image
             src={`${C}/logo-chrome.png`} alt="The OXAR mark in chrome" fill sizes="46vw"
-            className="object-contain" style={{ mixBlendMode: "screen" }}
+            className="object-contain"
           />
         </div>
         <div className="relative z-10 max-w-[min(1000px,58%)]">

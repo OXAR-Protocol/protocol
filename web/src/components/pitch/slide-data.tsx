@@ -34,11 +34,6 @@ interface ShellProps {
   imageBox?: "right";
   /** Width the slide body is held to, so it never runs under `imageBox`. */
   bodyMax?: string;
-  /** For art that ships on its own black background. The file's black is never quite
-   *  the slide's #000, so the picture's rectangle shows as a seam. Screen blending
-   *  makes true black contribute nothing, and the edge disappears instead of being
-   *  hidden under a gradient. */
-  blend?: "screen";
   light?: boolean;
   /** Slide body — supplied by the four wrappers below, not by the deck. */
   children: ReactNode;
@@ -65,7 +60,7 @@ function scrimBg(strength: number, from: ShellProps["scrimFrom"], light?: boolea
   return `rgba(${rgb},${near})`;
 }
 
-function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim = 85, scrimFrom, imagePos, imageBox, bodyMax, blend, light, children }: ShellProps) {
+function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim = 85, scrimFrom, imagePos, imageBox, bodyMax, light, children }: ShellProps) {
   return (
     <section
       className={`relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 py-16 md:px-16 ${light ? "bg-white" : "bg-black"}`}
@@ -77,21 +72,20 @@ function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim 
           <Image
             src={image} alt={imageAlt} fill loading="eager" sizes="44vw"
             className="object-cover"
-            style={{ ...(imagePos ? { objectPosition: imagePos } : {}), ...(blend ? { mixBlendMode: blend } : {}) }}
+            style={imagePos ? { objectPosition: imagePos } : undefined}
           />
-          {/* Art that blends has no edge to hide; a photograph does. */}
-          {!blend && (
-            <div
-              className="absolute inset-y-0 left-0 w-[22%]"
-              style={{ background: `linear-gradient(to right, ${light ? "#fff" : "#000"}, transparent)` }}
-            />
-          )}
+          {/* Softens where a photograph starts. Art on true black has no edge to hide,
+              but the gradient costs nothing there either. */}
+          <div
+            className="absolute inset-y-0 left-0 w-[22%]"
+            style={{ background: `linear-gradient(to right, ${light ? "#fff" : "#000"}, transparent)` }}
+          />
         </div>
       ) : image ? (
         <Image
           src={image} alt={imageAlt} fill loading="eager" sizes="100vw"
           className={cover ? "object-cover" : `object-contain ${light ? "opacity-[0.16]" : "opacity-45"}`}
-          style={{ ...(imagePos ? { objectPosition: imagePos } : {}), ...(blend ? { mixBlendMode: blend } : {}) }}
+          style={imagePos ? { objectPosition: imagePos } : undefined}
         />
       ) : null}
       {/* Deep enough that the 13px labels survive the pale patches of the photograph.
