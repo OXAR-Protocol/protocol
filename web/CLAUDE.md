@@ -155,6 +155,10 @@ React hooks only. No Redux / Zustand / global state. Data fetched in hooks, pass
 - Server: no prefix (api routes, supabase server client, delora key)
 - `.env.local` (gitignored), prod env in Vercel dashboard
 - **`vercel env add` gotcha**: pipe with `printf '%s'`, not `echo` — `echo` appends `\n` and breaks SDKs (Privy/Helius keys silently fail).
+- **`NEXT_PUBLIC_FEE_ACCOUNT_USDC` is money.** Setting it in Production starts charging
+  insiders AND rewrites what the public terms page says about fees. Set only on the
+  `test/platform-fee` preview branch until the fee is being announced on purpose —
+  see `docs/plans/2026-08-16-platform-fee-switches.md`.
 
 ### API Routes
 Server-side only. Validate all input. Currently:
