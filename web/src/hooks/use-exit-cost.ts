@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 
 import { USDC_MINT } from "@/lib/constants";
+import { usePlatformFeeBps } from "@/hooks/use-platform-fee";
 import {
   getSwapQuote,
   toBaseUnits,
   exitCostFraction,
   exitCostBand,
   findExitCeiling,
+  platformFeeUsd,
   type ExitCostBand,
 } from "@oxar/sdk";
 
@@ -43,7 +45,13 @@ const DEBOUNCE_MS = 500;
 /** Same quote used for the exit-cost preview and the ceiling probe: convert a
  * USD size to base units at the given reference price and quote a SELL back
  * to USDC. Throws on no route / failure — callers decide what that means. */
-async function sellQuoteUsd(mint: string, decimals: number, priceUsd: number, usd: number): Promise<number> {
+async function sellQuoteUsd(
+  mint: string,
+  decimals: number,
+  priceUsd: number,
+  usd: number,
+  feeBps: number,
+): Promise<number> {
   const units = usd / priceUsd;
   const amount = toBaseUnits(units, decimals);
   if (amount <= BigInt(0)) throw new Error("amount rounds to zero base units");
@@ -54,7 +62,8 @@ async function sellQuoteUsd(mint: string, decimals: number, priceUsd: number, us
     asLegacy: true,
     slippageBps: 100,
   });
-  return Number(quote.outAmount) / 1e6;
+  const gross = Number(quote.outAmount) / 1e6;
+  return gross - platformFeeUsd(gross, feeBps);
 }
 
 /**
@@ -89,6 +98,7 @@ export function useExitCost(params: {
   enabled: boolean;
 }): ExitCostPreview {
   const { mint, decimals, usdAmount, priceUsd, enabled } = params;
+  const feeBps = usePlatformFeeBps();
   const [state, setState] = useState<ExitCostPreview>(EMPTY);
 
   useEffect(() => {
@@ -108,7 +118,7 @@ export function useExitCost(params: {
     setState((s) => ({ ...s, loading: true, unavailable: false }));
     const timer = setTimeout(async () => {
       try {
-        const usdOut = await sellQuoteUsd(mint, decimals, priceUsd, usdAmount);
+        const usdOut = await sellQuoteUsd(mint, decimals, priceUsd, usdAmount, feeBps);
         const fraction = exitCostFraction(usdAmount, usdOut);
         if (!cancelled) {
           setState({
@@ -134,7 +144,7 @@ export function useExitCost(params: {
           probe: async (probeUsd) => {
             if (cancelled) return false;
             try {
-              await sellQuoteUsd(mint, decimals, priceUsd, probeUsd);
+              await sellQuoteUsd(mint, decimals, priceUsd, probeUsd, feeBps);
               return true;
             } catch {
               return false;
@@ -150,7 +160,7 @@ export function useExitCost(params: {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [mint, decimals, usdAmount, priceUsd, enabled]);
+  }, [mint, decimals, usdAmount, priceUsd, enabled, feeBps]);
 
   return state;
 }

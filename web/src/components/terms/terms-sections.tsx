@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { PLATFORM_FEE_BPS } from "@oxar/sdk";
+import { PLATFORM_FEE_POSSIBLE } from "@/lib/constants";
 
 /**
  * The ONE copy of the terms prose. `web/src/app/terms/page.tsx` (the public,
@@ -125,7 +127,15 @@ export const TERMS_SECTIONS: TermsSection[] = [
     id: "fees",
     heading: "9. Fees",
     short: "fees",
-    body: (
+    body: PLATFORM_FEE_POSSIBLE ? (
+      <p>
+        <strong>OXAR charges no fee on deposits, withdrawals, or yield earned</strong> — there is no performance fee, no deposit fee, and no withdrawal penalty. Money that sits and earns costs you nothing.
+        {" "}
+        <strong>OXAR charges {(PLATFORM_FEE_BPS / 100).toFixed(2)}% on a conversion</strong> — buying or selling an asset that has to be swapped, where dollars are one side of the trade. It is shown as its own line on the confirmation screen before you sign, and if that line is not there, no OXAR fee applies to that transaction. Depositing dollars into a dollar product is not a conversion and costs nothing.
+        {" "}
+        A separate cost comes from elsewhere: a swap-and-hold asset — tokenized stocks, gold, or Ondo USDY — has a one-time swap cost set by the market at the time of the trade, same as any on-chain swap; it is not collected by OXAR.
+      </p>
+    ) : (
       <p>
         <strong>OXAR charges no fee of its own</strong> on deposits, withdrawals, or yield earned — there is no performance fee, no deposit fee, and no withdrawal penalty. One cost comes from elsewhere: buying or selling a swap-and-hold asset — tokenized stocks, gold, or Ondo USDY — has a one-time swap cost set by the market at the time of the trade, same as any on-chain swap; it is not collected by OXAR.
       </p>

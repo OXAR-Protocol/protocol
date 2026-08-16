@@ -3,6 +3,7 @@
 import { formatUsdAmount } from "@oxar/sdk";
 
 import { useExitCost } from "@/hooks/use-exit-cost";
+import { usePlatformFeeBps } from "@/hooks/use-platform-fee";
 import { useT } from "@/lib/i18n";
 
 interface Props {
@@ -19,12 +20,13 @@ interface Props {
  * One quiet line under the buy amount, for price-exposure assets only: what
  * leaving would cost right now, quoted live rather than assumed. Not a warning
  * that blocks anything — `marketLooksBroken` still catches a genuinely broken
- * route elsewhere. The cost belongs to the market, not to OXAR: we're a
- * non-custodial interface, we don't set the price and don't take a fee here,
- * so the copy says so plainly instead of reading like a disclaimer.
+ * route elsewhere. Nearly all of the cost belongs to the market: we don't set the
+ * price. While we charge nothing the copy says so outright; once we do, the same
+ * sentence would be crediting the market with a cut that is ours, so it changes.
  */
 export function ExitCostNotice({ heldMint, heldDecimals, usdAmount, priceUsd }: Props) {
   const { t } = useT();
+  const feeBps = usePlatformFeeBps();
   const exit = useExitCost({
     mint: heldMint,
     decimals: heldDecimals,
@@ -43,7 +45,10 @@ export function ExitCostNotice({ heldMint, heldDecimals, usdAmount, priceUsd }: 
         ? exit.ceilingUsd !== null
           ? t("rail.exitCostCeiling", { usd: `$${formatUsdAmount(exit.ceilingUsd, 0)}` })
           : t("rail.exitCostUnavailable")
-        : t("rail.exitCostNow", { pct: ((exit.fraction ?? 0) * 100).toFixed(1) })}
+        : t(feeBps > 0 ? "rail.exitCostNowFee" : "rail.exitCostNow", {
+            pct: ((exit.fraction ?? 0) * 100).toFixed(1),
+            fee: (feeBps / 100).toFixed(2),
+          })}
     </p>
   );
 }
