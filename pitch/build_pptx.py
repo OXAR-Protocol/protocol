@@ -14,12 +14,16 @@ stand behind.
 
     python3 pitch/build_pptx.py [output.pptx]
 
-LAYOUT NOTE, learned the hard way: python-pptx cannot measure text, so anything
-that positions one block "under" another by estimating the height of the one above
-will eventually overlap it — a two-line headline lands on top of its own subtitle.
-Every block here therefore sits in a fixed slot on a grid. Slots are generous
-enough for the longest string we actually use; if a headline grows past two lines,
-move the slot rather than guessing again.
+LAYOUT NOTE, learned the hard way twice: python-pptx cannot measure text, so a
+layout that stacks blocks by estimating the height of the one above will overlap
+it the first time a headline wraps one line further than expected. Fixed slots
+were the second attempt and only moved the problem — a slot generous enough for
+the longest string wastes the space on every other slide.
+
+So we measure. `textfit` reads the real DM Sans and does the renderer's own greedy
+wrap, which means line counts are exact rather than guessed. Every block flows
+under the measured bottom of the one above it, and `_check` asserts at build time
+that nothing overlaps, overflows, or crosses into a picture.
 """
 
 from __future__ import annotations
@@ -30,6 +34,9 @@ from pathlib import Path
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.util import Emu, Inches, Pt
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import textfit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 ART = ROOT / "web" / "public" / "pitch" / "collage"
@@ -49,12 +56,10 @@ RULE_DARK, RULE_LIGHT = RGBColor(0x28, 0x28, 0x28), RGBColor(0xE2, 0xE2, 0xE2)
 W, H = Inches(13.333), Inches(7.5)
 PAD = Inches(0.85)
 
-# The grid. Every slot is fixed; nothing is stacked by guessing.
-Y_KICKER = Inches(0.95)
-Y_TITLE = Inches(1.40)
-Y_SUB = Inches(3.15)
-Y_BODY_WITH_SUB = Inches(4.35)
-Y_BODY = Inches(3.30)
+# Where a slide starts, and the air between blocks. Everything else is measured.
+Y_TOP = Inches(0.95)
+Y_TOP_STATEMENT = Inches(2.05)
+GAP_KICKER, GAP_TITLE, GAP_SUB = Inches(0.30), Inches(0.34), Inches(0.52)
 Y_FOOT = H - Inches(1.10)
 
 # Where the picture starts, and how much room that leaves the words. These two are a
@@ -109,9 +114,13 @@ class Deck:
         tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
         return tf
 
-    def _write(self, tf, segments, *, size, color, bold=False, spacing=1.0):
-        """A paragraph built from (text, is_accent) pairs, so one word can carry the
-        violet italic without the whole line changing typeface."""
+    def _write(self, s, left, top, width, segments, *, size, color, bold=False, spacing=1.0):
+        """Writes a paragraph and returns how tall it actually came out. Built from
+        (text, is_accent) pairs, so one word carries the violet italic without the
+        whole line changing typeface."""
+        plain = "".join(t for t, _ in segments)
+        height = textfit.height_emu(plain, width, size, bold=bold, spacing=spacing)
+        tf = self._box(s, left, top, width, height)
         p = tf.paragraphs[0]
         p.line_spacing = spacing
         for text, accent in segments:
@@ -120,6 +129,7 @@ class Deck:
             f = r.font
             f.name, f.size, f.bold, f.italic = FONT, Pt(size), bold, bool(accent)
             f.color.rgb = ACCENT if accent else color
+        return height
 
     def _rule(self, s, top, width, light: bool):
         line = s.shapes.add_connector(1, PAD, top, PAD + width, top)
@@ -128,40 +138,46 @@ class Deck:
 
     # -- slide furniture -------------------------------------------------------
 
-    def _head(self, s, kicker, title, sub, light, col, *, title_size=40):
+    def _head(self, s, kicker, title, sub, light, col, *, title_size=40, top=Y_TOP):
+        """Kicker, headline, subtitle — each under the measured bottom of the last.
+        Returns where the body may start."""
         ink = INK_LIGHT if light else INK_DARK
         muted = MUTED_LIGHT if light else MUTED_DARK
 
-        self._write(self._box(s, PAD, Y_KICKER, col, Inches(0.3)),
-                    [(f"[ {kicker} ]", False)], size=13, color=muted)
-        self._write(self._box(s, PAD, Y_TITLE, col, Inches(1.6)),
-                    title, size=title_size, color=ink, bold=True, spacing=0.95)
+        y = top
+        y += self._write(s, PAD, y, col, [(f"[ {kicker} ]", False)], size=13, color=muted)
+        y += GAP_KICKER
+        y += self._write(s, PAD, y, col, title, size=title_size, color=ink, bold=True, spacing=0.95)
+        y += GAP_TITLE
         if sub:
-            self._write(self._box(s, PAD, Y_SUB, min(col, Inches(6.6)), Inches(1.1)),
-                        [(sub, False)], size=14.5, color=muted, spacing=1.35)
+            y += self._write(s, PAD, y, min(col, Inches(6.6)), [(sub, False)],
+                             size=14.5, color=muted, spacing=1.35)
+            y += GAP_SUB
+        return Emu(int(y))
 
     def _foot(self, s, text, light, col=None):
         if not text:
             return
-        self._write(self._box(s, PAD, Y_FOOT, col or COL_FULL, Inches(0.8)),
-                    [(text, False)], size=10.5,
-                    color=FAINT_LIGHT if light else FAINT_DARK, spacing=1.3)
+        width = col or COL_FULL
+        h = textfit.height_emu(text, width, 10.5, spacing=1.3)
+        self._write(s, PAD, Emu(int(H - Inches(0.6) - h)), width, [(text, False)],
+                    size=10.5, color=FAINT_LIGHT if light else FAINT_DARK, spacing=1.3)
 
     # -- slide kinds -----------------------------------------------------------
 
     def title(self, title, sub, image, note):
         s = self._slide(False, image, wide=True)
-        self._write(self._box(s, PAD, Inches(2.65), COL_TITLE, Inches(1.75)),
-                    title, size=52, color=INK_DARK, bold=True, spacing=0.95)
-        self._write(self._box(s, PAD, Inches(4.6), COL_TITLE, Inches(1.3)),
-                    [(sub, False)], size=15, color=MUTED_DARK, spacing=1.4)
+        y = Inches(2.45)
+        y += self._write(s, PAD, y, COL_TITLE, title, size=48, color=INK_DARK, bold=True, spacing=0.95)
+        y += Inches(0.45)
+        self._write(s, PAD, y, COL_TITLE, [(sub, False)], size=15, color=MUTED_DARK, spacing=1.4)
         s.notes_slide.notes_text_frame.text = note
         return s
 
     def statement(self, kicker, title, sub, light, image, note, footer=None):
         s = self._slide(light, image)
         col = COL_SPLIT if image else COL_FULL
-        self._head(s, kicker, title, sub, light, col, title_size=46)
+        self._head(s, kicker, title, sub, light, col, title_size=44, top=Y_TOP_STATEMENT)
         self._foot(s, footer, light, col)
         s.notes_slide.notes_text_frame.text = note
         return s
@@ -169,20 +185,19 @@ class Deck:
     def columns(self, kicker, title, cols, light, image, note, footer=None):
         s = self._slide(light, image)
         col = COL_SPLIT if image else COL_FULL
-        self._head(s, kicker, title, None, light, col)
+        y0 = self._head(s, kicker, title, None, light, col)
         ink = INK_LIGHT if light else INK_DARK
         muted = MUTED_LIGHT if light else MUTED_DARK
 
         n = len(cols)
         gutter = Inches(0.45)
         width = Emu(int((col - gutter * (n - 1)) / n))
-        y = Y_BODY
+        y = y0
         self._rule(s, y - Inches(0.28), col, light)
         for i, (label, body) in enumerate(cols):
             x = Emu(int(PAD + i * (width + gutter)))
-            self._write(self._box(s, x, y, width, Inches(0.32)), [(label, False)], size=14, color=ink)
-            self._write(self._box(s, x, y + Inches(0.48), width, Inches(2.4)),
-                        [(body, False)], size=11.5, color=muted, spacing=1.4)
+            self._write(s, x, y, width, [(label, False)], size=14, color=ink)
+            self._write(s, x, y + Inches(0.48), width, [(body, False)], size=11.5, color=muted, spacing=1.4)
         self._foot(s, footer, light, col)
         s.notes_slide.notes_text_frame.text = note
         return s
@@ -190,7 +205,7 @@ class Deck:
     def stats(self, kicker, title, sub, items, light, image, note, footer=None):
         s = self._slide(light, image)
         col = COL_SPLIT if image else COL_FULL
-        self._head(s, kicker, title, sub, light, col)
+        y0 = self._head(s, kicker, title, sub, light, col)
         ink = INK_LIGHT if light else INK_DARK
         muted = MUTED_LIGHT if light else MUTED_DARK
         faint = FAINT_LIGHT if light else FAINT_DARK
@@ -198,15 +213,12 @@ class Deck:
         n = len(items)
         gutter = Inches(0.4)
         width = Emu(int((col - gutter * (n - 1)) / n))
-        y = Y_BODY_WITH_SUB if sub else Y_BODY
+        y = y0
         for i, (figure, label, note_text) in enumerate(items):
             x = Emu(int(PAD + i * (width + gutter)))
-            self._write(self._box(s, x, y, width, Inches(0.62)),
-                        [(figure, False)], size=36, color=ink, bold=True, spacing=0.9)
-            self._write(self._box(s, x, y + Inches(0.66), width, Inches(0.28)),
-                        [(label, False)], size=11.5, color=muted)
-            self._write(self._box(s, x, y + Inches(1.0), width, Inches(1.4)),
-                        [(note_text, False)], size=10, color=faint, spacing=1.3)
+            self._write(s, x, y, width, [(figure, False)], size=36, color=ink, bold=True, spacing=0.9)
+            self._write(s, x, y + Inches(0.66), width, [(label, False)], size=11.5, color=muted)
+            self._write(s, x, y + Inches(1.0), width, [(note_text, False)], size=10, color=faint, spacing=1.3)
         self._foot(s, footer, light, col)
         s.notes_slide.notes_text_frame.text = note
         return s
@@ -214,19 +226,17 @@ class Deck:
     def rows(self, kicker, title, items, light, image, note, footer=None):
         s = self._slide(light, image)
         col = COL_SPLIT if image else COL_FULL
-        self._head(s, kicker, title, None, light, col)
+        y = self._head(s, kicker, title, None, light, col)
         ink = INK_LIGHT if light else INK_DARK
         muted = MUTED_LIGHT if light else MUTED_DARK
 
-        y = Y_BODY
         step = Emu(int((Y_FOOT - Inches(0.25) - y) / len(items)))
         label_w = Inches(2.2)
         for label, body, strong in items:
             self._rule(s, y, col, light)
-            self._write(self._box(s, PAD, y + Inches(0.16), label_w, Inches(0.35)),
-                        [(label, False)], size=12.5, color=ink if strong else muted, bold=strong)
-            self._write(self._box(s, PAD + label_w + Inches(0.4), y + Inches(0.16),
-                                  col - label_w - Inches(0.4), step - Inches(0.28)),
+            self._write(s, PAD, y + Inches(0.16), label_w, [(label, False)], size=12.5, color=ink if strong else muted, bold=strong)
+            self._write(s, PAD + label_w + Inches(0.4), y + Inches(0.16),
+                        col - label_w - Inches(0.4),
                         [(body, False)], size=11.5, color=ink if strong else muted, spacing=1.32)
             y = Emu(int(y + step))
         self._foot(s, footer, light, col)
@@ -236,25 +246,49 @@ class Deck:
     def steps(self, kicker, title, items, light, image, note, footer=None):
         s = self._slide(light, image)
         col = COL_SPLIT if image else COL_FULL
-        self._head(s, kicker, title, None, light, col)
+        y = self._head(s, kicker, title, None, light, col)
         ink = INK_LIGHT if light else INK_DARK
         muted = MUTED_LIGHT if light else MUTED_DARK
 
-        y = Y_BODY
         step = Inches(1.1)
         for i, body in enumerate(items, start=1):
             self._rule(s, y, col, light)
-            self._write(self._box(s, PAD, y + Inches(0.2), Inches(1.1), Inches(0.6)),
-                        [(f"0{i}", False)], size=26, color=ink, bold=True)
-            self._write(self._box(s, PAD + Inches(1.35), y + Inches(0.3),
-                                  col - Inches(1.35), Inches(0.7)),
+            self._write(s, PAD, y + Inches(0.2), Inches(1.1), [(f"0{i}", False)], size=26, color=ink, bold=True)
+            self._write(s, PAD + Inches(1.35), y + Inches(0.3), col - Inches(1.35),
                         [(body, False)], size=12.5, color=muted, spacing=1.32)
             y += step
         self._foot(s, footer, light, col)
         s.notes_slide.notes_text_frame.text = note
         return s
 
+    def check(self) -> list[str]:
+        """Every text block against every other, plus the frame and the pictures.
+        Heights are measured, not assumed, so a complaint here is a real one — and
+        silence means the file is actually clean rather than merely built."""
+        faults: list[str] = []
+        for i, s in enumerate(self.prs.slides, start=1):
+            texts = [sh for sh in s.shapes if sh.has_text_frame and sh.text_frame.text.strip()]
+            pics = [sh for sh in s.shapes if sh.shape_type == 13]
+            for a in range(len(texts)):
+                A = texts[a]
+                for b in range(a + 1, len(texts)):
+                    B = texts[b]
+                    if (A.left < B.left + B.width and B.left < A.left + A.width
+                            and A.top < B.top + B.height and B.top < A.top + A.height):
+                        faults.append(f"slide {i}: “{A.text_frame.text[:22]}” overlaps “{B.text_frame.text[:22]}”")
+            for sh in texts:
+                if sh.top + sh.height > H:
+                    faults.append(f"slide {i}: “{sh.text_frame.text[:22]}” runs off the bottom")
+                for q in pics:
+                    if (sh.left + sh.width > q.left and sh.top < q.top + q.height
+                            and sh.top + sh.height > q.top):
+                        faults.append(f"slide {i}: “{sh.text_frame.text[:22]}” runs under the picture")
+        return faults
+
     def save(self, path: Path) -> Path:
+        faults = self.check()
+        if faults:
+            raise SystemExit("layout is broken:\n  " + "\n  ".join(faults))
         self.prs.save(str(path))
         return path
 
