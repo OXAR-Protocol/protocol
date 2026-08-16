@@ -73,7 +73,7 @@ function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim 
       {/* Matches the photo slides' weight on black (0.45); on white the cut-outs are
           high-contrast and would fight the type, so they run much fainter. */}
       {image && imageBox === "right" ? (
-        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[44%] md:block">
+        <div data-band className="pointer-events-none absolute inset-y-0 right-0 hidden w-[44%] md:block">
           <Image
             src={image} alt={imageAlt} fill loading="eager" sizes="44vw"
             className="object-cover"

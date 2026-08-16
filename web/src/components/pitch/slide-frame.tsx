@@ -75,14 +75,14 @@ export function SlideFrame({ kicker, title, sub, image, imageAlt = "", children,
 
   const imgFirst = variant === "left";
   return (
-    <section className={`grid min-h-screen w-full grid-cols-1 items-center gap-6 px-6 py-16 md:grid-cols-2 md:gap-10 md:px-16 ${bg}`}>
-      <div className={`${imgFirst ? "md:order-2" : ""} max-w-xl`}>
+    <section data-split className={`grid min-h-screen w-full grid-cols-1 items-center gap-6 px-6 py-16 md:grid-cols-2 md:gap-10 md:px-16 ${bg}`}>
+      <div data-split-text={imgFirst ? "second" : "first"} className={`${imgFirst ? "md:order-2" : ""} max-w-xl`}>
         <p className={K}>[ {kicker} ]</p>
         <h2 className={`${T} mt-4`}>{title}</h2>
         {sub && <p className={`${S} mt-6`}>{sub}</p>}
         {children}
       </div>
-      <div className={`${imgFirst ? "md:order-1" : ""} relative h-[42vh] w-full md:h-[74vh]`}>
+      <div data-split-img={imgFirst ? "first" : "second"} className={`${imgFirst ? "md:order-1" : ""} relative h-[42vh] w-full md:h-[74vh]`}>
         {/* eager, not lazy: printing to PDF renders every slide at once, and a lazy
             image below the fold would come out blank. */}
         {image && <Image src={image} alt={imageAlt} fill loading="eager" sizes="(max-width:768px) 100vw, 50vw" className="object-contain" />}
