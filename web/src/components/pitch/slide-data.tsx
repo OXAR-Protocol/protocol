@@ -16,9 +16,12 @@ interface ShellProps {
   /** Faint collage behind the type. */
   image?: string;
   imageAlt?: string;
-  /** Run `image` full-bleed under a dark scrim instead of faint behind the type —
-   *  for photographs that fill the frame rather than cut-outs that float in it. */
+  /** Run `image` full-bleed under a scrim instead of faint behind the type — for
+   *  photographs that fill the frame rather than cut-outs that float in it. */
   cover?: boolean;
+  /** Scrim strength over a `cover` image, 0–100. Higher = quieter picture. Busy
+   *  photographs under dense text need more; a single figure needs less. */
+  scrim?: number;
   light?: boolean;
   /** Slide body — supplied by the four wrappers below, not by the deck. */
   children: ReactNode;
@@ -34,7 +37,7 @@ const bodyCls = (light?: boolean) =>
   `font-light lowercase leading-relaxed text-[clamp(14px,1.3vw,17px)] ${light ? "text-black/70" : "text-white/65"}`;
 const ruleCls = (light?: boolean) => (light ? "border-black/10" : "border-white/10");
 
-function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, light, children }: ShellProps) {
+function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim = 85, light, children }: ShellProps) {
   return (
     <section
       className={`relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 py-16 md:px-16 ${light ? "bg-white" : "bg-black"}`}
@@ -48,7 +51,12 @@ function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, light,
         />
       )}
       {/* Deep enough that the 13px labels survive the pale patches of the photograph. */}
-      {cover && <div className="absolute inset-0 bg-black/85" />}
+      {cover && (
+        <div
+          className="absolute inset-0"
+          style={{ background: light ? `rgba(255,255,255,${scrim / 100})` : `rgba(0,0,0,${scrim / 100})` }}
+        />
+      )}
       <div className="relative z-10 w-full">
         <p className={kickerCls(light)}>[ {kicker} ]</p>
         <h2 className={`${dataTitleCls(light)} mt-4 max-w-3xl`}>{title}</h2>

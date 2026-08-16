@@ -39,9 +39,9 @@ export const MARKET: Stat[] = [
     note: "the idle share of solana's $16.7b stablecoin supply — money we can reach without asking anyone to bridge",
   },
   {
-    figure: "$0.6–6M",
+    figure: "$3M",
     label: "som · year one",
-    note: "500–5,000 savers at $1,200 each — the median our own waitlist volunteered, not an assumption",
+    note: "two basis points of the idle solana float — about 1,400 savers at the $2,080 the average stablecoin address holds",
   },
 ];
 
@@ -86,7 +86,7 @@ export const MODEL: Row[] = [
   },
   {
     label: "the price",
-    body: "phantom takes 0.85% for the same swap and hides it in the quote; metamask 0.875%. we take a third of that and name it as its own line before you sign.",
+    body: "revolut charges 1.49% to convert and a 1.5–2.5% spread on top; phantom 0.85% hidden inside the quote; metamask 0.875%. we take 0.25% and name it as its own line before you sign — and today, before launch, we take 0%.",
   },
   {
     label: "what it earns",
@@ -100,17 +100,34 @@ export const MODEL: Row[] = [
  *  hears "ten" discounts everything else on the slide. Better we say it first. */
 export const TRACTION: Stat[] = [
   { figure: "live", label: "on solana mainnet", note: "not a prototype — real money, from your own wallet" },
-  { figure: "99", label: "waitlist signups", note: "16 of them arrived through someone else's referral link" },
-  { figure: "$1.2k", label: "median intended deposit", note: "from the 10 who volunteered a figure — $75k in total" },
+  { figure: "99+", label: "waitlist signups", note: "16 of them arrived through someone else's referral link, with nothing spent on acquisition" },
+  { figure: "$75k", label: "intended deposits", note: "self-reported by the ten who named a figure — an intention, not a commitment. median $1,200" },
   { figure: "36", label: "assets", note: "5 yield sources, 28 tokenized stocks, gold and silver" },
 ];
 
 /** 13 — nobody covers both halves. */
 export const COMPETITION: Row[] = [
-  { label: "neobanks", body: "trusted and easy — but the rate is capped, the account is us-gated, and they hold your money." },
-  { label: "crypto wallets", body: "global and non-custodial — but 0%, and you are on your own." },
-  { label: "defi frontends", body: "the yield is real — but the interface is built for traders who already speak the language." },
-  { label: "oxar", body: "global access, real yield, real assets — and we hold nothing.", highlight: true },
+  {
+    label: "revolut",
+    body: "2.33% on dollars for a standard account, and up to 3.68% only on a paid tier — with capital at risk if the fund's nav falls. converting costs 1.49%, plus a 1.5–2.5% spread.",
+  },
+  {
+    label: "us savings apps",
+    body: "4–5%, the honest ceiling of a treasury rate — and they need a us bank account, which is the whole problem for everyone else.",
+  },
+  {
+    label: "crypto wallets",
+    body: "0% on the dollars sitting in them. phantom charges 0.85% to convert and hides it in the quote; metamask 0.875%.",
+  },
+  {
+    label: "defi frontends",
+    body: "the yield is real and the fee is often zero — but the interface is built for people who already speak the language.",
+  },
+  {
+    label: "oxar",
+    body: "5–12%, real assets, nothing held by us, and 0.25% to convert — a sixth of revolut, a third of phantom, printed on screen before you sign, and 0% until launch.",
+    highlight: true,
+  },
 ];
 
 /** 15 — roadmap. */
