@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import { getSwapQuote, usdToBase, type WalletAsset } from "@oxar/sdk";
+import { getSwapQuote, platformFeeUsd, usdToBase, type WalletAsset } from "@oxar/sdk";
+import { usePlatformFeeBps } from "@/hooks/use-platform-fee";
 
 export interface NetPreview {
   kind: "direct" | "swap";
@@ -27,6 +28,7 @@ export function useNetPreview(params: {
   const { payAsset, usdAmount, productMint, productDecimals } = params;
   const isDirect = payAsset?.mint === productMint;
   const kind: NetPreview["kind"] = !payAsset || isDirect ? "direct" : "swap";
+  const feeBps = usePlatformFeeBps();
 
   const [state, setState] = useState<Omit<NetPreview, "kind">>({ netUsdc: null, quoting: false });
 
@@ -48,7 +50,8 @@ export function useNetPreview(params: {
           outputMint: productMint,
           amount: usdToBase(payAsset, usdAmount),
         });
-        if (!cancelled) setState({ netUsdc: Number(q.otherAmountThreshold) / 10 ** productDecimals, quoting: false });
+        const gross = Number(q.otherAmountThreshold) / 10 ** productDecimals;
+        if (!cancelled) setState({ netUsdc: gross - platformFeeUsd(gross, feeBps), quoting: false });
       } catch {
         if (!cancelled) setState({ netUsdc: null, quoting: false });
       }
@@ -57,7 +60,7 @@ export function useNetPreview(params: {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [payAsset, usdAmount, isDirect, productMint, productDecimals]);
+  }, [payAsset, usdAmount, isDirect, productMint, productDecimals, feeBps]);
 
   return { kind, ...state };
 }

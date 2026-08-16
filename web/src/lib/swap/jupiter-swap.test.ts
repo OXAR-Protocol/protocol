@@ -77,4 +77,25 @@ describe("legacy-transaction flag (external wallets need legacy, not v0)", () =>
     await buildSwapTx({} as SwapQuote, "OWNER");
     expect(JSON.parse(calls[0].body!).asLegacyTransaction).toBeUndefined();
   });
+
+  // Charging is off by default and has to stay that way: a caller that says nothing
+  // about a fee must produce a request that says nothing about a fee.
+  it("asks for no fee unless one is passed", async () => {
+    await getSwapQuote({ inputMint: "SOL", outputMint: "USDC", amount: BigInt(1000) });
+    expect(calls[0].url).not.toContain("platformFeeBps");
+    calls = [];
+    await getSwapQuote({ inputMint: "SOL", outputMint: "USDC", amount: BigInt(1000), platformFeeBps: 0 });
+    expect(calls[0].url).not.toContain("platformFeeBps");
+    calls = [];
+    await buildSwapTx({} as SwapQuote, "OWNER");
+    expect(JSON.parse(calls[0].body!).feeAccount).toBeUndefined();
+  });
+
+  it("carries the rate on the quote and the account on the build", async () => {
+    await getSwapQuote({ inputMint: "SOL", outputMint: "USDC", amount: BigInt(1000), platformFeeBps: 25 });
+    expect(calls[0].url).toContain("platformFeeBps=25");
+    calls = [];
+    await buildSwapTx({} as SwapQuote, "OWNER", { feeAccount: "FEEACC" });
+    expect(JSON.parse(calls[0].body!)).toMatchObject({ feeAccount: "FEEACC" });
+  });
 });

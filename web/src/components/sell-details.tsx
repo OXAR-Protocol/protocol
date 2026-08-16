@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
+import { usePlatformFeeBps } from "@/hooks/use-platform-fee";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -20,6 +21,7 @@ export function SellDetails({
   asked,
   proceeds,
   costFraction,
+  feeUsd,
   quoting,
 }: {
   /** What the person typed, in dollars. */
@@ -28,9 +30,12 @@ export function SellDetails({
   proceeds: number | null;
   /** Share of the ask that doesn't arrive — spread plus fees. */
   costFraction: number | null;
+  /** Our cut of the proceeds, in USD. Zero while we're not charging. */
+  feeUsd: number;
   quoting: boolean;
 }) {
   const { t } = useT();
+  const feeBps = usePlatformFeeBps();
   const [open, setOpen] = useState(false);
 
   if (quoting) {
@@ -40,6 +45,9 @@ export function SellDetails({
 
   const pct = ((costFraction ?? 0) * 100).toFixed(2);
   const gap = Math.max(0, asked - proceeds);
+  // The gap has two owners once we charge. Ours is named separately, because the
+  // line below promises the rest is the market's — and that promise has to stay true.
+  const market = Math.max(0, gap - feeUsd);
 
   return (
     <div className="mt-2">
@@ -60,12 +68,20 @@ export function SellDetails({
       {open && (
         <div className="mt-2 space-y-1.5 rounded-[10px] border border-ink/10 p-3">
           <Line label={t("sell.detail.asked")} value={`$${formatUsdAmount(asked)}`} />
-          <Line label={t("sell.detail.cost")} value={`−$${formatUsdAmount(gap)}`} />
+          <Line label={t("sell.detail.cost")} value={`−$${formatUsdAmount(feeUsd > 0 ? market : gap)}`} />
+          {feeUsd > 0 && (
+            <Line
+              label={t("confirm.ourFee", { bps: (feeBps / 100).toFixed(2) })}
+              value={`−$${formatUsdAmount(feeUsd)}`}
+            />
+          )}
           <Line label={t("sell.detail.impact")} value={`−${pct}%`} />
           <Line label={t("sell.detail.output")} value={`$${formatUsdAmount(proceeds)}`} strong />
-          {/* Whose money this is, said once: the gap is the market's price for
-              getting out now, not a cut we take. */}
-          <p className="pt-1 text-[10px] leading-snug text-ink/35">{t("sell.detail.note")}</p>
+          {/* Whose money this is, said once: the market's price for getting out now
+              is separate from our line above, and much the larger of the two. */}
+          <p className="pt-1 text-[10px] leading-snug text-ink/35">
+            {t(feeUsd > 0 ? "sell.detail.noteFee" : "sell.detail.note")}
+          </p>
         </div>
       )}
     </div>

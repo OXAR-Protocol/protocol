@@ -44,10 +44,18 @@ export declare function getSwapQuote(params: {
     slippageBps?: number;
     /** Constrain the route so it fits a legacy transaction (for external wallets). */
     asLegacy?: boolean;
+    /** Our cut, in basis points. Omitted or 0 = we take nothing, which is the default
+     *  everywhere until the switch is thrown (see `platform-fee`). */
+    platformFeeBps?: number;
 }): Promise<SwapQuote>;
 /** Build the swap transaction (base64) for a quote + owner. v0 by default; legacy when asked. */
-export declare function buildSwapTx(quote: SwapQuote, ownerBase58: string, opts?: {
+export declare function buildSwapTx(quote: SwapQuote, ownerBase58: string, 
+/** `feeAccount` — the token account that receives the platform fee. Required
+ *  whenever the quote carried `platformFeeBps`; Jupiter rejects the pair
+ *  otherwise, and its mint must be one side of the swap. */
+opts?: {
     asLegacy?: boolean;
+    feeAccount?: string;
 }): Promise<string>;
 /** Deserialize Jupiter's base64 swap tx — legacy `Transaction` or v0 `VersionedTransaction`. */
 export declare function deserializeSwapTx(b64: string, asLegacy: boolean): Transaction | VersionedTransaction;
