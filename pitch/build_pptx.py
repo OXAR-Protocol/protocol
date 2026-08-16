@@ -29,6 +29,7 @@ that nothing overlaps, overflows, or crosses into a picture.
 from __future__ import annotations
 
 import sys
+import tempfile
 from pathlib import Path
 
 from pptx import Presentation
@@ -40,6 +41,13 @@ import textfit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 ART = ROOT / "web" / "public" / "pitch" / "collage"
+
+# Photographs, as opposed to cut-outs. A cut-out already carries its own alpha and
+# floats on the slide with no edge; a photograph is a rectangle, and a rectangle laid
+# on a white slide shows a hard seam down its side. These get a band of their own,
+# full height, with the leading edge dissolved into the background.
+PHOTOS = {"eye-through-clouds.jpg"}
+FEATHER = 0.30  # share of the band's width the fade occupies
 
 # --- The look -----------------------------------------------------------------
 # Same three colours and one typeface as the app and the landing: black, white, and
@@ -74,6 +82,7 @@ class Deck:
     def __init__(self) -> None:
         self.prs = Presentation()
         self.prs.slide_width, self.prs.slide_height = W, H
+        self._tmp = Path(tempfile.mkdtemp(prefix="oxar-deck-"))
 
     # -- primitives ------------------------------------------------------------
 
@@ -91,11 +100,17 @@ class Deck:
         path = ART / name
         if not path.exists():
             raise FileNotFoundError(f"missing deck art: {path}")
+        box_l = PIC_L_WIDE if wide else PIC_L
+
+        if name in PHOTOS:
+            band_w, band_h = W - box_l, H
+            s.shapes.add_picture(str(self._feathered(path, band_w, band_h)),
+                                 Emu(int(box_l)), 0, Emu(int(band_w)), Emu(int(band_h)))
+            return
+
         from PIL import Image as PILImage
 
         iw, ih = PILImage.open(path).size
-        # The right band, inset from the edges so nothing looks pasted on.
-        box_l = PIC_L_WIDE if wide else PIC_L
         box_w = W - box_l - Inches(0.5)
         box_t, box_h = Inches(0.7), H - Inches(1.4)
         scale = min(box_w / iw, box_h / ih)
@@ -106,6 +121,39 @@ class Deck:
             Emu(int(box_t + (box_h - h) / 2)),
             Emu(w), Emu(h),
         )
+
+    def _feathered(self, path: Path, band_w: int, band_h: int) -> Path:
+        """Crops a photograph to the band and dissolves its leading edge.
+
+        Google Slides has no way to feather a picture, and a rectangle pasted onto a
+        white slide reads as pasted. Baking the fade into the file means the edge is
+        gone everywhere the deck is ever opened, and survives the picture being moved
+        or resized by hand — which a gradient rectangle laid on top would not."""
+        from PIL import Image as PILImage
+
+        out = self._tmp / f"{path.stem}-feathered.png"
+        if out.exists():
+            return out
+
+        im = PILImage.open(path).convert("RGB")
+        want = band_w / band_h
+        iw, ih = im.size
+        if iw / ih > want:  # too wide: trim the sides
+            new_w = int(ih * want)
+            im = im.crop(((iw - new_w) // 2, 0, (iw - new_w) // 2 + new_w, ih))
+        else:  # too tall: trim top and bottom
+            new_h = int(iw / want)
+            im = im.crop((0, (ih - new_h) // 2, iw, (ih - new_h) // 2 + new_h))
+
+        im = im.convert("RGBA")
+        w, h = im.size
+        ramp = int(w * FEATHER)
+        alpha = PILImage.new("L", (w, h), 255)
+        row = [min(255, int(255 * x / ramp)) for x in range(w)]
+        alpha.putdata(row * h)
+        im.putalpha(alpha)
+        im.save(out)
+        return out
 
     def _box(self, s, left, top, width, height):
         tb = s.shapes.add_textbox(left, top, width, height)
