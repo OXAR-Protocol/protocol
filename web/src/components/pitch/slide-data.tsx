@@ -22,6 +22,18 @@ interface ShellProps {
   /** Scrim strength over a `cover` image, 0–100. Higher = quieter picture. Busy
    *  photographs under dense text need more; a single figure needs less. */
   scrim?: number;
+  /** Shield only the side the type sits on, and let the rest of the photograph keep
+   *  its colour. Without this the scrim is flat and the whole image goes pale. */
+  scrimFrom?: "left" | "bottom";
+  /** CSS object-position for the image. Note this does nothing horizontally when a
+   *  portrait source fills a landscape frame — the width is already exact, only the
+   *  vertical crop is free. Use `imageBox` to move the subject sideways. */
+  imagePos?: string;
+  /** Give the photograph its own band of the slide instead of running it behind
+   *  everything: full colour, no scrim, and the type keeps clean ground beside it. */
+  imageBox?: "right";
+  /** Width the slide body is held to, so it never runs under `imageBox`. */
+  bodyMax?: string;
   light?: boolean;
   /** Slide body — supplied by the four wrappers below, not by the deck. */
   children: ReactNode;
@@ -37,27 +49,54 @@ const bodyCls = (light?: boolean) =>
   `font-light lowercase leading-relaxed text-[clamp(14px,1.3vw,17px)] ${light ? "text-black/70" : "text-white/65"}`;
 const ruleCls = (light?: boolean) => (light ? "border-black/10" : "border-white/10");
 
-function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim = 85, light, children }: ShellProps) {
+/** Flat wash, or a gradient that only covers the side carrying type. The far end
+ *  keeps a small amount so a bright patch can't blow out a stray line of text. */
+function scrimBg(strength: number, from: ShellProps["scrimFrom"], light?: boolean): string {
+  const rgb = light ? "255,255,255" : "0,0,0";
+  const near = strength / 100;
+  const far = Math.max(0, near - 0.6);
+  if (from === "left") return `linear-gradient(to right, rgba(${rgb},${near}) 0%, rgba(${rgb},${near}) 34%, rgba(${rgb},${far}) 78%)`;
+  if (from === "bottom") return `linear-gradient(to top, rgba(${rgb},${near}) 0%, rgba(${rgb},${near}) 40%, rgba(${rgb},${far}) 85%)`;
+  return `rgba(${rgb},${near})`;
+}
+
+function Shell({ kicker, title, sub, footer, image, imageAlt = "", cover, scrim = 85, scrimFrom, imagePos, imageBox, bodyMax, light, children }: ShellProps) {
   return (
     <section
       className={`relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 py-16 md:px-16 ${light ? "bg-white" : "bg-black"}`}
     >
       {/* Matches the photo slides' weight on black (0.45); on white the cut-outs are
           high-contrast and would fight the type, so they run much fainter. */}
-      {image && (
+      {image && imageBox === "right" ? (
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[44%] md:block">
+          <Image
+            src={image} alt={imageAlt} fill loading="eager" sizes="44vw"
+            className="object-cover"
+            style={imagePos ? { objectPosition: imagePos } : undefined}
+          />
+          {/* Only the seam, so the picture doesn't end on a hard vertical line. */}
+          <div
+            className="absolute inset-y-0 left-0 w-[22%]"
+            style={{ background: `linear-gradient(to right, ${light ? "#fff" : "#000"}, transparent)` }}
+          />
+        </div>
+      ) : image ? (
         <Image
           src={image} alt={imageAlt} fill loading="eager" sizes="100vw"
           className={cover ? "object-cover" : `object-contain ${light ? "opacity-[0.16]" : "opacity-45"}`}
+          style={imagePos ? { objectPosition: imagePos } : undefined}
         />
-      )}
-      {/* Deep enough that the 13px labels survive the pale patches of the photograph. */}
+      ) : null}
+      {/* Deep enough that the 13px labels survive the pale patches of the photograph.
+          With `scrimFrom` it falls away across the frame, so the picture keeps its
+          colour on the side nothing is written. */}
       {cover && (
         <div
           className="absolute inset-0"
-          style={{ background: light ? `rgba(255,255,255,${scrim / 100})` : `rgba(0,0,0,${scrim / 100})` }}
+          style={{ background: scrimBg(scrim, scrimFrom, light) }}
         />
       )}
-      <div className="relative z-10 w-full">
+      <div className="relative z-10 w-full" style={bodyMax ? { maxWidth: bodyMax } : undefined}>
         <p className={kickerCls(light)}>[ {kicker} ]</p>
         <h2 className={`${dataTitleCls(light)} mt-4 max-w-3xl`}>{title}</h2>
         {sub && <p className={`${subCls(light)} mt-6`}>{sub}</p>}
@@ -148,12 +187,20 @@ export interface Stat {
 
 /** Big figures — traction, market sizing. */
 export function StatsSlide({ stats, ...shell }: SlideProps & { stats: Stat[] }) {
+  // The figures are sized in vw, which knows the window and not the column they have
+  // to fit in. Hold the body narrow (`bodyMax`) against a four-across grid and they
+  // collide — "$295B$15B" — so the track count follows the number of stats, and the
+  // type steps down when the body is constrained.
+  const narrow = !!shell.bodyMax;
   return (
     <Shell {...shell}>
-      <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4">
+      <div
+        className="mt-14 grid grid-cols-2 gap-x-8 gap-y-12"
+        style={{ gridTemplateColumns: `repeat(${Math.min(stats.length, 4)}, minmax(0, 1fr))` }}
+      >
         {stats.map((s) => (
-          <div key={s.label}>
-            <p className={`font-bold leading-none text-[clamp(36px,5.5vw,72px)] ${shell.light ? "text-black" : "text-white"}`}>
+          <div key={s.label} className="min-w-0">
+            <p className={`font-bold leading-none ${narrow ? "text-[clamp(28px,3.2vw,50px)]" : "text-[clamp(36px,5.5vw,72px)]"} ${shell.light ? "text-black" : "text-white"}`}>
               {s.figure}
             </p>
             <p className={`mt-3 text-sm lowercase ${shell.light ? "text-black/50" : "text-white/50"}`}>{s.label}</p>
