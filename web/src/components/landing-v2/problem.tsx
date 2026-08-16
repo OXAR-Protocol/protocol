@@ -3,8 +3,12 @@
 import { DISPLAY } from "./fonts";
 import { Label, Reveal, Spread } from "./primitives";
 
+/** Tight, but not touching. −0.07em ate more than DM Sans leaves between glyphs at
+ *  this size, so "Banks force a choice" rendered with the letters overlapping. The
+ *  rest of the landing (roadmap, speeds, partners) sits at −0.04em — matching them
+ *  is a smaller claim than inventing a third value. */
 const HEADLINE =
-  "text-[clamp(32px,4.5vw,64px)] leading-[1.05] tracking-[-0.07em]";
+  "text-[clamp(32px,4.5vw,64px)] leading-[1.05] tracking-[-0.04em]";
 
 export function Problem() {
   return (

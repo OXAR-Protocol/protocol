@@ -22,7 +22,7 @@ export function HowItWorks() {
       </Reveal>
 
       <Reveal delay={0.05}>
-        <div className="mt-6 font-light text-[clamp(32px,4.5vw,64px)] leading-[1.05] tracking-[-0.07em] md:ml-[25%]">
+        <div className="mt-6 font-light text-[clamp(32px,4.5vw,64px)] leading-[1.05] tracking-[-0.04em] md:ml-[25%]">
           <p>your money wakes up</p>
           <Spread>
             <span>in</span>

@@ -12,7 +12,7 @@ export function Waitlist() {
           <p className="lowercase text-[clamp(18px,1.7vw,24px)] leading-none text-white/55">[ the waitlist ]</p>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="mt-6 text-[clamp(32px,4.5vw,64px)] leading-[1.05] tracking-[-0.06em]">
+          <h2 className="mt-6 text-[clamp(32px,4.5vw,64px)] leading-[1.05] tracking-[-0.04em]">
             take a seat. <span className="italic text-white/55">we&apos;ll call</span> your number.
           </h2>
         </Reveal>
