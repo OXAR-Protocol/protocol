@@ -85,11 +85,11 @@ export function Deck() {
       {/* 06 — Market sizing — light */}
       <StatsSlide
         light kicker="market"
-        title={<>the savers are <span className={ACCENT}>already online.</span></>}
-        sub="we are not waiting on a behaviour change — these people already hold a wallet and already get paid in stablecoins."
+        title={<>the dollars are <span className={ACCENT}>already here, asleep.</span></>}
+        sub="we are not waiting on a behaviour change. the money is already on-chain, already in dollars, and already sitting still — the only thing missing is somewhere to put it that a normal person can use."
         image={`${C}/skyline.png`} imageAlt="A city skyline"
         stats={MARKET}
-        footer="1.4b adults worldwide still have no bank account at all (world bank findex)."
+        footer="sources: artemis and visa onchain analytics (supply, holders, active users), q2 2026. yield-bearing share is 2–6% depending on whose definition, so 95% idle is the conservative read. som is bottom-up from our own waitlist, not a share of the tam."
       />
 
       {/* 07 — Solution (hero image) — dark */}

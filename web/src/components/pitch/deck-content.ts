@@ -20,11 +20,29 @@ export const OPTIONS: Column[] = [
   },
 ];
 
-/** 06 — market sizing. */
+/** 06 — market sizing, rebuilt 2026-08-16 on published figures rather than on a feel
+ *  for how many people "have a savings instinct". Sized in idle dollars, because that
+ *  is the unit the problem is measured in and the unit a reader can check.
+ *  Sources: stablecoin supply $312B and Solana's $16.7B share (Q2 2026); yield-bearing
+ *  stablecoins ~$11B, i.e. 4–5% of supply; 150M+ addresses hold a non-zero stablecoin
+ *  balance (Artemis); 47M monthly active stablecoin users (Visa). The SOM figure is
+ *  bottom-up from our own waitlist: the median volunteered deposit is $1,200. */
 export const MARKET: Stat[] = [
-  { figure: "~50M", label: "tam", note: "people with a crypto wallet and a savings instinct" },
-  { figure: "~5M", label: "sam", note: "crypto-paid earners, dao contributors, remote workers on stablecoins" },
-  { figure: "500–5k", label: "som · year one", note: "active users, $1–10m in deposits" },
+  {
+    figure: "$295B",
+    label: "tam",
+    note: "on-chain dollars earning nothing — about 95% of a $312b stablecoin market, held across 150m+ addresses",
+  },
+  {
+    figure: "$15B",
+    label: "sam",
+    note: "the idle share of solana's $16.7b stablecoin supply — money we can reach without asking anyone to bridge",
+  },
+  {
+    figure: "$0.6–6M",
+    label: "som · year one",
+    note: "500–5,000 savers at $1,200 each — the median our own waitlist volunteered, not an assumption",
+  },
 ];
 
 /** 08 — the four surfaces of the app. */

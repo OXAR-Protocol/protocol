@@ -52,13 +52,19 @@ export default function InvestorsPage() {
       <section>
         <h2>5. Market</h2>
         <p>
-          <strong>TAM:</strong> Anyone with a crypto wallet + savings instinct (~50M globally and growing).
+          An earlier version of this section sized the market as “~50M people with a crypto wallet and a savings instinct.” That was a feel, not a figure, and nobody could check it. Sized below in idle dollars instead — the unit the problem is actually measured in, and one a reader can verify.
         </p>
         <p className="mt-3">
-          <strong>SAM:</strong> Crypto-paid earners + DAO contributors + remote workers using stablecoins for salary (~5M globally).
+          <strong>TAM — $295B.</strong> Total stablecoin supply was <strong>$312B</strong> in Q2 2026, and yield-bearing stablecoins account for roughly 4–5% of it (~$11B). So something on the order of <strong>95% of on-chain dollars earn nothing at all</strong>. Estimates of the yield-bearing share range from ~$4.6B to ~$19B depending on whose definition you take, which puts idle supply between 94% and 98.5% — we use the conservative end. That money sits across <strong>150M+ addresses</strong> holding a non-zero stablecoin balance, with <strong>47M monthly active</strong> stablecoin users.
         </p>
         <p className="mt-3">
-          <strong>SOM (Year 1):</strong> 500-5,000 active users, $1-10M TVL across yield positions and tokenized assets.
+          <strong>SAM — $15B.</strong> Solana carries <strong>$16.7B</strong> of stablecoin supply, about 4% of the global market, USDC roughly three-quarters of it. Applying the same idle share gives ~$15B of dollars sitting still on the chain the product is built on — money we can reach without asking anyone to bridge, install a second wallet, or learn what a bridge is. (Applying a global idle ratio to one chain is our extrapolation, not a published figure.)
+        </p>
+        <p className="mt-3">
+          <strong>SOM (Year 1) — $0.6–6M.</strong> Bottom-up rather than a slice of the TAM: 500–5,000 active savers at <strong>$1,200</strong> each, which is the median deposit the ten people on our waitlist who volunteered a number actually named. Note what this does <em>not</em> imply about revenue: deposits that sit still earn us nothing, so TVL is the wrong number to forecast income from — see section 6.
+        </p>
+        <p className="mt-3 text-sm">
+          Sources: Artemis stablecoin analytics and Visa Onchain Analytics (supply, holders, monthly actives), Q2 2026; Solana supply per Chainstack’s 2026 stablecoin review. Figures move monthly — re-check before quoting.
         </p>
       </section>
 
