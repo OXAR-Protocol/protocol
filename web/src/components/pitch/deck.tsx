@@ -121,26 +121,26 @@ export function Deck() {
       <SlideFrame
         light kicker="trust" variant="left"
         image={`${C}/torn-coin.png`} imageAlt="Everyone reaching for a piece of a coin"
-        title={<>everyone wants a piece — we take <span className={ACCENT}>none.</span></>}
-        sub="funds move straight from your wallet into audited protocols. oxar holds nothing and takes no cut. nothing to hack, no keys to lose."
+        title={<>everyone takes a piece — <span className={ACCENT}>we name ours.</span></>}
+        sub="funds move straight from your wallet into audited protocols. oxar holds nothing — nothing to hack, no keys to lose. the one cut we take is 0.25% on a conversion, printed on the confirm screen before you sign."
       />
 
       {/* 11 — Business model — dark */}
       <RowsSlide
         kicker="business model"
-        title={<>today we earn nothing. <span className={ACCENT}>on purpose.</span></>}
+        title={<>a quarter of a percent, <span className={ACCENT}>named before you sign.</span></>}
         image={`${C}/coin-stack.png`} imageAlt="Coins growing"
         rows={MODEL}
-        footer="at this stage, being able to say we take nothing is worth more than the revenue would be."
+        footer="built, disclosed in the terms, and switched off behind two switches — neither of them set. the day we turn it on, nothing on screen moves except the line that names it."
       />
 
       {/* 12 — Traction — dark, full-bleed photograph under a scrim */}
       <StatsSlide
         kicker="traction"
-        title={<>a working product, <span className={ACCENT}>already live.</span></>}
+        title={<>small numbers, <span className={ACCENT}>honestly counted.</span></>}
         image={`${C}/banknote-eyes.jpg`} imageAlt="Engraved eyes from banknotes of many countries" cover
         stats={TRACTION}
-        footer="gasless deposits, apple-pay funding, a live portfolio, english and ukrainian — shipped in months, bootstrapped."
+        footer="counted against the production database on 16 august 2026, not remembered. gasless deposits, apple-pay funding, a live portfolio, english and ukrainian — shipped in months, bootstrapped."
       />
 
       {/* 13 — Competition — dark */}
@@ -163,7 +163,7 @@ export function Deck() {
       {/* 15 — Roadmap — dark */}
       <RowsSlide
         kicker="roadmap"
-        title={<>from live, to <span className={ACCENT}>everywhere.</span></>}
+        title={<>the product is built. <span className={ACCENT}>now the people.</span></>}
         image={`${C}/children-pointing.png`} imageAlt="A child pointing at what's ahead"
         rows={ROADMAP}
       />

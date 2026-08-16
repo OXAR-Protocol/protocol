@@ -65,26 +65,32 @@ export default function InvestorsPage() {
       <section>
         <h2>6. Business model</h2>
         <p>
-          <strong>Today OXAR earns nothing, deliberately.</strong> There is no performance fee, no deposit or withdrawal fee, and no spread of our own — a cross-chain integrator markup of ~0.1% existed until 2026-07-30 and was turned off after it earned $0.16 in total. Our terms of use say the same thing, and they are the version that binds us.
+          <strong>0.25% on a conversion.</strong> Buying or selling anything that has to be swapped, where dollars are one side of the trade. Putting dollars into a dollar product is not a conversion and costs nothing. The fee is always taken in USDC, so it lands in one account with no dust to sweep.
         </p>
         <p className="mt-3">
-          <strong>The intended model</strong> is a 10% performance fee on yield earned — on growth, never on principal. At $10M TVL and 8% average APY that is ~$80k a year; at $100M TVL, ~$800k; profitability lands around $26M TVL. None of it is implemented, and switching it on is a product decision we have not made: at this stage “we take nothing” is worth more than the revenue would be.
+          <strong>A cut of the yield cannot work here, and we stopped pretending otherwise.</strong> An earlier version of this memo named a 10% performance fee as the intended model and did the arithmetic off it. That model requires custody: the position sits in the user’s own wallet, on a public market, and we are not in the flow when they exit — anyone could bypass us by connecting the same wallet to the protocol directly. A vault contract would fix that and would also break the one thing we sell. So the fee sits on the conversion, which is the part we actually perform.
         </p>
         <p className="mt-3">
-          <strong>Later, optionally:</strong> a spread on tokenized-asset swaps and premium features. Stated as intent, not as income.
+          <strong>The price is the argument.</strong> Phantom takes 0.85% on the same swap and hides it inside the quote; MetaMask 0.875%; Rabby 0.25%. We take 0.25% and print it as its own line on the confirmation screen before the user signs. Our terms say the same, and add the clause that makes it checkable: if that line is not there, no OXAR fee applied to that transaction.
+        </p>
+        <p className="mt-3">
+          <strong>Revenue tracks turnover, not deposits</strong> — roughly $1 for every $400 swapped. $10M of deposits that never move earns us nothing. That is the honest cost of building for savers rather than traders, and it is why distribution, not TVL, is the number that matters first.
+        </p>
+        <p className="mt-3">
+          <strong>Built and switched off.</strong> The machinery is live in production behind two independent switches — a feature flag and a fee account — and neither is set, so nobody has paid anything. A cross-chain integrator markup of ~0.1% existed until 2026-07-30 and was turned off after earning $0.16 in total, on $162.81 of volume, from one user who was us testing. That number is the most honest measure of our current scale.
         </p>
       </section>
 
       <section>
         <h2>7. Status & roadmap</h2>
         <p>
-          <strong>Now:</strong> Live on Solana <strong>mainnet</strong> — a non-custodial UI over audited protocol SDKs (Jupiter Lend, Ondo, Maple), with no contract of our own to deploy or audit. USDC yield plus tokenized stocks and gold work end-to-end: deposit → earn, or buy → hold → withdraw, all from your own wallet.
+          <strong>Now:</strong> Live on Solana <strong>mainnet</strong> — a non-custodial UI over audited protocol SDKs (Jupiter Lend, Ondo, Maple, Onre), with no contract of our own to deploy or audit. USDC yield plus tokenized stocks and gold work end-to-end: deposit → earn, or buy → hold → withdraw, all from your own wallet.
         </p>
         <p className="mt-3">
-          <strong>Aug 2026:</strong> Public launch. Yield + tokenized stocks and gold, Apple Pay deposits, polished onboarding.
+          <strong>Next:</strong> Open the door. The product is in closed alpha behind an email allowlist; Apple Pay funding, gasless deposits, a live portfolio and English/Ukrainian are all shipped. What is missing is people, not features.
         </p>
         <p className="mt-3">
-          <strong>Q4 2026:</strong> First tokenized bonds via a licensed broker partner. More yield sources and assets; cross-chain deposits fully wired via Delora.
+          <strong>Q4 2026:</strong> Assets from issuers Jupiter cannot route today, and from Backpack Securities — a US broker-dealer whose tokenized equities quote a round trip better than most of our current shelf. Euro yield, once lend positions are priced in their own currency rather than assumed to be dollars.
         </p>
         <p className="mt-3">
           <strong>2027:</strong> iOS / Android native apps. Multi-currency stablecoins. Geographic expansion via local partners.
