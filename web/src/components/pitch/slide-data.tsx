@@ -187,12 +187,20 @@ export interface Stat {
 
 /** Big figures — traction, market sizing. */
 export function StatsSlide({ stats, ...shell }: SlideProps & { stats: Stat[] }) {
+  // The figures are sized in vw, which knows the window and not the column they have
+  // to fit in. Hold the body narrow (`bodyMax`) against a four-across grid and they
+  // collide — "$295B$15B" — so the track count follows the number of stats, and the
+  // type steps down when the body is constrained.
+  const narrow = !!shell.bodyMax;
   return (
     <Shell {...shell}>
-      <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4">
+      <div
+        className="mt-14 grid grid-cols-2 gap-x-8 gap-y-12"
+        style={{ gridTemplateColumns: `repeat(${Math.min(stats.length, 4)}, minmax(0, 1fr))` }}
+      >
         {stats.map((s) => (
-          <div key={s.label}>
-            <p className={`font-bold leading-none text-[clamp(36px,5.5vw,72px)] ${shell.light ? "text-black" : "text-white"}`}>
+          <div key={s.label} className="min-w-0">
+            <p className={`font-bold leading-none ${narrow ? "text-[clamp(28px,3.2vw,50px)]" : "text-[clamp(36px,5.5vw,72px)]"} ${shell.light ? "text-black" : "text-white"}`}>
               {s.figure}
             </p>
             <p className={`mt-3 text-sm lowercase ${shell.light ? "text-black/50" : "text-white/50"}`}>{s.label}</p>
