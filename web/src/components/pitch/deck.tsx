@@ -87,7 +87,8 @@ export function Deck() {
         light kicker="market"
         title={<>the dollars are <span className={ACCENT}>already here, asleep.</span></>}
         sub="we are not waiting on a behaviour change. the money is already on-chain, already in dollars, and already sitting still — the only thing missing is somewhere to put it that a normal person can use."
-        image={`${C}/skyline.png`} imageAlt="A city skyline"
+        image={`${C}/hands-over-dollars.jpg`}
+        imageAlt="Two hands reaching across an uncut sheet of hundred-dollar bills" cover scrim={82}
         stats={MARKET}
         footer="sources: artemis and visa onchain analytics (supply, holders, active users), q2 2026. yield-bearing share is 2–6% depending on whose definition, so 95% idle is the conservative read. som is bottom-up from our own waitlist, not a share of the tam."
       />
@@ -122,7 +123,7 @@ export function Deck() {
         light kicker="trust" variant="left"
         image={`${C}/torn-coin.png`} imageAlt="Everyone reaching for a piece of a coin"
         title={<>everyone takes a piece — <span className={ACCENT}>we name ours.</span></>}
-        sub="funds move straight from your wallet into audited protocols. oxar holds nothing — nothing to hack, no keys to lose. the one cut we take is 0.25% on a conversion, printed on the confirm screen before you sign."
+        sub="funds move straight from your wallet into audited protocols. oxar holds nothing — nothing to hack, no keys to lose. the one cut we take is 0.25% on a conversion, printed on the confirm screen before you sign (after launch — today it is 0%)."
       />
 
       {/* 11 — Business model — dark */}
@@ -147,7 +148,8 @@ export function Deck() {
       <RowsSlide
         kicker="competition"
         title={<>nobody covers <span className={ACCENT}>both halves.</span></>}
-        image={`${C}/courthouse.png`} imageAlt="A neoclassical courthouse"
+        image={`${C}/eye-through-clouds.jpg`}
+        imageAlt="An eye watching through a tear in a painted sky" cover scrim={88}
         rows={COMPETITION}
         footer="the defensible part is not the yield — anyone can route to a protocol. it is who we serve, and that they trust us with the first dollar."
       />
