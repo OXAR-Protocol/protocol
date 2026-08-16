@@ -149,8 +149,8 @@ export function Deck() {
       <RowsSlide
         kicker="competition"
         title={<>nobody covers <span className={ACCENT}>both halves.</span></>}
-        image={`${C}/logo-chrome.png`} imageAlt="The OXAR mark in chrome"
-        imagePos="88% center"
+        image={`${C}/note-mark.png`} imageAlt="A crumpled hundred-dollar note with the OXAR mark pressed into it"
+        imageBox="right" bodyMax="min(1060px, 64%)"
         rows={COMPETITION}
         footer="the defensible part is not the yield — anyone can route to a protocol. it is who we serve, and that they trust us with the first dollar."
       />
@@ -172,24 +172,29 @@ export function Deck() {
       />
 
       {/* 16 — Team — light (type only: handshake.png ships with a baked-in checkerboard) */}
-      <section className="flex min-h-screen w-full flex-col justify-center bg-white px-6 py-16 md:px-16">
-        <Kicker light>the team</Kicker>
-        <h2 className="mt-4 max-w-3xl font-bold lowercase leading-[0.95] tracking-[-0.02em] text-black text-[clamp(30px,5vw,64px)]">
+      <section className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden bg-black px-6 py-16 md:px-16">
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] md:block">
+          <Image src={`${C}/logo-chrome.png`} alt="The OXAR mark in chrome" fill sizes="46vw" className="object-contain" />
+        </div>
+        <div className="relative z-10 max-w-[min(1000px,58%)]">
+        <Kicker>the team</Kicker>
+        <h2 className="mt-4 max-w-3xl font-bold lowercase leading-[0.95] tracking-[-0.02em] text-white text-[clamp(30px,5vw,64px)]">
           two founders, one <span className={ACCENT}>live product.</span>
         </h2>
         <div className="mt-14 grid max-w-4xl gap-x-10 gap-y-10 sm:grid-cols-2">
           {TEAM.map((m) => (
-            <div key={m.label} className="border-t border-black/10 pt-5">
-              <p className="text-[15px] lowercase text-black">{m.label}</p>
-              <p className="mt-3 font-light lowercase leading-relaxed text-black/60 text-[clamp(14px,1.3vw,17px)]">
+            <div key={m.label} className="border-t border-white/10 pt-5">
+              <p className="text-[15px] lowercase text-white">{m.label}</p>
+              <p className="mt-3 font-light lowercase leading-relaxed text-white/60 text-[clamp(14px,1.3vw,17px)]">
                 {m.body}
               </p>
             </div>
           ))}
         </div>
-        <p className="mt-14 max-w-2xl text-sm lowercase text-black/40">
+        <p className="mt-14 max-w-2xl text-sm lowercase text-white/40">
           building from ukraine, bootstrapped — a live product on mainnet in months.
         </p>
+        </div>
       </section>
 
       {/* 17 — The ask + contact — dark */}
