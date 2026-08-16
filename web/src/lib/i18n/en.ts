@@ -191,6 +191,8 @@ export const en = {
   "rail.actionWithdraw": "Withdraw",
   "rail.youReceive": "you receive",
   "rail.exitCostNow": "getting out right now would cost about {pct}% — that's the market's price, not a fee we charge",
+  "rail.exitCostNowFee":
+    "getting out right now would cost about {pct}% — nearly all of it the market’s price, plus our {fee}%",
   "rail.exitCostUnavailable": "there's no way out at this size right now — that's the market, not us",
   "rail.exitCostCeiling": "right now, about {usd} is the most that would sell in one go — a bigger position means selling in a few goes, with the price moving each time. that's the market's depth, not a fee we charge",
   "position.invested": "in",

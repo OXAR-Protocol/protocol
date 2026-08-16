@@ -23,3 +23,15 @@ export const USDC_DECIMALS = 6;
  * share an address.
  */
 export const FEE_ACCOUNT_USDC = process.env.NEXT_PUBLIC_FEE_ACCOUNT_USDC ?? "";
+
+/**
+ * Whether charging is possible in this deployment at all — for copy that can't ask
+ * about one particular user, like the terms page, which is public and rendered on
+ * the server with no session to read a feature flag from.
+ *
+ * Deliberately the weaker of the two conditions: it says "someone here may be
+ * charged", not "you were". The exact figure is always named on the confirm screen
+ * of the transaction it applies to, so a reader who never sees that line was never
+ * charged — which is what the terms say, and what keeps both windows honest.
+ */
+export const PLATFORM_FEE_POSSIBLE = FEE_ACCOUNT_USDC !== "";
