@@ -10,6 +10,7 @@ import { ChannelReport } from "@/components/channel-tracker";
 import { WarpProvider } from "@/components/warp-transition";
 import { WarpOnEntry } from "@/components/warp-on-entry";
 import { TermsAndIntroGate } from "@/components/terms/terms-and-intro-gate";
+import { SignInGateProvider } from "@/components/terms/sign-in-gate";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 
 export const dynamic = "force-dynamic";
@@ -20,26 +21,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Suspense fallback={null}>
         <AccessWall>
           <Providers>
-            <WarpProvider>
-              <WarpOnEntry />
-              <AuthGuard>
-                <PullToRefresh />
-                {/* Flex column so the photo footer sits pinned below the content (never
-                    overlapping it — text stays legible) and spans the full page width. */}
-                <div className="flex min-h-screen flex-col">
-                  <TopNav />
-                  <div className="mx-auto w-full max-w-[1100px] flex-1 px-5 pt-6">
-                    {children}
-                    <JoinCapture />
-                    <ChannelReport />
+            <SignInGateProvider>
+              <WarpProvider>
+                <WarpOnEntry />
+                <AuthGuard>
+                  <PullToRefresh />
+                  {/* Flex column so the photo footer sits pinned below the content (never
+                      overlapping it — text stays legible) and spans the full page width. */}
+                  <div className="flex min-h-screen flex-col">
+                    <TopNav />
+                    <div className="mx-auto w-full max-w-[1100px] flex-1 px-5 pt-6">
+                      {children}
+                      <JoinCapture />
+                      <ChannelReport />
+                    </div>
                   </div>
-                </div>
-                <TabBar />
-                {/* Terms gate first (blocking, per-wallet), THEN the first-run
-                    welcome/tour — never both on screen. See `TermsAndIntroGate`. */}
-                <TermsAndIntroGate />
-              </AuthGuard>
-            </WarpProvider>
+                  <TabBar />
+                  {/* Terms gate first (blocking, per-wallet), THEN the first-run
+                      welcome/tour — never both on screen. See `TermsAndIntroGate`. */}
+                  <TermsAndIntroGate />
+                </AuthGuard>
+              </WarpProvider>
+            </SignInGateProvider>
           </Providers>
         </AccessWall>
       </Suspense>

@@ -18,9 +18,14 @@ const termsDate = (locale: string) =>
   });
 
 interface Props {
-  walletAddress: string;
+  /** Whose acceptance this is. Empty before sign-in — the gate now runs *before*
+   *  Privy, so there is no wallet yet and the line is simply not drawn. */
+  walletAddress?: string;
   onAgree: () => void;
   onDecline: () => void;
+  /** Wording for the decline button. Declining before sign-in just closes the
+   *  sheet; declining after it withholds the app, and those are different acts. */
+  declineLabel?: string;
 }
 
 /**
@@ -34,7 +39,7 @@ interface Props {
  * `allocation-sheet.tsx` — same problem (a fixed tab bar + the home
  * indicator eating the bottom of the screen on a phone), same fix.
  */
-export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
+export function TermsGateModal({ walletAddress, onAgree, onDecline, declineLabel }: Props) {
   const { t, locale } = useT();
   const [agreed, setAgreed] = useState(false);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -81,9 +86,11 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
             <p className="text-[15px] text-ink">{t("terms.gate.title")}</p>
             <LanguageChips />
           </div>
-          <p className="mt-1 break-all font-mono text-[11px] leading-relaxed text-ink/45">
-            {t("terms.gate.forWallet", { addr: walletAddress })}
-          </p>
+          {walletAddress && (
+            <p className="mt-1 break-all font-mono text-[11px] leading-relaxed text-ink/45">
+              {t("terms.gate.forWallet", { addr: walletAddress })}
+            </p>
+          )}
           {locale === "uk" && (
             <p className="mt-1 text-[10px] text-ink/35">{t("terms.gate.translationNote")}</p>
           )}
@@ -128,7 +135,7 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline }: Props) {
               onClick={onDecline}
               className="text-[12px] lowercase tracking-wide text-ink/40 transition hover:text-ink"
             >
-              {t("terms.gate.decline")}
+              {declineLabel ?? t("terms.gate.decline")}
             </button>
             <button
               type="button"

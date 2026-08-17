@@ -7,12 +7,14 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
 
+import { useSignInGate } from "@/components/terms/sign-in-gate";
 import { useT } from "@/lib/i18n";
 
 export default function LoginPage() {
   const { login, authenticated, ready } = usePrivy();
   const router = useRouter();
   const { t } = useT();
+  const guard = useSignInGate();
 
   useEffect(() => {
     // The market, not the portfolio: a new account's portfolio is empty, and
@@ -24,7 +26,7 @@ export default function LoginPage() {
   // email or a Solana wallet; the account is whichever you log in with.
   const handleLogin = () => {
     if (!ready || authenticated) return;
-    login({ walletChainType: "solana-only" });
+    guard(() => login({ walletChainType: "solana-only" }));
   };
 
   return (

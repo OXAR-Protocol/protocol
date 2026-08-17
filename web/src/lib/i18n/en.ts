@@ -307,6 +307,7 @@ export const en = {
   "terms.gate.forWallet": "for wallet {addr}",
   "terms.gate.checkbox": "i've read these terms and agree — my funds, my own risk.",
   "terms.gate.decline": "decline",
+  "terms.gate.notNow": "not now",
   "terms.gate.agree": "agree & continue",
   "terms.gate.footer": "v{version} · updated {date} · {email}",
   // Shown only when the Ukrainian translation of the prose is displayed.

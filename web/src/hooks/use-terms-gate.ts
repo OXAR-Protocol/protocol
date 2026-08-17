@@ -16,6 +16,54 @@ import { acceptTerms } from "@/lib/terms";
  */
 const acceptedKey = (owner: string, version: string) => `oxar:terms-accepted:${version}:${owner}`;
 
+/** Agreed in this browser, before any wallet existed — see `SignInGateProvider`.
+ *  Browser-scoped because that is all there is to key to before sign-in. */
+const browserKey = (version: string) => `oxar:terms-browser:${version}`;
+/** Set the moment a pre-sign-in agreement happens, cleared the first time a
+ *  wallet shows up. Without it the same person agrees, gets a wallet a second
+ *  later, and is asked the identical question again. */
+const handOffKey = (version: string) => `oxar:terms-handoff:${version}`;
+
+export function hasAgreedInBrowser(): boolean {
+  try {
+    return !!localStorage.getItem(browserKey(TERMS_VERSION));
+  } catch {
+    // Storage blocked: we cannot remember, so we ask. Asking twice is a nuisance;
+    // letting someone through unasked is not.
+    return false;
+  }
+}
+
+export function rememberBrowserAgreement(): void {
+  try {
+    localStorage.setItem(browserKey(TERMS_VERSION), "1");
+  } catch {
+    /* can't remember → the gate asks again next time */
+  }
+}
+
+/** Arms the hand-off, so the wallet that appears next inherits this agreement. */
+export function handOffToWallet(): void {
+  try {
+    localStorage.setItem(handOffKey(TERMS_VERSION), "1");
+  } catch {
+    /* the per-wallet gate will simply ask */
+  }
+}
+
+/** Consumes the hand-off for `owner`, once. Deliberately single-use: a wallet
+ *  connecting days later must not inherit an agreement it was never part of. */
+function claimHandOff(owner: string): boolean {
+  try {
+    if (!localStorage.getItem(handOffKey(TERMS_VERSION))) return false;
+    localStorage.removeItem(handOffKey(TERMS_VERSION));
+    localStorage.setItem(acceptedKey(owner, TERMS_VERSION), "1");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export type TermsGateStatus =
   /** No wallet yet, or this wallet already accepted the current version. */
   | "hidden"
@@ -50,6 +98,12 @@ export function useTermsGate(): {
       return;
     }
     try {
+      // A pre-sign-in agreement, claimed once, for the wallet it produced.
+      if (claimHandOff(owner)) {
+        setStatus("hidden");
+        acceptTerms(owner);
+        return;
+      }
       setStatus(localStorage.getItem(acceptedKey(owner, TERMS_VERSION)) ? "hidden" : "gate");
     } catch {
       // Private mode / storage blocked — don't gate what we can't remember,
