@@ -284,6 +284,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "terms.gate.forWallet": "для гаманця {addr}",
   "terms.gate.checkbox": "я прочитав(-ла) умови і погоджуюсь — мої гроші, мій власний ризик.",
   "terms.gate.decline": "відхилити",
+  "terms.gate.notNow": "не зараз",
   "terms.gate.agree": "погодитись і продовжити",
   "terms.gate.footer": "v{version} · оновлено {date} · {email}",
   "terms.gate.translationNote": "переклад для зручності — юридично обов’язковою є англійська версія.",
