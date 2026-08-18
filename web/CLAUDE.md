@@ -18,7 +18,7 @@ Read the root `/OXAR/CLAUDE.md` first for project-wide context.
 ## Domain split
 
 Two hosts share one Next.js app, routed by `src/middleware.ts`:
-- `oxar.app` — marketing (`/`, `/investors`, `/terms`, `/docs`, `/kit`, `/pitch`)
+- `oxar.app` — marketing (`/`, `/investors`, `/terms`, `/docs`, `/kit`)
 - `app.oxar.app` — authenticated app (`/you`, `/market`, `/asset/[id]`, `/onboarding`, `/login`;
   `/home`, `/pile`, `/portfolio` are redirects kept for old links)
 
@@ -40,7 +40,7 @@ src/
                           was merged in — one object, one screen.
       onboarding/         First-run onboarding
       login/              Privy login
-    investors/, terms/, docs/, kit/, pitch/   Marketing pages
+    investors/, terms/, docs/, kit/   Marketing pages
     page.tsx              Landing
     layout.tsx            Root layout (fonts, metadata)
     api/
@@ -49,7 +49,7 @@ src/
       waitlist/           Supabase write
   components/
     ui/                   shadcn-style primitives (button, card, dialog, input, …)
-    pitch/, sections/, waitlist/, context/   Marketing-page sub-components
+    sections/, waitlist/, context/   Marketing-page sub-components
     yield-source-sheet.tsx, yield-amount-field.tsx, yield-action-success.tsx   Deposit/withdraw UI
     custom-select.tsx     Branded dropdown (replaces native <select>)
     tab-bar.tsx, top-nav.tsx, auth-guard.tsx
