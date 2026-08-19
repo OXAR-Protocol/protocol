@@ -169,8 +169,8 @@ export function PositionsSection() {
 
       {sellingV2 && (
         <PickedSellBar
-          views={held.filter((v) => selected.has(v.id))}
-          allHeld={allHeld}
+          views={allHeld}
+          selected={selected}
           onOutcome={(stillSelected) => setSelected(stillSelected)}
           onDone={refreshAfterTrade}
         />

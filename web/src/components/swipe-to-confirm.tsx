@@ -28,6 +28,7 @@ export function SwipeToConfirm({
   busyLabel,
   busy,
   disabled,
+  size = "sheet",
   onConfirm,
 }: {
   /** What the act is — "sell", "buy $20". The hold prefix is added where it applies. */
@@ -35,6 +36,9 @@ export function SwipeToConfirm({
   busyLabel?: string;
   busy?: boolean;
   disabled?: boolean;
+  /** "sheet" is the tall control at the foot of a sheet; "bar" is the same gesture
+   *  inside the picked-basket pill, where it has one row to live in. */
+  size?: "sheet" | "bar";
   onConfirm: () => void;
 }) {
   const { t } = useT();
@@ -91,13 +95,19 @@ export function SwipeToConfirm({
     </span>
   );
 
+  // In the bar it IS the bar's own button: filled, one row tall, no top margin. The
+  // sheet's control can be tall because it has a sheet to be tall in.
+  const inBar = size === "bar";
+
   if (!hold) {
     return (
       <button
         type="button"
         disabled={locked}
         onClick={onConfirm}
-        className="mt-3 inline-flex h-[52px] w-full items-center justify-center rounded-full bg-ink text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-30"
+        className={`inline-flex w-full items-center justify-center rounded-full bg-ink lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-30 ${
+          inBar ? "h-[38px] text-[13px]" : "mt-3 h-[52px] text-[14px]"
+        }`}
       >
         {body}
       </button>
@@ -119,13 +129,17 @@ export function SwipeToConfirm({
       // Stops the browser treating the press as the start of a scroll or a
       // double-tap zoom, which made the fill stutter on a phone.
       style={{ touchAction: "manipulation" }}
-      className="relative mt-3 h-[60px] w-full select-none overflow-hidden rounded-full border border-ink/12 bg-ink/[0.03] text-[14px] lowercase tracking-wide text-ink/60 transition disabled:opacity-40"
+      className={`relative w-full select-none overflow-hidden rounded-full lowercase tracking-wide transition disabled:opacity-40 ${
+        inBar
+          ? "h-[38px] bg-ink text-[13px] text-paper"
+          : "mt-3 h-[60px] border border-ink/12 bg-ink/[0.03] text-[14px] text-ink/60"
+      }`}
     >
       {/* The fill IS the timer — no separate spinner to read while deciding. */}
       <span
         aria-hidden
         style={{ width: `${progress * 100}%` }}
-        className="absolute inset-y-0 left-0 bg-ink/[0.07]"
+        className={`absolute inset-y-0 left-0 ${inBar ? "bg-paper/25" : "bg-ink/[0.07]"}`}
       />
       {body}
     </button>

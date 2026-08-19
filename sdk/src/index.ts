@@ -54,6 +54,7 @@ export * from "./core/exit-cost";
 export * from "./core/tx-delta";
 export * from "./core/format";
 export * from "./core/allocations";
+export * from "./core/top-up";
 export * from "./core/activity-stats";
 export * from "./core/format-date";
 export * from "./core/portfolio-history";

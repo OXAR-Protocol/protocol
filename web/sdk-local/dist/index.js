@@ -69,6 +69,7 @@ __exportStar(require("./core/exit-cost"), exports);
 __exportStar(require("./core/tx-delta"), exports);
 __exportStar(require("./core/format"), exports);
 __exportStar(require("./core/allocations"), exports);
+__exportStar(require("./core/top-up"), exports);
 __exportStar(require("./core/activity-stats"), exports);
 __exportStar(require("./core/format-date"), exports);
 __exportStar(require("./core/portfolio-history"), exports);

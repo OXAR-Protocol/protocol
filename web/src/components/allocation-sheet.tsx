@@ -42,6 +42,9 @@ interface Props {
   rows: AllocationRow[];
   /** Buy only: the money available to split across the rows. */
   budgetUsd?: number;
+  /** Buy only: how much of that budget is already dollars. Anything spent above it
+   *  is a swap, and a swap is a cost — so it gets said before it happens. */
+  cashUsd?: number;
   busy: boolean;
   /** "2 of 3" while it runs — each asset is its own transaction. */
   progress?: string | null;
@@ -77,6 +80,7 @@ export function AllocationSheet({
   mode,
   rows,
   budgetUsd,
+  cashUsd,
   busy,
   progress,
   results,
@@ -109,6 +113,9 @@ export function AllocationSheet({
   const remaining = budgetUsd !== undefined ? budgetUsd - allocated : 0;
   const overBudget = budgetUsd !== undefined && remaining < -0.005;
   const nothing = allocated <= 0;
+  // Dollars short of what's been allocated — covered by turning other coins into
+  // dollars on the way through. Zero when the wallet already holds enough.
+  const toConvert = cashUsd === undefined ? 0 : Math.max(0, Math.min(allocated, budgetUsd ?? allocated) - cashUsd);
 
   const setAmount = (id: string, v: string) =>
     setAmounts((prev) => ({ ...prev, [id]: normalizeDecimalInput(v) }));
@@ -207,6 +214,15 @@ export function AllocationSheet({
         </div>
 
         {payWith && <div className="mb-3">{payWith}</div>}
+
+        {/* Spending past the dollars means a swap happens first. Said here, with the
+            figure, before anything is signed — a conversion the user finds out about
+            afterwards is a cost we hid inside a purchase. */}
+        {toConvert > 0.005 && (
+          <p className="mb-3 rounded-[10px] border border-ink/10 bg-ink/[0.02] px-3 py-2 text-[11px] leading-snug text-ink/55">
+            {t("alloc.willConvert", { usd: `$${formatUsdAmount(toConvert)}` })}
+          </p>
+        )}
 
         <div className="space-y-2">
           {rows.map((r) => {

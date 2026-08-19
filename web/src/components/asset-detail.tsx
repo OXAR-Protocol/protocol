@@ -19,6 +19,7 @@ import { getAssetInfo } from "@/lib/yield/asset-info";
 import { AssetActionRail } from "@/components/asset-action-rail";
 import { AssetActionBar } from "@/components/asset-action-bar";
 import { AssetTrustStrip } from "@/components/asset-trust-strip";
+import { PoolDifference } from "@/components/pool-difference";
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc } from "@/lib/yield/asset-logo";
 import { AssetChart } from "@/components/asset-chart";
@@ -186,6 +187,9 @@ export function AssetDetail({
               );
             })}
           </div>
+        )}
+        {variants && variants.length > 1 && (
+          <PoolDifference variants={variants} selectedId={view.id} />
         )}
         </div>
       </motion.div>
