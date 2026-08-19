@@ -15,4 +15,4 @@
  * Date-based, UTC, `YYYY-MM-DD`. Update alongside the "Last updated" date on
  * the terms page itself when the terms change.
  */
-export declare const TERMS_VERSION = "2026-07-30";
+export declare const TERMS_VERSION = "2026-08-19";

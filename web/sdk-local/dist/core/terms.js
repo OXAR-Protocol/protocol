@@ -18,4 +18,4 @@ exports.TERMS_VERSION = void 0;
  * Date-based, UTC, `YYYY-MM-DD`. Update alongside the "Last updated" date on
  * the terms page itself when the terms change.
  */
-exports.TERMS_VERSION = "2026-07-30";
+exports.TERMS_VERSION = "2026-08-19";

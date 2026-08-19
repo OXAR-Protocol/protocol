@@ -101,6 +101,9 @@ export const TERMS_SECTIONS: TermsSection[] = [
         <p className="mt-3">
           Access to tokenized US stocks is <strong>geo-restricted</strong> (a Reg S–style block on US persons and certain jurisdictions) and may change without notice as the underlying issuers' compliance requirements change. Tokenized gold is a commodity-tracking token, not a security, and is not subject to this block.
         </p>
+        <p className="mt-3">
+          That block is applied <strong>by country</strong>, from the country your request appears to come from. It cannot detect regions, and the issuers exclude some: Crimea, Sevastopol, Luhansk and Donetsk are outside their service area even though the country is not. If you are in a territory, or under a status, that the issuer of an asset does not serve, <strong>you must not acquire that asset through the Platform</strong> — that eligibility is yours to observe, and passing our country check is not a determination that you are eligible. We may add, remove or tighten these restrictions at any time, including for assets you already hold, in which case the Platform may stop offering to buy them while leaving your existing tokens where they are: in your wallet, and sellable on the same public markets independently of OXAR.
+        </p>
       </>
     ),
   },
