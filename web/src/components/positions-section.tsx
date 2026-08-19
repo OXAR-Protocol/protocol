@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, ArrowUpRight } from "lucide-react";
@@ -72,6 +72,17 @@ export function PositionsSection() {
   // portfolio did; this is what says WHICH holding is dragging.
   const earnedById = useEarnedById();
   const investedById = useInvestedById();
+
+  // Selling three and seeing two is the balance we read arriving before the chain
+  // agreed: the transaction confirms, the account read behind it is a beat older, and
+  // the row that just left is still there until something else reloads. So read
+  // again, twice, quietly — the second and third pass cost nothing when the first was
+  // already right, and they are what makes a sold-out position actually leave.
+  const refreshAfterTrade = useCallback(() => {
+    refresh();
+    const timers = [1500, 4000].map((ms) => setTimeout(() => refreshSilently(), ms));
+    return () => timers.forEach(clearTimeout);
+  }, [refresh, refreshSilently]);
 
   const allHeld = views.filter((v) => v.underlyingBalance > BigInt(0));
   const held = allHeld.filter((v) => {
@@ -161,7 +172,7 @@ export function PositionsSection() {
           views={held.filter((v) => selected.has(v.id))}
           allHeld={allHeld}
           onOutcome={(stillSelected) => setSelected(stillSelected)}
-          onDone={refresh}
+          onDone={refreshAfterTrade}
         />
       )}
     </>
