@@ -192,6 +192,10 @@ export const en = {
   "alloc.confirmSell": "sell {usd}",
   "alloc.confirmBuy": "buy {usd}",
   "alloc.note": "{n} assets = {n} transactions",
+  // Closing on a half-finished basket: the wallet already moved money for some rows.
+  "alloc.leavePartial": "{done} of {total} went through. the rest haven't — leave anyway?",
+  "alloc.stay": "stay",
+  "alloc.leave": "leave",
   "bulk.buySelected": "buy all",
   "rail.max": "max",
   "rail.actionSell": "Sell",

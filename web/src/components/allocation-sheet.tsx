@@ -149,6 +149,23 @@ export function AllocationSheet({
   // Switching units keeps the money, not the number: $12 stays $12 and is re-written
   // as 0.0031 of the thing. Re-typing it after every switch would be the whole
   // feature, undone.
+  // Half a basket is a state worth naming. Signing two of five and closing used to
+  // discard the other three silently — the wallet had already moved money, and the
+  // screen that knew which rows were left just went away. One press asks; a second
+  // one leaves.
+  const partlyDone =
+    !!results &&
+    rows.some((r) => results[r.id]?.ok) &&
+    rows.some((r) => !results[r.id]?.ok);
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const requestClose = () => {
+    if (partlyDone && !confirmLeave) {
+      setConfirmLeave(true);
+      return;
+    }
+    onClose();
+  };
+
   const toggleUnits = (r: AllocationRow) => {
     const typed = typedIn(r.id);
     const price = r.unitPriceUsd || 0;
@@ -182,7 +199,7 @@ export function AllocationSheet({
               </p>
             )}
           </div>
-          <button type="button" onClick={onClose} disabled={busy} className="text-ink/35 transition hover:text-ink disabled:opacity-40">
+          <button type="button" onClick={requestClose} disabled={busy} className="text-ink/35 transition hover:text-ink disabled:opacity-40">
             <X size={18} strokeWidth={1.5} />
           </button>
         </div>
@@ -291,6 +308,35 @@ export function AllocationSheet({
         </div>
 
         {error && <p className="mt-3 text-center text-[12px] text-loss">{error}</p>}
+
+        {/* Asked where it can be answered: the rows above still show which went
+            through and which didn't, so the question isn't abstract. */}
+        {confirmLeave && (
+          <div className="mt-3 rounded-[10px] border border-ink/15 bg-ink/[0.03] p-3 text-center">
+            <p className="text-[12px] text-ink/70">
+              {t("alloc.leavePartial", {
+                done: String(rows.filter((r) => results?.[r.id]?.ok).length),
+                total: String(rows.length),
+              })}
+            </p>
+            <div className="mt-2 flex justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmLeave(false)}
+                className="rounded-full border border-ink/15 px-3 py-1.5 text-[12px] lowercase tracking-wide text-ink/60 transition hover:border-ink/40 hover:text-ink"
+              >
+                {t("alloc.stay")}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-full border border-ink bg-ink px-3 py-1.5 text-[12px] lowercase tracking-wide text-paper transition hover:opacity-90"
+              >
+                {t("alloc.leave")}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Sticky: with several assets the list is taller than the sheet, and a
             confirm you have to go looking for is a confirm people don't find. */}
