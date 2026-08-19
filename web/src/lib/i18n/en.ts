@@ -132,9 +132,13 @@ export const en = {
   "badge.earlyRiser.subtitle": "here while the market was still asleep",
 
   // Risk labels
-  "risk.low": "low risk",
-  "risk.medium": "medium risk",
-  "risk.high": "high risk",
+  // What the tier tracks is how far the value can travel, not whether the issuer
+  // can be trusted — see RISK_LABEL in lib/yield/display.ts.
+  "risk.low": "value holds",
+  "risk.medium": "value moves",
+  "risk.high": "value swings",
+  "risk.means":
+    "how far the value can move — not a verdict on who issues it. what backs each one is under \u201ccheck it yourself\u201d below.",
 
   // Buy/sell rail
   "rail.buy": "buy",
@@ -176,6 +180,9 @@ export const en = {
   "bulk.hint": "add several to sell them together",
   "bulk.pick": "add to basket",
   "bulk.picked": "in basket",
+  // On the portfolio the basket only sells — say so, or "add" reads as "add money".
+  "bulk.pickSell": "add to sell",
+  "bulk.pickedSell": "selling",
   "bulk.stopped": "stopped — nothing left your wallet",
   "alloc.sellTitle": "how much of each?",
   "alloc.buyTitle": "how much of each?",

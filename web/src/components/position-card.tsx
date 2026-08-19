@@ -144,7 +144,7 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
       {/* The card's one action, along its bottom edge — it used to sit in the top
           line, where it crowded the name and the arrow. */}
       {onTogglePick && (
-        <PickButton block className="mt-auto" picked={!!picked} onToggle={onTogglePick} label={view.name} />
+        <PickButton block intent="sell" className="mt-auto" picked={!!picked} onToggle={onTogglePick} label={view.name} />
       )}
     </button>
   );

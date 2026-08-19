@@ -119,9 +119,11 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "badge.earlyRiser.title": "early riser",
   "badge.earlyRiser.subtitle": "був тут, поки ринок ще спав",
 
-  "risk.low": "низький ризик",
-  "risk.medium": "середній ризик",
-  "risk.high": "високий ризик",
+  "risk.low": "вартість тримається",
+  "risk.medium": "вартість рухається",
+  "risk.high": "вартість коливається",
+  "risk.means":
+    "наскільки може змінитися вартість — це не оцінка того, хто випускає актив. чим він забезпечений, дивись у \u201cперевір сам\u201d нижче.",
 
   "rail.buy": "купити",
   "rail.deposit": "покласти",
@@ -162,6 +164,8 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "bulk.hint": "додай кілька, щоб продати разом",
   "bulk.pick": "у кошик",
   "bulk.picked": "у кошику",
+  "bulk.pickSell": "додати до продажу",
+  "bulk.pickedSell": "продаємо",
   "bulk.stopped": "зупинено — з гаманця нічого не пішло",
   "alloc.sellTitle": "скільки чого продати?",
   "alloc.buyTitle": "скільки чого купити?",

@@ -121,6 +121,7 @@ export function PositionRow({ view, onOpen, change24h, chart, earned, picked, on
         onTogglePick ? (
           <PickButton
             blockOnMobile
+            intent="sell"
             picked={picked}
             onToggle={onTogglePick}
             label={t("bulk.select", { name: view.name })}
