@@ -5,6 +5,7 @@ import { parseActivity, type ActivityEvent } from "@/lib/activity/parse";
 import { PROVIDERS } from "@/lib/yield/registry";
 import { JL_USDC, JL_USDT } from "@/lib/yield/position-mints";
 import { isPriceExposure } from "@/lib/yield/assets";
+import { isSameOrigin } from "@/lib/rpc-proxy";
 
 // Recent-activity feed from the wallet's on-chain history (Helius, key server-side).
 export const runtime = "nodejs";
@@ -55,6 +56,12 @@ const cache = new Map<string, { at: number; events: ActivityEvent[] }>();
 const TTL = 120_000;
 
 export async function POST(req: Request) {
+  // Our Helius quota pays for these. A stranger's page may not spend it — the
+  // data is public on-chain, the two requests a second are not.
+  if (!isSameOrigin(req.headers.get("origin"), req.url)) {
+    return NextResponse.json({ error: "Not allowed" }, { status: 403 });
+  }
+
   const key = heliusApiKey();
   if (!key) return NextResponse.json({ error: "Activity unavailable" }, { status: 503 });
 

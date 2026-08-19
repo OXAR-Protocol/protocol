@@ -15,6 +15,7 @@ import { fetchWithRetry } from "@oxar/sdk";
 import { heliusApiKey, fetchEnhancedHistory } from "@/lib/helius/history";
 import { readWalletBalances } from "@/lib/solana/balances";
 import { TRACKED_MINTS } from "@/lib/yield/position-mints";
+import { isSameOrigin } from "@/lib/rpc-proxy";
 
 /**
  * The portfolio over time — what it was worth, what it earned, and what moved in or
@@ -103,6 +104,12 @@ async function fetchPrices(
 }
 
 export async function POST(req: Request) {
+  // Our Helius quota pays for these. A stranger's page may not spend it — the
+  // data is public on-chain, the two requests a second are not.
+  if (!isSameOrigin(req.headers.get("origin"), req.url)) {
+    return NextResponse.json({ error: "Not allowed" }, { status: 403 });
+  }
+
   const key = heliusApiKey();
   if (!key) return NextResponse.json({ error: "History unavailable" }, { status: 503 });
 

@@ -5,6 +5,7 @@ import { heliusApiKey, fetchEnhancedHistory } from "@/lib/helius/history";
 import { XSTOCKS } from "@/lib/yield/xstocks";
 import { METALS } from "@/lib/yield/metals-catalog";
 import { CASH_MINTS, JL_USDC, JL_USDT } from "@/lib/yield/position-mints";
+import { isSameOrigin } from "@/lib/rpc-proxy";
 
 // On-chain cost-basis proxy. Reads the wallet's parsed transaction history from
 // Helius (key stays server-side) and derives net USD invested per swap-and-hold
@@ -45,6 +46,12 @@ const cache = new Map<string, { at: number; basis: Record<string, number> }>();
 const TTL = 300_000;
 
 export async function POST(req: Request) {
+  // Our Helius quota pays for these. A stranger's page may not spend it — the
+  // data is public on-chain, the two requests a second are not.
+  if (!isSameOrigin(req.headers.get("origin"), req.url)) {
+    return NextResponse.json({ error: "Not allowed" }, { status: 403 });
+  }
+
   const key = heliusApiKey();
   if (!key) return NextResponse.json({ error: "Earnings unavailable" }, { status: 503 });
 

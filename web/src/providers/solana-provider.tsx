@@ -14,7 +14,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
 import { buildKoraLegacyTx, rebuildV0WithKora, SOL_SPONSORED_RESERVE } from "@oxar/sdk";
 import { UserFacingError } from "@/lib/yield";
-import { RPC_URL } from "@/lib/constants";
+import { RPC_URL, WSS_URL, browserRpcEndpoint } from "@/lib/constants";
 import { clearCache } from "@/lib/cache";
 import { deriveSolanaWallets, hasExternalSolanaWallet } from "@/lib/wallet/solana-wallets";
 import { koraEnabled, koraPayer, koraBlockhash, koraSignAndSend, reportGaslessFailure } from "@/lib/gas/kora";
@@ -286,7 +286,13 @@ class PrivySolanaAdapter implements WalletSigner {
 }
 
 export function SolanaProvider({ children }: { children: ReactNode }) {
-  const connection = useMemo(() => new Connection(RPC_URL, "confirmed"), []);
+  // The endpoint is resolved once, in the browser: `browserRpcEndpoint()` returns
+  // our own proxy when NEXT_PUBLIC_RPC_PROXY is on, and Helius directly otherwise.
+  // The socket always goes to Helius — a serverless function can't hold one open.
+  const connection = useMemo(
+    () => new Connection(browserRpcEndpoint(), { commitment: "confirmed", wsEndpoint: WSS_URL }),
+    [],
+  );
   const { authenticated, user } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
   const { createWallet: createSolanaWallet } = useCreateSolanaWallet();
