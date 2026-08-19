@@ -21,6 +21,9 @@ import { isXStock } from "@/lib/yield/xstocks";
 import { isMetal } from "@/lib/yield/metals-catalog";
 import { useT } from "@/lib/i18n";
 
+/** Where the list was left, for the length of this visit. */
+const FILTER_KEY = "oxar:pile-filter";
+
 /**
  * Everything you hold: filter it, lay it out how you like, tick several to exit
  * together. What the total above is actually made of.
@@ -46,6 +49,20 @@ export function PositionsSection() {
   const chooseLayout = (next: Layout) => {
     setLayout(next);
     localStorage.setItem("oxar:pile-layout", next);
+  };
+
+  // The filter survives a trip into a position and back — opening one of your stocks
+  // and returning to a list of everything reads as the app forgetting what you were
+  // looking at. Session, not local: this is where you are in a visit, not a setting.
+  useEffect(() => {
+    const saved = sessionStorage.getItem(FILTER_KEY);
+    if (saved === "all" || saved === "yield" || saved === "stocks" || saved === "metals") {
+      setFilter(saved);
+    }
+  }, []);
+  const chooseFilter = (next: Filter) => {
+    setFilter(next);
+    sessionStorage.setItem(FILTER_KEY, next);
   };
 
   // Ticking several positions and exiting them together — dark until the key is on.
@@ -82,7 +99,7 @@ export function PositionsSection() {
       <PositionToolbar
         allHeld={allHeld}
         filter={filter}
-        onFilter={setFilter}
+        onFilter={chooseFilter}
         layout={layout}
         onLayout={chooseLayout}
         showPickHint={sellingV2 && held.length > 1 && selected.size === 0}

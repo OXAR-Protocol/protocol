@@ -10,11 +10,20 @@ export const RISK_TONE: Record<string, string> = {
   high: "text-rose-600",
 };
 
-/** Human-readable risk label per tier. */
+/** Human-readable label per tier.
+ *
+ *  These used to read "Low risk" / "Medium risk" / "High risk", which says a grade
+ *  without saying what was graded — and a reader supplies the missing half himself.
+ *  In crypto he supplies the wrong one: risk there means "will this thing rug", and
+ *  no tier we can assign from a catalogue answers that. What the tier actually
+ *  tracks is how far the value can travel — a lending rate barely moves, a share or
+ *  an ounce of gold moves with its market, insurance capital moves with a
+ *  catastrophe season. So the label says that instead, and whether an issuer is
+ *  trustworthy stays where it belongs: the links under "check it yourself". */
 export const RISK_LABEL: Record<string, string> = {
-  low: "Low risk",
-  medium: "Medium risk",
-  high: "High risk",
+  low: "Value holds",
+  medium: "Value moves",
+  high: "Value swings",
 };
 
 /** Human-readable chain label. */

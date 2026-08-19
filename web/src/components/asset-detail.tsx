@@ -156,6 +156,13 @@ export function AssetDetail({
           )}
         </div>
 
+        {/* The tier alone is a grade with the subject left out, and a reader in crypto
+            fills that blank in with "can this rug" — a question a catalogue tier
+            cannot answer. One line says what it does measure. */}
+        <p className="mt-2 max-w-[52ch] lowercase text-[12px] leading-relaxed text-ink/40">
+          {t("risk.means")}
+        </p>
+
         {/* Stablecoin picker for grouped markets (Jupiter Lend USDC/USDT/USDG) —
             each with its own APY; selecting switches the deposit target. */}
         {variants && variants.length > 1 && (
