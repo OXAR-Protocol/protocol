@@ -94,7 +94,21 @@ export function ProfileChart({
             fill
           />
         ) : (
-          <p className="py-12 text-center text-[12px] text-ink/35">{t("history.noChart")}</p>
+          // Nothing yet is a state, not an absence: a flat line at zero shows where
+          // the money will be drawn and keeps the screen the same height it will be
+          // tomorrow. A sentence in the middle of blank space reads as a broken chart.
+          <div className="relative">
+            <HoverChart
+              values={[0, 0]}
+              labels={["", ""]}
+              format={(v) => `$${formatUsdAmount(v)}`}
+              height={150}
+              className="text-ink/15"
+            />
+            <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-[12px] text-ink/30">
+              {t("history.noChart")}
+            </p>
+          </div>
         )}
       </div>
     </section>
