@@ -85,7 +85,7 @@ export const en = {
   "confirm.hold": "hold to {verb}",
   "confirm.back": "back",
   "success.deposited": "Deposited",
-  "success.withdrew": "Withdrew",
+  "success.withdrew": "Withdrawn",
   "success.bridging": "Bridging",
   "success.bridgingBody":
     "bridging to Solana — we'll finish the deposit automatically. you can keep browsing.",
