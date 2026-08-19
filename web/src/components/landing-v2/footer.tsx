@@ -7,7 +7,7 @@ type Link = { label: string; href: string; ext?: boolean };
 
 const COLUMNS: Link[][] = [
   [
-    { label: "twitter", href: "https://x.com/the_oxar", ext: true },
+    { label: "twitter", href: "https://x.com/oxar_app", ext: true },
     { label: "telegram", href: "https://t.me/eternaki", ext: true },
     { label: "email us", href: "mailto:support@oxar.app", ext: true },
   ],

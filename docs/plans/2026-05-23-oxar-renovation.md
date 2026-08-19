@@ -274,7 +274,7 @@ Crypto-paid фрилансер получает USDC зарплату на ко�
 **Цель**: 50-100 групп, 200-500 юзеров.
 
 - Colosseum hackathon network (Daniel прямо сейчас там)
-- @the_oxar Twitter — Build in Public стратегия (1 пост/день)
+- @oxar_app Twitter — Build in Public стратегия (1 пост/день)
 - Crypto-paid freelancer communities (Telegram, Discord, Reddit)
 - Hackathon prize visibility (если попадёт в финал)
 
