@@ -15,7 +15,6 @@ export function PickButton({
   label,
   block,
   blockOnMobile,
-  intent = "buy",
   className,
 }: {
   picked: boolean;
@@ -26,10 +25,6 @@ export function PickButton({
   block?: boolean;
   /** Full width on a phone, back to a chip once the row has width to spare. */
   blockOnMobile?: boolean;
-  /** What the basket this fills will DO. On the portfolio it sells; a reviewer read
-   *  the bare "add to basket" there as a way to put more money in, pressed it, and
-   *  found only a way out. The set is the same control either way — the word isn't. */
-  intent?: "buy" | "sell";
   className?: string;
 }) {
   const { t } = useT();
@@ -71,11 +66,11 @@ export function PickButton({
       {picked ? <Check size={11} strokeWidth={2.5} /> : <Plus size={11} strokeWidth={2.5} />}
       {/* Always the words. The icon-only variant this used to have on a phone said
        *  nothing about what tapping it would do; the rows make room instead. */}
-      <span>
-        {picked
-          ? t(intent === "sell" ? "bulk.pickedSell" : "bulk.picked")
-          : t(intent === "sell" ? "bulk.pickSell" : "bulk.pick")}
-      </span>
+      {/* One word everywhere. It used to say "add to sell" on the portfolio, back when
+          a basket picked there could only be sold — now it can go either way, and the
+          direction is chosen once, inside the basket, rather than promised by every
+          row that fills it. */}
+      <span>{t(picked ? "bulk.picked" : "bulk.pick")}</span>
     </span>
   );
 }

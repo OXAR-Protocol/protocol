@@ -54,6 +54,15 @@ interface Props {
    *  the conversion happens once for the whole basket — see `useBulkFunding`. */
   payWith?: ReactNode;
   error?: string | null;
+  /** Both directions this basket could go, in this basket's own words. */
+  verbs: { buy: string; sell: string };
+  /** Off when nothing picked is actually held — there is nothing to sell. */
+  canSell?: boolean;
+  /** What each picked position is worth today, whichever direction is showing —
+   *  choosing "sell" fills the rows with it. */
+  heldUsdById?: Record<string, number>;
+  /** The user chose a direction; the rows and the budget follow it. */
+  onMode: (next: "buy" | "sell") => void;
   onConfirm: (amounts: Record<string, number>) => void;
   /** Swap one row for a sibling market, carrying its amount across. */
   onSwap?: (fromId: string, toId: string) => void;
@@ -86,6 +95,10 @@ export function AllocationSheet({
   results,
   payWith,
   error,
+  verbs,
+  canSell,
+  heldUsdById,
+  onMode,
   onConfirm,
   onSwap,
   onClose,
@@ -119,6 +132,31 @@ export function AllocationSheet({
 
   const setAmount = (id: string, v: string) =>
     setAmounts((prev) => ({ ...prev, [id]: normalizeDecimalInput(v) }));
+
+  // Which direction has been chosen. Null while the question is still open — the
+  // sheet opens on the likelier one for the page, but nothing is armed until asked.
+  const [armed, setArmed] = useState<"buy" | "sell" | null>(canSell ? null : "buy");
+
+  /**
+   * Choose a direction. Selling a basket means selling it, so the rows fill
+   * themselves — that was the one-tap "sell all" this replaced, and making people
+   * type the same number they can already see is not a safeguard. Buying never
+   * fills itself: an amount nobody asked for is money nobody meant to spend.
+   */
+  const arm = (dir: "buy" | "sell") => {
+    onMode(dir);
+    setArmed(dir);
+    if (dir !== "sell" || allocated > 0) return;
+    // From the held values, not from `rows` — the rows are still the other
+    // direction's at this point; the parent swaps them on the next render.
+    setAmounts((prev) => {
+      const next = { ...prev };
+      for (const [id, usd] of Object.entries(heldUsdById ?? {})) {
+        if (!settled(id) && usd > 0) next[id] = String(floorToCents(usd));
+      }
+      return next;
+    });
+  };
 
   // The row keeps whatever was typed into it; only the market underneath changes.
   const swapRow = (from: string, to: string) => {
@@ -359,20 +397,56 @@ export function AllocationSheet({
         {/* Sticky: with several assets the list is taller than the sheet, and a
             confirm you have to go looking for is a confirm people don't find. */}
         <div className="sticky bottom-0 -mx-5 mt-4 bg-gradient-to-t from-paper via-paper to-paper/0 px-5 pb-1 pt-3">
-        {/* Held, not tapped — several assets bought or sold in one gesture is the
-            biggest single act in the app, and it sits under a thumb that has just
-            been scrolling a list. */}
-        <SwipeToConfirm
-          label={t(mode === "sell" ? "alloc.confirmSell" : "alloc.confirmBuy", {
-            usd: `$${formatUsdAmount(allocated)}`,
-          })}
-          busyLabel={progress ?? undefined}
-          busy={busy}
-          disabled={nothing || overBudget}
-          onConfirm={() =>
-            onConfirm(Object.fromEntries(rows.map((r) => [r.id, valueOf(r)]).filter(([, v]) => (v as number) > 0)))
-          }
-        />
+        {/* Which way the money goes, asked HERE — next to the amounts it applies to,
+            rather than on the strip at the bottom of the page where the basket was
+            filled. Pressing one stretches it into the hold; nothing has happened yet. */}
+        {armed ? (
+          <>
+            {/* Held, not tapped — several assets bought or sold in one gesture is the
+                biggest single act in the app, and it sits under a thumb that has just
+                been scrolling a list. */}
+            <SwipeToConfirm
+              label={t("bulk.actionUsd", {
+                verb: armed === "sell" ? verbs.sell : verbs.buy,
+                usd: `$${formatUsdAmount(allocated)}`,
+              })}
+              busyLabel={progress ?? undefined}
+              busy={busy}
+              disabled={nothing || overBudget}
+              onConfirm={() =>
+                onConfirm(Object.fromEntries(rows.map((r) => [r.id, valueOf(r)]).filter(([, v]) => (v as number) > 0)))
+              }
+            />
+            {canSell && !busy && (
+              <button
+                type="button"
+                onClick={() => setArmed(null)}
+                className="mt-2 w-full text-center text-[11px] lowercase tracking-wide text-ink/40 transition hover:text-ink"
+              >
+                {t("alloc.chooseAgain")}
+              </button>
+            )}
+          </>
+        ) : (
+          <div className="mt-3 flex gap-2">
+            {canSell && (
+              <button
+                type="button"
+                onClick={() => arm("sell")}
+                className="h-[52px] flex-1 rounded-full border border-ink/15 text-[14px] lowercase tracking-wide text-ink/70 transition hover:border-ink/40 hover:text-ink"
+              >
+                {verbs.sell}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => arm("buy")}
+              className="h-[52px] flex-1 rounded-full bg-ink text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
+            >
+              {verbs.buy}
+            </button>
+          </div>
+        )}
 
         {/* Said once, before signing — and it has to match what the wallet will
             actually ask for, or the sentence trains people to ignore it. */}
