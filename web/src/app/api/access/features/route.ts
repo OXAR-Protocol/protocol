@@ -19,8 +19,17 @@ const DEFAULT_INSIDER_EMAILS = ["daniel.l@oxar.app"];
  *  paybis-cashout: card cash-out via Paybis. Works, but no arrival tracking yet.
  *  paybis-topup:   card top-up via Paybis. Pulled back from everyone: it cannot serve
  *                  the users who need it most — Ukrainian banks decline the charge —
- *                  so offering it broadly was a choice that mostly ends in a decline. */
-const DEFAULT_INSIDER_FEATURES = ["paybis-cashout", "paybis-topup", "platform-fee"];
+ *                  so offering it broadly was a choice that mostly ends in a decline.
+ *  bulk-one-signature: a basket signed as ONE prompt instead of one per asset
+ *                  (Privy's batch overload). Insider-only until it has carried real
+ *                  money on both wallet kinds — embedded and an external one — because
+ *                  a refusal now costs the whole basket rather than the rest of it. */
+const DEFAULT_INSIDER_FEATURES = [
+  "paybis-cashout",
+  "paybis-topup",
+  "platform-fee",
+  "bulk-one-signature",
+];
 
 
 

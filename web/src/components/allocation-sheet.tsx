@@ -9,6 +9,7 @@ import { formatUsdAmount, floorTo, floorToCents, normalizeDecimalInput } from "@
 import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { SwipeToConfirm } from "@/components/swipe-to-confirm";
+import { useFeature } from "@/hooks/use-features";
 import { useT } from "@/lib/i18n";
 
 export interface AllocationRow {
@@ -86,6 +87,7 @@ export function AllocationSheet({
   onClose,
 }: Props) {
   const { t } = useT();
+  const oneSignature = useFeature("bulk-one-signature");
   const [amounts, setAmounts] = useState<Record<string, string>>({});
   // Which rows are being typed in units rather than dollars. Per row, because a
   // basket can hold a share and a lending market at once, and only one of those has
@@ -356,9 +358,12 @@ export function AllocationSheet({
           }
         />
 
-        {/* Several assets means several transactions — said once, before signing. */}
+        {/* Said once, before signing — and it has to match what the wallet will
+            actually ask for, or the sentence trains people to ignore it. */}
         <p className="mt-2 text-center text-[11px] text-ink/35">
-          {t("alloc.note", { n: String(rows.length) })}
+          {t(oneSignature && rows.length > 1 ? "alloc.noteOneSig" : "alloc.note", {
+            n: String(rows.length),
+          })}
         </p>
         </div>
       </motion.div>
