@@ -42,6 +42,12 @@ export function ProfileChart({
 }) {
   const { t } = useT();
 
+  // Days before the first dollar arrived are not history, they are the absence of
+  // it — and drawing them pins the whole line to the floor, because the range then
+  // runs from an empty wallet to a full one. A gain of a cent on ten dollars looked
+  // like a flat line along the bottom for exactly this reason.
+  const firstFunded = points.findIndex((p) => p.usd > 0.005);
+  const drawn = firstFunded > 0 ? points.slice(firstFunded) : points;
   const now = points.length ? points[points.length - 1]!.usd : 0;
   const earned = performance?.earnedUsd ?? null;
   const up = earned === null || earned >= 0;
@@ -84,10 +90,10 @@ export function ProfileChart({
           <div className="flex h-[150px] items-center justify-center text-ink/25">
             <Loader2 size={16} className="animate-spin" />
           </div>
-        ) : points.length > 1 ? (
+        ) : drawn.length > 1 ? (
           <HoverChart
-            values={points.map((p) => p.usd)}
-            labels={points.map((p) => formatDayShort(p.t, locale))}
+            values={drawn.map((p) => p.usd)}
+            labels={drawn.map((p) => formatDayShort(p.t, locale))}
             format={(v) => `$${formatUsdAmount(v)}`}
             height={150}
             className={up ? "text-profit" : "text-loss"}
