@@ -100,10 +100,16 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
           // supposed to remove. Turning it off makes our own hold-to-confirm the one
           // gate, which is where the amounts, the fee and the route are already shown.
           //
-          // Deploy-time switch, not a live one, and off by default: it removes a
-          // confirmation step from the money path, so it gets a preview and a
-          // deliberate decision rather than a merge.
-          showWalletUIs: process.env.NEXT_PUBLIC_PRIVY_SILENT_SIGN === "1" ? false : undefined,
+          // ON by default as of this commit — the decision, with a date and an author,
+          // rather than an env var nobody set. `NEXT_PUBLIC_PRIVY_SILENT_SIGN=0` puts
+          // Privy's sheets back if we ever want them.
+          //
+          // What is lost: a second confirmation screen. What is not: the confirmation.
+          // Every signature in this app is raised by our own hold-to-confirm, which
+          // names the amount, the route, the swap cost and the fee — Privy's sheet
+          // repeated less of that, once per transaction, which is how a basket of
+          // three became three taps after we had already made it one signature.
+          showWalletUIs: process.env.NEXT_PUBLIC_PRIVY_SILENT_SIGN === "0",
           solana: {
             // Create an embedded wallet ONLY for users who have no wallet of their
             // own (email/social login). A wallet-login user operates from their own
