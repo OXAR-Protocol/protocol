@@ -39,6 +39,12 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
   const history = usePortfolioHistory(range);
   const { counts, listedDays, loading: loadingDays } = useDayActivity(history.days);
 
+  // An account that has never held anything. Every figure on this screen is then
+  // genuinely zero, and showing dashes made an empty portfolio look broken rather
+  // than empty — "is my money even here?" was the actual report.
+  const neverFunded =
+    !history.loading && history.days.length > 0 && history.days.every((d) => d.usd <= 0.005);
+
   return (
     <>
       {/* Two columns from `lg`: the chart takes the width it deserves and the money
@@ -53,6 +59,7 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
           onRangeChange={setRange}
           loading={history.loading}
           locale={locale}
+          neverFunded={neverFunded}
         />
         <div className="mt-5">
           <PerformanceStats
@@ -60,6 +67,7 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
             heldMints={history.heldMints}
             counts={counts}
             range={range}
+            neverFunded={neverFunded}
           />
         </div>
         </div>

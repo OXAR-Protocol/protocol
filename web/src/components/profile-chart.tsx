@@ -32,6 +32,7 @@ export function ProfileChart({
   onRangeChange,
   loading,
   locale,
+  neverFunded,
 }: {
   points: PerformanceDay[];
   performance: RangePerformance | null;
@@ -39,6 +40,8 @@ export function ProfileChart({
   onRangeChange: (r: Range) => void;
   loading: boolean;
   locale: string;
+  /** Nothing has ever been held here — see `PerformanceStats`. Zero, not a dash. */
+  neverFunded?: boolean;
 }) {
   const { t } = useT();
 
@@ -61,7 +64,7 @@ export function ProfileChart({
             ${formatUsdAmount(now)}
           </p>
           <p className={`whitespace-nowrap text-[13px] tabular-nums ${up ? "text-profit" : "text-loss"}`}>
-            {earned === null ? "—" : formatSignedUsd(earned)}
+            {earned === null ? (neverFunded ? "$0.00" : "—") : formatSignedUsd(earned)}
             <span className="text-ink/40"> · {t(`history.range.${range}` as "history.range.7")}</span>
           </p>
         </div>

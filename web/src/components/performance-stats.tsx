@@ -25,6 +25,7 @@ export function PerformanceStats({
   heldMints,
   counts,
   range,
+  neverFunded,
 }: {
   performance: RangePerformance | null;
   /** Still held today; anything else in the breakdown was closed inside the range. */
@@ -33,6 +34,10 @@ export function PerformanceStats({
    *  comes from `performance`. */
   counts: ActivityCount;
   range: Range;
+  /** No money has ever been in here. Then "—" is wrong: nothing earned nothing, and
+   *  a dash reads as "we couldn't work it out" on a screen that has nothing to work
+   *  out. On a funded wallet a missing figure stays a dash. */
+  neverFunded?: boolean;
 }) {
   const { t } = useT();
   const [showBreakdown, setShowBreakdown] = useState(false);
@@ -52,10 +57,18 @@ export function PerformanceStats({
             range that opens before the wallet held anything and a deposit inside one. */}
         <Stat
           label={`${t("history.earned")} · ${t(`history.range.${range}` as "history.range.7")}`}
-          value={performance?.earnedUsd == null ? "—" : formatSignedUsd(performance.earnedUsd)}
+          value={
+            performance?.earnedUsd == null
+              ? neverFunded
+                ? "$0.00"
+                : "—"
+              : formatSignedUsd(performance.earnedUsd)
+          }
           hint={
             performance?.returnPct == null
-              ? undefined
+              ? neverFunded
+                ? "0.00%"
+                : undefined
               : `${performance.returnPct >= 0 ? "+" : ""}${(performance.returnPct * 100).toFixed(2)}%`
           }
           note={

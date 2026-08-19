@@ -14,11 +14,16 @@ export const en = {
   // Home
   "home.sources.many": "{n} sources · earning every block",
   "home.startHere": "start here",
-  "home.napping1": "your money's been napping.",
-  "home.napping2": "let's wake it up.",
+  // The app's whole idea is that money SLEEPS somewhere that pays — so telling
+  // people to wake theirs up on the first screen argued with the name over their
+  // heads. Idle money isn't asleep, it's just sitting there.
+  "home.napping1": "your money is sitting still.",
+  "home.napping2": "it could be sleeping somewhere that pays.",
+  // Four commands in a row read as a machine listing steps. It's one thought, so
+  // it's one sentence.
   "home.empty.body":
-    "pick a source. add dollars. earn from day one. withdraw whenever you want — the money always stays yours.",
-  "home.wakeUp": "wake up your money",
+    "put dollars into a source and they start earning the same day. take them out whenever you like — they never stop being yours.",
+  "home.wakeUp": "put it somewhere that pays",
   "home.wallet.label": "in your wallet · not working yet",
   "home.wallet.cta": "put it to work",
   "movers.title": "on the move · 24h",
@@ -26,7 +31,7 @@ export const en = {
   // Yield list
   "yield.title": "Where your money can sleep",
   "yield.subtitle":
-    "Pick a source. Open it. Add dollars. Withdraw anytime. Money goes straight into the source — it stays yours.",
+    "Open a source to see what it pays and how it works. What you put in goes straight there and stays yours, and you can take it out whenever.",
   "yield.clear": "clear",
   "yield.liveNow": "Live now",
   "sort.default": "our order",
@@ -162,8 +167,17 @@ export const en = {
   "alloc.dollars": "dollars to spend",
   "alloc.switchTo": "put it in {name} instead",
   "alloc.switchUnits": "switch between dollars and units",
-  "bulk.sellSelected": "sell all",
   "bulk.clear": "clear",
+  // What the basket's two buttons are called. A share is bought and sold; money is
+  // put into a lending market and taken out; a basket of both gets the plain words.
+  "verb.buy": "buy",
+  "verb.sell": "sell",
+  "verb.deposit": "deposit",
+  "verb.withdraw": "withdraw",
+  "verb.putIn": "put in",
+  "verb.takeOut": "take out",
+  "bulk.actionUsd": "{verb} {usd}",
+  "bulk.amounts": "amounts",
   "pile.history": "history",
   "asset.history": "your history with this",
   "pile.filter.all": "all",
@@ -177,7 +191,7 @@ export const en = {
   "proof.backing": "what backs it",
   "proof.rate": "where the rate comes from",
   "bulk.setLabel": "{n} in basket · {usd}",
-  "bulk.hint": "add several to sell them together",
+  "bulk.hint": "pick a few and buy or sell them together",
   "bulk.pick": "add to basket",
   "bulk.picked": "in basket",
   // On the portfolio the basket only sells — say so, or "add" reads as "add money".
@@ -197,7 +211,14 @@ export const en = {
   "alloc.leavePartial": "{done} of {total} went through. the rest haven't — leave anyway?",
   "alloc.stay": "stay",
   "alloc.leave": "leave",
-  "bulk.buySelected": "buy all",
+  "alloc.otherCoins": "{usd} more in other coins — spend it and it becomes dollars first.",
+  "alloc.willConvert": "{usd} of your other coins turns into dollars first, at the market's rate. One extra step, then the buying.",
+  "alloc.converting": "turning coins into dollars…",
+  // Two markets, one product. When the rates match, the rate stops being the answer.
+  "pool.sameRate": "Both pay about the same right now, so the rate isn't what decides it.",
+  "pool.rateAside": "The rate moves. These two don't differ only by it.",
+  "pool.inPool": "{usd} lent here",
+  "pool.sizeMeans": "A bigger pool takes a big withdrawal without the rate lurching, and you end up holding whichever dollar you picked.",
   "rail.max": "max",
   "rail.actionSell": "Sell",
   "rail.actionWithdraw": "Withdraw",
