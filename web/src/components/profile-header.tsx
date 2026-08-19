@@ -9,6 +9,7 @@ import { formatUsdAmount } from "@oxar/sdk";
 
 import { EarlyRiserBadge } from "@/components/early-riser-badge";
 import { SettingsSheet } from "@/components/settings-sheet";
+import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useSolanaName } from "@/hooks/use-solana-name";
@@ -39,6 +40,12 @@ export function ProfileHeader() {
   const { user } = usePrivy();
   const { walletAddress } = useSolanaContext();
   const { totalUsdc, positionCount } = useAggregatePersonalBalance();
+  // "$0.00 working · 0 positions" answers what is invested and says nothing about
+  // what is HERE. On an empty account that reads as an empty account, and the
+  // dollars sitting in the wallet — the ones this screen exists to put to work —
+  // were not on it anywhere.
+  const { assets } = useWalletAssets();
+  const walletUsd = assets.reduce((sum, a) => sum + (a.usdValue ?? 0), 0);
 
   const address = walletAddress?.toBase58() ?? user?.wallet?.address ?? null;
   const solName = useSolanaName(address);
@@ -140,6 +147,9 @@ export function ProfileHeader() {
 
       <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-ink/50">
         <Stat icon={Wallet} text={t("profile.working", { value: `$${formatUsdAmount(totalUsdc)}` })} />
+        {walletUsd > 0.005 && (
+          <Stat icon={Wallet} text={t("profile.inWallet", { value: `$${formatUsdAmount(walletUsd)}` })} />
+        )}
         <Stat icon={Layers} text={t("profile.positions", { n: String(positionCount) })} />
         {joined && <Stat icon={Clock} text={t("profile.joined", { date: joined })} />}
       </div>

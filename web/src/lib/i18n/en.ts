@@ -406,6 +406,7 @@ export const en = {
   "profile.working": "{value} working",
   "profile.allTogether": "everything, all together",
   "profile.positions": "{n} positions",
+  "profile.inWallet": "{value} in your wallet",
   "profile.joined": "here since {date}",
   "money.working": "already working",
   "money.fund.title": "Top up",

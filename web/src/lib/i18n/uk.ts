@@ -375,6 +375,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "profile.working": "{value} працює",
   "profile.allTogether": "усе разом",
   "profile.positions": "позицій: {n}",
+  "profile.inWallet": "{value} у гаманці",
   "profile.joined": "тут із {date}",
   "money.working": "вже працюють",
   "money.fund.title": "Поповнити",

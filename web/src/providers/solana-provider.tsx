@@ -28,14 +28,15 @@ export interface WalletSigner {
   publicKey: PublicKey;
   signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T>;
   /**
-   * Sign SEVERAL transactions behind one prompt, returning the signed bytes.
+   * Sign SEVERAL transactions behind one prompt and broadcast them, returning a
+   * signature per transaction, in order.
    *
-   * Optional: present when the connected wallet supports it. Raw bytes rather than
-   * rebuilt objects because external wallets can't be round-tripped through
-   * `Transaction.from` — the same reason `signAndSend` broadcasts their bytes
-   * directly (see below).
+   * Optional: present when the connected wallet supports batch signing. Sending
+   * belongs in here rather than at the call site because gas does: the gasless
+   * relayer is the fee payer and the broadcaster, and a caller that signed a batch
+   * and sent it itself would quietly bill the user for their own gas.
    */
-  signAllRaw?(txs: (Transaction | VersionedTransaction)[]): Promise<Uint8Array[]>;
+  signAllAndSend?(txs: (Transaction | VersionedTransaction)[]): Promise<string[]>;
   /**
    * Sign AND broadcast a transaction; returns the signature. External (mobile)
    * wallets can't round-trip a signed tx back through our deserialize (it fails
@@ -297,14 +298,57 @@ class PrivySolanaAdapter implements WalletSigner {
     return (tx as VersionedTransaction).serialize();
   }
 
-  /** Present only when the provider handed us Privy's batch signer. */
-  get signAllRaw(): ((txs: (Transaction | VersionedTransaction)[]) => Promise<Uint8Array[]>) | undefined {
+  /**
+   * One prompt for a whole basket — and the same gas story as one at a time.
+   *
+   * Kora pays when it can: every transaction is rebuilt onto the relayer's fee payer
+   * and its blockhash BEFORE the batch is signed, then each signed transaction goes
+   * back to Kora to be co-signed and broadcast. Skipping that is what made a basket
+   * bill the user for gas they were told they didn't need — and on a wallet with
+   * almost no SOL it failed by the row.
+   *
+   * Present only when the provider handed us Privy's batch signer.
+   */
+  get signAllAndSend(): ((txs: (Transaction | VersionedTransaction)[]) => Promise<string[]>) | undefined {
     const batch = this._batchSign;
     if (!batch) return undefined;
+
     return async (txs) => {
-      const bytes: Uint8Array[] = [];
-      for (const tx of txs) bytes.push(await this._toBytes(tx));
-      return batch(bytes);
+      if (koraEnabled()) {
+        try {
+          const [payer, blockhash] = await Promise.all([koraPayer(), koraBlockhash()]);
+          const koraPk = new PublicKey(payer);
+          const prepared: (Transaction | VersionedTransaction)[] = [];
+          for (const tx of txs) {
+            prepared.push(
+              tx instanceof Transaction
+                ? buildKoraLegacyTx(tx, this._publicKey, koraPk, blockhash)
+                : await rebuildV0WithKora(tx, this._publicKey, koraPk, blockhash, this._connection),
+            );
+          }
+          const unsigned = prepared.map((t) =>
+            t instanceof Transaction
+              ? t.serialize({ requireAllSignatures: false, verifySignatures: false })
+              : t.serialize(),
+          );
+          const signed = await batch(unsigned);
+          const sigs: string[] = [];
+          for (const bytes of signed) sigs.push(await koraSignAndSend(bytes));
+          return sigs;
+        } catch (e) {
+          // Same rule as the single-transaction path: a relayer that can't take this
+          // basket is a reason to pay our own gas, not a reason to fail. The user is
+          // asked once more only because the batch has to be rebuilt.
+          reportGaslessFailure(this._publicKey.toBase58(), "bulk", e);
+        }
+      }
+
+      const unsigned: Uint8Array[] = [];
+      for (const tx of txs) unsigned.push(await this._toBytes(tx));
+      const signed = await batch(unsigned);
+      const sigs: string[] = [];
+      for (const bytes of signed) sigs.push(await this._connection.sendRawTransaction(bytes));
+      return sigs;
     };
   }
 
