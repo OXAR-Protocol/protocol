@@ -94,6 +94,16 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
           showWalletLoginFirst: false,
         },
         embeddedWallets: {
+          // Privy draws its own confirmation for every signature the embedded wallet
+          // makes. With a basket signed as one batch that is still one prompt PER
+          // TRANSACTION — three assets, three taps, which is the thing the batch was
+          // supposed to remove. Turning it off makes our own hold-to-confirm the one
+          // gate, which is where the amounts, the fee and the route are already shown.
+          //
+          // Deploy-time switch, not a live one, and off by default: it removes a
+          // confirmation step from the money path, so it gets a preview and a
+          // deliberate decision rather than a merge.
+          showWalletUIs: process.env.NEXT_PUBLIC_PRIVY_SILENT_SIGN === "1" ? false : undefined,
           solana: {
             // Create an embedded wallet ONLY for users who have no wallet of their
             // own (email/social login). A wallet-login user operates from their own
