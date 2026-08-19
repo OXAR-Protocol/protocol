@@ -145,7 +145,7 @@ export function ProfileHeader() {
         </button>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-ink/50">
+      <div className="mb-6 mt-5 flex flex-wrap items-center gap-x-5 gap-y-2.5 text-[12px] text-ink/50">
         <Stat icon={Wallet} text={t("profile.working", { value: `$${formatUsdAmount(totalUsdc)}` })} />
         {walletUsd > 0.005 && (
           <Stat icon={Wallet} text={t("profile.inWallet", { value: `$${formatUsdAmount(walletUsd)}` })} />
