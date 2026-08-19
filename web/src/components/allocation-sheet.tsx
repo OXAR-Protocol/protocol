@@ -10,6 +10,7 @@ import { AssetIcon } from "@/components/asset-icon";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 import { SwipeToConfirm } from "@/components/swipe-to-confirm";
 import { useFeature } from "@/hooks/use-features";
+import { useSolanaContext } from "@/providers/solana-provider";
 import { useT } from "@/lib/i18n";
 
 export interface AllocationRow {
@@ -104,7 +105,12 @@ export function AllocationSheet({
   onClose,
 }: Props) {
   const { t } = useT();
-  const oneSignature = useFeature("bulk-one-signature");
+  // Promised only where it's true. The basket is signed once when the wallet has a
+  // "sign all of these" to call; over a connection where it doesn't, the same basket
+  // costs a confirmation per transaction, and a line claiming otherwise is the kind
+  // of small lie that teaches people to stop reading the lines.
+  const { onePrompt } = useSolanaContext();
+  const oneSignature = useFeature("bulk-one-signature") && onePrompt;
   const [amounts, setAmounts] = useState<Record<string, string>>({});
   // Which rows are being typed in units rather than dollars. Per row, because a
   // basket can hold a share and a lending market at once, and only one of those has

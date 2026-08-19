@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 
-import { useSolanaContext } from "@/providers/solana-provider";
+import { useSolanaContext, type BatchSendResult } from "@/providers/solana-provider";
 import { useFeature } from "@/hooks/use-features";
 import { getProvider, toFriendlyError, isCancellation, toBaseUnits } from "@/lib/yield";
 import { recordBasisDelta } from "@/lib/earnings/pending-basis";
@@ -125,11 +125,11 @@ export function useBulkTrade() {
         }
 
         if (built.length) {
-          let sigs: string[];
+          let sent: BatchSendResult[];
           try {
             // Signs the batch AND broadcasts it — through the gasless relayer when it
             // can, which is why sending isn't done here. See `signAllAndSend`.
-            sigs = await wallet.signAllAndSend(built.map((b) => b.tx));
+            sent = await wallet.signAllAndSend(built.map((b) => b.tx));
           } catch (e) {
             console.error("Bulk signing failed:", e);
             const cancelled = isCancellation(e);
@@ -145,8 +145,18 @@ export function useBulkTrade() {
           // its own fate, which is what the per-row result is for.
           for (let i = 0; i < built.length; i++) {
             const { job, basisDelta } = built[i]!;
+            const sig = sent[i]?.signature;
+            if (!sig) {
+              // Signed, but never made it onto the network. Its neighbours may well
+              // have — reported here, per row, rather than as one failed basket.
+              const e = sent[i]?.error;
+              console.error(`Bulk ${job.kind} send failed for ${job.id}:`, e);
+              outcomes.push({ id: job.id, ok: false, error: toFriendlyError(e) });
+              setDone([...outcomes]);
+              continue;
+            }
             try {
-              await connection.confirmTransaction(sigs[i]!, "confirmed");
+              await connection.confirmTransaction(sig, "confirmed");
               if (basisDelta !== 0) {
                 recordBasisDelta(walletAddress.toBase58(), job.id, basisDelta);
               }

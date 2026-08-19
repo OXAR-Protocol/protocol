@@ -22,22 +22,41 @@ import { RPC_URL, WSS_URL, browserRpcEndpoint } from "@/lib/constants";
 import { clearCache } from "@/lib/cache";
 import { deriveSolanaWallets, hasExternalSolanaWallet } from "@/lib/wallet/solana-wallets";
 import { injectedBatchSign, type BatchSign } from "@/lib/wallet/injected-batch";
-import { koraEnabled, koraPayer, koraBlockhash, koraSignAndSend, reportGaslessFailure } from "@/lib/gas/kora";
+import {
+  koraEnabled,
+  koraPayer,
+  koraBlockhash,
+  koraSignAndSend,
+  reportGaslessFailure,
+  bulkGaslessAvailable,
+  markBulkGaslessBroken,
+} from "@/lib/gas/kora";
+
+/** What became of one transaction in a signed batch: a signature, or why not. */
+export interface BatchSendResult {
+  signature?: string;
+  error?: unknown;
+}
 
 /** Minimal wallet signer — what yield providers need to sign + send. */
 export interface WalletSigner {
   publicKey: PublicKey;
   signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T>;
   /**
-   * Sign SEVERAL transactions behind one prompt and broadcast them, returning a
-   * signature per transaction, in order.
+   * Sign SEVERAL transactions behind one prompt and broadcast them, reporting each
+   * one's fate in order.
    *
    * Optional: present when the connected wallet supports batch signing. Sending
    * belongs in here rather than at the call site because gas does: the gasless
    * relayer is the fee payer and the broadcaster, and a caller that signed a batch
    * and sent it itself would quietly bill the user for their own gas.
+   *
+   * Per transaction, not all-or-nothing: one signature covers the basket, but each
+   * transaction still has its own fate on the network. Throwing on the first bad
+   * send would report a sale that DID land as failed, and the obvious next move —
+   * selling it again — is one the wallet no longer can.
    */
-  signAllAndSend?(txs: (Transaction | VersionedTransaction)[]): Promise<string[]>;
+  signAllAndSend?(txs: (Transaction | VersionedTransaction)[]): Promise<BatchSendResult[]>;
   /**
    * Sign AND broadcast a transaction; returns the signature. External (mobile)
    * wallets can't round-trip a signed tx back through our deserialize (it fails
@@ -62,6 +81,11 @@ interface SolanaContextValue {
   /** True when a real signer is connected (not the read-only fallback). Background
    *  flows (e.g. the pending-bridge deposit) must wait for this before signing. */
   canSign: boolean;
+  /** True when a basket really does cost ONE wallet confirmation. The embedded
+   *  wallet always can; an external one can when its own `signAllTransactions` is
+   *  reachable. Over WalletConnect it isn't, and the basket costs a prompt per
+   *  transaction — which the sheet has to say rather than promise otherwise. */
+  onePrompt: boolean;
 }
 
 const SolanaContext = createContext<SolanaContextValue>({
@@ -72,6 +96,7 @@ const SolanaContext = createContext<SolanaContextValue>({
   retryCreateWallet: () => {},
   isExternal: false,
   canSign: false,
+  onePrompt: false,
 });
 
 export function useSolanaContext() {
@@ -310,12 +335,20 @@ class PrivySolanaAdapter implements WalletSigner {
    *
    * Present only when the provider handed us Privy's batch signer.
    */
-  get signAllAndSend(): ((txs: (Transaction | VersionedTransaction)[]) => Promise<string[]>) | undefined {
+  get signAllAndSend():
+    | ((txs: (Transaction | VersionedTransaction)[]) => Promise<BatchSendResult[]>)
+    | undefined {
     const batch = this._batchSign;
     if (!batch) return undefined;
 
     return async (txs) => {
-      if (koraEnabled()) {
+      // Gasless is decided BEFORE the wallet is asked, and never after. Falling back
+      // once a signature exists means rebuilding the basket onto our own gas and
+      // showing the same confirmation a second time — which is what happened: two
+      // identical sheets for one basket, and the second one signed transactions the
+      // first attempt had already made stale.
+      let unsigned: Uint8Array[] | null = null;
+      if (bulkGaslessAvailable()) {
         try {
           const [payer, blockhash] = await Promise.all([koraPayer(), koraBlockhash()]);
           const koraPk = new PublicKey(payer);
@@ -327,29 +360,48 @@ class PrivySolanaAdapter implements WalletSigner {
                 : await rebuildV0WithKora(tx, this._publicKey, koraPk, blockhash, this._connection),
             );
           }
-          const unsigned = prepared.map((t) =>
+          unsigned = prepared.map((t) =>
             t instanceof Transaction
               ? t.serialize({ requireAllSignatures: false, verifySignatures: false })
               : t.serialize(),
           );
-          const signed = await batch(unsigned);
-          const sigs: string[] = [];
-          for (const bytes of signed) sigs.push(await koraSignAndSend(bytes));
-          return sigs;
         } catch (e) {
-          // Same rule as the single-transaction path: a relayer that can't take this
-          // basket is a reason to pay our own gas, not a reason to fail. The user is
-          // asked once more only because the batch has to be rebuilt.
-          reportGaslessFailure(this._publicKey.toBase58(), "bulk", e);
+          // Nothing has been signed yet, so paying our own gas costs the user
+          // nothing but the fee — the prompt below is still their first.
+          reportGaslessFailure(this._publicKey.toBase58(), "bulk-prepare", e);
+          unsigned = null;
         }
       }
 
-      const unsigned: Uint8Array[] = [];
-      for (const tx of txs) unsigned.push(await this._toBytes(tx));
+      const viaKora = unsigned !== null;
+      if (!unsigned) {
+        unsigned = [];
+        for (const tx of txs) unsigned.push(await this._toBytes(tx));
+      }
+
+      // The one prompt. A refusal here throws — nothing was signed, and the caller
+      // reports the basket as stopped.
       const signed = await batch(unsigned);
-      const sigs: string[] = [];
-      for (const bytes of signed) sigs.push(await this._connection.sendRawTransaction(bytes));
-      return sigs;
+
+      const results: BatchSendResult[] = [];
+      for (const bytes of signed) {
+        try {
+          results.push({
+            signature: viaKora
+              ? await koraSignAndSend(bytes)
+              : await this._connection.sendRawTransaction(bytes),
+          });
+        } catch (e) {
+          if (viaKora) {
+            reportGaslessFailure(this._publicKey.toBase58(), "bulk-send", e);
+            // Not for this basket — it's signed, and re-asking is the thing we're
+            // fixing. For the next one, which pays its own gas and asks once.
+            markBulkGaslessBroken();
+          }
+          results.push({ error: e });
+        }
+      }
+      return results;
     };
   }
 
@@ -445,9 +497,9 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
       });
   }, [authenticated, user, solanaAddress, createSolanaWallet]);
 
-  const { wallet, walletAddress } = useMemo(() => {
+  const { wallet, walletAddress, onePrompt } = useMemo(() => {
     if (!solanaAddress) {
-      return { wallet: null, walletAddress: null };
+      return { wallet: null, walletAddress: null, onePrompt: false };
     }
     const pubkey = new PublicKey(solanaAddress);
     // SAFETY: Privy types the batch input against its own connected-wallet type,
@@ -470,16 +522,21 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
     // asked for two signatures. Their own `signAllTransactions` is the one call that
     // doesn't — and when it isn't there (WalletConnect, locked, another account
     // selected), Privy's path still works, one prompt per transaction, as before.
-    const batchSign = (isExternalActive ? injectedBatchSign(solanaAddress) : null) ?? privyBatch;
+    const injected = isExternalActive ? injectedBatchSign(solanaAddress) : null;
+    const batchSign = injected ?? privyBatch;
     const signer: WalletSigner = connectedWallet
       ? new PrivySolanaAdapter(pubkey, connectedWallet, connection, isExternalActive, batchSign)
       : new ReadOnlyWallet(pubkey);
-    return { wallet: signer, walletAddress: pubkey };
+    return {
+      wallet: signer,
+      walletAddress: pubkey,
+      onePrompt: !!connectedWallet && (!isExternalActive || !!injected),
+    };
   }, [solanaAddress, connectedWallet, connection, isExternalActive, signSolanaTransaction]);
 
   return (
     <SolanaContext.Provider
-      value={{ connection, wallet, walletAddress, walletError, retryCreateWallet, isExternal: isExternalActive, canSign: !!connectedWallet }}
+      value={{ connection, wallet, walletAddress, walletError, retryCreateWallet, isExternal: isExternalActive, canSign: !!connectedWallet, onePrompt }}
     >
       {children}
     </SolanaContext.Provider>

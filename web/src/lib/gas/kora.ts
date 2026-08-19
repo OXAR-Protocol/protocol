@@ -10,6 +10,24 @@
  */
 const PROXY_URL = "/api/kora";
 
+/**
+ * The relayer let a basket down after it had already been signed — for the rest of
+ * this visit, baskets pay their own gas instead.
+ *
+ * A basket is signed once, up front, so there is no falling back mid-flight: asking
+ * again is a second identical confirmation for a basket the user already approved.
+ * The only honest place to react is the NEXT basket, which is what this is for. It
+ * doesn't touch single transactions — those still try gasless first and fall back
+ * before anything is signed.
+ */
+let bulkGaslessBroken = false;
+export function markBulkGaslessBroken(): void {
+  bulkGaslessBroken = true;
+}
+export function bulkGaslessAvailable(): boolean {
+  return koraEnabled() && !bulkGaslessBroken;
+}
+
 /** Gated by a public flag so the client knows whether the node is wired without a probe. */
 export function koraEnabled(): boolean {
   return process.env.NEXT_PUBLIC_KORA_ENABLED === "1";
