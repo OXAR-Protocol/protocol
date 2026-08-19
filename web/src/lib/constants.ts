@@ -8,6 +8,39 @@ export type { YieldSourceConfig, ApyBucket, ApyBucketConfig } from "@oxar/sdk";
 export const RPC_URL =
   process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
 
+/**
+ * Where the browser sends its RPC calls.
+ *
+ * `NEXT_PUBLIC_SOLANA_RPC_URL` carries the api-key into the bundle, so anyone can
+ * read it and spend our quota. With `NEXT_PUBLIC_RPC_PROXY=1` the browser talks to
+ * our own `/api/rpc` instead and the key stays on the server. Off by default: this
+ * moves every RPC call the app makes onto a serverless function, and that is a
+ * change to test on a preview before it carries the money path in production.
+ *
+ * Server code keeps using `RPC_URL` directly — it is already on the side of the
+ * wall where the key belongs.
+ */
+export const RPC_PROXY_ENABLED = process.env.NEXT_PUBLIC_RPC_PROXY === "1";
+
+/** HTTP endpoint for browser-side RPC. Absolute, because wallet libraries build
+ *  `URL`s from it and a bare path fails that. */
+export function browserRpcEndpoint(): string {
+  if (!RPC_PROXY_ENABLED || typeof window === "undefined") return RPC_URL;
+  return `${window.location.origin}/api/rpc`;
+}
+
+/**
+ * Websocket endpoint for live balance updates.
+ *
+ * Subscriptions can't run through a serverless function, so this connects to Helius
+ * directly and whatever key it carries IS public. Give it its own key, locked to our
+ * domains in the Helius dashboard, and keep the working key server-side; without
+ * this set it falls back to deriving one from `RPC_URL`, which is today's behaviour
+ * and today's leak.
+ */
+export const WSS_URL =
+  process.env.NEXT_PUBLIC_SOLANA_WSS_URL || RPC_URL.replace("https://", "wss://");
+
 // Mainnet USDC mint — the asset all v1 yield providers accept.
 export const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 export const USDC_DECIMALS = 6;
