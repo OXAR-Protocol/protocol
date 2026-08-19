@@ -111,7 +111,7 @@ export function useBulkTrade() {
       // The trade-off moves rather than disappears: a refusal now costs the whole
       // basket instead of the rest of it, and a send can still fail after the
       // signature. Both are reported per row, as before.
-      if (oneSignature && wallet.signAllRaw && jobs.length > 1) {
+      if (oneSignature && wallet.signAllAndSend && jobs.length > 1) {
         const built: { job: BulkTradeJob; tx: Transaction | VersionedTransaction; basisDelta: number }[] = [];
         for (const job of jobs) {
           try {
@@ -125,9 +125,11 @@ export function useBulkTrade() {
         }
 
         if (built.length) {
-          let signed: Uint8Array[];
+          let sigs: string[];
           try {
-            signed = await wallet.signAllRaw(built.map((b) => b.tx));
+            // Signs the batch AND broadcasts it — through the gasless relayer when it
+            // can, which is why sending isn't done here. See `signAllAndSend`.
+            sigs = await wallet.signAllAndSend(built.map((b) => b.tx));
           } catch (e) {
             console.error("Bulk signing failed:", e);
             const cancelled = isCancellation(e);
@@ -139,14 +141,12 @@ export function useBulkTrade() {
             return outcomes;
           }
 
-          // Sent one after another rather than all at once: they are separate
-          // transactions on the same wallet, and firing them together races the
-          // same blockhash the way the old loop was careful not to.
+          // Confirmed one after another: they are separate transactions and each has
+          // its own fate, which is what the per-row result is for.
           for (let i = 0; i < built.length; i++) {
             const { job, basisDelta } = built[i]!;
             try {
-              const sig = await connection.sendRawTransaction(signed[i]!);
-              await connection.confirmTransaction(sig, "confirmed");
+              await connection.confirmTransaction(sigs[i]!, "confirmed");
               if (basisDelta !== 0) {
                 recordBasisDelta(walletAddress.toBase58(), job.id, basisDelta);
               }
