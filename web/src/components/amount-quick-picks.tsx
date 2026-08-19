@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
+import { FractionChips } from "@/components/fraction-chips";
 import { useT } from "@/lib/i18n";
 
 const FRACTIONS = [0.1, 0.25, 0.5, 1] as const;
@@ -32,19 +33,11 @@ export function AmountQuickPicks({
 
   return (
     <div className="mt-2">
-      <div className="flex gap-1.5">
-        {FRACTIONS.map((f) => (
-          <button
-            key={f}
-            type="button"
-            disabled={disabled || available <= 0}
-            onClick={() => onPick(available * f)}
-            className="flex-1 rounded-full border border-ink/15 py-1.5 text-[11px] lowercase tracking-wide text-ink/55 transition hover:border-ink/40 hover:text-ink disabled:opacity-40"
-          >
-            {f === 1 ? t("rail.max") : `${f * 100}%`}
-          </button>
-        ))}
-      </div>
+      <FractionChips
+        options={FRACTIONS.map((f) => ({ value: f, label: f === 1 ? t("rail.max") : `${f * 100}%` }))}
+        onPick={(f) => onPick(available * f)}
+        disabled={disabled || available <= 0}
+      />
 
       <div className="mt-2 flex items-center gap-1.5 text-[11px] tabular-nums text-ink/40">
         <span>

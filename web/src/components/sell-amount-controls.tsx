@@ -4,6 +4,7 @@ import { ArrowUpDown } from "lucide-react";
 
 import { floorToCents, centPrecision, floorTo } from "@oxar/sdk";
 
+import { FractionChips } from "@/components/fraction-chips";
 import { useT } from "@/lib/i18n";
 
 /** Quick fractions of the position. 100% is offered as its own button below. */
@@ -49,56 +50,45 @@ export function SellAmountControls({
   // would only widen the gap it has to forgive.
   const setFraction = (f: number) => onAmountChange(floorToCents(positionValue * f));
 
-  const chip = (active: boolean) =>
-    `rounded-full px-2.5 py-1 text-[11px] lowercase tracking-wide transition ${
-      active ? "bg-ink text-paper" : "bg-ink/[0.05] text-ink/55 hover:text-ink"
-    } disabled:cursor-not-allowed disabled:opacity-40`;
-
   const heldUnits = canShowUnits ? positionValue / unitPriceUsd! : 0;
 
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-1.5">
-      {FRACTIONS.map((f) => (
-        <button
-          key={f}
-          type="button"
-          disabled={disabled || positionValue <= 0}
-          onClick={() => setFraction(f)}
-          className={chip(Math.abs(amount - positionValue * f) < 0.005 && amount > 0)}
-        >
-          {f * 100}%
-        </button>
-      ))}
-      <button
-        type="button"
+    <div className="mt-2">
+      <FractionChips
+        options={[
+          ...FRACTIONS.map((f) => ({ value: f, label: `${f * 100}%` })),
+          { value: 1, label: t("rail.sellAll") },
+        ]}
+        // The full exit passes the position through untouched — see setFraction.
+        onPick={(f) => (f === 1 ? onAmountChange(positionValue) : setFraction(f))}
+        isActive={(f) =>
+          f === 1
+            ? amount >= positionValue && positionValue > 0
+            : Math.abs(amount - positionValue * f) < 0.005 && amount > 0
+        }
         disabled={disabled || positionValue <= 0}
-        onClick={() => onAmountChange(positionValue)}
-        className={chip(amount >= positionValue && positionValue > 0)}
-      >
-        {t("rail.sellAll")}
-      </button>
+      />
 
       {canShowUnits && (
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={onToggleUnits}
-          className="ml-auto inline-flex items-center gap-1.5 text-[11px] lowercase tracking-wide text-ink/40 transition hover:text-ink/70"
-          title={t("rail.switchUnits")}
-          aria-label={t("rail.switchUnits")}
-        >
-          <ArrowUpDown size={12} strokeWidth={1.5} />
-          {inUnits ? "USDC" : unitLabel}
-        </button>
-      )}
-
-      {canShowUnits && (
-        <span className="w-full text-[11px] tabular-nums text-ink/35">
-          {t("rail.youHold", {
-            n: String(floorTo(heldUnits, centPrecision(unitPriceUsd!))),
-            sym: unitLabel!,
-          })}
-        </span>
+        <div className="mt-2 flex items-center justify-between gap-2 text-[11px]">
+          <span className="tabular-nums text-ink/35">
+            {t("rail.youHold", {
+              n: String(floorTo(heldUnits, centPrecision(unitPriceUsd!))),
+              sym: unitLabel!,
+            })}
+          </span>
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={onToggleUnits}
+            className="inline-flex items-center gap-1.5 lowercase tracking-wide text-ink/40 transition hover:text-ink/70"
+            title={t("rail.switchUnits")}
+            aria-label={t("rail.switchUnits")}
+          >
+            <ArrowUpDown size={12} strokeWidth={1.5} />
+            {inUnits ? "USDC" : unitLabel}
+          </button>
+        </div>
       )}
     </div>
   );
