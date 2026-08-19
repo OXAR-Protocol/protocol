@@ -45,7 +45,10 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
   const { t } = useT();
   const bulk = useBulkTrade();
   const money = useBasketBuy(bulk.run);
-  const [sheet, setSheet] = useState<"buy" | "sell" | null>(null);
+  const [open, setOpen] = useState(false);
+  // Which way the money goes. The sheet asks; this remembers, because the rows and
+  // the budget it shows are different questions in each direction.
+  const [mode, setMode] = useState<"buy" | "sell">("buy");
   const [funding, setFunding] = useState(false);
   // Which way the money is going in the run that's happening — the sheet can be
   // closed while it runs, and "buying 2 of 3" under a sale is a lie.
@@ -92,7 +95,7 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
   const finish = (outcomes: { id: string; ok: boolean }[], clearOnSuccess: boolean) => {
     onOutcome(new Set(outcomes.filter((o) => !o.ok).map((o) => o.id)));
     if (outcomes.length > 0 && outcomes.every((o) => o.ok)) {
-      setSheet(null);
+      setOpen(false);
       if (clearOnSuccess) onClear();
       // A finished run must not colour the next selection.
       bulk.reset();
@@ -126,13 +129,21 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
   // takes over the screen, so the basket steps aside for it and comes back after.
   const openFunding = () => {
     money.setError(null);
-    setSheet(null);
+    setOpen(false);
     setFunding(true);
   };
   const closeFunding = () => {
     setFunding(false);
     void Promise.resolve(money.refreshAssets()).catch((e: unknown) => money.setError(toFriendlyError(e)));
-    setSheet("buy");
+    setOpen(true);
+  };
+
+  /** Opening the basket picks the likelier errand for this screen — everything you
+   *  already hold is a basket you're probably leaving; anything else, you're buying.
+   *  The sheet still asks, this just decides which rows it opens on. */
+  const openBasket = () => {
+    setMode(held.length === picked.size && picked.size > 0 ? "sell" : "buy");
+    setOpen(true);
   };
 
   const busy = bulk.state === "running" || money.converting;
@@ -146,11 +157,6 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
         heldUsd={heldUsd}
         state={bulk.state}
         done={bulk.done.map((d) => ({ ...d, id: views.find((v) => v.id === d.id)?.name ?? d.id }))}
-        verbs={{ buy: t(verbs.buy), sell: t(verbs.sell) }}
-        canSell={held.length > 0}
-        // On a basket you already own, leaving is the likelier errand — so that's
-        // the filled button. On the market it's the other way round.
-        primary={held.length === picked.size && picked.size > 0 ? "sell" : "buy"}
         progress={
           bulk.state === "running"
             ? t(running === "sell" ? "bulk.progressSell" : "bulk.progressBuy", {
@@ -159,24 +165,28 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
               })
             : null
         }
-        onBuy={() => setSheet("buy")}
-        onSellAll={() => void sell({})}
-        onSellAmounts={() => setSheet("sell")}
+        onOpen={openBasket}
         onClear={() => {
           onClear();
           bulk.reset();
         }}
       />
 
-      {sheet && (
+      {open && (
         <AllocationSheet
-          mode={sheet}
-          rows={sheet === "buy" ? buyRows : sellRows}
-          {...(sheet === "buy" ? { budgetUsd: money.budgetUsd, cashUsd: money.cashUsd, onSwap } : {})}
+          mode={mode}
+          rows={mode === "buy" ? buyRows : sellRows}
+          {...(mode === "buy" ? { budgetUsd: money.budgetUsd, cashUsd: money.cashUsd, onSwap } : {})}
+          verbs={{ buy: t(verbs.buy), sell: t(verbs.sell) }}
+          canSell={held.length > 0}
+          heldUsdById={Object.fromEntries(
+            held.map((v) => [v.id, fromBaseUnits(v.underlyingBalance, v.decimals)]),
+          )}
+          onMode={setMode}
           busy={busy}
           results={bulk.results}
           payWith={
-            sheet === "buy" ? (
+            mode === "buy" ? (
               <>
                 <div className="flex items-center gap-2 rounded-[10px] border border-ink/10 px-3 py-2.5">
                   <Wallet size={14} strokeWidth={1.5} className="shrink-0 text-ink/40" />
@@ -205,16 +215,16 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
             busy
               ? money.converting
                 ? t("alloc.converting")
-                : t(sheet === "sell" ? "bulk.progressSell" : "bulk.progressBuy", {
+                : t(mode === "sell" ? "bulk.progressSell" : "bulk.progressBuy", {
                     n: String(bulk.done.length),
-                    total: String(sheet === "sell" ? sellRows.length : buyRows.length),
+                    total: String(mode === "sell" ? sellRows.length : buyRows.length),
                   })
               : null
           }
           error={money.error}
-          onConfirm={sheet === "buy" ? buy : sell}
+          onConfirm={mode === "buy" ? buy : sell}
           onClose={() => {
-            setSheet(null);
+            setOpen(false);
             money.setError(null);
             bulk.reset();
           }}
