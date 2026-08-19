@@ -20,10 +20,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className={`${dmSans.variable} ${dmSans.className} app-texture min-h-screen text-ink`}>
       <Suspense fallback={null}>
         <AccessWall>
-          <Providers>
-            <SignInGateProvider>
-              <WarpProvider>
-                <WarpOnEntry />
+          {/* The warp sits ABOVE Providers on purpose. PrivyProvider reads its config
+              at mount, so it is keyed by the theme and that subtree remounts on every
+              light↔dark switch. With the warp inside it, changing the theme replayed
+              the three-second entry animation — which reads as the app reloading
+              itself for a colour. Nothing in the warp needs Privy or the locale. */}
+          <WarpProvider>
+            <WarpOnEntry />
+            <Providers>
+              <SignInGateProvider>
                 <AuthGuard>
                   <PullToRefresh />
                   {/* Flex column so the photo footer sits pinned below the content (never
@@ -41,9 +46,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       welcome/tour — never both on screen. See `TermsAndIntroGate`. */}
                   <TermsAndIntroGate />
                 </AuthGuard>
-              </WarpProvider>
-            </SignInGateProvider>
-          </Providers>
+              </SignInGateProvider>
+            </Providers>
+          </WarpProvider>
         </AccessWall>
       </Suspense>
     </div>
