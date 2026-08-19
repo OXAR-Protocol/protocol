@@ -11,7 +11,11 @@ import {
 } from "react";
 import { Connection, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { usePrivy } from "@privy-io/react-auth";
-import { useWallets as useSolanaWallets, useCreateWallet as useCreateSolanaWallet } from "@privy-io/react-auth/solana";
+import {
+  useWallets as useSolanaWallets,
+  useCreateWallet as useCreateSolanaWallet,
+  useSignTransaction as useSolanaSignTransaction,
+} from "@privy-io/react-auth/solana";
 import { buildKoraLegacyTx, rebuildV0WithKora, SOL_SPONSORED_RESERVE } from "@oxar/sdk";
 import { UserFacingError } from "@/lib/yield";
 import { RPC_URL, WSS_URL, browserRpcEndpoint } from "@/lib/constants";
@@ -23,6 +27,15 @@ import { koraEnabled, koraPayer, koraBlockhash, koraSignAndSend, reportGaslessFa
 export interface WalletSigner {
   publicKey: PublicKey;
   signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T>;
+  /**
+   * Sign SEVERAL transactions behind one prompt, returning the signed bytes.
+   *
+   * Optional: present when the connected wallet supports it. Raw bytes rather than
+   * rebuilt objects because external wallets can't be round-tripped through
+   * `Transaction.from` — the same reason `signAndSend` broadcasts their bytes
+   * directly (see below).
+   */
+  signAllRaw?(txs: (Transaction | VersionedTransaction)[]): Promise<Uint8Array[]>;
   /**
    * Sign AND broadcast a transaction; returns the signature. External (mobile)
    * wallets can't round-trip a signed tx back through our deserialize (it fails
@@ -117,17 +130,29 @@ interface PrivyWalletLike {
   address: string;
 }
 
+/** Sign a batch, given already-serialized unsigned transactions. Supplied by the
+ *  provider, which is where Privy's hook can be called. */
+export type BatchSign = (txBytes: Uint8Array[]) => Promise<Uint8Array[]>;
+
 class PrivySolanaAdapter implements WalletSigner {
   private _publicKey: PublicKey;
   private _wallet: PrivyWalletLike;
   private _connection: Connection;
   private _isExternal: boolean;
+  private _batchSign?: BatchSign;
 
-  constructor(pubkey: PublicKey, wallet: PrivyWalletLike, connection: Connection, isExternal: boolean) {
+  constructor(
+    pubkey: PublicKey,
+    wallet: PrivyWalletLike,
+    connection: Connection,
+    isExternal: boolean,
+    batchSign?: BatchSign,
+  ) {
     this._publicKey = pubkey;
     this._wallet = wallet;
     this._connection = connection;
     this._isExternal = isExternal;
+    this._batchSign = batchSign;
   }
 
   get publicKey(): PublicKey {
@@ -256,9 +281,9 @@ class PrivySolanaAdapter implements WalletSigner {
     return this._connection.sendRawTransaction(signed.serialize());
   }
 
-  async signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T> {
-    let txBytes: Uint8Array;
-
+  /** Unsigned wire bytes, with the two fields a legacy transaction may still be
+   *  missing filled in. Shared by the one-at-a-time and the batch paths. */
+  private async _toBytes(tx: Transaction | VersionedTransaction): Promise<Uint8Array> {
     if (tx instanceof Transaction) {
       if (!tx.recentBlockhash) {
         const { blockhash } = await this._connection.getLatestBlockhash();
@@ -267,10 +292,24 @@ class PrivySolanaAdapter implements WalletSigner {
       if (!tx.feePayer) {
         tx.feePayer = this._publicKey;
       }
-      txBytes = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
-    } else {
-      txBytes = (tx as VersionedTransaction).serialize();
+      return tx.serialize({ requireAllSignatures: false, verifySignatures: false });
     }
+    return (tx as VersionedTransaction).serialize();
+  }
+
+  /** Present only when the provider handed us Privy's batch signer. */
+  get signAllRaw(): ((txs: (Transaction | VersionedTransaction)[]) => Promise<Uint8Array[]>) | undefined {
+    const batch = this._batchSign;
+    if (!batch) return undefined;
+    return async (txs) => {
+      const bytes: Uint8Array[] = [];
+      for (const tx of txs) bytes.push(await this._toBytes(tx));
+      return batch(bytes);
+    };
+  }
+
+  async signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T> {
+    const txBytes: Uint8Array = await this._toBytes(tx);
 
     const result = await this._wallet.signTransaction({
       transaction: txBytes,
@@ -295,6 +334,10 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   );
   const { authenticated, user } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
+  // Privy's batch overload: `signTransaction(...inputs)` returns one output per
+  // input, behind a single prompt. This is what turns a five-asset basket from
+  // five signatures into one.
+  const { signTransaction: signSolanaTransaction } = useSolanaSignTransaction();
   const { createWallet: createSolanaWallet } = useCreateSolanaWallet();
 
   const [walletError, setWalletError] = useState<string | null>(null);
@@ -362,11 +405,26 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
       return { wallet: null, walletAddress: null };
     }
     const pubkey = new PublicKey(solanaAddress);
+    // SAFETY: Privy types the batch input against its own connected-wallet type,
+    // which `connectedWallet` is at runtime — it came out of `useSolanaWallets()`.
+    // The local `PrivyWalletLike` shape is ours, deliberately narrower.
+    const batchSign: BatchSign | undefined = connectedWallet
+      ? async (txBytes) => {
+          const inputs = txBytes.map((transaction) => ({
+            transaction,
+            wallet: connectedWallet as never,
+            chain: "solana:mainnet" as const,
+          }));
+          const out = await signSolanaTransaction(...(inputs as [never, ...never[]]));
+          const list = Array.isArray(out) ? out : [out];
+          return list.map((r) => r.signedTransaction);
+        }
+      : undefined;
     const signer: WalletSigner = connectedWallet
-      ? new PrivySolanaAdapter(pubkey, connectedWallet, connection, isExternalActive)
+      ? new PrivySolanaAdapter(pubkey, connectedWallet, connection, isExternalActive, batchSign)
       : new ReadOnlyWallet(pubkey);
     return { wallet: signer, walletAddress: pubkey };
-  }, [solanaAddress, connectedWallet, connection, isExternalActive]);
+  }, [solanaAddress, connectedWallet, connection, isExternalActive, signSolanaTransaction]);
 
   return (
     <SolanaContext.Provider

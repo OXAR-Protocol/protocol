@@ -175,6 +175,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "alloc.confirmSell": "продати {usd}",
   "alloc.confirmBuy": "купити {usd}",
   "alloc.note": "{n} активів = {n} транзакцій",
+  "alloc.noteOneSig": "{n} активів · це {n} транзакцій і один підпис",
   "alloc.leavePartial": "{done} з {total} пройшли. решта - ні. все одно вийти?",
   "alloc.stay": "лишитись",
   "alloc.leave": "вийти",
