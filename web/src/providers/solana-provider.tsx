@@ -21,6 +21,7 @@ import { UserFacingError } from "@/lib/yield";
 import { RPC_URL, WSS_URL, browserRpcEndpoint } from "@/lib/constants";
 import { clearCache } from "@/lib/cache";
 import { deriveSolanaWallets, hasExternalSolanaWallet } from "@/lib/wallet/solana-wallets";
+import { injectedBatchSign, type BatchSign } from "@/lib/wallet/injected-batch";
 import { koraEnabled, koraPayer, koraBlockhash, koraSignAndSend, reportGaslessFailure } from "@/lib/gas/kora";
 
 /** Minimal wallet signer — what yield providers need to sign + send. */
@@ -133,7 +134,7 @@ interface PrivyWalletLike {
 
 /** Sign a batch, given already-serialized unsigned transactions. Supplied by the
  *  provider, which is where Privy's hook can be called. */
-export type BatchSign = (txBytes: Uint8Array[]) => Promise<Uint8Array[]>;
+export type { BatchSign };
 
 class PrivySolanaAdapter implements WalletSigner {
   private _publicKey: PublicKey;
@@ -452,7 +453,7 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
     // SAFETY: Privy types the batch input against its own connected-wallet type,
     // which `connectedWallet` is at runtime — it came out of `useSolanaWallets()`.
     // The local `PrivyWalletLike` shape is ours, deliberately narrower.
-    const batchSign: BatchSign | undefined = connectedWallet
+    const privyBatch: BatchSign | undefined = connectedWallet
       ? async (txBytes) => {
           const inputs = txBytes.map((transaction) => ({
             transaction,
@@ -464,6 +465,12 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
           return list.map((r) => r.signedTransaction);
         }
       : undefined;
+    // Privy's one prompt is Privy's own UI, which an external wallet never shows:
+    // it forwards our batch to Phantom one transaction at a time, so a basket of two
+    // asked for two signatures. Their own `signAllTransactions` is the one call that
+    // doesn't — and when it isn't there (WalletConnect, locked, another account
+    // selected), Privy's path still works, one prompt per transaction, as before.
+    const batchSign = (isExternalActive ? injectedBatchSign(solanaAddress) : null) ?? privyBatch;
     const signer: WalletSigner = connectedWallet
       ? new PrivySolanaAdapter(pubkey, connectedWallet, connection, isExternalActive, batchSign)
       : new ReadOnlyWallet(pubkey);
