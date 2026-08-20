@@ -24,7 +24,6 @@ export function PayWithPicker({
   dollarsUsd,
   disabled,
   onChange,
-  onFund,
 }: {
   /** null = dollars. */
   value: Cashable | null;
@@ -32,8 +31,6 @@ export function PayWithPicker({
   dollarsUsd: number;
   disabled?: boolean;
   onChange: (next: Cashable | null) => void;
-  /** Money in — offered beside the list, since "none of these" is a real answer. */
-  onFund?: () => void;
 }) {
   const { t } = useT();
   const [open, setOpen] = useState(false);
@@ -95,19 +92,16 @@ export function PayWithPicker({
               }}
             />
           ))}
-          {onFund && (
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onFund();
-              }}
-              className="mt-1 w-full rounded-[8px] px-2.5 py-2 text-center text-[12px] lowercase tracking-wide text-ink/50 transition hover:bg-ink/[0.04] hover:text-ink"
-            >
-              {t("wallet.fund")}
-            </button>
-          )}
         </div>
+      )}
+
+      {/* Said whenever the answer isn't dollars, and said before anything is
+          confirmed: paying with a thing means turning it into dollars first, and
+          that is a trade at the market's price, not a transfer at ours. */}
+      {value && (
+        <p className="border-t border-ink/[0.07] px-3 py-2 text-[11px] leading-snug text-ink/45">
+          {t(value.kind === "coin" ? "pay.noteSwap" : "pay.noteSale", { sym: value.symbol })}
+        </p>
       )}
     </div>
   );

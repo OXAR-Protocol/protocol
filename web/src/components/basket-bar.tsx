@@ -1,19 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
-
 import { formatUsdAmount } from "@oxar/sdk";
 
 import { PickBar } from "@/components/pick-bar";
 import { PayWithPicker } from "@/components/pay-with-picker";
 import { AllocationSheet } from "@/components/allocation-sheet";
-import { FundSheet } from "@/components/fund-sheet";
 import { useBulkTrade } from "@/hooks/use-bulk-trade";
 import { useBasketBuy } from "@/hooks/use-basket-buy";
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import type { ProviderView } from "@/hooks/use-yield-positions";
-import { fromBaseUnits, getProvider, positionTitle, unitLabelOf, toFriendlyError } from "@/lib/yield";
+import { fromBaseUnits, getProvider, positionTitle, unitLabelOf } from "@/lib/yield";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { useT } from "@/lib/i18n";
 import type { TranslationKey } from "@/lib/i18n/en";
@@ -49,7 +46,6 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
   // Which way the money goes. The sheet asks; this remembers, because the rows and
   // the budget it shows are different questions in each direction.
   const [mode, setMode] = useState<"buy" | "sell">("buy");
-  const [funding, setFunding] = useState(false);
   // Which way the money is going in the run that's happening — the sheet can be
   // closed while it runs, and "buying 2 of 3" under a sale is a lie.
   const [running, setRunning] = useState<"buy" | "sell">("buy");
@@ -125,19 +121,6 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
     finish(outcomes, true);
   };
 
-  // Money in is a SIDE errand — it raises the budget, it doesn't buy anything. It also
-  // takes over the screen, so the basket steps aside for it and comes back after.
-  const openFunding = () => {
-    money.setError(null);
-    setOpen(false);
-    setFunding(true);
-  };
-  const closeFunding = () => {
-    setFunding(false);
-    void Promise.resolve(money.refreshAssets()).catch((e: unknown) => money.setError(toFriendlyError(e)));
-    setOpen(true);
-  };
-
   /** Opening the basket picks the likelier errand for this screen — everything you
    *  already hold is a basket you're probably leaving; anything else, you're buying.
    *  The sheet still asks, this just decides which rows it opens on. */
@@ -194,7 +177,6 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
                   dollarsUsd={money.cashUsd}
                   disabled={busy}
                   onChange={money.pay.setSource}
-                  onFund={openFunding}
                 />
                 {/* Only while the method IS dollars: the automatic top-up is a
                     safety net under the default, not a second payment method. */}
@@ -226,7 +208,6 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
         />
       )}
 
-      <AnimatePresence>{funding && <FundSheet onClose={closeFunding} />}</AnimatePresence>
     </>
   );
 }
