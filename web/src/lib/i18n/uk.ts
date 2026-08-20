@@ -295,6 +295,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "history.trades": "операції",
   "history.onDays": "за {n} днів",
   "history.today": "сьогодні",
+  "history.sinceStart": "від початку",
   "history.noChart": "історії вартості ще немає — вона з'явиться, коли щось триматимеш.",
   "market.filterScope": "фільтрують лише ставки нижче — акції та метали не фільтруються",
   "err.gaslessDown": "безкоштовні комісії мережі тимчасово недоступні, а на гаманці немає SOL, щоб оплатити її. твої гроші на місці — спробуй за хвилину.",

@@ -87,7 +87,8 @@ export function AssetDetail({
   // looked sellable ("sell it again"). Refresh now AND again shortly after to catch lag.
   const settle = () => {
     onDone();
-    setTimeout(onDone, 3000);
+    setTimeout(onDone, 1500);
+    setTimeout(onDone, 4000);
   };
 
   const handleExit = async () => {
@@ -102,24 +103,37 @@ export function AssetDetail({
       plan.mode === "redeemAll"
         ? await redeemAll(plan.shares, positionValue)
         : await withdraw(plan.amount);
-    // Report what SETTLED, not what was asked for: a sell quoted at $4.94 landed
-    // $4.84, and echoing the request turned the receipt into a guess. Falls back to
-    // the requested figure only if the transaction can't be read yet.
+
     const requested = plan.mode === "redeemAll" ? positionValue : amount;
-    const landed = walletAddress
-      ? await settledAmount(connection, sig, walletAddress, view.assetMint)
-      : null;
     const soldUnits =
       sharePriceUsd && sharePriceUsd > 0 ? requested / sharePriceUsd : undefined;
-    setResult({
+    const receipt: ActionResult = {
       kind: "withdraw",
-      amount: landed !== null && landed > BigInt(0) ? fromBaseUnits(landed, view.decimals) : requested,
+      amount: requested,
       symbol: price ? "USDC" : view.assetSymbol,
       units: soldUnits,
       unitLabel: soldUnits !== undefined ? unitLabel : undefined,
       assetId: view.id,
-    });
+    };
+
+    // The receipt goes up the moment the transaction is confirmed. It used to wait
+    // for the read below — two RPC calls with a retry and a pause between them, on a
+    // node that rate-limits us — so a sale that had already gone through sat behind a
+    // blank screen, and if that read was slow enough to be abandoned there was no
+    // receipt at all. Money moved: say so, then refine the figure.
+    setResult(receipt);
     settle();
+
+    // What SETTLED, not what was asked for: a sell quoted at $4.94 landed $4.84, and
+    // echoing the request turns a receipt into a guess. Best-effort by definition —
+    // the number on screen is already true enough to act on.
+    if (!walletAddress) return;
+    const landed = await settledAmount(connection, sig, walletAddress, view.assetMint);
+    if (landed !== null && landed > BigInt(0)) {
+      setResult((shown) =>
+        shown === receipt ? { ...receipt, amount: fromBaseUnits(landed, view.decimals) } : shown,
+      );
+    }
   };
 
   // The bottom padding clears the buy/sell bar alone — the tab bar hides on this

@@ -12,7 +12,6 @@ import {
 } from "@oxar/sdk";
 
 import { EarnedBreakdown } from "@/components/earned-breakdown";
-import { type Range } from "@/lib/history-range";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -24,8 +23,8 @@ export function PerformanceStats({
   performance,
   heldMints,
   counts,
-  range,
   neverFunded,
+  periodLabel,
 }: {
   performance: RangePerformance | null;
   /** Still held today; anything else in the breakdown was closed inside the range. */
@@ -33,11 +32,13 @@ export function PerformanceStats({
   /** Only the trade COUNT comes from the activity feed; every figure that is money
    *  comes from `performance`. */
   counts: ActivityCount;
-  range: Range;
   /** No money has ever been in here. Then "—" is wrong: nothing earned nothing, and
    *  a dash reads as "we couldn't work it out" on a screen that has nothing to work
    *  out. On a funded wallet a missing figure stays a dash. */
   neverFunded?: boolean;
+  /** The period these figures ACTUALLY cover — "1 year" only when there is a year of
+   *  history behind it. See `ProfileMoney`. */
+  periodLabel: string;
 }) {
   const { t } = useT();
   const [showBreakdown, setShowBreakdown] = useState(false);
@@ -47,6 +48,11 @@ export function PerformanceStats({
   // wallet that only ever deposited it would be a row of zeros, and on one that
   // traded it is usually the whole story behind a small negative.
   const traded = !!performance && !isDustUsd(Math.abs(performance.costUsd));
+  // A percentage of almost nothing is not a percentage. A cent that became 1.1 cents
+  // is "+10%" and reads as a claim about the product; the dollar figure beside it
+  // already says everything true about that day.
+  const worthAPercentage =
+    !!performance && Math.max(performance.startUsd ?? 0, performance.endUsd ?? 0) >= 1;
 
   return (
     <>
@@ -56,7 +62,7 @@ export function PerformanceStats({
             and wasn't. The percentage beside it is time-weighted, so it survives a
             range that opens before the wallet held anything and a deposit inside one. */}
         <Stat
-          label={`${t("history.earned")} · ${t(`history.range.${range}` as "history.range.7")}`}
+          label={`${t("history.earned")} · ${periodLabel}`}
           value={
             performance?.earnedUsd == null
               ? neverFunded
@@ -65,7 +71,7 @@ export function PerformanceStats({
               : formatSignedUsd(performance.earnedUsd)
           }
           hint={
-            performance?.returnPct == null
+            performance?.returnPct == null || !worthAPercentage
               ? neverFunded
                 ? "0.00%"
                 : undefined
