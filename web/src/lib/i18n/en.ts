@@ -211,6 +211,13 @@ export const en = {
   "alloc.otherCoins": "{usd} more in other coins — spend it and it becomes dollars first.",
   "alloc.willConvert": "{usd} of your other coins turns into dollars first, at the market's rate. One extra step, then the buying.",
   "alloc.converting": "turning coins into dollars…",
+  // The payment method. Dollars unless you say otherwise — and every other option
+  // says, on its own row, that paying with it is a trade.
+  "pay.with": "pay with",
+  "pay.readyNow": "ready to spend",
+  "pay.viaSwap": "converted to dollars first",
+  "pay.viaSale": "sold for dollars first",
+  "pay.selling": "selling it for dollars…",
   // Two markets, one product. When the rates match, the rate stops being the answer.
   "pool.sameRate": "Both pay about the same right now, so the rate isn't what decides it.",
   "pool.rateAside": "The rate moves. These two don't differ only by it.",

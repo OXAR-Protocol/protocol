@@ -4,25 +4,35 @@ import { useCallback, useState } from "react";
 
 import { rescaleAllocations } from "@oxar/sdk";
 
-import { useWalletAssets } from "@/hooks/use-wallet-assets";
+import { usePaySource } from "@/hooks/use-pay-source";
 import { useTopUp } from "@/hooks/use-top-up";
 import { toFriendlyError } from "@/lib/yield";
 import type { BulkTradeOutcome } from "@/hooks/use-bulk-trade";
 
 /**
- * Paying for a basket, including the part where the money isn't dollars yet.
+ * Paying for a basket, with whatever the money is currently shaped like.
  *
- * Buying settles in USDC, and the app used to make that the user's problem: a wallet
- * holding $40 of SOL and no USDC was told it had nothing to spend, and the way out
- * was a separate screen that turned coins into dollars and sent you back. Now the
- * conversion happens on the way through — quoted before it runs, one swap for the
- * whole gap rather than one per purchase, and the allocations are re-fitted to the
- * dollars that ACTUALLY arrived rather than the ones that were quoted.
+ * Dollars by default — that is what a purchase settles in, and what most wallets
+ * hold. Two ways past that, and they are different questions:
+ *
+ * - The budget falls a little short of what was allocated. Nobody asked to trade;
+ *   they asked to buy. The gap is covered from the biggest other holding, quoted
+ *   first (see `useTopUp`), and the purchase goes ahead.
+ * - The user PICKED another payment method — a coin, or something they already own.
+ *   Then that method funds the whole purchase and the dollars sitting in the wallet
+ *   are left alone, because choosing to pay with Apple and finding your dollars
+ *   spent instead is not what was agreed.
+ *
+ * Either way the allocations are re-fitted to the dollars that ACTUALLY arrived
+ * rather than the ones that were quoted — a swap lands at or under its quote, and
+ * the shortfall would otherwise fall entirely on the last purchase in the run.
  */
 export function useBasketBuy(run: (jobs: { kind: "buy"; id: string; amountUsd: number }[]) => Promise<BulkTradeOutcome[]>) {
-  const { assets, refresh } = useWalletAssets();
-  const { cashUsd, spareUsd, topUp, converting } = useTopUp(assets);
+  const pay = usePaySource();
+  const { spareUsd, topUp, converting } = useTopUp(pay.assets);
   const [error, setError] = useState<string | null>(null);
+
+  const cashUsd = pay.dollars.usd;
 
   const buy = useCallback(
     async (amounts: Record<string, number>): Promise<BulkTradeOutcome[]> => {
@@ -30,17 +40,19 @@ export function useBasketBuy(run: (jobs: { kind: "buy"; id: string; amountUsd: n
       const wanted = Object.values(amounts).reduce((sum, v) => sum + v, 0);
       let spendable = cashUsd;
 
-      // A gap of a few cents isn't worth a swap — the allocations are trimmed to the
-      // dollars already there instead, which is what `rescaleAllocations` is for.
-      if (wanted > cashUsd + 0.05) {
-        try {
+      try {
+        if (pay.source) {
+          spendable = await pay.raise(wanted);
+        } else if (wanted > cashUsd + 0.05) {
+          // A gap of a few cents isn't worth a swap — the allocations are trimmed to
+          // the dollars already there instead.
           spendable = cashUsd + (await topUp(wanted - cashUsd));
-        } catch (e) {
-          console.error("Top-up failed:", e);
-          setError(toFriendlyError(e));
-          return [];
+          pay.refresh();
         }
-        void refresh();
+      } catch (e) {
+        console.error("Raising the money failed:", e);
+        setError(toFriendlyError(e));
+        return [];
       }
 
       const final = rescaleAllocations(amounts, spendable);
@@ -48,19 +60,22 @@ export function useBasketBuy(run: (jobs: { kind: "buy"; id: string; amountUsd: n
       if (jobs.length === 0) return [];
       return run(jobs);
     },
-    [cashUsd, topUp, refresh, run],
+    [cashUsd, pay, topUp, run],
   );
 
   return {
+    /** The chosen payment method and everything the picker needs to show it. */
+    pay,
     /** Dollars, ready to spend now. */
     cashUsd,
-    /** Everything else the wallet holds, which a swap can turn into dollars. */
+    /** Everything else the wallet holds — only offered as an automatic top-up while
+     *  the payment method IS dollars. */
     spareUsd,
-    budgetUsd: cashUsd + spareUsd,
-    converting,
+    budgetUsd: pay.source ? pay.budgetUsd : cashUsd + spareUsd,
+    converting: converting || pay.busy,
     error,
     setError,
-    refreshAssets: refresh,
+    refreshAssets: pay.refresh,
     buy,
   };
 }
