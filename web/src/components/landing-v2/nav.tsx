@@ -36,10 +36,13 @@ export function Nav() {
           ))}
         </ul>
 
+        {/* The one thing on this bar that isn't navigation. It used to be set like
+            the menu items — black text on white — so the only action on the page
+            looked like a fifth link. Filled, it reads as the button it is. */}
         <div className="flex justify-end">
           <a
             href="#waitlist"
-            className="lowercase text-[clamp(16px,1.5vw,22px)] text-black transition-colors hover:text-[#3c05c7]"
+            className="rounded-full bg-black px-[clamp(18px,1.7vw,26px)] py-[clamp(9px,0.85vw,13px)] text-[clamp(16px,1.5vw,22px)] leading-none lowercase text-white transition-colors hover:bg-[#3c05c7]"
           >
             get early access
           </a>
