@@ -199,7 +199,7 @@ export const en = {
   "alloc.sellTitle": "how much of each?",
   "alloc.buyTitle": "how much of each?",
   "alloc.left": "{usd} left",
-  "alloc.over": "more than you have",
+  "alloc.over": "more than you have — change how you pay above",
   "alloc.youHave": "you have {usd}",
   "alloc.note": "{n} assets = {n} transactions",
   "alloc.noteOneSig": "{n} assets · still {n} transactions, one signature",
@@ -208,8 +208,6 @@ export const en = {
   "alloc.chooseAgain": "choose the other way",
   "alloc.stay": "stay",
   "alloc.leave": "leave",
-  "alloc.otherCoins": "{usd} more in other coins — spend it and it becomes dollars first.",
-  "alloc.willConvert": "{usd} of your other coins turns into dollars first, at the market's rate. One extra step, then the buying.",
   "alloc.converting": "turning coins into dollars…",
   // The payment method. Dollars unless you say otherwise — and every other option
   // says, on its own row, that paying with it is a trade.

@@ -159,7 +159,7 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
         <AllocationSheet
           mode={mode}
           rows={mode === "buy" ? buyRows : sellRows}
-          {...(mode === "buy" ? { budgetUsd: money.budgetUsd, cashUsd: money.cashUsd, onSwap } : {})}
+          {...(mode === "buy" ? { budgetUsd: money.budgetUsd, onSwap } : {})}
           verbs={{ buy: t(verbs.buy), sell: t(verbs.sell) }}
           canSell={held.length > 0}
           heldUsdById={Object.fromEntries(
@@ -178,13 +178,6 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
                   disabled={busy}
                   onChange={money.pay.setSource}
                 />
-                {/* Only while the method IS dollars: the automatic top-up is a
-                    safety net under the default, not a second payment method. */}
-                {!money.pay.source && money.spareUsd > 0.005 && (
-                  <p className="mt-1.5 px-1 text-[11px] leading-snug text-ink/40">
-                    {t("alloc.otherCoins", { usd: `$${formatUsdAmount(money.spareUsd)}` })}
-                  </p>
-                )}
               </>
             ) : undefined
           }
