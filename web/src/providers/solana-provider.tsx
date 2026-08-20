@@ -523,7 +523,24 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
     // doesn't — and when it isn't there (WalletConnect, locked, another account
     // selected), Privy's path still works, one prompt per transaction, as before.
     const injected = isExternalActive ? injectedBatchSign(solanaAddress) : null;
-    const batchSign = injected ?? privyBatch;
+    // The wallet's own batch, with a way out. It talks to us across an in-app
+    // browser's bridge and can hand back a shape we can't send; that used to take
+    // the whole basket down with a sentence that explained nothing. Nothing has
+    // been broadcast at this point, so asking again — once per transaction, the way
+    // it worked before — costs taps and saves the basket. The reason goes to the
+    // server, because "it failed" is not a thing anyone can fix.
+    const batchSign: BatchSign | undefined = injected
+      ? async (txBytes) => {
+          try {
+            return await injected(txBytes);
+          } catch (e) {
+            console.error("Wallet batch signing failed; falling back to one prompt per transaction:", e);
+            reportGaslessFailure(solanaAddress, "batch-sign", e);
+            if (!privyBatch) throw e;
+            return privyBatch(txBytes);
+          }
+        }
+      : privyBatch;
     const signer: WalletSigner = connectedWallet
       ? new PrivySolanaAdapter(pubkey, connectedWallet, connection, isExternalActive, batchSign)
       : new ReadOnlyWallet(pubkey);
