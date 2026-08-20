@@ -33,6 +33,7 @@ export function ProfileChart({
   loading,
   locale,
   neverFunded,
+  periodLabel,
 }: {
   points: PerformanceDay[];
   performance: RangePerformance | null;
@@ -42,6 +43,8 @@ export function ProfileChart({
   locale: string;
   /** Nothing has ever been held here — see `PerformanceStats`. Zero, not a dash. */
   neverFunded?: boolean;
+  /** The period the figure beside the total actually covers — see `ProfileMoney`. */
+  periodLabel: string;
 }) {
   const { t } = useT();
 
@@ -65,7 +68,7 @@ export function ProfileChart({
           </p>
           <p className={`whitespace-nowrap text-[13px] tabular-nums ${up ? "text-profit" : "text-loss"}`}>
             {earned === null ? (neverFunded ? "$0.00" : "—") : formatSignedUsd(earned)}
-            <span className="text-ink/40"> · {t(`history.range.${range}` as "history.range.7")}</span>
+            <span className="text-ink/40"> · {periodLabel}</span>
           </p>
         </div>
 

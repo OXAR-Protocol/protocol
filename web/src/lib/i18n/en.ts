@@ -332,6 +332,9 @@ export const en = {
   "history.trades": "trades",
   "history.onDays": "on {n} days",
   "history.today": "today",
+  // Shown instead of "1 year" when the wallet hasn't been around that long — the
+  // figures cover its own history, and claiming the range invents the rest.
+  "history.sinceStart": "since you started",
   "history.noChart": "no value history yet — it appears once you hold something.",
   "market.filterScope": "these narrow the savings rates below — stocks and metals aren't filtered",
   "err.gaslessDown": "free network fees are briefly unavailable and your wallet has no SOL to cover one. your money is safe where it is — try again in a moment.",

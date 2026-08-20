@@ -45,6 +45,16 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
   const neverFunded =
     !history.loading && history.days.length > 0 && history.days.every((d) => d.usd <= 0.005);
 
+  // The figures cover the wallet's OWN history, which the server already trims to the
+  // day money first appeared. Labelling that "1 year" invents the rest: a cent put in
+  // yesterday came back as an annual return. So the label says what was actually
+  // measured, and only claims the range when the range is really there.
+  const covered = history.days.length;
+  const periodLabel =
+    covered > 0 && covered < range
+      ? t("history.sinceStart")
+      : t(`history.range.${range}` as "history.range.7");
+
   return (
     <>
       {/* Two columns from `lg`: the chart takes the width it deserves and the money
@@ -60,14 +70,15 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
           loading={history.loading}
           locale={locale}
           neverFunded={neverFunded}
+          periodLabel={periodLabel}
         />
         <div className="mt-5">
           <PerformanceStats
             performance={history.performance}
             heldMints={history.heldMints}
             counts={counts}
-            range={range}
             neverFunded={neverFunded}
+            periodLabel={periodLabel}
           />
         </div>
         </div>
