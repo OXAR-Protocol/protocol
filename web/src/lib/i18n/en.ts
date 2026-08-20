@@ -218,6 +218,8 @@ export const en = {
   "pay.viaSwap": "converted to dollars first",
   "pay.viaSale": "sold for dollars first",
   "pay.selling": "selling it for dollars…",
+  "pay.noteSwap": "{sym} is swapped for dollars first, at whatever the market pays for it at that moment.",
+  "pay.noteSale": "{sym} is sold for dollars first — a real sale, at whatever the market pays for it at that moment. The swap costs a little, like any other.",
   // Two markets, one product. When the rates match, the rate stops being the answer.
   "pool.sameRate": "Both pay about the same right now, so the rate isn't what decides it.",
   "pool.rateAside": "The rate moves. These two don't differ only by it.",

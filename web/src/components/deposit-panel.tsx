@@ -216,7 +216,6 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             dollarsUsd={dollarsFree}
             disabled={working}
             onChange={pay.setSource}
-            onFund={() => setShowFund(true)}
           />
         </div>
       )}
