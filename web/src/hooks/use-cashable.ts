@@ -51,8 +51,18 @@ export type Cashable = CashableCoin | CashablePosition;
  * Sorted by what each is worth, because the thing you meant is almost always the
  * biggest one.
  */
-export function useCashable(): { items: Cashable[]; loading: boolean } {
-  const { assets, loading: coinsLoading } = useWalletAssets();
+export function useCashable(): {
+  items: Cashable[];
+  /** The dollars themselves — not in `items` (they are already money), but every
+   *  screen that asks "what do you want to pay with" has to offer them first. */
+  dollars: { usd: number; asset: WalletAsset | null };
+  /** The raw coin list, for callers that plan their own conversions. */
+  assets: WalletAsset[];
+  loading: boolean;
+  /** Re-read the coins after something moved — a conversion, a sale. */
+  refresh: () => void;
+} {
+  const { assets, loading: coinsLoading, refreshSilently } = useWalletAssets();
   const { views, loading: positionsLoading } = useYieldPositions();
   const { isExternal } = useSolanaContext();
   const reserveGas = !koraEnabled() || isExternal;
@@ -84,5 +94,10 @@ export function useCashable(): { items: Cashable[]; loading: boolean } {
     return [...coins, ...positions].filter((c) => c.usd >= MIN_CASH_USD).sort((a, b) => b.usd - a.usd);
   }, [assets, views, reserveGas]);
 
-  return { items, loading: coinsLoading || positionsLoading };
+  const dollars = useMemo(() => {
+    const usdc = assets.find((a) => a.mint === USDC_MINT) ?? null;
+    return { usd: usdc ? spendableUsd(usdc, reserveGas) : 0, asset: usdc };
+  }, [assets, reserveGas]);
+
+  return { items, dollars, assets, loading: coinsLoading || positionsLoading, refresh: refreshSilently };
 }

@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 
 import { AmountQuickPicks } from "@/components/amount-quick-picks";
+import { PayWithPicker } from "@/components/pay-with-picker";
 import { FundSheet } from "@/components/fund-sheet";
+import { usePaySource } from "@/hooks/use-pay-source";
 import { koraEnabled } from "@/lib/gas/kora";
 import { DepositConfirm } from "@/components/deposit-confirm";
 import { ExitCostNotice } from "@/components/exit-cost-notice";
@@ -15,7 +17,7 @@ import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { isPriceExposure } from "@/lib/yield/assets";
-import { normalizeDecimalInput, spendableBase } from "@oxar/sdk";
+import { normalizeDecimalInput, spendableBase, toBaseUnits } from "@oxar/sdk";
 import { USDC_MINT } from "@/lib/constants";
 import { useT, localizeError } from "@/lib/i18n";
 
@@ -38,10 +40,12 @@ interface Props {
  * chain — which is the crypto machinery we promise not to show. Someone came to buy
  * a hundred dollars of Apple; which coin settles it is our problem, not theirs.
  *
- * So the only currency here is the dollar, and the only balance that matters is the
- * USDC already in the wallet. Other coins haven't disappeared: they stopped being a
- * payment method and became what they are — other money, turned into dollars in the
- * top-up sheet, which is also where paying from another chain now lives.
+ * So the amount is always in dollars — one field, one currency, whatever settles it.
+ * WHERE those dollars come from is a separate question with an obvious default: the
+ * USDC in the wallet. Anything else the wallet holds — a coin, or something already
+ * bought — can be picked instead, and the conversion is named before it runs. What
+ * we don't do is decide that for someone: a purchase that quietly sells your Apple
+ * is not a purchase you agreed to.
  */
 export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUsd, unitLabel = "shares" }: Props) {
   const { t } = useT();
@@ -72,17 +76,37 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const assetsLoading = solLoading;
   // Paying dollars into a dollar product needs no swap at all.
   const isDirect = view.assetMint === USDC_MINT;
-  // The wallet's dollars. Everything else it holds is spendable only after being
-  // turned into these, which is a separate, explicit act — money never moves
-  // sideways on its own.
-  const payAsset = useMemo(
+  // What this is paid with. Dollars unless the user says otherwise — a coin they
+  // hold, or something they already bought. Whatever they pick, the figure below is
+  // in DOLLARS, because that is what the field asks for.
+  const pay = usePaySource();
+  const dollarsAsset = useMemo(
     () => solAssets.find((a) => a.mint === USDC_MINT) ?? null,
     [solAssets],
   );
-  const free = payAsset
-    ? Number(spendableBase(payAsset, !koraEnabled() || isExternal)) / 10 ** payAsset.decimals
+  // Paying with a holding means the dollars don't exist yet — the review and the
+  // preview still need something to describe, and one dollar is one dollar.
+  const payAsset =
+    pay.source?.kind === "coin"
+      ? pay.source.asset
+      : dollarsAsset ??
+        (pay.source
+          ? {
+              mint: USDC_MINT,
+              symbol: "USDC",
+              decimals: 6,
+              amount: toBaseUnits(pay.source.usd.toFixed(6), 6),
+              uiAmount: pay.source.usd,
+              usdValue: pay.source.usd,
+              chain: "solana" as const,
+            }
+          : null);
+  const dollarsFree = dollarsAsset
+    ? Number(spendableBase(dollarsAsset, !koraEnabled() || isExternal)) / 10 ** dollarsAsset.decimals
     : 0;
-  const emptyWallet = !assetsLoading && free <= 0;
+  const free = pay.source ? pay.source.usd : dollarsFree;
+  // Empty only when there is nothing to pay with AT ALL — dollars, coins, holdings.
+  const emptyWallet = !assetsLoading && !pay.loading && free <= 0 && pay.options.length === 0;
 
 
   // Dollars in, dollars out: no unit price to convert through any more.
@@ -98,6 +122,10 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
     const n = parseFloat(s);
     setAmount(n > 0 ? String(Number((n * sharePriceUsd!).toFixed(2))) : "");
   };
+
+  // Selling a holding to pay is part of THIS purchase — the panel stays busy through
+  // it, or the confirm button invites a second attempt while the first is still going.
+  const working = busy || pay.busy;
 
   const preview = useNetPreview({
     payAsset,
@@ -119,9 +147,30 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
 
   const handleDeposit = async () => {
-    if (!payAsset || usdAmount <= 0) return;
+    if (usdAmount <= 0) return;
     try {
-      const depositedBase = await depositWith(payAsset, usdAmount);
+      // Paying with something you already own: sell exactly this much of it first,
+      // then buy with the dollars that arrived. A coin needs none of this — the
+      // deposit swaps it on the way in, one transaction instead of two.
+      let asset = payAsset;
+      let amount = usdAmount;
+      if (pay.source?.kind === "position") {
+        const landed = await pay.raise(usdAmount);
+        amount = Math.min(usdAmount, landed);
+        // A dollar is a dollar: the wallet may not have HAD any before the sale, so
+        // the asset it pays with is described from what the sale produced.
+        asset = {
+          mint: USDC_MINT,
+          symbol: "USDC",
+          decimals: 6,
+          amount: toBaseUnits(landed.toFixed(6), 6),
+          uiAmount: landed,
+          usdValue: landed,
+          chain: "solana",
+        };
+      }
+      if (!asset || amount <= 0) return;
+      const depositedBase = await depositWith(asset, amount);
       setConfirming(false); // leave the review so the panel resets behind the success overlay
       onDeposited(Number(depositedBase) / 10 ** view.decimals);
     } catch {
@@ -144,8 +193,8 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           isDirect={isDirect}
           preview={preview}
           swapIn={swapIn}
-          busy={busy}
-          label={busyLabel}
+          busy={working}
+          label={busyLabel ?? (pay.busy ? t("pay.selling") : null)}
           error={error}
           onConfirm={handleDeposit}
           onBack={() => setConfirming(false)}
@@ -157,9 +206,20 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
   return (
     <div className="p-4 rounded-[6px] border border-ink/10 bg-paper">
-      {/* Label the field as the PAYMENT method — without this the prominent "USDC"
-          reads as if the user is buying USDC, not paying with it for the asset. */}
-      <p className="text-[10px] lowercase tracking-wide text-ink/40 mb-2">{t("deposit.payWith")}</p>
+      {/* The payment method, ahead of the amount — it's the thing the amount is
+          taken FROM, and it used to be an unchangeable label saying "dollars". */}
+      {!emptyWallet && (
+        <div className="mb-3">
+          <PayWithPicker
+            value={pay.source}
+            options={pay.options}
+            dollarsUsd={dollarsFree}
+            disabled={working}
+            onChange={pay.setSource}
+            onFund={() => setShowFund(true)}
+          />
+        </div>
+      )}
 
       {/* One currency, so the field says the amount and nothing else. */}
       <div className="mt-2">
@@ -263,7 +323,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             // A card top-up that's still funding/arriving hasn't touched the wallet
             // yet — no reason to freeze this unrelated path. Once it's actually
             // buying (signing+sending), the two shouldn't race the same wallet.
-            disabled={busy || !payAsset || usdAmount <= 0 || short > 0}
+            disabled={working || !payAsset || usdAmount <= 0 || short > 0}
             className="mt-3 w-full px-4 py-3 rounded-full bg-ink text-paper text-[14px] font-medium lowercase tracking-wide hover:bg-ink/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
           >
             {verb}

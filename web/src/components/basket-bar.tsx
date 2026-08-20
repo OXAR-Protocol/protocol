@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { Wallet } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
 import { PickBar } from "@/components/pick-bar";
+import { PayWithPicker } from "@/components/pay-with-picker";
 import { AllocationSheet } from "@/components/allocation-sheet";
 import { FundSheet } from "@/components/fund-sheet";
 import { useBulkTrade } from "@/hooks/use-bulk-trade";
@@ -188,26 +188,21 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
           payWith={
             mode === "buy" ? (
               <>
-                <div className="flex items-center gap-2 rounded-[10px] border border-ink/10 px-3 py-2.5">
-                  <Wallet size={14} strokeWidth={1.5} className="shrink-0 text-ink/40" />
-                  <span className="text-[12px] lowercase tracking-wide text-ink/45">{t("alloc.dollars")}</span>
-                  <span className="ml-auto text-[13px] tabular-nums text-ink">
-                    ${formatUsdAmount(money.cashUsd)}
-                  </span>
-                </div>
-                {money.spareUsd > 0.005 && (
+                <PayWithPicker
+                  value={money.pay.source}
+                  options={money.pay.options}
+                  dollarsUsd={money.cashUsd}
+                  disabled={busy}
+                  onChange={money.pay.setSource}
+                  onFund={openFunding}
+                />
+                {/* Only while the method IS dollars: the automatic top-up is a
+                    safety net under the default, not a second payment method. */}
+                {!money.pay.source && money.spareUsd > 0.005 && (
                   <p className="mt-1.5 px-1 text-[11px] leading-snug text-ink/40">
                     {t("alloc.otherCoins", { usd: `$${formatUsdAmount(money.spareUsd)}` })}
                   </p>
                 )}
-                <button
-                  type="button"
-                  onClick={openFunding}
-                  disabled={busy}
-                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-ink/15 px-4 py-2.5 text-[13px] lowercase tracking-wide text-ink/70 transition hover:border-ink/40 hover:text-ink disabled:opacity-40"
-                >
-                  {t("wallet.fund")}
-                </button>
               </>
             ) : undefined
           }
