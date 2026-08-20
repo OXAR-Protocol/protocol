@@ -1,132 +1,90 @@
 import { describe, it, expect, afterEach } from "vitest";
-import {
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-  TransactionMessage,
-  VersionedTransaction,
-} from "@solana/web3.js";
+import { getWallets } from "@wallet-standard/app";
 
 import { injectedBatchSign } from "./injected-batch";
 
-const owner = Keypair.generate();
-const payer = Keypair.generate();
-const BLOCKHASH = "11111111111111111111111111111111";
+const ADDRESS = "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin";
+const OTHER = "6dNVEK3hqQAMe8tGoAyZzZgpX1J4iBGqhZ1L5V9dGRnE";
 
-/** A legacy transfer whose fee payer is somebody else — the gasless shape. */
-function legacyTx(): Transaction {
-  const tx = new Transaction().add(
-    SystemProgram.transfer({
-      fromPubkey: owner.publicKey,
-      toPubkey: new PublicKey(BLOCKHASH),
-      lamports: 1,
-    }),
-  );
-  tx.recentBlockhash = BLOCKHASH;
-  tx.feePayer = payer.publicKey;
-  return tx;
+const wire = (n: number) => Uint8Array.from([n, n + 1, n + 2]);
+
+/** A Wallet-Standard wallet, registered the way a real one registers itself. */
+function register(opts: {
+  address?: string;
+  sign?: (...inputs: { transaction: Uint8Array }[]) => Promise<readonly { signedTransaction: unknown }[]>;
+  feature?: string;
+}) {
+  const wallet = {
+    version: "1.0.0",
+    name: "Test Wallet",
+    icon: "data:image/svg+xml;base64,",
+    chains: ["solana:mainnet"],
+    accounts: [{ address: opts.address ?? ADDRESS, publicKey: new Uint8Array(32), chains: [], features: [] }],
+    features: opts.sign
+      ? { [opts.feature ?? "solana:signTransaction"]: { version: "1.0.0", signTransaction: opts.sign } }
+      : {},
+  };
+  return getWallets().register(wallet as never);
 }
 
-function v0Tx(): VersionedTransaction {
-  const message = new TransactionMessage({
-    payerKey: payer.publicKey,
-    recentBlockhash: BLOCKHASH,
-    instructions: [
-      SystemProgram.transfer({
-        fromPubkey: owner.publicKey,
-        toPubkey: new PublicKey(BLOCKHASH),
-        lamports: 1,
-      }),
-    ],
-  }).compileToV0Message();
-  return new VersionedTransaction(message);
-}
-
-function stubWallet(provider: unknown) {
-  (globalThis as { window?: unknown }).window = { phantom: { solana: provider } };
-}
-
+const cleanups: (() => void)[] = [];
 afterEach(() => {
-  delete (globalThis as { window?: unknown }).window;
+  while (cleanups.length) cleanups.pop()!();
 });
 
 describe("injectedBatchSign", () => {
-  it("is absent when no wallet is injected", () => {
-    (globalThis as { window?: unknown }).window = {};
-    expect(injectedBatchSign(owner.publicKey.toBase58())).toBeNull();
+  it("is absent when no registered wallet can sign", () => {
+    cleanups.push(register({}));
+    expect(injectedBatchSign(ADDRESS)).toBeNull();
   });
 
-  it("is absent when the injected wallet is on another account", () => {
-    stubWallet({ publicKey: payer.publicKey, signAllTransactions: async () => [] });
-    expect(injectedBatchSign(owner.publicKey.toBase58())).toBeNull();
+  it("is absent when the wallet holds a different account", () => {
+    cleanups.push(register({ address: OTHER, sign: async () => [] }));
+    expect(injectedBatchSign(ADDRESS)).toBeNull();
   });
 
-  it("hands the wallet every transaction at once, legacy and v0 alike", async () => {
-    let seen: unknown[] = [];
-    stubWallet({
-      publicKey: owner.publicKey,
-      signAllTransactions: async (txs: unknown[]) => {
-        seen = txs;
-        return txs;
-      },
-    });
+  it("hands the wallet every transaction in ONE call, as bytes", async () => {
+    let seen: { transaction: Uint8Array }[] = [];
+    cleanups.push(
+      register({
+        sign: async (...inputs) => {
+          seen = inputs;
+          return inputs.map((i) => ({ signedTransaction: i.transaction }));
+        },
+      }),
+    );
 
-    const batch = injectedBatchSign(owner.publicKey.toBase58());
-    expect(batch).not.toBeNull();
-
-    const wire = [
-      legacyTx().serialize({ requireAllSignatures: false, verifySignatures: false }),
-      v0Tx().serialize(),
-    ];
-    const out = await batch!(wire);
+    const out = await injectedBatchSign(ADDRESS)!([wire(1), wire(9)]);
 
     // One call, both transactions — that IS the fix: two prompts became one.
     expect(seen).toHaveLength(2);
-    expect(seen[0]).toBeInstanceOf(Transaction);
-    expect(seen[1]).toBeInstanceOf(VersionedTransaction);
-    expect(out).toHaveLength(2);
+    expect(seen[0]!.transaction).toBeInstanceOf(Uint8Array);
+    expect(out).toEqual([wire(1), wire(9)]);
   });
 
-  // What actually broke a live basket: the wallet signed, and gave back something
-  // that wasn't a web3.js object. Every shape it can arrive in has to survive.
+  // The standard says Uint8Array; an in-app browser's bridge is less careful. Every
+  // shape the same bytes can arrive in has to survive — this is what broke a live
+  // basket, which signed fine and then failed on every row.
   it.each([
     ["base64", (b: Uint8Array) => btoa(String.fromCharCode(...b))],
-    ["raw bytes", (b: Uint8Array) => b],
     ["a byte array", (b: Uint8Array) => Array.from(b)],
     ["a JSON'd Buffer", (b: Uint8Array) => ({ type: "Buffer", data: Array.from(b) })],
-    ["a look-alike with its own serialize", (b: Uint8Array) => ({ serialize: () => b })],
-  ])("takes back a transaction returned as %s", async (_name, shape) => {
-    const wire = v0Tx().serialize();
-    stubWallet({
-      publicKey: owner.publicKey,
-      signAllTransactions: async (txs: unknown[]) => txs.map(() => shape(wire)),
-    });
-    const out = await injectedBatchSign(owner.publicKey.toBase58())!([wire]);
-    expect(out[0]).toEqual(wire);
+    ["a byte-keyed object", (b: Uint8Array) => ({ ...Array.from(b) })],
+  ])("takes back a signature returned as %s", async (_name, shape) => {
+    cleanups.push(
+      register({ sign: async (...inputs) => inputs.map((i) => ({ signedTransaction: shape(i.transaction) })) }),
+    );
+    const out = await injectedBatchSign(ADDRESS)!([wire(4)]);
+    expect(out[0]).toEqual(wire(4));
   });
 
-  it("says what the shape was when it can't send it", async () => {
-    stubWallet({
-      publicKey: owner.publicKey,
-      signAllTransactions: async () => [{ mystery: true }],
-    });
-    await expect(injectedBatchSign(owner.publicKey.toBase58())!([v0Tx().serialize()])).rejects.toThrow(
-      /shape we can't send/,
-    );
+  it("says which transaction came back in a shape it can't send", async () => {
+    cleanups.push(register({ sign: async () => [{ signedTransaction: { mystery: true } }] }));
+    await expect(injectedBatchSign(ADDRESS)!([wire(1)])).rejects.toThrow(/transaction 1 into a shape/);
   });
 
   it("refuses a wallet that gives back a different number of transactions", async () => {
-    stubWallet({
-      publicKey: owner.publicKey,
-      signAllTransactions: async (txs: unknown[]) => txs.slice(1),
-    });
-    const batch = injectedBatchSign(owner.publicKey.toBase58())!;
-    await expect(
-      batch([
-        legacyTx().serialize({ requireAllSignatures: false, verifySignatures: false }),
-        v0Tx().serialize(),
-      ]),
-    ).rejects.toThrow(/different number/);
+    cleanups.push(register({ sign: async (...inputs) => inputs.slice(1).map((i) => ({ signedTransaction: i.transaction })) }));
+    await expect(injectedBatchSign(ADDRESS)!([wire(1), wire(2)])).rejects.toThrow(/different number/);
   });
 });

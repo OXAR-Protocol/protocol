@@ -1,112 +1,110 @@
 "use client";
 
-import { Transaction, VersionedTransaction } from "@solana/web3.js";
+import { getWallets } from "@wallet-standard/app";
 
 /** Sign a batch of already-serialized unsigned transactions, in one prompt. */
 export type BatchSign = (txBytes: Uint8Array[]) => Promise<Uint8Array[]>;
 
 /**
- * The wallet's own "sign all of these" — for the wallets that have one.
+ * The wallet's own "sign all of these", through the Wallet Standard.
  *
- * Privy's batch overload puts a basket behind ONE confirmation, and that is what
- * the embedded wallet does. An external wallet doesn't go through Privy's UI: the
- * request is forwarded to Phantom or Solflare one transaction at a time, so two
- * assets meant two prompts even though the app had asked once. Their injected
- * providers all implement the wallet standard's `signAllTransactions`, which is
- * exactly the missing call — one approval sheet listing every transaction.
+ * Privy's batch overload collapses a basket into ONE confirmation because the
+ * confirmation is Privy's own sheet — which exists only for the embedded wallet.
+ * For an external one Privy forwards the requests singly, so a basket of two asked
+ * for two signatures.
  *
- * Best-effort by design. No injected provider (mobile via WalletConnect), a locked
- * wallet, or a different account selected in it → null, and the caller keeps Privy's
- * path, which still works and still prompts per transaction.
+ * The standard has exactly the call that doesn't: `solana:signTransaction` takes an
+ * array of inputs and returns one output per input, behind a single approval listing
+ * every transaction. Crucially it is defined in BYTES both ways —
+ * `{ transaction: Uint8Array } → { signedTransaction: Uint8Array }` — which is the
+ * same contract the single-transaction path has always used.
+ *
+ * That last point is the bug this replaces. The first version called Phantom's older
+ * injected `signAllTransactions`, which takes and returns web3.js OBJECTS. Those have
+ * to cross an in-app browser's bridge, and what came back was not always an object we
+ * could serialize: a basket signed fine and then failed on every row.
+ *
+ * Best-effort by design. No registered wallet holding this account — mobile over
+ * WalletConnect, a locked wallet, another account selected — and the caller keeps
+ * Privy's path, which still works and still prompts per transaction.
  */
-interface InjectedProvider {
-  publicKey?: { toString(): string } | null;
-  signAllTransactions?: (
-    txs: (Transaction | VersionedTransaction)[],
-  ) => Promise<(Transaction | VersionedTransaction)[]>;
+
+/** The Solana chain we transact on, as the standard identifies it. */
+const CHAIN = "solana:mainnet";
+const SIGN_FEATURE = "solana:signTransaction";
+
+interface SignTransactionFeature {
+  signTransaction(
+    ...inputs: { account: unknown; transaction: Uint8Array; chain?: string }[]
+  ): Promise<readonly { signedTransaction: unknown }[]>;
 }
 
-/** The providers a browser can have injected, in the order we'd trust them. */
-function candidates(): InjectedProvider[] {
-  if (typeof window === "undefined") return [];
-  const w = window as unknown as Record<string, unknown>;
-  const phantom = (w.phantom as { solana?: InjectedProvider } | undefined)?.solana;
-  return [phantom, w.solflare, w.backpack, w.solana].filter(
-    (p): p is InjectedProvider => !!p && typeof (p as InjectedProvider).signAllTransactions === "function",
-  );
+export function injectedBatchSign(address: string): BatchSign | null {
+  let registered: readonly { features: Record<string, unknown>; accounts: readonly { address: string }[] }[];
+  try {
+    registered = getWallets().get();
+  } catch {
+    // No window, no registry — server render, or a browser with nothing injected.
+    return null;
+  }
+
+  for (const wallet of registered) {
+    const feature = wallet.features[SIGN_FEATURE] as SignTransactionFeature | undefined;
+    if (typeof feature?.signTransaction !== "function") continue;
+    // Only the account we're actually transacting from. A wallet can hold several,
+    // and signing with the wrong one produces a transaction nobody can send.
+    const account = wallet.accounts.find((a) => a.address === address);
+    if (!account) continue;
+
+    return async (txBytes) => {
+      const outputs = await feature.signTransaction(
+        ...txBytes.map((transaction) => ({ account, transaction, chain: CHAIN })),
+      );
+      if (!Array.isArray(outputs) || outputs.length !== txBytes.length) {
+        throw new Error("The wallet returned a different number of transactions than it was given");
+      }
+      return outputs.map((o, i) => {
+        const bytes = asBytes(o?.signedTransaction);
+        if (!bytes) {
+          throw new Error(
+            `The wallet signed transaction ${i + 1} into a shape we can't send (${describe(o?.signedTransaction)})`,
+          );
+        }
+        return bytes;
+      });
+    };
+  }
+
+  return null;
 }
 
 /**
- * Wire bytes back out, whatever the wallet handed us.
- *
- * This is the part that broke: a basket signed fine — the wallet showed one sheet,
- * the user confirmed it — and then every row reported "something went wrong". The
- * single-transaction path never had this problem because it passes BYTES both ways
- * and the wallet gives bytes back. Objects have to cross the in-app browser's
- * bridge, and what comes back on the other side is not always a `Transaction`: it
- * can be base64, raw bytes, a byte array, or a look-alike carrying its own
- * `serialize`. Trusting `instanceof` there turned a signed basket into a TypeError.
- *
- * Signatures are kept as they are and nothing is re-compiled — a gasless
- * transaction is still missing the relayer's signature at this point, by design.
+ * The standard says `Uint8Array`, and in the same tab that is what arrives. Across an
+ * in-app browser's bridge the same value can turn up as a base64 string, a plain byte
+ * array, or a `Buffer` that has been through JSON — so every shape is accepted rather
+ * than assumed, and an unrecognised one is named instead of thrown as a TypeError.
  */
-function toWire(tx: unknown): Uint8Array {
-  if (tx instanceof Transaction) {
-    return tx.serialize({ requireAllSignatures: false, verifySignatures: false });
-  }
-  if (tx instanceof VersionedTransaction) return tx.serialize();
-  const bytes = asBytes(tx);
-  if (bytes) return bytes;
-  if (tx && typeof (tx as { serialize?: unknown }).serialize === "function") {
-    const out = (tx as { serialize: (o?: unknown) => unknown }).serialize({
-      requireAllSignatures: false,
-      verifySignatures: false,
-    });
-    const serialized = asBytes(out);
-    if (serialized) return serialized;
-  }
-  throw new Error(`The wallet returned a signed transaction in a shape we can't send (${describe(tx)})`);
-}
-
-/** The four shapes a signed transaction arrives in when it isn't an object. */
 function asBytes(value: unknown): Uint8Array | null {
   if (value instanceof Uint8Array) return value;
   if (value instanceof ArrayBuffer) return new Uint8Array(value);
   if (typeof value === "string") return Uint8Array.from(atob(value), (c) => c.charCodeAt(0));
   if (Array.isArray(value) && value.every((n) => typeof n === "number")) return Uint8Array.from(value);
-  // A Buffer that has been through JSON on the way across the bridge.
   const data = (value as { data?: unknown } | null)?.data;
   if (Array.isArray(data) && data.every((n) => typeof n === "number")) return Uint8Array.from(data);
+  // A byte-keyed object — what a Uint8Array becomes when it crosses as plain JSON.
+  if (value && typeof value === "object") {
+    const keys = Object.keys(value);
+    if (keys.length > 0 && keys.every((k) => /^\d+$/.test(k))) {
+      return Uint8Array.from(keys.map((k) => (value as Record<string, number>)[k]!));
+    }
+  }
   return null;
 }
 
-/** Enough about the mystery object to fix it next time, and nothing sensitive. */
+/** Enough about the mystery value to fix it next time, and nothing sensitive. */
 function describe(value: unknown): string {
   if (value === null || value === undefined) return String(value);
   if (typeof value !== "object") return typeof value;
   const ctor = (value as { constructor?: { name?: string } }).constructor?.name ?? "object";
   return `${ctor}: ${Object.keys(value).slice(0, 6).join(", ") || "no keys"}`;
-}
-
-/** Legacy or v0, told apart by which parser accepts it rather than by guessing at
- *  a byte — `Transaction.from` refuses a versioned message by name. */
-function fromWire(bytes: Uint8Array): Transaction | VersionedTransaction {
-  try {
-    return Transaction.from(bytes);
-  } catch {
-    return VersionedTransaction.deserialize(bytes);
-  }
-}
-
-export function injectedBatchSign(address: string): BatchSign | null {
-  const provider = candidates().find((p) => p.publicKey?.toString() === address);
-  if (!provider?.signAllTransactions) return null;
-
-  return async (txBytes) => {
-    const signed = await provider.signAllTransactions!(txBytes.map(fromWire));
-    if (!Array.isArray(signed) || signed.length !== txBytes.length) {
-      throw new Error("The wallet returned a different number of transactions than it was given");
-    }
-    return signed.map(toWire);
-  };
 }
