@@ -50,7 +50,7 @@ export function HeroGate({
         </button>
         <button
           onClick={() => onEnter("problem")}
-          className="flex h-[38px] items-center justify-center bg-white/[0.34] px-[20px] backdrop-blur-[14.15px] transition-colors hover:bg-white/[0.45]"
+          className="flex h-[38px] items-center justify-center rounded-[42.5px] bg-white/[0.34] px-[26px] backdrop-blur-[14.15px] transition-colors hover:bg-white/[0.45]"
         >
           <span className="lowercase text-[clamp(15px,1.25vw,18px)] leading-none whitespace-nowrap">
             see how it works
