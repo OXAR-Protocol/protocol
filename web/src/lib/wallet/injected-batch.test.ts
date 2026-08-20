@@ -88,6 +88,34 @@ describe("injectedBatchSign", () => {
     expect(out).toHaveLength(2);
   });
 
+  // What actually broke a live basket: the wallet signed, and gave back something
+  // that wasn't a web3.js object. Every shape it can arrive in has to survive.
+  it.each([
+    ["base64", (b: Uint8Array) => btoa(String.fromCharCode(...b))],
+    ["raw bytes", (b: Uint8Array) => b],
+    ["a byte array", (b: Uint8Array) => Array.from(b)],
+    ["a JSON'd Buffer", (b: Uint8Array) => ({ type: "Buffer", data: Array.from(b) })],
+    ["a look-alike with its own serialize", (b: Uint8Array) => ({ serialize: () => b })],
+  ])("takes back a transaction returned as %s", async (_name, shape) => {
+    const wire = v0Tx().serialize();
+    stubWallet({
+      publicKey: owner.publicKey,
+      signAllTransactions: async (txs: unknown[]) => txs.map(() => shape(wire)),
+    });
+    const out = await injectedBatchSign(owner.publicKey.toBase58())!([wire]);
+    expect(out[0]).toEqual(wire);
+  });
+
+  it("says what the shape was when it can't send it", async () => {
+    stubWallet({
+      publicKey: owner.publicKey,
+      signAllTransactions: async () => [{ mystery: true }],
+    });
+    await expect(injectedBatchSign(owner.publicKey.toBase58())!([v0Tx().serialize()])).rejects.toThrow(
+      /shape we can't send/,
+    );
+  });
+
   it("refuses a wallet that gives back a different number of transactions", async () => {
     stubWallet({
       publicKey: owner.publicKey,
