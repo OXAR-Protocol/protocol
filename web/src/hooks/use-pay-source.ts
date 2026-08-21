@@ -8,6 +8,7 @@ import { useCashable, type Cashable } from "@/hooks/use-cashable";
 import { useBulkFunding } from "@/hooks/use-bulk-funding";
 import { useBulkTrade } from "@/hooks/use-bulk-trade";
 import { useSolanaContext } from "@/providers/solana-provider";
+import { excludePaySources, type PayExclusion } from "@/lib/pay/exclude";
 import { readUsdcUsd } from "@/lib/usdc-balance";
 import { UserFacingError } from "@/lib/yield";
 
@@ -28,20 +29,34 @@ const MIN_FOR_DOLLARS = 1;
  *
  * `null` means dollars. A coin reaches dollars by a swap, a position by a sale; that
  * difference is ours to handle, not something to make anyone learn.
+ *
+ * `exclude` says what this purchase IS, so the thing being bought can't pay for
+ * itself — see `excludePaySources`.
  */
-export function usePaySource() {
-  const { items, dollars, assets, loading, refresh } = useCashable();
+export function usePaySource(exclude?: PayExclusion) {
+  const { items: cashable, dollars, assets, loading, refresh } = useCashable();
   const { fundUsdc, converting } = useBulkFunding();
   const bulk = useBulkTrade();
   const { connection, walletAddress } = useSolanaContext();
   const [source, setSource] = useState<Cashable | null>(null);
   const [chosen, setChosen] = useState(false);
 
+  // Not memoised on purpose: `exclude` is written inline at every call site, so any
+  // memo key would have to be rebuilt from its contents each render anyway — and the
+  // entries this returns are the same objects `useCashable` already memoised.
+  const items = excludePaySources(cashable, exclude);
+
   // Dollars are the default — but only when there are any. A wallet holding one
   // stock and no USDC would otherwise open on "$0.00 to spend" and a disabled
   // button, with the way out hidden inside a dropdown nobody has reason to open.
-  const fallback = !chosen && dollars.usd < MIN_FOR_DOLLARS ? items[0] ?? null : null;
-  const active = source ?? fallback;
+  // Never while the balances are still arriving: an unread balance is not a zero one,
+  // and picking a holding to sell off the back of one would be the same mistake.
+  const fallback = !chosen && !loading && dollars.usd < MIN_FOR_DOLLARS ? items[0] ?? null : null;
+  // A method picked before the exclusion applied — the sheet stays mounted while the
+  // purchase changes underneath it — falls back to dollars rather than paying for
+  // something with itself.
+  const picked = source && items.some((i) => i.key === source.key) ? source : null;
+  const active = picked ?? fallback;
 
   const choose = (next: Cashable | null) => {
     setChosen(true);

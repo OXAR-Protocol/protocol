@@ -4,9 +4,8 @@ import { Clock } from "lucide-react";
 
 import { CashOutFlow } from "@/components/cash-out-flow";
 import { PaybisSheet } from "@/components/paybis-sheet";
-import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useFeature } from "@/hooks/use-features";
-import { USDC_MINT } from "@/lib/constants";
+import { useUsdcBalance } from "@/hooks/use-usdc-balance";
 import { useT } from "@/lib/i18n";
 
 /** Feature key for the Paybis cash-out. Dark until the pilot has run for real. */
@@ -19,9 +18,9 @@ export const CASH_OUT_FEATURE = "paybis-cashout";
  */
 export function CashOutSheet({ onClose }: { onClose: () => void }) {
   const { t } = useT();
-  const { assets } = useWalletAssets();
   const live = useFeature(CASH_OUT_FEATURE);
-  const usdcValue = assets.find((a) => a.mint === USDC_MINT)?.usdValue ?? 0;
+  // The dollars, from the chain — the same figure every other screen prints.
+  const usdcValue = useUsdcBalance().usd ?? 0;
 
   return (
     <PaybisSheet

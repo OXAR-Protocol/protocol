@@ -14,8 +14,9 @@ import { DepositNetworks } from "@/components/deposit-networks";
 import { FundConvert } from "@/components/fund-convert";
 import { CardRouteSheet, type CardRoute } from "@/components/card-route-sheet";
 import { TopUpSheet, TOP_UP_FEATURE } from "@/components/top-up-sheet";
-import { useCardTopUp, getUsdcUi } from "@/hooks/use-card-topup";
+import { useCardTopUp } from "@/hooks/use-card-topup";
 import { useFeature } from "@/hooks/use-features";
+import { useUsdcBalance } from "@/hooks/use-usdc-balance";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useT } from "@/lib/i18n";
 
@@ -36,7 +37,7 @@ type Way = null | "crypto" | "network" | "exchange" | "card" | "convert";
  */
 export function FundSheet({ onClose }: { onClose: () => void }) {
   const { t } = useT();
-  const { walletAddress, connection, isExternal } = useSolanaContext();
+  const { walletAddress, isExternal } = useSolanaContext();
   const { topUp, busy } = useCardTopUp();
   const paybisTopUp = useFeature(TOP_UP_FEATURE);
 
@@ -44,7 +45,7 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
   const [amount, setAmount] = useState("");
   const [showRoutes, setShowRoutes] = useState(false);
   const [showPaybis, setShowPaybis] = useState(false);
-  const [balance, setBalance] = useState<number | null>(null);
+  const { usd: balance } = useUsdcBalance();
   // The card widget black-screens inside a mobile wallet's in-app browser — the
   // same blocker the deposit panel carries, for the same reason.
   const [isMobile, setIsMobile] = useState(false);
@@ -54,17 +55,6 @@ export function FundSheet({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
   }, []);
-
-  useEffect(() => {
-    if (!walletAddress) return;
-    let cancelled = false;
-    void getUsdcUi(connection, walletAddress).then((v) => {
-      if (!cancelled) setBalance(v);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [connection, walletAddress]);
 
   const cardRoutes: CardRoute[] = [
     {

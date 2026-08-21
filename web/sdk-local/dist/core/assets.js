@@ -4,7 +4,9 @@ exports.SOL_SPONSORED_RESERVE = exports.SOL_FEE_RESERVE = exports.SOL_MINT = voi
 exports.assetUid = assetUid;
 exports.spendableBase = spendableBase;
 exports.spendableUsd = spendableUsd;
+exports.usdcAsset = usdcAsset;
 exports.usdToBase = usdToBase;
+exports.priceableMints = priceableMints;
 exports.buildWalletAssets = buildWalletAssets;
 const units_1 = require("./units");
 /** Native SOL wrapped-mint sentinel (used as the asset id for SOL). */
@@ -53,6 +55,25 @@ function spendableUsd(asset, reserveGas = true) {
     const price = asset.usdValue / asset.uiAmount;
     return (Number(spendableBase(asset, reserveGas)) / 10 ** asset.decimals) * price;
 }
+/**
+ * A dollar holding described from a dollar figure.
+ *
+ * Dollars are sometimes known before the asset list is: they were read straight off
+ * the chain, or a sale just produced them and the indexer hasn't caught up. The money
+ * path still wants a `WalletAsset` to carry the mint and the decimals — a dollar is a
+ * dollar, so this builds one rather than making each caller inline the same literal.
+ */
+function usdcAsset(mint, usd, decimals = 6) {
+    return {
+        mint,
+        symbol: "USDC",
+        decimals,
+        amount: (0, units_1.toBaseUnits)(usd.toFixed(decimals), decimals),
+        uiAmount: usd,
+        usdValue: usd,
+        chain: "solana",
+    };
+}
 /** USD amount → base units of `asset`, at its current unit price (usdValue/uiAmount).
  *  Single source of truth for the USD-denominated money path. */
 function usdToBase(asset, usd) {
@@ -60,11 +81,34 @@ function usdToBase(asset, usd) {
     return (0, units_1.toBaseUnits)((usd / price).toFixed(asset.decimals), asset.decimals);
 }
 /**
+ * Which of a wallet's holdings to ask a price for.
+ *
+ * The caller used to take "the first N ids DAS returned", and DAS returns emptied
+ * token accounts and the app's own positions alongside real holdings — so on a
+ * heavily traded wallet the budget was spent on nothing and the USDC never got
+ * priced. Unpriced meant valued at zero, and zero meant dropped by the dust filter:
+ * the wallet held dollars and the app said it held none.
+ *
+ * So: only what has a balance, never what's counted elsewhere, and `first` (cash) at
+ * the front — if anything falls off the end, it must not be the dollars.
+ */
+function priceableMints(das, opts = {}) {
+    const mints = (das.items ?? [])
+        .filter((i) => i?.interface?.startsWith("Fungible"))
+        .filter((i) => !!i.token_info?.balance && BigInt(i.token_info.balance) > BigInt(0))
+        .map((i) => i.id)
+        .filter((mint) => !opts.skip?.has(mint));
+    const ordered = opts.first
+        ? [...mints.filter((m) => opts.first.has(m)), ...mints.filter((m) => !opts.first.has(m))]
+        : mints;
+    return opts.max === undefined ? ordered : ordered.slice(0, opts.max);
+}
+/**
  * Build a USD-valued asset list from a Helius DAS result + a Jupiter price map.
  * Includes native SOL (priced by Helius directly), drops dust/zero/unpriced,
  * sorts by USD value desc.
  */
-function buildWalletAssets(das, prices) {
+function buildWalletAssets(das, prices, opts = {}) {
     const assets = [];
     const native = das?.nativeBalance;
     if (native?.lamports && native.lamports > 0) {
@@ -89,7 +133,8 @@ function buildWalletAssets(das, prices) {
         if (amount <= BigInt(0))
             continue;
         const uiAmount = Number(amount) / 10 ** ti.decimals;
-        const usdPrice = prices[item.id]?.usdPrice ?? 0;
+        const quoted = prices[item.id]?.usdPrice;
+        const usdPrice = quoted ?? (opts.assumeUsdOne?.has(item.id) ? 1 : 0);
         assets.push({
             mint: item.id,
             symbol: item.content?.metadata?.symbol || `${item.id.slice(0, 4)}…`,

@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { rescaleAllocations } from "@oxar/sdk";
 
 import { usePaySource } from "@/hooks/use-pay-source";
+import type { PayExclusion } from "@/lib/pay/exclude";
 import { toFriendlyError } from "@/lib/yield";
 import type { BulkTradeOutcome } from "@/hooks/use-bulk-trade";
 
@@ -21,9 +22,15 @@ import type { BulkTradeOutcome } from "@/hooks/use-bulk-trade";
  * The allocations are re-fitted to the dollars that ACTUALLY arrived rather than the
  * ones that were quoted — a swap lands at or under its quote, and the shortfall would
  * otherwise fall entirely on the last purchase in the run.
+ *
+ * `exclude` carries what the basket is buying: a basket must not be funded by selling
+ * something inside it.
  */
-export function useBasketBuy(run: (jobs: { kind: "buy"; id: string; amountUsd: number }[]) => Promise<BulkTradeOutcome[]>) {
-  const pay = usePaySource();
+export function useBasketBuy(
+  run: (jobs: { kind: "buy"; id: string; amountUsd: number }[]) => Promise<BulkTradeOutcome[]>,
+  exclude?: PayExclusion,
+) {
+  const pay = usePaySource(exclude);
   const [error, setError] = useState<string | null>(null);
 
   const cashUsd = pay.dollars.usd;

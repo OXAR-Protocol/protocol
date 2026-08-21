@@ -4,10 +4,10 @@ import { useCallback, useRef, useState } from "react";
 import { useFiatOnramp } from "@privy-io/react-auth";
 import type { FiatOnrampEnvironment } from "@privy-io/api-types";
 import { PublicKey, type Connection } from "@solana/web3.js";
-import { getAssociatedTokenAddress } from "@solana/spl-token";
 
 import { pollArrival } from "@oxar/sdk";
 import { useSolanaContext } from "@/providers/solana-provider";
+import { readUsdcUsd } from "@/lib/usdc-balance";
 import { UserFacingError } from "@/lib/yield";
 import { USDC_MINT } from "@/lib/constants";
 
@@ -28,16 +28,14 @@ const ONRAMP_ENV: FiatOnrampEnvironment =
 
 export type CardTopUpStatus = "idle" | "funding" | "arriving";
 
-/** The wallet's USDC balance in UI units (0 if the ATA doesn't exist yet). */
-export async function getUsdcUi(connection: Connection, owner: PublicKey): Promise<number> {
-  try {
-    const ata = await getAssociatedTokenAddress(new PublicKey(USDC_MINT), owner);
-    const bal = await connection.getTokenAccountBalance(ata);
-    return bal.value.uiAmount ?? 0;
-  } catch {
-    return 0; // no ATA / not funded yet
-  }
-}
+/**
+ * The wallet's USDC balance in UI units.
+ *
+ * One reader for the dollars, shared with every screen that prints them: this used to
+ * be a second implementation that looked at the associated token account alone, so a
+ * balance held anywhere else read as zero and the same number differed by screen.
+ */
+export const getUsdcUi = readUsdcUsd;
 
 /** Poll until the USDC balance rises by ≥ `minDelta` (funds landed), or timeout.
  *  Returns the realized delta in UI units (what actually arrived). Thin wrapper
