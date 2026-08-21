@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import {
   buildWalletAssets,
+  priceableMints,
   spendableBase,
   assetUid,
   SOL_FEE_RESERVE,
@@ -67,6 +68,81 @@ describe("buildWalletAssets", () => {
     };
     const assets = buildWalletAssets(das, { [USDC]: { usdPrice: 1 }, dust: { usdPrice: 1 } });
     expect(assets.map((a) => a.symbol)).toEqual(["USDC", "SOL"]); // $200, then $80; dust/zero/nft gone
+  });
+
+  it("keeps a stablecoin at $1 when the price feed skips it", () => {
+    const das: DasResult = {
+      items: [
+        {
+          interface: "FungibleToken",
+          id: USDC,
+          content: { metadata: { symbol: "USDC" } },
+          token_info: { balance: 76_850_000, decimals: 6 },
+        },
+      ],
+    };
+    // The price round came back without USDC — rate-limited, truncated, whatever.
+    // Dollars must not vanish from the wallet because a third party didn't answer.
+    const [usdc] = buildWalletAssets(das, {}, { assumeUsdOne: new Set([USDC]) });
+    expect(usdc).toBeDefined();
+    expect(usdc!.usdValue).toBeCloseTo(76.85, 2);
+  });
+
+  it("still prefers the quoted price over the assumed dollar", () => {
+    const das: DasResult = {
+      items: [
+        {
+          interface: "FungibleToken",
+          id: USDC,
+          content: { metadata: { symbol: "USDC" } },
+          token_info: { balance: 100_000_000, decimals: 6 },
+        },
+      ],
+    };
+    const [usdc] = buildWalletAssets(das, { [USDC]: { usdPrice: 0.99 } }, { assumeUsdOne: new Set([USDC]) });
+    expect(usdc!.usdValue).toBeCloseTo(99, 2);
+  });
+
+  it("leaves an unpriced non-cash token out, assumption or not", () => {
+    const das: DasResult = {
+      items: [{ interface: "FungibleToken", id: "spam", token_info: { balance: 1_000_000_000, decimals: 6 } }],
+    };
+    expect(buildWalletAssets(das, {}, { assumeUsdOne: new Set([USDC]) })).toEqual([]);
+  });
+});
+
+describe("priceableMints", () => {
+  const fungible = (id: string, balance: number): NonNullable<DasResult["items"]>[number] => ({
+    interface: "FungibleToken",
+    id,
+    token_info: { balance, decimals: 6 },
+  });
+
+  it("skips empty token accounts — a traded wallet is full of them", () => {
+    const das: DasResult = { items: [fungible("empty", 0), fungible("real", 1_000_000)] };
+    expect(priceableMints(das)).toEqual(["real"]);
+  });
+
+  it("skips positions the app already counts", () => {
+    const das: DasResult = { items: [fungible("jlUSDC", 5), fungible("real", 5)] };
+    expect(priceableMints(das, { skip: new Set(["jlUSDC"]) })).toEqual(["real"]);
+  });
+
+  it("puts cash first, so a cut can never drop the dollars", () => {
+    const das: DasResult = {
+      items: [fungible("spam1", 5), fungible("spam2", 5), fungible(USDC, 5)],
+    };
+    expect(priceableMints(das, { first: new Set([USDC]), max: 2 })).toEqual([USDC, "spam1"]);
+  });
+
+  it("keeps every real holding when there's no ceiling", () => {
+    const items = Array.from({ length: 60 }, (_, i) => fungible(`mint${i}`, 5));
+    expect(priceableMints({ items })).toHaveLength(60);
+  });
+
+  it("ignores NFTs", () => {
+    const das: DasResult = { items: [{ interface: "V1_NFT", id: "nft" }, fungible("real", 5)] };
+    expect(priceableMints(das)).toEqual(["real"]);
   });
 });
 

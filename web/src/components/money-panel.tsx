@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
@@ -8,9 +9,11 @@ import { formatUsdAmount } from "@oxar/sdk";
 import { PhotoBg } from "@/components/photo-bg";
 import { TokenIcon } from "@/components/token-icon";
 import { MoneyActions } from "@/components/money-actions";
+import { useUsdcBalance } from "@/hooks/use-usdc-balance";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useLiveBalances } from "@/hooks/use-live-balances";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
+import { USDC_MINT } from "@/lib/constants";
 import { useT } from "@/lib/i18n";
 
 /** Below this we treat wallet cash as dust: no chips, and no nudge to invest it. */
@@ -27,15 +30,25 @@ const MAX_CHIPS = 3;
  */
 export function MoneyPanel() {
   const { t } = useT();
-  const { assets, loading, refreshSilently } = useWalletAssets();
+  const { assets, refreshSilently } = useWalletAssets();
   const { totalUsdc } = useAggregatePersonalBalance();
+  // "Free to use" is the dollars, read off the chain — the same figure the money
+  // sheet and the buying screen show. Everything else the wallet holds is a coin you
+  // could spend, not a dollar you have, and it is listed as chips underneath.
+  const cash = useUsdcBalance();
   // Money that moves shows up without a reload; a second subscription on the same
   // socket costs nothing worth counting.
-  useLiveBalances(refreshSilently);
+  const refreshCash = cash.refresh;
+  useLiveBalances(
+    useCallback(() => {
+      refreshSilently();
+      refreshCash();
+    }, [refreshSilently, refreshCash]),
+  );
 
-  const free = assets.reduce((sum, a) => sum + a.usdValue, 0);
-  const idle = free >= MIN_SHOWN_USD;
-  const chips = assets.slice(0, MAX_CHIPS);
+  const otherCoins = assets.filter((a) => a.mint !== USDC_MINT);
+  const idle = (cash.usd ?? 0) >= MIN_SHOWN_USD || otherCoins.length > 0;
+  const chips = otherCoins.slice(0, MAX_CHIPS);
 
   return (
     <section className="relative overflow-hidden rounded-[12px] border border-ink/10 bg-paper p-5">
@@ -57,7 +70,7 @@ export function MoneyPanel() {
       <div className="relative mt-5 border-t border-ink/[0.07] pt-4">
         <p className="text-[11px] lowercase tracking-wide text-ink/40">{t("money.free")}</p>
         <p className="mt-1 text-[clamp(1.6rem,3vw,2rem)] font-light leading-none tracking-[-0.02em] tabular-nums text-ink">
-          {loading ? "—" : `$${formatUsdAmount(free)}`}
+          {cash.usd === null ? "—" : `$${formatUsdAmount(cash.usd)}`}
         </p>
 
         {idle && (
@@ -74,8 +87,8 @@ export function MoneyPanel() {
                   </span>
                 </span>
               ))}
-              {assets.length > chips.length && (
-                <span className="text-[11px] text-ink/40">+{assets.length - chips.length}</span>
+              {otherCoins.length > chips.length && (
+                <span className="text-[11px] text-ink/40">+{otherCoins.length - chips.length}</span>
               )}
             </div>
 

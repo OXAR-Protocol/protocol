@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { spendableUsd, type WalletAsset } from "@oxar/sdk";
 
+import { useUsdcBalance } from "@/hooks/use-usdc-balance";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useYieldPositions, type ProviderView } from "@/hooks/use-yield-positions";
 import { useSolanaContext } from "@/providers/solana-provider";
@@ -54,8 +55,9 @@ export type Cashable = CashableCoin | CashablePosition;
 export function useCashable(): {
   items: Cashable[];
   /** The dollars themselves — not in `items` (they are already money), but every
-   *  screen that asks "what do you want to pay with" has to offer them first. */
-  dollars: { usd: number; asset: WalletAsset | null };
+   *  screen that asks "what do you want to pay with" has to offer them first. Read
+   *  off the chain, so a quiet price feed can't turn a funded wallet into an empty one. */
+  dollars: { usd: number };
   /** The raw coin list, for callers that plan their own conversions. */
   assets: WalletAsset[];
   loading: boolean;
@@ -64,6 +66,8 @@ export function useCashable(): {
 } {
   const { assets, loading: coinsLoading, refreshSilently } = useWalletAssets();
   const { views, loading: positionsLoading } = useYieldPositions();
+  // Dollars come off the chain, not out of the priced asset list — see `useUsdcBalance`.
+  const cash = useUsdcBalance();
   const { isExternal } = useSolanaContext();
   const reserveGas = !koraEnabled() || isExternal;
 
@@ -94,10 +98,19 @@ export function useCashable(): {
     return [...coins, ...positions].filter((c) => c.usd >= MIN_CASH_USD).sort((a, b) => b.usd - a.usd);
   }, [assets, views, reserveGas]);
 
-  const dollars = useMemo(() => {
-    const usdc = assets.find((a) => a.mint === USDC_MINT) ?? null;
-    return { usd: usdc ? spendableUsd(usdc, reserveGas) : 0, asset: usdc };
-  }, [assets, reserveGas]);
+  const dollars = useMemo(() => ({ usd: cash.usd ?? 0 }), [cash.usd]);
 
-  return { items, dollars, assets, loading: coinsLoading || positionsLoading, refresh: refreshSilently };
+  const refreshCash = cash.refresh;
+  const refresh = useCallback(() => {
+    refreshSilently();
+    refreshCash();
+  }, [refreshSilently, refreshCash]);
+
+  return {
+    items,
+    dollars,
+    assets,
+    loading: coinsLoading || positionsLoading || cash.loading,
+    refresh,
+  };
 }

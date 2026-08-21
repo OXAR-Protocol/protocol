@@ -7,17 +7,15 @@ import { AmountQuickPicks } from "@/components/amount-quick-picks";
 import { PayWithPicker } from "@/components/pay-with-picker";
 import { FundSheet } from "@/components/fund-sheet";
 import { usePaySource } from "@/hooks/use-pay-source";
-import { koraEnabled } from "@/lib/gas/kora";
 import { DepositConfirm } from "@/components/deposit-confirm";
 import { ExitCostNotice } from "@/components/exit-cost-notice";
-import { useSolanaContext } from "@/providers/solana-provider";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useUniversalDeposit } from "@/hooks/use-universal-deposit";
 import { useNetPreview } from "@/hooks/use-net-preview";
 import { useSwapInPreview } from "@/hooks/use-swap-in-preview";
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { isPriceExposure } from "@/lib/yield/assets";
-import { normalizeDecimalInput, spendableBase, toBaseUnits } from "@oxar/sdk";
+import { normalizeDecimalInput, usdcAsset } from "@oxar/sdk";
 import { USDC_MINT } from "@/lib/constants";
 import { useT, localizeError } from "@/lib/i18n";
 
@@ -54,13 +52,6 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const { depositWith, status, error } = useUniversalDeposit(view.id);
   const busy = status !== "idle";
   const busyLabel = busy ? t(`status.${status}` as "status.working") : null;
-  // Apple Pay / card path — funds fresh USDC via Privy's on-ramp, then buys.
-  // Works with no crypto in the wallet (the whole point), so it's independent
-  // of the pay-asset picker below.
-  // Card buy funds native SOL (Privy on-ramp), keeps a gas buffer, swaps the rest
-  // into the asset. The user's own SOL pays gas for any tx — no relayer/sponsorship.
-  const { isExternal } = useSolanaContext();
-
   // Amount is entered in the selected currency's units; USD is derived for the
   // (USD-denominated) money path below via the asset's unit price. `null` = the
   // field is untouched, so it shows a ≈ $50 default of the current currency.
@@ -78,32 +69,25 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   const isDirect = view.assetMint === USDC_MINT;
   // What this is paid with. Dollars unless the user says otherwise — a coin they
   // hold, or something they already bought. Whatever they pick, the figure below is
-  // in DOLLARS, because that is what the field asks for.
-  const pay = usePaySource();
+  // in DOLLARS, because that is what the field asks for. Everything except the thing
+  // being bought: paying for Apple with Apple is two swaps back to where you started.
+  const pay = usePaySource({ viewIds: [view.id], mints: [view.heldMint] });
+  // The dollars come off the chain (`usePaySource` → `useUsdcBalance`), not out of the
+  // priced asset list: that list can lose USDC when the price feed doesn't answer, and
+  // this screen then offered no dollars to pay with while the wallet held plenty.
+  const dollarsFree = pay.dollars.usd;
   const dollarsAsset = useMemo(
-    () => solAssets.find((a) => a.mint === USDC_MINT) ?? null,
-    [solAssets],
+    () =>
+      solAssets.find((a) => a.mint === USDC_MINT) ??
+      (dollarsFree > 0 ? usdcAsset(USDC_MINT, dollarsFree) : null),
+    [solAssets, dollarsFree],
   );
   // Paying with a holding means the dollars don't exist yet — the review and the
   // preview still need something to describe, and one dollar is one dollar.
   const payAsset =
     pay.source?.kind === "coin"
       ? pay.source.asset
-      : dollarsAsset ??
-        (pay.source
-          ? {
-              mint: USDC_MINT,
-              symbol: "USDC",
-              decimals: 6,
-              amount: toBaseUnits(pay.source.usd.toFixed(6), 6),
-              uiAmount: pay.source.usd,
-              usdValue: pay.source.usd,
-              chain: "solana" as const,
-            }
-          : null);
-  const dollarsFree = dollarsAsset
-    ? Number(spendableBase(dollarsAsset, !koraEnabled() || isExternal)) / 10 ** dollarsAsset.decimals
-    : 0;
+      : dollarsAsset ?? (pay.source ? usdcAsset(USDC_MINT, pay.source.usd) : null);
   const free = pay.source ? pay.source.usd : dollarsFree;
   // Empty only when there is nothing to pay with AT ALL — dollars, coins, holdings.
   const emptyWallet = !assetsLoading && !pay.loading && free <= 0 && pay.options.length === 0;
@@ -159,15 +143,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         amount = Math.min(usdAmount, landed);
         // A dollar is a dollar: the wallet may not have HAD any before the sale, so
         // the asset it pays with is described from what the sale produced.
-        asset = {
-          mint: USDC_MINT,
-          symbol: "USDC",
-          decimals: 6,
-          amount: toBaseUnits(landed.toFixed(6), 6),
-          uiAmount: landed,
-          usdValue: landed,
-          chain: "solana",
-        };
+        asset = usdcAsset(USDC_MINT, landed);
       }
       if (!asset || amount <= 0) return;
       const depositedBase = await depositWith(asset, amount);

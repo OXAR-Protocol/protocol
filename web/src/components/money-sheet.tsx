@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ArrowDownToLine, ArrowUpFromLine, Clock } from "lucide-react";
 
@@ -12,9 +12,8 @@ import { FundSheet } from "@/components/fund-sheet";
 import { SendSheet } from "@/components/send-sheet";
 import { WithdrawPicker } from "@/components/withdraw-picker";
 import { CashOutSheet } from "@/components/cash-out-sheet";
-import { getUsdcUi } from "@/hooks/use-card-topup";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
-import { useSolanaContext } from "@/providers/solana-provider";
+import { useUsdcBalance } from "@/hooks/use-usdc-balance";
 import { useT } from "@/lib/i18n";
 
 type Open = null | "fund" | "withdraw" | "send" | "cashout";
@@ -34,21 +33,9 @@ type Open = null | "fund" | "withdraw" | "send" | "cashout";
  */
 export function MoneySheet({ onClose }: { onClose: () => void }) {
   const { t } = useT();
-  const { connection, walletAddress } = useSolanaContext();
   const { totalUsdc } = useAggregatePersonalBalance();
-  const [free, setFree] = useState<number | null>(null);
+  const { usd: free } = useUsdcBalance();
   const [open, setOpen] = useState<Open>(null);
-
-  useEffect(() => {
-    if (!walletAddress) return;
-    let cancelled = false;
-    void getUsdcUi(connection, walletAddress).then((v) => {
-      if (!cancelled) setFree(v);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [connection, walletAddress]);
 
   return (
     <>

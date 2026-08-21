@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { formatUsdAmount } from "@oxar/sdk";
 
 import { PickBar } from "@/components/pick-bar";
 import { PayWithPicker } from "@/components/pay-with-picker";
@@ -41,7 +40,6 @@ interface Props {
 export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }: Props) {
   const { t } = useT();
   const bulk = useBulkTrade();
-  const money = useBasketBuy(bulk.run);
   const [open, setOpen] = useState(false);
   // Which way the money goes. The sheet asks; this remembers, because the rows and
   // the budget it shows are different questions in each direction.
@@ -53,6 +51,13 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
   const pickedViews = views.filter((v) => picked.has(v.id));
   const held = pickedViews.filter((v) => v.underlyingBalance > BigInt(0));
   const heldUsd = held.reduce((sum, v) => sum + fromBaseUnits(v.underlyingBalance, v.decimals), 0);
+
+  // Nothing in the basket may pay for the basket: selling Apple to buy Apple is a
+  // round trip through two swaps that leaves you holding slightly less of it.
+  const money = useBasketBuy(bulk.run, {
+    viewIds: [...picked],
+    mints: pickedViews.map((v) => v.heldMint),
+  });
 
   // Prices for the picked price-exposure assets, so a buy row can be typed in shares.
   const { prices } = useStockPrices(
@@ -170,15 +175,13 @@ export function BasketBar({ views, picked, onOutcome, onClear, onSwap, onDone }:
           results={bulk.results}
           payWith={
             mode === "buy" ? (
-              <>
-                <PayWithPicker
-                  value={money.pay.source}
-                  options={money.pay.options}
-                  dollarsUsd={money.cashUsd}
-                  disabled={busy}
-                  onChange={money.pay.setSource}
-                />
-              </>
+              <PayWithPicker
+                value={money.pay.source}
+                options={money.pay.options}
+                dollarsUsd={money.cashUsd}
+                disabled={busy}
+                onChange={money.pay.setSource}
+              />
             ) : undefined
           }
           progress={
