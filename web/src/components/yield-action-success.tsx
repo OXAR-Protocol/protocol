@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+
+import { SPRING } from "@/lib/motion";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
@@ -67,7 +69,7 @@ export function YieldActionSuccess({ result, onDone, address }: Props) {
       <motion.div
         initial={{ scale: 0.7, opacity: 0, y: 10 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        transition={{ type: "spring", damping: 15, stiffness: 220 }}
+        transition={SPRING.celebrate}
         className="relative"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}

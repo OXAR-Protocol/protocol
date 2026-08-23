@@ -31,8 +31,8 @@ export function MoneyActions({ labelled }: { labelled?: boolean }) {
           aria-label={t("wallet.fund")}
           className={
             labelled
-              ? "inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
-              : "inline-flex h-10 w-10 items-center justify-center rounded-full bg-ink text-paper transition hover:bg-ink/85"
+              ? "inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
+              : "inline-flex h-10 w-10 items-center justify-center rounded-full bg-ink text-paper transition active:scale-[0.97] hover:bg-ink/85"
           }
         >
           <Plus size={labelled ? 13 : 17} strokeWidth={2} />

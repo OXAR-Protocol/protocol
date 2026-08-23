@@ -34,7 +34,7 @@ export function TermsBlocked({ onReviewTerms }: { onReviewTerms: () => void }) {
         <button
           type="button"
           onClick={onReviewTerms}
-          className="mt-7 rounded-full bg-ink px-6 py-3 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
+          className="mt-7 rounded-full bg-ink px-6 py-3 text-[13px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
         >
           {t("terms.gate.reviewTerms")}
         </button>

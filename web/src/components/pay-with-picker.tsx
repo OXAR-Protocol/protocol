@@ -39,7 +39,7 @@ export function PayWithPicker({
   const usd = value ? value.usd : dollarsUsd;
 
   return (
-    <div className="rounded-[10px] border border-ink/10">
+    <div className="rounded-control border border-ink/10">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -126,7 +126,7 @@ function Option({
     <button
       type="button"
       onClick={onPick}
-      className={`flex w-full items-center gap-2.5 rounded-[8px] px-2.5 py-2 text-left transition hover:bg-ink/[0.04] ${
+      className={`flex w-full items-center gap-2.5 rounded-field px-2.5 py-2 text-left transition hover:bg-ink/[0.04] ${
         picked ? "bg-ink/[0.04]" : ""
       }`}
     >

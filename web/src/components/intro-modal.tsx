@@ -111,7 +111,7 @@ export function IntroModal() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="relative w-full max-w-[440px] overflow-hidden rounded-t-[20px] border border-ink/10 bg-paper sm:rounded-[20px]"
+            className="relative w-full max-w-[440px] overflow-hidden rounded-t-sheet border border-ink/10 bg-paper sm:rounded-sheet"
           >
             <button
               type="button"
@@ -153,7 +153,7 @@ export function IntroModal() {
                 <button
                   type="button"
                   onClick={startTour}
-                  className="rounded-full bg-ink px-5 py-2.5 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
+                  className="rounded-full bg-ink px-5 py-2.5 text-[13px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
                 >
                   {t("intro.showMeAround")}
                 </button>

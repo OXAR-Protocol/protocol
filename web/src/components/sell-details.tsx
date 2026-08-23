@@ -66,7 +66,7 @@ export function SellDetails({
       </button>
 
       {open && (
-        <div className="mt-2 space-y-1.5 rounded-[10px] border border-ink/10 p-3">
+        <div className="mt-2 space-y-1.5 rounded-control border border-ink/10 p-3">
           <Line label={t("sell.detail.asked")} value={`$${formatUsdAmount(asked)}`} />
           <Line label={t("sell.detail.cost")} value={`−$${formatUsdAmount(feeUsd > 0 ? market : gap)}`} />
           {feeUsd > 0 && (

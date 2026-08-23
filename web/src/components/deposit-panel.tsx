@@ -160,7 +160,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
   if (confirming && payAsset) {
     return (
-      <div className="p-4 rounded-[6px] border border-ink/10 bg-paper">
+      <div className="p-4 rounded-tight border border-ink/10 bg-paper">
         <DepositConfirm
           verb={verb}
           usdAmount={usdAmount}
@@ -181,7 +181,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
 
   return (
-    <div className="p-4 rounded-[6px] border border-ink/10 bg-paper">
+    <div className="p-4 rounded-tight border border-ink/10 bg-paper">
       {/* The payment method, ahead of the amount — it's the thing the amount is
           taken FROM, and it used to be an unchangeable label saying "dollars". */}
       {!emptyWallet && (
@@ -201,19 +201,19 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
         {assetsLoading ? (
           <p className="text-xs text-ink/40">{t("deposit.loadingAssets")}</p>
         ) : emptyWallet ? (
-          <div className="rounded-[12px] border border-ink/10 p-4 text-center">
+          <div className="rounded-card border border-ink/10 p-4 text-center">
             <p className="text-[13px] leading-snug text-ink/55">{t("deposit.emptyWallet")}</p>
             <button
               type="button"
               onClick={() => setShowFund(true)}
-              className="mt-3 w-full rounded-full bg-ink px-4 py-2.5 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
+              className="mt-3 w-full rounded-full bg-ink px-4 py-2.5 text-[13px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
             >
               {t("wallet.fund")}
             </button>
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-2 rounded-[12px] border border-ink/10 px-4 py-3 transition-colors focus-within:border-ink/30">
+            <div className="flex items-center gap-2 rounded-card border border-ink/10 px-4 py-3 transition-colors focus-within:border-ink/30">
               <span className="text-[22px] text-ink/35">$</span>
               <input
                 type="text"
@@ -236,7 +236,7 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
 
         {/* Quantity shortcut — type how many units to buy; the pay amount fills in. */}
         {canQuantity && payAsset && (
-          <div className="mt-2 flex items-center justify-between gap-2 rounded-[10px] border border-ink/10 px-3 py-2">
+          <div className="mt-2 flex items-center justify-between gap-2 rounded-control border border-ink/10 px-3 py-2">
             <span className="text-[11px] lowercase tracking-wide text-ink/40">{lower}</span>
             <input
               type="text"

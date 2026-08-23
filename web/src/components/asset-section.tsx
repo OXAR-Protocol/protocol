@@ -14,6 +14,7 @@ import { useEarnings } from "@/hooks/use-earnings";
 import { useStocksAllowed } from "@/hooks/use-stocks-allowed";
 import type { AssetMeta } from "@/lib/yield/assets";
 import { fromBaseUnits, getProvider } from "@/lib/yield";
+import { useRise } from "@/lib/motion";
 import { useT } from "@/lib/i18n";
 import { MarketSortSelect } from "@/components/market-sort";
 import { usePickSet } from "@/components/pick-set";
@@ -54,6 +55,7 @@ interface Props {
 export function AssetSection({ catalog, title, badge, gated = false, layout = "list", filterable = false, tourAnchor }: Props) {
   const router = useRouter();
   const { t } = useT();
+  const rise = useRise();
   const allowed = useStocksAllowed();
   const features = useFeatures();
   const [sector, setSector] = useState<string>("all");
@@ -164,9 +166,7 @@ export function AssetSection({ catalog, title, badge, gated = false, layout = "l
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.18 }}
+      {...rise(1)}
       className="mt-10"
     >
       <div data-tour={tourAnchor} className="mb-3 flex items-center justify-between gap-2">

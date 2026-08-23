@@ -59,7 +59,7 @@ export function TourCard({
       initial={{ y: side === "bottom" ? 16 : -16, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-x-3 z-[60] mx-auto max-w-[420px] rounded-[16px] border border-ink/10 bg-paper p-4 shadow-[0_8px_28px_rgba(0,0,0,0.16)]"
+      className="fixed inset-x-3 z-[60] mx-auto max-w-[420px] rounded-panel border border-ink/10 bg-paper p-4 shadow-[0_8px_28px_rgba(0,0,0,0.16)]"
       style={
         side === "bottom"
           ? { bottom: `calc(100vh - ${band.bottom}px + ${GAP}px)` }
@@ -98,7 +98,7 @@ export function TourCard({
         <button
           type="button"
           onClick={onNext}
-          className="inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
+          className="inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
         >
           {t(isLast ? "tour.done" : "tour.next")}
           {isLast ? <Check size={13} strokeWidth={2} /> : <ArrowRight size={13} strokeWidth={1.5} />}

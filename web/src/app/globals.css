@@ -56,28 +56,46 @@
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-instrument-serif);
 
-  --animate-breathing: breathing 8s ease-in-out infinite;
-  --animate-bounce-slow: bounce-slow 2s ease-in-out infinite;
+  /* Motion, as values rather than as a habit.
 
-  @keyframes breathing {
-    0%, 100% {
-      opacity: 0.15;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.25;
-      transform: scale(1.05);
-    }
-  }
+     Colour and type have been tokenised here since the theme landed; motion never
+     was, so every transition in the app fell through to whatever Tailwind and
+     framer-motion default to. Three of ~28 transitions named a curve. These are the
+     curves the rest of the app should be reaching for.
 
-  @keyframes bounce-slow {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(8px);
-    }
-  }
+     The built-in CSS easings are too weak to read as deliberate — `ease-out` at
+     these control points starts fast enough that the motion feels like a response
+     rather than a delay, which is the whole point of easing an entrance.
+
+     Only the curve that has callers is defined. A strong `--ease-in-out` for
+     on-screen movement and an iOS `--ease-drawer` for sheets both belong in a
+     vocabulary like this one, and both were written here first — but nothing in the
+     app reaches for them yet (the sheets use springs), and shipping a token with no
+     users is how `@keyframes beamFlow` survived in this file for months. Add them
+     back in the change that needs them. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* Budgets, not suggestions: UI motion stays under 300ms because past that the
+     animation stops being feedback and starts being a wait. */
+  --duration-press: 160ms;
+  --duration-fast: 200ms;
+
+  /* The corner scale, named for what it wraps rather than for its size.
+
+     Thirteen radii were being hand-typed across the app — 5, 6, 8, 10, 12, 14, 16, 18
+     and 20px, plus four Tailwind names — which is not nine decisions, it is one
+     decision made nine times inattentively. Four is enough for every surface here.
+
+     Deliberately NOT `--radius-sm/md/lg`: those names already exist in Tailwind's own
+     scale and `ui/button.tsx` reads `var(--radius-md)` from it, so redefining them
+     would silently resize every button in the app. These add utilities
+     (`rounded-field`, `rounded-card`, …) instead of overwriting one. */
+  --radius-tight: 6px;
+  --radius-field: 8px;
+  --radius-control: 10px;
+  --radius-card: 12px;
+  --radius-panel: 16px;
+  --radius-sheet: 22px;
 }
 
 html {
@@ -120,27 +138,34 @@ input[type="number"] {
   background: rgba(0, 0, 0, 0.35);
 }
 
-.bg-grid {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-}
+/* `.bg-grid`, `@keyframes beamFlow/beamFlowV/beamPulse` and the `breathing` /
+   `bounce-slow` utilities used to live here. They had zero references left in `src/` —
+   leftovers from the pre-pivot design, still being shipped to every visitor. */
 
-/* Energy beam animations */
-@keyframes beamFlow {
-  0% { background-position: 100% 0; }
-  100% { background-position: -100% 0; }
-}
-@keyframes beamFlowV {
-  0% { background-position: 0 100%; }
-  100% { background-position: 0 -100%; }
-}
-@keyframes beamPulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
+/* Reduced motion.
 
+   Fewer and gentler, not none: someone who asks for less motion still needs to see
+   that a sheet opened and that a value changed, so opacity and colour stay. What goes
+   is travel — anything that moves across the screen, and anything that never stops.
+
+   Durations collapse rather than hitting zero, because an instant swap reads as a
+   glitch even to someone who asked for no animation. The JS side of this lives in
+   `useAppReducedMotion()` (src/lib/motion.ts), which the entry warp and the movers
+   carousel consult before they run at all. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 80ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 /* Light theme overrides */
 

@@ -55,7 +55,7 @@ export function CashOutFlow({ usdc }: { usdc: number }) {
         href={paybisSellUrl()}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85"
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3 text-[14px] font-medium lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
       >
         {t("cashout.open")}
         <ExternalLink size={14} strokeWidth={1.5} />

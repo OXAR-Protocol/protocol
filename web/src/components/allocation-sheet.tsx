@@ -231,7 +231,7 @@ export function AllocationSheet({
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-h-[88vh] w-full max-w-[520px] overflow-auto rounded-t-[16px] border border-ink/10 bg-paper p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-[16px]"
+        className="max-h-[88vh] w-full max-w-[520px] overflow-auto rounded-t-panel border border-ink/10 bg-paper p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-panel"
       >
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
@@ -259,7 +259,7 @@ export function AllocationSheet({
             return (
             <div
               key={r.id}
-              className={`rounded-[10px] border p-3 ${
+              className={`rounded-control border p-3 ${
                 broke ? "border-red-600/30 bg-red-600/[0.03]" : "border-ink/10"
               }`}
             >
@@ -358,7 +358,7 @@ export function AllocationSheet({
         {/* Asked where it can be answered: the rows above still show which went
             through and which didn't, so the question isn't abstract. */}
         {confirmLeave && (
-          <div className="mt-3 rounded-[10px] border border-ink/15 bg-ink/[0.03] p-3 text-center">
+          <div className="mt-3 rounded-control border border-ink/15 bg-ink/[0.03] p-3 text-center">
             <p className="text-[12px] text-ink/70">
               {t("alloc.leavePartial", {
                 done: String(rows.filter((r) => results?.[r.id]?.ok).length),
@@ -431,7 +431,7 @@ export function AllocationSheet({
             <button
               type="button"
               onClick={() => arm("buy")}
-              className="h-[52px] flex-1 rounded-full bg-ink text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
+              className="h-[52px] flex-1 rounded-full bg-ink text-[14px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
             >
               {verbs.buy}
             </button>

@@ -31,7 +31,7 @@ export function EarnedBreakdown({
   });
 
   return (
-    <div className="mt-3 rounded-[8px] bg-ink/[0.02] px-3 py-2.5">
+    <div className="mt-3 rounded-field bg-ink/[0.02] px-3 py-2.5">
       <Line label={t("history.market")} amount={performance.marketUsd} />
       <Line label={t("history.tradingCost")} amount={performance.costUsd} />
 

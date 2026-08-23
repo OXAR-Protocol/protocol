@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
+
+import { SPRING } from "@/lib/motion";
 import { X, Loader2, Send } from "lucide-react";
 
 import type { FeedbackKind } from "@oxar/sdk";
@@ -77,9 +79,9 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
         initial={{ y: 60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 60, opacity: 0 }}
-        transition={{ type: "spring", damping: 26, stiffness: 220 }}
+        transition={SPRING.soft}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[440px] rounded-[12px] border border-ink/15 bg-paper p-6 md:p-7"
+        className="relative w-full max-w-[440px] rounded-card border border-ink/15 bg-paper p-6 md:p-7"
       >
         <div className="mb-5 flex items-start justify-between">
           <div>
@@ -101,7 +103,7 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
             <motion.div
               initial={{ scale: 0.7, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              transition={{ type: "spring", damping: 15, stiffness: 220 }}
+              transition={SPRING.celebrate}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -144,7 +146,7 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
               rows={5}
               maxLength={2000}
               placeholder={t(kind === "bug" ? "feedback.placeholderBug" : "feedback.placeholderIdea")}
-              className="mt-3 w-full resize-none rounded-[10px] border border-ink/10 p-3 text-sm text-ink outline-none transition placeholder:text-ink/30 focus:border-ink/30"
+              className="mt-3 w-full resize-none rounded-control border border-ink/10 p-3 text-sm text-ink outline-none transition placeholder:text-ink/30 focus:border-ink/30"
             />
 
             <input
@@ -152,7 +154,7 @@ export function FeedbackSheet({ onClose }: { onClose: () => void }) {
               onChange={(e) => setContact(e.target.value)}
               maxLength={120}
               placeholder={t("feedback.contactPlaceholder")}
-              className="mt-2 w-full rounded-[10px] border border-ink/10 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink/30 focus:border-ink/30"
+              className="mt-2 w-full rounded-control border border-ink/10 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink/30 focus:border-ink/30"
             />
 
             {error && <p className="mt-3 text-[11px] text-loss">{error}</p>}

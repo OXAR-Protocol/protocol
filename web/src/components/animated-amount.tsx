@@ -2,6 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 
+import { SPRING } from "@/lib/motion";
+
 /**
  * A number that grows and shrinks a digit at a time.
  *
@@ -38,7 +40,7 @@ export function AnimatedAmount({
             // survivors along, so pressing keys quickly caught a digit mid-slide,
             // sitting on top of its neighbour.
             exit={{ opacity: 0, transition: { duration: 0.08 } }}
-            transition={{ type: "spring", stiffness: 700, damping: 40, mass: 0.4 }}
+            transition={SPRING.digit}
             className="inline-block tabular-nums"
           >
             {ch}

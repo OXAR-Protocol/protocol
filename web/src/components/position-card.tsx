@@ -54,7 +54,7 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
   return (
     <button
       onClick={onOpen}
-      className={`group relative isolate flex flex-col gap-4 overflow-hidden rounded-[8px] border bg-paper p-5 text-left transition ${
+      className={`group relative isolate flex flex-col gap-4 overflow-hidden rounded-field border bg-paper p-5 text-left transition ${
         picked ? "border-ink/40 ring-1 ring-ink/10" : "border-ink/10 hover:border-ink/30"
       }`}
     >

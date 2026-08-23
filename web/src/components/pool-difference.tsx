@@ -32,7 +32,7 @@ export function PoolDifference({ variants, selectedId }: { variants: ProviderVie
     .sort((a, b) => b.usd - a.usd);
 
   return (
-    <div className="mt-4 max-w-[52ch] rounded-[10px] border border-ink/[0.08] bg-ink/[0.02] p-3">
+    <div className="mt-4 max-w-[52ch] rounded-control border border-ink/[0.08] bg-ink/[0.02] p-3">
       <p className="text-[12px] leading-relaxed text-ink/55">
         {t(sameRate ? "pool.sameRate" : "pool.rateAside")}
       </p>

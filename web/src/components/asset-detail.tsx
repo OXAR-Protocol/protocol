@@ -13,6 +13,7 @@ import type { ProviderView } from "@/hooks/use-yield-positions";
 import { fromBaseUnits, planWithdrawal } from "@/lib/yield";
 import { settledAmount } from "@/lib/yield/settled";
 import { PhotoBg } from "@/components/photo-bg";
+import { useRise } from "@/lib/motion";
 import { useT } from "@/lib/i18n";
 import { isPriceExposure } from "@/lib/yield/assets";
 import { getAssetInfo } from "@/lib/yield/asset-info";
@@ -27,12 +28,6 @@ import { HoverChart } from "@/components/hover-chart";
 import { YieldActionSuccess, type ActionResult } from "@/components/yield-action-success";
 import { ActivityFeed } from "@/components/activity-feed";
 import { AssetProof } from "@/components/asset-proof";
-
-const fade = (delay: number) => ({
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, delay },
-});
 
 /** Full-page asset detail, Ondo-style: live price/APY + area chart on the left,
  *  a sticky buy/sell rail on the right, curated "what it is" + position below.
@@ -51,6 +46,7 @@ export function AssetDetail({
 }) {
   const price = isPriceExposure(view.id);
   const { t, locale } = useT();
+  const fade = useRise();
   const info = getAssetInfo(view.id, locale);
   const { walletAddress, connection } = useSolanaContext();
   const { withdraw, redeemAll, loading, error } = useYieldActions(view.id);
@@ -215,8 +211,8 @@ export function AssetDetail({
           doing outranks what the thing is — it used to sit below the chart and the essay. */}
       {positionValue > 0 && (
         <motion.section
-          {...fade(0.08)}
-          className="relative mt-6 overflow-hidden rounded-[12px] border border-ink/10 bg-paper p-5"
+          {...fade(1)}
+          className="relative mt-6 overflow-hidden rounded-card border border-ink/10 bg-paper p-5"
         >
           {/* The wallet card's treatment, not a violet wash: a white card and a real
               photograph. The engraving at 6% behind a purple tint read as a smudge —
@@ -278,7 +274,7 @@ export function AssetDetail({
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px]">
         {/* Left: chart + about + position */}
         <div className="min-w-0">
-          <motion.div {...fade(0.05)}>
+          <motion.div {...fade(1)}>
             {view.heldMint ? (
               <AssetChart mint={view.heldMint} />
             ) : apyHistory.length > 1 ? (
@@ -298,11 +294,11 @@ export function AssetDetail({
           </motion.div>
 
           {info && (
-            <motion.section {...fade(0.1)} className="mt-10">
+            <motion.section {...fade(2)} className="mt-10">
               <p className="lowercase text-[13px] text-ink/45 mb-3">{t("asset.whatItIs")}</p>
               <p className="text-[clamp(17px,1.6vw,21px)] leading-snug text-ink/80">{info.about}</p>
               {info.facts && info.facts.length > 0 && (
-                <div className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-[12px] border border-ink/10 bg-ink/10 sm:grid-cols-2">
+                <div className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-card border border-ink/10 bg-ink/10 sm:grid-cols-2">
                   {info.facts.map((f, i) => {
                     // An odd last fact would leave an empty 2nd cell showing the grey
                     // grid background — span it full width so the row stays filled.
@@ -319,14 +315,14 @@ export function AssetDetail({
             </motion.section>
           )}
 
-          <motion.section {...fade(0.18)}>
+          <motion.section {...fade(3)}>
             <AssetProof id={view.id} />
           </motion.section>
 
           {/* "your history with this" needs a "you". Signed out it read as an empty
               ledger — a promise of nothing — so it isn't offered at all. */}
           {view.heldMint && walletAddress && (
-            <motion.section {...fade(0.2)} className="mt-10">
+            <motion.section {...fade(4)} className="mt-10">
               <p className="mb-3 lowercase text-[13px] text-ink/45">{t("asset.history")}</p>
               {/* Only this asset's rows — a ledger of everything belongs in the portfolio. */}
               <ActivityFeed mint={view.heldMint} unitLabel={unitLabel} />
@@ -336,7 +332,7 @@ export function AssetDetail({
 
         {/* Desktop: the rail beside the chart. On a phone it moves into a sheet
             raised by the bar at the bottom — see AssetActionBar. */}
-        <motion.div {...fade(0.2)} className="hidden lg:block">
+        <motion.div {...fade(4)} className="hidden lg:block">
           <AssetActionRail
             view={view}
             price={price}

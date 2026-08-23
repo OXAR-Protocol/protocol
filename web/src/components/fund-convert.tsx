@@ -116,7 +116,7 @@ export function FundConvert({ onConverted }: { onConverted: () => void }) {
           type="button"
           onClick={run}
           disabled={!ready || busy}
-          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-25"
+          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85 disabled:opacity-25"
         >
           {busy && <Loader2 size={14} className="animate-spin" />}
           {t("convert.action", { sym: picked.symbol })}

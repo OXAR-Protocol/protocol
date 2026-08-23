@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
+import { SPRING } from "@/lib/motion";
 import { X } from "lucide-react";
 
 import { INVITE_FLAG, CAPTURED_FLAG, DISMISSED_FLAG } from "./invite";
@@ -85,11 +87,11 @@ export function JoinCapture() {
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="relative w-full max-w-[380px] overflow-hidden rounded-[18px] bg-paper shadow-[0_20px_60px_rgba(0,0,0,0.25)]"
+            className="relative w-full max-w-[380px] overflow-hidden rounded-panel bg-paper shadow-[0_20px_60px_rgba(0,0,0,0.25)]"
             initial={{ y: 24, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 24, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 26 }}
+            transition={SPRING.soft}
           >
             <button
               onClick={dismiss}
@@ -127,12 +129,12 @@ export function JoinCapture() {
                       onKeyDown={(e) => e.key === "Enter" && submit()}
                       placeholder="you@email.com"
                       inputMode="email"
-                      className="w-full rounded-[12px] border border-ink/15 px-3.5 py-3 text-[15px] outline-none placeholder:text-ink/30 focus:border-ink/40"
+                      className="w-full rounded-card border border-ink/15 px-3.5 py-3 text-[15px] outline-none placeholder:text-ink/30 focus:border-ink/40"
                     />
                     <button
                       onClick={submit}
                       disabled={!valid || busy}
-                      className="w-full rounded-full bg-ink py-3 text-[14px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-40"
+                      className="w-full rounded-full bg-ink py-3 text-[14px] font-medium lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85 disabled:opacity-40"
                     >
                       {busy ? "…" : "keep me posted"}
                     </button>

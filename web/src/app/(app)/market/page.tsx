@@ -23,6 +23,7 @@ import { PickSetProvider } from "@/components/pick-set";
 import { PickedBuyBar } from "@/components/picked-buy-bar";
 import { useFeature } from "@/hooks/use-features";
 import { useYieldPositions } from "@/hooks/use-yield-positions";
+import { useRise } from "@/lib/motion";
 import { useT } from "@/lib/i18n";
 
 type Layout = "list" | "grid";
@@ -47,6 +48,7 @@ export default function YieldPage() {
   const canPickMany = useFeature("selling-v2") && authenticated;
   const router = useRouter();
   const { t } = useT();
+  const rise = useRise();
   const [apyBucket, setApyBucket] = useState<ApyBucket | null>(null);
   const [layout, setLayout] = useState<Layout>("list");
   // Off by default: the catalog order is ours, any ranking has to be asked for.
@@ -100,9 +102,7 @@ export default function YieldPage() {
     <PickSetProvider enabled={canPickMany}>
     <div className="max-w-[900px] mx-auto pt-8 pb-32 px-4">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        {...rise(0)}
       >
         <SectionLabel>market</SectionLabel>
         <h1 className="mt-4 text-[clamp(26px,4vw,44px)] text-ink leading-[1.04] tracking-[-0.04em] lowercase">
@@ -119,9 +119,7 @@ export default function YieldPage() {
 
       {/* Filters */}
       <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.05 }}
+        {...rise(1)}
         className="mt-8 flex flex-wrap items-center gap-3"
       >
         <p className="w-full text-[11px] lowercase tracking-wide text-ink/40">
@@ -162,9 +160,7 @@ export default function YieldPage() {
       {/* Live sources */}
       {liveSources.length > 0 && (
         <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          {...rise(2)}
           className="mt-10"
         >
           <div data-tour="catalog" className="flex items-center justify-between mb-3">
@@ -182,7 +178,7 @@ export default function YieldPage() {
                   key={mode}
                   onClick={() => chooseLayout(mode)}
                   aria-label={`${mode} view`}
-                  className={`p-1.5 rounded-[5px] border transition ${
+                  className={`p-1.5 rounded-tight border transition ${
                     layout === mode
                       ? "border-ink/30 text-ink"
                       : "border-ink/10 text-ink/45 hover:text-ink/70"
@@ -246,9 +242,7 @@ export default function YieldPage() {
       {/* Roadmap — native */}
       {roadmapNative.length > 0 && (
         <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
+          {...rise(3)}
           className="mt-10"
         >
           <p className="text-xs lowercase tracking-[0.2em] text-ink/40 mb-3">
@@ -265,9 +259,7 @@ export default function YieldPage() {
       {/* Roadmap — cross-chain */}
       {roadmapCrossChain.length > 0 && (
         <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          {...rise(4)}
           className="mt-12"
         >
           <div className="flex items-baseline justify-between mb-3">
@@ -292,7 +284,7 @@ export default function YieldPage() {
         </p>
       )}
 
-      <div className="mt-12 p-5 rounded-[8px] border border-ink/10 bg-paper">
+      <div className="mt-12 p-5 rounded-field border border-ink/10 bg-paper">
         <p className="text-sm text-ink">{t("yield.nfa.title")}</p>
         <p className="mt-1 text-xs text-ink/45 leading-relaxed">
           {t("yield.nfa.body")}

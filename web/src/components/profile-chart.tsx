@@ -1,7 +1,5 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
-
 import {
   formatUsdAmount,
   formatSignedUsd,
@@ -10,6 +8,8 @@ import {
   type RangePerformance,
 } from "@oxar/sdk";
 
+import { AnimatedAmount } from "@/components/animated-amount";
+import { Skeleton } from "@/components/ui/skeleton";
 import { HoverChart } from "@/components/hover-chart";
 import { RANGES, type Range } from "@/lib/history-range";
 import { useT } from "@/lib/i18n";
@@ -63,8 +63,12 @@ export function ProfileChart({
       <p className="text-[11px] lowercase tracking-wide text-ink/40">{t("profile.allTogether")}</p>
       <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <div className="flex flex-wrap items-baseline gap-x-3">
+          {/* The headline figure on the page, and it used to change by being replaced:
+              one frame it says $0.00, the next it says $1,234.56. Animating it per
+              character is the difference between reading a new number and watching
+              your own number arrive. */}
           <p className="text-[clamp(30px,6vw,44px)] font-light leading-none tracking-[-0.02em] tabular-nums text-ink">
-            ${formatUsdAmount(now)}
+            $<AnimatedAmount value={formatUsdAmount(now)} />
           </p>
           <p className={`whitespace-nowrap text-[13px] tabular-nums ${up ? "text-profit" : "text-loss"}`}>
             {earned === null ? (neverFunded ? "$0.00" : "—") : formatSignedUsd(earned)}
@@ -93,9 +97,10 @@ export function ProfileChart({
           everywhere else it was just wallpaper. */}
       <div className="dot-field mt-4 -mx-5 sm:mx-0">
         {loading ? (
-          <div className="flex h-[150px] items-center justify-center text-ink/25">
-            <Loader2 size={16} className="animate-spin" />
-          </div>
+          // The height was already reserved, so nothing jumped here — but a spinner
+          // still says "wait" where a shape can say "a chart is coming", which is the
+          // same information without the pause in it.
+          <Skeleton className="mx-5 h-[150px] rounded-panel sm:mx-0" />
         ) : drawn.length > 1 ? (
           <HoverChart
             values={drawn.map((p) => p.usd)}

@@ -60,7 +60,13 @@ export function Speeds() {
                 </div>
                 {/* tagline + sources — expand on hover/tap */}
                 <div
-                  className={`grid transition-all duration-300 ${active ? "mt-3 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
+                  // Animating `grid-template-rows` is a layout animation, which is
+                  // normally a finding — but it is also the only way to transition to
+                  // an auto height without measuring, and this is a marketing page
+                  // with one row open at a time. What `transition-all` was adding on
+                  // top of it was not: it also animated everything else this element
+                  // has. Narrowed to the three properties that move, with a real curve.
+                  className={`grid transition-[grid-template-rows,opacity,margin-top] duration-300 ease-out ${active ? "mt-3 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
                 >
                   <p className="min-h-0 overflow-hidden text-[clamp(14px,1.25vw,18px)] text-black/55">{s.tag}</p>
                 </div>

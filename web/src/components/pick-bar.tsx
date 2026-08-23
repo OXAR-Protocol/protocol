@@ -92,7 +92,7 @@ export function PickBar({ picked, selectedCount, heldUsd, state, done, progress,
           type="button"
           onClick={onOpen}
           disabled={busy || selectedCount === 0}
-          className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[13px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85 disabled:opacity-40"
         >
           {busy && <Loader2 size={13} className="animate-spin" />}
           {t("bulk.open")}
