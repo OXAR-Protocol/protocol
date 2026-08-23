@@ -258,3 +258,31 @@ them are the PR contradicting itself:
   button and release halfway; pull to refresh and let go early; throttle the CPU 6× in
   DevTools and hold-to-confirm again — the fill must stay smooth.
 - Toggle "Reduce motion" in macOS/iOS settings and repeat all of the above.
+
+---
+
+## Follow-up (2026-08-24): the warp is gone
+
+The audit shortened the entry warp and made it skippable. The right question turned
+out to be a different one — not "how long should it be" but "what is it for".
+
+Answer: nothing. A sweep of the codebase found exactly one trigger, `WarpOnEntry`,
+mounted in `(app)/layout.tsx`, and it was attached to no event whatsoever. It did not
+wait for auth. It did not wait for balances. It did not cover a navigation — the
+`url` and `onComplete` options in `WarpOptions`, the two that exist precisely so a
+warp can cover a real transition, had zero callers. It played because the layout
+mounted, and held a `z-9999` overlay over the app while it did.
+
+An animation with no event behind it is decoration, and decoration does not get to
+stand between someone and their money on the way in.
+
+Removed: `warp-on-entry.tsx`, `warp-transition.tsx`, `warp-canvas.ts`,
+`logo-path-data.ts` — 661 lines forming a closed loop that nothing outside it
+referenced — plus the `WarpProvider` wrapper in the app layout. It is in git history
+if a real transition ever needs it.
+
+The same sweep checked every other full-screen overlay in the app: sheets, modals,
+the access wall, the terms gate, the tour spotlight, the success screens. Every one
+of them appears because something happened. There are no infinite animations outside
+loading spinners and skeletons, and no `whileInView` reveals outside marketing. The
+warp was the only decorative-only motion in the product.

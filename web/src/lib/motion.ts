@@ -60,9 +60,8 @@ export const SPRING = {
  * True when the visitor has asked their OS for less motion.
  *
  * The CSS media query in `globals.css` handles anything CSS drives. This is for the
- * decisions CSS cannot make: whether the entry warp plays at all, whether the movers
- * carousel advances by itself. Those are not "shorter" under reduced motion — they are
- * off.
+ * decisions CSS cannot make: whether the movers carousel advances by itself at all.
+ * That is not "shorter" under reduced motion — it is off.
  */
 export function useAppReducedMotion(): boolean {
   return useReducedMotion() ?? false;

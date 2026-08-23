@@ -150,8 +150,8 @@ input[type="number"] {
 
    Durations collapse rather than hitting zero, because an instant swap reads as a
    glitch even to someone who asked for no animation. The JS side of this lives in
-   `useAppReducedMotion()` (src/lib/motion.ts), which the entry warp and the movers
-   carousel consult before they run at all. */
+   `useAppReducedMotion()` (src/lib/motion.ts), for the decisions CSS cannot make —
+   whether the movers carousel advances by itself at all. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
