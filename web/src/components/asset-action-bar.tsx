@@ -62,7 +62,7 @@ export function AssetActionBar({
           <button
             type="button"
             onClick={() => setOpen("buy")}
-            className="flex-1 rounded-full bg-ink py-3 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
+            className="flex-1 rounded-full bg-ink py-3 text-[14px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
           >
             {price ? t("rail.buy") : t("rail.deposit")}
           </button>

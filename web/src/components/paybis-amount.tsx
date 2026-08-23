@@ -44,7 +44,7 @@ export function PaybisAmount({
 
   return (
     <>
-      <div className="rounded-[10px] border border-ink/10 px-4 py-3">
+      <div className="rounded-control border border-ink/10 px-4 py-3">
         <div className="flex items-baseline justify-between gap-3">
           <label className="text-[11px] lowercase tracking-wide text-ink/40">{t("cashout.amount")}</label>
           {max !== undefined && (
@@ -82,7 +82,7 @@ export function PaybisAmount({
         ))}
       </div>
 
-      <div className="mt-3 min-h-[58px] rounded-[10px] border border-ink/10 bg-ink/[0.02] px-4 py-3">
+      <div className="mt-3 min-h-[58px] rounded-control border border-ink/10 bg-ink/[0.02] px-4 py-3">
         {loading && !quote ? (
           <Loader2 size={15} strokeWidth={1.5} className="animate-spin text-ink/30" />
         ) : quote ? (
@@ -104,7 +104,7 @@ export function PaybisAmount({
       </div>
 
       {pricey && (
-        <div className="mt-2 flex items-start gap-2 rounded-[10px] border border-amber-500/30 bg-amber-500/[0.06] px-3 py-2.5">
+        <div className="mt-2 flex items-start gap-2 rounded-control border border-amber-500/30 bg-amber-500/[0.06] px-3 py-2.5">
           <TriangleAlert size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-amber-600" />
           <p className="text-[12px] leading-snug text-ink/65">{t("cashout.pricey")}</p>
         </div>

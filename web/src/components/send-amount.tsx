@@ -100,7 +100,7 @@ export function SendAmount({
         type="button"
         onClick={onContinue}
         disabled={!ready}
-        className="mt-3 w-full rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-25"
+        className="mt-3 w-full rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85 disabled:opacity-25"
       >
         {overspending ? t("send.notEnough", { sym: asset.symbol }) : t("send.review.open")}
       </button>

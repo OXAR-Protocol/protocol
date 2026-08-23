@@ -60,7 +60,7 @@ export function PositionToolbar({ allHeld, filter, onFilter, layout, onLayout, s
                 key={mode}
                 onClick={() => onLayout(mode)}
                 aria-label={`${mode} view`}
-                className={`rounded-[5px] border p-1.5 transition ${
+                className={`rounded-tight border p-1.5 transition ${
                   layout === mode
                     ? "border-ink/30 text-ink"
                     : "border-ink/10 text-ink/45 hover:text-ink/70"

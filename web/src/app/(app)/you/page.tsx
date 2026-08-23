@@ -11,6 +11,7 @@ import { MoneyPanel } from "@/components/money-panel";
 import { PhotoBg } from "@/components/photo-bg";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useSignIn } from "@/hooks/use-sign-in";
+import { useRise } from "@/lib/motion";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -29,6 +30,7 @@ export default function YouPage() {
   const { ready, authenticated } = usePrivy();
   const { totalUsdc, loading } = useAggregatePersonalBalance();
   const { t } = useT();
+  const rise = useRise();
   const signIn = useSignIn();
 
   if (!ready) return null;
@@ -38,16 +40,14 @@ export default function YouPage() {
     return (
       <div className="mx-auto max-w-[800px] pb-32">
         <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mt-10 rounded-[12px] border border-ink/10 bg-paper p-6 text-center"
+          {...rise(0)}
+          className="mt-10 rounded-card border border-ink/10 bg-paper p-6 text-center"
         >
           <p className="text-sm text-ink/45">{t("guest.you.body")}</p>
           <button
             type="button"
             onClick={signIn}
-            className="mt-4 rounded-full bg-ink px-6 py-2.5 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
+            className="mt-4 rounded-full bg-ink px-6 py-2.5 text-[14px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
           >
             {t("common.signIn")}
           </button>
@@ -59,9 +59,7 @@ export default function YouPage() {
   return (
     <div className="mx-auto max-w-[1100px] pb-32">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        {...rise(0)}
         className="mt-2"
       >
         <ProfileHeader />
@@ -69,11 +67,9 @@ export default function YouPage() {
 
       {totalUsdc === 0 && !loading ? (
         <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          {...rise(1)}
         >
-          <div className="relative overflow-hidden rounded-[16px] border border-ink/10 bg-paper">
+          <div className="relative overflow-hidden rounded-panel border border-ink/10 bg-paper">
             <PhotoBg src="/art/coin-stacking.webp" scrim="left" position="object-right" />
             <div className="relative p-8 md:p-10">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand)]/30 bg-[var(--brand)]/10 px-2 py-1 text-[10px] lowercase tracking-widest text-[var(--brand)]">
@@ -88,7 +84,7 @@ export default function YouPage() {
               <p className="mt-3 max-w-md text-sm leading-relaxed text-ink/55">{t("home.empty.body")}</p>
               <Link
                 href="/market"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-[14px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-[14px] font-medium lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
               >
                 {t("home.wakeUp")}
                 <ArrowUpRight size={14} strokeWidth={1.5} />

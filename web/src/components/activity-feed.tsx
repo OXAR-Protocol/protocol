@@ -42,7 +42,7 @@ export function ActivityFeed({ mint, unitLabel }: Props = {}) {
 
   if (loading) {
     return (
-      <div className="border border-ink/10 bg-paper rounded-[12px] p-6 text-center">
+      <div className="border border-ink/10 bg-paper rounded-card p-6 text-center">
         <Loader2 className="animate-spin inline text-ink/40" size={18} />
       </div>
     );
@@ -50,7 +50,7 @@ export function ActivityFeed({ mint, unitLabel }: Props = {}) {
 
   if (events.length === 0) {
     return (
-      <div className="border border-ink/10 bg-paper rounded-[12px] p-6 text-center">
+      <div className="border border-ink/10 bg-paper rounded-card p-6 text-center">
         <p className="text-sm text-ink/45">
           {t("activity.empty")}
         </p>
@@ -59,7 +59,7 @@ export function ActivityFeed({ mint, unitLabel }: Props = {}) {
   }
 
   return (
-    <div className="divide-y divide-ink/[0.06] overflow-hidden rounded-[12px] border border-ink/10 bg-paper">
+    <div className="divide-y divide-ink/[0.06] overflow-hidden rounded-card border border-ink/10 bg-paper">
       {events.slice(0, visible).map((e, i) => {
         const inflow = INFLOW.includes(e.kind);
         const Icon = inflow ? ArrowDownLeft : ArrowUpRight;

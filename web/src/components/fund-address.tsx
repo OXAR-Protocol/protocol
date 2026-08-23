@@ -30,7 +30,7 @@ export function FundAddress({ address, hint }: { address: string; hint: string }
       <p className="text-[12px] leading-snug text-ink/60">{hint}</p>
 
       <div className="mt-4 flex justify-center">
-        <div className="rounded-[12px] border border-ink/10 bg-paper p-4">
+        <div className="rounded-card border border-ink/10 bg-paper p-4">
           <QRCodeSVG value={address} size={168} level="M" />
         </div>
       </div>

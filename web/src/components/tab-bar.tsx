@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+
+import { SPRING } from "@/lib/motion";
 import { Wallet, TrendingUp } from "lucide-react";
 
 import { useT } from "@/lib/i18n";
@@ -57,7 +59,7 @@ export function TabBar() {
               {isActive && (
                 <motion.span
                   layoutId="tab-bar-active"
-                  transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                  transition={SPRING.snappy}
                   className="absolute inset-0 -z-10 rounded-full bg-ink"
                 />
               )}

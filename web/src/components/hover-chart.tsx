@@ -94,7 +94,7 @@ export function HoverChart({ values, format, height = 220, className, fill, labe
             style={{ left: `${leftPct}%`, top: `${topPct}%` }}
           />
           <div
-            className="pointer-events-none absolute whitespace-nowrap rounded-[6px] bg-ink px-2 py-1 text-[11px] tabular-nums text-paper"
+            className="pointer-events-none absolute whitespace-nowrap rounded-tight bg-ink px-2 py-1 text-[11px] tabular-nums text-paper"
             style={{ left: `${leftPct}%`, top: `${topPct}%`, transform: `translate(${tx}, ${ty})` }}
           >
             {format(value)}

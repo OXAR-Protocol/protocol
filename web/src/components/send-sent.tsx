@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+
+import { SPRING } from "@/lib/motion";
 import { ExternalLink } from "lucide-react";
 
 import { useT } from "@/lib/i18n";
@@ -37,7 +39,7 @@ export function SendSent({
       <motion.div
         initial={{ scale: 0.7, opacity: 0, y: 10 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        transition={{ type: "spring", damping: 15, stiffness: 220 }}
+        transition={SPRING.celebrate}
         className="flex justify-center"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}

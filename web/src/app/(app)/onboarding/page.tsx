@@ -7,12 +7,14 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Wallet, Smartphone, ArrowRight } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
+import { useRise } from "@/lib/motion";
 import { useT } from "@/lib/i18n";
 
 export default function OnboardingPage() {
   const { login, authenticated, ready } = usePrivy();
   const router = useRouter();
   const { t } = useT();
+  const rise = useRise();
 
   useEffect(() => {
     if (ready && authenticated) router.replace("/you");
@@ -21,9 +23,7 @@ export default function OnboardingPage() {
   return (
     <div className="mx-auto max-w-[1000px] pb-32 pt-8">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        {...rise(0)}
       >
         <SectionLabel>{t("onb.label")}</SectionLabel>
         <h1 className="mt-4 max-w-2xl text-[clamp(28px,4.4vw,48px)] leading-[1.04] tracking-[-0.04em]">
@@ -35,16 +35,14 @@ export default function OnboardingPage() {
       </motion.div>
 
       <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
+        {...rise(1)}
         className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2"
       >
         {/* Wallet */}
         <button
           onClick={() => login()}
           disabled={!ready}
-          className="rounded-[14px] border border-ink/10 bg-paper p-8 text-left transition-colors hover:border-ink/30 disabled:opacity-50"
+          className="rounded-card border border-ink/10 bg-paper p-8 text-left transition-colors hover:border-ink/30 disabled:opacity-50"
         >
           <Wallet className="mb-6 text-ink/50" size={30} strokeWidth={1.5} />
           <h2 className="lowercase text-[clamp(20px,2.2vw,26px)] tracking-[-0.02em]">{t("onb.crypto.title")}</h2>
@@ -58,7 +56,7 @@ export default function OnboardingPage() {
         </button>
 
         {/* Apple Pay / Google Pay (coming soon) */}
-        <div className="rounded-[14px] border border-ink/10 bg-paper p-8 text-left opacity-80">
+        <div className="rounded-card border border-ink/10 bg-paper p-8 text-left opacity-80">
           <Smartphone className="mb-6 text-ink/50" size={30} strokeWidth={1.5} />
           <h2 className="lowercase text-[clamp(20px,2.2vw,26px)] tracking-[-0.02em]">{t("onb.phone.title")}</h2>
           <p className="mt-2 lowercase text-[clamp(14px,1.2vw,16px)] leading-snug text-ink/50">
@@ -71,9 +69,7 @@ export default function OnboardingPage() {
       </motion.section>
 
       <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        {...rise(2)}
         className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 lowercase text-[13px] text-ink/35"
       >
         <span>{t("onb.chip1")}</span>

@@ -16,7 +16,7 @@ export function AssetProof({ id }: { id: string }) {
   if (!links.length) return null;
 
   return (
-    <div className="mt-8 rounded-[12px] border border-ink/10 bg-paper p-5">
+    <div className="mt-8 rounded-card border border-ink/10 bg-paper p-5">
       <p className="lowercase text-[13px] text-ink/45">{t("proof.title")}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {links.map((l) => (

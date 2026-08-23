@@ -59,7 +59,7 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline, declineLabel
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="flex max-h-[92vh] w-full max-w-[560px] flex-col overflow-hidden rounded-t-[20px] border border-ink/10 bg-paper sm:rounded-[20px]"
+        className="flex max-h-[92vh] w-full max-w-[560px] flex-col overflow-hidden rounded-t-sheet border border-ink/10 bg-paper sm:rounded-sheet"
       >
         {/* The eyes get a band of their own rather than sitting behind the header.
             First attempt put the photo behind the header text: at ~100px tall and 560
@@ -141,7 +141,7 @@ export function TermsGateModal({ walletAddress, onAgree, onDecline, declineLabel
               type="button"
               disabled={!agreed}
               onClick={onAgree}
-              className="rounded-full bg-ink px-5 py-2.5 text-[13px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-30"
+              className="rounded-full bg-ink px-5 py-2.5 text-[13px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85 disabled:opacity-30"
             >
               {t("terms.gate.agree")}
             </button>

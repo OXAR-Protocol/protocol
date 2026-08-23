@@ -91,7 +91,7 @@ export function CustomSelect({
         <div
           style={{ maxHeight: drop.maxHeight }}
           className={`absolute z-50 w-max min-w-full overflow-auto border border-ink/15 bg-paper py-1 shadow-[0_8px_24px_rgba(0,0,0,0.12)] ${
-            pill ? "rounded-[10px]" : "rounded"
+            pill ? "rounded-control" : "rounded"
           } ${align === "right" ? "right-0" : "left-0"} ${
             drop.up ? "bottom-full mb-1" : "top-full mt-1"
           }`}

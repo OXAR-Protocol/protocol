@@ -50,7 +50,7 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
 
   if (days.length === 0) {
     return (
-      <div className="rounded-[12px] border border-ink/10 bg-paper p-8 text-center text-[13px] text-ink/45">
+      <div className="rounded-card border border-ink/10 bg-paper p-8 text-center text-[13px] text-ink/45">
         {t("activity.empty")}
       </div>
     );
@@ -61,7 +61,7 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
   return (
     <div className="space-y-3">
       {shown.map((d) => (
-        <div key={d.day} className="rounded-[12px] border border-ink/10 bg-paper">
+        <div key={d.day} className="rounded-card border border-ink/10 bg-paper">
           {/* The day itself: what it closed at, and how that moved. */}
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-ink/[0.06] px-4 py-3">
             <span className="text-[13px] text-ink">
@@ -146,7 +146,7 @@ export function DayHistory({ days, locale }: { days: DayActivity<ActivityEvent>[
         <button
           type="button"
           onClick={() => setLimit((n) => n + PAGE)}
-          className="w-full rounded-[12px] border border-ink/10 bg-paper py-3 text-[12px] lowercase tracking-wide text-ink/55 transition hover:border-ink/30 hover:text-ink"
+          className="w-full rounded-card border border-ink/10 bg-paper py-3 text-[12px] lowercase tracking-wide text-ink/55 transition hover:border-ink/30 hover:text-ink"
         >
           {t("activity.showMore")}
         </button>

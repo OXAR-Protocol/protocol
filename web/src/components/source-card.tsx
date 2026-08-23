@@ -34,7 +34,7 @@ export function SourceCard({ group, onOpen }: Props) {
   return (
     <button
       onClick={onOpen}
-      className="group relative isolate overflow-hidden flex flex-col gap-4 p-5 rounded-[8px] border border-ink/10 bg-paper hover:border-ink/30 transition text-left"
+      className="group relative isolate overflow-hidden flex flex-col gap-4 p-5 rounded-field border border-ink/10 bg-paper hover:border-ink/30 transition text-left"
     >
       <BanknoteBg seed={group.views[0]?.id ?? group.name} />
       <div className="flex items-start justify-between gap-2">

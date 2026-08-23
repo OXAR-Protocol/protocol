@@ -22,7 +22,7 @@ export function GuestActionRail() {
         <button
           type="button"
           onClick={signIn}
-          className="mt-4 w-full rounded-full bg-ink px-4 py-3 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85"
+          className="mt-4 w-full rounded-full bg-ink px-4 py-3 text-[14px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
         >
           {t("rail.guestCta")}
         </button>

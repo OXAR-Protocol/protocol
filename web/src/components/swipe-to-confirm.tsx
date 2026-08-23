@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { animate, motion, useMotionValue, useTransform } from "framer-motion";
 import { Loader2 } from "lucide-react";
 
 import { useHoldsToConfirm } from "@/hooks/use-holds-to-confirm";
+import { DURATION, EASE_OUT } from "@/lib/motion";
 import { useT } from "@/lib/i18n";
 
 /** How long the press has to last to count as a decision. */
@@ -43,25 +45,50 @@ export function SwipeToConfirm({
 }) {
   const { t } = useT();
   const hold = useHoldsToConfirm();
-  const [progress, setProgress] = useState(0);
+  // The fill is a motion value, not React state.
+  //
+  // It used to be `useState` written from inside the rAF loop and applied as
+  // `width: ${progress * 100}%`, which bought two problems on the one interaction in
+  // the app that must never stutter: a full React render on every frame of the hold,
+  // and `width` — a layout property, so each of those frames also cost a relayout and
+  // a repaint. Eight hundred milliseconds of that is roughly fifty of each.
+  //
+  // A motion value is written straight to the element, so nothing re-renders; `scaleX`
+  // is composited, so nothing relayouts. Same fill, off the main thread's critical path.
+  const fill = useMotionValue(0);
+  // The full transform string rather than framer's `scaleX` shorthand — the shorthand
+  // routes through a transform template on the main thread.
+  const fillTransform = useTransform(fill, (v) => `scaleX(${v})`);
   const holding = useRef(false);
   const startedAt = useRef(0);
   const frame = useRef<number>(0);
   const locked = !!disabled || !!busy;
 
   const stop = () => {
+    if (!holding.current) return;
     holding.current = false;
     cancelAnimationFrame(frame.current);
-    setProgress(0);
+    // Let go halfway and the fill recedes rather than vanishing. Snapping it to zero
+    // in one frame read as a glitch — as if the control had broken — when what
+    // actually happened is that a decision was withdrawn. The hold is deliberate and
+    // slow; the retreat is the system answering, so it is quick.
+    animate(fill, 0, { duration: DURATION.press, ease: EASE_OUT });
   };
 
   const tick = (now: number) => {
     if (!holding.current) return;
     const done = Math.min(1, (now - startedAt.current) / HOLD_MS);
-    setProgress(done);
+    fill.set(done);
     if (done >= 1) {
       holding.current = false;
-      setProgress(0);
+      fill.set(0);
+      // The moment money is authorised, felt in the hand. Absent on iOS Safari, which
+      // does not implement it — so it is a bonus, never the confirmation itself.
+      try {
+        navigator.vibrate?.(12);
+      } catch {
+        // Some browsers throw on a gesture-less call. The confirm still happens.
+      }
       onConfirm();
       return;
     }
@@ -105,7 +132,7 @@ export function SwipeToConfirm({
         type="button"
         disabled={locked}
         onClick={onConfirm}
-        className={`inline-flex w-full items-center justify-center rounded-full bg-ink lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-30 ${
+        className={`inline-flex w-full items-center justify-center rounded-full bg-ink lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85 disabled:opacity-30 ${
           inBar ? "h-[38px] text-[13px]" : "mt-3 h-[52px] text-[14px]"
         }`}
       >
@@ -135,11 +162,13 @@ export function SwipeToConfirm({
           : "mt-3 h-[60px] border border-ink/12 bg-ink/[0.03] text-[14px] text-ink/60"
       }`}
     >
-      {/* The fill IS the timer — no separate spinner to read while deciding. */}
-      <span
+      {/* The fill IS the timer — no separate spinner to read while deciding. It spans
+          the whole control and is squeezed from the left, so the growing edge lands in
+          the same place the old width animation put it. */}
+      <motion.span
         aria-hidden
-        style={{ width: `${progress * 100}%` }}
-        className={`absolute inset-y-0 left-0 ${inBar ? "bg-paper/25" : "bg-ink/[0.07]"}`}
+        style={{ transform: fillTransform, transformOrigin: "left" }}
+        className={`absolute inset-0 ${inBar ? "bg-paper/25" : "bg-ink/[0.07]"}`}
       />
       {body}
     </button>

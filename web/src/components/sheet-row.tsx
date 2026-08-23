@@ -49,7 +49,7 @@ export function SheetRow({
   return (
     <Tag
       {...(inert ? {} : { type: "button" as const, onClick, disabled: disabled || busy })}
-      className={`flex min-h-[76px] w-full items-center gap-3 rounded-[12px] border border-ink/12 px-4 py-3 text-left transition ${
+      className={`flex min-h-[76px] w-full items-center gap-3 rounded-card border border-ink/12 px-4 py-3 text-left transition ${
         inert
           ? "cursor-default opacity-60"
           : "enabled:hover:border-ink/40 enabled:hover:bg-ink/[0.015] disabled:opacity-45"

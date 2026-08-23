@@ -13,7 +13,7 @@ interface Props {
  */
 export function YieldSourceRow({ source }: Props) {
   return (
-    <div className="w-full text-left p-5 rounded-[8px] border border-ink/5 opacity-60">
+    <div className="w-full text-left p-5 rounded-field border border-ink/5 opacity-60">
       <div className="flex items-center gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">

@@ -85,7 +85,7 @@ export function MoneySheet({ onClose }: { onClose: () => void }) {
 /** One of the two figures — dashes while it's being read, never a false zero. */
 function Figure({ label, value }: { label: string; value: number | null }) {
   return (
-    <div className="rounded-[10px] border border-ink/10 px-4 py-3">
+    <div className="rounded-control border border-ink/10 px-4 py-3">
       <p className="text-[11px] lowercase tracking-wide text-ink/40">{label}</p>
       <p className="mt-0.5 text-[18px] tabular-nums text-ink">
         {value === null ? "—" : `$${formatUsdAmount(value)}`}

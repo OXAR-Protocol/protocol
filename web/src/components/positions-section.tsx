@@ -3,9 +3,10 @@
 import { useCallback, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 import { PhotoBg } from "@/components/photo-bg";
+import { SkeletonRows } from "@/components/ui/skeleton";
 import { PositionCard } from "@/components/position-card";
 import { PositionRow } from "@/components/position-row";
 import { PickedSellBar } from "@/components/picked-sell-bar";
@@ -117,11 +118,12 @@ export function PositionsSection() {
       />
 
       {loading ? (
-        <div className="flex justify-center p-8">
-          <Loader2 className="animate-spin text-ink/40" size={24} />
-        </div>
+        // Rows, not a spinner: a centred spinner reserves none of the height the list
+        // is about to need, so the whole page below it jumped at the moment the data
+        // arrived. These are the same height as the real rows.
+        <SkeletonRows />
       ) : held.length === 0 ? (
-        <div className="relative overflow-hidden rounded-[8px] border border-ink/10 bg-paper p-8 text-center">
+        <div className="relative overflow-hidden rounded-field border border-ink/10 bg-paper p-8 text-center">
           {/* An empty state is where a photo earns its place: nothing to read yet, and
               the picture says what the words are for. */}
           <PhotoBg src="/art/coin-stacking.webp" scrim="center" position="object-right" opacity="opacity-25" />
@@ -129,7 +131,7 @@ export function PositionsSection() {
           <p className="relative mt-1 text-xs text-ink/45">{t("pile.empty.body")}</p>
           <Link
             href="/market"
-            className="relative mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[14px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85"
+            className="relative mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[14px] font-medium lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
           >
             {t("pile.explore")}
             <ArrowUpRight size={14} strokeWidth={1.5} />

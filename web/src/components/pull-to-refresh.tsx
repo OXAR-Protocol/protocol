@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { animate, motion, useMotionValue, useTransform } from "framer-motion";
 import { RefreshCw } from "lucide-react";
 
 import { clearCache } from "@/lib/cache";
+import { SPRING } from "@/lib/motion";
 
 /**
  * Pull down at the top of the page to reload — the gesture every phone app has.
@@ -27,20 +29,59 @@ const TRIGGER_PX = 72;
 const MAX_PULL_PX = 96;
 
 export function PullToRefresh() {
-  const [pull, setPull] = useState(0);
+  // The distance lives in a motion value, not in React state.
+  //
+  // As state it was written on every `touchmove` — so the whole subtree reconciled
+  // once per frame of the pull, to move one 32px circle. A motion value writes the
+  // transform straight to the node and never renders. What IS state is the two things
+  // that genuinely change the tree: whether the indicator exists, and whether it has
+  // crossed the threshold. Both change at most twice per gesture.
+  const pull = useMotionValue(0);
+  const indicatorY = useTransform(pull, (v) => `translateY(${v * 0.6}px)`);
+  const iconRotate = useTransform(pull, (v) => `rotate(${v * 3}deg)`);
+
+  const [visible, setVisible] = useState(false);
+  const [ready, setReady] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const start = useRef<number | null>(null);
-  // The handlers need to READ how far the pull got without making the state updater
-  // do work — an updater that calls another setState is not a pure function of the
-  // previous value, and React is entitled to run it twice.
-  const pullRef = useRef(0);
-  const setPullBoth = (v: number) => {
-    pullRef.current = v;
-    setPull(v);
-  };
+  // Mirrors of the two flags, so the passive listeners can read the current value
+  // without being re-registered every time one of them flips.
+  const visibleRef = useRef(false);
+  const readyRef = useRef(false);
 
   useEffect(() => {
     const atTop = () => window.scrollY <= 0;
+
+    /** Move the indicator, and flip the two flags only when they actually change. */
+    const setPull = (v: number) => {
+      pull.set(v);
+      const nowVisible = v > 0;
+      const nowReady = v >= TRIGGER_PX;
+      if (nowVisible !== visibleRef.current) {
+        visibleRef.current = nowVisible;
+        setVisible(nowVisible);
+      }
+      if (nowReady !== readyRef.current) {
+        readyRef.current = nowReady;
+        setReady(nowReady);
+      }
+    };
+
+    /** Give the pull back with a spring instead of deleting it.
+     *
+     *  Setting the distance to zero snapped the indicator home in a single frame,
+     *  which reads as the gesture having failed rather than as having been let go of.
+     *  A pull that felt attached to something on the way down should feel attached on
+     *  the way back. */
+    const release = () => {
+      animate(pull, 0, { ...SPRING.sheet, restDelta: 0.5 }).then(() => {
+        if (pull.get() !== 0) return;
+        visibleRef.current = false;
+        readyRef.current = false;
+        setVisible(false);
+        setReady(false);
+      });
+    };
 
     const onStart = (e: TouchEvent) => {
       // One finger, at the top, and not inside something that scrolls on its own —
@@ -58,22 +99,22 @@ export function PullToRefresh() {
       // gesture back rather than fighting it.
       if (dy <= 0 || !atTop()) {
         start.current = null;
-        setPullBoth(0);
+        release();
         return;
       }
       // Square-root damping: the first pixels answer immediately, the last ones
       // resist, which is what makes a pull feel like it's attached to something.
-      setPullBoth(Math.min(MAX_PULL_PX, Math.sqrt(dy) * 7));
+      setPull(Math.min(MAX_PULL_PX, Math.sqrt(dy) * 7));
     };
 
     const onEnd = () => {
       if (start.current === null) return;
       start.current = null;
-      if (pullRef.current < TRIGGER_PX) {
-        setPullBoth(0);
+      if (pull.get() < TRIGGER_PX) {
+        release();
         return;
       }
-      setPullBoth(TRIGGER_PX);
+      setPull(TRIGGER_PX);
       setRefreshing(true);
       // Cleared first, so the reload can't be served the numbers the pull was
       // meant to replace.
@@ -92,29 +133,29 @@ export function PullToRefresh() {
       window.removeEventListener("touchend", onEnd);
       window.removeEventListener("touchcancel", onEnd);
     };
-  }, [refreshing]);
+  }, [refreshing, pull]);
 
-  if (pull <= 0 && !refreshing) return null;
+  if (!visible && !refreshing) return null;
 
-  const ready = pull >= TRIGGER_PX;
   return (
-    <div
+    <motion.div
       aria-hidden
       className="pointer-events-none fixed inset-x-0 top-0 z-[70] flex justify-center"
-      style={{ transform: `translateY(${pull * 0.6}px)` }}
+      style={{ transform: indicatorY }}
     >
       <span
         className={`mt-2 flex h-8 w-8 items-center justify-center rounded-full border bg-paper/90 backdrop-blur transition-colors ${
           ready || refreshing ? "border-ink/20 text-ink" : "border-ink/10 text-ink/35"
         }`}
       >
-        <RefreshCw
-          size={14}
-          strokeWidth={2}
-          className={refreshing ? "animate-spin" : undefined}
-          style={refreshing ? undefined : { transform: `rotate(${pull * 3}deg)` }}
-        />
+        <motion.span style={refreshing ? undefined : { transform: iconRotate }}>
+          <RefreshCw
+            size={14}
+            strokeWidth={2}
+            className={refreshing ? "animate-spin" : undefined}
+          />
+        </motion.span>
       </span>
-    </div>
+    </motion.div>
   );
 }

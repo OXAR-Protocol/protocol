@@ -50,7 +50,7 @@ export function YieldAmountField({
   hold,
 }: Props) {
   return (
-    <div className="p-4 rounded-[6px] border border-ink/10 bg-paper">
+    <div className="p-4 rounded-tight border border-ink/10 bg-paper">
       <p className="text-[10px] lowercase tracking-wide text-ink/40 mb-2">
         {label}
       </p>

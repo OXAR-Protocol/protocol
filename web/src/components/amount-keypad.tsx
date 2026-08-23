@@ -46,7 +46,7 @@ export function AmountKeypad({
           type="button"
           onClick={() => press(key)}
           aria-label={key === "back" ? "delete" : key}
-          className="flex h-14 items-center justify-center rounded-[10px] text-[22px] text-ink transition hover:bg-ink/[0.04] active:bg-ink/[0.08]"
+          className="flex h-14 items-center justify-center rounded-control text-[22px] text-ink transition hover:bg-ink/[0.04] active:bg-ink/[0.08]"
         >
           {key === "back" ? <Delete size={20} strokeWidth={1.5} /> : key}
         </button>

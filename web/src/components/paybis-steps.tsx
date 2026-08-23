@@ -37,7 +37,7 @@ export function PaybisSteps({ dir, steps }: { dir: string; steps: readonly Paybi
                 width={900}
                 height={600}
                 unoptimized
-                className="mt-2 w-full rounded-[8px] border border-ink/10"
+                className="mt-2 w-full rounded-field border border-ink/10"
               />
             )}
           </div>

@@ -75,7 +75,7 @@ export function FundCardAmount({
         type="button"
         onClick={onContinue}
         disabled={belowMin}
-        className="mt-4 w-full rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-30"
+        className="mt-4 w-full rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85 disabled:opacity-30"
       >
         {belowMin ? t("fund.card.min", { min: String(min) }) : t("fund.card.continue")}
       </button>

@@ -52,13 +52,13 @@ export function SendReview({
         {amount} <span className="text-[1.2rem] text-ink/45">{symbol}</span>
       </p>
 
-      <div className="mt-5 space-y-3 rounded-[10px] border border-ink/10 p-4">
+      <div className="mt-5 space-y-3 rounded-control border border-ink/10 p-4">
         <Row label={t("send.review.to")} value={to} mono />
         <Row label={t("send.review.network")} value={chainLabel} />
       </div>
 
       {/* Amber, not red: nothing has gone wrong yet — this is the moment to check. */}
-      <div className="mt-4 rounded-[10px] border border-[#a35b00]/30 bg-[#a35b00]/[0.04] p-4">
+      <div className="mt-4 rounded-control border border-[#a35b00]/30 bg-[#a35b00]/[0.04] p-4">
         <p className="flex items-start gap-2 text-[12px] leading-snug text-[#a35b00]">
           <AlertTriangle size={13} strokeWidth={1.5} className="mt-px shrink-0" />
           <span>
@@ -77,7 +77,7 @@ export function SendReview({
         type="button"
         onClick={onConfirm}
         disabled={busy}
-        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3.5 text-[14px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-25"
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3.5 text-[14px] font-medium lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85 disabled:opacity-25"
       >
         {busy ? (
           <>

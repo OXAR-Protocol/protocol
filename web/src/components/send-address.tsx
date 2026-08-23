@@ -45,7 +45,7 @@ export function SendAddress({
         <p className="text-[13px] text-ink/60">{t("send.address.on", { chain: chain.label })}</p>
       </div>
 
-      <div className="flex items-center gap-2 rounded-[12px] border border-ink/12 px-4 py-3.5 transition-colors focus-within:border-ink/40">
+      <div className="flex items-center gap-2 rounded-card border border-ink/12 px-4 py-3.5 transition-colors focus-within:border-ink/40">
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -84,7 +84,7 @@ export function SendAddress({
         type="button"
         onClick={onContinue}
         disabled={!valid}
-        className="mt-5 w-full rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition hover:bg-ink/85 disabled:opacity-25"
+        className="mt-5 w-full rounded-full bg-ink px-4 py-3.5 text-[14px] lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85 disabled:opacity-25"
       >
         {t("fund.card.continue")}
       </button>

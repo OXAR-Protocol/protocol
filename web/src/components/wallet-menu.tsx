@@ -68,7 +68,7 @@ export function WalletMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-[12px] border border-ink/10 bg-paper shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+        <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-card border border-ink/10 bg-paper shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
           <AddressRow label={t("you.wallet")} address={solana} />
 
           {/* One door for money instead of three items that each did a piece of it —

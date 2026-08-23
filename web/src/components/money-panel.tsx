@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import { formatUsdAmount } from "@oxar/sdk";
 
+import { AnimatedAmount } from "@/components/animated-amount";
 import { PhotoBg } from "@/components/photo-bg";
 import { TokenIcon } from "@/components/token-icon";
 import { MoneyActions } from "@/components/money-actions";
@@ -51,7 +52,7 @@ export function MoneyPanel() {
   const chips = otherCoins.slice(0, MAX_CHIPS);
 
   return (
-    <section className="relative overflow-hidden rounded-[12px] border border-ink/10 bg-paper p-5">
+    <section className="relative overflow-hidden rounded-card border border-ink/10 bg-paper p-5">
       <PhotoBg src="/art/dripping-dollar.webp" scrim="left" position="object-[right_top]" opacity="opacity-25" />
 
       <div className="relative flex items-start justify-between gap-4">
@@ -59,18 +60,31 @@ export function MoneyPanel() {
         <MoneyActions />
       </div>
 
-      {/* Working first: it is the part that answers "is my money doing anything". */}
+      {/* Working first: it is the part that answers "is my money doing anything".
+          The figure animates a character at a time rather than being replaced: this
+          is the number that changes when a deposit lands, and swapping the whole
+          string in one frame makes the eye read a NEW number instead of the same one
+          growing. `AnimatedAmount` was already in the repo doing exactly this for
+          keypad entry — it just had never been pointed at the balance it was built
+          for. `initial={false}` inside it means the first paint is silent; only real
+          changes move. */}
       <div className="relative mt-4">
         <p className="text-[11px] lowercase tracking-wide text-ink/40">{t("money.working")}</p>
         <p className="mt-1 text-[clamp(1.6rem,3vw,2rem)] font-light leading-none tracking-[-0.02em] tabular-nums text-ink">
-          ${formatUsdAmount(totalUsdc)}
+          $<AnimatedAmount value={formatUsdAmount(totalUsdc)} />
         </p>
       </div>
 
       <div className="relative mt-5 border-t border-ink/[0.07] pt-4">
         <p className="text-[11px] lowercase tracking-wide text-ink/40">{t("money.free")}</p>
         <p className="mt-1 text-[clamp(1.6rem,3vw,2rem)] font-light leading-none tracking-[-0.02em] tabular-nums text-ink">
-          {cash.usd === null ? "—" : `$${formatUsdAmount(cash.usd)}`}
+          {cash.usd === null ? (
+            "—"
+          ) : (
+            <>
+              $<AnimatedAmount value={formatUsdAmount(cash.usd)} />
+            </>
+          )}
         </p>
 
         {idle && (
@@ -95,7 +109,7 @@ export function MoneyPanel() {
             <Link
               href="/market"
               data-tour="deposit"
-              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] font-medium lowercase tracking-wide text-paper transition hover:bg-ink/85"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] font-medium lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
             >
               {t("home.wallet.cta")}
               <ArrowUpRight size={14} strokeWidth={1.5} />

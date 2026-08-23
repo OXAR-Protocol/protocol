@@ -3,6 +3,8 @@
 import { useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion, useDragControls } from "framer-motion";
+
+import { SPRING } from "@/lib/motion";
 import { X } from "lucide-react";
 
 /**
@@ -56,7 +58,7 @@ export function SheetShell({
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
-        transition={{ type: "spring", damping: 32, stiffness: 320 }}
+        transition={SPRING.sheet}
         drag="y"
         dragListener={false}
         dragControls={drag}
@@ -69,7 +71,7 @@ export function SheetShell({
         onClick={(e) => e.stopPropagation()}
         // `--pb` is the padding the sheet wants; `.safe-bottom` adds the notch inset
         // on top of it (see globals.css) rather than standing in for it.
-        className="safe-bottom relative max-h-[88vh] w-full overflow-y-auto rounded-t-[22px] border border-ink/10 bg-paper px-6 pt-3 [--pb:1.5rem] sm:max-h-full sm:max-w-[440px] sm:rounded-[16px] sm:px-7 sm:pt-6 sm:[--pb:1.75rem]"
+        className="safe-bottom relative max-h-[88vh] w-full overflow-y-auto rounded-t-sheet border border-ink/10 bg-paper px-6 pt-3 [--pb:1.5rem] sm:max-h-full sm:max-w-[440px] sm:rounded-panel sm:px-7 sm:pt-6 sm:[--pb:1.75rem]"
       >
         {/* The handle is the instruction: a bar you can grab, and the only place the
             sheet listens for a drag. `touch-none` keeps the browser from claiming the
