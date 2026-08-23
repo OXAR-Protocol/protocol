@@ -383,6 +383,7 @@ export function AssetDetail({
           settle();
         }}
         onSell={handleExit}
+        settled={result !== null}
         loading={loading}
         error={error}
         sharePriceUsd={sharePriceUsd}
