@@ -117,6 +117,7 @@ export function AssetActionRail({
           onDeposited={onDeposited}
           sharePriceUsd={sharePriceUsd}
           unitLabel={unitLabel}
+          bare={bare}
         />
       ) : (
         <>

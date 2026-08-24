@@ -2,8 +2,6 @@
 
 import { Plus } from "lucide-react";
 
-import { formatUsdAmount } from "@oxar/sdk";
-
 import { FractionChips } from "@/components/fraction-chips";
 import { useT } from "@/lib/i18n";
 
@@ -39,21 +37,23 @@ export function AmountQuickPicks({
         disabled={disabled || available <= 0}
       />
 
-      <div className="mt-2 flex items-center gap-1.5 text-[11px] tabular-nums text-ink/40">
-        <span>
-          ${formatUsdAmount(available)} {t("rail.available")}
-        </span>
-        {onTopUp && (
-          <button
-            type="button"
-            onClick={onTopUp}
-            aria-label={t("wallet.fund")}
-            className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-ink/20 text-ink/45 transition hover:border-ink/50 hover:text-ink"
-          >
+      {/* The ceiling used to be restated here — "$3,440.68 available" — sixty pixels
+          under the identical figure in the pay-with row, which just gives the reader
+          two numbers to diff. The row above owns the balance (it changes when you
+          change what you're paying with); this line keeps only the thing that row
+          cannot offer, which is the way to raise it. */}
+      {onTopUp && (
+        <button
+          type="button"
+          onClick={onTopUp}
+          className="mt-2.5 inline-flex items-center gap-1.5 text-[11px] lowercase tracking-wide text-ink/40 transition hover:text-ink"
+        >
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-ink/20">
             <Plus size={10} strokeWidth={2} />
-          </button>
-        )}
-      </div>
+          </span>
+          {t("wallet.fund")}
+        </button>
+      )}
     </div>
   );
 }

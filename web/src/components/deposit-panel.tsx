@@ -22,13 +22,18 @@ import { useT, localizeError } from "@/lib/i18n";
 interface Props {
   view: ProviderView;
   onDeposited: (usdAmount: number) => void;
-  /** Action verb — "Deposit" (default) for yield sources, "Buy" for stocks. */
+  /** Action verb — "deposit" (default) for yield sources, "buy" for stocks. */
   verb?: string;
   /** Per-unit USD price (e.g. a share price). When set, a "buy N units" input
    *  appears that auto-fills the pay amount. */
   sharePriceUsd?: number;
   /** Label for one unit in the quantity input, e.g. "SPCXx" / "shares". */
   unitLabel?: string;
+  /** Inside a sheet, which is already a surface — so the panel draws no card of its
+   *  own. Two nested borders sixteen pixels apart made the reader work out which one
+   *  was the boundary; on the desktop rail, where the panel floats beside the chart,
+   *  it still needs its own. */
+  bare?: boolean;
 }
 
 /**
@@ -45,7 +50,7 @@ interface Props {
  * we don't do is decide that for someone: a purchase that quietly sells your Apple
  * is not a purchase you agreed to.
  */
-export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUsd, unitLabel = "shares" }: Props) {
+export function DepositPanel({ view, onDeposited, verb = "deposit", sharePriceUsd, unitLabel = "shares", bare }: Props) {
   const { t } = useT();
   const lower = verb.toLowerCase();
   const { assets: solAssets, loading: solLoading } = useWalletAssets();
@@ -180,8 +185,11 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
   }
 
 
+  /** Nothing to press yet: no amount, nothing to pay with, or not enough of it. */
+  const notReady = working || !payAsset || usdAmount <= 0 || short > 0;
+
   return (
-    <div className="p-4 rounded-tight border border-ink/10 bg-paper">
+    <div className={bare ? "" : "p-4 rounded-tight border border-ink/10 bg-paper"}>
       {/* The payment method, ahead of the amount — it's the thing the amount is
           taken FROM, and it used to be an unchangeable label saying "dollars". */}
       {!emptyWallet && (
@@ -213,15 +221,21 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-2 rounded-card border border-ink/10 px-4 py-3 transition-colors focus-within:border-ink/30">
-              <span className="text-[22px] text-ink/35">$</span>
+            {/* The one thing this screen is for.
+                It used to be 22px inside a bordered box the same weight as the
+                pay-with row above it — the amount and the thing it comes out of,
+                drawn as peers. Now it is the size of the decision: no box, a rule
+                underneath that answers to focus, and the dollar sign kept small so
+                the digits carry. */}
+            <div className="flex items-baseline gap-2 border-b border-ink/10 pb-2 transition-colors focus-within:border-ink/40">
+              <span className="text-[20px] text-ink/30">$</span>
               <input
                 type="text"
                 inputMode="decimal"
                 value={effectiveAmount}
                 onChange={(e) => setAmount(normalizeDecimalInput(e.target.value))}
                 placeholder="0.00"
-                className="w-full bg-transparent text-[22px] tabular-nums text-ink outline-none placeholder:text-ink/25"
+                className="w-full bg-transparent text-[clamp(30px,9vw,38px)] font-light leading-none tracking-[-0.02em] tabular-nums text-ink outline-none placeholder:text-ink/20"
               />
             </div>
 
@@ -298,8 +312,16 @@ export function DepositPanel({ view, onDeposited, verb = "Deposit", sharePriceUs
             // A card top-up that's still funding/arriving hasn't touched the wallet
             // yet — no reason to freeze this unrelated path. Once it's actually
             // buying (signing+sending), the two shouldn't race the same wallet.
-            disabled={working || !payAsset || usdAmount <= 0 || short > 0}
-            className="mt-3 w-full px-4 py-3 rounded-full bg-ink text-paper text-[14px] font-medium lowercase tracking-wide hover:bg-ink/85 disabled:opacity-30 transition inline-flex items-center justify-center gap-2"
+            disabled={notReady}
+            // Filled once there is something to press, outlined until then.
+            // `disabled:opacity-30` on a filled button leaves a large grey slab
+            // sitting where the primary action goes, and a grey slab reads as
+            // broken rather than as waiting for an amount.
+            className={`mt-4 w-full px-4 py-3.5 rounded-full text-[14px] font-medium lowercase tracking-wide transition inline-flex items-center justify-center gap-2 ${
+              notReady
+                ? "border border-ink/12 text-ink/35"
+                : "bg-ink text-paper active:scale-[0.97] hover:bg-ink/85"
+            }`}
           >
             {verb}
           </button>
