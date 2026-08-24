@@ -52,24 +52,57 @@ export async function fetchEnhancedHistory(
   maxPages = 8,
   since?: number,
 ): Promise<EnhancedTx[]> {
+  return (await fetchHistoryPaged(owner, key, maxPages, since)).txs;
+}
+
+/**
+ * The same paging, plus the one fact the caller cannot infer from the result: whether
+ * this is the wallet's WHOLE history or just as much of it as we were willing to ask
+ * for.
+ *
+ * It matters because the portfolio chart reconstructs the past by undoing transfers
+ * backwards from today. Undoing a withdrawal adds the money back, so on a wallet that
+ * has taken more out than it put in the reconstruction grows the further back it goes
+ * — and it cannot tell "you really did hold this much in May" from "your account did
+ * not exist in May". Only `exhausted` separates them: if paging ran off the end of the
+ * wallet's history, the oldest transaction we hold IS its first, and there was nothing
+ * before it.
+ */
+export async function fetchHistoryPaged(
+  owner: string,
+  key: string,
+  maxPages = 8,
+  since?: number,
+): Promise<{ txs: EnhancedTx[]; exhausted: boolean }> {
   const out: EnhancedTx[] = [];
   let before = "";
+  let exhausted = false;
   for (let i = 0; i < maxPages; i++) {
     const url =
       `https://api.helius.xyz/v0/addresses/${owner}/transactions` +
       `?api-key=${key}&limit=100${before ? `&before=${before}` : ""}`;
     const res = await fetch(url);
+    // A failed page is not the end of the wallet's history, it is the end of our
+    // patience — the difference decides whether the chart may speak about May.
     if (!res.ok) break;
     const page = (await res.json()) as EnhancedTx[];
-    if (!Array.isArray(page) || page.length === 0) break;
+    if (!Array.isArray(page) || page.length === 0) {
+      exhausted = true;
+      break;
+    }
     out.push(...page);
     const oldest = page[page.length - 1];
-    if (!oldest?.signature || page.length < 100) break;
+    if (page.length < 100) {
+      // A short page means Helius had no more to give: this is the beginning.
+      exhausted = true;
+      break;
+    }
+    if (!oldest?.signature) break;
     // Reached back past the window — everything older belongs to a question nobody
     // asked. A page whose last entry carries no timestamp is not evidence of that, so
     // it keeps paging: too much history is harmless, too little is a wrong number.
     if (since !== undefined && oldest.timestamp !== undefined && oldest.timestamp < since) break;
     before = oldest.signature;
   }
-  return out;
+  return { txs: out, exhausted };
 }
