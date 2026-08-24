@@ -183,6 +183,31 @@ export async function POST(req: Request) {
     // `history`, so the birthday has to come from the same list.
     const bornAt = bornAtFrom(history, exhausted);
 
+    // What the replay implies the wallet held on the day it was born.
+    //
+    // When `exhausted` is true we KNOW the answer: nothing. A wallet holds nothing
+    // before its first transaction. So any mint with a balance here is one whose
+    // arrival we never saw — and every day from birth until that unseen arrival is
+    // overstated by exactly this much. The reported chart opened at $5,549 on a
+    // two-day-old wallet and sat flat for a fortnight with no transactions at all,
+    // which is what that looks like from the outside.
+    //
+    // Counted, not corrected: subtracting a residue whose date is unknown would move
+    // the error rather than remove it. This says how big the problem is and which
+    // mint carries it, so the next change can be aimed instead of guessed.
+    const netMoved: Record<string, number> = {};
+    for (const tx of txs) {
+      for (const [mint, delta] of Object.entries(tx.legs)) {
+        netMoved[mint] = (netMoved[mint] ?? 0) + delta;
+      }
+    }
+    const residue: Record<string, number> = {};
+    for (const mint of mints) {
+      const at = (balancesNow[mint] ?? 0) - (netMoved[mint] ?? 0);
+      // UI units, so the threshold is generous — this is a diagnostic, not a guard.
+      if (Math.abs(at) > 1e-6) residue[mint] = at;
+    }
+
     const series = trimLeadingEmpty(
       portfolioSeries({
         now,
@@ -218,6 +243,9 @@ export async function POST(req: Request) {
         asked: days,
         exhausted,
         failed,
+        // Non-empty here with `exhausted: true` is a bug, and names the mint holding it.
+        birthResidue: residue,
+        birthResidueMints: Object.keys(residue).length,
         bornAt: bornAt ?? null,
       },
     };
