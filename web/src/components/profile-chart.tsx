@@ -35,6 +35,7 @@ export function ProfileChart({
   neverFunded,
   periodLabel,
   split,
+  chrome,
 }: {
   points: PerformanceDay[];
   performance: RangePerformance | null;
@@ -49,6 +50,8 @@ export function ProfileChart({
   /** The working / free-to-use split, rendered by the caller so this stays
    *  presentational. See `MoneySplit`. */
   split?: React.ReactNode;
+  /** The account control, rendered opposite the balance. See `ProfileHeader`. */
+  chrome?: React.ReactNode;
 }) {
   const { t } = useT();
 
@@ -72,7 +75,7 @@ export function ProfileChart({
           address, the badge and a row of facts — so the one number people open this
           screen for was the one thing they had to scroll past an identifier to reach.
           Banks lead with the balance. */}
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex flex-wrap items-baseline gap-x-3">
           {/* It used to change by being replaced: one frame $0.00, the next $1,234.56.
               Animating it per character is the difference between reading a new number
@@ -86,20 +89,24 @@ export function ProfileChart({
           </p>
         </div>
 
-        <div className="flex shrink-0 flex-wrap gap-1.5">
-          {RANGES.map((r) => (
-            <button
-              key={r}
-              type="button"
-              onClick={() => onRangeChange(r)}
-              className={`rounded-full px-2.5 py-1 text-[11px] lowercase tracking-wide transition ${
-                range === r ? "bg-ink text-paper" : "bg-ink/[0.05] text-ink/55 hover:text-ink"
-              }`}
-            >
-              {t(`history.range.${r}` as "history.range.7")}
-            </button>
-          ))}
-        </div>
+        {/* Opposite the balance, where a bank puts your face: the account, and the
+            way into it. It used to sit a whole row higher, above a greeting. */}
+        {chrome}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {RANGES.map((r) => (
+          <button
+            key={r}
+            type="button"
+            onClick={() => onRangeChange(r)}
+            className={`rounded-full px-2.5 py-1 text-[11px] lowercase tracking-wide transition active:scale-[0.97] ${
+              range === r ? "bg-ink text-paper" : "bg-ink/[0.05] text-ink/55 hover:text-ink"
+            }`}
+          >
+            {t(`history.range.${r}` as "history.range.7")}
+          </button>
+        ))}
       </div>
 
       {/* "How much do I have" and "how much can I spend" are asked one after the
