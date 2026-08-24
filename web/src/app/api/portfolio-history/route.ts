@@ -12,7 +12,7 @@ import {
 
 import { fetchWithRetry } from "@oxar/sdk";
 
-import { heliusApiKey, fetchHistoryPaged } from "@/lib/helius/history";
+import { heliusApiKey, fetchHistoryPaged, bornAtFrom } from "@/lib/helius/history";
 import { readWalletBalances } from "@/lib/solana/balances";
 import { TRACKED_MINTS } from "@/lib/yield/position-mints";
 import { isSameOrigin } from "@/lib/rpc-proxy";
@@ -176,14 +176,12 @@ export async function POST(req: Request) {
     for (const tx of txs) for (const mint of Object.keys(tx.legs)) mints.add(mint);
     const { series: prices, status: priceStatus } = await fetchPrices([...mints], days);
 
-    // When paging ran off the end of the wallet's history, the oldest transaction we
-    // hold IS its first — so the chart may state that nothing existed before it. When
-    // paging stopped for any other reason (a page cap, the window, a failed request)
-    // the beginning is simply unknown, and claiming a birthday we cannot see would
-    // trade one wrong chart for another.
-    const bornAt = exhausted
-      ? txs.reduce((oldest, t) => Math.min(oldest, t.timestamp), Infinity)
-      : Infinity;
+    // Read from the WHOLE history, not from `txs`. `txs` is filtered down to the
+    // mints this app tracks, and the first thing a wallet ever does is usually not the
+    // first thing we care about — so taking the birthday from there put it later than
+    // it really was and cut off days that genuinely happened. `exhausted` describes
+    // `history`, so the birthday has to come from the same list.
+    const bornAt = bornAtFrom(history, exhausted);
 
     const series = trimLeadingEmpty(
       portfolioSeries({
@@ -192,7 +190,7 @@ export async function POST(req: Request) {
         balancesNow,
         txs,
         prices,
-        ...(Number.isFinite(bornAt) ? { bornAt } : {}),
+        ...(bornAt !== undefined ? { bornAt } : {}),
       }),
     );
     const performance = summarizePerformance(series);
@@ -219,7 +217,7 @@ export async function POST(req: Request) {
         covered: series.length,
         asked: days,
         exhausted,
-        bornAt: Number.isFinite(bornAt) ? bornAt : null,
+        bornAt: bornAt ?? null,
       },
     };
     cache.set(cacheKey, { at: Date.now(), body });

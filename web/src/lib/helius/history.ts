@@ -68,6 +68,38 @@ export async function fetchEnhancedHistory(
  * wallet's history, the oldest transaction we hold IS its first, and there was nothing
  * before it.
  */
+/**
+ * When the wallet first did anything — or `undefined` when we cannot know.
+ *
+ * Only meaningful together with `exhausted` from `fetchHistoryPaged`: if paging ran
+ * off the end of the wallet's history then the oldest transaction in it is the first
+ * one there has ever been, and the portfolio chart may state that nothing existed
+ * before it. If paging stopped for any other reason, the beginning is unknown and
+ * this returns `undefined` rather than a guess.
+ *
+ * It must be given the WHOLE history, not a filtered subset. Handing it the
+ * tracked-mint transactions instead put the birthday later than it really was — the
+ * first thing a wallet does is often not the first thing this app cares about — and
+ * the chart then cut off days that genuinely happened. That shipped once: a 7-day
+ * range showed a balance the 30-day range had already erased, because `exhausted` is
+ * a property of the window and the two ranges disagreed about where life began.
+ */
+export function bornAtFrom(
+  txs: readonly EnhancedTx[],
+  exhausted: boolean,
+): number | undefined {
+  if (!exhausted) return undefined;
+  let oldest = Infinity;
+  // A transaction with no timestamp tells us nothing about when anything started;
+  // treating its absence as epoch zero would move the birthday to 1970.
+  for (const tx of txs) {
+    if (typeof tx.timestamp === "number" && tx.timestamp > 0 && tx.timestamp < oldest) {
+      oldest = tx.timestamp;
+    }
+  }
+  return Number.isFinite(oldest) ? oldest : undefined;
+}
+
 export async function fetchHistoryPaged(
   owner: string,
   key: string,
