@@ -26,7 +26,7 @@ export const en = {
   "home.wakeUp": "put it somewhere that pays",
   "home.wallet.label": "in your wallet · not working yet",
   "home.wallet.cta": "put it to work",
-  "home.wallet.idle": "not working yet",
+  "home.wallet.idle": "sitting in your wallet",
   "movers.title": "on the move · 24h",
 
   // Yield list

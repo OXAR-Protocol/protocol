@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 
 import { ProfileChart } from "@/components/profile-chart";
 import { MoneySplit } from "@/components/money-split";
+import { ProfileHeader } from "@/components/profile-header";
 import { PerformanceStats } from "@/components/performance-stats";
 import { PositionsSection } from "@/components/positions-section";
 import { DayHistory } from "@/components/day-history";
@@ -61,6 +62,7 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
         <div>
         <ProfileChart
           split={<MoneySplit />}
+          chrome={<ProfileHeader />}
           points={history.days}
           performance={history.performance}
           range={range}

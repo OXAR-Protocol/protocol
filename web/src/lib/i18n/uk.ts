@@ -15,7 +15,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "home.wakeUp": "поклади туди, де платять",
   "home.wallet.label": "у гаманці · ще не працюють",
   "home.wallet.cta": "нехай працюють",
-  "home.wallet.idle": "ще не працюють",
+  "home.wallet.idle": "лежить у гаманці",
   "movers.title": "у русі · 24 год",
 
   "yield.title": "Де твої гроші можуть спати",

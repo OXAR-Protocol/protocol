@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 
-import { ProfileHeader } from "@/components/profile-header";
 import { ProfileMoney } from "@/components/profile-money";
 import { MoneyPanel } from "@/components/money-panel";
 import { PhotoBg } from "@/components/photo-bg";
@@ -58,12 +57,6 @@ export default function YouPage() {
 
   return (
     <div className="mx-auto max-w-[1100px] pb-32">
-      <motion.div
-        {...rise(0)}
-        className="mt-2"
-      >
-        <ProfileHeader />
-      </motion.div>
 
       {totalUsdc === 0 && !loading ? (
         <motion.section
