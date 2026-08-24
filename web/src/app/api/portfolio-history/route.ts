@@ -139,7 +139,7 @@ export async function POST(req: Request) {
     // on a quiet one needs one page.
     const now = Math.floor(Date.now() / 1000);
     const windowStart = now - days * 86_400;
-    const [{ txs: history, exhausted }, allBalances] = await Promise.all([
+    const [{ txs: history, exhausted, failed }, allBalances] = await Promise.all([
       fetchHistoryPaged(owner, key, MAX_PAGES, windowStart),
       readWalletBalances(owner),
     ]);
@@ -217,10 +217,15 @@ export async function POST(req: Request) {
         covered: series.length,
         asked: days,
         exhausted,
+        failed,
         bornAt: bornAt ?? null,
       },
     };
-    cache.set(cacheKey, { at: Date.now(), body });
+    // A page we could not read means this answer is built on less history than the
+    // wallet has, which is how a chart ends up drawing months that never happened.
+    // Serving that for the next five minutes would make one rate-limited request the
+    // user's whole afternoon, so a truncated answer is returned but not remembered.
+    if (!failed) cache.set(cacheKey, { at: Date.now(), body });
     return NextResponse.json(body);
   } catch (e) {
     console.error("Portfolio history error:", e);

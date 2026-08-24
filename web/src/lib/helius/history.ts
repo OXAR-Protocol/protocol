@@ -4,7 +4,7 @@
  * recent-activity feed, so the paging logic lives in one place.
  */
 
-import type { AccountData } from "@oxar/sdk";
+import { fetchWithRetry, type AccountData } from "@oxar/sdk";
 
 /** One token movement inside an enhanced transaction (the fields we read). */
 export interface EnhancedTokenTransfer {
@@ -56,19 +56,6 @@ export async function fetchEnhancedHistory(
 }
 
 /**
- * The same paging, plus the one fact the caller cannot infer from the result: whether
- * this is the wallet's WHOLE history or just as much of it as we were willing to ask
- * for.
- *
- * It matters because the portfolio chart reconstructs the past by undoing transfers
- * backwards from today. Undoing a withdrawal adds the money back, so on a wallet that
- * has taken more out than it put in the reconstruction grows the further back it goes
- * — and it cannot tell "you really did hold this much in May" from "your account did
- * not exist in May". Only `exhausted` separates them: if paging ran off the end of the
- * wallet's history, the oldest transaction we hold IS its first, and there was nothing
- * before it.
- */
-/**
  * When the wallet first did anything — or `undefined` when we cannot know.
  *
  * Only meaningful together with `exhausted` from `fetchHistoryPaged`: if paging ran
@@ -100,23 +87,64 @@ export function bornAtFrom(
   return Number.isFinite(oldest) ? oldest : undefined;
 }
 
+/**
+ * The same paging, plus the one fact the caller cannot infer from the result: whether
+ * this is the wallet's WHOLE history or just as much of it as we were willing to ask
+ * for.
+ *
+ * It matters because the portfolio chart reconstructs the past by undoing transfers
+ * backwards from today. Undoing a withdrawal adds the money back, so on a wallet that
+ * has taken more out than it put in the reconstruction grows the further back it goes
+ * — and it cannot tell "you really did hold this much in May" from "your account did
+ * not exist in May". Only `exhausted` separates them: if paging ran off the end of the
+ * wallet's history, the oldest transaction we hold IS its first, and there was nothing
+ * before it.
+ */
 export async function fetchHistoryPaged(
   owner: string,
   key: string,
   maxPages = 8,
   since?: number,
-): Promise<{ txs: EnhancedTx[]; exhausted: boolean }> {
+): Promise<{ txs: EnhancedTx[]; exhausted: boolean; failed: boolean }> {
   const out: EnhancedTx[] = [];
   let before = "";
   let exhausted = false;
+  let failed = false;
   for (let i = 0; i < maxPages; i++) {
     const url =
       `https://api.helius.xyz/v0/addresses/${owner}/transactions` +
       `?api-key=${key}&limit=100${before ? `&before=${before}` : ""}`;
-    const res = await fetch(url);
-    // A failed page is not the end of the wallet's history, it is the end of our
-    // patience — the difference decides whether the chart may speak about May.
-    if (!res.ok) break;
+    // Retried, the way the prices in the same route already are. Helius rate-limits
+    // at a couple of requests a second and paging fires them back to back, so a 429
+    // on page three is an ordinary event — and a bare `fetch` turned it into a
+    // silently truncated history. Measured on a real wallet: the 90-day range read
+    // all 292 transactions and knew the account was born in April, while the 365-day
+    // range stopped at 200 and, having no birthday to bound it, drew eight months
+    // that never happened.
+    // `fetchWithRetry` throws once its attempts are spent, and it imposes a timeout
+    // the bare `fetch` here never had. Both are caught: a page we could not read
+    // leaves the history INCOMPLETE, which the caller must know about, but it must
+    // not take down the whole request — the earnings engine and the activity feed
+    // page through here too, and partial history is worth more to them than a 502.
+    let res: Response;
+    try {
+      res = await fetchWithRetry(url, undefined, {
+        retries: 3,
+        backoffMs: 400,
+        // Enhanced history is not a fast endpoint; the 8s default turned slow-but-fine
+        // pages into failures.
+        timeoutMs: 15_000,
+      });
+    } catch {
+      failed = true;
+      break;
+    }
+    // Still refused after retrying. That is the end of our patience, not the end of
+    // the wallet's history, and the caller must be able to tell those apart.
+    if (!res.ok) {
+      failed = true;
+      break;
+    }
     const page = (await res.json()) as EnhancedTx[];
     if (!Array.isArray(page) || page.length === 0) {
       exhausted = true;
@@ -136,5 +164,5 @@ export async function fetchHistoryPaged(
     if (since !== undefined && oldest.timestamp !== undefined && oldest.timestamp < since) break;
     before = oldest.signature;
   }
-  return { txs: out, exhausted };
+  return { txs: out, exhausted, failed };
 }
