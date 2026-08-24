@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 
 import { Sparkline } from "@/components/sparkline";
+import { sparklineDomain, sparklineY } from "@/lib/yield";
 
 interface Props {
   values: number[];
@@ -22,8 +23,8 @@ interface Props {
  * and a value tooltip follow the pointer CONTINUOUSLY — the cursor's exact x is
  * used (not snapped to a data index), and both the dot's height and the shown
  * value are linearly interpolated between the two neighbouring points, so it
- * glides without the big jumps you get from sparse data. Same min→bottom /
- * max→top mapping as `sparklinePath`, so the dot rides exactly on the line.
+ * glides without the big jumps you get from sparse data. Positions come from the
+ * shared `sparklineY` scale, so the dot rides exactly on the line.
  *
  * Pointer-based, so it works for mouse hover AND touch: tap or drag on mobile
  * scrubs the chart (touch-action pan-y keeps vertical page scroll working). On
@@ -42,9 +43,9 @@ export function HoverChart({ values, format, height = 220, className, fill, labe
     setFrac(Math.min(1, Math.max(0, (clientX - rect.left) / rect.width)));
   };
 
-  const min = n > 0 ? Math.min(...values) : 0;
-  const max = n > 0 ? Math.max(...values) : 0;
-  const span = max - min;
+  // The same scale the line is drawn on — padding and minimum domain included — so
+  // the marker rides the curve instead of its own straight-to-the-edges version.
+  const domain = sparklineDomain(values);
 
   let leftPct = 0;
   let topPct = 0;
@@ -59,7 +60,7 @@ export function HoverChart({ values, format, height = 220, className, fill, labe
     // is not a date, and inventing one would be worse than showing the nearer day.
     label = labels?.[t < 0.5 ? idx : idx + 1] ?? null;
     leftPct = frac * 100;
-    topPct = span === 0 ? 50 : (1 - (value - min) / span) * 100;
+    topPct = sparklineY(value, domain) * 100;
   }
 
   // Keep the tooltip on-screen: shift its anchor near the edges, flip it below

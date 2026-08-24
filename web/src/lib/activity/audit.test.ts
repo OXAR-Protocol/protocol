@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { groupByDay, countActivity, portfolioSeries, summarizePerformance } from "@oxar/sdk";
 
-import { netInvestedFromSwaps, type HeliusTx } from "@/lib/earnings/swaps";
+import { costBasisFromSwaps, type HeliusTx } from "@/lib/earnings/swaps";
 import { CASH_MINTS } from "@/lib/yield/position-mints";
 
 const D = 86_400;
@@ -51,7 +51,7 @@ describe("the two ways of saying what you earned agree", () => {
   const finalPrice = 110;
 
   it("agrees on a purchase settled in USDT", () => {
-    const invested = netInvestedFromSwaps(asHelius(), OWNER, AAPL, CASH_MINTS);
+    const invested = costBasisFromSwaps(asHelius(), OWNER, AAPL, CASH_MINTS).basis;
     const costBasisEarned = held * finalPrice - invested;
 
     const performance = summarizePerformance(
@@ -74,9 +74,12 @@ describe("the two ways of saying what you earned agree", () => {
   // USDC alone — as the cost-basis engine was — the same purchase looks free, and a
   // position bought with $100 reports the whole $110 as profit.
   it("would not agree if only one settlement token were read", () => {
-    const usdcOnly = netInvestedFromSwaps(asHelius(), OWNER, AAPL, new Set([USDC]));
-    expect(usdcOnly).toBe(0);
-    expect(held * finalPrice - usdcOnly).toBeCloseTo(110, 6); // the phantom profit
+    const usdcOnly = costBasisFromSwaps(asHelius(), OWNER, AAPL, new Set([USDC]));
+    expect(usdcOnly.basis).toBe(0);
+    expect(held * finalPrice - usdcOnly.basis).toBeCloseTo(110, 6); // the phantom profit
+    // …which is exactly why an unexplained holding is now reported as uncovered:
+    // the figure is never shown rather than shown wrong.
+    expect(usdcOnly.covered).toBe(false);
     expect(CASH_MINTS.has(USDT)).toBe(true);
   });
 });

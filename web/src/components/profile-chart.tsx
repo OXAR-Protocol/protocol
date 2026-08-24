@@ -64,6 +64,7 @@ export function ProfileChart({
   const now = points.length ? points[points.length - 1]!.usd : 0;
   const earned = performance?.earnedUsd ?? null;
   const up = earned === null || earned >= 0;
+  const rangeLabel = t(`history.range.${range}` as "history.range.7");
 
   return (
     <section data-tour="balance">
@@ -76,7 +77,12 @@ export function ProfileChart({
           screen for was the one thing they had to scroll past an identifier to reach.
           Banks lead with the balance. */}
       <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-wrap items-baseline gap-x-3">
+        {/* Column on a phone, row once there's room. This was `flex-wrap` at every
+            width, so the change sat beside the total or dropped below it depending on
+            how many characters it happened to have: "−$1.13 · 7 days" fit, "−$41.27 ·
+            30 days" didn't, and switching range shunted the whole chart down a line.
+            A layout that depends on the value is a layout that jumps. */}
+        <div className="flex min-w-0 flex-col items-baseline gap-x-3 gap-y-1 sm:flex-row">
           {/* It used to change by being replaced: one frame $0.00, the next $1,234.56.
               Animating it per character is the difference between reading a new number
               and watching your own number arrive. */}
@@ -85,7 +91,10 @@ export function ProfileChart({
           </h1>
           <p className={`whitespace-nowrap text-[13px] tabular-nums ${up ? "text-profit" : "text-loss"}`}>
             {earned === null ? (neverFunded ? "$0.00" : "—") : formatSignedUsd(earned)}
-            <span className="text-ink/40"> · {periodLabel}</span>
+            {/* The active range chip sits right underneath saying the same word, so the
+                period is only worth repeating when the two disagree — a wallet younger
+                than the range, where this reads "since start" instead. */}
+            {periodLabel !== rangeLabel && <span className="text-ink/40"> · {periodLabel}</span>}
           </p>
         </div>
 

@@ -34,29 +34,54 @@ export interface HeliusTx {
   tokenTransfers?: HeliusTokenTransfer[];
 }
 
+export interface CostBasis {
+  /** Net USD still invested in the held units. */
+  basis: number;
+  /**
+   * Whether that figure describes the whole holding.
+   *
+   * False means the history doesn't explain where these units came from — the
+   * acquisition fell outside the fetched window, or it was paid for in something
+   * that isn't a dollar (asset→asset swap, a transfer in). The basis is then an
+   * undercount, and `value − undercount` reads as profit the holder never made.
+   * A position at $24 acquired this way reported "+$24 since you bought", which is
+   * the worst direction for a money screen to be wrong in. Absent beats invented.
+   */
+  covered: boolean;
+}
+
+/** Units this far below the holding are rounding dust, not an unexplained buy. */
+const DUST = 0.005;
+
 /**
- * Net USD the `owner` has put into acquiring `heldMint`, derived from swap legs.
+ * Net USD the `owner` has put into acquiring `heldMint`, derived from swap legs,
+ * plus whether the history actually accounts for what is held.
+ *
  * Counts only transactions where the owner's `heldMint` balance actually moved
  * (i.e. a real acquire/dispose), attributing the same-tx cash delta as the
- * cost/proceeds. Receiving the held asset for free (no cost leg) adds 0 — honest.
+ * cost/proceeds. Units acquired with no cost leg add nothing to the basis — and
+ * are tracked separately, because a holding built that way can't be priced from
+ * this history at all.
  *
  * `costMints` is the whole set of dollars the app deals in, not one of them. Reading
  * a single settlement token meant a purchase paid in USDT looked free: no cost leg,
  * so nothing was invested, so the entire position read as profit. Every mint in the
  * set is a dollar stablecoin, so its UI amount IS its dollar amount.
  */
-export function netInvestedFromSwaps(
+export function costBasisFromSwaps(
   txs: HeliusTx[],
   owner: string,
   heldMint: string,
   costMints: ReadonlySet<string>,
-): number {
+): CostBasis {
   // Oldest first: a disposal can only be attributed against units acquired before it.
   // Sort is stable, so txs without a timestamp keep their given order.
   const ordered = [...txs].sort((a, b) => (a.timestamp ?? 0) - (b.timestamp ?? 0));
 
   let units = 0; // held-asset units currently attributed
   let basis = 0; // USD still invested in them
+  let uncosted = 0; // of `units`, those acquired with no dollar leg to price them
+  let seen = false; // the held mint moved for the owner at least once
 
   for (const tx of ordered) {
     let heldDelta = 0;
@@ -71,16 +96,21 @@ export function netInvestedFromSwaps(
     }
     // Only when the held asset moved for the owner is this an acquire/dispose.
     if (heldDelta === 0) continue;
+    seen = true;
 
     if (heldDelta > 0) {
       // Acquire. costDelta < 0 means the cost token left the wallet to pay for it;
-      // a free receipt (no cost leg) adds units at zero cost.
+      // a receipt with no cost leg adds units this history cannot price.
       units += heldDelta;
       if (costDelta < 0) basis += -costDelta;
+      else uncosted += heldDelta;
       continue;
     }
 
     const sold = -heldDelta;
+    // Whatever leaves takes its share of the unpriced units with it, however it left.
+    const gone = units > 0 ? Math.min(1, sold / units) : 1;
+    uncosted *= 1 - gone;
     if (costDelta > 0) {
       // Sale: proceeds came back, so they reduce what is still invested. Keeping the
       // realized gain in this figure is deliberate — earned = value − netInvested then
@@ -88,10 +118,10 @@ export function netInvestedFromSwaps(
       basis -= costDelta;
     } else if (units > 0) {
       // Transfer out, no proceeds: retire the share of the basis that left with it.
-      basis -= basis * Math.min(1, sold / units);
+      basis -= basis * gone;
     }
     units = Math.max(0, units - sold);
   }
 
-  return basis;
+  return { basis, covered: seen && uncosted <= units * DUST };
 }
