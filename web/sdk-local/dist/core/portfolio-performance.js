@@ -34,11 +34,17 @@ const BALANCE_FLOOR = -1e-6;
  *
  * `balancesNow` should be READ, not inferred: seeding the backward replay from the
  * wallet's actual balances is what keeps today's figure equal to the one on the rest
- * of the screen. Days the transaction history doesn't reach are dropped rather than
- * guessed — see BALANCE_FLOOR.
+ * of the screen.
+ *
+ * Days the transaction history doesn't reach are dropped rather than guessed, and the
+ * reach is bounded from both sides. A holding that goes negative means we missed the
+ * inflow that started it — that is BALANCE_FLOOR, and it needs no help from the caller.
+ * The other side is invisible from in here: undoing withdrawals only ever makes the
+ * past look richer, so a wallet that has taken out more than it put in reconstructs a
+ * balance for days it never existed. `bornAt` is how the caller closes that door.
  */
 function portfolioSeries(params) {
-    const { now, days, balancesNow, txs, prices } = params;
+    const { now, days, balancesNow, txs, prices, bornAt } = params;
     const mints = new Set(Object.keys(balancesNow));
     for (const tx of txs)
         for (const m of Object.keys(tx.legs))
@@ -69,6 +75,28 @@ function portfolioSeries(params) {
     let oldest = days;
     while (oldest > 0 && Object.values(balances[oldest]).some((b) => b < BALANCE_FLOOR))
         oldest--;
+    // …and the same question from the other side, which that check cannot see.
+    //
+    // A negative holding is what an unseen INFLOW looks like when you replay backwards.
+    // An unseen OUTFLOW looks like nothing at all: undoing a withdrawal adds the money
+    // back, so the reconstruction simply grows the further back it goes and never trips
+    // the floor. On a wallet that has taken more out than it put in, that produces a
+    // balance of `today + everything withdrawn − everything deposited`, flat, stretching
+    // to the left edge of whatever range was asked for. Reported from a two-month-old
+    // account, a one-year chart opened at $5,840 on a day the wallet did not yet exist.
+    //
+    // The arithmetic is identical to the case it must NOT break — "you sold 50 on
+    // Tuesday, so you held 50 on Monday" is the same undo, and it is correct. What
+    // separates them is only whether the wallet existed back there, and no amount of
+    // staring at these numbers reveals that. So the caller says: `bornAt` is passed
+    // when, and only when, the history behind `txs` was read to its end, which makes
+    // the oldest transaction in it the wallet's first.
+    if (bornAt !== undefined) {
+        // Day k closes at bounds[k - 1]. Keep the days whose close is at or after the
+        // wallet's first transaction, so the oldest point plotted already contains it.
+        const bounded = Math.floor((now - bornAt) / DAY) + 1;
+        oldest = Math.max(0, Math.min(oldest, bounded));
+    }
     const out = [];
     for (let k = oldest; k >= 1; k--) {
         const openedAt = bounds[k];

@@ -12,7 +12,7 @@ import {
 
 import { fetchWithRetry } from "@oxar/sdk";
 
-import { heliusApiKey, fetchEnhancedHistory } from "@/lib/helius/history";
+import { heliusApiKey, fetchHistoryPaged } from "@/lib/helius/history";
 import { readWalletBalances } from "@/lib/solana/balances";
 import { TRACKED_MINTS } from "@/lib/yield/position-mints";
 import { isSameOrigin } from "@/lib/rpc-proxy";
@@ -139,8 +139,8 @@ export async function POST(req: Request) {
     // on a quiet one needs one page.
     const now = Math.floor(Date.now() / 1000);
     const windowStart = now - days * 86_400;
-    const [history, allBalances] = await Promise.all([
-      fetchEnhancedHistory(owner, key, MAX_PAGES, windowStart),
+    const [{ txs: history, exhausted }, allBalances] = await Promise.all([
+      fetchHistoryPaged(owner, key, MAX_PAGES, windowStart),
       readWalletBalances(owner),
     ]);
 
@@ -176,6 +176,15 @@ export async function POST(req: Request) {
     for (const tx of txs) for (const mint of Object.keys(tx.legs)) mints.add(mint);
     const { series: prices, status: priceStatus } = await fetchPrices([...mints], days);
 
+    // When paging ran off the end of the wallet's history, the oldest transaction we
+    // hold IS its first — so the chart may state that nothing existed before it. When
+    // paging stopped for any other reason (a page cap, the window, a failed request)
+    // the beginning is simply unknown, and claiming a birthday we cannot see would
+    // trade one wrong chart for another.
+    const bornAt = exhausted
+      ? txs.reduce((oldest, t) => Math.min(oldest, t.timestamp), Infinity)
+      : Infinity;
+
     const series = trimLeadingEmpty(
       portfolioSeries({
         now,
@@ -183,6 +192,7 @@ export async function POST(req: Request) {
         balancesNow,
         txs,
         prices,
+        ...(Number.isFinite(bornAt) ? { bornAt } : {}),
       }),
     );
     const performance = summarizePerformance(series);
@@ -208,6 +218,8 @@ export async function POST(req: Request) {
         priceStatus,
         covered: series.length,
         asked: days,
+        exhausted,
+        bornAt: Number.isFinite(bornAt) ? bornAt : null,
       },
     };
     cache.set(cacheKey, { at: Date.now(), body });

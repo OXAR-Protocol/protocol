@@ -59,8 +59,14 @@ export interface PerformanceDay {
  *
  * `balancesNow` should be READ, not inferred: seeding the backward replay from the
  * wallet's actual balances is what keeps today's figure equal to the one on the rest
- * of the screen. Days the transaction history doesn't reach are dropped rather than
- * guessed — see BALANCE_FLOOR.
+ * of the screen.
+ *
+ * Days the transaction history doesn't reach are dropped rather than guessed, and the
+ * reach is bounded from both sides. A holding that goes negative means we missed the
+ * inflow that started it — that is BALANCE_FLOOR, and it needs no help from the caller.
+ * The other side is invisible from in here: undoing withdrawals only ever makes the
+ * past look richer, so a wallet that has taken out more than it put in reconstructs a
+ * balance for days it never existed. `bornAt` is how the caller closes that door.
  */
 export declare function portfolioSeries(params: {
     /** Unix seconds — "now". */
@@ -70,4 +76,10 @@ export declare function portfolioSeries(params: {
     balancesNow: Readonly<Record<string, number>>;
     txs: readonly WalletTx[];
     prices: PriceSeries;
+    /** The wallet's FIRST transaction, in unix seconds — pass it only when `txs` came
+     *  from a history that was read all the way to its end. Days closing before it are
+     *  then known not to exist, rather than merely unreconstructable. Omit it whenever
+     *  the history was truncated by a page cap, a window, or an error: an unknown
+     *  beginning must not be mistaken for a recent one. */
+    bornAt?: number;
 }): PerformanceDay[];
