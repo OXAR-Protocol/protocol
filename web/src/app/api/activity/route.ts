@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { heliusApiKey, fetchEnhancedHistory } from "@/lib/helius/history";
+import { heliusApiKey } from "@/lib/helius/history";
+import { getWalletHistory } from "@/lib/helius/wallet-history";
 import { parseActivity, type ActivityEvent } from "@/lib/activity/parse";
 import { PROVIDERS } from "@/lib/yield/registry";
 import { JL_USDC, JL_USDT } from "@/lib/yield/position-mints";
@@ -87,7 +88,9 @@ export async function POST(req: Request) {
   }
 
   try {
-    const txs = await fetchEnhancedHistory(owner, key, want > DEFAULT_EVENTS ? HISTORY_PAGES : FEED_PAGES);
+    const { txs } = await getWalletHistory(owner, key, {
+      pages: want > DEFAULT_EVENTS ? HISTORY_PAGES : FEED_PAGES,
+    });
     const events = parseActivity(txs, owner, USDC, ASSET_NAMES, ASSET_DECIMALS, ASSET_IS_PRICE).slice(0, want);
     cache.set(cacheKey, { at: Date.now(), events });
     return NextResponse.json({ events });

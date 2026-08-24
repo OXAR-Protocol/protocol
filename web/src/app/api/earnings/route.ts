@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { netInvestedFromSwaps } from "@/lib/earnings/swaps";
-import { heliusApiKey, fetchEnhancedHistory } from "@/lib/helius/history";
+import { heliusApiKey } from "@/lib/helius/history";
+import { getWalletHistory } from "@/lib/helius/wallet-history";
 import { XSTOCKS } from "@/lib/yield/xstocks";
 import { METALS } from "@/lib/yield/metals-catalog";
 import { CASH_MINTS, JL_USDC, JL_USDT } from "@/lib/yield/position-mints";
@@ -75,7 +76,7 @@ export async function POST(req: Request) {
     // profit. Page deeper here (the recent-activity feed keeps the small default). The
     // 5-min server cache means this deeper fetch is paid rarely. (True cost-basis for
     // >2.5k-tx wallets still needs a durable ledger — out of scope for v1.)
-    const txs = await fetchEnhancedHistory(owner, key, 25);
+    const { txs } = await getWalletHistory(owner, key, { pages: 25 });
     const basis: Record<string, number> = {};
     for (const s of SOURCES) {
       basis[s.id] = netInvestedFromSwaps(txs, owner, s.heldMint, CASH_MINTS);
