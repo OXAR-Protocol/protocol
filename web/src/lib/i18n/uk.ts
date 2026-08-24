@@ -15,6 +15,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "home.wakeUp": "поклади туди, де платять",
   "home.wallet.label": "у гаманці · ще не працюють",
   "home.wallet.cta": "нехай працюють",
+  "home.wallet.idle": "ще не працюють",
   "movers.title": "у русі · 24 год",
 
   "yield.title": "Де твої гроші можуть спати",
@@ -393,6 +394,10 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "profile.positions": "позицій: {n}",
   "profile.inWallet": "{value} у гаманці",
   "profile.joined": "тут із {date}",
+  "profile.morning": "доброго ранку",
+  "profile.afternoon": "доброго дня",
+  "profile.evening": "доброго вечора",
+  "profile.freeToUse": "{value} вільні",
   "money.working": "вже працюють",
   "money.fund.title": "Поповнити",
   "money.fund.body": "З гаманця, карткою або з біржі",

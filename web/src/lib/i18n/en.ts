@@ -26,6 +26,7 @@ export const en = {
   "home.wakeUp": "put it somewhere that pays",
   "home.wallet.label": "in your wallet · not working yet",
   "home.wallet.cta": "put it to work",
+  "home.wallet.idle": "not working yet",
   "movers.title": "on the move · 24h",
 
   // Yield list
@@ -436,6 +437,10 @@ export const en = {
   "profile.positions": "{n} positions",
   "profile.inWallet": "{value} in your wallet",
   "profile.joined": "here since {date}",
+  "profile.morning": "good morning",
+  "profile.afternoon": "good afternoon",
+  "profile.evening": "good evening",
+  "profile.freeToUse": "{value} free to use",
   "money.working": "already working",
   "money.fund.title": "Top up",
   "money.fund.body": "From a wallet, with a card, or out of an exchange",

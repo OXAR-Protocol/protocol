@@ -4,16 +4,11 @@ import { useCallback } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
-import { formatUsdAmount } from "@oxar/sdk";
-
-import { AnimatedAmount } from "@/components/animated-amount";
 import { PhotoBg } from "@/components/photo-bg";
 import { TokenIcon } from "@/components/token-icon";
-import { MoneyActions } from "@/components/money-actions";
 import { useUsdcBalance } from "@/hooks/use-usdc-balance";
 import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useLiveBalances } from "@/hooks/use-live-balances";
-import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { USDC_MINT } from "@/lib/constants";
 import { useT } from "@/lib/i18n";
 
@@ -22,20 +17,21 @@ const MIN_SHOWN_USD = 1;
 const MAX_CHIPS = 3;
 
 /**
- * The two halves of what the total above is: money at work, and money that isn't.
+ * Money that isn't doing anything, and the way to change that.
  *
- * It used to lead the page with the wallet balance, and the portfolio total came
- * after — so the first number you met was a part, the second was the whole, and
- * nothing said which was which. The whole goes first now; this panel breaks it in
- * two and puts the acts beside the half they change.
+ * This card used to carry the two halves of the total — what's working and what's
+ * free — and it sat below the chart, which is below the analytics, which is below
+ * the fold. Both figures now sit directly under the balance they break down (see
+ * `MoneySplit`), where the second question a person asks gets answered next to the
+ * first.
+ *
+ * What could not move up is what's left here: the coins the wallet holds that aren't
+ * dollars, and the one act that puts idle money to work. With nothing idle there is
+ * nothing to say, so the card doesn't appear at all rather than stating a zero.
  */
 export function MoneyPanel() {
   const { t } = useT();
   const { assets, refreshSilently } = useWalletAssets();
-  const { totalUsdc } = useAggregatePersonalBalance();
-  // "Free to use" is the dollars, read off the chain — the same figure the money
-  // sheet and the buying screen show. Everything else the wallet holds is a coin you
-  // could spend, not a dollar you have, and it is listed as chips underneath.
   const cash = useUsdcBalance();
   // Money that moves shows up without a reload; a second subscription on the same
   // socket costs nothing worth counting.
@@ -49,74 +45,45 @@ export function MoneyPanel() {
 
   const otherCoins = assets.filter((a) => a.mint !== USDC_MINT);
   const idle = (cash.usd ?? 0) >= MIN_SHOWN_USD || otherCoins.length > 0;
+  if (!idle) return null;
+
   const chips = otherCoins.slice(0, MAX_CHIPS);
 
   return (
     <section className="relative overflow-hidden rounded-card border border-ink/10 bg-paper p-5">
       <PhotoBg src="/art/dripping-dollar.webp" scrim="left" position="object-[right_top]" opacity="opacity-25" />
 
-      <div className="relative flex items-start justify-between gap-4">
-        <p className="text-[11px] lowercase tracking-wide text-ink/40">{t("money.title")}</p>
-        <MoneyActions />
-      </div>
+      <p className="relative text-[11px] lowercase tracking-wide text-ink/40">
+        {t("home.wallet.idle")}
+      </p>
 
-      {/* Working first: it is the part that answers "is my money doing anything".
-          The figure animates a character at a time rather than being replaced: this
-          is the number that changes when a deposit lands, and swapping the whole
-          string in one frame makes the eye read a NEW number instead of the same one
-          growing. `AnimatedAmount` was already in the repo doing exactly this for
-          keypad entry — it just had never been pointed at the balance it was built
-          for. `initial={false}` inside it means the first paint is silent; only real
-          changes move. */}
-      <div className="relative mt-4">
-        <p className="text-[11px] lowercase tracking-wide text-ink/40">{t("money.working")}</p>
-        <p className="mt-1 text-[clamp(1.6rem,3vw,2rem)] font-light leading-none tracking-[-0.02em] tabular-nums text-ink">
-          $<AnimatedAmount value={formatUsdAmount(totalUsdc)} />
-        </p>
-      </div>
-
-      <div className="relative mt-5 border-t border-ink/[0.07] pt-4">
-        <p className="text-[11px] lowercase tracking-wide text-ink/40">{t("money.free")}</p>
-        <p className="mt-1 text-[clamp(1.6rem,3vw,2rem)] font-light leading-none tracking-[-0.02em] tabular-nums text-ink">
-          {cash.usd === null ? (
-            "—"
-          ) : (
-            <>
-              $<AnimatedAmount value={formatUsdAmount(cash.usd)} />
-            </>
-          )}
-        </p>
-
-        {idle && (
-          <>
-            <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              {chips.map((a) => (
-                <span
-                  key={a.mint}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 py-1 pl-1 pr-2.5"
-                >
-                  <TokenIcon asset={a} className="h-4 w-4" />
-                  <span className="text-[11px] text-ink/60">
-                    ${a.usdValue.toFixed(2)} {a.symbol}
-                  </span>
-                </span>
-              ))}
-              {otherCoins.length > chips.length && (
-                <span className="text-[11px] text-ink/40">+{otherCoins.length - chips.length}</span>
-              )}
-            </div>
-
-            <Link
-              href="/market"
-              data-tour="deposit"
-              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] font-medium lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
+      {chips.length > 0 && (
+        <div className="relative mt-3 flex flex-wrap items-center gap-1.5">
+          {chips.map((a) => (
+            <span
+              key={a.mint}
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 py-1 pl-1 pr-2.5"
             >
-              {t("home.wallet.cta")}
-              <ArrowUpRight size={14} strokeWidth={1.5} />
-            </Link>
-          </>
-        )}
-      </div>
+              <TokenIcon asset={a} className="h-4 w-4" />
+              <span className="text-[11px] text-ink/60">
+                ${a.usdValue.toFixed(2)} {a.symbol}
+              </span>
+            </span>
+          ))}
+          {otherCoins.length > chips.length && (
+            <span className="text-[11px] text-ink/40">+{otherCoins.length - chips.length}</span>
+          )}
+        </div>
+      )}
+
+      <Link
+        href="/market"
+        data-tour="deposit"
+        className="relative mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] font-medium lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
+      >
+        {t("home.wallet.cta")}
+        <ArrowUpRight size={14} strokeWidth={1.5} />
+      </Link>
     </section>
   );
 }

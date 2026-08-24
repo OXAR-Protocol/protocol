@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { ProfileChart } from "@/components/profile-chart";
+import { MoneySplit } from "@/components/money-split";
 import { PerformanceStats } from "@/components/performance-stats";
 import { PositionsSection } from "@/components/positions-section";
 import { DayHistory } from "@/components/day-history";
@@ -59,6 +60,7 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
       <motion.div {...rise(1)} className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div>
         <ProfileChart
+          split={<MoneySplit />}
           points={history.days}
           performance={history.performance}
           range={range}

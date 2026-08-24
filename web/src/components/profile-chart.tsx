@@ -34,6 +34,7 @@ export function ProfileChart({
   locale,
   neverFunded,
   periodLabel,
+  split,
 }: {
   points: PerformanceDay[];
   performance: RangePerformance | null;
@@ -45,6 +46,9 @@ export function ProfileChart({
   neverFunded?: boolean;
   /** The period the figure beside the total actually covers — see `ProfileMoney`. */
   periodLabel: string;
+  /** The working / free-to-use split, rendered by the caller so this stays
+   *  presentational. See `MoneySplit`. */
+  split?: React.ReactNode;
 }) {
   const { t } = useT();
 
@@ -60,16 +64,22 @@ export function ProfileChart({
 
   return (
     <section data-tour="balance">
-      <p className="text-[11px] lowercase tracking-wide text-ink/40">{t("profile.allTogether")}</p>
-      <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+      {/* No label above it any more. On a screen about money a figure this size does
+          not need to be told it is money, and "everything, all together" was a caption
+          explaining the obvious directly above the obvious.
+
+          This is now the h1 of the page. It used to sit fourth, under the wallet
+          address, the badge and a row of facts — so the one number people open this
+          screen for was the one thing they had to scroll past an identifier to reach.
+          Banks lead with the balance. */}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <div className="flex flex-wrap items-baseline gap-x-3">
-          {/* The headline figure on the page, and it used to change by being replaced:
-              one frame it says $0.00, the next it says $1,234.56. Animating it per
-              character is the difference between reading a new number and watching
-              your own number arrive. */}
-          <p className="text-[clamp(30px,6vw,44px)] font-light leading-none tracking-[-0.02em] tabular-nums text-ink">
+          {/* It used to change by being replaced: one frame $0.00, the next $1,234.56.
+              Animating it per character is the difference between reading a new number
+              and watching your own number arrive. */}
+          <h1 className="text-[clamp(34px,8vw,54px)] font-light leading-none tracking-[-0.03em] tabular-nums text-ink">
             $<AnimatedAmount value={formatUsdAmount(now)} />
-          </p>
+          </h1>
           <p className={`whitespace-nowrap text-[13px] tabular-nums ${up ? "text-profit" : "text-loss"}`}>
             {earned === null ? (neverFunded ? "$0.00" : "—") : formatSignedUsd(earned)}
             <span className="text-ink/40"> · {periodLabel}</span>
@@ -91,6 +101,12 @@ export function ProfileChart({
           ))}
         </div>
       </div>
+
+      {/* "How much do I have" and "how much can I spend" are asked one after the
+          other, so they are answered one after the other. Both figures were already
+          computed — they just lived in a card below the chart, which is after the
+          analytics and after the fold. */}
+      {split}
 
       {/* Full-bleed on a phone: the page's own padding stops at the chart's edge. The
           dot field lives here and nowhere else — behind data it reads as graph paper,
