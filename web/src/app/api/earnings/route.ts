@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { netInvestedFromSwaps } from "@/lib/earnings/swaps";
+import { costBasisFromSwaps } from "@/lib/earnings/swaps";
 import { heliusApiKey } from "@/lib/helius/history";
 import { getWalletHistory } from "@/lib/helius/wallet-history";
 import { XSTOCKS } from "@/lib/yield/xstocks";
@@ -79,7 +79,12 @@ export async function POST(req: Request) {
     const { txs } = await getWalletHistory(owner, key, { pages: 25 });
     const basis: Record<string, number> = {};
     for (const s of SOURCES) {
-      basis[s.id] = netInvestedFromSwaps(txs, owner, s.heldMint, CASH_MINTS);
+      // A source the history can't account for is left OUT of the map, not written
+      // as zero. The client keys off "is this id present" to decide whether it may
+      // show a profit figure, so a zero here claimed the holder paid nothing — and
+      // the whole position was then reported as profit.
+      const cost = costBasisFromSwaps(txs, owner, s.heldMint, CASH_MINTS);
+      if (cost.covered) basis[s.id] = cost.basis;
     }
     cache.set(owner, { at: Date.now(), basis });
     return NextResponse.json({ basis });

@@ -5,5 +5,5 @@ export { toBaseUnits, fromBaseUnits } from "@oxar/sdk";
 export { planWithdrawal, type WithdrawPlan } from "./withdraw";
 export { groupProviderViews, pickTarget, type ProviderGroup } from "./group-views";
 export { getApyHistory, getProviderTvl, getTvlMap, type ApyHistoryPoint } from "./yields-api";
-export { sparklinePath } from "./sparkline";
+export { sparklinePath, sparklineDomain, sparklineY } from "./sparkline";
 export { toFriendlyError, isCancellation, UserFacingError } from "./errors";
