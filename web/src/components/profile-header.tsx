@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { AnimatePresence } from "framer-motion";
 import { Check, Clock, Copy, Layers, Settings, Wallet } from "lucide-react";
@@ -13,16 +13,8 @@ import { useWalletAssets } from "@/hooks/use-wallet-assets";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useSolanaContext } from "@/providers/solana-provider";
 import { useSolanaName } from "@/hooks/use-solana-name";
+import { MetalAvatar } from "@/components/metal-avatar";
 import { useT } from "@/lib/i18n";
-
-/** Four brand-adjacent plates; the address picks one, so it's the same every visit. */
-const PLATES = ["bg-[var(--brand)]", "bg-ink", "bg-[#b45309]", "bg-[#065f46]"] as const;
-
-function plateFor(seed: string): string {
-  let hash = 0;
-  for (const ch of seed) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
-  return PLATES[hash % PLATES.length]!;
-}
 
 /**
  * Who you are here, at the top of your own page.
@@ -60,7 +52,6 @@ export function ProfileHeader() {
   // heading IS the address, and a second line under it said the same string twice
   // in two different truncations.
   const secondary = named ? short : null;
-  const plate = useMemo(() => plateFor(address ?? name), [address, name]);
 
   const [copied, setCopied] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -78,11 +69,12 @@ export function ProfileHeader() {
   return (
     <section data-tour="account">
       <div className="flex items-center gap-4">
-        <span
-          className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-[24px] uppercase text-paper ${plate}`}
-        >
-          {name.slice(0, 1)}
-        </span>
+        {/* The mark on spun metal — the same surface as the home-screen icon.
+            It replaced a flat plate whose colour was hashed out of the address
+            across violet, black, amber and green, which made the most saturated
+            thing on a money screen a coin flip and put an orange in a palette that
+            has none. See `MetalAvatar`. */}
+        <MetalAvatar seed={address ?? name} size={64} />
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             {named ? (
