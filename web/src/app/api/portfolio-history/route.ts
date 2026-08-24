@@ -12,7 +12,8 @@ import {
 
 import { fetchWithRetry } from "@oxar/sdk";
 
-import { heliusApiKey, fetchHistoryPaged, bornAtFrom } from "@/lib/helius/history";
+import { heliusApiKey, bornAtFrom } from "@/lib/helius/history";
+import { getWalletHistory } from "@/lib/helius/wallet-history";
 import { readWalletBalances } from "@/lib/solana/balances";
 import { TRACKED_MINTS } from "@/lib/yield/position-mints";
 import { isSameOrigin } from "@/lib/rpc-proxy";
@@ -33,7 +34,7 @@ export const dynamic = "force-dynamic";
 const PRICES_URL = "https://coins.llama.fi/chart";
 const MAX_DAYS = 365;
 const DEFAULT_DAYS = 90;
-/** Ceiling on paging, not a target — see `fetchEnhancedHistory`. 4000 transactions is
+/** Ceiling on paging, not a target — see `getWalletHistory`. 4000 transactions is
  *  deep enough for a year of ordinary use and still returns inside the request. */
 const MAX_PAGES = 40;
 
@@ -139,10 +140,11 @@ export async function POST(req: Request) {
     // on a quiet one needs one page.
     const now = Math.floor(Date.now() / 1000);
     const windowStart = now - days * 86_400;
-    const [{ txs: history, exhausted, failed }, allBalances] = await Promise.all([
-      fetchHistoryPaged(owner, key, MAX_PAGES, windowStart),
-      readWalletBalances(owner),
-    ]);
+    const [{ txs: history, exhausted, failed, cached: historyCached }, allBalances] =
+      await Promise.all([
+        getWalletHistory(owner, key, { pages: MAX_PAGES, since: windowStart }),
+        readWalletBalances(owner),
+      ]);
 
     // Everything the owner moved, transaction by transaction — as NET balance
     // changes, not as a sum of transfer legs. A routed swap moves the same dollars
@@ -243,6 +245,7 @@ export async function POST(req: Request) {
         asked: days,
         exhausted,
         failed,
+        historyCached,
         // Non-empty here with `exhausted: true` is a bug, and names the mint holding it.
         birthResidue: residue,
         birthResidueMints: Object.keys(residue).length,
