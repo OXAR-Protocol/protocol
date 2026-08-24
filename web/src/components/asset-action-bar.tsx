@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 
 import type { ProviderView } from "@/hooks/use-yield-positions";
@@ -31,6 +31,7 @@ export function AssetActionBar({
   onAmountChange,
   onDeposited,
   onSell,
+  settled,
   loading,
   error,
   sharePriceUsd,
@@ -43,6 +44,8 @@ export function AssetActionBar({
   onAmountChange: (v: number) => void;
   onDeposited: (usd: number, pending?: boolean) => void;
   onSell: () => void;
+  /** True once an act has produced a receipt. See the effect below. */
+  settled: boolean;
   loading: boolean;
   error: string | null;
   sharePriceUsd?: number;
@@ -51,6 +54,27 @@ export function AssetActionBar({
   const { t } = useT();
   const [open, setOpen] = useState<null | "buy" | "sell">(null);
   const canSell = positionValue > 0;
+
+  /**
+   * A receipt exists, so the form that asked for it is finished. Close.
+   *
+   * This used to be handled in the deposit callback alone — one `setOpen(null)`
+   * wrapped around `onDeposited`, and nothing at all on the sell path. So a sale
+   * left its sheet standing, and because the rail falls back to the deposit panel
+   * the moment there is no position left to sell (`asset-action-rail.tsx`, the
+   * `|| !canSell` branch), what stood there was a sheet titled "withdraw" with a
+   * "deposit" button in it. The act was over; the screen was still asking.
+   *
+   * Keying off the receipt rather than off either callback is what makes this one
+   * rule instead of two. It is also the only signal that survives the tail of
+   * `handleExit`: the sale sets its receipt the moment the transaction confirms,
+   * then goes on to refine the figure with a best-effort read that is allowed to
+   * fail. Closing on "the sell handler resolved" would keep a completed sale's
+   * sheet open whenever that read threw.
+   */
+  useEffect(() => {
+    if (settled) setOpen(null);
+  }, [settled]);
 
   return (
     <>
@@ -99,10 +123,7 @@ export function AssetActionBar({
               positionValue={positionValue}
               amount={amount}
               onAmountChange={onAmountChange}
-              onDeposited={(usd, pending) => {
-                setOpen(null);
-                onDeposited(usd, pending);
-              }}
+              onDeposited={onDeposited}
               onSell={onSell}
               loading={loading}
               error={error}
