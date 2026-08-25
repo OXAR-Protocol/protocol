@@ -55,6 +55,16 @@ export interface Flow {
     /** Stable coin that ARRIVED — money taken back out. */
     receivedUsd: number;
     origin: FlowOrigin;
+    /**
+     * What the dollars were exchanged FOR — the mint on the other side of the trade.
+     *
+     * Without it the table can say how much moved and never which market it moved
+     * through, so "is anyone using gold" has no answer. Null only when the counterpart
+     * cannot be named, which `txFlow` already refuses to record.
+     */
+    mint: string | null;
+    /** That mint's net movement, UI units, signed: positive = the wallet received it. */
+    mintAmount: number;
 }
 /** Proof first, then our own record, then nothing. */
 export declare function flowOrigin(tx: DatedTx, attribution?: Attribution): FlowOrigin;

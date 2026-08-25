@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { syncVolume } from "@/lib/analytics/volume-sync";
+import { snapshotAum } from "@/lib/analytics/aum";
+import { knownWallets, syncVolume } from "@/lib/analytics/volume-sync";
 
 /**
- * The nightly read of what actually moved THROUGH US.
+ * The nightly read of the two figures that answer different questions.
+ *
+ * FLOW — what moved through us, from the transactions themselves.
+ * STOCK — what is still held, from the balances, priced today.
+ *
+ * Both, because volume alone is ambiguous where it matters: $1,000 of it is $1,000
+ * that arrived and stayed, or $100 that went in and out five times, and for a yield
+ * product those are opposite outcomes. They run in one job against one wallet list,
+ * so the two figures can never disagree about who was counted.
  *
  * Runs on a schedule rather than on a page view: the cost is one Helius request per
  * wallet per night, against the twenty-five a single visit to `/you` can spend. It
@@ -37,8 +46,12 @@ export async function GET(req: NextRequest) {
   // block explorer before they become the numbers we quote.
   const dry = req.nextUrl.searchParams.get("dry") === "1";
   try {
-    const report = await syncVolume({ dry });
-    return NextResponse.json({ ok: true, dry, ...report });
+    const volume = await syncVolume({ dry });
+    // One timestamp for the whole snapshot: a balance is a fact about a moment, and
+    // stamping each row as it is written would smear one photograph across the run.
+    const takenAt = new Date().toISOString();
+    const aum = await snapshotAum(await knownWallets(), { dry, takenAt });
+    return NextResponse.json({ ok: true, dry, volume, aum });
   } catch (e) {
     const reason = e instanceof Error ? e.message : "sync failed";
     console.error("[volume-sync] failed:", reason);

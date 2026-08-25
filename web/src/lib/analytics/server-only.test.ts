@@ -57,12 +57,27 @@ function importClosure(entry: string): Set<string> {
 const isClientModule = (file: string) =>
   /^\s*["']use client["']/.test(readFileSync(file, "utf8"));
 
-describe("volume-sync stays on the server", () => {
-  const entry = resolve(SRC, "lib/analytics/volume-sync.ts");
+describe.each(["lib/analytics/volume-sync.ts", "lib/analytics/aum.ts"])(
+  "%s stays on the server",
+  (rel) => {
+    const entry = resolve(SRC, rel);
 
-  it("pulls in nothing marked \"use client\"", () => {
-    const offenders = [...importClosure(entry)].filter(isClientModule);
-    expect(offenders.map((f) => f.replace(`${SRC}/`, ""))).toEqual([]);
+    it("resolves a real import closure — otherwise this test proves nothing", () => {
+      expect(importClosure(entry).size).toBeGreaterThan(0);
+    });
+
+    it("pulls in nothing marked \"use client\"", () => {
+      const offenders = [...importClosure(entry)].filter(isClientModule);
+      expect(offenders.map((f) => f.replace(`${SRC}/`, ""))).toEqual([]);
+    });
+  },
+);
+
+describe("the detector itself", () => {
+  it("recognises a client module when it sees one", () => {
+    // Guards the guard: if this stopped matching, the checks above would pass by
+    // never detecting anything. `gas/kora.ts` is the module that caused the outage.
+    expect(isClientModule(resolve(SRC, "lib/gas/kora.ts"))).toBe(true);
   });
 
   it("reads the relayer set from the SDK, where the server can touch it", () => {
