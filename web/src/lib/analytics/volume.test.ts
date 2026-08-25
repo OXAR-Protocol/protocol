@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { txFlow, walletFlows, totalVolume, newestTs, type DatedTx } from "@oxar/sdk";
+import { txFlow, walletFlows, totalVolume, newestTs, flowOrigin, isOurs, type DatedTx } from "@oxar/sdk";
 
 const OWNER = "AkC8BHHNJQ61fXVsHVnWsferBm4PC6t8oT8YwRmrwDtB";
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
@@ -31,12 +31,12 @@ function tx(sig: string, ts: number, legs: Record<string, number>): DatedTx {
 describe("txFlow", () => {
   it("reads a buy as stable coin spent", () => {
     const flow = txFlow(tx("sig1", 1_000, { [USDC]: -11.452405, [META]: 0.0176 }), OWNER, STABLES);
-    expect(flow).toEqual({ sig: "sig1", ts: 1_000, spentUsd: 11.452405, receivedUsd: 0 });
+    expect(flow).toEqual({ sig: "sig1", ts: 1_000, spentUsd: 11.452405, receivedUsd: 0, origin: "unknown" });
   });
 
   it("reads a sell as stable coin received", () => {
     const flow = txFlow(tx("sig2", 2_000, { [USDC]: 20, [META]: -0.03 }), OWNER, STABLES);
-    expect(flow).toEqual({ sig: "sig2", ts: 2_000, spentUsd: 0, receivedUsd: 20 });
+    expect(flow).toEqual({ sig: "sig2", ts: 2_000, spentUsd: 0, receivedUsd: 20, origin: "unknown" });
   });
 
   it("states the settled amount, not the amount that was asked for", () => {
@@ -166,5 +166,51 @@ describe("newestTs", () => {
 
   it("is 0 for an empty set — read the wallet from the beginning", () => {
     expect(newestTs([])).toBe(0);
+  });
+});
+
+describe("attribution", () => {
+  const RELAYER = "MQwRCwbeRmhpNdAjvkMysLHS92WSXQvw7wJ8hPoYFrL";
+  const buy = (sig: string, feePayer?: string): DatedTx => ({
+    ...tx(sig, 1_000, { [USDC]: -10, [META]: 0.015 }),
+    feePayer,
+  });
+
+  it("takes our relayer paying the fee as proof the transaction is ours", () => {
+    const flow = txFlow(buy("s1", RELAYER), OWNER, STABLES, { relayers: new Set([RELAYER]) });
+    expect(flow?.origin).toBe("relayer");
+    expect(isOurs(flow!)).toBe(true);
+  });
+
+  it("falls back to our own record of the signature", () => {
+    const flow = txFlow(buy("s2"), OWNER, STABLES, { recorded: new Set(["s2"]) });
+    expect(flow?.origin).toBe("recorded");
+    expect(isOurs(flow!)).toBe(true);
+  });
+
+  it("prefers proof over our own record when both are present", () => {
+    const flow = txFlow(buy("s3", RELAYER), OWNER, STABLES, {
+      relayers: new Set([RELAYER]),
+      recorded: new Set(["s3"]),
+    });
+    expect(flow?.origin).toBe("relayer");
+  });
+
+  it("leaves someone else's app unattributed — it is not our volume", () => {
+    const flow = txFlow(buy("s4", OWNER), OWNER, STABLES, { relayers: new Set([RELAYER]) });
+    expect(flow?.origin).toBe("unknown");
+    expect(isOurs(flow!)).toBe(false);
+  });
+
+  it("is unknown when nothing to match against was given", () => {
+    expect(flowOrigin(buy("s5", RELAYER))).toBe("unknown");
+  });
+
+  it("totals only our own flows when the caller filters first", () => {
+    const txs = [buy("mine", RELAYER), buy("theirs", OWNER)];
+    const flows = walletFlows(txs, OWNER, STABLES, { relayers: new Set([RELAYER]) });
+    expect(flows).toHaveLength(2);
+    expect(totalVolume(flows.filter(isOurs)).volumeUsd).toBeCloseTo(10, 6);
+    expect(totalVolume(flows).volumeUsd).toBeCloseTo(20, 6);
   });
 });

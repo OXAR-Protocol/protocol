@@ -21,6 +21,33 @@ export interface DatedTx extends DeltaSource {
   signature?: string;
   /** Unix SECONDS, per the Helius enhanced API. */
   timestamp?: number;
+  /** Who paid the network fee. Our relayer paying it is a signature we can read. */
+  feePayer?: string;
+}
+
+/**
+ * How we know a transaction came through us.
+ *
+ * The chain is the honest source for the AMOUNT and a useless one for the AUTHOR:
+ * a wallet that trades on Jupiter directly leaves a transaction indistinguishable
+ * from one our screen built, and counting those makes "our volume" a number about
+ * other people's apps.
+ *
+ * `relayer` — our gasless relayer paid the fee. Nothing else can put that address
+ * there, so it is proof rather than a guess, and it covers the ordinary path: a
+ * wallet with no SOL, which is most of them.
+ * `recorded` — the browser told us about this signature. Weaker (a closed tab never
+ * reports) but never wrong in the other direction.
+ * `unknown` — someone else's app, or ours on a path we cannot yet mark.
+ */
+export type FlowOrigin = "relayer" | "recorded" | "unknown";
+
+/** What lets a transaction be recognised as ours. */
+export interface Attribution {
+  /** Fee-payer addresses that only ever appear on transactions we built. */
+  relayers?: ReadonlySet<string>;
+  /** Signatures the client reported to `/api/track`. */
+  recorded?: ReadonlySet<string>;
 }
 
 /** One transaction's money movement, in stable-coin units (≈ USD). */
@@ -32,6 +59,19 @@ export interface Flow {
   spentUsd: number;
   /** Stable coin that ARRIVED — money taken back out. */
   receivedUsd: number;
+  origin: FlowOrigin;
+}
+
+/** Proof first, then our own record, then nothing. */
+export function flowOrigin(tx: DatedTx, attribution: Attribution = {}): FlowOrigin {
+  if (tx.feePayer && attribution.relayers?.has(tx.feePayer)) return "relayer";
+  if (tx.signature && attribution.recorded?.has(tx.signature)) return "recorded";
+  return "unknown";
+}
+
+/** Whether a flow happened through us at all. */
+export function isOurs(flow: Flow): boolean {
+  return flow.origin !== "unknown";
 }
 
 /**
@@ -57,7 +97,12 @@ const DUST = 0.01;
  * was the largest "trade" in our history. Netted across the basket the same
  * transaction is a $21 spread with no position on either side of it, and drops out.
  */
-export function txFlow(tx: DatedTx, owner: string, stableMints: ReadonlySet<string>): Flow | null {
+export function txFlow(
+  tx: DatedTx,
+  owner: string,
+  stableMints: ReadonlySet<string>,
+  attribution: Attribution = {},
+): Flow | null {
   const sig = tx.signature;
   const ts = tx.timestamp;
   if (!sig || typeof ts !== "number" || ts <= 0) return null;
@@ -77,6 +122,7 @@ export function txFlow(tx: DatedTx, owner: string, stableMints: ReadonlySet<stri
     ts,
     spentUsd: stable < 0 ? -stable : 0,
     receivedUsd: stable > 0 ? stable : 0,
+    origin: flowOrigin(tx, attribution),
   };
 }
 
@@ -85,10 +131,11 @@ export function walletFlows(
   txs: readonly DatedTx[],
   owner: string,
   stableMints: ReadonlySet<string>,
+  attribution: Attribution = {},
 ): Flow[] {
   const flows: Flow[] = [];
   for (const tx of txs) {
-    const flow = txFlow(tx, owner, stableMints);
+    const flow = txFlow(tx, owner, stableMints, attribution);
     if (flow) flows.push(flow);
   }
   return flows.sort((a, b) => a.ts - b.ts);
