@@ -15,11 +15,25 @@
  * that: what the wallet paid, or what came back.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.flowOrigin = flowOrigin;
+exports.isOurs = isOurs;
 exports.txFlow = txFlow;
 exports.walletFlows = walletFlows;
 exports.totalVolume = totalVolume;
 exports.newestTs = newestTs;
 const wallet_deltas_1 = require("./wallet-deltas");
+/** Proof first, then our own record, then nothing. */
+function flowOrigin(tx, attribution = {}) {
+    if (tx.feePayer && attribution.relayers?.has(tx.feePayer))
+        return "relayer";
+    if (tx.signature && attribution.recorded?.has(tx.signature))
+        return "recorded";
+    return "unknown";
+}
+/** Whether a flow happened through us at all. */
+function isOurs(flow) {
+    return flow.origin !== "unknown";
+}
 /**
  * Below this, a leg is rounding rather than a trade. Stable coins carry six
  * decimals and a route's dust can land a hundredth of a cent on either side.
@@ -42,7 +56,7 @@ const DUST = 0.01;
  * was the largest "trade" in our history. Netted across the basket the same
  * transaction is a $21 spread with no position on either side of it, and drops out.
  */
-function txFlow(tx, owner, stableMints) {
+function txFlow(tx, owner, stableMints, attribution = {}) {
     const sig = tx.signature;
     const ts = tx.timestamp;
     if (!sig || typeof ts !== "number" || ts <= 0)
@@ -62,13 +76,14 @@ function txFlow(tx, owner, stableMints) {
         ts,
         spentUsd: stable < 0 ? -stable : 0,
         receivedUsd: stable > 0 ? stable : 0,
+        origin: flowOrigin(tx, attribution),
     };
 }
 /** Every transaction in `txs` that moved money, oldest first. */
-function walletFlows(txs, owner, stableMints) {
+function walletFlows(txs, owner, stableMints, attribution = {}) {
     const flows = [];
     for (const tx of txs) {
-        const flow = txFlow(tx, owner, stableMints);
+        const flow = txFlow(tx, owner, stableMints, attribution);
         if (flow)
             flows.push(flow);
     }
