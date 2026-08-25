@@ -1,14 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { usePrivy } from "@privy-io/react-auth";
 import { AnimatePresence } from "framer-motion";
+import { Settings } from "lucide-react";
 
 import { EarlyRiserBadge } from "@/components/early-riser-badge";
 import { SettingsSheet } from "@/components/settings-sheet";
-import { useSolanaContext } from "@/providers/solana-provider";
-import { useSolanaName } from "@/hooks/use-solana-name";
-import { MetalAvatar } from "@/components/metal-avatar";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -22,34 +19,37 @@ import { useT } from "@/lib/i18n";
  * pleasant and says nothing, and a whole row of the page is a lot to spend on
  * pleasant.
  *
- * The avatar IS the button now. Two controls sat here — a metal disc that did
- * nothing and a gear beside it — where every banking app has exactly one: your face,
- * top right, which opens your account.
+ * The gear is the button. It briefly wasn't — the metal disc took over for a day —
+ * and that was wrong for a reason worth keeping: a bank can make the avatar the
+ * settings control because the avatar is your face. Ours carries the OXAR mark,
+ * identical for every account bar the metal finish, so it reads as the product's
+ * badge, not as your account. A badge is not an affordance. The disc moved to the
+ * wallet pill in the top bar, where being decorative is the whole job.
  *
  * `2 positions` went with the greeting: the list further down this same page is that
  * fact, in more detail, without having been asked.
  */
 export function ProfileHeader() {
   const { t } = useT();
-  const { user } = usePrivy();
-  const { walletAddress } = useSolanaContext();
-  const address = walletAddress?.toBase58() ?? user?.wallet?.address ?? null;
-  const solName = useSolanaName(address);
-  const seed = address ?? solName ?? user?.email?.address ?? "you";
-
   const [showSettings, setShowSettings] = useState(false);
 
   return (
     <>
       <div className="flex shrink-0 items-center gap-2">
         <EarlyRiserBadge />
+        {/* A gear, because a gear means settings.
+            The metal disc stood here for a day and it could not do this job: it
+            carries the OXAR mark, identical for everyone bar the finish, so it reads
+            as our logo rather than as your account. A bank can make the avatar the
+            button because the avatar is your face. Ours is our badge, and a badge is
+            not an affordance. */}
         <button
           type="button"
           onClick={() => setShowSettings(true)}
           aria-label={t("settings.title")}
-          className="rounded-full transition active:scale-[0.97]"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 text-ink/45 transition active:scale-[0.97] hover:border-ink/30 hover:text-ink"
         >
-          <MetalAvatar seed={seed} size={38} />
+          <Settings size={16} strokeWidth={1.5} />
         </button>
       </div>
 

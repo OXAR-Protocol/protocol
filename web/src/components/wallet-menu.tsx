@@ -7,6 +7,7 @@ import { AnimatePresence } from "framer-motion";
 import { Copy, Check, LogOut, ChevronDown, KeyRound, MessageSquare, Wallet } from "lucide-react";
 
 import { useSolanaContext } from "@/providers/solana-provider";
+import { MetalAvatar } from "@/components/metal-avatar";
 import { MoneySheet } from "@/components/money-sheet";
 import { FeedbackSheet } from "@/components/feedback-sheet";
 import { useSolanaName } from "@/hooks/use-solana-name";
@@ -62,7 +63,11 @@ export function WalletMenu() {
         onClick={() => setOpen((v) => !v)}
         className="inline-flex items-center gap-2 rounded-full border border-ink/15 px-4 py-2 lowercase text-[14px] text-ink/70 transition-colors hover:border-ink/40 hover:text-ink"
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
+        {/* The app-icon material, at the one size where it is unambiguously
+            decoration: a dot said "connected" and nothing else, and this says the
+            same thing while looking like the product. It is not a control — the
+            whole pill is. */}
+        <MetalAvatar seed={solana ?? "you"} size={16} />
         {solName ?? shortSolana}
         <ChevronDown size={13} strokeWidth={1.5} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
