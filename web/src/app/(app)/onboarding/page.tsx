@@ -7,6 +7,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Wallet, Smartphone, ArrowRight } from "lucide-react";
 
 import { SectionLabel } from "@/components/section-label";
+import { useSignInGate } from "@/components/terms/sign-in-gate";
 import { useRise } from "@/lib/motion";
 import { useT } from "@/lib/i18n";
 
@@ -15,6 +16,9 @@ export default function OnboardingPage() {
   const router = useRouter();
   const { t } = useT();
   const rise = useRise();
+  // The third door into Privy, and the one that was still ungated: the nav and
+  // /login both ask for the terms first, this opened an account without them.
+  const guard = useSignInGate();
 
   useEffect(() => {
     if (ready && authenticated) router.replace("/you");
@@ -40,7 +44,7 @@ export default function OnboardingPage() {
       >
         {/* Wallet */}
         <button
-          onClick={() => login()}
+          onClick={() => guard(() => login())}
           disabled={!ready}
           className="rounded-card border border-ink/10 bg-paper p-8 text-left transition-colors hover:border-ink/30 disabled:opacity-50"
         >
