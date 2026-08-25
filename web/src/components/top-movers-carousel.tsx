@@ -111,7 +111,7 @@ export function TopMoversCarousel() {
                   // hover, and then never fires the leave. The lift is now a
                   // pointer-only affordance; touch gets the press feedback instead.
                   // `transition-all` narrowed to what is actually meant to move.
-                  className={`${CARD_BASIS} group relative isolate flex shrink-0 grow-0 snap-start flex-col justify-between overflow-hidden rounded-panel border border-ink/10 bg-paper p-5 transition-[transform,border-color,box-shadow] duration-fast ease-out active:scale-[0.99] hover:border-ink/25 [@media(hover:hover)and(pointer:fine)]:hover:-translate-y-0.5 [@media(hover:hover)and(pointer:fine)]:hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]`}
+                  className={`${CARD_BASIS} group relative isolate flex shrink-0 grow-0 snap-start flex-col justify-between overflow-hidden rounded-panel border border-ink/10 bg-paper p-5 transition-[transform,border-color,box-shadow] duration-fast ease-out active:scale-[0.99] hover:border-ink/25 [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-0.5 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)]`}
                 >
                   <BanknoteBg seed={m.id} hover />
                   <div className="relative flex items-start justify-between">
