@@ -1,6 +1,15 @@
 import { describe, it, expect } from "vitest";
 
-import { txFlow, walletFlows, totalVolume, newestTs, flowOrigin, isOurs, type DatedTx } from "@oxar/sdk";
+import {
+  txFlow,
+  walletFlows,
+  totalVolume,
+  newestTs,
+  newestTxTs,
+  flowOrigin,
+  isOurs,
+  type DatedTx,
+} from "@oxar/sdk";
 
 const OWNER = "AkC8BHHNJQ61fXVsHVnWsferBm4PC6t8oT8YwRmrwDtB";
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
@@ -212,5 +221,40 @@ describe("attribution", () => {
     expect(flows).toHaveLength(2);
     expect(totalVolume(flows.filter(isOurs)).volumeUsd).toBeCloseTo(10, 6);
     expect(totalVolume(flows).volumeUsd).toBeCloseTo(20, 6);
+  });
+});
+
+describe("paging hands the same transaction back twice", () => {
+  const dup = tx("same", 1_000, { [USDC]: -10, [META]: 0.015 });
+
+  it("keeps one row per signature", () => {
+    // Postgres refuses an upsert batch that names one key twice, and that is exactly
+    // how the sync died on the only wallet busy enough to need six pages:
+    // "ON CONFLICT DO UPDATE command cannot affect row a second time".
+    const flows = walletFlows([dup, { ...dup }], OWNER, STABLES);
+    expect(flows).toHaveLength(1);
+    expect(new Set(flows.map((f) => f.sig)).size).toBe(1);
+  });
+
+  it("does not double the money either", () => {
+    expect(totalVolume(walletFlows([dup, { ...dup }], OWNER, STABLES)).volumeUsd).toBeCloseTo(10, 6);
+  });
+});
+
+describe("newestTxTs", () => {
+  it("comes from the transactions read, not from the flows found", () => {
+    // A wallet that only ever transferred: no flows, but it HAS been read to here.
+    const transfersOnly = [tx("t1", 5_000, { [USDC]: -50 }), tx("t2", 9_000, { [USDC]: 20 })];
+    expect(walletFlows(transfersOnly, OWNER, STABLES)).toHaveLength(0);
+    expect(newestTs(walletFlows(transfersOnly, OWNER, STABLES))).toBe(0);
+    expect(newestTxTs(transfersOnly)).toBe(9_000);
+  });
+
+  it("is 0 for an empty read", () => {
+    expect(newestTxTs([])).toBe(0);
+  });
+
+  it("ignores a transaction with no block time", () => {
+    expect(newestTxTs([{ signature: "x" }, tx("y", 3_000, { [USDC]: -5, [META]: 1 })])).toBe(3_000);
   });
 });

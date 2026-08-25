@@ -78,7 +78,24 @@ export declare function isOurs(flow: Flow): boolean;
  * transaction is a $21 spread with no position on either side of it, and drops out.
  */
 export declare function txFlow(tx: DatedTx, owner: string, stableMints: ReadonlySet<string>, attribution?: Attribution): Flow | null;
-/** Every transaction in `txs` that moved money, oldest first. */
+/**
+ * The newest block time in a batch of transactions, or 0 for an empty one.
+ *
+ * The cursor belongs to the READ, not to what the read happened to find. A wallet
+ * whose transactions were all transfers produces no flows, and taking the cursor
+ * from the flows would leave it at zero — so that wallet's whole history is paged
+ * again every night, for ever, to discover the same nothing.
+ */
+export declare function newestTxTs(txs: readonly DatedTx[]): number;
+/**
+ * Every transaction in `txs` that moved money, oldest first, one row per signature.
+ *
+ * Deduped, because paging can hand back the same transaction twice at a page
+ * boundary and the destination keys on signature. Postgres refuses an upsert whose
+ * batch names one key twice — "ON CONFLICT DO UPDATE command cannot affect row a
+ * second time" — and that took down the sync for the one wallet busy enough to
+ * need six pages.
+ */
 export declare function walletFlows(txs: readonly DatedTx[], owner: string, stableMints: ReadonlySet<string>, attribution?: Attribution): Flow[];
 export interface VolumeTotals {
     spentUsd: number;
