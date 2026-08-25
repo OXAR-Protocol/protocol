@@ -16,6 +16,12 @@ export const INVITE_CODES = [
   // meant to be seen by anyone, so it buys no exclusivity — it's here purely so the
   // post's traffic lands under its own channel instead of merging into `direct`.
   "oro-gold",
+  // The one link we hand out everywhere — launch pages, posts, DMs, decks:
+  //   https://app.oxar.app/join?code=launch
+  // Deliberately a single code rather than one per channel: a link you have to pick
+  // the right variant of is a link that gets pasted wrong. Attribution for it is
+  // therefore coarse (everything lands under `launch`) — that's the trade.
+  "launch",
 ] as const;
 
 /** Is this `?code` one of our valid invite codes? */

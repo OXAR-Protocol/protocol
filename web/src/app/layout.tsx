@@ -34,10 +34,36 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+// What a pasted OXAR link looks like in a chat, a feed, or a launch page. The old
+// copy here still described the pre-pivot bond protocol — government-guaranteed
+// paper at "4-18% APY" — which is not what v1 is, and it shipped with no image at
+// all, so every share rendered a bare grey rectangle with a wrong sentence in it.
+// One `metadataBase` covers both hosts: the marketing domain is the canonical one,
+// and /og.jpg is served from either.
+// Same string the landing sets for itself, so the tab title and the share card
+// don't disagree about the wordmark's full stop.
+const TITLE = "OXAR. — where your money sleeps";
+const DESCRIPTION =
+  "Wake it up. Earn yield, own real assets — no bank, no broker, no lock. Your money stays in your own wallet.";
+
 export const metadata: Metadata = {
-  title: "OXAR Protocol — Real-World Yields, On-Chain",
-  description:
-    "Government-guaranteed bonds from emerging markets, tokenized on Solana. 4-18% APY. Deposit USDC, earn yield, trade freely.",
+  metadataBase: new URL("https://oxar.app"),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "/",
+    siteName: "OXAR",
+    type: "website",
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "OXAR" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/og.jpg"],
+  },
 };
 
 export default function RootLayout({
