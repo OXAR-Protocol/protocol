@@ -14,7 +14,7 @@ import { PositionToolbar, type Filter, type Layout } from "@/components/position
 import { useYieldPositions, type ProviderView } from "@/hooks/use-yield-positions";
 import { useStockPrices } from "@/hooks/use-stock-prices";
 import { useStockCharts } from "@/hooks/use-stock-charts";
-import { useEarnedById, useInvestedById } from "@/hooks/use-earnings";
+import { useEarnedById, useInvestedById, useEarningsUnavailable } from "@/hooks/use-earnings";
 import { useLiveBalances } from "@/hooks/use-live-balances";
 import { useFeature } from "@/hooks/use-features";
 import { isPriceExposure } from "@/lib/yield/assets";
@@ -73,6 +73,8 @@ export function PositionsSection() {
   // portfolio did; this is what says WHICH holding is dragging.
   const earnedById = useEarnedById();
   const investedById = useInvestedById();
+  // A profit figure that simply vanishes reads as "this one has none".
+  const earningsGone = useEarningsUnavailable();
 
   // Selling three and seeing two is the balance we read arriving before the chain
   // agreed: the transaction confirms, the account read behind it is a beat older, and
@@ -146,6 +148,7 @@ export function PositionsSection() {
               onOpen={() => router.push(`/asset/${v.id}`)}
               change24h={change24hOf(v)}
               earned={earnedById[v.id]}
+              earnedUnavailable={earningsGone}
               invested={investedById[v.id]}
               picked={selected.has(v.id)}
               onTogglePick={sellingV2 ? () => toggleSelected(v.id) : undefined}
@@ -162,6 +165,7 @@ export function PositionsSection() {
               change24h={change24hOf(v)}
               chart={v.heldMint ? charts[v.heldMint] : undefined}
               earned={earnedById[v.id]}
+              earnedUnavailable={earningsGone}
               picked={selected.has(v.id)}
               onTogglePick={sellingV2 ? () => toggleSelected(v.id) : undefined}
             />

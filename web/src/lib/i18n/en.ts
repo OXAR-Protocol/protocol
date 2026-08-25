@@ -461,6 +461,7 @@ export const en = {
   "send.review.warnEvm": "This lands on {chain}. An address that looks right on another network is still the wrong one.",
   "send.review.warnFinal": "Once it's sent, no one can send it back.",
   "send.review.confirm": "send it",
+  "common.couldntLoad": "couldn't load this just now — pull down to try again",
   "common.signIn": "sign in",
   "guest.you.body": "Sign in to see your wallet address, your language and the badge you earned by arriving early.",
   "fund.label": "add money",

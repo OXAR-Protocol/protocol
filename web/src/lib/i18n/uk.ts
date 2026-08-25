@@ -418,6 +418,7 @@ export const uk: Partial<Record<TranslationKey, string>> = {
   "send.review.warnEvm": "Гроші прийдуть у мережу {chain}. Адреса, що виглядає правильно в іншій мережі, все одно не та.",
   "send.review.warnFinal": "Після відправлення повернути їх не зможе ніхто.",
   "send.review.confirm": "надіслати",
+  "common.couldntLoad": "не вдалося завантажити — потягніть вниз, щоб спробувати ще раз",
   "common.signIn": "увійти",
   "guest.you.body": "Увійдіть, щоб побачити адресу гаманця, мову та значок за те, що ви прийшли рано.",
   "fund.label": "поповнення",

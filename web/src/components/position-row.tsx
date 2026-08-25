@@ -9,6 +9,7 @@ import { LiveAmount } from "@/components/live-amount";
 import { AssetIcon } from "@/components/asset-icon";
 import { MarketRow } from "@/components/market-row";
 import { Sparkline } from "@/components/sparkline";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useApyHistory } from "@/hooks/use-apy-history";
 import { PickButton } from "@/components/pick-button";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
@@ -26,6 +27,9 @@ interface Props {
   /** Profit since this was bought (on-chain cost basis). Absent when the engine
    *  can't attribute the position — nothing shown beats a confident zero. */
   earned?: number;
+  /** The cost-basis read failed. A figure that just disappears reads as "this one
+   *  has no profit"; a placeholder reads as "we are still working it out". */
+  earnedUnavailable?: boolean;
   picked: boolean;
   /** Absent when picking is off — the row then renders no pick control at all. */
   onTogglePick?: () => void;
@@ -38,7 +42,7 @@ interface Props {
  * row used to shrink it to a bare "+" on a phone, which said nothing about what
  * tapping it would do.
  */
-export function PositionRow({ view, onOpen, change24h, chart, earned, picked, onTogglePick }: Props) {
+export function PositionRow({ view, onOpen, change24h, chart, earned, earnedUnavailable, picked, onTogglePick }: Props) {
   const { t } = useT();
   // A yield source has no price to draw, but it has a rate — the card has always
   // shown that curve and the row showed an empty slot, so a Jupiter Lend position
@@ -108,11 +112,15 @@ export function PositionRow({ view, onOpen, change24h, chart, earned, picked, on
               used to hide under half a cent, so a week-old deposit had the line and
               a fresh one didn't, which reads as the app knowing about one and not
               the other. Small amounts get the digits they need instead. */}
-          {typeof earned === "number" && (
+          {typeof earned === "number" ? (
             <p className={`text-[11px] tabular-nums ${earned >= 0 ? "text-ink/40" : "text-loss"}`}>
               {earned >= 0 ? "+" : "−"}${formatUsdAmount(Math.abs(earned))} {t("position.sinceBuy")}
             </p>
-          )}
+          ) : earnedUnavailable ? (
+            // Absence is not zero. Without this the line simply vanished, which on a
+            // position you know you are up on reads as the app disagreeing with you.
+            <Skeleton className="mt-1 h-[11px] w-24" />
+          ) : null}
         </>
       }
       // Collecting a set, not ticking a table — so it reads as an action on the

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, Check } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 import type { ProviderView } from "@/hooks/use-yield-positions";
 import { useApyHistory } from "@/hooks/use-apy-history";
@@ -14,6 +14,7 @@ import { LiveAmount } from "@/components/live-amount";
 import { PickButton } from "@/components/pick-button";
 import { useT } from "@/lib/i18n";
 import { AssetIcon } from "@/components/asset-icon";
+import { Skeleton } from "@/components/ui/skeleton";
 import { BanknoteBg } from "@/components/banknote-bg";
 import { assetLogoSrc, assetIconLabel } from "@/lib/yield/asset-logo";
 
@@ -28,13 +29,16 @@ interface Props {
   change24h?: number;
   /** Profit since this was bought (on-chain cost basis), when we can attribute it. */
   earned?: number;
+  /** The cost-basis read failed. A figure that just disappears reads as "this one
+   *  has no profit"; a placeholder reads as "we are still working it out". */
+  earnedUnavailable?: boolean;
   /** What was put in, same basis — turns "worth $10.22" into "worth $10.22, from $10.05". */
   invested?: number;
 }
 
 /** Grid ("квадратик") card for one source — APY trend for yield, price trend
  *  + 24h change for price-exposure assets (stocks/gold). */
-export function PositionCard({ view, onOpen, change24h, earned, invested, picked, onTogglePick }: Props) {
+export function PositionCard({ view, onOpen, change24h, earned, earnedUnavailable, invested, picked, onTogglePick }: Props) {
   const { t } = useT();
   const value = fromBaseUnits(view.underlyingBalance, view.decimals);
   const apyHistory = useApyHistory(view.defiLlamaPoolId);
@@ -98,11 +102,13 @@ export function PositionCard({ view, onOpen, change24h, earned, invested, picked
           )}
           {/* Which of your holdings is actually down — the same line the list rows
               carry, so switching layout doesn't lose the answer. */}
-          {typeof earned === "number" && (
+          {typeof earned === "number" ? (
             <p className={`text-[11px] tabular-nums ${earned >= 0 ? "text-ink/40" : "text-loss"}`}>
               {earned >= 0 ? "+" : "−"}${formatUsdAmount(Math.abs(earned))} {t("position.sinceBuy")}
             </p>
-          )}
+          ) : earnedUnavailable ? (
+            <Skeleton className="mt-1 h-[11px] w-24" />
+          ) : null}
         </div>
         {isPrice && typeof change24h === "number" ? (
           <p
