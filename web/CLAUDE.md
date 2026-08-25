@@ -213,6 +213,40 @@ yarn sync-sdk   # rebuilds sdk → refreshes sdk-local/dist + idl.json → re-li
 Commit the updated `sdk-local/` alongside your `sdk/` change so the deploy build (which
 copies `sdk-local/dist` in `prebuild`) ships the new SDK.
 
+## Metrics — one command
+
+Every OXAR number comes from four Supabase views, filled nightly (03:00 UTC) by
+`/api/volume-sync`. To read them all at once, from `web/`:
+
+```bash
+node --env-file=.env.local scripts/metrics.mjs
+```
+
+Prints AUM, volume, both broken down by market, and the gasless relayer's balance.
+Read-only. To refresh before reading (instead of waiting for the cron):
+
+```bash
+curl "https://app.oxar.app/api/volume-sync" -H "Authorization: Bearer $CRON_SECRET"
+```
+
+| View | Answers |
+|---|---|
+| `oxar_aum` | What is under management. **Use `at_work_usd`**, not `total_usd` |
+| `oxar_aum_by_asset` | Which market holds it |
+| `oxar_volume` | What moved through us, all time |
+| `oxar_volume_by_asset` | Which market it moved through |
+
+Three things that make these numbers right, and are easy to undo by accident:
+
+- **`at_work_usd`, not `total_usd`.** The total includes USDC sitting in wallets
+  undeployed. On the first run that was 94% of it — a 17x overstatement.
+- **Volume counts only OUR transactions**, identified by the gasless relayer paying
+  the fee (`KORA_FEE_PAYERS`) or by a signature the client reported. A wallet also
+  trading on Jupiter directly must not land in our figure.
+- **The `events` table is NOT a source of amounts** — only of the invite channel a
+  wallet arrived through. It recorded typed intentions, one of which logged an
+  $11.45 buy as $7,997.15.
+
 ## Common Pitfalls
 - Forgetting `"use client"` on a page that uses hooks → cryptic SSR errors
 - Calling `.rpc()` / auto-send instead of manual sign+send → fails with the Privy embedded wallet
