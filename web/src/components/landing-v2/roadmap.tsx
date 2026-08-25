@@ -2,31 +2,33 @@
 
 import { Label, Reveal } from "./primitives";
 
+// Dates only where one is actually committed to. A milestone that carries a month it
+// then misses is worse than one that carries none — the page keeps announcing the miss.
 const MILESTONES = [
   {
     phase: "now",
-    name: "building",
-    copy: "USDC yield live on Solana mainnet (Jupiter Lend). Tokenized stocks and gold you can buy and hold. More sources under construction.",
+    name: "closed alpha",
+    copy: "Live on Solana mainnet, by invite. Dollar yield on Jupiter Lend, Ondo Treasuries, Maple and OnRe. Tokenized stocks, gold and silver. Card and Apple Pay deposits, and we pay the gas.",
     size: "clamp(48px,8.9vw,128px)",
     tint: "text-[#3c05c7]",
     current: true,
   },
   {
-    phase: "aug 2026",
+    phase: "next",
     name: "public launch",
-    copy: "Yield plus tokenized stocks and gold, Apple Pay deposits, withdraw anytime. Always non-custodial — your keys, your money.",
+    copy: "The waitlist opens and the invite goes away. Plus cashing back out to your card. Always non-custodial — your keys, your money.",
     size: "clamp(40px,6.4vw,92px)",
     tint: "text-black",
   },
   {
-    phase: "q4 2026",
-    name: "more assets, more chains",
-    copy: "First tokenized bonds via a partner broker. More yield sources and assets, plus cross-chain deposits via Delora.",
+    phase: "2027",
+    name: "bonds and more markets",
+    copy: "First tokenized bonds via a partner broker. More yield sources, more assets, more of the world's markets in one place.",
     size: "clamp(30px,4.45vw,64px)",
     tint: "text-black/65",
   },
   {
-    phase: "2027",
+    phase: "later",
     name: "native app + scale",
     copy: "iOS and Android. Multi-currency. Emerging-market bonds and new asset classes beyond the first markets.",
     size: "clamp(24px,3.2vw,46px)",
