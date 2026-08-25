@@ -4,10 +4,10 @@ import { DISPLAY } from "./fonts";
 import { Label, Reveal, Spread } from "./primitives";
 
 const STEPS = [
-  { n: "01", title: "connect or tap", copy: "Connect a crypto wallet — Apple Pay deposits on the way. No bank account, no broker. Setup takes a minute." },
-  { n: "02", title: "choose your pace", copy: "Sleepy, Walking or Running — three risk templates. Pick once, change anytime." },
-  { n: "03", title: "money wakes up", copy: "Your USDC earns on Jupiter Lend, Ondo and Maple today, with more on the way." },
-  { n: "04", title: "own real assets", copy: "Not just yield — buy tokenized stocks and gold, held in your own wallet. Bonds and new assets coming next." },
+  { n: "01", title: "sign in", copy: "An email is enough — a wallet is made for you. Or connect the Solana wallet you already have. No bank account, no broker." },
+  { n: "02", title: "put dollars in", copy: "Card or Apple Pay, crypto from any chain, or straight from an exchange. Gas is on us — you never need SOL to move." },
+  { n: "03", title: "choose the pace", copy: "The market, sorted by how loud you want it: sleepy, walking, running. Buy one thing or several in a single go." },
+  { n: "04", title: "own real things", copy: "Dollar yield on Jupiter Lend, Ondo Treasuries, Maple and OnRe. Tokenized stocks, gold and silver. All of it held in your own wallet." },
   { n: "05", title: "wake some up anytime", copy: "Withdraw whenever. No locks, no penalty. Your money sleeps because you let it." },
 ];
 

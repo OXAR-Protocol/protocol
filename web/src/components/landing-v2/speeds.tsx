@@ -4,10 +4,13 @@ import { useState } from "react";
 import { DISPLAY } from "./fonts";
 import { Label, Reveal, Spread } from "./primitives";
 
+// APY bands are the app's own — keep in sync with `APY_BUCKETS` in @oxar/sdk, which
+// is what the market actually filters by. Taglines name a source only where it sits
+// firmly inside its band; a rate that drifts across one would date this page.
 const SPEEDS = [
-  { name: "sleepy", apy: "4-6%", tag: "slow but steady — Ondo USDY · Jupiter Lend", size: "clamp(48px,7.6vw,110px)" },
-  { name: "walking", apy: "6-9%", tag: "balanced pace — Maple Syrup · JLP", size: "clamp(64px,12.5vw,180px)", accent: true },
-  { name: "running", apy: "9-14%", tag: "fast and loud — JLP · Drift · Jupiter perps", size: "clamp(80px,18vw,260px)" },
+  { name: "sleepy", apy: "<6%", tag: "steady dollar yield — jupiter lend, ondo treasuries, maple", size: "clamp(48px,7.6vw,110px)" },
+  { name: "walking", apy: "6-9%", tag: "the middle ground — more yield, more moving parts", size: "clamp(64px,12.5vw,180px)", accent: true },
+  { name: "running", apy: "9%+", tag: "the loud end — tokenized reinsurance, real underwriting risk", size: "clamp(80px,18vw,260px)" },
 ];
 
 export function Speeds() {
@@ -77,7 +80,8 @@ export function Speeds() {
         <div className="border-t border-black/15" />
         <Reveal delay={0.1}>
           <p className="mt-7 lowercase text-[clamp(12px,1vw,14px)] text-black/35">
-            pick once, change anytime. your keys, your money, withdraw whenever.
+            these are filters, not portfolios — you buy each thing yourself. your keys,
+            your money, withdraw whenever.
           </p>
         </Reveal>
       </div>

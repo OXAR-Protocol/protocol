@@ -34,12 +34,16 @@ export function Problem() {
         <Stat value="0%" size="clamp(40px,6.25vw,90px)" copy="most crypto wallets earn this on their usdc" muted />
         <Stat value="4%" size="clamp(56px,12.5vw,180px)" copy="best high-yield savings — requires a bank" />
         <div className="relative">
+          {/* The floor is the stablecoin source most people land on (Jupiter Lend USDC),
+              the ceiling is the loudest thing listed (OnRe ONyc). Both float — this is a
+              public claim about our own rates, so re-check it against DefiLlama whenever
+              a source is added or dropped rather than letting it drift. */}
           <Reveal delay={0.15}>
             <span
               className="block whitespace-nowrap font-bold leading-[0.8] text-[#3c05c7]"
               style={{ fontFamily: DISPLAY, fontSize: "clamp(88px,18.1vw,261px)" }}
             >
-              5-12%
+              5-11%
             </span>
           </Reveal>
           <Reveal delay={0.25}>
