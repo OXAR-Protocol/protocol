@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { ProfileChart } from "@/components/profile-chart";
 import { MoneySplit } from "@/components/money-split";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Unavailable } from "@/components/ui/unavailable";
 import { ProfileHeader } from "@/components/profile-header";
 import { PerformanceStats } from "@/components/performance-stats";
 import { PositionsSection } from "@/components/positions-section";
@@ -35,7 +36,8 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
   const rise = useRise();
   const [range, setRange] = useState<Range>(30);
   const history = usePortfolioHistory(range);
-  const { counts, listedDays, loading: loadingDays } = useDayActivity(history.days);
+  const { counts, listedDays, loading: loadingDays, unavailable: daysGone } =
+    useDayActivity(history.days);
 
   // An account that has never held anything. Every figure on this screen is then
   // genuinely zero, and showing dashes made an empty portfolio look broken rather
@@ -63,6 +65,7 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
         <ProfileChart
           split={<MoneySplit />}
           chrome={<ProfileHeader />}
+          unavailable={history.unavailable}
           points={history.days}
           performance={history.performance}
           range={range}
@@ -73,13 +76,17 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
           periodLabel={periodLabel}
         />
         <div className="mt-5">
-          <PerformanceStats
-            performance={history.performance}
-            heldMints={history.heldMints}
-            counts={counts}
-            neverFunded={neverFunded}
-            periodLabel={periodLabel}
-          />
+          {history.unavailable ? (
+            <Unavailable height="h-[120px]" />
+          ) : (
+            <PerformanceStats
+              performance={history.performance}
+              heldMints={history.heldMints}
+              counts={counts}
+              neverFunded={neverFunded}
+              periodLabel={periodLabel}
+            />
+          )}
         </div>
         </div>
 
@@ -95,9 +102,9 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
       <motion.section {...rise(3)} className="mt-10" data-tour="history">
         <p className="mb-3 text-xs lowercase tracking-[0.2em] text-ink/40">{t("pile.history")}</p>
         {loadingDays ? (
-          <div className="flex justify-center py-10 text-ink/25">
-            <Loader2 size={16} className="animate-spin" />
-          </div>
+          <Skeleton className="h-[140px] w-full" />
+        ) : daysGone ? (
+          <Unavailable height="h-[140px]" />
         ) : (
           <DayHistory days={listedDays} locale={locale} />
         )}

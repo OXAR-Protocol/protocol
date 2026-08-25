@@ -10,6 +10,7 @@ import {
 
 import { AnimatedAmount } from "@/components/animated-amount";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Unavailable } from "@/components/ui/unavailable";
 import { HoverChart } from "@/components/hover-chart";
 import { RANGES, type Range } from "@/lib/history-range";
 import { useT } from "@/lib/i18n";
@@ -36,6 +37,7 @@ export function ProfileChart({
   periodLabel,
   split,
   chrome,
+  unavailable,
 }: {
   points: PerformanceDay[];
   performance: RangePerformance | null;
@@ -52,6 +54,9 @@ export function ProfileChart({
   split?: React.ReactNode;
   /** The account control, rendered opposite the balance. See `ProfileHeader`. */
   chrome?: React.ReactNode;
+  /** The series could not be loaded, or came back built on partial history. Drawing
+   *  it anyway is how a truncated read became a flat line nobody could question. */
+  unavailable?: boolean;
 }) {
   const { t } = useT();
 
@@ -133,6 +138,11 @@ export function ProfileChart({
           // still says "wait" where a shape can say "a chart is coming", which is the
           // same information without the pause in it.
           <Skeleton className="mx-5 h-[150px] rounded-panel sm:mx-0" />
+        ) : unavailable ? (
+          // Not the same as "nothing yet". A flat line at today's balance is what a
+          // truncated read produces, and it is indistinguishable from a month in
+          // which nothing happened — which is exactly how it was reported.
+          <Unavailable className="mx-5 sm:mx-0" height="h-[150px]" />
         ) : drawn.length > 1 ? (
           <HoverChart
             values={drawn.map((p) => p.usd)}

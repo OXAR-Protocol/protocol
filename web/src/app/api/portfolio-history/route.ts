@@ -229,6 +229,10 @@ export async function POST(req: Request) {
     const body = {
       days: series,
       performance,
+      // Load-bearing, so it lives in the response rather than in `debug`: a page we
+      // could not read means these days are reconstructed from less history than the
+      // wallet has, and the client must be able to say so instead of drawing it.
+      incomplete: failed,
       // What the wallet still holds. The breakdown covers everything that MOVED money
       // in the window, which rightly includes positions closed inside it — but a list
       // that mixes them with no mark reads as "these are your positions", and the

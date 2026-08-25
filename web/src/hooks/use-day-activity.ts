@@ -16,7 +16,7 @@ import { useActivity } from "@/hooks/use-activity";
  */
 export function useDayActivity(seriesDays: PerformanceDay[]) {
   // Deep enough for a year of ordinary use; the route caps it.
-  const { events, loading } = useActivity(500);
+  const { events, loading, unavailable } = useActivity(500);
 
   const days = useMemo(() => {
     const cutoff = seriesDays.length ? utcDayStart(seriesDays[0]!.t) : 0;
@@ -31,5 +31,6 @@ export function useDayActivity(seriesDays: PerformanceDay[]) {
     counts: useMemo(() => countActivity(days), [days]),
     listedDays: useMemo(() => activeDays(days), [days]),
     loading,
+    unavailable,
   };
 }

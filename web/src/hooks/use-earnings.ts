@@ -28,6 +28,11 @@ export interface SourceEarning {
 
 const cacheKey = (owner: string) => `earnings-basis:${owner}`;
 
+/** Wallets whose basis request failed. An empty basis and a basis we could not fetch
+ *  produce the same empty list of sources, and only one of them means "nothing here
+ *  to attribute" — the other means "we do not know yet, and must not imply zero". */
+const failedFor = new Set<string>();
+
 /**
  * Realized + unrealized earnings per source, from ON-CHAIN cost basis (the
  * `/api/earnings` Helius-history engine), combined with the live position value:
@@ -54,10 +59,18 @@ function loadBasis(owner: string): Promise<void> {
         body: JSON.stringify({ owner }),
       });
       const json = (await res.json()) as { basis?: Record<string, number> };
-      const b = json?.basis ?? {};
-      setIndexedBasis(owner, b);
-      setCache(cacheKey(owner), b);
+      // A 502 parses fine and carries no basis; writing that as an empty map is how
+      // "we could not load your profit" became "your profit is nothing".
+      if (!res.ok || !json?.basis) {
+        failedFor.add(owner);
+        setIndexedBasis(owner, {});
+        return;
+      }
+      failedFor.delete(owner);
+      setIndexedBasis(owner, json.basis);
+      setCache(cacheKey(owner), json.basis);
     } catch {
+      failedFor.add(owner);
       setIndexedBasis(owner, {});
     } finally {
       inflight.delete(owner);
@@ -89,6 +102,7 @@ export function useEarnings() {
     [owner, version],
   );
   const loading = posLoading || (!!owner && !basis);
+  const unavailable = !!owner && failedFor.has(owner);
 
   const active = views.filter((v) => fromBaseUnits(v.underlyingBalance, v.decimals) > 0);
   const sources: SourceEarning[] = [];
@@ -121,6 +135,7 @@ export function useEarnings() {
     allCovered,
     totalValue,
     loading,
+    unavailable,
   };
 }
 
@@ -135,6 +150,12 @@ export function useEarnedById(): Record<string, number> {
     () => Object.fromEntries(sources.map((s) => [s.id, s.earned])),
     [sources],
   );
+}
+
+/** True when the cost-basis read failed, so a missing figure means "we could not
+ *  work it out" rather than "this position has no profit to show". */
+export function useEarningsUnavailable(): boolean {
+  return useEarnings().unavailable;
 }
 
 /**
