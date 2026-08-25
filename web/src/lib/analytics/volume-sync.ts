@@ -11,11 +11,18 @@
  * history here is a volume figure that is quietly too small.
  */
 
-import { walletFlows, totalVolume, newestTs, isOurs, type Attribution, type Flow } from "@oxar/sdk";
+import {
+  walletFlows,
+  totalVolume,
+  newestTs,
+  isOurs,
+  KORA_FEE_PAYERS,
+  type Attribution,
+  type Flow,
+} from "@oxar/sdk";
 
 import { heliusApiKey, fetchHistoryPaged } from "@/lib/helius/history";
 import { getSupabaseServer } from "@/lib/supabase-server";
-import { KORA_FEE_PAYERS } from "@/lib/gas/kora";
 import { CASH_MINTS } from "@/lib/yield/position-mints";
 
 /** Page ceiling per wallet. 100 transactions a page — 40 covers a very busy year. */
@@ -34,6 +41,8 @@ export interface WalletSyncResult {
   receivedUsd: number;
   /** History came back short — the cursor was left where it was. */
   incomplete: boolean;
+  /** Why this wallet came back empty. Absent when it didn't. */
+  error?: string;
 }
 
 /** What moved through OUR app. The headline figure; everything else is context. */
@@ -192,8 +201,12 @@ export async function syncVolume(opts: { dry?: boolean } = {}): Promise<SyncRepo
       results.push(result);
       for (const f of flows) if (!seen.has(f.sig)) seen.set(f.sig, f);
     } catch (e) {
-      console.error("[volume-sync] wallet failed", wallet, e);
-      results.push({ wallet, found: 0, ours: 0, spentUsd: 0, receivedUsd: 0, incomplete: true });
+      // Reported, not just logged. This job failed on every wallet once and said only
+      // "incomplete", which reads as a rate limit; the cause was a thrown TypeError.
+      // A silent zero is the failure mode this whole table exists to stop.
+      const error = e instanceof Error ? e.message : String(e);
+      console.error("[volume-sync] wallet failed", wallet, error);
+      results.push({ wallet, found: 0, ours: 0, spentUsd: 0, receivedUsd: 0, incomplete: true, error });
     }
   }
 
