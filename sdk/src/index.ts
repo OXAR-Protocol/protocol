@@ -47,6 +47,7 @@ export * from "./core/paybis";
 export * from "./core/card-coverage";
 export * from "./core/wallet-deltas";
 export * from "./core/volume";
+export * from "./core/relayers";
 export * from "./core/jupiter-swap";
 export * from "./core/earnings-basis";
 export * from "./core/features";

@@ -62,6 +62,7 @@ __exportStar(require("./core/paybis"), exports);
 __exportStar(require("./core/card-coverage"), exports);
 __exportStar(require("./core/wallet-deltas"), exports);
 __exportStar(require("./core/volume"), exports);
+__exportStar(require("./core/relayers"), exports);
 __exportStar(require("./core/jupiter-swap"), exports);
 __exportStar(require("./core/earnings-basis"), exports);
 __exportStar(require("./core/features"), exports);

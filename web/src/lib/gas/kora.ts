@@ -46,20 +46,6 @@ async function koraRpc<T>(method: string, params?: unknown): Promise<T> {
   return json.result as T;
 }
 
-/**
- * Every fee-payer our relayer has ever signed with.
- *
- * A set rather than one address, because the live payer is whatever the node
- * currently answers with and a rotation would orphan the history signed by the old
- * one. Its use is backwards-looking: a transaction whose fee was paid by one of
- * these was built by us and by nothing else, which is the only proof of authorship
- * the chain carries. Add the new address here when the relayer key rotates; never
- * remove the old one.
- */
-export const KORA_FEE_PAYERS: ReadonlySet<string> = new Set([
-  "MQwRCwbeRmhpNdAjvkMysLHS92WSXQvw7wJ8hPoYFrL",
-]);
-
 /** The fee-payer Kora will co-sign with — set as the transaction's fee payer. */
 export async function koraPayer(): Promise<string> {
   const r = await koraRpc<{ signer_address: string }>("getPayerSigner");
