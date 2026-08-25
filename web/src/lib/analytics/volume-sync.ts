@@ -14,7 +14,7 @@
 import {
   walletFlows,
   totalVolume,
-  newestTs,
+  newestTxTs,
   isOurs,
   KORA_FEE_PAYERS,
   type Attribution,
@@ -163,7 +163,10 @@ async function syncWallet(
 
   if (!dry) {
     await writeFlows(wallet, flows);
-    await writeCursor(wallet, newestTs(flows) || (since ?? 0), failed);
+    // From the READ, not from what it found: a wallet that only ever transfers has
+    // no flows, and a cursor taken from those would sit at zero and re-page the
+    // whole history every night.
+    await writeCursor(wallet, newestTxTs(txs) || (since ?? 0), failed);
   }
 
   return {

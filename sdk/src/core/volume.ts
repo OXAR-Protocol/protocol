@@ -126,19 +126,44 @@ export function txFlow(
   };
 }
 
-/** Every transaction in `txs` that moved money, oldest first. */
+/**
+ * The newest block time in a batch of transactions, or 0 for an empty one.
+ *
+ * The cursor belongs to the READ, not to what the read happened to find. A wallet
+ * whose transactions were all transfers produces no flows, and taking the cursor
+ * from the flows would leave it at zero — so that wallet's whole history is paged
+ * again every night, for ever, to discover the same nothing.
+ */
+export function newestTxTs(txs: readonly DatedTx[]): number {
+  let newest = 0;
+  for (const tx of txs) {
+    if (typeof tx.timestamp === "number" && tx.timestamp > newest) newest = tx.timestamp;
+  }
+  return newest;
+}
+
+/**
+ * Every transaction in `txs` that moved money, oldest first, one row per signature.
+ *
+ * Deduped, because paging can hand back the same transaction twice at a page
+ * boundary and the destination keys on signature. Postgres refuses an upsert whose
+ * batch names one key twice — "ON CONFLICT DO UPDATE command cannot affect row a
+ * second time" — and that took down the sync for the one wallet busy enough to
+ * need six pages.
+ */
 export function walletFlows(
   txs: readonly DatedTx[],
   owner: string,
   stableMints: ReadonlySet<string>,
   attribution: Attribution = {},
 ): Flow[] {
-  const flows: Flow[] = [];
+  const bySig = new Map<string, Flow>();
   for (const tx of txs) {
     const flow = txFlow(tx, owner, stableMints, attribution);
-    if (flow) flows.push(flow);
+    // First wins: the same transaction read twice is the same transaction.
+    if (flow && !bySig.has(flow.sig)) bySig.set(flow.sig, flow);
   }
-  return flows.sort((a, b) => a.ts - b.ts);
+  return [...bySig.values()].sort((a, b) => a.ts - b.ts);
 }
 
 export interface VolumeTotals {
