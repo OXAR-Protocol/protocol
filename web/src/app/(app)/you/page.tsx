@@ -1,13 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
-import { ArrowUpRight, Sparkles } from "lucide-react";
 
 import { ProfileMoney } from "@/components/profile-money";
 import { MoneyPanel } from "@/components/money-panel";
-import { PhotoBg } from "@/components/photo-bg";
+import { StartHere } from "@/components/start-here";
 import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
 import { useSignIn } from "@/hooks/use-sign-in";
 import { useRise } from "@/lib/motion";
@@ -31,6 +29,8 @@ export default function YouPage() {
   const { t } = useT();
   const rise = useRise();
   const signIn = useSignIn();
+
+  const nothingWorking = totalUsdc === 0 && !loading;
 
   if (!ready) return null;
 
@@ -58,36 +58,15 @@ export default function YouPage() {
   return (
     <div className="mx-auto max-w-[1100px] pb-32">
 
-      {totalUsdc === 0 && !loading ? (
-        <motion.section
-          {...rise(1)}
-        >
-          <div className="relative overflow-hidden rounded-panel border border-ink/10 bg-paper">
-            <PhotoBg src="/art/coin-stacking.webp" scrim="left" position="object-right" />
-            <div className="relative p-8 md:p-10">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand)]/30 bg-[var(--brand)]/10 px-2 py-1 text-[10px] lowercase tracking-widest text-[var(--brand)]">
-                <Sparkles size={10} strokeWidth={1.5} />
-                {t("home.startHere")}
-              </span>
-              <h2 className="mt-4 text-2xl leading-tight lowercase text-ink md:text-3xl">
-                {t("home.napping1")}
-                <br />
-                <span className="text-ink/55">{t("home.napping2")}</span>
-              </h2>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-ink/55">{t("home.empty.body")}</p>
-              <Link
-                href="/market"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-[14px] font-medium lowercase tracking-wide text-paper transition active:scale-[0.97] hover:bg-ink/85"
-              >
-                {t("home.wakeUp")}
-                <ArrowUpRight size={14} strokeWidth={1.5} />
-              </Link>
-            </div>
-          </div>
-        </motion.section>
-      ) : (
-        <ProfileMoney wallet={<MoneyPanel />} />
-      )}
+      {/* The balance is always on this page now, whatever it says. Nothing at work
+          is a fine thing for it to say — $0.00 working, $500 free to use — and it is
+          a great deal more use than a picture of coins where the number should be.
+          `StartHere` sits under it as a nudge; `MoneyPanel` is the smaller nudge for
+          a wallet that already has something working, so only one shows at a time. */}
+      <ProfileMoney
+        wallet={nothingWorking ? null : <MoneyPanel />}
+        startHere={nothingWorking ? <StartHere /> : null}
+      />
     </div>
   );
 }

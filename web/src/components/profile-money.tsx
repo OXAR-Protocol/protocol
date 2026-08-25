@@ -12,6 +12,8 @@ import { PerformanceStats } from "@/components/performance-stats";
 import { PositionsSection } from "@/components/positions-section";
 import { DayHistory } from "@/components/day-history";
 import { usePortfolioHistory } from "@/hooks/use-portfolio-history";
+import { useAggregatePersonalBalance } from "@/hooks/use-aggregate-balance";
+import { useUsdcBalance } from "@/hooks/use-usdc-balance";
 import { useDayActivity } from "@/hooks/use-day-activity";
 import { type Range } from "@/lib/history-range";
 import { useRise } from "@/lib/motion";
@@ -31,13 +33,25 @@ import { useT } from "@/lib/i18n";
  * sum it, the day list takes its window from it — so nothing on screen can be
  * describing a different month than its neighbour.
  */
-export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
+export function ProfileMoney({
+  wallet,
+  startHere,
+}: {
+  wallet: React.ReactNode;
+  /** Shown instead of `wallet` when nothing is at work yet — see `StartHere`. */
+  startHere?: React.ReactNode;
+}) {
   const { t, locale } = useT();
   const rise = useRise();
   const [range, setRange] = useState<Range>(30);
   const history = usePortfolioHistory(range);
   const { counts, listedDays, loading: loadingDays, unavailable: daysGone } =
     useDayActivity(history.days);
+  // What the rest of the page says you have: money at work plus dollars free to
+  // spend, both read live off the chain rather than reconstructed from history.
+  const { totalUsdc } = useAggregatePersonalBalance();
+  const freeCash = useUsdcBalance();
+  const liveTotal = totalUsdc + (freeCash.usd ?? 0);
 
   // An account that has never held anything. Every figure on this screen is then
   // genuinely zero, and showing dashes made an empty portfolio look broken rather
@@ -60,12 +74,16 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
       {/* Two columns from `lg`: the chart takes the width it deserves and the money
           panel fills what used to be empty margin. Below that everything is full
           width, because a table squeezed into two thirds is a worse table. */}
-      <motion.div {...rise(1)} className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <motion.div
+        {...rise(1)}
+        className={`mt-8 grid gap-6 ${wallet ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}
+      >
         <div>
         <ProfileChart
           split={<MoneySplit />}
           chrome={<ProfileHeader />}
           unavailable={history.unavailable}
+          liveTotalUsd={liveTotal}
           points={history.days}
           performance={history.performance}
           range={range}
@@ -92,6 +110,12 @@ export function ProfileMoney({ wallet }: { wallet: React.ReactNode }) {
 
         {wallet}
       </motion.div>
+
+      {startHere && (
+        <motion.section {...rise(2)} className="mt-8">
+          {startHere}
+        </motion.section>
+      )}
 
       {/* No heading: the rows are self-evidently what you hold, and "what it's made
           of" was a label explaining a list that explains itself. */}

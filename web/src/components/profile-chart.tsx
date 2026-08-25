@@ -38,6 +38,7 @@ export function ProfileChart({
   split,
   chrome,
   unavailable,
+  liveTotalUsd,
 }: {
   points: PerformanceDay[];
   performance: RangePerformance | null;
@@ -57,6 +58,11 @@ export function ProfileChart({
   /** The series could not be loaded, or came back built on partial history. Drawing
    *  it anyway is how a truncated read became a flat line nobody could question. */
   unavailable?: boolean;
+  /** Working + free, read live off the chain. The headline falls back to this when
+   *  the history has nothing to say, because those two numbers sit four lines apart
+   *  and must never contradict each other: "$0.00" above "$500 free to use" is the
+   *  page arguing with itself. */
+  liveTotalUsd?: number;
 }) {
   const { t } = useT();
 
@@ -66,7 +72,10 @@ export function ProfileChart({
   // like a flat line along the bottom for exactly this reason.
   const firstFunded = points.findIndex((p) => p.usd > 0.005);
   const drawn = firstFunded > 0 ? points.slice(firstFunded) : points;
-  const now = points.length ? points[points.length - 1]!.usd : 0;
+  // The series is the chart's business; the headline's job is to agree with the
+  // rest of the screen, so it prefers the reading everything else uses when the
+  // series has nothing to offer.
+  const now = points.length ? points[points.length - 1]!.usd : (liveTotalUsd ?? 0);
   const earned = performance?.earnedUsd ?? null;
   const up = earned === null || earned >= 0;
   const rangeLabel = t(`history.range.${range}` as "history.range.7");
