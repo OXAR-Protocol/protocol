@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
 
 import { TermsGateModal } from "@/components/terms/terms-gate-modal";
-import { handOffToWallet, hasAgreedInBrowser, rememberBrowserAgreement } from "@/hooks/use-terms-gate";
+import { handOffToWallet } from "@/hooks/use-terms-gate";
 import { useT } from "@/lib/i18n";
 
 // The fallback runs the action ungated, which would be a hole if it were
@@ -25,10 +25,16 @@ const Ctx = createContext<(action: () => void) => void>((action) => action());
  * So the gate moved in front. Nothing is created until the box is ticked: press
  * "connect", read, agree, and only then does Privy open.
  *
- * Before sign-in the agreement can only be remembered per browser — there is no
- * wallet to key it to. The per-wallet gate downstream is unchanged and still
- * catches a different wallet connecting later; `handOffToWallet` is what stops
- * the same person being asked twice in the same breath.
+ * It asks EVERY time, and deliberately does not remember. The browser is the only
+ * thing there is to key an agreement to before sign-in, and a browser is not a
+ * person — a remembered tick means the next person to press "connect" on this
+ * device gets in without ever seeing the terms, which is precisely what the gate
+ * exists to prevent. Signing in is also rare (once per device, per person), so
+ * asking every time costs a returning user nothing.
+ *
+ * The per-wallet gate downstream is unchanged and still catches a different wallet
+ * connecting later; `handOffToWallet` is what stops the same person being asked
+ * twice in the same breath.
  */
 export function SignInGateProvider({ children }: { children: ReactNode }) {
   const { t } = useT();
@@ -36,16 +42,11 @@ export function SignInGateProvider({ children }: { children: ReactNode }) {
   const pending = useRef<(() => void) | null>(null);
 
   const guard = useCallback((action: () => void) => {
-    if (hasAgreedInBrowser()) {
-      action();
-      return;
-    }
     pending.current = action;
     setOpen(true);
   }, []);
 
   const agree = () => {
-    rememberBrowserAgreement();
     handOffToWallet();
     setOpen(false);
     const run = pending.current;
