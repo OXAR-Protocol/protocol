@@ -60,6 +60,16 @@ export interface Flow {
   /** Stable coin that ARRIVED — money taken back out. */
   receivedUsd: number;
   origin: FlowOrigin;
+  /**
+   * What the dollars were exchanged FOR — the mint on the other side of the trade.
+   *
+   * Without it the table can say how much moved and never which market it moved
+   * through, so "is anyone using gold" has no answer. Null only when the counterpart
+   * cannot be named, which `txFlow` already refuses to record.
+   */
+  mint: string | null;
+  /** That mint's net movement, UI units, signed: positive = the wallet received it. */
+  mintAmount: number;
 }
 
 /** Proof first, then our own record, then nothing. */
@@ -112,10 +122,21 @@ export function txFlow(
   for (const [mint, amount] of Object.entries(legs)) if (stableMints.has(mint)) stable += amount;
   if (Math.abs(stable) < DUST) return null;
 
-  const hasCounterpart = Object.entries(legs).some(
-    ([mint, amount]) => !stableMints.has(mint) && Math.sign(amount) === -Math.sign(stable) && amount !== 0,
-  );
-  if (!hasCounterpart) return null;
+  // The counterpart is the biggest non-stable leg moving the other way. Biggest,
+  // not first: a route can leave dust of an intermediate token in the wallet, and
+  // naming that as the market traded would file a gold purchase under the hop it
+  // happened to pass through.
+  let mint: string | null = null;
+  let mintAmount = 0;
+  for (const [candidate, amount] of Object.entries(legs)) {
+    if (stableMints.has(candidate) || amount === 0) continue;
+    if (Math.sign(amount) !== -Math.sign(stable)) continue;
+    if (Math.abs(amount) > Math.abs(mintAmount)) {
+      mint = candidate;
+      mintAmount = amount;
+    }
+  }
+  if (!mint) return null;
 
   return {
     sig,
@@ -123,6 +144,8 @@ export function txFlow(
     spentUsd: stable < 0 ? -stable : 0,
     receivedUsd: stable > 0 ? stable : 0,
     origin: flowOrigin(tx, attribution),
+    mint,
+    mintAmount,
   };
 }
 

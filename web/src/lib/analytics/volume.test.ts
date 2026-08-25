@@ -40,12 +40,28 @@ function tx(sig: string, ts: number, legs: Record<string, number>): DatedTx {
 describe("txFlow", () => {
   it("reads a buy as stable coin spent", () => {
     const flow = txFlow(tx("sig1", 1_000, { [USDC]: -11.452405, [META]: 0.0176 }), OWNER, STABLES);
-    expect(flow).toEqual({ sig: "sig1", ts: 1_000, spentUsd: 11.452405, receivedUsd: 0, origin: "unknown" });
+    expect(flow).toEqual({
+      sig: "sig1",
+      ts: 1_000,
+      spentUsd: 11.452405,
+      receivedUsd: 0,
+      origin: "unknown",
+      mint: META,
+      mintAmount: 0.0176,
+    });
   });
 
   it("reads a sell as stable coin received", () => {
     const flow = txFlow(tx("sig2", 2_000, { [USDC]: 20, [META]: -0.03 }), OWNER, STABLES);
-    expect(flow).toEqual({ sig: "sig2", ts: 2_000, spentUsd: 0, receivedUsd: 20, origin: "unknown" });
+    expect(flow).toEqual({
+      sig: "sig2",
+      ts: 2_000,
+      spentUsd: 0,
+      receivedUsd: 20,
+      origin: "unknown",
+      mint: META,
+      mintAmount: -0.03,
+    });
   });
 
   it("states the settled amount, not the amount that was asked for", () => {
@@ -256,5 +272,37 @@ describe("newestTxTs", () => {
 
   it("ignores a transaction with no block time", () => {
     expect(newestTxTs([{ signature: "x" }, tx("y", 3_000, { [USDC]: -5, [META]: 1 })])).toBe(3_000);
+  });
+});
+
+describe("which market the dollars went through", () => {
+  const GOLD = "2VhjJ9WxaGC3EZFwJG9BDUs9KxKCAjQY4vgd1qxgYWVg";
+
+  it("names the mint bought", () => {
+    const flow = txFlow(tx("m1", 1_000, { [USDC]: -20, [GOLD]: 0.006 }), OWNER, STABLES);
+    expect(flow?.mint).toBe(GOLD);
+    expect(flow?.mintAmount).toBeCloseTo(0.006, 9);
+  });
+
+  it("signs the amount by direction — negative when it was sold", () => {
+    const flow = txFlow(tx("m2", 2_000, { [USDC]: 20, [GOLD]: -0.006 }), OWNER, STABLES);
+    expect(flow?.mint).toBe(GOLD);
+    expect(flow?.mintAmount).toBeLessThan(0);
+  });
+
+  it("picks the biggest leg, not the first — a route can leave dust behind", () => {
+    // Passing through an intermediate token must not file the trade under the hop.
+    const flow = txFlow(
+      tx("m3", 3_000, { [USDC]: -20, [META]: 0.00001, [GOLD]: 0.006 }),
+      OWNER,
+      STABLES,
+    );
+    expect(flow?.mint).toBe(GOLD);
+  });
+
+  it("ignores a leg moving the SAME way as the dollars", () => {
+    // Both left the wallet — that is not what the dollars were exchanged for.
+    const flow = txFlow(tx("m4", 4_000, { [USDC]: -20, [META]: -5, [GOLD]: 0.006 }), OWNER, STABLES);
+    expect(flow?.mint).toBe(GOLD);
   });
 });

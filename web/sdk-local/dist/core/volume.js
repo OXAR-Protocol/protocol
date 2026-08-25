@@ -69,8 +69,23 @@ function txFlow(tx, owner, stableMints, attribution = {}) {
             stable += amount;
     if (Math.abs(stable) < DUST)
         return null;
-    const hasCounterpart = Object.entries(legs).some(([mint, amount]) => !stableMints.has(mint) && Math.sign(amount) === -Math.sign(stable) && amount !== 0);
-    if (!hasCounterpart)
+    // The counterpart is the biggest non-stable leg moving the other way. Biggest,
+    // not first: a route can leave dust of an intermediate token in the wallet, and
+    // naming that as the market traded would file a gold purchase under the hop it
+    // happened to pass through.
+    let mint = null;
+    let mintAmount = 0;
+    for (const [candidate, amount] of Object.entries(legs)) {
+        if (stableMints.has(candidate) || amount === 0)
+            continue;
+        if (Math.sign(amount) !== -Math.sign(stable))
+            continue;
+        if (Math.abs(amount) > Math.abs(mintAmount)) {
+            mint = candidate;
+            mintAmount = amount;
+        }
+    }
+    if (!mint)
         return null;
     return {
         sig,
@@ -78,6 +93,8 @@ function txFlow(tx, owner, stableMints, attribution = {}) {
         spentUsd: stable < 0 ? -stable : 0,
         receivedUsd: stable > 0 ? stable : 0,
         origin: flowOrigin(tx, attribution),
+        mint,
+        mintAmount,
     };
 }
 /**

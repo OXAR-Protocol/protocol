@@ -68,7 +68,7 @@ export interface SyncReport {
  * reached the client-side tracker. `events` is a poor source of AMOUNTS but a fine
  * source of addresses — a wallet lands there on login, before it has moved a cent.
  */
-async function knownWallets(): Promise<string[]> {
+export async function knownWallets(): Promise<string[]> {
   const supabase = getSupabaseServer();
   const [tracked, synced] = await Promise.all([
     supabase.from("events").select("wallet"),
@@ -123,6 +123,8 @@ async function writeFlows(wallet: string, flows: readonly Flow[]): Promise<void>
       spent_usd: f.spentUsd,
       received_usd: f.receivedUsd,
       origin: f.origin,
+      mint: f.mint,
+      mint_amount: f.mintAmount,
     })),
     // Not `ignoreDuplicates`: a re-sync must be able to CORRECT a row. Attribution
     // improves over time — a transaction read before its event landed is `unknown`
