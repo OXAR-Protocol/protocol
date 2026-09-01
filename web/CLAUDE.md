@@ -15,14 +15,15 @@ Read the root `/OXAR/CLAUDE.md` first for project-wide context.
 - Supabase (server-side, waitlist persistence)
 - Delora API (cross-chain bridge — server-side calls only, key in env)
 
-## Domain split
+## Domain
 
-Two hosts share one Next.js app, routed by `src/middleware.ts`:
-- `oxar.app` — marketing (`/`, `/investors`, `/terms`, `/docs`, `/kit`)
-- `app.oxar.app` — authenticated app (`/you`, `/market`, `/asset/[id]`, `/onboarding`, `/login`;
-  `/home`, `/pile`, `/portfolio` are redirects kept for old links)
+This app is **`app.oxar.app`** — every route it ships, app and marketing alike
+(`/you`, `/market`, `/asset/[id]`, `/onboarding`, `/login`, plus the long-form
+`/terms`, `/investors`, `/docs`, `/kit`). `oxar.app` is a **separate Vercel project**
+(`oxar-landing`); nothing on it is built from this repo.
 
-When adding a new authenticated route, append it to `APP_ROUTES` in `middleware.ts` so cross-domain redirects work.
+`src/middleware.ts` is down to two rules: `www.oxar.app` → `oxar.app` (308) and bare
+`app.oxar.app/` → `/market` (307). Adding a route no longer requires touching it.
 
 ## File Structure
 
@@ -173,10 +174,9 @@ Server-side only. Validate all input. Currently:
 
 ### Adding a New Page
 1. Create `src/app/(app)/new-page/page.tsx` with `"use client";`
-2. If authenticated: add `"/new-page"` to `APP_ROUTES` in `middleware.ts`
-3. Add hooks in `src/hooks/` if needed
-4. Add nav link in `components/tab-bar.tsx` or link from `/you`
-5. Keep file < 200 lines — extract sub-components
+2. Add hooks in `src/hooks/` if needed
+3. Add nav link in `components/tab-bar.tsx` or link from `/you`
+4. Keep file < 200 lines — extract sub-components
 
 ## Build and Dev
 
@@ -252,7 +252,6 @@ Three things that make these numbers right, and are easy to undo by accident:
 - Calling `.rpc()` / auto-send instead of manual sign+send → fails with the Privy embedded wallet
 - Adding your own ATA-creation ix in deposit/withdraw → the Jupiter SDK already does it (double-create)
 - Not creating Associated Token Account before token ops → transaction fails
-- Adding a route to `(app)/` but forgetting to update `APP_ROUTES` in `middleware.ts` → cross-domain redirect breaks
 - Using native `<select>` — breaks the visual system. Use `CustomSelect`.
 - Treating `@solana/kit` and `@solana-program/memo` as removable — they're transitive deps of Privy's Solana connectors.
 
