@@ -3,37 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 const APP_DOMAIN = "app.oxar.app";
 const MARKETING_DOMAIN = "oxar.app";
 
-const APP_ROUTES = [
-  "/portfolio",
-  "/home", // renamed → /portfolio; kept so the redirect page is reachable
-  "/market",
-  "/yield", // renamed → /market; kept so the redirect page is reachable
-  "/pile", // moved onto /home; kept so the redirect page is reachable
-  "/you",
-  "/asset",
-  "/onboarding",
-  "/login",
-  "/join", // invite-link landing (clears the wall via ?code, then → /home)
-];
-
-const MARKETING_ROUTES = [
-  "/investors",
-  "/terms",
-  "/docs",
-  "/kit",
-];
-
-function isAppRoute(pathname: string): boolean {
-  return APP_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
-}
-
-function isMarketingRoute(pathname: string): boolean {
-  // "/" is handled separately per-host — on the marketing domain it's the
-  // landing page; on the app domain bare "/" routes to /portfolio (the AccessWall
-  // wrapper in (app)/layout then gates entry behind the email allowlist).
-  return MARKETING_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
-}
-
+/**
+ * This deployment is the app, and only the app. oxar.app is now served by a
+ * separate project (the landing), so there is no second host to route between:
+ * everything shipped from here — including the long-form pages /terms,
+ * /investors, /docs and /kit, which used to answer only on the marketing
+ * domain — is served on app.oxar.app.
+ */
 export function middleware(req: NextRequest) {
   const host = req.headers.get("host") ?? "";
   const { pathname, search } = req.nextUrl;
@@ -49,25 +25,12 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  const isApp = host === APP_DOMAIN;
-  const isMarketing = host === MARKETING_DOMAIN;
-
   // Bare app.oxar.app/ → the catalog, signed in or not. The portfolio is the right
   // landing page only for someone who already has positions; for everyone else it
   // is an empty screen, and what they came for is the list of places to put money.
-  if (isApp && pathname === "/") {
+  if (host === APP_DOMAIN && pathname === "/") {
     const url = new URL(`https://${APP_DOMAIN}/market${search}`);
     return NextResponse.redirect(url, 307);
-  }
-
-  if (isMarketing && isAppRoute(pathname)) {
-    const url = new URL(`https://${APP_DOMAIN}${pathname}${search}`);
-    return NextResponse.redirect(url, 308);
-  }
-
-  if (isApp && isMarketingRoute(pathname)) {
-    const url = new URL(`https://${MARKETING_DOMAIN}${pathname}${search}`);
-    return NextResponse.redirect(url, 308);
   }
 
   return NextResponse.next();

@@ -88,7 +88,9 @@ export function PrivyProvider({ children }: { children: ReactNode }) {
           // wallet doesn't exist.
           walletList: ["phantom", "solflare", "backpack", "detected_solana_wallets"],
           // Whichever mark survives the sheet it's printed on.
-          logo: dark ? "https://oxar.app/images/white.svg" : "https://oxar.app/images/black.svg",
+          logo: dark
+            ? "https://app.oxar.app/images/white.svg"
+            : "https://app.oxar.app/images/black.svg",
           landingHeader: "Welcome to OXAR",
           loginMessage: "Real-world yields. On-chain access.",
           showWalletLoginFirst: false,

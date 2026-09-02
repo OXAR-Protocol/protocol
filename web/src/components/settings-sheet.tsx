@@ -32,13 +32,9 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       <p className="mb-3 mt-6 text-[11px] lowercase tracking-wide text-ink/40">{t("you.language")}</p>
       <LanguagePicker />
 
-      {/* /terms is a marketing route (see middleware.ts) that only resolves on
-          oxar.app, not app.oxar.app — an absolute URL + hard navigation, not
-          next/link, so it actually lands instead of hitting the domain-split
-          redirect mid client-side transition. */}
       <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
         <a
-          href="https://oxar.app/terms"
+          href="/terms"
           className="text-xs lowercase tracking-wide text-ink/40 transition hover:text-ink/60"
         >
           {t("you.terms")}

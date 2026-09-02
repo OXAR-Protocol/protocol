@@ -38,8 +38,8 @@ export const viewport: Viewport = {
 // copy here still described the pre-pivot bond protocol — government-guaranteed
 // paper at "4-18% APY" — which is not what v1 is, and it shipped with no image at
 // all, so every share rendered a bare grey rectangle with a wrong sentence in it.
-// One `metadataBase` covers both hosts: the marketing domain is the canonical one,
-// and /og.jpg is served from either.
+// `metadataBase` is app.oxar.app: oxar.app is a separate project now, and /og.jpg
+// is served by this one.
 // Same string the landing sets for itself, so the tab title and the share card
 // don't disagree about the wordmark's full stop.
 const TITLE = "OXAR. — where your money sleeps";
@@ -47,7 +47,7 @@ const DESCRIPTION =
   "Wake it up. Earn yield, own real assets — no bank, no broker, no lock. Your money stays in your own wallet.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://oxar.app"),
+  metadataBase: new URL("https://app.oxar.app"),
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
