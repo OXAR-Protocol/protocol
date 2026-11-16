@@ -89,6 +89,20 @@ describe.skipIf(!RUN)("money path · deposit builds + simulates (mainnet)", () =
     return classify(r.value.err, r.value.logs);
   }
 
+  // Jupiter's keyless lite-api rate-limits ~20 providers' quote+swap calls run back
+  // to back (429), and the SDK's short backoff can't outwait the window. Give a
+  // rate-limited build a few more tries after a pause — any other error still fails.
+  async function buildWhenRateLimited<T>(build: () => Promise<T>): Promise<T> {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await build();
+      } catch (e) {
+        if (attempt >= 3 || !/\(429\)/.test(String(e))) throw e;
+        await new Promise((r) => setTimeout(r, 12_000));
+      }
+    }
+  }
+
   for (const p of PROVIDERS) {
     if (SERVER_ONLY.has(p.id)) {
       it.skip(`${p.id} — built by /api server route (sim needs running app)`, () => {});
@@ -98,9 +112,11 @@ describe.skipIf(!RUN)("money path · deposit builds + simulates (mainnet)", () =
       const amount = BigInt(1_000_000); // $1 (6-decimal USDC)
       let tx: Transaction | VersionedTransaction;
       if (p.buildDepositTx) {
-        tx = await p.buildDepositTx({ owner: OWNER, amount, connection });
+        const build = p.buildDepositTx;
+        tx = await buildWhenRateLimited(() => build({ owner: OWNER, amount, connection }));
       } else if (p.buildDepositIxs) {
-        const ixs: TransactionInstruction[] = await p.buildDepositIxs({ owner: OWNER, amount, connection });
+        const build = p.buildDepositIxs;
+        const ixs: TransactionInstruction[] = await buildWhenRateLimited(() => build({ owner: OWNER, amount, connection }));
         expect(ixs.length, "provider returned no instructions").toBeGreaterThan(0);
         tx = new Transaction().add(...ixs);
       } else {
