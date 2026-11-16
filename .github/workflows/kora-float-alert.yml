@@ -19,6 +19,8 @@ jobs:
       - name: Check fee-payer balance
         env:
           GH_TOKEN: ${{ github.token }}
+          # No checkout in this job, so gh can't infer the repo from .git.
+          GH_REPO: ${{ github.repository }}
           FEE_PAYER: MQwRCwbeRmhpNdAjvkMysLHS92WSXQvw7wJ8hPoYFrL
           THRESHOLD_LAMPORTS: "30000000" # 0.03 SOL (~15 first-deposit ATA rents)
         run: |
